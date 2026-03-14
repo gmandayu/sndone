@@ -2644,33 +2644,28 @@ public partial class SnDOne {
         // Row Inserted event
         public void RowInserted(Dictionary<string, object>? rsold, Dictionary<string, object> rsnew) {
             //Log("Row Inserted");
-            try {
-                var nomorReferensi = rsnew["NomorPenimbunanPenyaluran"].ToString();
-                var jenisProses = "PenimbunanPenyaluran";
-                var dibuatOleh = CurrentUserName();
-                var tipePenyaluran = rsnew["TipePenyaluran"].ToString();
-                // int IdModa = 0;
-                string sql = "";
-                int IdModa = rsnew.ContainsKey("IdModa") ? Convert.ToInt32(rsnew["IdModa"]) : 0;
-                if (tipePenyaluran == "Sales"){
-                    // IdModa = rsnew.ContainsKey("IdModa") ? Convert.ToInt32(rsnew["IdModa"]) : 0;
-                    sql = $"EXEC GenerateProsesAktivitas_PenimbunanPenyaluran '{nomorReferensi}', {IdModa}, '{dibuatOleh}'";
-                } else {
-                    string? noPenyaluran = rsnew.ContainsKey("NoPenyaluran") && rsnew["NoPenyaluran"] != null ? rsnew["NoPenyaluran"].ToString() : null;
-                    if (noPenyaluran != null)
-                    {
-                        sql = $"EXEC GenerateProsesAktivitas_PenimbunanPenyaluranKonsinyasi '{nomorReferensi}', '{jenisProses}', '{dibuatOleh}', '{noPenyaluran}', {IdModa}";
-                    }
-                    else
-                    {
-                        sql = $"EXEC GenerateProsesAktivitas_PenimbunanPenyaluranKonsinyasi '{nomorReferensi}', '{jenisProses}', '{dibuatOleh}', NULL, {IdModa}";
-                    }
-                    // sql = $"EXEC GenerateProsesAktivitas_PenimbunanPenyaluranKonsinyasi '{nomorReferensi}', '{jenisProses}', '{dibuatOleh}', '{noPenyaluran}'";
+            try
+            {
+                int idModa = rsnew.ContainsKey("IdModa") && rsnew["IdModa"] != null ? Convert.ToInt32(rsnew["IdModa"]) : 0;
+                string nomorReferensi = rsnew.ContainsKey("NomorPenimbunanPenyaluran") && rsnew["NomorPenimbunanPenyaluran"] != null ? rsnew["NomorPenimbunanPenyaluran"].ToString().Replace("'", "''") : "";
+                string tipePenyaluran = rsnew.ContainsKey("TipePenyaluran") && rsnew["TipePenyaluran"] != null ? rsnew["TipePenyaluran"].ToString() : "";
+                string dibuatOleh = CurrentUserName().Replace("'", "''");
+                string? noPenyaluran = rsnew.ContainsKey("NoPenyaluran") && rsnew["NoPenyaluran"] != null ? rsnew["NoPenyaluran"].ToString().Replace("'", "''") : null;
+                string sql;
+
+                if (tipePenyaluran == "Sales")
+                    sql = $"EXEC GenerateProsesAktivitas_PenimbunanPenyaluran '{nomorReferensi}', {idModa}, '{dibuatOleh}'";
+                else
+                {
+                    string jenisProses = idModa == 12 ? "PenyimpananPenyaluranKonsinyasiPipaJarakDekat" : "PenimbunanPenyaluran";
+                    string noPenyaluranSql = noPenyaluran != null ? $"'{noPenyaluran}'" : "NULL";
+                    sql = $"EXEC GenerateProsesAktivitas_PenimbunanPenyaluranKonsinyasi '{nomorReferensi}', '{jenisProses}', '{dibuatOleh}', {noPenyaluranSql}, {idModa}";
                 }
                 ExecuteScalar(sql);
-            } catch (Exception ex) {
-                // Optional: log error jika mau
-                Log("Error in Row_Inserted (Generate Proses & Aktivitas): " + ex.Message);
+            }
+            catch (Exception ex)
+            {
+                Log("Error in RowInserted (Generate Proses & Aktivitas): " + ex.Message);
             }
         }
         // Row Updating event

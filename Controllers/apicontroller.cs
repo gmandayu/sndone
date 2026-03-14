@@ -2152,7 +2152,7 @@ public partial class LookUpListController : ApiController
             {WhereBy("p.NomorPenimbunan", useNomorReferensi)};",
             "PenimbunanPenyaluran" or "PenyimpananPenyaluranSalesSTSBBM" or "PenyimpananPenyaluranKonsinyasiSTSBBM" or
             "PenyimpananPenyaluranSalesSTSLPG" or "PenyimpananPenyaluranKonsinyasiSTSLPG" or "PenyimpananPenyaluranSalesPipa" or
-            "PenyimpananPenyaluranKonsinyasiPipa" or "PenyimpananPenyaluranSalesRTW" or "PenyimpananPenyaluranKonsinyasiRTW" or "PenyimpananPenyaluranKonsinyasi" => $@"
+            "PenyimpananPenyaluranKonsinyasiPipa" or "PenyimpananPenyaluranSalesRTW" or "PenyimpananPenyaluranKonsinyasiRTW" or "PenyimpananPenyaluranKonsinyasi" or "PenyimpananPenyaluranKonsinyasiPipaJarakDekat" => $@"
             SELECT TOP 1
                 'PROSES PENYALURAN <span style=""color: red"">' + p.NomorPenimbunanPenyaluran + '</span>' +
                 ', Tangki : <span style=""color: red"">' + UPPER(ISNULL(mt.NamaTerminal,'-')) + ' - ' + 

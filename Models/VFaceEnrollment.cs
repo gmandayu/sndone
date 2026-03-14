@@ -1,0 +1,2049 @@
+namespace SnDOne.Models;
+
+// Partial class
+public partial class SnDOne {
+    /// <summary>
+    /// vFaceEnrollment
+    /// </summary>
+    [MaybeNull]
+    public static VFaceEnrollment vFaceEnrollment
+    {
+        get => HttpData.Resolve<VFaceEnrollment>("VFaceEnrollment");
+        set => HttpData["VFaceEnrollment"] = value;
+    }
+
+    /// <summary>
+    /// Table class for VFaceEnrollment
+    /// </summary>
+    public class VFaceEnrollment : DbTable
+    {
+        public override Dictionary<string, string> KeyFields { get; set; } = new() { // DN
+            { "IdUser", "IdUser" },
+        };
+
+        public int RowCount = 0; // DN
+
+        public bool UseSessionForListSql = true;
+
+        // Column CSS classes
+        public string LeftColumnClass = "col-sm-2 col-form-label ew-label";
+
+        public string RightColumnClass = "col-sm-10";
+
+        public string OffsetColumnClass = "col-sm-10 offset-sm-2";
+
+        public string TableLeftColumnClass = "w-col-2";
+
+        // Ajax / Modal
+        public bool UseAjaxActions = false;
+
+        public bool ModalSearch = true;
+
+        public bool ModalView = false;
+
+        public bool ModalAdd = false;
+
+        public bool ModalEdit = false;
+
+        public bool ModalUpdate = false;
+
+        public bool InlineDelete = false;
+
+        public bool ModalGridAdd = false;
+
+        public bool ModalGridEdit = false;
+
+        public bool ModalMultiEdit = false;
+
+        public readonly DbField<SqlDbType> IdUser;
+
+        public readonly DbField<SqlDbType> _Username;
+
+        public readonly DbField<SqlDbType> LinkRedirect;
+
+        public readonly DbField<SqlDbType> _Email;
+
+        public readonly DbField<SqlDbType> NamaLengkap;
+
+        public readonly DbField<SqlDbType> DownloadFace;
+
+        public readonly DbField<SqlDbType> IdPosition;
+
+        public readonly DbField<SqlDbType> Jabatan;
+
+        public readonly DbField<SqlDbType> Face;
+
+        public readonly DbField<SqlDbType> TanggalInputFace;
+
+        public readonly DbField<SqlDbType> UserInputFace;
+
+        public readonly DbField<SqlDbType> AzurePersonId;
+
+        // Constructor
+        public VFaceEnrollment()
+        {
+            // Language object // DN
+            Language = ResolveLanguage();
+            TableVar = "VFaceEnrollment";
+            Name = "VFaceEnrollment";
+            Type = "VIEW";
+            UpdateTable = "dbo.VFaceEnrollment"; // Update Table
+            DbId = "DB"; // DN
+            ExportAll = true;
+            ExportPageBreakCount = 0; // Page break per every n record (PDF only)
+            ExportPageOrientation = "portrait"; // Page orientation (PDF only)
+            ExportPageSize = "a4"; // Page size (PDF only)
+            ExportColumnWidths = []; // Column widths (PDF only) // DN
+            ExportExcelPageOrientation = ""; // Page orientation (EPPlus only)
+            ExportExcelPageSize = ""; // Page size (EPPlus only)
+            ExportWordPageOrientation = ""; // Page orientation (Word only)
+            DetailAdd = false; // Allow detail add
+            DetailEdit = false; // Allow detail edit
+            DetailView = false; // Allow detail view
+            ShowMultipleDetails = false; // Show multiple details
+            GridAddRowCount = 5;
+            AllowAddDeleteRow = true; // Allow add/delete row
+            UseAjaxActions = UseAjaxActions || Config.UseAjaxActions;
+            UserIdAllowSecurity = Config.DefaultUserIdAllowSecurity; // User ID Allow
+
+            // IdUser
+            IdUser = new(this, "x_IdUser", 3, SqlDbType.Int) {
+                Name = "IdUser",
+                Expression = "[IdUser]",
+                BasicSearchExpression = "CAST([IdUser] AS NVARCHAR)",
+                DateTimeFormat = -1,
+                VirtualExpression = "[IdUser]",
+                IsVirtual = false,
+                ForceSelection = false,
+                SelectMultiple = false,
+                VirtualSearch = false,
+                ViewTag = "FORMATTED TEXT",
+                HtmlTag = "TEXT",
+                InputTextType = "text",
+                IsPrimaryKey = true, // Primary key field
+                Nullable = false, // NOT NULL field
+                Required = true, // Required field
+                DefaultErrorMessage = Language.Phrase("IncorrectInteger"),
+                SearchOperators = ["=", "<>", "IN", "NOT IN", "<", "<=", ">", ">=", "BETWEEN", "NOT BETWEEN"],
+                CustomMessage = Language.FieldPhrase("VFaceEnrollment", "IdUser", "CustomMsg"),
+                IsUpload = false
+            };
+            IdUser.Raw = true;
+            Fields.Add("IdUser", IdUser);
+
+            // Username
+            _Username = new(this, "x__Username", 200, SqlDbType.VarChar) {
+                Name = "Username",
+                Expression = "[Username]",
+                BasicSearchExpression = "[Username]",
+                DateTimeFormat = -1,
+                VirtualExpression = "[Username]",
+                IsVirtual = false,
+                ForceSelection = false,
+                SelectMultiple = false,
+                VirtualSearch = false,
+                ViewTag = "FORMATTED TEXT",
+                HtmlTag = "TEXT",
+                InputTextType = "text",
+                Nullable = false, // NOT NULL field
+                Required = true, // Required field
+                UseFilter = true, // Table header filter
+                SearchOperators = ["=", "<>", "IN", "NOT IN", "STARTS WITH", "NOT STARTS WITH", "LIKE", "NOT LIKE", "ENDS WITH", "NOT ENDS WITH", "IS EMPTY", "IS NOT EMPTY"],
+                CustomMessage = Language.FieldPhrase("VFaceEnrollment", "_Username", "CustomMsg"),
+                IsUpload = false
+            };
+            _Username.Lookup = new Lookup<DbField>(_Username, "VFaceEnrollment", true, "Username", new List<string> {"Username", "", "", ""}, "", "", new List<string> {}, new List<string> {}, new List<string> {}, new List<string> {}, new List<string> {}, new List<string> {}, false, "", "", "");
+            Fields.Add("Username", _Username);
+
+            // LinkRedirect
+            LinkRedirect = new(this, "x_LinkRedirect", 202, SqlDbType.NVarChar) {
+                Name = "LinkRedirect",
+                Expression = "'<a href=VFaceEnrollmentEdit/' + CAST(IdUser AS NVARCHAR(50))+'>'+CAST(Username AS NVARCHAR(50))+'</a>'",
+                UseBasicSearch = true,
+                BasicSearchExpression = "'<a href=VFaceEnrollmentEdit/' + CAST(IdUser AS NVARCHAR(50))+'>'+CAST(Username AS NVARCHAR(50))+'</a>'",
+                DateTimeFormat = -1,
+                VirtualExpression = "'<a href=VFaceEnrollmentEdit/' + CAST(IdUser AS NVARCHAR(50))+'>'+CAST(Username AS NVARCHAR(50))+'</a>'",
+                IsVirtual = false,
+                ForceSelection = false,
+                SelectMultiple = false,
+                VirtualSearch = false,
+                ViewTag = "FORMATTED TEXT",
+                HtmlTag = "TEXT",
+                InputTextType = "text",
+                IsCustom = true, // Custom field
+                UseFilter = true, // Table header filter
+                SearchOperators = ["=", "<>", "IN", "NOT IN", "STARTS WITH", "NOT STARTS WITH", "LIKE", "NOT LIKE", "ENDS WITH", "NOT ENDS WITH", "IS EMPTY", "IS NOT EMPTY", "IS NULL", "IS NOT NULL"],
+                CustomMessage = Language.FieldPhrase("VFaceEnrollment", "LinkRedirect", "CustomMsg"),
+                IsUpload = false
+            };
+            LinkRedirect.Lookup = new Lookup<DbField>(LinkRedirect, "VFaceEnrollment", true, "LinkRedirect", new List<string> {"LinkRedirect", "", "", ""}, "", "", new List<string> {}, new List<string> {}, new List<string> {}, new List<string> {}, new List<string> {}, new List<string> {}, false, "", "", "");
+            Fields.Add("LinkRedirect", LinkRedirect);
+
+            // Email
+            _Email = new(this, "x__Email", 200, SqlDbType.VarChar) {
+                Name = "Email",
+                Expression = "[Email]",
+                UseBasicSearch = true,
+                BasicSearchExpression = "[Email]",
+                DateTimeFormat = -1,
+                VirtualExpression = "[Email]",
+                IsVirtual = false,
+                ForceSelection = false,
+                SelectMultiple = false,
+                VirtualSearch = false,
+                ViewTag = "FORMATTED TEXT",
+                HtmlTag = "TEXT",
+                InputTextType = "text",
+                UseFilter = true, // Table header filter
+                SearchOperators = ["=", "<>", "IN", "NOT IN", "STARTS WITH", "NOT STARTS WITH", "LIKE", "NOT LIKE", "ENDS WITH", "NOT ENDS WITH", "IS EMPTY", "IS NOT EMPTY", "IS NULL", "IS NOT NULL"],
+                CustomMessage = Language.FieldPhrase("VFaceEnrollment", "_Email", "CustomMsg"),
+                IsUpload = false
+            };
+            _Email.Lookup = new Lookup<DbField>(_Email, "VFaceEnrollment", true, "Email", new List<string> {"Email", "", "", ""}, "", "", new List<string> {}, new List<string> {}, new List<string> {}, new List<string> {}, new List<string> {}, new List<string> {}, false, "", "", "");
+            Fields.Add("Email", _Email);
+
+            // NamaLengkap
+            NamaLengkap = new(this, "x_NamaLengkap", 200, SqlDbType.VarChar) {
+                Name = "NamaLengkap",
+                Expression = "[NamaLengkap]",
+                UseBasicSearch = true,
+                BasicSearchExpression = "[NamaLengkap]",
+                DateTimeFormat = -1,
+                VirtualExpression = "[NamaLengkap]",
+                IsVirtual = false,
+                ForceSelection = false,
+                SelectMultiple = false,
+                VirtualSearch = false,
+                ViewTag = "FORMATTED TEXT",
+                HtmlTag = "TEXT",
+                InputTextType = "text",
+                UseFilter = true, // Table header filter
+                SearchOperators = ["=", "<>", "IN", "NOT IN", "STARTS WITH", "NOT STARTS WITH", "LIKE", "NOT LIKE", "ENDS WITH", "NOT ENDS WITH", "IS EMPTY", "IS NOT EMPTY", "IS NULL", "IS NOT NULL"],
+                CustomMessage = Language.FieldPhrase("VFaceEnrollment", "NamaLengkap", "CustomMsg"),
+                IsUpload = false
+            };
+            NamaLengkap.Lookup = new Lookup<DbField>(NamaLengkap, "VFaceEnrollment", true, "NamaLengkap", new List<string> {"NamaLengkap", "", "", ""}, "", "", new List<string> {}, new List<string> {}, new List<string> {}, new List<string> {}, new List<string> {}, new List<string> {}, false, "", "", "");
+            Fields.Add("NamaLengkap", NamaLengkap);
+
+            // DownloadFace
+            DownloadFace = new(this, "x_DownloadFace", 203, SqlDbType.NText) {
+                Name = "DownloadFace",
+                Expression = "CASE WHEN Face IS NOT NULL AND LTRIM(RTRIM(Face)) <> '' THEN '<a class=' + CHAR(34) + 'download-face btn btn-primary' + CHAR(34) + ' data-url=' + CAST(Face AS NVARCHAR(255)) + '><i class=' + CHAR(34) + 'fas fa-download me-2' + CHAR(34) + '></i> Download Face</a>' ELSE '<p>Not Uploaded</p>' END",
+                UseBasicSearch = true,
+                BasicSearchExpression = "CASE WHEN Face IS NOT NULL AND LTRIM(RTRIM(Face)) <> '' THEN '<a class=' + CHAR(34) + 'download-face btn btn-primary' + CHAR(34) + ' data-url=' + CAST(Face AS NVARCHAR(255)) + '><i class=' + CHAR(34) + 'fas fa-download me-2' + CHAR(34) + '></i> Download Face</a>' ELSE '<p>Not Uploaded</p>' END",
+                DateTimeFormat = -1,
+                VirtualExpression = "CASE WHEN Face IS NOT NULL AND LTRIM(RTRIM(Face)) <> '' THEN '<a class=' + CHAR(34) + 'download-face btn btn-primary' + CHAR(34) + ' data-url=' + CAST(Face AS NVARCHAR(255)) + '><i class=' + CHAR(34) + 'fas fa-download me-2' + CHAR(34) + '></i> Download Face</a>' ELSE '<p>Not Uploaded</p>' END",
+                IsVirtual = false,
+                ForceSelection = false,
+                SelectMultiple = false,
+                VirtualSearch = false,
+                ViewTag = "FORMATTED TEXT",
+                HtmlTag = "TEXTAREA",
+                InputTextType = "text",
+                IsCustom = true, // Custom field
+                Sortable = false, // Allow sort
+                SearchOperators = ["=", "<>", "IN", "NOT IN", "STARTS WITH", "NOT STARTS WITH", "LIKE", "NOT LIKE", "ENDS WITH", "NOT ENDS WITH", "IS EMPTY", "IS NOT EMPTY", "IS NULL", "IS NOT NULL"],
+                CustomMessage = Language.FieldPhrase("VFaceEnrollment", "DownloadFace", "CustomMsg"),
+                IsUpload = false
+            };
+            Fields.Add("DownloadFace", DownloadFace);
+
+            // IdPosition
+            IdPosition = new(this, "x_IdPosition", 3, SqlDbType.Int) {
+                Name = "IdPosition",
+                Expression = "[IdPosition]",
+                UseBasicSearch = true,
+                BasicSearchExpression = "CAST([IdPosition] AS NVARCHAR)",
+                DateTimeFormat = -1,
+                VirtualExpression = "[IdPosition]",
+                IsVirtual = false,
+                ForceSelection = false,
+                SelectMultiple = false,
+                VirtualSearch = false,
+                ViewTag = "FORMATTED TEXT",
+                HtmlTag = "TEXT",
+                InputTextType = "text",
+                UseFilter = true, // Table header filter
+                DefaultErrorMessage = Language.Phrase("IncorrectInteger"),
+                SearchOperators = ["=", "<>", "IN", "NOT IN", "<", "<=", ">", ">=", "BETWEEN", "NOT BETWEEN", "IS NULL", "IS NOT NULL"],
+                CustomMessage = Language.FieldPhrase("VFaceEnrollment", "IdPosition", "CustomMsg"),
+                IsUpload = false
+            };
+            IdPosition.Raw = true;
+            IdPosition.Lookup = new Lookup<DbField>(IdPosition, "MasterPosition", true, "IdPosition", new List<string> {"IdPosition", "NamaPosition", "", ""}, "", "", new List<string> {}, new List<string> {}, new List<string> {}, new List<string> {}, new List<string> {}, new List<string> {}, false, "", "", "CONCAT(CAST([IdPosition] AS NVARCHAR),'" + ValueSeparator(1, IdPosition) + "',[NamaPosition])");
+            Fields.Add("IdPosition", IdPosition);
+
+            // Jabatan
+            Jabatan = new(this, "x_Jabatan", 202, SqlDbType.NVarChar) {
+                Name = "Jabatan",
+                Expression = "[Jabatan]",
+                UseBasicSearch = true,
+                BasicSearchExpression = "[Jabatan]",
+                DateTimeFormat = -1,
+                VirtualExpression = "[Jabatan]",
+                IsVirtual = false,
+                ForceSelection = false,
+                SelectMultiple = false,
+                VirtualSearch = false,
+                ViewTag = "FORMATTED TEXT",
+                HtmlTag = "TEXT",
+                InputTextType = "text",
+                UseFilter = true, // Table header filter
+                SearchOperators = ["=", "<>", "IN", "NOT IN", "STARTS WITH", "NOT STARTS WITH", "LIKE", "NOT LIKE", "ENDS WITH", "NOT ENDS WITH", "IS EMPTY", "IS NOT EMPTY", "IS NULL", "IS NOT NULL"],
+                CustomMessage = Language.FieldPhrase("VFaceEnrollment", "Jabatan", "CustomMsg"),
+                IsUpload = false
+            };
+            Jabatan.Lookup = new Lookup<DbField>(Jabatan, "VFaceEnrollment", true, "Jabatan", new List<string> {"Jabatan", "", "", ""}, "", "", new List<string> {}, new List<string> {}, new List<string> {}, new List<string> {}, new List<string> {}, new List<string> {}, false, "", "", "");
+            Fields.Add("Jabatan", Jabatan);
+
+            // Face
+            Face = new(this, "x_Face", 202, SqlDbType.NVarChar) {
+                Name = "Face",
+                Expression = "[Face]",
+                UseBasicSearch = true,
+                BasicSearchExpression = "[Face]",
+                DateTimeFormat = -1,
+                VirtualExpression = "[Face]",
+                IsVirtual = false,
+                ForceSelection = false,
+                SelectMultiple = false,
+                VirtualSearch = false,
+                ViewTag = "FORMATTED TEXT",
+                HtmlTag = "TEXT",
+                InputTextType = "text",
+                UseFilter = true, // Table header filter
+                SearchOperators = ["=", "<>", "IN", "NOT IN", "STARTS WITH", "NOT STARTS WITH", "LIKE", "NOT LIKE", "ENDS WITH", "NOT ENDS WITH", "IS EMPTY", "IS NOT EMPTY", "IS NULL", "IS NOT NULL"],
+                CustomMessage = Language.FieldPhrase("VFaceEnrollment", "Face", "CustomMsg"),
+                IsUpload = false
+            };
+            Face.Lookup = new Lookup<DbField>(Face, "VFaceEnrollment", true, "Face", new List<string> {"Face", "", "", ""}, "", "", new List<string> {}, new List<string> {}, new List<string> {}, new List<string> {}, new List<string> {}, new List<string> {}, false, "", "", "");
+            Fields.Add("Face", Face);
+
+            // TanggalInputFace
+            TanggalInputFace = new(this, "x_TanggalInputFace", 135, SqlDbType.DateTime) {
+                Name = "TanggalInputFace",
+                Expression = "[TanggalInputFace]",
+                UseBasicSearch = true,
+                BasicSearchExpression = CastDateFieldForLike("[TanggalInputFace]", 9, "DB"),
+                DateTimeFormat = 9,
+                VirtualExpression = "[TanggalInputFace]",
+                IsVirtual = false,
+                ForceSelection = false,
+                SelectMultiple = false,
+                VirtualSearch = false,
+                ViewTag = "FORMATTED TEXT",
+                HtmlTag = "TEXT",
+                InputTextType = "text",
+                UseFilter = true, // Table header filter
+                DefaultErrorMessage = ConvertToString(Language.Phrase("IncorrectDate")).Replace("%s", DateFormat(9)),
+                SearchOperators = ["=", "<>", "IN", "NOT IN", "<", "<=", ">", ">=", "BETWEEN", "NOT BETWEEN", "IS NULL", "IS NOT NULL"],
+                CustomMessage = Language.FieldPhrase("VFaceEnrollment", "TanggalInputFace", "CustomMsg"),
+                IsUpload = false
+            };
+            TanggalInputFace.Raw = true;
+            TanggalInputFace.Lookup = new Lookup<DbField>(TanggalInputFace, "VFaceEnrollment", true, "TanggalInputFace", new List<string> {"TanggalInputFace", "", "", ""}, "", "", new List<string> {}, new List<string> {}, new List<string> {}, new List<string> {}, new List<string> {}, new List<string> {}, false, "", "", "");
+            Fields.Add("TanggalInputFace", TanggalInputFace);
+
+            // UserInputFace
+            UserInputFace = new(this, "x_UserInputFace", 202, SqlDbType.NVarChar) {
+                Name = "UserInputFace",
+                Expression = "[UserInputFace]",
+                UseBasicSearch = true,
+                BasicSearchExpression = "[UserInputFace]",
+                DateTimeFormat = -1,
+                VirtualExpression = "[UserInputFace]",
+                IsVirtual = false,
+                ForceSelection = false,
+                SelectMultiple = false,
+                VirtualSearch = false,
+                ViewTag = "FORMATTED TEXT",
+                HtmlTag = "TEXT",
+                InputTextType = "text",
+                UseFilter = true, // Table header filter
+                SearchOperators = ["=", "<>", "IN", "NOT IN", "STARTS WITH", "NOT STARTS WITH", "LIKE", "NOT LIKE", "ENDS WITH", "NOT ENDS WITH", "IS EMPTY", "IS NOT EMPTY", "IS NULL", "IS NOT NULL"],
+                CustomMessage = Language.FieldPhrase("VFaceEnrollment", "UserInputFace", "CustomMsg"),
+                IsUpload = false
+            };
+            UserInputFace.Lookup = new Lookup<DbField>(UserInputFace, "VFaceEnrollment", true, "UserInputFace", new List<string> {"UserInputFace", "", "", ""}, "", "", new List<string> {}, new List<string> {}, new List<string> {}, new List<string> {}, new List<string> {}, new List<string> {}, false, "", "", "");
+            Fields.Add("UserInputFace", UserInputFace);
+
+            // AzurePersonId
+            AzurePersonId = new(this, "x_AzurePersonId", 72, SqlDbType.UniqueIdentifier) {
+                Name = "AzurePersonId",
+                Expression = "[AzurePersonId]",
+                BasicSearchExpression = "[AzurePersonId]",
+                DateTimeFormat = -1,
+                VirtualExpression = "[AzurePersonId]",
+                IsVirtual = false,
+                ForceSelection = false,
+                SelectMultiple = false,
+                VirtualSearch = false,
+                ViewTag = "FORMATTED TEXT",
+                HtmlTag = "TEXT",
+                InputTextType = "text",
+                DefaultErrorMessage = Language.Phrase("IncorrectGUID"),
+                SearchOperators = ["=", "<>", "IN", "NOT IN", "IS NULL", "IS NOT NULL"],
+                CustomMessage = Language.FieldPhrase("VFaceEnrollment", "AzurePersonId", "CustomMsg"),
+                IsUpload = false
+            };
+            AzurePersonId.Raw = true;
+            Fields.Add("AzurePersonId", AzurePersonId);
+
+            // Call Table Load event
+            TableLoad();
+        }
+
+        #pragma warning disable 618
+        // Connection
+        public override DatabaseConnection<SqlConnection, SqlDbType> Connection => GetConnection(DbId);
+        #pragma warning restore 618
+
+        // Set Field Visibility
+        public override bool GetFieldVisibility(string fldname)
+        {
+            var fld = FieldByName(fldname);
+            return fld?.Visible ?? false; // Returns original value
+        }
+
+        // Set left column class (must be predefined col-*-* classes of Bootstrap grid system)
+        public void SetLeftColumnClass(string columnClass)
+        {
+            Match m = Regex.Match(columnClass, @"^col\-(\w+)\-(\d+)$");
+            if (m.Success) {
+                LeftColumnClass = columnClass + " col-form-label ew-label";
+                RightColumnClass = "col-" + m.Groups[1].Value + "-" + ConvertToString(12 - ConvertToInt(m.Groups[2].Value));
+                OffsetColumnClass = RightColumnClass + " " + columnClass.Replace("col-", "offset-");
+                TableLeftColumnClass = Regex.Replace(columnClass, @"/^col-\w+-(\d+)$/", "w-col-$1"); // Change to w-col-*
+            }
+        }
+
+        // Multiple column sort
+        public void UpdateSort(DbField fld, bool ctrl)
+        {
+            string sortField, lastSort, curSort, orderBy, lastOrderBy, curOrderBy;
+            if (CurrentOrder == fld.Name) {
+                sortField = fld.Expression;
+                lastSort = fld.Sort;
+                if ((new[] { "ASC", "DESC", "NO" }).Contains(CurrentOrderType)) {
+                    curSort = CurrentOrderType;
+                } else {
+                    curSort = lastSort;
+                }
+                lastOrderBy = (new[] { "ASC", "DESC" }).Contains(lastSort) ? sortField + " " + lastSort : "";
+                curOrderBy = (new[] { "ASC", "DESC" }).Contains(curSort) ? sortField + " " + curSort : "";
+                if (ctrl) {
+                    orderBy = SessionOrderBy;
+                    List<string> listOrderBy = !Empty(orderBy) ? orderBy.Split([", "], StringSplitOptions.None).ToList() : new();
+                    if (!Empty(lastOrderBy) && listOrderBy.Contains(lastOrderBy)) {
+                        if (Empty(curOrderBy)) {
+                            listOrderBy.Remove(lastOrderBy);
+                        } else {
+                            var index = listOrderBy.IndexOf(lastOrderBy);
+                            listOrderBy[index] = curOrderBy;
+                        }
+                    } else if (!Empty(curOrderBy)) {
+                        listOrderBy.Add(curOrderBy);
+                    }
+                    orderBy = String.Join(", ", listOrderBy);
+                    SessionOrderBy = orderBy; // Save to Session
+                } else {
+                    SessionOrderBy = curOrderBy; // Save to Session
+                }
+            }
+        }
+
+        // Update field sort
+        public void UpdateFieldSort()
+        {
+            string orderBy = SessionOrderBy; // Get ORDER BY from Session
+            var flds = GetSortFields(orderBy);
+            foreach (var (key, field) in Fields) {
+                string fldSort = "";
+                foreach (var fld in flds) {
+                    if (fld[0] == field.Expression || fld[0] == field.VirtualExpression)
+                        fldSort = fld[1];
+                }
+                field.Sort = fldSort;
+            }
+        }
+
+        // Current master table name
+        public string CurrentMasterTable
+        {
+            get => Session.GetString(Config.ProjectName + "_" + TableVar + "_" + Config.TableMasterTable);
+            set => Session[Config.ProjectName + "_" + TableVar + "_" + Config.TableMasterTable] = value;
+        }
+
+        // Current detail table name
+        public string CurrentDetailTable
+        {
+            get => Session.GetString(Config.ProjectName + "_" + TableVar + "_" + Config.TableDetailTable);
+            set => Session[Config.ProjectName + "_" + TableVar + "_" + Config.TableDetailTable] = value;
+        }
+
+        #pragma warning disable 1998
+        // Render X Axis for chart
+        public async Task<Dictionary<string, object>> RenderChartXAxis(string chartVar, Dictionary<string, object> chartRow)
+        {
+            return chartRow;
+        }
+        #pragma warning restore 1998
+
+        // Table level SQL
+        // FROM
+        private string? _sqlFrom = null;
+
+        public string SqlFrom
+        {
+            get => _sqlFrom ?? "dbo.VFaceEnrollment";
+            set => _sqlFrom = value;
+        }
+
+        // SELECT
+        private string? _sqlSelect = null;
+
+        public string SqlSelect
+        {
+            get => _sqlSelect ?? "SELECT " + SqlSelectFields + " FROM " + SqlFrom;
+            set => _sqlSelect = value;
+        }
+
+        private string SqlSelectFields
+        {
+            get {
+                string select = "*, '<a href=VFaceEnrollmentEdit/' + CAST(IdUser AS NVARCHAR(50))+'>'+CAST(Username AS NVARCHAR(50))+'</a>' AS [LinkRedirect], CASE WHEN Face IS NOT NULL AND LTRIM(RTRIM(Face)) <> '' THEN '<a class=' + CHAR(34) + 'download-face btn btn-primary' + CHAR(34) + ' data-url=' + CAST(Face AS NVARCHAR(255)) + '><i class=' + CHAR(34) + 'fas fa-download me-2' + CHAR(34) + '></i> Download Face</a>' ELSE '<p>Not Uploaded</p>' END AS [DownloadFace]";
+                if (select == "*") {
+                    bool useFieldNames = false; // Reserved, not used
+                    List<string> fieldNames = [];
+                    foreach (var (key, fld) in Fields) {
+                        string expr = fld.Expression;
+                        fieldNames.Add(expr);
+                    }
+                    if (useFieldNames)
+                        select = String.Join(", ", fieldNames);
+                }
+                return select;
+            }
+        }
+
+        // WHERE // DN
+        private string? _sqlWhere = null;
+
+        public string SqlWhere
+        {
+            get {
+                string where = "";
+                return _sqlWhere ?? where;
+            }
+            set {
+                _sqlWhere = value;
+            }
+        }
+
+        // Group By
+        private string? _sqlGroupBy = null;
+
+        public string SqlGroupBy
+        {
+            get => _sqlGroupBy ?? "";
+            set => _sqlGroupBy = value;
+        }
+
+        // Having
+        private string? _sqlHaving = null;
+
+        public string SqlHaving
+        {
+            get => _sqlHaving ?? "";
+            set => _sqlHaving = value;
+        }
+
+        // Order By
+        private string? _sqlOrderBy = null;
+
+        public string SqlOrderBy
+        {
+            get => _sqlOrderBy ?? "";
+            set => _sqlOrderBy = value;
+        }
+
+        // Apply User ID filters
+        public string ApplyUserIDFilters(string filter, string id = "")
+        {
+            return filter;
+        }
+
+        // Check if User ID security allows view all
+        public bool UserIDAllow(string id = "")
+        {
+            int allow = UserIdAllowSecurity;
+            return id switch {
+                "add" => ((allow & 1) == 1),
+                "copy" => ((allow & 1) == 1),
+                "gridadd" => ((allow & 1) == 1),
+                "register" => ((allow & 1) == 1),
+                "addopt" => ((allow & 1) == 1),
+                "edit" => ((allow & 4) == 4),
+                "gridedit" => ((allow & 4) == 4),
+                "update" => ((allow & 4) == 4),
+                "changepassword" => ((allow & 4) == 4),
+                "resetpassword" => ((allow & 4) == 4),
+                "delete" => ((allow & 2) == 2),
+                "view" => ((allow & 32) == 32),
+                "search" => ((allow & 64) == 64),
+                "lookup" => ((allow & 256) == 256),
+                _ => ((allow & 8) == 8)
+            };
+        }
+
+        /// <summary>
+        /// Get record count by reading data reader (Async) // DN
+        /// </summary>
+        /// <param name="sql">SQL</param>
+        /// <param name="c">Connection</param>
+        /// <returns>Record count</returns>
+        public async Task<int> GetRecordCountAsync(string sql, dynamic? c = null) {
+            try {
+                var cnt = 0;
+                var conn = c ?? Connection;
+                using var dr = await conn.ExecuteReaderAsync(sql, main: false);
+                if (dr != null) {
+                    while (await dr.ReadAsync())
+                        cnt++;
+                }
+                return cnt;
+            } catch {
+                if (Config.Debug)
+                    throw;
+                return -1;
+            }
+        }
+
+        /// <summary>
+        /// Get record count by reading data reader // DN
+        /// </summary>
+        /// <param name="sql">SQL</param>
+        /// <param name="c">Connection</param>
+        /// <returns>Record count</returns>
+        public int GetRecordCount(string sql, dynamic? c = null) => GetRecordCountAsync(sql, c).GetAwaiter().GetResult();
+
+        /// <summary>
+        /// Try to get record count by SELECT COUNT(*) (Async) // DN
+        /// </summary>
+        /// <param name="sql">SQL</param>
+        /// <param name="c">Connection</param>
+        /// <returns>Record count</returns>
+        public async Task<int> TryGetRecordCountAsync(string sql, dynamic? c = null)
+        {
+            string orderBy = OrderBy;
+            var conn = c ?? Connection;
+            sql = Regex.Replace(sql, @"/\*BeginOrderBy\*/[\s\S]+/\*EndOrderBy\*/", "", RegexOptions.IgnoreCase).Trim(); // Remove ORDER BY clause (MSSQL)
+            if (!Empty(orderBy) && sql.EndsWith(orderBy))
+                sql = sql.Substring(0, sql.Length - orderBy.Length); // Remove ORDER BY clause
+            try {
+                string sqlcnt;
+                if ((new[] { "TABLE", "VIEW", "LINKTABLE" }).Contains(Type) && sql.StartsWith(SqlSelect)) { // Handle Custom Field
+                    sqlcnt = "SELECT COUNT(*) FROM " + SqlFrom + sql.Substring(SqlSelect.Length);
+                } else {
+                    sqlcnt = "SELECT COUNT(*) FROM (" + sql + ") EW_COUNT_TABLE";
+                }
+                return await conn?.ExecuteScalarAsync<int>(sqlcnt) ?? 0;
+            } catch {
+                return await GetRecordCountAsync(sql, conn);
+            }
+        }
+
+        /// <summary>
+        /// Try to get record count by SELECT COUNT(*) // DN
+        /// </summary>
+        /// <param name="sql">SQL</param>
+        /// <param name="c">Connection</param>
+        /// <returns>Record count</returns>
+        public int TryGetRecordCount(string sql, dynamic? c = null) => TryGetRecordCountAsync(sql, c).GetAwaiter().GetResult();
+
+        // Get SQL
+        public string GetSql(string where, string orderBy = "") => BuildSelectSql(SqlSelect, SqlWhere, SqlGroupBy, SqlHaving, SqlOrderBy, where, orderBy);
+
+        // Table SQL
+        public string CurrentSql
+        {
+            get {
+                string filter = CurrentFilter;
+                filter = ApplyUserIDFilters(filter); // Add User ID filter
+                string sort = SessionOrderBy;
+                return GetSql(filter, sort);
+            }
+        }
+
+        // Table SQL with List page filter
+        public string ListSql
+        {
+            get {
+                string sort = "";
+                string select = "";
+                string filter = UseSessionForListSql ? SessionWhere : "";
+                AddFilter(ref filter, CurrentFilter);
+                RecordsetSelecting(ref filter);
+                filter = ApplyUserIDFilters(filter); // Add User ID filter
+                select = SqlSelect;
+                sort = UseSessionForListSql ? SessionOrderBy : "";
+                return BuildSelectSql(select, SqlWhere, SqlGroupBy, SqlHaving, SqlOrderBy, filter, sort);
+            }
+        }
+
+        // Get ORDER BY clause
+        public string OrderBy
+        {
+            get {
+                string sort = SessionOrderBy;
+                return BuildSelectSql("", "", "", "", SqlOrderBy, "", sort);
+            }
+        }
+
+        /// <summary>
+        /// Get record count based on filter (for detail record count in master table pages) (Async) // DN
+        /// </summary>
+        /// <param name="filter">Filter</param>
+        /// <returns>Record count</returns>
+        public async Task<int> LoadRecordCountAsync(string filter) => await TryGetRecordCountAsync(GetSql(filter));
+
+        /// <summary>
+        /// Get record count based on filter (for detail record count in master table pages) // DN
+        /// </summary>
+        /// <param name="filter">Filter</param>
+        /// <returns>Record count</returns>
+        public int LoadRecordCount(string filter) => TryGetRecordCount(GetSql(filter));
+
+        /// <summary>
+        /// Get record count (for current List page) (Async) // DN
+        /// </summary>
+        /// <returns>Record count</returns>
+        public async Task<int> ListRecordCountAsync() => await TryGetRecordCountAsync(ListSql);
+
+        /// <summary>
+        /// Get record count (for current List page) // DN
+        /// </summary>
+        /// <returns>Record count</returns>
+        public int ListRecordCount() => TryGetRecordCount(ListSql);
+
+        /// <summary>
+        /// Inserts the specified entity into the database and returns the ID
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity</typeparam>
+        /// <typeparam name="T">The type of the ID (int)</typeparam>
+        /// <param name="entity">The entity to be inserted</param>
+        /// <param name="transaction">Optional transaction for the command</param>
+        /// <param name="timeout">Timeout period</param>
+        /// <param name="main">Use main connection or not</param>
+        /// <returns>The ID of the inserted entity</returns>
+        public override T InsertGetId<TEntity, T>(TEntity entity, IDbTransaction? transaction = null, int? timeout = null, bool main = false)
+            where TEntity : class
+        {
+            var row = BuildDictionaryFromObject(entity, Crud.Create);
+            var queryBuilder = GetQueryBuilder(main);
+            T id = queryBuilder.InsertGetId<T>(row, transaction ?? GetTransaction(main), timeout);
+            return id;
+        }
+
+        /// <summary>
+        /// Inserts the specified entity into the database and returns the ID
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity</typeparam>
+        /// <typeparam name="T">The type of the ID (int)</typeparam>
+        /// <param name="entity">The entity to be inserted</param>
+        /// <param name="transaction">Optional transaction for the command</param>
+        /// <param name="timeout">Timeout period</param>
+        /// <param name="cancellationToken">Optional cancellation token for the command</param>
+        /// <param name="main">Use main connection or not</param>
+        /// <returns>The ID of the inserted entity</returns>
+        public override async Task<T> InsertGetIdAsync<TEntity, T>(TEntity entity, IDbTransaction? transaction = null, int? timeout = null, CancellationToken cancellationToken = default, bool main = false)
+            where TEntity : class
+        {
+            var row = BuildDictionaryFromObject(entity, Crud.Create);
+            var queryBuilder = GetQueryBuilder(main);
+            T id = await queryBuilder.InsertGetIdAsync<T>(row, transaction ?? GetTransaction(main), timeout, cancellationToken);
+            return id;
+        }
+
+        /// <summary>
+        /// Insert (Async)
+        /// </summary>
+        /// <param name="data">Data to be inserted (IDictionary|Anonymous)</param>
+        /// <returns>Row affected</returns>
+        public async Task<int> InsertAsync(object data)
+        {
+            int result = 0;
+            IDictionary<string, object> row;
+            if (data is IDictionary<string, object> d)
+                row = d;
+            else if (IsAnonymousType(data))
+                row = ConvertToDictionary<object>(data);
+            else if (IsEntity(data))
+                row = BuildDictionaryFromObject(data, Crud.Create).ToDictionary();
+            else
+                throw new ArgumentException("Data must be of anonymous or Dictionary<string, object> or Entities.VfaceEnrollment type", "data");
+            row = row.Where(kvp => {
+                var fld = FieldByName(kvp.Key);
+                return fld != null && !fld.IsCustom;
+            }).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+            if (row.Count == 0)
+                return -1;
+            var queryBuilder = GetQueryBuilder();
+            try {
+                result = await queryBuilder.InsertAsync(row);
+            } catch (Exception e) {
+                CurrentPage?.SetFailureMessage(e.Message);
+                if (Config.Debug)
+                    throw;
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Insert
+        /// </summary>
+        /// <param name="data">Data to be inserted (IDictionary|Anonymous)</param>
+        /// <returns>Row affected</returns>
+        public int Insert(object data) => InsertAsync(data).GetAwaiter().GetResult();
+
+        /// <summary>
+        /// Update (Async)
+        /// </summary>
+        /// <param name="data">Data (with primary key) to be updated (IDictionary|Anonymous)</param>
+        /// <returns>Row affected</returns>
+        public async Task<int> UpdateAsync(object data)
+        {
+            IDictionary<string, object> row;
+            if (data is IDictionary<string, object> d)
+                row = d;
+            else if (IsAnonymousType(data))
+                row = ConvertToDictionary<object>(data);
+            else
+                throw new ArgumentException("Data must be of anonymous or Dictionary<string, object> type", "data");
+            var where = GetRowFilter(row);
+            if (where != null) {
+                foreach (string key in where.Keys)
+                    row.Remove(key);
+                return await UpdateAsync(row, where);
+            }
+            return -1; // Prevent update all record
+        }
+
+        /// <summary>
+        /// Update (Async)
+        /// </summary>
+        /// <param name="data">Data to be updated (IDictionary|Anonymous)</param>
+        /// <param name="where">Where (IDictionary|Anonymous|string)</param>
+        /// <returns>Row affected</returns>
+        public async Task<int> UpdateAsync(object data, object? where) => await UpdateAsync(data, where, null);
+
+        #pragma warning disable 168, 219
+        /// <summary>
+        /// Update (Async)
+        /// </summary>
+        /// <param name="data">Data to be updated (IDictionary|Anonymous)</param>
+        /// <param name="where">Where (IDictionary|Anonymous)</param>
+        /// <param name="rsold">Old record</param>
+        /// <returns>Row affected</returns>
+        public async Task<int> UpdateAsync(object data, object? where, Dictionary<string, object>? rsold)
+        {
+            int result = -1;
+            IDictionary<string, object> row;
+            if (data is IDictionary<string, object> d)
+                row = d;
+            else if (IsAnonymousType(data))
+                row = ConvertToDictionary<object>(data);
+            else if (IsEntity(data))
+                row = BuildDictionaryFromObject(data, Crud.Update).ToDictionary();
+            else
+                throw new ArgumentException("Data must be of anonymous or Dictionary<string, object> or Entities.VfaceEnrollment type", "data");
+            Dictionary<string, object> rscascade = new();
+            row = row.Where(kvp => FieldByName(kvp.Key) is DbField fld && !fld.IsCustom).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+            if (row.Count == 0)
+                return -1;
+            var queryBuilder = GetQueryBuilder();
+            string filter = CurrentFilter;
+            if (!Empty(filter))
+                queryBuilder.WhereRaw(filter);
+            if (IsAnonymousType(where))
+                queryBuilder.Where(where);
+            else if (where is IDictionary<string, object> dict)
+                queryBuilder.Where(dict);
+            else if (where is string)
+                queryBuilder.WhereRaw((string)where);
+            if (GetRowFilter(rsold) is IDictionary<string, object> rowFilter) // Add filter from old record
+                queryBuilder.Where(rowFilter);
+            if (queryBuilder.HasComponent("where")) // Prevent update all records
+                result = await queryBuilder.UpdateAsync(row);
+            return result;
+        }
+        #pragma warning restore 168, 219
+
+        /// <summary>
+        /// Gather a list of key-values representing the properties of the object and their values
+        /// </summary>
+        /// <param name="data">The plain C# object</param>
+        /// <param name="crud">Operation</param>
+        /// <returns></returns>
+        public override Dictionary<string, object> BuildDictionaryFromObject(object data, Crud crud = Crud.None)
+        {
+            var dictionary = new Dictionary<string, object>();
+            var props = data.GetType().GetRuntimeProperties().ToArray();
+            foreach (var property in props) {
+                if (property.IsDefined(typeof(IgnoreAttribute)))
+                    continue;
+                var colAttr = property.GetCustomAttribute(typeof(ColumnAttribute)) as ColumnAttribute;
+                var fldName = colAttr?.Name ?? property.Name;
+                if (!Fields.TryGetValue(fldName, out DbField? fld) || fld == null || fld.IsCustom || (crud == Crud.Create || crud == Crud.Update) && fld.IsAutoIncrement)
+                    continue;
+                if (crud == Crud.Update && colAttr is KeyAttribute)
+                    continue;
+                var value = property.GetValue(data);
+                if (crud == Crud.Create || crud == Crud.Update) {
+                    var dbType = ((DbField<SqlDbType>)fld).DbType;
+                    if (dbType == SqlDbType.VarBinary || dbType == SqlDbType.Binary || dbType == SqlDbType.Image)
+                        value = new SqlBinaryParameter(value, fld.Nullable); // Cannot update to null directly (Dapper/Microsoft.Data.SqlClient bug?)
+                    if ((fld.DataType == DataType.String || fld.DataType == DataType.Memo) && value is string s && !Empty(s)) {
+                        if (fld.IsEncrypted)
+                            value = AesEncrypt(s);
+                        else if (!fld.Raw)
+                            value = RemoveXss(s);
+                        if (fld.UserValues != null) {
+                            if (fld.IsEnum) {
+                                if (!fld.UserValues.Contains(s))
+                                    throw new ArgumentException($"Invalid {fld.Name} value");
+                            } else if (fld.IsSet && s.Split(Config.MultipleOptionSeparator) is IList list) {
+                                foreach (var v in list) {
+                                    if (!fld.UserValues.Contains(v))
+                                        throw new ArgumentException($"Invalid {fld.Name} value");
+                                }
+                            }
+                        }
+                    }
+                }
+                dictionary.Add(fld.Name, value!);
+            }
+            return dictionary;
+        }
+
+        /// <summary>
+        /// Convert entity values
+        /// </summary>
+        /// <param name="entity">Entity returned by Dapper</param>
+        /// <returns>Entity</returns>
+        [return: NotNullIfNotNull("entity")]
+        public override TEntity? ConvertEntity<TEntity>(TEntity? entity)
+            where TEntity : class
+        {
+            if (entity == null)
+                return null;
+            var props = entity.GetType().GetRuntimeProperties();
+            foreach (var property in props) {
+                var colAttr = property.GetCustomAttribute(typeof(ColumnAttribute)) as ColumnAttribute;
+                var fldName = colAttr?.Name ?? property.Name;
+                if (!Fields.TryGetValue(fldName, out DbField? fld) || fld == null || fld.IsCustom || fld.IsAutoIncrement)
+                    continue;
+                if (((DbField<SqlDbType>)fld).DbType == SqlDbType.Timestamp)
+                    continue;
+                var value = property.GetValue(entity);
+                if ((fld.DataType == DataType.String || fld.DataType == DataType.Memo) && value is string s && !Empty(s)) {
+                    if (fld.IsEncrypted)
+                        property.SetValue(entity, AesDecrypt(s));
+                    else if (!fld.Raw)
+                        property.SetValue(entity, HtmlDecode(s));
+                }
+            }
+            return entity;
+        }
+
+        /// <summary>
+        /// Update
+        /// </summary>
+        /// <param name="data">Data (with primary key) to be updated (IDictionary|Anonymous)</param>
+        /// <returns>Row affected</returns>
+        public int Update(object data) => UpdateAsync(data).GetAwaiter().GetResult();
+
+        /// <summary>
+        /// Update
+        /// </summary>
+        /// <param name="data">Data to be updated (IDictionary|Anonymous)</param>
+        /// <param name="where">Where (IDictionary|Anonymous|string)</param>
+        /// <returns>Row affected</returns>
+        public int Update(object data, object where) => UpdateAsync(data, where).GetAwaiter().GetResult();
+
+        /// <summary>
+        /// Update
+        /// </summary>
+        /// <param name="data">Data to be updated (IDictionary|Anonymous)</param>
+        /// <param name="where">Where (IDictionary|Anonymous|string)</param>
+        /// <param name="rsold">Old record</param>
+        /// <returns>Row affected</returns>
+        public int Update(object data, object where, Dictionary<string, object> rsold) => UpdateAsync(data, where, rsold).GetAwaiter().GetResult();
+
+        #pragma warning disable 168, 1998
+        /// <summary>
+        /// Delete (Async)
+        /// </summary>
+        /// <param name="data">Data to be removed (IDictionary|Anonymous)</param>
+        /// <param name="where">Where (IDictionary|Anonymous|string)</param>
+        /// <returns>Row affected</returns>
+        public async Task<int> DeleteAsync(object? data, object? where = null)
+        {
+            bool delete = true;
+            IDictionary<string, object>? row = null;
+            if (data is IDictionary<string, object> d)
+                row = d;
+            else if (IsAnonymousType(data))
+                row = ConvertToDictionary<object>(data);
+            else if (IsEntity(data))
+                row = BuildDictionaryFromObject(data, Crud.Delete).ToDictionary();
+            else
+                throw new ArgumentException("Data must be of anonymous or Dictionary<string, object> or Entities.VfaceEnrollment type", "data");
+            var queryBuilder = GetQueryBuilder(true); // Use main connection
+            if (GetRowFilter(row) is IDictionary<string, object> rowFilter)
+                queryBuilder.Where(rowFilter);
+            if (IsAnonymousType(where))
+                queryBuilder.Where(where);
+            else if (where is IDictionary<string, object> dict)
+                queryBuilder.Where(dict);
+            else if (where is string)
+                queryBuilder.WhereRaw((string)where);
+            int result = delete && queryBuilder.HasComponent("where") // Avoid delete if no WHERE clause
+                ? await queryBuilder.DeleteAsync(Connection.Transaction)
+                : -1;
+            return result;
+        }
+        #pragma warning restore 168, 1998
+
+        /// <summary>
+        /// Delete
+        /// </summary>
+        /// <param name="data">Data to be removed (IDictionary|Anonymous)</param>
+        /// <param name="where">Where (IDictionary|Anonymous|string)</param>
+        /// <returns>Row affected</returns>
+        public int Delete(object data, object? where = null) => DeleteAsync(data, where).GetAwaiter().GetResult();
+
+        // Load DbValue from recordset
+        public void LoadDbValues(Dictionary<string, object>? row)
+        {
+            if (row == null)
+                return;
+            try {
+                IdUser.DbValue = row["IdUser"]; // Set DB value only
+                _Username.DbValue = row["Username"]; // Set DB value only
+                LinkRedirect.DbValue = row["LinkRedirect"]; // Set DB value only
+                _Email.DbValue = row["Email"]; // Set DB value only
+                NamaLengkap.DbValue = row["NamaLengkap"]; // Set DB value only
+                DownloadFace.DbValue = row["DownloadFace"]; // Set DB value only
+                IdPosition.DbValue = row["IdPosition"]; // Set DB value only
+                Jabatan.DbValue = row["Jabatan"]; // Set DB value only
+                Face.DbValue = row["Face"]; // Set DB value only
+                TanggalInputFace.DbValue = row["TanggalInputFace"]; // Set DB value only
+                UserInputFace.DbValue = row["UserInputFace"]; // Set DB value only
+                AzurePersonId.DbValue = row["AzurePersonId"]; // Set DB value only
+            } catch {}
+        }
+
+        public void DeleteUploadedFiles(Dictionary<string, object> row)
+        {
+            LoadDbValues(row);
+        }
+
+        // Record filter WHERE clause
+        private string _sqlKeyFilter => "[IdUser] = @IdUser@";
+
+        #pragma warning disable 168, 219
+        // Get record filter as string
+        public string GetRecordFilter(Dictionary<string, object>? row = null, bool current = false)
+        {
+            string keyFilter = _sqlKeyFilter;
+            object? val = null, result = "";
+            foreach (var (fldName, fldParm) in KeyFields) {
+                var fld = FieldByName(fldName);
+                if (fld == null)
+                    throw new Exception($"Field '{fldName}' not found");
+                val = row?.TryGetValue(fldName, out result) ?? false
+                    ? result
+                    : !Empty(fld.OldValue) && !current ? fld.OldValue : fld.CurrentValue;
+                if (fld.DataType == DataType.Number && !IsNumeric(val))
+                    return "0=1"; // Invalid key
+                if (fld.DataType == DataType.Date)
+                    val = UnformatDateTime(val, fld.FormatPattern);
+                if (val == null)
+                    return "0=1"; // Invalid key
+                keyFilter = keyFilter.Replace($"@{fldParm}@", AdjustSql(val, DbId)); // Replace key value
+            }
+            return keyFilter;
+        }
+
+        // Get record filter as Dictionary // DN
+        public override Dictionary<string, object>? GetRowFilter(object? data = null, bool remove = false)
+        {
+            if (data == null)
+                return null;
+            var row = ConvertToDictionary<object>(data);
+            Dictionary<string, object>? keyFilter = new();
+            foreach (var (fldName, fldParm) in KeyFields) {
+                object? val = row.TryGetValue(fldName, out object? result) ? result : null;
+                if (Empty(val) || FieldByName(fldName)?.DataType == DataType.Number && !IsNumeric(val)) // Invalid key
+                    return null;
+                keyFilter.Add(fldName, val); // Add key value
+                if (remove && data is IDictionary<string, object> dict)
+                    dict.Remove(fldName);
+            }
+            return keyFilter.Count > 0 ? keyFilter : null;
+        }
+
+        // Get record filter as Dictionary // DN
+        public override Dictionary<string, object>? GetRowFilter(object[]? ids = null)
+        {
+            if (ids == null || ids.Length != KeyFields.Count)
+                return null;
+            Dictionary<string, object>? keyFilter = new();
+            int i = 0;
+            foreach (var (fldName, fldParm) in KeyFields) {
+                object val = ids[i++];
+                if (Empty(val) || FieldByName(fldName)?.DataType == DataType.Number && !IsNumeric(val)) // Invalid key
+                    return null;
+                keyFilter.Add(fldName, val); // Add key value
+            }
+            return keyFilter.Count > 0 ? keyFilter : null;
+        }
+
+        // Return URL
+        public string ReturnUrl
+        {
+            get {
+                string name = Config.ProjectName + "_" + TableVar + "_" + Config.TableReturnUrl;
+                // Get referer URL automatically
+                if (!Empty(ReferUrl()) && !SameText(ReferPage(), CurrentPageName()) &&
+                    !SameText(ReferPage(), "login")) {// Referer not same page or login page
+                        Session[name] = ReferUrl(); // Save to Session
+                }
+                if (!Empty(Session[name])) {
+                    return Session.GetString(name);
+                } else {
+                    return "VFaceEnrollmentList";
+                }
+            }
+            set {
+                Session[Config.ProjectName + "_" + TableVar + "_" + Config.TableReturnUrl] = value;
+            }
+        }
+
+        // Get modal caption
+        public string GetModalCaption(string pageName)
+        {
+            return pageName switch {
+                "VFaceEnrollmentView" => Language.Phrase("View"),
+                "VFaceEnrollmentEdit" => Language.Phrase("Edit"),
+                "VFaceEnrollmentAdd" => Language.Phrase("Add"),
+                _ => String.Empty
+            };
+        }
+
+        // Default route URL
+        public string DefaultRouteUrl
+        {
+            get {
+                return "VFaceEnrollmentList";
+            }
+        }
+
+        // API page name
+        public string GetApiPageName(string action)
+        {
+            return action.ToLowerInvariant() switch {
+                Config.ApiViewAction => "VFaceEnrollmentView",
+                Config.ApiAddAction => "VFaceEnrollmentAdd",
+                Config.ApiEditAction => "VFaceEnrollmentEdit",
+                Config.ApiDeleteAction => "VFaceEnrollmentDelete",
+                Config.ApiListAction => "VFaceEnrollmentList",
+                _ => String.Empty
+            };
+        }
+
+        // API page class name // DN
+        public string GetApiPageClassName(string action)
+        {
+            return action.ToLowerInvariant() switch {
+                Config.ApiViewAction => "VFaceEnrollmentView",
+                Config.ApiAddAction => "VFaceEnrollmentAdd",
+                Config.ApiEditAction => "VFaceEnrollmentEdit",
+                Config.ApiDeleteAction => "VFaceEnrollmentDelete",
+                Config.ApiListAction => "VFaceEnrollmentList",
+                _ => String.Empty
+            };
+        }
+
+        // Current URL
+        public string GetCurrentUrl(string parm = "")
+        {
+            string url = CurrentPageName();
+            if (!Empty(parm))
+                url = KeyUrl(url, parm);
+            else
+                url = KeyUrl(url, Config.TableShowDetail + "=");
+            return AddMasterUrl(url);
+        }
+
+        // List URL
+        public string ListUrl => "VFaceEnrollmentList";
+
+        // View URL
+        public string ViewUrl => GetViewUrl();
+
+        // View URL
+        public string GetViewUrl(string parm = "")
+        {
+            string url = "";
+            if (!Empty(parm))
+                url = KeyUrl("VFaceEnrollmentView", parm);
+            else
+                url = KeyUrl("VFaceEnrollmentView", Config.TableShowDetail + "=");
+            return AddMasterUrl(url);
+        }
+
+        // Add URL
+        public string AddUrl { get; set; } = "VFaceEnrollmentAdd";
+
+        // Add URL
+        public string GetAddUrl(string parm = "")
+        {
+            string url = "";
+            if (!Empty(parm))
+                url = "VFaceEnrollmentAdd?" + parm;
+            else
+                url = "VFaceEnrollmentAdd";
+            return AppPath(AddMasterUrl(url));
+        }
+
+        // Edit URL
+        public string EditUrl => GetEditUrl();
+
+        // Edit URL (with parameter)
+        public string GetEditUrl(string parm = "")
+        {
+            string url = "";
+            url = KeyUrl("VFaceEnrollmentEdit", parm);
+            return AppPath(AddMasterUrl(url)); // DN
+        }
+
+        // Inline edit URL
+        public string InlineEditUrl =>
+            AppPath(AddMasterUrl(KeyUrl("VFaceEnrollmentList", "action=edit"))); // DN
+
+        // Copy URL
+        public string CopyUrl => GetCopyUrl();
+
+        // Copy URL
+        public string GetCopyUrl(string parm = "")
+        {
+            string url = "";
+            url = KeyUrl("VFaceEnrollmentAdd", parm);
+            return AppPath(AddMasterUrl(url)); // DN
+        }
+
+        // Inline copy URL
+        public string InlineCopyUrl =>
+            AppPath(AddMasterUrl(KeyUrl("VFaceEnrollmentList", "action=copy"))); // DN
+
+        // Delete URL
+        public string GetDeleteUrl(string parm = "")
+        {
+            return UseAjaxActions && Param<bool>("infinitescroll") && CurrentPageID() == "list"
+                ? AppPath(KeyUrl(Config.ApiUrl + Config.ApiDeleteAction + "/" + TableVar))
+                : AppPath(KeyUrl("VFaceEnrollmentDelete", parm)); // DN
+        }
+
+        // Delete URL
+        public string DeleteUrl => GetDeleteUrl();
+
+        // Add master URL
+        public string AddMasterUrl(string url)
+        {
+            return url;
+        }
+
+        // Get primary key as JSON
+        public string KeyToJson(bool htmlEncode = false)
+        {
+            string json = "";
+            json += "\"IdUser\":" + ConvertToJson(IdUser.CurrentValue, "number", true);
+            json = "{" + json + "}";
+            if (htmlEncode)
+                json = HtmlEncode(json);
+            return json;
+        }
+
+        // Add key value to URL // DN
+        public string KeyUrl(string url, string parm = "")
+        {
+            if (!IsNull(IdUser.CurrentValue)) {
+                url += "/" + IdUser.CurrentValue;
+            } else {
+                return "javascript:ew.alert(ew.language.phrase('InvalidRecord'));";
+            }
+            if (Empty(parm))
+                return url;
+            else
+                return url + "?" + parm;
+        }
+
+        // Render sort
+        public string RenderFieldHeader(DbField fld)
+        {
+            string sortUrl = "";
+            string attrs = "";
+            if (CurrentPageID() != "grid" && fld.Sortable) {
+                sortUrl = SortUrl(fld);
+                attrs = " role=\"button\" data-ew-action=\"sort\" data-ajax=\"" + (UseAjaxActions ? "true" : "false") + "\" data-sort-url=\"" + sortUrl + "\" data-sort-type=\"2\"";
+                if (!Empty(ContextClass)) // Add context
+                    attrs += " data-context=\"" + HtmlEncode(ContextClass) + "\"";
+            }
+            string html = "<div class=\"ew-table-header-caption\"" + attrs + ">" + fld.Caption + "</div>";
+            if (!Empty(sortUrl)) {
+                html += "<div class=\"ew-table-header-sort\">" + fld.SortIcon + "</div>";
+            }
+            if (CurrentPageID() != "grid" && !IsExport() && fld.UseFilter && Security.CanSearch) {
+                html += "<div class=\"ew-filter-dropdown-btn\" data-ew-action=\"filter\" data-table=\"" + fld.TableVar + "\" data-field=\"" + fld.FieldVar +
+                    "\"><div class=\"ew-table-header-filter\" role=\"button\" aria-haspopup=\"true\">" + Language.Phrase("Filter") +
+                    (IsList(fld.EditValue) ? Language.Phrase("FilterCount").Replace("%c", ((IList)fld.EditValue).Count.ToString()) : "") +
+                    "</div></div>";
+            }
+            html = "<div class=\"ew-table-header-btn\">" + html + "</div>";
+            if (UseCustomTemplate) {
+                string scriptId = ("tpc_{id}").Replace("{id}", fld.TableVar + "_" + fld.Param);
+                html = "<template id=\"" + scriptId + "\">" + html + "</template>";
+            }
+            return html;
+        }
+
+        // Sort URL (already URL-encoded)
+        public string SortUrl(DbField fld)
+        {
+            if (!Empty(CurrentAction) || !Empty(Export) ||
+                ((int[])[141, 201, 203, 128, 204, 205]).Contains(fld.Type)) { // Unsortable data type
+                return "";
+            } else if (fld.Sortable) {
+                string urlParm = "order=" + UrlEncode(fld.Name) + "&amp;ordertype=" + fld.NextSort;
+                if (!Empty(DashboardReport))
+                    urlParm += "&amp;" + Config.PageDashboard + "=true";
+                return AddMasterUrl(CurrentDashboardPageUrl() + "?" + urlParm);
+            }
+            return "";
+        }
+
+        #pragma warning disable 168, 219
+        // Get key as string
+        public string GetKey(bool current = false, string? keySeparator = null)
+        {
+            List<string> keys = [];
+            string val;
+            string sep = keySeparator ?? Config.CompositeKeySeparator;
+            foreach (var (fldName, fldParm) in KeyFields) {
+                val = current ? ConvertToString(FieldByName(fldName)?.CurrentValue) : ConvertToString(FieldByName(fldName)?.OldValue);
+                if (Empty(val))
+                    return String.Empty;
+                keys.Add(val);
+            }
+            return String.Join(sep, keys);
+        }
+
+        // Get record filter as string // DN
+        public string GetKey(IDictionary<string, object> row)
+        {
+            List<string> keys = [];
+            object? val = null, result;
+            foreach (var (fldName, fldParm) in KeyFields) {
+                val = row?.TryGetValue(fldName, out result) ?? false ? ConvertToString(result) : null;
+                if (Empty(val))
+                    return String.Empty; // Invalid key
+                keys.Add(ConvertToString(val)); // Add key value
+            }
+            return String.Join(Config.CompositeKeySeparator, keys);
+        }
+        #pragma warning restore 168, 219
+
+        // Set key
+        public void SetKey(string key, bool current = false, string? keySeparator = null)
+        {
+            OldKey = key;
+            string sep = keySeparator ?? Config.CompositeKeySeparator;
+            string[] keys = OldKey.Split(Convert.ToChar(sep));
+            if (keys.Length == KeyFields.Count) {
+                for (int i = 0; i < KeyFields.Count; i++) {
+                    var fld = FieldByName(KeyFields.ElementAt(i).Key);
+                    if (fld != null) {
+                        if (current)
+                            fld.CurrentValue = keys[i];
+                        else
+                            fld.OldValue = keys[i];
+                    }
+                }
+            }
+        }
+
+        #pragma warning disable 168
+        // Get record keys
+        public List<string> GetRecordKeys()
+        {
+            List<string> result = new();
+            StringValues sv;
+            List<string> keysList = new();
+            if (Post("key_m[]", out sv) || Get("key_m[]", out sv)) { // DN
+                keysList = ((StringValues)sv).Select(k => ConvertToString(k)).ToList();
+            } else if (RouteValues.Count > 0 || Query.Count > 0 || Form.Count > 0) { // DN
+                string key = "";
+                string[] keyValues = {};
+                if (IsApi() && RouteValues.TryGetValue("key", out object? k)) {
+                    string str = ConvertToString(k);
+                    keyValues = str.Split('/');
+                }
+                if (RouteValues.TryGetValue("IdUser", out object? v0)) { // IdUser // DN
+                    key = UrlDecode(v0); // DN
+                } else if (IsApi() && !Empty(keyValues)) {
+                    key = keyValues[0];
+                } else {
+                    key = Param("IdUser");
+                }
+                keysList.Add(key);
+            }
+            // Check keys
+            foreach (var keys in keysList) {
+                if (KeyFields.Count > 1 && (!IsArray(keys) || keys.Length != KeyFields.Count))
+                    continue;
+                if (!IsNumeric(keys)) // IdUser
+                    continue;
+                result.Add(keys);
+            }
+            return result;
+        }
+        #pragma warning restore 168
+
+        // Get filter from records
+        public string GetFilterFromRecords(IEnumerable<Dictionary<string, object>> rows) =>
+            String.Join(" OR ", rows.Select(row => "(" + GetRecordFilter(row) + ")"));
+
+        // Get filter from record keys
+        public string GetFilterFromRecordKeys(bool setCurrent = true)
+        {
+            List<string> recordKeys = GetRecordKeys();
+            string keyFilter = "";
+            foreach (var keys in recordKeys) {
+                if (!Empty(keyFilter))
+                    keyFilter += " OR ";
+                if (setCurrent)
+                    IdUser.CurrentValue = keys;
+                else
+                    IdUser.OldValue = keys;
+                keyFilter += "(" + GetRecordFilter() + ")";
+            }
+            return keyFilter;
+        }
+
+        // Load row values from recordset
+        public void LoadListRowValues(Dictionary<string, object>? row)
+        {
+            if (row == null)
+                return;
+            IdUser.SetDbValue(row["IdUser"]);
+            _Username.SetDbValue(row["Username"]);
+            LinkRedirect.SetDbValue(row["LinkRedirect"]);
+            _Email.SetDbValue(row["Email"]);
+            NamaLengkap.SetDbValue(row["NamaLengkap"]);
+            DownloadFace.SetDbValue(row["DownloadFace"]);
+            IdPosition.SetDbValue(row["IdPosition"]);
+            Jabatan.SetDbValue(row["Jabatan"]);
+            Face.SetDbValue(row["Face"]);
+            TanggalInputFace.SetDbValue(row["TanggalInputFace"]);
+            UserInputFace.SetDbValue(row["UserInputFace"]);
+            AzurePersonId.SetDbValue(row["AzurePersonId"]);
+        }
+
+        // Load row values from recordset
+        public void LoadListRowValues(DbDataReader? dr) => LoadListRowValues(GetDictionary(dr));
+
+        // Render list content
+        public async Task<string> RenderListContent(string filter)
+        {
+            string pageName = "VFaceEnrollmentList";
+            dynamic? page = CreateInstance(pageName, [Controller]); // DN
+            if (page != null) {
+                page.UseLayout = false; // DN
+                await page.LoadRecordsetFromFilter(filter);
+                string html = await GetViewOutput(pageName, null, page, false);
+                page.Terminate(); // Terminate page and clean up
+                return html;
+            }
+            return "";
+        }
+
+        #pragma warning disable 1998
+        // Render list row values
+        public async Task RenderListRow()
+        {
+            // Call Row Rendering event
+            RowRendering();
+
+            // Common render codes
+
+            // IdUser
+
+            // Username
+
+            // LinkRedirect
+
+            // Email
+
+            // NamaLengkap
+
+            // DownloadFace
+
+            // IdPosition
+
+            // Jabatan
+
+            // Face
+
+            // TanggalInputFace
+
+            // UserInputFace
+
+            // AzurePersonId
+
+            // IdUser
+            IdUser.ViewValue = IdUser.CurrentValue;
+            IdUser.ViewValue = FormatNumber(IdUser.ViewValue, IdUser.FormatPattern);
+            IdUser.ViewCustomAttributes = "";
+
+            // Username
+            _Username.ViewValue = ConvertToString(_Username.CurrentValue); // DN
+            _Username.ViewCustomAttributes = "";
+
+            // LinkRedirect
+            LinkRedirect.ViewValue = ConvertToString(LinkRedirect.CurrentValue); // DN
+            LinkRedirect.ViewCustomAttributes = "";
+
+            // Email
+            _Email.ViewValue = ConvertToString(_Email.CurrentValue); // DN
+            _Email.ViewCustomAttributes = "";
+
+            // NamaLengkap
+            NamaLengkap.ViewValue = ConvertToString(NamaLengkap.CurrentValue); // DN
+            NamaLengkap.ViewCustomAttributes = "";
+
+            // DownloadFace
+            DownloadFace.ViewValue = DownloadFace.CurrentValue;
+            DownloadFace.ViewCustomAttributes = "";
+
+            // IdPosition
+            IdPosition.ViewValue = IdPosition.CurrentValue;
+            string curVal = ConvertToString(IdPosition.CurrentValue);
+            if (!Empty(curVal)) {
+                if (IdPosition.Lookup != null && IsDictionary(IdPosition.Lookup?.Options) && IdPosition.Lookup?.Options.Values.Count > 0) { // Load from cache // DN
+                    IdPosition.ViewValue = IdPosition.LookupCacheOption(curVal);
+                } else { // Lookup from database // DN
+                    string filterWrk = SearchFilter(IdPosition.Lookup?.GetTable()?.Fields["IdPosition"].SearchExpression, "=", IdPosition.CurrentValue, IdPosition.Lookup?.GetTable()?.Fields["IdPosition"].SearchDataType, "");
+                    string? sqlWrk = IdPosition.Lookup?.GetSql(false, filterWrk, null, this, true, true);
+                    List<Dictionary<string, object>>? rswrk = sqlWrk != null ? Connection.GetRows(sqlWrk) : null; // Must use Sync to avoid overwriting ViewValue in RenderViewRow
+                    if (rswrk?.Count > 0 && IdPosition.Lookup != null) { // Lookup values found
+                        var listwrk = IdPosition.Lookup?.RenderViewRow(rswrk[0]);
+                        IdPosition.ViewValue = IdPosition.DisplayValue(listwrk);
+                    } else {
+                        IdPosition.ViewValue = FormatNumber(IdPosition.CurrentValue, IdPosition.FormatPattern);
+                    }
+                }
+            } else {
+                IdPosition.ViewValue = DbNullValue;
+            }
+            IdPosition.ViewCustomAttributes = "";
+
+            // Jabatan
+            Jabatan.ViewValue = ConvertToString(Jabatan.CurrentValue); // DN
+            Jabatan.ViewCustomAttributes = "";
+
+            // Face
+            Face.ViewValue = ConvertToString(Face.CurrentValue); // DN
+            Face.ViewCustomAttributes = "";
+
+            // TanggalInputFace
+            TanggalInputFace.ViewValue = TanggalInputFace.CurrentValue;
+            TanggalInputFace.ViewValue = FormatDateTime(TanggalInputFace.ViewValue, TanggalInputFace.FormatPattern);
+            TanggalInputFace.ViewCustomAttributes = "";
+
+            // UserInputFace
+            UserInputFace.ViewValue = ConvertToString(UserInputFace.CurrentValue); // DN
+            UserInputFace.ViewCustomAttributes = "";
+
+            // AzurePersonId
+            AzurePersonId.ViewValue = ConvertToString(AzurePersonId.CurrentValue); // DN
+            AzurePersonId.ViewCustomAttributes = "";
+
+            // IdUser
+            IdUser.HrefValue = "";
+            IdUser.TooltipValue = "";
+
+            // Username
+            _Username.HrefValue = "";
+            _Username.TooltipValue = "";
+
+            // LinkRedirect
+            LinkRedirect.HrefValue = "";
+            LinkRedirect.TooltipValue = "";
+
+            // Email
+            _Email.HrefValue = "";
+            _Email.TooltipValue = "";
+
+            // NamaLengkap
+            NamaLengkap.HrefValue = "";
+            NamaLengkap.TooltipValue = "";
+
+            // DownloadFace
+            DownloadFace.HrefValue = "";
+            DownloadFace.TooltipValue = "";
+
+            // IdPosition
+            IdPosition.HrefValue = "";
+            IdPosition.TooltipValue = "";
+
+            // Jabatan
+            Jabatan.HrefValue = "";
+            Jabatan.TooltipValue = "";
+
+            // Face
+            Face.HrefValue = "";
+            Face.TooltipValue = "";
+
+            // TanggalInputFace
+            TanggalInputFace.HrefValue = "";
+            TanggalInputFace.TooltipValue = "";
+
+            // UserInputFace
+            UserInputFace.HrefValue = "";
+            UserInputFace.TooltipValue = "";
+
+            // AzurePersonId
+            AzurePersonId.HrefValue = "";
+            AzurePersonId.TooltipValue = "";
+
+            // Call Row Rendered event
+            RowRendered();
+
+            // Save data for Custom Template
+            Rows.Add(CustomTemplateFieldValues());
+        }
+        #pragma warning restore 1998
+
+        #pragma warning disable 1998
+        // Render edit row values
+        public async Task RenderEditRow()
+        {
+            // Call Row Rendering event
+            RowRendering();
+
+            // IdUser
+            IdUser.SetupEditAttributes();
+            IdUser.EditValue = IdUser.CurrentValue;
+            IdUser.PlaceHolder = RemoveHtml(IdUser.Caption);
+
+            // Username
+            _Username.SetupEditAttributes();
+            _Username.EditValue = ConvertToString(_Username.CurrentValue); // DN
+            _Username.ViewCustomAttributes = "";
+
+            // LinkRedirect
+            LinkRedirect.SetupEditAttributes();
+            if (!LinkRedirect.Raw)
+                LinkRedirect.CurrentValue = HtmlDecode(LinkRedirect.CurrentValue);
+            LinkRedirect.EditValue = LinkRedirect.CurrentValue;
+            LinkRedirect.PlaceHolder = RemoveHtml(LinkRedirect.Caption);
+
+            // Email
+            _Email.SetupEditAttributes();
+            _Email.EditValue = ConvertToString(_Email.CurrentValue); // DN
+            _Email.ViewCustomAttributes = "";
+
+            // NamaLengkap
+            NamaLengkap.SetupEditAttributes();
+            NamaLengkap.EditValue = ConvertToString(NamaLengkap.CurrentValue); // DN
+            NamaLengkap.ViewCustomAttributes = "";
+
+            // DownloadFace
+            DownloadFace.SetupEditAttributes();
+            DownloadFace.EditValue = DownloadFace.CurrentValue;
+            DownloadFace.ViewCustomAttributes = "";
+
+            // IdPosition
+            IdPosition.SetupEditAttributes();
+            IdPosition.EditValue = IdPosition.CurrentValue;
+            IdPosition.PlaceHolder = RemoveHtml(IdPosition.Caption);
+            if (!Empty(IdPosition.EditValue) && IsNumeric(IdPosition.EditValue))
+                IdPosition.EditValue = FormatNumber(IdPosition.EditValue, null);
+
+            // Jabatan
+            Jabatan.SetupEditAttributes();
+            if (!Jabatan.Raw)
+                Jabatan.CurrentValue = HtmlDecode(Jabatan.CurrentValue);
+            Jabatan.EditValue = Jabatan.CurrentValue;
+            Jabatan.PlaceHolder = RemoveHtml(Jabatan.Caption);
+
+            // Face
+            Face.SetupEditAttributes();
+            if (!Face.Raw)
+                Face.CurrentValue = HtmlDecode(Face.CurrentValue);
+            Face.EditValue = Face.CurrentValue;
+            Face.PlaceHolder = RemoveHtml(Face.Caption);
+
+            // TanggalInputFace
+            TanggalInputFace.SetupEditAttributes();
+            TanggalInputFace.EditValue = FormatDateTime(TanggalInputFace.CurrentValue, TanggalInputFace.FormatPattern);
+            TanggalInputFace.PlaceHolder = RemoveHtml(TanggalInputFace.Caption);
+
+            // UserInputFace
+            UserInputFace.SetupEditAttributes();
+            if (!UserInputFace.Raw)
+                UserInputFace.CurrentValue = HtmlDecode(UserInputFace.CurrentValue);
+            UserInputFace.EditValue = UserInputFace.CurrentValue;
+            UserInputFace.PlaceHolder = RemoveHtml(UserInputFace.Caption);
+
+            // AzurePersonId
+            AzurePersonId.SetupEditAttributes();
+            AzurePersonId.EditValue = AzurePersonId.CurrentValue;
+            AzurePersonId.PlaceHolder = RemoveHtml(AzurePersonId.Caption);
+
+            // Call Row Rendered event
+            RowRendered();
+        }
+        #pragma warning restore 1998
+
+        // Aggregate list row values
+        public void AggregateListRowValues()
+        {
+        }
+
+        #pragma warning disable 1998
+        // Aggregate list row (for rendering)
+        public async Task AggregateListRow()
+        {
+            // Call Row Rendered event
+            RowRendered();
+        }
+        #pragma warning restore 1998
+
+        // Export data in HTML/CSV/Word/Excel/Email/PDF format
+        public async Task ExportDocument(dynamic doc, DbDataReader dataReader, int startRec, int stopRec, string exportType = "")
+        {
+            if (doc == null)
+                return;
+            if (dataReader == null)
+                return;
+            if (!doc.ExportCustom) {
+                // Write header
+                doc.ExportTableHeader();
+                if (doc.Horizontal) { // Horizontal format, write header
+                    doc.BeginExportRow();
+                    if (exportType == "view") {
+                        doc.ExportCaption(IdUser);
+                        doc.ExportCaption(_Username);
+                        doc.ExportCaption(LinkRedirect);
+                        doc.ExportCaption(_Email);
+                        doc.ExportCaption(NamaLengkap);
+                        doc.ExportCaption(DownloadFace);
+                        doc.ExportCaption(IdPosition);
+                        doc.ExportCaption(Jabatan);
+                        doc.ExportCaption(Face);
+                        doc.ExportCaption(TanggalInputFace);
+                        doc.ExportCaption(UserInputFace);
+                        doc.ExportCaption(AzurePersonId);
+                    } else {
+                        doc.ExportCaption(IdUser);
+                        doc.ExportCaption(_Username);
+                        doc.ExportCaption(LinkRedirect);
+                        doc.ExportCaption(_Email);
+                        doc.ExportCaption(NamaLengkap);
+                        doc.ExportCaption(DownloadFace);
+                        doc.ExportCaption(IdPosition);
+                        doc.ExportCaption(Jabatan);
+                        doc.ExportCaption(Face);
+                        doc.ExportCaption(TanggalInputFace);
+                        doc.ExportCaption(UserInputFace);
+                        doc.ExportCaption(AzurePersonId);
+                    }
+                    doc.EndExportRow();
+                }
+            }
+            int recCnt = startRec - 1;
+            // Read first record for View Page // DN
+            if (exportType == "view") {
+                await dataReader.ReadAsync();
+            // Move to and read first record for list page // DN
+            } else {
+                if (Connection.SelectOffset) {
+                    await dataReader.ReadAsync();
+                } else {
+                    for (int i = 0; i < startRec; i++) // Move to the start record and use do-while loop
+                        await dataReader.ReadAsync();
+                }
+            }
+            int rowcnt = 0; // DN
+            do { // DN
+                recCnt++;
+                if (recCnt >= startRec) {
+                    rowcnt = recCnt - startRec + 1;
+
+                    // Page break
+                    if (ExportPageBreakCount > 0) {
+                        if (rowcnt > 1 && (rowcnt - 1) % ExportPageBreakCount == 0)
+                            doc.ExportPageBreak();
+                    }
+                    LoadListRowValues(dataReader);
+
+                    // Render row
+                    RowType = RowType.View; // Render view
+                    ResetAttributes();
+                    await RenderListRow();
+                    if (!doc.ExportCustom) {
+                        doc.BeginExportRow(rowcnt); // Allow CSS styles if enabled
+                        if (exportType == "view") {
+                            await doc.ExportField(IdUser);
+                            await doc.ExportField(_Username);
+                            await doc.ExportField(LinkRedirect);
+                            await doc.ExportField(_Email);
+                            await doc.ExportField(NamaLengkap);
+                            await doc.ExportField(DownloadFace);
+                            await doc.ExportField(IdPosition);
+                            await doc.ExportField(Jabatan);
+                            await doc.ExportField(Face);
+                            await doc.ExportField(TanggalInputFace);
+                            await doc.ExportField(UserInputFace);
+                            await doc.ExportField(AzurePersonId);
+                        } else {
+                            await doc.ExportField(IdUser);
+                            await doc.ExportField(_Username);
+                            await doc.ExportField(LinkRedirect);
+                            await doc.ExportField(_Email);
+                            await doc.ExportField(NamaLengkap);
+                            await doc.ExportField(DownloadFace);
+                            await doc.ExportField(IdPosition);
+                            await doc.ExportField(Jabatan);
+                            await doc.ExportField(Face);
+                            await doc.ExportField(TanggalInputFace);
+                            await doc.ExportField(UserInputFace);
+                            await doc.ExportField(AzurePersonId);
+                        }
+                        doc.EndExportRow(rowcnt);
+                    }
+                }
+
+                // Call Row Export server event
+                if (doc.ExportCustom)
+                    RowExport(doc, dataReader);
+            } while (recCnt < stopRec && await dataReader.ReadAsync()); // DN
+            if (!doc.ExportCustom)
+                doc.ExportTableFooter();
+        }
+
+        // Table filter
+        private string? _tableFilter = null;
+
+        public string TableFilter
+        {
+            get => _tableFilter ?? "";
+            set => _tableFilter = value;
+        }
+
+        // TblBasicSearchDefault
+        private string? _tableBasicSearchDefault = null;
+
+        public string TableBasicSearchDefault
+        {
+            get => _tableBasicSearchDefault ?? "";
+            set => _tableBasicSearchDefault = value;
+        }
+
+        #pragma warning disable 1998
+        // Get file data
+        public async Task<IActionResult> GetFileData(string fldparm, string[] keys, bool resize, int width = -1, int height = -1)
+        {
+            if (width < 0)
+                width = Config.ThumbnailDefaultWidth;
+            if (height < 0)
+                height = Config.ThumbnailDefaultHeight;
+
+            // No binary fields
+            return JsonBoolResult.FalseResult; // Incorrect key
+        }
+        #pragma warning restore 1998
+
+        // Table level events
+
+        // Table Load event
+        public void TableLoad()
+        {
+            // Enter your code here
+        }
+
+        // Recordset Selecting event
+        public void RecordsetSelecting(ref string filter) {
+            var currentUserLevel = CurrentUserLevel()?.ToString();
+                    if (currentUserLevel == "-1" || currentUserLevel == "3") {
+                        return; 
+                    }
+                    var currentUserPositionIdStr = CurrentUserInfo("IdPosition")?.ToString();
+                    if (!string.IsNullOrEmpty(currentUserPositionIdStr) && int.TryParse(currentUserPositionIdStr, out int currentUserPositionId))
+                    {
+                        List<string> userIdsToShow = new List<string>();
+                        string sqlGetUsersInRelatedPlants = @"
+                            WITH UserPlants AS (
+                                SELECT DISTINCT IdPlant
+                                FROM MappingPosition
+                                WHERE IdPosition = @CurrentUserPositionId
+                            ),
+                            PositionsInPlants AS (
+                                SELECT DISTINCT IdPosition
+                                FROM MappingPosition
+                                WHERE IdPlant IN (SELECT IdPlant FROM UserPlants)
+                            )
+                            SELECT DISTINCT MU.IdUser
+                            FROM MasterUser MU
+                            WHERE MU.IdPosition IN (SELECT IdPosition FROM PositionsInPlants)
+                            and MU.UserLevel not in (-1, 3, 4);";
+                        try
+                        {
+                            using (var actualSqlConnection = Connection.OpenConnection())
+                            {
+                                var users = actualSqlConnection.Query<int>(
+                                    sqlGetUsersInRelatedPlants,
+                                    new { CurrentUserPositionId = currentUserPositionId }, 
+                                    transaction: Connection.Transaction
+                                );
+                                userIdsToShow = users.Select(id => id.ToString()).ToList();
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Log($"Error fetching users for related plants based on Position ID {currentUserPositionId}: {ex.Message}");
+                            AddFilter(ref filter, "1=0"); 
+                            return;
+                        }
+                        if (userIdsToShow.Count > 0)
+                        {
+                            string userFilter = $"[IdUser] IN ({string.Join(",", userIdsToShow)})";
+                            AddFilter(ref filter, userFilter);
+                        }
+                        else
+                        {
+                            AddFilter(ref filter, "1=0");
+                            Log($"No users found in related plants for Position ID {currentUserPositionId}. Applying '1=0' filter.");
+                        }
+                    }
+                    else
+                    {
+                        AddFilter(ref filter, "1=0");
+                        Log($"User {CurrentUserName()} has no valid Position ID assigned. Applying '1=0' filter.");
+                    }
+        }
+
+        // Recordset Selected event
+        public void RecordsetSelected(DbDataReader rs) {
+            // Enter your code here
+        }
+
+        // Recordset Searching event
+        public void RecordsetSearching(ref string filter) {
+            // Enter your code here
+        }
+
+        // Recordset Search Validated event
+        public void RecordsetSearchValidated() {
+            // Enter your code here
+        }
+
+        // Row_Selecting event
+        public void RowSelecting(ref string filter) {
+            // Enter your code here
+        }
+
+        // Row Selected event
+        public void RowSelected(Dictionary<string, object> row) {
+            //Log("Row Selected");
+        }
+
+        // Row Inserting event
+        public bool RowInserting(Dictionary<string, object>? rsold, Dictionary<string, object> rsnew) {
+            // Enter your code here
+            // To cancel, set return value to False and error message to CancelMessage
+            return true;
+        }
+
+        // Row Inserted event
+        public void RowInserted(Dictionary<string, object>? rsold, Dictionary<string, object> rsnew) {
+            //Log("Row Inserted");
+        }
+
+        // Row Updating event
+        public bool RowUpdating(Dictionary<string, object> rsold, Dictionary<string, object> rsnew) {
+            // Enter your code here
+            // To cancel, set return value to False and error message to CancelMessage
+            return true;
+        }
+
+        // Row Updated event
+        public void RowUpdated(Dictionary<string, object> rsold, Dictionary<string, object> rsnew) {
+            //Log("Row Updated");
+        }
+
+        // Row Update Conflict event
+        public bool RowUpdateConflict(Dictionary<string, object> rsold, Dictionary<string, object> rsnew) {
+            // Enter your code here
+            // To ignore conflict, set return value to false
+            return true;
+        }
+
+        // Recordset Deleting event
+        public bool RowDeleting(Dictionary<string, object> rs) {
+            // Enter your code here
+            // To cancel, set return value to False and error message to CancelMessage
+            return true;
+        }
+
+        // Row Deleted event
+        public void RowDeleted(Dictionary<string, object> rs) {
+            //Log("Row Deleted");
+        }
+
+        // Row Export event
+        // doc = export document object
+        public virtual void RowExport(dynamic doc, DbDataReader rs) {
+            //doc.Text.Append("<div>" + MyField.ViewValue +"</div>"); // Build HTML with field value: rs["MyField"] or MyField.ViewValue
+        }
+
+        // Email Sending event
+        public virtual bool EmailSending(EmailBase email, dynamic? args) {
+            //Log(email);
+            return true;
+        }
+
+        // Lookup Selecting event
+        public void LookupSelecting(DbField fld, ref string filter) {
+            // Enter your code here
+        }
+
+        // Row Rendering event
+        public void RowRendering() {
+            // Enter your code here
+        }
+
+        // Row Rendered event
+        public void RowRendered() {
+            //VarDump(<FieldName>); // View field properties
+        }
+
+        // User ID Filtering event
+        public void UserIdFiltering(ref string filter) {
+            // Enter your code here
+        }
+    }
+} // End Partial class

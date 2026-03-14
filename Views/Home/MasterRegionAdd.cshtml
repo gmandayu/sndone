@@ -1,0 +1,124 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (masterRegionAdd.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = masterRegionAdd.UseLayout ? "_Layout" : "";
+}
+<script>
+var currentTable = @Html.Raw(ConvertToJson(masterRegionAdd.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { MasterRegion: currentTable } });
+var currentPageID = ew.PAGE_ID = "add";
+var currentForm;
+var fMasterRegionadd;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("fMasterRegionadd")
+        .setPageId("add")
+
+        // Add fields
+        .setFields([
+
+            ["Region", [fields.Region.visible && fields.Region.required ? ew.Validators.required(fields.Region.caption) : null], fields.Region.isInvalid],
+            ["RegionCode", [fields.RegionCode.visible && fields.RegionCode.required ? ew.Validators.required(fields.RegionCode.caption) : null], fields.RegionCode.isInvalid]
+        ])
+
+        // Form_CustomValidate
+        .setCustomValidate(
+            function(fobj) { // DO NOT CHANGE THIS LINE!
+                    // Your custom validation code here, return false if invalid.
+                    return true;
+                }
+        )
+
+        // Use JavaScript validation or not
+        .setValidateRequired(ew.CLIENT_VALIDATE)
+
+        // Dynamic selection lists
+        .setLists({
+        })
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Write your client script here, no need to add script tags.
+});
+</script>
+@masterRegionAdd.ShowPageHeader()
+@masterRegionAdd.ShowMessages()
+<form name="fMasterRegionadd" id="fMasterRegionadd" class="@(masterRegionAdd.FormClassName)" action="@AppPath(CurrentPageName())" method="post" novalidate autocomplete="off">
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+<input type="hidden" name="action" id="action" value="insert">
+<input type="hidden" name="modal" value="@ConvertToInt(masterRegionAdd.IsModal)">
+@if (IsJsonResponse()) {
+<input type="hidden" name="json" value="1">
+}
+<input type="hidden" name="@(masterRegionAdd.OldKeyName)" value="@Html.Raw(masterRegionAdd.OldKey)">
+<div class="ew-add-div"><!-- page* -->
+@if (masterRegionAdd.Region.Visible) { // masterRegionAdd.Region.Visible (begin)
+    <div id="r_Region" @Html.Raw(masterRegionAdd.Region.RowAttributes)>
+        <label id="elh_MasterRegion_Region" for="x_Region" class="@(masterRegionAdd.LeftColumnClass)">@Html.Raw(masterRegionAdd.Region.Caption)@Html.Raw(masterRegionAdd.Region.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(masterRegionAdd.RightColumnClass)"><div @Html.Raw(masterRegionAdd.Region.CellAttributes)>
+<span id="el_MasterRegion_Region">
+<input type="@(masterRegionAdd.Region.InputTextType)" name="x_Region" id="x_Region" data-table="MasterRegion" data-field="x_Region" value="@Html.Raw(masterRegionAdd.Region.EditValue)" size="30" maxlength="100" placeholder="@Html.Raw(HtmlEncode(masterRegionAdd.Region.PlaceHolder))" data-format-pattern="@(masterRegionAdd.Region.FormatPattern)"@Html.Raw(masterRegionAdd.Region.EditAttributes) aria-describedby="x_Region_help">
+@Html.Raw(masterRegionAdd.Region.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(masterRegionAdd.Region.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* masterRegionAdd.Region.Visible (end) *@
+@if (masterRegionAdd.RegionCode.Visible) { // masterRegionAdd.RegionCode.Visible (begin)
+    <div id="r_RegionCode" @Html.Raw(masterRegionAdd.RegionCode.RowAttributes)>
+        <label id="elh_MasterRegion_RegionCode" for="x_RegionCode" class="@(masterRegionAdd.LeftColumnClass)">@Html.Raw(masterRegionAdd.RegionCode.Caption)@Html.Raw(masterRegionAdd.RegionCode.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(masterRegionAdd.RightColumnClass)"><div @Html.Raw(masterRegionAdd.RegionCode.CellAttributes)>
+<span id="el_MasterRegion_RegionCode">
+<input type="@(masterRegionAdd.RegionCode.InputTextType)" name="x_RegionCode" id="x_RegionCode" data-table="MasterRegion" data-field="x_RegionCode" value="@Html.Raw(masterRegionAdd.RegionCode.EditValue)" size="30" maxlength="20" placeholder="@Html.Raw(HtmlEncode(masterRegionAdd.RegionCode.PlaceHolder))" data-format-pattern="@(masterRegionAdd.RegionCode.FormatPattern)"@Html.Raw(masterRegionAdd.RegionCode.EditAttributes) aria-describedby="x_RegionCode_help">
+@Html.Raw(masterRegionAdd.RegionCode.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(masterRegionAdd.RegionCode.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* masterRegionAdd.RegionCode.Visible (end) *@
+</div><!-- /page* -->
+@{ masterRegionAdd.CloseRecordset(); }
+@Html.Raw(masterRegionAdd.IsModal ? "<template class=\"ew-modal-buttons\">" : "<div class=\"row ew-buttons\">")<!-- buttons .row -->
+    <div class="@(masterRegionAdd.OffsetColumnClass)"><!-- buttons offset -->
+    <button class="btn btn-primary ew-btn" name="btn-action" id="btn-action" type="submit" form="fMasterRegionadd">@Html.Raw(Language.Phrase("AddBtn"))</button>
+@if (IsJsonResponse()) {
+    <button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" data-bs-dismiss="modal">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+} else {
+    <button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" form="fMasterRegionadd" data-href="@AppPath(masterRegionAdd.ReturnUrl)">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+}
+    </div><!-- /buttons offset -->
+@Html.Raw(masterRegionAdd.IsModal ? "</template>" : "</div>")<!-- /buttons .row -->
+</form>
+@masterRegionAdd.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("MasterRegion");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Write your table-specific startup script here
+    // document.write("page loaded");
+});
+</script>

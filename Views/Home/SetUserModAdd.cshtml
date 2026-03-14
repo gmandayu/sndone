@@ -1,0 +1,556 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (setUserModAdd.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = setUserModAdd.UseLayout ? "_Layout" : "";
+}
+<script>
+var currentTable = @Html.Raw(ConvertToJson(setUserModAdd.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { SetUserMOD: currentTable } });
+var currentPageID = ew.PAGE_ID = "add";
+var currentForm;
+var fSetUserMODadd;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("fSetUserMODadd")
+        .setPageId("add")
+
+        // Add fields
+        .setFields([
+
+            ["Tanggal", [fields.Tanggal.visible && fields.Tanggal.required ? ew.Validators.required(fields.Tanggal.caption) : null, ew.Validators.datetime(fields.Tanggal.clientFormatPattern)], fields.Tanggal.isInvalid],
+            ["LookupPlant", [fields.LookupPlant.visible && fields.LookupPlant.required ? ew.Validators.required(fields.LookupPlant.caption) : null], fields.LookupPlant.isInvalid],
+            ["Plant", [fields.Plant.visible && fields.Plant.required ? ew.Validators.required(fields.Plant.caption) : null], fields.Plant.isInvalid],
+            ["LookupUserMod", [fields.LookupUserMod.visible && fields.LookupUserMod.required ? ew.Validators.required(fields.LookupUserMod.caption) : null], fields.LookupUserMod.isInvalid],
+            ["UserMOD", [fields.UserMOD.visible && fields.UserMOD.required ? ew.Validators.required(fields.UserMOD.caption) : null], fields.UserMOD.isInvalid]
+        ])
+
+        // Form_CustomValidate
+        .setCustomValidate(
+            function(fobj) { // DO NOT CHANGE THIS LINE!
+                    // Your custom validation code here, return false if invalid.
+                    return true;
+                }
+        )
+
+        // Use JavaScript validation or not
+        .setValidateRequired(ew.CLIENT_VALIDATE)
+
+        // Dynamic selection lists
+        .setLists({
+            "LookupPlant": @Html.Raw(setUserModAdd.LookupPlant.ToClientList(setUserModAdd)),
+            "Plant": @Html.Raw(setUserModAdd.Plant.ToClientList(setUserModAdd)),
+            "LookupUserMod": @Html.Raw(setUserModAdd.LookupUserMod.ToClientList(setUserModAdd)),
+            "UserMOD": @Html.Raw(setUserModAdd.UserMOD.ToClientList(setUserModAdd)),
+        })
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Client script
+    $(document).on("change", "#x_Plant", function () {
+        $("#x_UserMOD").val(null).trigger("change"); // kosongkan saat plant berubah
+    });
+    var parent_url = ew.PATH_BASE;
+    $('#x_UserMOD').on('change', function() {
+        const $select = $(this);
+        const userModId = String($select.val() || '').trim();
+        if (userModId) {
+            if (typeof showLoading === 'function') showLoading();
+            $.ajax({
+                url: parent_url + 'api/LookUpList/CheckFaceEnrollment',
+                type: 'GET',
+                data: { idUser: userModId },
+                success: function(faceRes) {
+                    if (typeof hideLoading === 'function') hideLoading();
+                    if (faceRes && faceRes.success) {
+                        if (!faceRes.isEnrolled) {
+                            if (confirm("User MOD yang dipilih belum mendaftarkan wajahnya. Apakah Anda ingin pergi ke halaman Pendaftaran Wajah sekarang?")) {
+                                window.location.href = parent_url + 'VFaceEnrollmentList';
+                            } else {
+                                $select.val(null).trigger('change.select2');
+                                ew.alert("Pilih User MOD lain yang wajahnya terdaftar di Face Enrollment.");
+                            }
+                        }
+                    } else {
+                        ew.alert((faceRes && faceRes.message) || "Gagal memeriksa status pendaftaran wajah.");
+                        $select.val(null).trigger('change.select2'); 
+                    }
+                },
+                error: function() {
+                    if (typeof hideLoading === 'function') hideLoading();
+                    ew.alert("Gagal memeriksa status pendaftaran wajah (jaringan/server).");
+                    $select.val(null).trigger('change.select2'); 
+                }
+            });
+        }
+    });
+    $('#btn-action').on('click', function (e) {
+        e.preventDefault();
+        const $btn = $(this);
+        const idPlant = String($('#x_Plant').val() || '').trim();
+        const tanggal = String($('#x_Tanggal').val() || '').trim();
+        const userMod = String($('#x_UserMOD').val() || '').trim();
+        if (!idPlant) {
+            ew.alert("Plant tidak boleh kosong.");
+            return;
+        }
+        if (!tanggal) {
+            ew.alert("Tanggal tidak boleh kosong.");
+            return;
+        }
+        if (!userMod) {
+            ew.alert("User MOD wajib dipilih.");
+            return;
+        }
+        $btn.prop('disabled', true);
+        if (typeof showLoading === 'function') showLoading();
+        $.ajax({
+            url: parent_url + 'api/LookUpList/CheckFaceEnrollment',
+            type: 'GET',
+            data: { idUser: userMod },
+            success: function(faceRes) {
+                if (faceRes && faceRes.success) {
+                    if (faceRes.isEnrolled) {
+                        checkDuplicateMod(idPlant, tanggal);
+                    } else {
+                        if (typeof hideLoading === 'function') hideLoading();
+                        ew.alert("User MOD yang dipilih belum mendaftarkan wajahnya. Silakan pilih User MOD lain atau daftarkan wajah user ini terlebih dahulu.");
+                        $btn.prop('disabled', false); 
+                    }
+                } else {
+                    if (typeof hideLoading === 'function') hideLoading();
+                    ew.alert((faceRes && faceRes.message) || "Gagal memeriksa status pendaftaran wajah saat submit.");
+                    $btn.prop('disabled', false);
+                }
+            },
+            error: function() {
+                if (typeof hideLoading === 'function') hideLoading();
+                ew.alert("Gagal memeriksa status pendaftaran wajah (jaringan/server) saat submit.");
+                $btn.prop('disabled', false);
+            }
+        });
+    }); 
+    function checkDuplicateMod(plantToCheck, dateToCheck) {
+        $.ajax({
+            url: parent_url + 'api/LookUpList/CheckPlantDateMod',
+            type: 'GET',
+            data: { idPlant: plantToCheck, tanggal: dateToCheck },
+            success: function (modRes) {
+                if (typeof hideLoading === 'function') hideLoading(); 
+                if (!modRes || modRes.success !== true) {
+                    ew.alert((modRes && modRes.message) || "Gagal melakukan pengecekan MOD.");
+                    $btn.prop('disabled', false);
+                    return;
+                }
+                if (modRes.exists === true) {
+                    const plantLabel = (modRes.terminalName && modRes.terminalName.trim())
+                        ? `${modRes.plant} - ${modRes.terminalName}`
+                        : modRes.plant;
+                    ew.alert(`Sudah ada MOD untuk Plant ${plantLabel} pada tanggal ${modRes.tanggal}. Silakan cek kembali.`);
+                    $btn.prop('disabled', false); 
+                } else {
+                    $('#fSetUserMODadd').submit();
+                }
+            },
+            error: function () {
+                if (typeof hideLoading === 'function') hideLoading();
+                ew.alert("Gagal melakukan pengecekan duplikasi MOD (jaringan/server).");
+                $btn.prop('disabled', false);
+            }
+        });
+    }
+    $('#x_LookupPlant').on("change", function () {
+        const selectedValue = $(this).val();
+        $('#x_Plant').val(selectedValue).trigger('change');
+        const lookupUserModId = $("#x_LookupUserMod");
+        $.ajax({
+            url: parent_url + 'api/LookUpList/get-dropdown/user-plant?plantId=' + selectedValue,
+            method: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                lookupUserModId.empty(); 
+                lookupUserModId.append('<option value="" selected>-- Pilih Plant --</option>');
+                $.each(data, function (index, item) {
+                    lookupUserModId.append(`<option value="${item.Value}">${item.Label}</option>`);
+                });
+            },
+            error: function (xhr, status, error) {
+                console.error("Gagal ambil data dropdown:", error);
+                lookupUserModId.empty();
+            }
+        });
+    });
+    $('#x_LookupUserMod').on("change", function () {
+        const selectedValue = $(this).val();
+        $('#x_UserMOD').val(selectedValue).trigger('change');
+    });
+});
+</script>
+@setUserModAdd.ShowPageHeader()
+@setUserModAdd.ShowMessages()
+<form name="fSetUserMODadd" id="fSetUserMODadd" class="@(setUserModAdd.FormClassName)" action="@AppPath(CurrentPageName())" method="post" novalidate autocomplete="off">
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+<input type="hidden" name="action" id="action" value="insert">
+<input type="hidden" name="modal" value="@ConvertToInt(setUserModAdd.IsModal)">
+@if (IsJsonResponse()) {
+<input type="hidden" name="json" value="1">
+}
+<input type="hidden" name="@(setUserModAdd.OldKeyName)" value="@Html.Raw(setUserModAdd.OldKey)">
+<div class="ew-add-div"><!-- page* -->
+@if (setUserModAdd.Tanggal.Visible) { // setUserModAdd.Tanggal.Visible (begin)
+    <div id="r_Tanggal" @Html.Raw(setUserModAdd.Tanggal.RowAttributes)>
+        <label id="elh_SetUserMOD_Tanggal" for="x_Tanggal" class="@(setUserModAdd.LeftColumnClass)">@Html.Raw(setUserModAdd.Tanggal.Caption)@Html.Raw(setUserModAdd.Tanggal.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(setUserModAdd.RightColumnClass)"><div @Html.Raw(setUserModAdd.Tanggal.CellAttributes)>
+<span id="el_SetUserMOD_Tanggal">
+<input type="@(setUserModAdd.Tanggal.InputTextType)" name="x_Tanggal" id="x_Tanggal" data-table="SetUserMOD" data-field="x_Tanggal" value="@Html.Raw(setUserModAdd.Tanggal.EditValue)" placeholder="@Html.Raw(HtmlEncode(setUserModAdd.Tanggal.PlaceHolder))" data-format-pattern="@(setUserModAdd.Tanggal.FormatPattern)"@Html.Raw(setUserModAdd.Tanggal.EditAttributes) aria-describedby="x_Tanggal_help">
+@Html.Raw(setUserModAdd.Tanggal.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(setUserModAdd.Tanggal.GetErrorMessage())</div>
+@if (!setUserModAdd.Tanggal.ReadOnly && !setUserModAdd.Tanggal.Disabled && !setUserModAdd.Tanggal.EditAttrs.Is("readonly") && !setUserModAdd.Tanggal.EditAttrs.Is("disabled")) {
+<script>
+loadjs.ready(["fSetUserMODadd", "datetimepicker"], function () {
+    let format = "@Html.Raw(DateFormat(9))", // DN
+        options = {
+                localization: {
+                    locale: ew.LANGUAGE_ID + "-u-nu-" + ew.getNumberingSystem(),
+                    hourCycle: format.match(/H/) ? "h24" : "h12",
+                    format,
+                    ...ew.language.phrase("datetimepicker")
+                },
+                display: {
+                    icons: {
+                        previous: ew.IS_RTL ? "fa-solid fa-chevron-right" : "fa-solid fa-chevron-left",
+                        next: ew.IS_RTL ? "fa-solid fa-chevron-left" : "fa-solid fa-chevron-right"
+                    },
+                    components: {
+                        clock: !!format.match(/h/i) || !!format.match(/m/) || !!format.match(/s/i),
+                        hours: !!format.match(/h/i),
+                        minutes: !!format.match(/m/),
+                        seconds: !!format.match(/s/i)
+                    },
+                theme: ew.getPreferredTheme()
+                }
+            };
+    ew.createDateTimePicker("fSetUserMODadd", "x_Tanggal", ew.deepAssign({"useCurrent":false,"display":{"sideBySide":false}}, options));
+});
+</script>
+}
+</span>
+</div></div>
+    </div>
+} @* setUserModAdd.Tanggal.Visible (end) *@
+@if (setUserModAdd.LookupPlant.Visible) { // setUserModAdd.LookupPlant.Visible (begin)
+    <div id="r_LookupPlant" @Html.Raw(setUserModAdd.LookupPlant.RowAttributes)>
+        <label id="elh_SetUserMOD_LookupPlant" for="x_LookupPlant" class="@(setUserModAdd.LeftColumnClass)">@Html.Raw(setUserModAdd.LookupPlant.Caption)@Html.Raw(setUserModAdd.LookupPlant.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(setUserModAdd.RightColumnClass)"><div @Html.Raw(setUserModAdd.LookupPlant.CellAttributes)>
+<span id="el_SetUserMOD_LookupPlant">
+    <select
+        id="x_LookupPlant"
+        name="x_LookupPlant"
+        class="form-select ew-select@(setUserModAdd.LookupPlant.IsInvalidClass)"
+        data-select2-id="fSetUserMODadd_x_LookupPlant"
+        data-table="SetUserMOD"
+        data-field="x_LookupPlant"
+        data-value-separator="@(setUserModAdd.LookupPlant.DisplayValueSeparatorAttribute)"
+        data-placeholder="@(HtmlEncode(setUserModAdd.LookupPlant.PlaceHolder))"
+        @Html.Raw(setUserModAdd.LookupPlant.EditAttributes)>
+        @(setUserModAdd.LookupPlant.SelectOptionListHtml("x_LookupPlant"))
+    </select>
+    @Html.Raw(setUserModAdd.LookupPlant.GetCustomMessage)
+    <div class="invalid-feedback">@Html.Raw(setUserModAdd.LookupPlant.GetErrorMessage())</div>
+<script>
+loadjs.ready("fSetUserMODadd", function() {
+    var options = { name: "x_LookupPlant", selectId: "fSetUserMODadd_x_LookupPlant" },
+        el = document.querySelector("select[data-select2-id='" + options.selectId + "']");
+    if (!el)
+        return;
+    options.closeOnSelect = !options.multiple;
+    options.dropdownParent = el.closest("#ew-modal-dialog, #ew-add-opt-dialog");
+    if (fSetUserMODadd.lists.LookupPlant?.lookupOptions.length) {
+        options.data = { id: "x_LookupPlant", form: "fSetUserMODadd" };
+    } else {
+        options.ajax = { id: "x_LookupPlant", form: "fSetUserMODadd", limit: ew.LOOKUP_PAGE_SIZE };
+    }
+    options.minimumInputLength = ew.selectMinimumInputLength;
+    options = Object.assign({}, ew.selectOptions, options, ew.vars.tables.SetUserMOD.fields.LookupPlant.selectOptions);
+    ew.createSelect(options);
+});
+</script>
+</span>
+</div></div>
+    </div>
+} @* setUserModAdd.LookupPlant.Visible (end) *@
+@if (setUserModAdd.Plant.Visible) { // setUserModAdd.Plant.Visible (begin)
+    <div id="r_Plant" @Html.Raw(setUserModAdd.Plant.RowAttributes)>
+        <label id="elh_SetUserMOD_Plant" class="@(setUserModAdd.LeftColumnClass)">@Html.Raw(setUserModAdd.Plant.Caption)@Html.Raw(setUserModAdd.Plant.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(setUserModAdd.RightColumnClass)"><div @Html.Raw(setUserModAdd.Plant.CellAttributes)>
+<span id="el_SetUserMOD_Plant">
+<span>@{
+    if (IsRTL) {
+        setUserModAdd.Plant.EditAttrs["dir"] = "rtl";
+    }
+}</span>
+<span id="as_x_Plant" class="ew-auto-suggest">
+    <input type="text" class="form-control" name="sv_x_Plant" id="sv_x_Plant" value="@(RemoveHtml(ConvertToString(setUserModAdd.Plant.EditValue)))" autocomplete="off" size="30" placeholder="@Html.Raw(HtmlEncode(setUserModAdd.Plant.PlaceHolder))" data-placeholder="@Html.Raw(HtmlEncode(setUserModAdd.Plant.PlaceHolder))" data-format-pattern="@(setUserModAdd.Plant.FormatPattern)" @Html.Raw(setUserModAdd.Plant.EditAttributes) aria-describedby="x_Plant_help">
+</span>
+<selection-list hidden class="form-control" data-table="SetUserMOD" data-field="x_Plant" data-input="sv_x_Plant" data-value-separator="@(setUserModAdd.Plant.DisplayValueSeparatorAttribute)" name="x_Plant" id="x_Plant" value="@(HtmlEncode(setUserModAdd.Plant.CurrentValue))"></selection-list>
+@Html.Raw(setUserModAdd.Plant.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(setUserModAdd.Plant.GetErrorMessage())</div>
+<script>
+loadjs.ready(["fSetUserMODadd"], function() {
+    fSetUserMODadd.createAutoSuggest(Object.assign({"id":"x_Plant","forceSelect":true}, { lookupAllDisplayFields: @(setUserModAdd.Plant.Lookup.LookupAllDisplayFields ? "true" : "false") }, ew.vars.tables.SetUserMOD.fields.Plant.autoSuggestOptions));
+});
+</script>
+@Html.Raw(setUserModAdd.Plant.Lookup.GetParamTag(setUserModAdd, "p_x_Plant"))
+</span>
+</div></div>
+    </div>
+} @* setUserModAdd.Plant.Visible (end) *@
+@if (setUserModAdd.LookupUserMod.Visible) { // setUserModAdd.LookupUserMod.Visible (begin)
+    <div id="r_LookupUserMod" @Html.Raw(setUserModAdd.LookupUserMod.RowAttributes)>
+        <label id="elh_SetUserMOD_LookupUserMod" for="x_LookupUserMod" class="@(setUserModAdd.LeftColumnClass)">@Html.Raw(setUserModAdd.LookupUserMod.Caption)@Html.Raw(setUserModAdd.LookupUserMod.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(setUserModAdd.RightColumnClass)"><div @Html.Raw(setUserModAdd.LookupUserMod.CellAttributes)>
+<span id="el_SetUserMOD_LookupUserMod">
+    <select
+        id="x_LookupUserMod"
+        name="x_LookupUserMod"
+        class="form-select ew-select@(setUserModAdd.LookupUserMod.IsInvalidClass)"
+        data-select2-id="fSetUserMODadd_x_LookupUserMod"
+        data-table="SetUserMOD"
+        data-field="x_LookupUserMod"
+        data-value-separator="@(setUserModAdd.LookupUserMod.DisplayValueSeparatorAttribute)"
+        data-placeholder="@(HtmlEncode(setUserModAdd.LookupUserMod.PlaceHolder))"
+        @Html.Raw(setUserModAdd.LookupUserMod.EditAttributes)>
+        @(setUserModAdd.LookupUserMod.SelectOptionListHtml("x_LookupUserMod"))
+    </select>
+    @Html.Raw(setUserModAdd.LookupUserMod.GetCustomMessage)
+    <div class="invalid-feedback">@Html.Raw(setUserModAdd.LookupUserMod.GetErrorMessage())</div>
+<script>
+loadjs.ready("fSetUserMODadd", function() {
+    var options = { name: "x_LookupUserMod", selectId: "fSetUserMODadd_x_LookupUserMod" },
+        el = document.querySelector("select[data-select2-id='" + options.selectId + "']");
+    if (!el)
+        return;
+    options.closeOnSelect = !options.multiple;
+    options.dropdownParent = el.closest("#ew-modal-dialog, #ew-add-opt-dialog");
+    if (fSetUserMODadd.lists.LookupUserMod?.lookupOptions.length) {
+        options.data = { id: "x_LookupUserMod", form: "fSetUserMODadd" };
+    } else {
+        options.ajax = { id: "x_LookupUserMod", form: "fSetUserMODadd", limit: ew.LOOKUP_PAGE_SIZE };
+    }
+    options.minimumResultsForSearch = Infinity;
+    options = Object.assign({}, ew.selectOptions, options, ew.vars.tables.SetUserMOD.fields.LookupUserMod.selectOptions);
+    ew.createSelect(options);
+});
+</script>
+</span>
+</div></div>
+    </div>
+} @* setUserModAdd.LookupUserMod.Visible (end) *@
+@if (setUserModAdd.UserMOD.Visible) { // setUserModAdd.UserMOD.Visible (begin)
+    <div id="r_UserMOD" @Html.Raw(setUserModAdd.UserMOD.RowAttributes)>
+        <label id="elh_SetUserMOD_UserMOD" class="@(setUserModAdd.LeftColumnClass)">@Html.Raw(setUserModAdd.UserMOD.Caption)@Html.Raw(setUserModAdd.UserMOD.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(setUserModAdd.RightColumnClass)"><div @Html.Raw(setUserModAdd.UserMOD.CellAttributes)>
+<span id="el_SetUserMOD_UserMOD">
+<span>@{
+    if (IsRTL) {
+        setUserModAdd.UserMOD.EditAttrs["dir"] = "rtl";
+    }
+}</span>
+<span id="as_x_UserMOD" class="ew-auto-suggest">
+    <input type="text" class="form-control" name="sv_x_UserMOD" id="sv_x_UserMOD" value="@(RemoveHtml(ConvertToString(setUserModAdd.UserMOD.EditValue)))" autocomplete="off" size="30" placeholder="@Html.Raw(HtmlEncode(setUserModAdd.UserMOD.PlaceHolder))" data-placeholder="@Html.Raw(HtmlEncode(setUserModAdd.UserMOD.PlaceHolder))" data-format-pattern="@(setUserModAdd.UserMOD.FormatPattern)" @Html.Raw(setUserModAdd.UserMOD.EditAttributes) aria-describedby="x_UserMOD_help">
+</span>
+<selection-list hidden class="form-control" data-table="SetUserMOD" data-field="x_UserMOD" data-input="sv_x_UserMOD" data-value-separator="@(setUserModAdd.UserMOD.DisplayValueSeparatorAttribute)" name="x_UserMOD" id="x_UserMOD" value="@(HtmlEncode(setUserModAdd.UserMOD.CurrentValue))"></selection-list>
+@Html.Raw(setUserModAdd.UserMOD.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(setUserModAdd.UserMOD.GetErrorMessage())</div>
+<script>
+loadjs.ready(["fSetUserMODadd"], function() {
+    fSetUserMODadd.createAutoSuggest(Object.assign({"id":"x_UserMOD","forceSelect":true}, { lookupAllDisplayFields: @(setUserModAdd.UserMOD.Lookup.LookupAllDisplayFields ? "true" : "false") }, ew.vars.tables.SetUserMOD.fields.UserMOD.autoSuggestOptions));
+});
+</script>
+@Html.Raw(setUserModAdd.UserMOD.Lookup.GetParamTag(setUserModAdd, "p_x_UserMOD"))
+</span>
+</div></div>
+    </div>
+} @* setUserModAdd.UserMOD.Visible (end) *@
+</div><!-- /page* -->
+@{ setUserModAdd.CloseRecordset(); }
+@Html.Raw(setUserModAdd.IsModal ? "<template class=\"ew-modal-buttons\">" : "<div class=\"row ew-buttons\">")<!-- buttons .row -->
+    <div class="@(setUserModAdd.OffsetColumnClass)"><!-- buttons offset -->
+    <button class="btn btn-primary ew-btn" name="btn-action" id="btn-action" type="submit" form="fSetUserMODadd">@Html.Raw(Language.Phrase("AddBtn"))</button>
+@if (IsJsonResponse()) {
+    <button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" data-bs-dismiss="modal">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+} else {
+    <button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" form="fSetUserMODadd" data-href="@AppPath(setUserModAdd.ReturnUrl)">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+}
+    </div><!-- /buttons offset -->
+@Html.Raw(setUserModAdd.IsModal ? "</template>" : "</div>")<!-- /buttons .row -->
+</form>
+@setUserModAdd.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("SetUserMOD");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Startup script
+    // Write your table-specific startup script here
+    var parent_url = ew.PATH_BASE;
+    $('#r_Plant').hide();
+    $('#r_UserMOD').hide();
+    $(document).ready(function () {
+        const userMod = $("#x_UserMOD");
+        userMod.empty();
+        const ddl = $("#x_LookupPlant");
+        ddl.empty();
+        ddl.append('<option value="">Loading...</option>');
+        $.ajax({
+            url: parent_url + 'api/LookUpList/get-dropdown/plant',
+            method: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                ddl.empty(); 
+                $.each(data, function (index, item) {
+                    const selected = index === 0 ? 'selected' : '';
+                    ddl.append(`<option value="${item.Value}" ${selected}>${item.Label}</option>`);
+                });
+                ddl.trigger('change');
+            },
+            error: function (xhr, status, error) {
+                console.error("Gagal ambil data dropdown:", error);
+                ddl.empty();
+            }
+        });
+        const element = document.getElementById('datetimepicker_fSetUserMODadd_x_Tanggal');
+        if (!element) return;
+
+        // Ambil format dari atribut bawaan ASP.NET Maker
+        const input = document.getElementById('x_Tanggal');
+        const formatPattern = input?.dataset.formatPattern || 'yyyy/MM/dd HH:mm:ss';
+
+        // Siapkan opsi picker dengan format Luxon yang sesuai
+        const options = {
+            localization: {
+                format: formatPattern
+            },
+            restrictions: {
+                minDate: tempusDominus.DateTime.convert(new Date()) // format aman Luxon
+            },
+            display: {
+                components: {
+                    calendar: true,
+                    date: true,
+                    month: true,
+                    year: true,
+                    hours: true,
+                    minutes: true,
+                    seconds: true
+                }
+            }
+        };
+
+        // Inisialisasi datepicker baru
+        new tempusDominus.TempusDominus(element, options);
+    });
+    function setTanggal() {
+        const today = new Date();
+
+        // Format ke yyyy/mm/dd hh:mm:ss
+        const formattedDate =
+            today.getFullYear() + "/" +
+            String(today.getMonth() + 1).padStart(2, '0') + "/" +
+            String(today.getDate()).padStart(2, '0') + " " +
+            String(today.getHours()).padStart(2, '0') + ":" +
+            String(today.getMinutes()).padStart(2, '0') + ":" +
+            String(today.getSeconds()).padStart(2, '0');
+
+        // Set ke input #x_Tanggal
+        document.getElementById("x_Tanggal").value = formattedDate;
+    }
+
+    // Jalankan saat halaman/form Add terbuka
+    window.onload = function() {
+        setTanggal();
+    };
+    (function () {
+        const role = parseInt('@CurrentUserInfo("Rule")') || 0; // 0=Superadmin, 10=OH
+        const isAllowed = (role === 0 || role === 10);
+        if (isAllowed) return;
+
+        // ====== Blokir akses & tampilkan peringatan ======
+        const $container = $(".content .container-fluid").first();
+        const $form = $("form.ew-form").first(); // form Add bawaan ASP.NET Maker (id biasanya f<TableName>add)
+        const listUrl = ew.PATH_BASE + "SetUserMODList"; // ganti jika route Anda berbeda
+
+        // Alert peringatan (Bootstrap)
+        const $alert = $(`
+          <div class="alert alert-warning d-flex align-items-start" role="alert" id="no-access-alert">
+            <i class="fa-solid fa-triangle-exclamation me-2 mt-1"></i>
+            <div>
+              <div class="fw-bold">Tidak ada akses untuk membuat Set User MOD.</div>
+              <div class="small">
+                Hanya pengguna dengan Role <strong>Superadmin</strong> atau <strong>OH</strong> yang dapat menambah data di halaman ini.
+                <br>Solusi: <em>Ganti Akun</em> atau <em>minta diberikan akses oleh Superadmin</em>.
+              </div>
+              <div class="mt-2">
+                <a href="${ew.PATH_BASE}logout" class="btn btn-outline-secondary btn-sm me-2">
+                  <i class="fa-solid fa-right-from-bracket"></i> Ganti Akun
+                </a>
+                <a href="${listUrl}" class="btn btn-primary btn-sm">
+                  <i class="fa-solid fa-list"></i> Kembali ke List
+                </a>
+              </div>
+            </div>
+          </div>
+        `);
+
+        // Sisipkan alert di atas form
+        if ($container.length) $container.prepend($alert);
+        else $("body").prepend($alert);
+
+        // Nonaktifkan input & tombol di form
+        if ($form.length) {
+          // Blokir submit (klik, enter, dll.)
+          $form.on("submit", function (e) { e.preventDefault(); return false; });
+
+          // Disable semua kontrol
+          $form.find("input, select, textarea, button").prop("disabled", true);
+
+          // Re-enable tombol/link Cancel jika ada
+          $form.find('a.btn-secondary, a.ew-btn, a.btn')
+               .filter(function () {
+                  const href = (this.getAttribute("href") || "").toLowerCase();
+                  return href.includes("list") || href.includes("cancel");
+               })
+               .prop("disabled", false)
+               .removeClass("disabled");
+        }
+
+        // Bersihkan tombol Add/Save lain yang mungkin muncul
+        $(".ew-toolbar a.ew-add, .ew-grid-lower-panel a, button[name='btn-action'], button[name='btn-submit']").hide();
+
+        // Tambahan UX: scroll ke atas supaya alert terlihat
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      })();
+});
+</script>

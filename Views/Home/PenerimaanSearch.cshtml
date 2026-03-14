@@ -1,0 +1,388 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (penerimaanSearch.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = penerimaanSearch.UseLayout ? "_Layout" : "";
+}
+<script>
+var currentTable = @Html.Raw(ConvertToJson(penerimaanSearch.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { Penerimaan: currentTable } });
+var currentPageID = ew.PAGE_ID = "search";
+var currentForm;
+var fPenerimaansearch, currentSearchForm, currentAdvancedSearchForm;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery,
+        fields = currentTable.fields;
+
+    // Form object for search
+    let form = new ew.FormBuilder()
+        .setId("fPenerimaansearch")
+        .setPageId("search")
+@if (penerimaanSearch.IsModal && penerimaanSearch.UseAjaxActions) {
+        <text>.setSubmitWithFetch(true)</text>
+}
+
+        // Add fields
+        .setFields([
+
+            ["TanggalSandar", [ew.Validators.datetime(fields.TanggalSandar.clientFormatPattern)], fields.TanggalSandar.isInvalid],
+            ["y_TanggalSandar", [ew.Validators.between], false],
+            ["TanggalDibuat", [], fields.TanggalDibuat.isInvalid],
+            ["y_TanggalDibuat", [ew.Validators.between], false],
+            ["TanggalDiperbarui", [], fields.TanggalDiperbarui.isInvalid],
+            ["y_TanggalDiperbarui", [ew.Validators.between], false]
+        ])
+        // Validate form
+        .setValidate(
+            async function () {
+                if (!this.validateRequired)
+                    return true; // Ignore validation
+                let fobj = this.getForm();
+
+                // Validate fields
+                if (!this.validateFields())
+                    return false;
+
+                // Call Form_CustomValidate event
+                if (!(await this.customValidate?.(fobj) ?? true)) {
+                    this.focus();
+                    return false;
+                }
+                return true;
+            }
+        )
+
+        // Form_CustomValidate
+        .setCustomValidate(
+            function(fobj) { // DO NOT CHANGE THIS LINE!
+                    // Your custom validation code here, return false if invalid.
+                    return true;
+                }
+        )
+
+        // Use JavaScript validation or not
+        .setValidateRequired(ew.CLIENT_VALIDATE)
+
+        // Dynamic selection lists
+        .setLists({
+        })
+        .build();
+    window[form.id] = form;
+@if (penerimaanSearch.IsModal) {
+    <text>currentAdvancedSearchForm = form;</text>
+} else {
+    <text>currentForm = form;</text>
+}
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Write your client script here, no need to add script tags.
+});
+</script>
+@penerimaanSearch.ShowPageHeader()
+@penerimaanSearch.ShowMessages()
+<form name="fPenerimaansearch" id="fPenerimaansearch" class="@(penerimaanSearch.FormClassName)" action="@AppPath(CurrentPageName())" method="post" novalidate autocomplete="off">
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+<input type="hidden" name="action" id="action" value="search">
+@if (penerimaanSearch.IsModal) {
+<input type="hidden" name="modal" value="1">
+}
+<div class="ew-search-div"><!-- page* -->
+@if (penerimaanSearch.TanggalSandar.Visible) { // penerimaanSearch.TanggalSandar.Visible (begin)
+    <div id="r_TanggalSandar" class="row" @Html.Raw(penerimaanSearch.TanggalSandar.RowAttributes)>
+        <label for="x_TanggalSandar" class="@(penerimaanSearch.LeftColumnClass)"><span id="elh_Penerimaan_TanggalSandar">@Html.Raw(penerimaanSearch.TanggalSandar.Caption)</span>
+        <span class="ew-search-operator">
+@Html.Raw(Language.Phrase("BETWEEN"))
+<input type="hidden" name="z_TanggalSandar" id="z_TanggalSandar" value="BETWEEN">
+</span>
+        </label>
+        <div class="@(penerimaanSearch.RightColumnClass)">
+            <div @Html.Raw(penerimaanSearch.TanggalSandar.CellAttributes)>
+                <div class="d-flex align-items-start">
+                <span id="el_Penerimaan_TanggalSandar" class="ew-search-field">
+<input type="@(penerimaanSearch.TanggalSandar.InputTextType)" name="x_TanggalSandar" id="x_TanggalSandar" data-table="Penerimaan" data-field="x_TanggalSandar" value="@Html.Raw(penerimaanSearch.TanggalSandar.EditValue)" placeholder="@Html.Raw(HtmlEncode(penerimaanSearch.TanggalSandar.PlaceHolder))" data-format-pattern="@(penerimaanSearch.TanggalSandar.FormatPattern)"@Html.Raw(penerimaanSearch.TanggalSandar.EditAttributes)>
+<div class="invalid-feedback">@Html.Raw(penerimaanSearch.TanggalSandar.GetErrorMessage(false))</div>
+@if (!penerimaanSearch.TanggalSandar.ReadOnly && !penerimaanSearch.TanggalSandar.Disabled && !penerimaanSearch.TanggalSandar.EditAttrs.Is("readonly") && !penerimaanSearch.TanggalSandar.EditAttrs.Is("disabled")) {
+<script>
+loadjs.ready(["fPenerimaansearch", "datetimepicker"], function () {
+    let format = "@Html.Raw(DateFormat(9))", // DN
+        options = {
+                localization: {
+                    locale: ew.LANGUAGE_ID + "-u-nu-" + ew.getNumberingSystem(),
+                    hourCycle: format.match(/H/) ? "h24" : "h12",
+                    format,
+                    ...ew.language.phrase("datetimepicker")
+                },
+                display: {
+                    icons: {
+                        previous: ew.IS_RTL ? "fa-solid fa-chevron-right" : "fa-solid fa-chevron-left",
+                        next: ew.IS_RTL ? "fa-solid fa-chevron-left" : "fa-solid fa-chevron-right"
+                    },
+                    components: {
+                        clock: !!format.match(/h/i) || !!format.match(/m/) || !!format.match(/s/i),
+                        hours: !!format.match(/h/i),
+                        minutes: !!format.match(/m/),
+                        seconds: !!format.match(/s/i)
+                    },
+                theme: ew.getPreferredTheme()
+                }
+            };
+    ew.createDateTimePicker("fPenerimaansearch", "x_TanggalSandar", ew.deepAssign({"useCurrent":false,"display":{"sideBySide":false}}, options));
+});
+</script>
+}
+</span>
+                    <span class="ew-search-and"><label>@Html.Raw(Language.Phrase("AND"))</label></span>
+                    <span id="el2_Penerimaan_TanggalSandar" class="ew-search-field2">
+<input type="@(penerimaanSearch.TanggalSandar.InputTextType)" name="y_TanggalSandar" id="y_TanggalSandar" data-table="Penerimaan" data-field="x_TanggalSandar" value="@Html.Raw(penerimaanSearch.TanggalSandar.EditValue2)" placeholder="@Html.Raw(HtmlEncode(penerimaanSearch.TanggalSandar.PlaceHolder))" data-format-pattern="@(penerimaanSearch.TanggalSandar.FormatPattern)"@Html.Raw(penerimaanSearch.TanggalSandar.EditAttributes)>
+<div class="invalid-feedback">@Html.Raw(penerimaanSearch.TanggalSandar.GetErrorMessage(false))</div>
+@if (!penerimaanSearch.TanggalSandar.ReadOnly && !penerimaanSearch.TanggalSandar.Disabled && !penerimaanSearch.TanggalSandar.EditAttrs.Is("readonly") && !penerimaanSearch.TanggalSandar.EditAttrs.Is("disabled")) {
+<script>
+loadjs.ready(["fPenerimaansearch", "datetimepicker"], function () {
+    let format = "@Html.Raw(DateFormat(9))", // DN
+        options = {
+                localization: {
+                    locale: ew.LANGUAGE_ID + "-u-nu-" + ew.getNumberingSystem(),
+                    hourCycle: format.match(/H/) ? "h24" : "h12",
+                    format,
+                    ...ew.language.phrase("datetimepicker")
+                },
+                display: {
+                    icons: {
+                        previous: ew.IS_RTL ? "fa-solid fa-chevron-right" : "fa-solid fa-chevron-left",
+                        next: ew.IS_RTL ? "fa-solid fa-chevron-left" : "fa-solid fa-chevron-right"
+                    },
+                    components: {
+                        clock: !!format.match(/h/i) || !!format.match(/m/) || !!format.match(/s/i),
+                        hours: !!format.match(/h/i),
+                        minutes: !!format.match(/m/),
+                        seconds: !!format.match(/s/i)
+                    },
+                theme: ew.getPreferredTheme()
+                }
+            };
+    ew.createDateTimePicker("fPenerimaansearch", "y_TanggalSandar", ew.deepAssign({"useCurrent":false,"display":{"sideBySide":false}}, options));
+});
+</script>
+}
+</span>
+                </div>
+            </div>
+        </div>
+    </div>
+} @* penerimaanSearch.TanggalSandar.Visible (end) *@
+@if (penerimaanSearch.TanggalDibuat.Visible) { // penerimaanSearch.TanggalDibuat.Visible (begin)
+    <div id="r_TanggalDibuat" class="row" @Html.Raw(penerimaanSearch.TanggalDibuat.RowAttributes)>
+        <label class="@(penerimaanSearch.LeftColumnClass)"><span id="elh_Penerimaan_TanggalDibuat">@Html.Raw(penerimaanSearch.TanggalDibuat.Caption)</span>
+        <span class="ew-search-operator">
+@Html.Raw(Language.Phrase("BETWEEN"))
+<input type="hidden" name="z_TanggalDibuat" id="z_TanggalDibuat" value="BETWEEN">
+</span>
+        </label>
+        <div class="@(penerimaanSearch.RightColumnClass)">
+            <div @Html.Raw(penerimaanSearch.TanggalDibuat.CellAttributes)>
+                <div class="d-flex align-items-start">
+                <span id="el_Penerimaan_TanggalDibuat" class="ew-search-field">
+<input type="@(penerimaanSearch.TanggalDibuat.InputTextType)" name="x_TanggalDibuat" id="x_TanggalDibuat" data-table="Penerimaan" data-field="x_TanggalDibuat" value="@Html.Raw(penerimaanSearch.TanggalDibuat.EditValue)" placeholder="@Html.Raw(HtmlEncode(penerimaanSearch.TanggalDibuat.PlaceHolder))" data-format-pattern="@(penerimaanSearch.TanggalDibuat.FormatPattern)"@Html.Raw(penerimaanSearch.TanggalDibuat.EditAttributes)>
+<div class="invalid-feedback">@Html.Raw(penerimaanSearch.TanggalDibuat.GetErrorMessage(false))</div>
+@if (!penerimaanSearch.TanggalDibuat.ReadOnly && !penerimaanSearch.TanggalDibuat.Disabled && !penerimaanSearch.TanggalDibuat.EditAttrs.Is("readonly") && !penerimaanSearch.TanggalDibuat.EditAttrs.Is("disabled")) {
+<script>
+loadjs.ready(["fPenerimaansearch", "datetimepicker"], function () {
+    let format = "@Html.Raw(DateFormat(9))", // DN
+        options = {
+                localization: {
+                    locale: ew.LANGUAGE_ID + "-u-nu-" + ew.getNumberingSystem(),
+                    hourCycle: format.match(/H/) ? "h24" : "h12",
+                    format,
+                    ...ew.language.phrase("datetimepicker")
+                },
+                display: {
+                    icons: {
+                        previous: ew.IS_RTL ? "fa-solid fa-chevron-right" : "fa-solid fa-chevron-left",
+                        next: ew.IS_RTL ? "fa-solid fa-chevron-left" : "fa-solid fa-chevron-right"
+                    },
+                    components: {
+                        clock: !!format.match(/h/i) || !!format.match(/m/) || !!format.match(/s/i),
+                        hours: !!format.match(/h/i),
+                        minutes: !!format.match(/m/),
+                        seconds: !!format.match(/s/i)
+                    },
+                theme: ew.getPreferredTheme()
+                }
+            };
+    ew.createDateTimePicker("fPenerimaansearch", "x_TanggalDibuat", ew.deepAssign({"useCurrent":false,"display":{"sideBySide":false}}, options));
+});
+</script>
+}
+</span>
+                    <span class="ew-search-and"><label>@Html.Raw(Language.Phrase("AND"))</label></span>
+                    <span id="el2_Penerimaan_TanggalDibuat" class="ew-search-field2">
+<input type="@(penerimaanSearch.TanggalDibuat.InputTextType)" name="y_TanggalDibuat" id="y_TanggalDibuat" data-table="Penerimaan" data-field="x_TanggalDibuat" value="@Html.Raw(penerimaanSearch.TanggalDibuat.EditValue2)" placeholder="@Html.Raw(HtmlEncode(penerimaanSearch.TanggalDibuat.PlaceHolder))" data-format-pattern="@(penerimaanSearch.TanggalDibuat.FormatPattern)"@Html.Raw(penerimaanSearch.TanggalDibuat.EditAttributes)>
+<div class="invalid-feedback">@Html.Raw(penerimaanSearch.TanggalDibuat.GetErrorMessage(false))</div>
+@if (!penerimaanSearch.TanggalDibuat.ReadOnly && !penerimaanSearch.TanggalDibuat.Disabled && !penerimaanSearch.TanggalDibuat.EditAttrs.Is("readonly") && !penerimaanSearch.TanggalDibuat.EditAttrs.Is("disabled")) {
+<script>
+loadjs.ready(["fPenerimaansearch", "datetimepicker"], function () {
+    let format = "@Html.Raw(DateFormat(9))", // DN
+        options = {
+                localization: {
+                    locale: ew.LANGUAGE_ID + "-u-nu-" + ew.getNumberingSystem(),
+                    hourCycle: format.match(/H/) ? "h24" : "h12",
+                    format,
+                    ...ew.language.phrase("datetimepicker")
+                },
+                display: {
+                    icons: {
+                        previous: ew.IS_RTL ? "fa-solid fa-chevron-right" : "fa-solid fa-chevron-left",
+                        next: ew.IS_RTL ? "fa-solid fa-chevron-left" : "fa-solid fa-chevron-right"
+                    },
+                    components: {
+                        clock: !!format.match(/h/i) || !!format.match(/m/) || !!format.match(/s/i),
+                        hours: !!format.match(/h/i),
+                        minutes: !!format.match(/m/),
+                        seconds: !!format.match(/s/i)
+                    },
+                theme: ew.getPreferredTheme()
+                }
+            };
+    ew.createDateTimePicker("fPenerimaansearch", "y_TanggalDibuat", ew.deepAssign({"useCurrent":false,"display":{"sideBySide":false}}, options));
+});
+</script>
+}
+</span>
+                </div>
+            </div>
+        </div>
+    </div>
+} @* penerimaanSearch.TanggalDibuat.Visible (end) *@
+@if (penerimaanSearch.TanggalDiperbarui.Visible) { // penerimaanSearch.TanggalDiperbarui.Visible (begin)
+    <div id="r_TanggalDiperbarui" class="row" @Html.Raw(penerimaanSearch.TanggalDiperbarui.RowAttributes)>
+        <label class="@(penerimaanSearch.LeftColumnClass)"><span id="elh_Penerimaan_TanggalDiperbarui">@Html.Raw(penerimaanSearch.TanggalDiperbarui.Caption)</span>
+        <span class="ew-search-operator">
+@Html.Raw(Language.Phrase("BETWEEN"))
+<input type="hidden" name="z_TanggalDiperbarui" id="z_TanggalDiperbarui" value="BETWEEN">
+</span>
+        </label>
+        <div class="@(penerimaanSearch.RightColumnClass)">
+            <div @Html.Raw(penerimaanSearch.TanggalDiperbarui.CellAttributes)>
+                <div class="d-flex align-items-start">
+                <span id="el_Penerimaan_TanggalDiperbarui" class="ew-search-field">
+<input type="@(penerimaanSearch.TanggalDiperbarui.InputTextType)" name="x_TanggalDiperbarui" id="x_TanggalDiperbarui" data-table="Penerimaan" data-field="x_TanggalDiperbarui" value="@Html.Raw(penerimaanSearch.TanggalDiperbarui.EditValue)" placeholder="@Html.Raw(HtmlEncode(penerimaanSearch.TanggalDiperbarui.PlaceHolder))" data-format-pattern="@(penerimaanSearch.TanggalDiperbarui.FormatPattern)"@Html.Raw(penerimaanSearch.TanggalDiperbarui.EditAttributes)>
+<div class="invalid-feedback">@Html.Raw(penerimaanSearch.TanggalDiperbarui.GetErrorMessage(false))</div>
+@if (!penerimaanSearch.TanggalDiperbarui.ReadOnly && !penerimaanSearch.TanggalDiperbarui.Disabled && !penerimaanSearch.TanggalDiperbarui.EditAttrs.Is("readonly") && !penerimaanSearch.TanggalDiperbarui.EditAttrs.Is("disabled")) {
+<script>
+loadjs.ready(["fPenerimaansearch", "datetimepicker"], function () {
+    let format = "@Html.Raw(DateFormat(9))", // DN
+        options = {
+                localization: {
+                    locale: ew.LANGUAGE_ID + "-u-nu-" + ew.getNumberingSystem(),
+                    hourCycle: format.match(/H/) ? "h24" : "h12",
+                    format,
+                    ...ew.language.phrase("datetimepicker")
+                },
+                display: {
+                    icons: {
+                        previous: ew.IS_RTL ? "fa-solid fa-chevron-right" : "fa-solid fa-chevron-left",
+                        next: ew.IS_RTL ? "fa-solid fa-chevron-left" : "fa-solid fa-chevron-right"
+                    },
+                    components: {
+                        clock: !!format.match(/h/i) || !!format.match(/m/) || !!format.match(/s/i),
+                        hours: !!format.match(/h/i),
+                        minutes: !!format.match(/m/),
+                        seconds: !!format.match(/s/i)
+                    },
+                theme: ew.getPreferredTheme()
+                }
+            };
+    ew.createDateTimePicker("fPenerimaansearch", "x_TanggalDiperbarui", ew.deepAssign({"useCurrent":false,"display":{"sideBySide":false}}, options));
+});
+</script>
+}
+</span>
+                    <span class="ew-search-and"><label>@Html.Raw(Language.Phrase("AND"))</label></span>
+                    <span id="el2_Penerimaan_TanggalDiperbarui" class="ew-search-field2">
+<input type="@(penerimaanSearch.TanggalDiperbarui.InputTextType)" name="y_TanggalDiperbarui" id="y_TanggalDiperbarui" data-table="Penerimaan" data-field="x_TanggalDiperbarui" value="@Html.Raw(penerimaanSearch.TanggalDiperbarui.EditValue2)" placeholder="@Html.Raw(HtmlEncode(penerimaanSearch.TanggalDiperbarui.PlaceHolder))" data-format-pattern="@(penerimaanSearch.TanggalDiperbarui.FormatPattern)"@Html.Raw(penerimaanSearch.TanggalDiperbarui.EditAttributes)>
+<div class="invalid-feedback">@Html.Raw(penerimaanSearch.TanggalDiperbarui.GetErrorMessage(false))</div>
+@if (!penerimaanSearch.TanggalDiperbarui.ReadOnly && !penerimaanSearch.TanggalDiperbarui.Disabled && !penerimaanSearch.TanggalDiperbarui.EditAttrs.Is("readonly") && !penerimaanSearch.TanggalDiperbarui.EditAttrs.Is("disabled")) {
+<script>
+loadjs.ready(["fPenerimaansearch", "datetimepicker"], function () {
+    let format = "@Html.Raw(DateFormat(9))", // DN
+        options = {
+                localization: {
+                    locale: ew.LANGUAGE_ID + "-u-nu-" + ew.getNumberingSystem(),
+                    hourCycle: format.match(/H/) ? "h24" : "h12",
+                    format,
+                    ...ew.language.phrase("datetimepicker")
+                },
+                display: {
+                    icons: {
+                        previous: ew.IS_RTL ? "fa-solid fa-chevron-right" : "fa-solid fa-chevron-left",
+                        next: ew.IS_RTL ? "fa-solid fa-chevron-left" : "fa-solid fa-chevron-right"
+                    },
+                    components: {
+                        clock: !!format.match(/h/i) || !!format.match(/m/) || !!format.match(/s/i),
+                        hours: !!format.match(/h/i),
+                        minutes: !!format.match(/m/),
+                        seconds: !!format.match(/s/i)
+                    },
+                theme: ew.getPreferredTheme()
+                }
+            };
+    ew.createDateTimePicker("fPenerimaansearch", "y_TanggalDiperbarui", ew.deepAssign({"useCurrent":false,"display":{"sideBySide":false}}, options));
+});
+</script>
+}
+</span>
+                </div>
+            </div>
+        </div>
+    </div>
+} @* penerimaanSearch.TanggalDiperbarui.Visible (end) *@
+</div><!-- /page* -->
+@Html.Raw(penerimaanSearch.IsModal ? Html.Raw("<template class=\"ew-modal-buttons\">") : Html.Raw("<div class=\"row ew-buttons\">"))<!-- buttons .row -->
+    <div class="@(penerimaanSearch.OffsetColumnClass)"><!-- buttons offset -->
+        <button class="btn btn-primary ew-btn" name="btn-action" id="btn-action" type="submit" form="fPenerimaansearch">@Html.Raw(Language.Phrase("Search"))</button>
+@if (penerimaanSearch.IsModal) {
+        <button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" form="fPenerimaansearch">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+} else {
+        <button class="btn btn-default ew-btn" name="btn-reset" id="btn-reset" type="button" form="fPenerimaansearch" data-ew-action="reload">@Html.Raw(Language.Phrase("Reset"))</button>
+}
+    </div><!-- /buttons offset -->
+@Html.Raw(penerimaanSearch.IsModal ? Html.Raw("</template>") : Html.Raw("</div>"))<!-- /buttons .row -->
+</form>
+@penerimaanSearch.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("Penerimaan");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Startup script
+    $('.ew-search-operator').hide();
+    $('.ew-search-and').hide();
+    $('.ew-search-field2').addClass('ew-search-field').removeClass('ew-search-field2');
+    $('.ew-search-field').addClass('align-items-center');
+    $('.modal-header').addClass('bg-primary');
+    const fromEl = '<p class="p-0 m-0 fw-bold me-2" style="width: 80px;">Start Date</p>';
+    const toEl = '<p class="p-0 m-0 fw-bold mx-2" style="width: 70px;">End Date</p>';
+    $('#datetimepicker_fPenerimaansearch_x_TanggalSandar').before(fromEl);
+    $('#datetimepicker_fPenerimaansearch_y_TanggalSandar').before(toEl);
+    $('#datetimepicker_fPenerimaansearch_x_TanggalDibuat').before(fromEl);
+    $('#datetimepicker_fPenerimaansearch_y_TanggalDibuat').before(toEl);
+    $('#datetimepicker_fPenerimaansearch_x_TanggalDiperbarui').before(fromEl);
+    $('#datetimepicker_fPenerimaansearch_y_TanggalDiperbarui').before(toEl);
+});
+</script>

@@ -1,0 +1,1868 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (aktivitasList.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = aktivitasList.UseLayout ? "_Layout" : "";
+}
+@if (!aktivitasList.IsExport()) {
+<script>
+var currentTable = @Html.Raw(ConvertToJson(aktivitasList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { Aktivitas: currentTable } });
+var currentPageID = ew.PAGE_ID = "list";
+var currentForm;
+var @(aktivitasList.FormName);
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("@(aktivitasList.FormName)")
+        .setPageId("list")
+        .setSubmitWithFetch(@(aktivitasList.UseAjaxActions ? "true" : "false"))
+        .setFormKeyCountName("@(aktivitasList.FormKeyCountName)")
+
+        // Dynamic selection lists
+        .setLists({
+            "No_Referensi": @Html.Raw(aktivitasList.No_Referensi.ToClientList(aktivitasList)),
+            "IdProses": @Html.Raw(aktivitasList.IdProses.ToClientList(aktivitasList)),
+            "Aktivitas2": @Html.Raw(aktivitasList.Aktivitas2.ToClientList(aktivitasList)),
+            "PIC": @Html.Raw(aktivitasList.PIC.ToClientList(aktivitasList)),
+            "TanggalMulai": @Html.Raw(aktivitasList.TanggalMulai.ToClientList(aktivitasList)),
+            "TanggalSelesai": @Html.Raw(aktivitasList.TanggalSelesai.ToClientList(aktivitasList)),
+            "StatusAktivitas": @Html.Raw(aktivitasList.StatusAktivitas.ToClientList(aktivitasList)),
+            "DibuatOleh": @Html.Raw(aktivitasList.DibuatOleh.ToClientList(aktivitasList)),
+            "TanggalDibuat": @Html.Raw(aktivitasList.TanggalDibuat.ToClientList(aktivitasList)),
+            "DiperbaruiOleh": @Html.Raw(aktivitasList.DiperbaruiOleh.ToClientList(aktivitasList)),
+            "TanggalDiperbarui": @Html.Raw(aktivitasList.TanggalDiperbarui.ToClientList(aktivitasList)),
+            "TipeAktivitas": @Html.Raw(aktivitasList.TipeAktivitas.ToClientList(aktivitasList)),
+            "Keterangan": @Html.Raw(aktivitasList.Keterangan.ToClientList(aktivitasList)),
+            "TipeProses": @Html.Raw(aktivitasList.TipeProses.ToClientList(aktivitasList)),
+            "Urutan": @Html.Raw(aktivitasList.Urutan.ToClientList(aktivitasList)),
+            "IsNominationTankReceivingLineOpen": @Html.Raw(aktivitasList.IsNominationTankReceivingLineOpen.ToClientList(aktivitasList)),
+            "IsNonNominationReceivingLineClosedAndSealed": @Html.Raw(aktivitasList.IsNonNominationReceivingLineClosedAndSealed.ToClientList(aktivitasList)),
+            "IsTankEmptyAndDry": @Html.Raw(aktivitasList.IsTankEmptyAndDry.ToClientList(aktivitasList)),
+            "IsDocumentationComplete": @Html.Raw(aktivitasList.IsDocumentationComplete.ToClientList(aktivitasList)),
+        })
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Client script
+    var parent_url = ew.PATH_BASE;
+    $(document).on('click', '.download-document', function () {
+        var IdAktivitasDokumen = $(this).attr('IdAktivitasDokumen');
+        event.preventDefault();
+        $.ajax({
+            url: parent_url + 'api/LookUpList/download_activity_document',
+            type: 'GET',
+            data: { IdDokumen: IdAktivitasDokumen },
+            xhrFields: {
+                responseType: 'blob'
+            },
+            success: function(response, status, xhr) {
+                const disposition = xhr.getResponseHeader('Content-Disposition');
+                let fileName = "file_download";
+                if (disposition && disposition.indexOf('filename=') !== -1) {
+                    const fileNameMatch = disposition.match(/filename="?([^";]+)"?/);
+                    if (fileNameMatch && fileNameMatch[1]) {
+                        fileName = fileNameMatch[1];
+                    }
+                }
+                const blobUrl = window.URL.createObjectURL(response);
+                const a = document.createElement('a');
+                a.href = blobUrl;
+                a.download = fileName; 
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(blobUrl);
+                ew.alert("Download successful!");
+            },
+            error: function(xhr, status, error) {
+                if (xhr.status === 404) {
+                    ew.alert("File not found on the server.");
+                } else if (xhr.status === 500) {
+                    ew.alert("An error occurred. Please try again later.");
+                } else {
+                    ew.alert("Failed to download the file. Error: " + xhr.responseText);
+                }
+            }
+        });
+    });
+});
+</script>
+}
+@if (!aktivitasList.IsExport()) {
+<div class="btn-toolbar ew-toolbar">
+@if (aktivitasList.TotalRecords > 0 && aktivitasList.ExportOptions.Visible) {
+    aktivitasList.ExportOptions.Render("body");
+}
+@if (aktivitasList.ImportOptions.Visible) {
+    aktivitasList.ImportOptions.Render("body");
+}
+@if (aktivitasList.SearchOptions.Visible) {
+    aktivitasList.SearchOptions.Render("body");
+}
+@if (aktivitasList.FilterOptions.Visible) {
+    aktivitasList.FilterOptions.Render("body");
+}
+</div>
+}
+@if (aktivitasList.ShowCurrentFilter) {
+    aktivitasList.ShowFilterList();
+}
+@if (!aktivitasList.IsModal) {
+<form name="fAktivitassrch" id="fAktivitassrch" class="ew-form ew-ext-search-form" action="@AppPath(CurrentPageName())" novalidate autocomplete="off">
+<div id="fAktivitassrch_search_panel" class="mb-2 mb-sm-0 @(aktivitasList.SearchPanelClass)"><!-- .ew-search-panel -->
+<script>
+var currentTable = @Html.Raw(ConvertToJson(aktivitasList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { Aktivitas: currentTable } });
+var currentForm;
+var fAktivitassrch, currentSearchForm, currentAdvancedSearchForm;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery,
+        fields = currentTable.fields;
+
+    // Form object for search
+    let form = new ew.FormBuilder()
+        .setId("fAktivitassrch")
+        .setPageId("list")
+@if (aktivitasList.UseAjaxActions) {
+        <text>.setSubmitWithFetch(true)</text>
+}
+
+        // Add fields
+        .setFields([
+        ])
+        // Validate form
+        .setValidate(
+            async function () {
+                if (!this.validateRequired)
+                    return true; // Ignore validation
+                let fobj = this.getForm();
+
+                // Validate fields
+                if (!this.validateFields())
+                    return false;
+
+                // Call Form_CustomValidate event
+                if (!(await this.customValidate?.(fobj) ?? true)) {
+                    this.focus();
+                    return false;
+                }
+                return true;
+            }
+        )
+
+        // Form_CustomValidate
+        .setCustomValidate(
+            function(fobj) { // DO NOT CHANGE THIS LINE!
+                    // Your custom validation code here, return false if invalid.
+                    return true;
+                }
+        )
+
+        // Use JavaScript validation or not
+        .setValidateRequired(ew.CLIENT_VALIDATE)
+
+        // Dynamic selection lists
+        .setLists({
+            "No_Referensi": @Html.Raw(aktivitasList.No_Referensi.ToClientList(aktivitasList)),
+            "IdProses": @Html.Raw(aktivitasList.IdProses.ToClientList(aktivitasList)),
+            "IdTemplateAktivitas": @Html.Raw(aktivitasList.IdTemplateAktivitas.ToClientList(aktivitasList)),
+            "Aktivitas2": @Html.Raw(aktivitasList.Aktivitas2.ToClientList(aktivitasList)),
+            "NamaAktivitas": @Html.Raw(aktivitasList.NamaAktivitas.ToClientList(aktivitasList)),
+            "PIC": @Html.Raw(aktivitasList.PIC.ToClientList(aktivitasList)),
+            "TanggalMulai": @Html.Raw(aktivitasList.TanggalMulai.ToClientList(aktivitasList)),
+            "TanggalSelesai": @Html.Raw(aktivitasList.TanggalSelesai.ToClientList(aktivitasList)),
+            "StatusAktivitas": @Html.Raw(aktivitasList.StatusAktivitas.ToClientList(aktivitasList)),
+            "DibuatOleh": @Html.Raw(aktivitasList.DibuatOleh.ToClientList(aktivitasList)),
+            "TanggalDibuat": @Html.Raw(aktivitasList.TanggalDibuat.ToClientList(aktivitasList)),
+            "DiperbaruiOleh": @Html.Raw(aktivitasList.DiperbaruiOleh.ToClientList(aktivitasList)),
+            "TanggalDiperbarui": @Html.Raw(aktivitasList.TanggalDiperbarui.ToClientList(aktivitasList)),
+            "TipeAktivitas": @Html.Raw(aktivitasList.TipeAktivitas.ToClientList(aktivitasList)),
+            "sandar_nama_kapal": @Html.Raw(aktivitasList.sandar_nama_kapal.ToClientList(aktivitasList)),
+            "sandar_tgl_tiba": @Html.Raw(aktivitasList.sandar_tgl_tiba.ToClientList(aktivitasList)),
+            "sandar_nominasi": @Html.Raw(aktivitasList.sandar_nominasi.ToClientList(aktivitasList)),
+            "Produk": @Html.Raw(aktivitasList.Produk.ToClientList(aktivitasList)),
+            "Shipment": @Html.Raw(aktivitasList.Shipment.ToClientList(aktivitasList)),
+            "Nama_Proses": @Html.Raw(aktivitasList.Nama_Proses.ToClientList(aktivitasList)),
+            "IdDokumen": @Html.Raw(aktivitasList.IdDokumen.ToClientList(aktivitasList)),
+            "PathFile": @Html.Raw(aktivitasList.PathFile.ToClientList(aktivitasList)),
+            "TanggalUploadDok": @Html.Raw(aktivitasList.TanggalUploadDok.ToClientList(aktivitasList)),
+            "UserUploadDok": @Html.Raw(aktivitasList.UserUploadDok.ToClientList(aktivitasList)),
+            "NamaDokumen": @Html.Raw(aktivitasList.NamaDokumen.ToClientList(aktivitasList)),
+            "Keterangan": @Html.Raw(aktivitasList.Keterangan.ToClientList(aktivitasList)),
+            "IdRefAnak": @Html.Raw(aktivitasList.IdRefAnak.ToClientList(aktivitasList)),
+            "TableAnak": @Html.Raw(aktivitasList.TableAnak.ToClientList(aktivitasList)),
+            "TipeProses": @Html.Raw(aktivitasList.TipeProses.ToClientList(aktivitasList)),
+            "Urutan": @Html.Raw(aktivitasList.Urutan.ToClientList(aktivitasList)),
+        })
+
+        // Filters
+        .setFilterList(@Html.Raw(aktivitasList.GetFilterList()))
+        .build();
+    window[form.id] = form;
+    currentSearchForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<input type="hidden" name="cmd" value="search">
+@if (Security.CanSearch) {
+if (!aktivitasList.IsExport() && Empty(aktivitasList.CurrentAction) && aktivitasList.HasSearchFields()) { @* Show search form (begin) *@
+<div class="ew-extended-search container-fluid ps-2">
+<div class="row mb-0@(aktivitasList.SearchFieldsPerRow > 0 ? " row-cols-sm-" + aktivitasList.SearchFieldsPerRow : "")">
+@{
+    // Render search row
+    aktivitasList.RowType = RowType.Search;
+    aktivitasList.ResetAttributes();
+    await aktivitasList.RenderRow();
+}
+@if (aktivitasList.No_Referensi.Visible) { // aktivitasList.No_Referensi.Visible (begin)
+    if (!aktivitasList.No_Referensi.UseFilter) {
+        aktivitasList.SearchColumnCount++;
+    }
+    <div id="xs_No_Referensi" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(aktivitasList.No_Referensi.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_No_Referensi"
+            name="x_No_Referensi[]"
+            class="form-control ew-select@(aktivitasList.No_Referensi.IsInvalidClass)"
+            data-select2-id="fAktivitassrch_x_No_Referensi"
+            data-table="Aktivitas"
+            data-field="x_No_Referensi"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(aktivitasList.No_Referensi.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(aktivitasList.No_Referensi.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(aktivitasList.No_Referensi.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(aktivitasList.No_Referensi.EditAttributes)>
+            @(aktivitasList.No_Referensi.SelectOptionListHtml("x_No_Referensi", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(aktivitasList.No_Referensi.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fAktivitassrch", function() {
+            var options = {
+                name: "x_No_Referensi",
+                selectId: "fAktivitassrch_x_No_Referensi",
+                ajax: { id: "x_No_Referensi", form: "fAktivitassrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.Aktivitas.fields.No_Referensi.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* aktivitasList.No_Referensi.Visible (end) *@
+@if (aktivitasList.IdProses.Visible) { // aktivitasList.IdProses.Visible (begin)
+    if (!aktivitasList.IdProses.UseFilter) {
+        aktivitasList.SearchColumnCount++;
+    }
+    <div id="xs_IdProses" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(aktivitasList.IdProses.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_IdProses"
+            name="x_IdProses[]"
+            class="form-control ew-select@(aktivitasList.IdProses.IsInvalidClass)"
+            data-select2-id="fAktivitassrch_x_IdProses"
+            data-table="Aktivitas"
+            data-field="x_IdProses"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(aktivitasList.IdProses.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(aktivitasList.IdProses.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(aktivitasList.IdProses.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(aktivitasList.IdProses.EditAttributes)>
+            @(aktivitasList.IdProses.SelectOptionListHtml("x_IdProses", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(aktivitasList.IdProses.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fAktivitassrch", function() {
+            var options = {
+                name: "x_IdProses",
+                selectId: "fAktivitassrch_x_IdProses",
+                ajax: { id: "x_IdProses", form: "fAktivitassrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.Aktivitas.fields.IdProses.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* aktivitasList.IdProses.Visible (end) *@
+@if (aktivitasList.IdTemplateAktivitas.Visible) { // aktivitasList.IdTemplateAktivitas.Visible (begin)
+    if (!aktivitasList.IdTemplateAktivitas.UseFilter) {
+        aktivitasList.SearchColumnCount++;
+    }
+    <div id="xs_IdTemplateAktivitas" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(aktivitasList.IdTemplateAktivitas.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_IdTemplateAktivitas"
+            name="x_IdTemplateAktivitas[]"
+            class="form-control ew-select@(aktivitasList.IdTemplateAktivitas.IsInvalidClass)"
+            data-select2-id="fAktivitassrch_x_IdTemplateAktivitas"
+            data-table="Aktivitas"
+            data-field="x_IdTemplateAktivitas"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(aktivitasList.IdTemplateAktivitas.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(aktivitasList.IdTemplateAktivitas.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(aktivitasList.IdTemplateAktivitas.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(aktivitasList.IdTemplateAktivitas.EditAttributes)>
+            @(aktivitasList.IdTemplateAktivitas.SelectOptionListHtml("x_IdTemplateAktivitas", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(aktivitasList.IdTemplateAktivitas.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fAktivitassrch", function() {
+            var options = {
+                name: "x_IdTemplateAktivitas",
+                selectId: "fAktivitassrch_x_IdTemplateAktivitas",
+                ajax: { id: "x_IdTemplateAktivitas", form: "fAktivitassrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.Aktivitas.fields.IdTemplateAktivitas.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* aktivitasList.IdTemplateAktivitas.Visible (end) *@
+@if (aktivitasList.Aktivitas2.Visible) { // aktivitasList.Aktivitas2.Visible (begin)
+    if (!aktivitasList.Aktivitas2.UseFilter) {
+        aktivitasList.SearchColumnCount++;
+    }
+    <div id="xs_Aktivitas2" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(aktivitasList.Aktivitas2.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_Aktivitas2"
+            name="x_Aktivitas2[]"
+            class="form-control ew-select@(aktivitasList.Aktivitas2.IsInvalidClass)"
+            data-select2-id="fAktivitassrch_x_Aktivitas2"
+            data-table="Aktivitas"
+            data-field="x_Aktivitas2"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(aktivitasList.Aktivitas2.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(aktivitasList.Aktivitas2.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(aktivitasList.Aktivitas2.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(aktivitasList.Aktivitas2.EditAttributes)>
+            @(aktivitasList.Aktivitas2.SelectOptionListHtml("x_Aktivitas2", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(aktivitasList.Aktivitas2.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fAktivitassrch", function() {
+            var options = {
+                name: "x_Aktivitas2",
+                selectId: "fAktivitassrch_x_Aktivitas2",
+                ajax: { id: "x_Aktivitas2", form: "fAktivitassrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.Aktivitas.fields.Aktivitas2.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* aktivitasList.Aktivitas2.Visible (end) *@
+@if (aktivitasList.NamaAktivitas.Visible) { // aktivitasList.NamaAktivitas.Visible (begin)
+    if (!aktivitasList.NamaAktivitas.UseFilter) {
+        aktivitasList.SearchColumnCount++;
+    }
+    <div id="xs_NamaAktivitas" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(aktivitasList.NamaAktivitas.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_NamaAktivitas"
+            name="x_NamaAktivitas[]"
+            class="form-control ew-select@(aktivitasList.NamaAktivitas.IsInvalidClass)"
+            data-select2-id="fAktivitassrch_x_NamaAktivitas"
+            data-table="Aktivitas"
+            data-field="x_NamaAktivitas"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(aktivitasList.NamaAktivitas.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(aktivitasList.NamaAktivitas.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(aktivitasList.NamaAktivitas.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(aktivitasList.NamaAktivitas.EditAttributes)>
+            @(aktivitasList.NamaAktivitas.SelectOptionListHtml("x_NamaAktivitas", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(aktivitasList.NamaAktivitas.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fAktivitassrch", function() {
+            var options = {
+                name: "x_NamaAktivitas",
+                selectId: "fAktivitassrch_x_NamaAktivitas",
+                ajax: { id: "x_NamaAktivitas", form: "fAktivitassrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.Aktivitas.fields.NamaAktivitas.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* aktivitasList.NamaAktivitas.Visible (end) *@
+@if (aktivitasList.PIC.Visible) { // aktivitasList.PIC.Visible (begin)
+    if (!aktivitasList.PIC.UseFilter) {
+        aktivitasList.SearchColumnCount++;
+    }
+    <div id="xs_PIC" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(aktivitasList.PIC.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_PIC"
+            name="x_PIC[]"
+            class="form-control ew-select@(aktivitasList.PIC.IsInvalidClass)"
+            data-select2-id="fAktivitassrch_x_PIC"
+            data-table="Aktivitas"
+            data-field="x_PIC"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(aktivitasList.PIC.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(aktivitasList.PIC.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(aktivitasList.PIC.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(aktivitasList.PIC.EditAttributes)>
+            @(aktivitasList.PIC.SelectOptionListHtml("x_PIC", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(aktivitasList.PIC.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fAktivitassrch", function() {
+            var options = {
+                name: "x_PIC",
+                selectId: "fAktivitassrch_x_PIC",
+                ajax: { id: "x_PIC", form: "fAktivitassrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.Aktivitas.fields.PIC.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* aktivitasList.PIC.Visible (end) *@
+@if (aktivitasList.TanggalMulai.Visible) { // aktivitasList.TanggalMulai.Visible (begin)
+    if (!aktivitasList.TanggalMulai.UseFilter) {
+        aktivitasList.SearchColumnCount++;
+    }
+    <div id="xs_TanggalMulai" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(aktivitasList.TanggalMulai.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_TanggalMulai"
+            name="x_TanggalMulai[]"
+            class="form-control ew-select@(aktivitasList.TanggalMulai.IsInvalidClass)"
+            data-select2-id="fAktivitassrch_x_TanggalMulai"
+            data-table="Aktivitas"
+            data-field="x_TanggalMulai"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(aktivitasList.TanggalMulai.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(aktivitasList.TanggalMulai.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(aktivitasList.TanggalMulai.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(aktivitasList.TanggalMulai.EditAttributes)>
+            @(aktivitasList.TanggalMulai.SelectOptionListHtml("x_TanggalMulai", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(aktivitasList.TanggalMulai.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fAktivitassrch", function() {
+            var options = {
+                name: "x_TanggalMulai",
+                selectId: "fAktivitassrch_x_TanggalMulai",
+                ajax: { id: "x_TanggalMulai", form: "fAktivitassrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.Aktivitas.fields.TanggalMulai.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* aktivitasList.TanggalMulai.Visible (end) *@
+@if (aktivitasList.TanggalSelesai.Visible) { // aktivitasList.TanggalSelesai.Visible (begin)
+    if (!aktivitasList.TanggalSelesai.UseFilter) {
+        aktivitasList.SearchColumnCount++;
+    }
+    <div id="xs_TanggalSelesai" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(aktivitasList.TanggalSelesai.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_TanggalSelesai"
+            name="x_TanggalSelesai[]"
+            class="form-control ew-select@(aktivitasList.TanggalSelesai.IsInvalidClass)"
+            data-select2-id="fAktivitassrch_x_TanggalSelesai"
+            data-table="Aktivitas"
+            data-field="x_TanggalSelesai"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(aktivitasList.TanggalSelesai.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(aktivitasList.TanggalSelesai.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(aktivitasList.TanggalSelesai.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(aktivitasList.TanggalSelesai.EditAttributes)>
+            @(aktivitasList.TanggalSelesai.SelectOptionListHtml("x_TanggalSelesai", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(aktivitasList.TanggalSelesai.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fAktivitassrch", function() {
+            var options = {
+                name: "x_TanggalSelesai",
+                selectId: "fAktivitassrch_x_TanggalSelesai",
+                ajax: { id: "x_TanggalSelesai", form: "fAktivitassrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.Aktivitas.fields.TanggalSelesai.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* aktivitasList.TanggalSelesai.Visible (end) *@
+@if (aktivitasList.StatusAktivitas.Visible) { // aktivitasList.StatusAktivitas.Visible (begin)
+    if (!aktivitasList.StatusAktivitas.UseFilter) {
+        aktivitasList.SearchColumnCount++;
+    }
+    <div id="xs_StatusAktivitas" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(aktivitasList.StatusAktivitas.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_StatusAktivitas"
+            name="x_StatusAktivitas[]"
+            class="form-control ew-select@(aktivitasList.StatusAktivitas.IsInvalidClass)"
+            data-select2-id="fAktivitassrch_x_StatusAktivitas"
+            data-table="Aktivitas"
+            data-field="x_StatusAktivitas"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(aktivitasList.StatusAktivitas.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(aktivitasList.StatusAktivitas.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(aktivitasList.StatusAktivitas.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(aktivitasList.StatusAktivitas.EditAttributes)>
+            @(aktivitasList.StatusAktivitas.SelectOptionListHtml("x_StatusAktivitas", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(aktivitasList.StatusAktivitas.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fAktivitassrch", function() {
+            var options = {
+                name: "x_StatusAktivitas",
+                selectId: "fAktivitassrch_x_StatusAktivitas",
+                ajax: { id: "x_StatusAktivitas", form: "fAktivitassrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.Aktivitas.fields.StatusAktivitas.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* aktivitasList.StatusAktivitas.Visible (end) *@
+@if (aktivitasList.DibuatOleh.Visible) { // aktivitasList.DibuatOleh.Visible (begin)
+    if (!aktivitasList.DibuatOleh.UseFilter) {
+        aktivitasList.SearchColumnCount++;
+    }
+    <div id="xs_DibuatOleh" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(aktivitasList.DibuatOleh.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_DibuatOleh"
+            name="x_DibuatOleh[]"
+            class="form-control ew-select@(aktivitasList.DibuatOleh.IsInvalidClass)"
+            data-select2-id="fAktivitassrch_x_DibuatOleh"
+            data-table="Aktivitas"
+            data-field="x_DibuatOleh"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(aktivitasList.DibuatOleh.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(aktivitasList.DibuatOleh.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(aktivitasList.DibuatOleh.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(aktivitasList.DibuatOleh.EditAttributes)>
+            @(aktivitasList.DibuatOleh.SelectOptionListHtml("x_DibuatOleh", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(aktivitasList.DibuatOleh.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fAktivitassrch", function() {
+            var options = {
+                name: "x_DibuatOleh",
+                selectId: "fAktivitassrch_x_DibuatOleh",
+                ajax: { id: "x_DibuatOleh", form: "fAktivitassrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.Aktivitas.fields.DibuatOleh.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* aktivitasList.DibuatOleh.Visible (end) *@
+@if (aktivitasList.TanggalDibuat.Visible) { // aktivitasList.TanggalDibuat.Visible (begin)
+    if (!aktivitasList.TanggalDibuat.UseFilter) {
+        aktivitasList.SearchColumnCount++;
+    }
+    <div id="xs_TanggalDibuat" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(aktivitasList.TanggalDibuat.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_TanggalDibuat"
+            name="x_TanggalDibuat[]"
+            class="form-control ew-select@(aktivitasList.TanggalDibuat.IsInvalidClass)"
+            data-select2-id="fAktivitassrch_x_TanggalDibuat"
+            data-table="Aktivitas"
+            data-field="x_TanggalDibuat"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(aktivitasList.TanggalDibuat.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(aktivitasList.TanggalDibuat.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(aktivitasList.TanggalDibuat.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(aktivitasList.TanggalDibuat.EditAttributes)>
+            @(aktivitasList.TanggalDibuat.SelectOptionListHtml("x_TanggalDibuat", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(aktivitasList.TanggalDibuat.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fAktivitassrch", function() {
+            var options = {
+                name: "x_TanggalDibuat",
+                selectId: "fAktivitassrch_x_TanggalDibuat",
+                ajax: { id: "x_TanggalDibuat", form: "fAktivitassrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.Aktivitas.fields.TanggalDibuat.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* aktivitasList.TanggalDibuat.Visible (end) *@
+@if (aktivitasList.DiperbaruiOleh.Visible) { // aktivitasList.DiperbaruiOleh.Visible (begin)
+    if (!aktivitasList.DiperbaruiOleh.UseFilter) {
+        aktivitasList.SearchColumnCount++;
+    }
+    <div id="xs_DiperbaruiOleh" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(aktivitasList.DiperbaruiOleh.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_DiperbaruiOleh"
+            name="x_DiperbaruiOleh[]"
+            class="form-control ew-select@(aktivitasList.DiperbaruiOleh.IsInvalidClass)"
+            data-select2-id="fAktivitassrch_x_DiperbaruiOleh"
+            data-table="Aktivitas"
+            data-field="x_DiperbaruiOleh"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(aktivitasList.DiperbaruiOleh.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(aktivitasList.DiperbaruiOleh.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(aktivitasList.DiperbaruiOleh.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(aktivitasList.DiperbaruiOleh.EditAttributes)>
+            @(aktivitasList.DiperbaruiOleh.SelectOptionListHtml("x_DiperbaruiOleh", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(aktivitasList.DiperbaruiOleh.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fAktivitassrch", function() {
+            var options = {
+                name: "x_DiperbaruiOleh",
+                selectId: "fAktivitassrch_x_DiperbaruiOleh",
+                ajax: { id: "x_DiperbaruiOleh", form: "fAktivitassrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.Aktivitas.fields.DiperbaruiOleh.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* aktivitasList.DiperbaruiOleh.Visible (end) *@
+@if (aktivitasList.TanggalDiperbarui.Visible) { // aktivitasList.TanggalDiperbarui.Visible (begin)
+    if (!aktivitasList.TanggalDiperbarui.UseFilter) {
+        aktivitasList.SearchColumnCount++;
+    }
+    <div id="xs_TanggalDiperbarui" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(aktivitasList.TanggalDiperbarui.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_TanggalDiperbarui"
+            name="x_TanggalDiperbarui[]"
+            class="form-control ew-select@(aktivitasList.TanggalDiperbarui.IsInvalidClass)"
+            data-select2-id="fAktivitassrch_x_TanggalDiperbarui"
+            data-table="Aktivitas"
+            data-field="x_TanggalDiperbarui"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(aktivitasList.TanggalDiperbarui.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(aktivitasList.TanggalDiperbarui.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(aktivitasList.TanggalDiperbarui.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(aktivitasList.TanggalDiperbarui.EditAttributes)>
+            @(aktivitasList.TanggalDiperbarui.SelectOptionListHtml("x_TanggalDiperbarui", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(aktivitasList.TanggalDiperbarui.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fAktivitassrch", function() {
+            var options = {
+                name: "x_TanggalDiperbarui",
+                selectId: "fAktivitassrch_x_TanggalDiperbarui",
+                ajax: { id: "x_TanggalDiperbarui", form: "fAktivitassrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.Aktivitas.fields.TanggalDiperbarui.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* aktivitasList.TanggalDiperbarui.Visible (end) *@
+@if (aktivitasList.TipeAktivitas.Visible) { // aktivitasList.TipeAktivitas.Visible (begin)
+    if (!aktivitasList.TipeAktivitas.UseFilter) {
+        aktivitasList.SearchColumnCount++;
+    }
+    <div id="xs_TipeAktivitas" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(aktivitasList.TipeAktivitas.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_TipeAktivitas"
+            name="x_TipeAktivitas[]"
+            class="form-control ew-select@(aktivitasList.TipeAktivitas.IsInvalidClass)"
+            data-select2-id="fAktivitassrch_x_TipeAktivitas"
+            data-table="Aktivitas"
+            data-field="x_TipeAktivitas"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(aktivitasList.TipeAktivitas.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(aktivitasList.TipeAktivitas.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(aktivitasList.TipeAktivitas.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(aktivitasList.TipeAktivitas.EditAttributes)>
+            @(aktivitasList.TipeAktivitas.SelectOptionListHtml("x_TipeAktivitas", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(aktivitasList.TipeAktivitas.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fAktivitassrch", function() {
+            var options = {
+                name: "x_TipeAktivitas",
+                selectId: "fAktivitassrch_x_TipeAktivitas",
+                ajax: { id: "x_TipeAktivitas", form: "fAktivitassrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.Aktivitas.fields.TipeAktivitas.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* aktivitasList.TipeAktivitas.Visible (end) *@
+@if (aktivitasList.sandar_nama_kapal.Visible) { // aktivitasList.sandar_nama_kapal.Visible (begin)
+    if (!aktivitasList.sandar_nama_kapal.UseFilter) {
+        aktivitasList.SearchColumnCount++;
+    }
+    <div id="xs_sandar_nama_kapal" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(aktivitasList.sandar_nama_kapal.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_sandar_nama_kapal"
+            name="x_sandar_nama_kapal[]"
+            class="form-control ew-select@(aktivitasList.sandar_nama_kapal.IsInvalidClass)"
+            data-select2-id="fAktivitassrch_x_sandar_nama_kapal"
+            data-table="Aktivitas"
+            data-field="x_sandar_nama_kapal"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(aktivitasList.sandar_nama_kapal.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(aktivitasList.sandar_nama_kapal.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(aktivitasList.sandar_nama_kapal.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(aktivitasList.sandar_nama_kapal.EditAttributes)>
+            @(aktivitasList.sandar_nama_kapal.SelectOptionListHtml("x_sandar_nama_kapal", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(aktivitasList.sandar_nama_kapal.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fAktivitassrch", function() {
+            var options = {
+                name: "x_sandar_nama_kapal",
+                selectId: "fAktivitassrch_x_sandar_nama_kapal",
+                ajax: { id: "x_sandar_nama_kapal", form: "fAktivitassrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.Aktivitas.fields.sandar_nama_kapal.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* aktivitasList.sandar_nama_kapal.Visible (end) *@
+@if (aktivitasList.sandar_tgl_tiba.Visible) { // aktivitasList.sandar_tgl_tiba.Visible (begin)
+    if (!aktivitasList.sandar_tgl_tiba.UseFilter) {
+        aktivitasList.SearchColumnCount++;
+    }
+    <div id="xs_sandar_tgl_tiba" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(aktivitasList.sandar_tgl_tiba.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_sandar_tgl_tiba"
+            name="x_sandar_tgl_tiba[]"
+            class="form-control ew-select@(aktivitasList.sandar_tgl_tiba.IsInvalidClass)"
+            data-select2-id="fAktivitassrch_x_sandar_tgl_tiba"
+            data-table="Aktivitas"
+            data-field="x_sandar_tgl_tiba"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(aktivitasList.sandar_tgl_tiba.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(aktivitasList.sandar_tgl_tiba.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(aktivitasList.sandar_tgl_tiba.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(aktivitasList.sandar_tgl_tiba.EditAttributes)>
+            @(aktivitasList.sandar_tgl_tiba.SelectOptionListHtml("x_sandar_tgl_tiba", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(aktivitasList.sandar_tgl_tiba.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fAktivitassrch", function() {
+            var options = {
+                name: "x_sandar_tgl_tiba",
+                selectId: "fAktivitassrch_x_sandar_tgl_tiba",
+                ajax: { id: "x_sandar_tgl_tiba", form: "fAktivitassrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.Aktivitas.fields.sandar_tgl_tiba.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* aktivitasList.sandar_tgl_tiba.Visible (end) *@
+@if (aktivitasList.sandar_nominasi.Visible) { // aktivitasList.sandar_nominasi.Visible (begin)
+    if (!aktivitasList.sandar_nominasi.UseFilter) {
+        aktivitasList.SearchColumnCount++;
+    }
+    <div id="xs_sandar_nominasi" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(aktivitasList.sandar_nominasi.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_sandar_nominasi"
+            name="x_sandar_nominasi[]"
+            class="form-control ew-select@(aktivitasList.sandar_nominasi.IsInvalidClass)"
+            data-select2-id="fAktivitassrch_x_sandar_nominasi"
+            data-table="Aktivitas"
+            data-field="x_sandar_nominasi"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(aktivitasList.sandar_nominasi.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(aktivitasList.sandar_nominasi.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(aktivitasList.sandar_nominasi.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(aktivitasList.sandar_nominasi.EditAttributes)>
+            @(aktivitasList.sandar_nominasi.SelectOptionListHtml("x_sandar_nominasi", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(aktivitasList.sandar_nominasi.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fAktivitassrch", function() {
+            var options = {
+                name: "x_sandar_nominasi",
+                selectId: "fAktivitassrch_x_sandar_nominasi",
+                ajax: { id: "x_sandar_nominasi", form: "fAktivitassrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.Aktivitas.fields.sandar_nominasi.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* aktivitasList.sandar_nominasi.Visible (end) *@
+@if (aktivitasList.Produk.Visible) { // aktivitasList.Produk.Visible (begin)
+    if (!aktivitasList.Produk.UseFilter) {
+        aktivitasList.SearchColumnCount++;
+    }
+    <div id="xs_Produk" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(aktivitasList.Produk.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_Produk"
+            name="x_Produk[]"
+            class="form-control ew-select@(aktivitasList.Produk.IsInvalidClass)"
+            data-select2-id="fAktivitassrch_x_Produk"
+            data-table="Aktivitas"
+            data-field="x_Produk"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(aktivitasList.Produk.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(aktivitasList.Produk.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(aktivitasList.Produk.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(aktivitasList.Produk.EditAttributes)>
+            @(aktivitasList.Produk.SelectOptionListHtml("x_Produk", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(aktivitasList.Produk.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fAktivitassrch", function() {
+            var options = {
+                name: "x_Produk",
+                selectId: "fAktivitassrch_x_Produk",
+                ajax: { id: "x_Produk", form: "fAktivitassrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.Aktivitas.fields.Produk.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* aktivitasList.Produk.Visible (end) *@
+@if (aktivitasList.Shipment.Visible) { // aktivitasList.Shipment.Visible (begin)
+    if (!aktivitasList.Shipment.UseFilter) {
+        aktivitasList.SearchColumnCount++;
+    }
+    <div id="xs_Shipment" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(aktivitasList.Shipment.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_Shipment"
+            name="x_Shipment[]"
+            class="form-control ew-select@(aktivitasList.Shipment.IsInvalidClass)"
+            data-select2-id="fAktivitassrch_x_Shipment"
+            data-table="Aktivitas"
+            data-field="x_Shipment"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(aktivitasList.Shipment.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(aktivitasList.Shipment.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(aktivitasList.Shipment.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(aktivitasList.Shipment.EditAttributes)>
+            @(aktivitasList.Shipment.SelectOptionListHtml("x_Shipment", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(aktivitasList.Shipment.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fAktivitassrch", function() {
+            var options = {
+                name: "x_Shipment",
+                selectId: "fAktivitassrch_x_Shipment",
+                ajax: { id: "x_Shipment", form: "fAktivitassrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.Aktivitas.fields.Shipment.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* aktivitasList.Shipment.Visible (end) *@
+@if (aktivitasList.Nama_Proses.Visible) { // aktivitasList.Nama_Proses.Visible (begin)
+    if (!aktivitasList.Nama_Proses.UseFilter) {
+        aktivitasList.SearchColumnCount++;
+    }
+    <div id="xs_Nama_Proses" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(aktivitasList.Nama_Proses.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_Nama_Proses"
+            name="x_Nama_Proses[]"
+            class="form-control ew-select@(aktivitasList.Nama_Proses.IsInvalidClass)"
+            data-select2-id="fAktivitassrch_x_Nama_Proses"
+            data-table="Aktivitas"
+            data-field="x_Nama_Proses"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(aktivitasList.Nama_Proses.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(aktivitasList.Nama_Proses.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(aktivitasList.Nama_Proses.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(aktivitasList.Nama_Proses.EditAttributes)>
+            @(aktivitasList.Nama_Proses.SelectOptionListHtml("x_Nama_Proses", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(aktivitasList.Nama_Proses.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fAktivitassrch", function() {
+            var options = {
+                name: "x_Nama_Proses",
+                selectId: "fAktivitassrch_x_Nama_Proses",
+                ajax: { id: "x_Nama_Proses", form: "fAktivitassrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.Aktivitas.fields.Nama_Proses.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* aktivitasList.Nama_Proses.Visible (end) *@
+@if (aktivitasList.IdDokumen.Visible) { // aktivitasList.IdDokumen.Visible (begin)
+    if (!aktivitasList.IdDokumen.UseFilter) {
+        aktivitasList.SearchColumnCount++;
+    }
+    <div id="xs_IdDokumen" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(aktivitasList.IdDokumen.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_IdDokumen"
+            name="x_IdDokumen[]"
+            class="form-control ew-select@(aktivitasList.IdDokumen.IsInvalidClass)"
+            data-select2-id="fAktivitassrch_x_IdDokumen"
+            data-table="Aktivitas"
+            data-field="x_IdDokumen"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(aktivitasList.IdDokumen.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(aktivitasList.IdDokumen.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(aktivitasList.IdDokumen.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(aktivitasList.IdDokumen.EditAttributes)>
+            @(aktivitasList.IdDokumen.SelectOptionListHtml("x_IdDokumen", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(aktivitasList.IdDokumen.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fAktivitassrch", function() {
+            var options = {
+                name: "x_IdDokumen",
+                selectId: "fAktivitassrch_x_IdDokumen",
+                ajax: { id: "x_IdDokumen", form: "fAktivitassrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.Aktivitas.fields.IdDokumen.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* aktivitasList.IdDokumen.Visible (end) *@
+@if (aktivitasList.PathFile.Visible) { // aktivitasList.PathFile.Visible (begin)
+    if (!aktivitasList.PathFile.UseFilter) {
+        aktivitasList.SearchColumnCount++;
+    }
+    <div id="xs_PathFile" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(aktivitasList.PathFile.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_PathFile"
+            name="x_PathFile[]"
+            class="form-control ew-select@(aktivitasList.PathFile.IsInvalidClass)"
+            data-select2-id="fAktivitassrch_x_PathFile"
+            data-table="Aktivitas"
+            data-field="x_PathFile"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(aktivitasList.PathFile.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(aktivitasList.PathFile.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(aktivitasList.PathFile.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(aktivitasList.PathFile.EditAttributes)>
+            @(aktivitasList.PathFile.SelectOptionListHtml("x_PathFile", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(aktivitasList.PathFile.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fAktivitassrch", function() {
+            var options = {
+                name: "x_PathFile",
+                selectId: "fAktivitassrch_x_PathFile",
+                ajax: { id: "x_PathFile", form: "fAktivitassrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.Aktivitas.fields.PathFile.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* aktivitasList.PathFile.Visible (end) *@
+@if (aktivitasList.TanggalUploadDok.Visible) { // aktivitasList.TanggalUploadDok.Visible (begin)
+    if (!aktivitasList.TanggalUploadDok.UseFilter) {
+        aktivitasList.SearchColumnCount++;
+    }
+    <div id="xs_TanggalUploadDok" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(aktivitasList.TanggalUploadDok.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_TanggalUploadDok"
+            name="x_TanggalUploadDok[]"
+            class="form-control ew-select@(aktivitasList.TanggalUploadDok.IsInvalidClass)"
+            data-select2-id="fAktivitassrch_x_TanggalUploadDok"
+            data-table="Aktivitas"
+            data-field="x_TanggalUploadDok"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(aktivitasList.TanggalUploadDok.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(aktivitasList.TanggalUploadDok.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(aktivitasList.TanggalUploadDok.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(aktivitasList.TanggalUploadDok.EditAttributes)>
+            @(aktivitasList.TanggalUploadDok.SelectOptionListHtml("x_TanggalUploadDok", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(aktivitasList.TanggalUploadDok.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fAktivitassrch", function() {
+            var options = {
+                name: "x_TanggalUploadDok",
+                selectId: "fAktivitassrch_x_TanggalUploadDok",
+                ajax: { id: "x_TanggalUploadDok", form: "fAktivitassrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.Aktivitas.fields.TanggalUploadDok.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* aktivitasList.TanggalUploadDok.Visible (end) *@
+@if (aktivitasList.UserUploadDok.Visible) { // aktivitasList.UserUploadDok.Visible (begin)
+    if (!aktivitasList.UserUploadDok.UseFilter) {
+        aktivitasList.SearchColumnCount++;
+    }
+    <div id="xs_UserUploadDok" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(aktivitasList.UserUploadDok.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_UserUploadDok"
+            name="x_UserUploadDok[]"
+            class="form-control ew-select@(aktivitasList.UserUploadDok.IsInvalidClass)"
+            data-select2-id="fAktivitassrch_x_UserUploadDok"
+            data-table="Aktivitas"
+            data-field="x_UserUploadDok"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(aktivitasList.UserUploadDok.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(aktivitasList.UserUploadDok.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(aktivitasList.UserUploadDok.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(aktivitasList.UserUploadDok.EditAttributes)>
+            @(aktivitasList.UserUploadDok.SelectOptionListHtml("x_UserUploadDok", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(aktivitasList.UserUploadDok.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fAktivitassrch", function() {
+            var options = {
+                name: "x_UserUploadDok",
+                selectId: "fAktivitassrch_x_UserUploadDok",
+                ajax: { id: "x_UserUploadDok", form: "fAktivitassrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.Aktivitas.fields.UserUploadDok.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* aktivitasList.UserUploadDok.Visible (end) *@
+@if (aktivitasList.NamaDokumen.Visible) { // aktivitasList.NamaDokumen.Visible (begin)
+    if (!aktivitasList.NamaDokumen.UseFilter) {
+        aktivitasList.SearchColumnCount++;
+    }
+    <div id="xs_NamaDokumen" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(aktivitasList.NamaDokumen.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_NamaDokumen"
+            name="x_NamaDokumen[]"
+            class="form-control ew-select@(aktivitasList.NamaDokumen.IsInvalidClass)"
+            data-select2-id="fAktivitassrch_x_NamaDokumen"
+            data-table="Aktivitas"
+            data-field="x_NamaDokumen"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(aktivitasList.NamaDokumen.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(aktivitasList.NamaDokumen.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(aktivitasList.NamaDokumen.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(aktivitasList.NamaDokumen.EditAttributes)>
+            @(aktivitasList.NamaDokumen.SelectOptionListHtml("x_NamaDokumen", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(aktivitasList.NamaDokumen.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fAktivitassrch", function() {
+            var options = {
+                name: "x_NamaDokumen",
+                selectId: "fAktivitassrch_x_NamaDokumen",
+                ajax: { id: "x_NamaDokumen", form: "fAktivitassrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.Aktivitas.fields.NamaDokumen.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* aktivitasList.NamaDokumen.Visible (end) *@
+@if (aktivitasList.Keterangan.Visible) { // aktivitasList.Keterangan.Visible (begin)
+    if (!aktivitasList.Keterangan.UseFilter) {
+        aktivitasList.SearchColumnCount++;
+    }
+    <div id="xs_Keterangan" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(aktivitasList.Keterangan.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_Keterangan"
+            name="x_Keterangan[]"
+            class="form-control ew-select@(aktivitasList.Keterangan.IsInvalidClass)"
+            data-select2-id="fAktivitassrch_x_Keterangan"
+            data-table="Aktivitas"
+            data-field="x_Keterangan"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(aktivitasList.Keterangan.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(aktivitasList.Keterangan.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(aktivitasList.Keterangan.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(aktivitasList.Keterangan.EditAttributes)>
+            @(aktivitasList.Keterangan.SelectOptionListHtml("x_Keterangan", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(aktivitasList.Keterangan.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fAktivitassrch", function() {
+            var options = {
+                name: "x_Keterangan",
+                selectId: "fAktivitassrch_x_Keterangan",
+                ajax: { id: "x_Keterangan", form: "fAktivitassrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.Aktivitas.fields.Keterangan.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* aktivitasList.Keterangan.Visible (end) *@
+@if (aktivitasList.IdRefAnak.Visible) { // aktivitasList.IdRefAnak.Visible (begin)
+    if (!aktivitasList.IdRefAnak.UseFilter) {
+        aktivitasList.SearchColumnCount++;
+    }
+    <div id="xs_IdRefAnak" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(aktivitasList.IdRefAnak.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_IdRefAnak"
+            name="x_IdRefAnak[]"
+            class="form-control ew-select@(aktivitasList.IdRefAnak.IsInvalidClass)"
+            data-select2-id="fAktivitassrch_x_IdRefAnak"
+            data-table="Aktivitas"
+            data-field="x_IdRefAnak"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(aktivitasList.IdRefAnak.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(aktivitasList.IdRefAnak.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(aktivitasList.IdRefAnak.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(aktivitasList.IdRefAnak.EditAttributes)>
+            @(aktivitasList.IdRefAnak.SelectOptionListHtml("x_IdRefAnak", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(aktivitasList.IdRefAnak.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fAktivitassrch", function() {
+            var options = {
+                name: "x_IdRefAnak",
+                selectId: "fAktivitassrch_x_IdRefAnak",
+                ajax: { id: "x_IdRefAnak", form: "fAktivitassrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.Aktivitas.fields.IdRefAnak.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* aktivitasList.IdRefAnak.Visible (end) *@
+@if (aktivitasList.TableAnak.Visible) { // aktivitasList.TableAnak.Visible (begin)
+    if (!aktivitasList.TableAnak.UseFilter) {
+        aktivitasList.SearchColumnCount++;
+    }
+    <div id="xs_TableAnak" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(aktivitasList.TableAnak.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_TableAnak"
+            name="x_TableAnak[]"
+            class="form-control ew-select@(aktivitasList.TableAnak.IsInvalidClass)"
+            data-select2-id="fAktivitassrch_x_TableAnak"
+            data-table="Aktivitas"
+            data-field="x_TableAnak"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(aktivitasList.TableAnak.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(aktivitasList.TableAnak.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(aktivitasList.TableAnak.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(aktivitasList.TableAnak.EditAttributes)>
+            @(aktivitasList.TableAnak.SelectOptionListHtml("x_TableAnak", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(aktivitasList.TableAnak.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fAktivitassrch", function() {
+            var options = {
+                name: "x_TableAnak",
+                selectId: "fAktivitassrch_x_TableAnak",
+                ajax: { id: "x_TableAnak", form: "fAktivitassrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.Aktivitas.fields.TableAnak.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* aktivitasList.TableAnak.Visible (end) *@
+@if (aktivitasList.TipeProses.Visible) { // aktivitasList.TipeProses.Visible (begin)
+    if (!aktivitasList.TipeProses.UseFilter) {
+        aktivitasList.SearchColumnCount++;
+    }
+    <div id="xs_TipeProses" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(aktivitasList.TipeProses.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_TipeProses"
+            name="x_TipeProses[]"
+            class="form-control ew-select@(aktivitasList.TipeProses.IsInvalidClass)"
+            data-select2-id="fAktivitassrch_x_TipeProses"
+            data-table="Aktivitas"
+            data-field="x_TipeProses"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(aktivitasList.TipeProses.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(aktivitasList.TipeProses.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(aktivitasList.TipeProses.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(aktivitasList.TipeProses.EditAttributes)>
+            @(aktivitasList.TipeProses.SelectOptionListHtml("x_TipeProses", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(aktivitasList.TipeProses.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fAktivitassrch", function() {
+            var options = {
+                name: "x_TipeProses",
+                selectId: "fAktivitassrch_x_TipeProses",
+                ajax: { id: "x_TipeProses", form: "fAktivitassrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.Aktivitas.fields.TipeProses.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* aktivitasList.TipeProses.Visible (end) *@
+@if (aktivitasList.Urutan.Visible) { // aktivitasList.Urutan.Visible (begin)
+    if (!aktivitasList.Urutan.UseFilter) {
+        aktivitasList.SearchColumnCount++;
+    }
+    <div id="xs_Urutan" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(aktivitasList.Urutan.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_Urutan"
+            name="x_Urutan[]"
+            class="form-control ew-select@(aktivitasList.Urutan.IsInvalidClass)"
+            data-select2-id="fAktivitassrch_x_Urutan"
+            data-table="Aktivitas"
+            data-field="x_Urutan"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(aktivitasList.Urutan.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(aktivitasList.Urutan.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(aktivitasList.Urutan.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(aktivitasList.Urutan.EditAttributes)>
+            @(aktivitasList.Urutan.SelectOptionListHtml("x_Urutan", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(aktivitasList.Urutan.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fAktivitassrch", function() {
+            var options = {
+                name: "x_Urutan",
+                selectId: "fAktivitassrch_x_Urutan",
+                ajax: { id: "x_Urutan", form: "fAktivitassrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.Aktivitas.fields.Urutan.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* aktivitasList.Urutan.Visible (end) *@
+</div><!-- /.row -->
+<div class="row mb-0">
+    <div class="col-sm-auto px-0 pe-sm-2">
+        <div class="ew-basic-search input-group">
+            <input type="search" name="@(Config.TableBasicSearch)" id="@(Config.TableBasicSearch)" class="form-control ew-basic-search-keyword" value="@Html.Raw(HtmlEncode(aktivitasList.BasicSearch.SessionKeyword))" placeholder="@(HtmlEncode(Language.Phrase("Search")))" aria-label="@(HtmlEncode(Language.Phrase("Search")))">
+            <input type="hidden" name="@(Config.TableBasicSearchType)" id="@(Config.TableBasicSearchType)" class="ew-basic-search-type" value="@(HtmlEncode(aktivitasList.BasicSearch.SessionType))">
+            <button type="button" data-bs-toggle="dropdown" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split" aria-haspopup="true" aria-expanded="false">
+                <span id="searchtype">@Html.Raw(aktivitasList.BasicSearch.TypeNameShort)</span>
+            </button>
+            <div class="dropdown-menu dropdown-menu-end">
+                <button type="button" class="dropdown-item@(aktivitasList.BasicSearch.SessionType == "" ? " active" : "")" form="fAktivitassrch" data-ew-action="search-type">@Html.Raw(Language.Phrase("QuickSearchAuto"))</button>
+                <button type="button" class="dropdown-item@(aktivitasList.BasicSearch.SessionType == "=" ? " active" : "")" form="fAktivitassrch" data-ew-action="search-type" data-search-type="=">@Html.Raw(Language.Phrase("QuickSearchExact"))</button>
+                <button type="button" class="dropdown-item@(aktivitasList.BasicSearch.SessionType == "AND" ? " active" : "")" form="fAktivitassrch" data-ew-action="search-type" data-search-type="AND">@Html.Raw(Language.Phrase("QuickSearchAll"))</button>
+                <button type="button" class="dropdown-item@(aktivitasList.BasicSearch.SessionType == "OR" ? " active" : "")" form="fAktivitassrch" data-ew-action="search-type" data-search-type="OR">@Html.Raw(Language.Phrase("QuickSearchAny"))</button>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-auto mb-3">
+        <button class="btn btn-primary" name="btn-submit" id="btn-submit" type="submit">@Html.Raw(Language.Phrase("SearchBtn"))</button>
+    </div>
+</div>
+</div><!-- /.ew-extended-search -->
+} @* Show search form (end) *@
+}
+</div><!-- /.ew-search-panel -->
+</form>
+}
+@aktivitasList.ShowPageHeader()
+@aktivitasList.ShowMessages()
+<main class="list @(aktivitasList.TotalRecords == 0 && !aktivitasList.IsAdd ? " ew-no-record" : "")">
+<div id="ew-header-options">
+    @aktivitasList.HeaderOptions.RenderBody()
+</div>
+<div id="ew-list">
+@if (aktivitasList.TotalRecords > 0 || !Empty(aktivitasList.CurrentAction)) {
+<div class="card ew-card ew-grid@(aktivitasList.IsAddOrEdit ? " ew-grid-add-edit" : "") @(aktivitasList.TableGridClass)">
+<form name="@(aktivitasList.FormName)" id="@(aktivitasList.FormName)" class="ew-form ew-list-form" action="@AppPath(aktivitasList.PageName)" method="post" novalidate autocomplete="off">
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+@if (aktivitasList.IsModal) {
+<input type="hidden" name="modal" value="1">
+}
+<div id="gmp_Aktivitas" class="card-body ew-grid-middle-panel @(aktivitasList.TableContainerClass)" style="@(aktivitasList.TableContainerStyle)">
+@if (aktivitasList.TotalRecords > 0 || aktivitasList.IsGridEdit || aktivitasList.IsMultiEdit) {
+<table id="tbl_Aktivitaslist" class="@(aktivitasList.TableClass)"><!-- .ew-table -->
+<thead>
+    <tr class="ew-table-header">
+@{
+    // Header row
+    aktivitasList.RowType = RowType.Header;
+
+    // Render list options
+    await aktivitasList.RenderListOptions();
+}
+@* Render list options (header, left) *@
+@aktivitasList.ListOptions.RenderHeader("left")
+@if (aktivitasList.No_Referensi.Visible) { // aktivitasList.No_Referensi.Visible (begin)
+        <th data-name="No_Referensi" class="@(aktivitasList.No_Referensi.HeaderCellClass)"><div id="elh_Aktivitas_No_Referensi" class="Aktivitas_No_Referensi">@Html.Raw(aktivitasList.RenderFieldHeader(aktivitasList.No_Referensi))</div></th>
+} @* aktivitasList.No_Referensi.Visible (end) *@
+@if (aktivitasList.IdProses.Visible) { // aktivitasList.IdProses.Visible (begin)
+        <th data-name="IdProses" class="@(aktivitasList.IdProses.HeaderCellClass)"><div id="elh_Aktivitas_IdProses" class="Aktivitas_IdProses">@Html.Raw(aktivitasList.RenderFieldHeader(aktivitasList.IdProses))</div></th>
+} @* aktivitasList.IdProses.Visible (end) *@
+@if (aktivitasList.Aktivitas2.Visible) { // aktivitasList.Aktivitas2.Visible (begin)
+        <th data-name="Aktivitas2" class="@(aktivitasList.Aktivitas2.HeaderCellClass)"><div id="elh_Aktivitas_Aktivitas2" class="Aktivitas_Aktivitas2">@Html.Raw(aktivitasList.RenderFieldHeader(aktivitasList.Aktivitas2))</div></th>
+} @* aktivitasList.Aktivitas2.Visible (end) *@
+@if (aktivitasList.PIC.Visible) { // aktivitasList.PIC.Visible (begin)
+        <th data-name="PIC" class="@(aktivitasList.PIC.HeaderCellClass)"><div id="elh_Aktivitas_PIC" class="Aktivitas_PIC">@Html.Raw(aktivitasList.RenderFieldHeader(aktivitasList.PIC))</div></th>
+} @* aktivitasList.PIC.Visible (end) *@
+@if (aktivitasList.TanggalMulai.Visible) { // aktivitasList.TanggalMulai.Visible (begin)
+        <th data-name="TanggalMulai" class="@(aktivitasList.TanggalMulai.HeaderCellClass)"><div id="elh_Aktivitas_TanggalMulai" class="Aktivitas_TanggalMulai">@Html.Raw(aktivitasList.RenderFieldHeader(aktivitasList.TanggalMulai))</div></th>
+} @* aktivitasList.TanggalMulai.Visible (end) *@
+@if (aktivitasList.TanggalSelesai.Visible) { // aktivitasList.TanggalSelesai.Visible (begin)
+        <th data-name="TanggalSelesai" class="@(aktivitasList.TanggalSelesai.HeaderCellClass)"><div id="elh_Aktivitas_TanggalSelesai" class="Aktivitas_TanggalSelesai">@Html.Raw(aktivitasList.RenderFieldHeader(aktivitasList.TanggalSelesai))</div></th>
+} @* aktivitasList.TanggalSelesai.Visible (end) *@
+@if (aktivitasList.StatusAktivitas.Visible) { // aktivitasList.StatusAktivitas.Visible (begin)
+        <th data-name="StatusAktivitas" class="@(aktivitasList.StatusAktivitas.HeaderCellClass)"><div id="elh_Aktivitas_StatusAktivitas" class="Aktivitas_StatusAktivitas">@Html.Raw(aktivitasList.RenderFieldHeader(aktivitasList.StatusAktivitas))</div></th>
+} @* aktivitasList.StatusAktivitas.Visible (end) *@
+@if (aktivitasList.DibuatOleh.Visible) { // aktivitasList.DibuatOleh.Visible (begin)
+        <th data-name="DibuatOleh" class="@(aktivitasList.DibuatOleh.HeaderCellClass)"><div id="elh_Aktivitas_DibuatOleh" class="Aktivitas_DibuatOleh">@Html.Raw(aktivitasList.RenderFieldHeader(aktivitasList.DibuatOleh))</div></th>
+} @* aktivitasList.DibuatOleh.Visible (end) *@
+@if (aktivitasList.TanggalDibuat.Visible) { // aktivitasList.TanggalDibuat.Visible (begin)
+        <th data-name="TanggalDibuat" class="@(aktivitasList.TanggalDibuat.HeaderCellClass)"><div id="elh_Aktivitas_TanggalDibuat" class="Aktivitas_TanggalDibuat">@Html.Raw(aktivitasList.RenderFieldHeader(aktivitasList.TanggalDibuat))</div></th>
+} @* aktivitasList.TanggalDibuat.Visible (end) *@
+@if (aktivitasList.DiperbaruiOleh.Visible) { // aktivitasList.DiperbaruiOleh.Visible (begin)
+        <th data-name="DiperbaruiOleh" class="@(aktivitasList.DiperbaruiOleh.HeaderCellClass)"><div id="elh_Aktivitas_DiperbaruiOleh" class="Aktivitas_DiperbaruiOleh">@Html.Raw(aktivitasList.RenderFieldHeader(aktivitasList.DiperbaruiOleh))</div></th>
+} @* aktivitasList.DiperbaruiOleh.Visible (end) *@
+@if (aktivitasList.TanggalDiperbarui.Visible) { // aktivitasList.TanggalDiperbarui.Visible (begin)
+        <th data-name="TanggalDiperbarui" class="@(aktivitasList.TanggalDiperbarui.HeaderCellClass)"><div id="elh_Aktivitas_TanggalDiperbarui" class="Aktivitas_TanggalDiperbarui">@Html.Raw(aktivitasList.RenderFieldHeader(aktivitasList.TanggalDiperbarui))</div></th>
+} @* aktivitasList.TanggalDiperbarui.Visible (end) *@
+@if (aktivitasList.TipeAktivitas.Visible) { // aktivitasList.TipeAktivitas.Visible (begin)
+        <th data-name="TipeAktivitas" class="@(aktivitasList.TipeAktivitas.HeaderCellClass)"><div id="elh_Aktivitas_TipeAktivitas" class="Aktivitas_TipeAktivitas">@Html.Raw(aktivitasList.RenderFieldHeader(aktivitasList.TipeAktivitas))</div></th>
+} @* aktivitasList.TipeAktivitas.Visible (end) *@
+@if (aktivitasList.Keterangan.Visible) { // aktivitasList.Keterangan.Visible (begin)
+        <th data-name="Keterangan" class="@(aktivitasList.Keterangan.HeaderCellClass)"><div id="elh_Aktivitas_Keterangan" class="Aktivitas_Keterangan">@Html.Raw(aktivitasList.RenderFieldHeader(aktivitasList.Keterangan))</div></th>
+} @* aktivitasList.Keterangan.Visible (end) *@
+@if (aktivitasList.TipeProses.Visible) { // aktivitasList.TipeProses.Visible (begin)
+        <th data-name="TipeProses" class="@(aktivitasList.TipeProses.HeaderCellClass)"><div id="elh_Aktivitas_TipeProses" class="Aktivitas_TipeProses">@Html.Raw(aktivitasList.RenderFieldHeader(aktivitasList.TipeProses))</div></th>
+} @* aktivitasList.TipeProses.Visible (end) *@
+@if (aktivitasList.Urutan.Visible) { // aktivitasList.Urutan.Visible (begin)
+        <th data-name="Urutan" class="@(aktivitasList.Urutan.HeaderCellClass)"><div id="elh_Aktivitas_Urutan" class="Aktivitas_Urutan">@Html.Raw(aktivitasList.RenderFieldHeader(aktivitasList.Urutan))</div></th>
+} @* aktivitasList.Urutan.Visible (end) *@
+@if (aktivitasList.IsNominationTankReceivingLineOpen.Visible) { // aktivitasList.IsNominationTankReceivingLineOpen.Visible (begin)
+        <th data-name="IsNominationTankReceivingLineOpen" class="@(aktivitasList.IsNominationTankReceivingLineOpen.HeaderCellClass)"><div id="elh_Aktivitas_IsNominationTankReceivingLineOpen" class="Aktivitas_IsNominationTankReceivingLineOpen">@Html.Raw(aktivitasList.RenderFieldHeader(aktivitasList.IsNominationTankReceivingLineOpen))</div></th>
+} @* aktivitasList.IsNominationTankReceivingLineOpen.Visible (end) *@
+@if (aktivitasList.IsNonNominationReceivingLineClosedAndSealed.Visible) { // aktivitasList.IsNonNominationReceivingLineClosedAndSealed.Visible (begin)
+        <th data-name="IsNonNominationReceivingLineClosedAndSealed" class="@(aktivitasList.IsNonNominationReceivingLineClosedAndSealed.HeaderCellClass)"><div id="elh_Aktivitas_IsNonNominationReceivingLineClosedAndSealed" class="Aktivitas_IsNonNominationReceivingLineClosedAndSealed">@Html.Raw(aktivitasList.RenderFieldHeader(aktivitasList.IsNonNominationReceivingLineClosedAndSealed))</div></th>
+} @* aktivitasList.IsNonNominationReceivingLineClosedAndSealed.Visible (end) *@
+@if (aktivitasList.IsTankEmptyAndDry.Visible) { // aktivitasList.IsTankEmptyAndDry.Visible (begin)
+        <th data-name="IsTankEmptyAndDry" class="@(aktivitasList.IsTankEmptyAndDry.HeaderCellClass)"><div id="elh_Aktivitas_IsTankEmptyAndDry" class="Aktivitas_IsTankEmptyAndDry">@Html.Raw(aktivitasList.RenderFieldHeader(aktivitasList.IsTankEmptyAndDry))</div></th>
+} @* aktivitasList.IsTankEmptyAndDry.Visible (end) *@
+@if (aktivitasList.IsDocumentationComplete.Visible) { // aktivitasList.IsDocumentationComplete.Visible (begin)
+        <th data-name="IsDocumentationComplete" class="@(aktivitasList.IsDocumentationComplete.HeaderCellClass)"><div id="elh_Aktivitas_IsDocumentationComplete" class="Aktivitas_IsDocumentationComplete">@Html.Raw(aktivitasList.RenderFieldHeader(aktivitasList.IsDocumentationComplete))</div></th>
+} @* aktivitasList.IsDocumentationComplete.Visible (end) *@
+@* Render list options (header, right) *@
+@aktivitasList.ListOptions.RenderHeader("right")
+    </tr>
+</thead>
+<tbody data-page="@(aktivitasList.PageNumber)">
+@{
+    await aktivitasList.SetupGrid();
+    bool eof = aktivitasList.Recordset == null; // DN
+}
+@while (aktivitasList.RecordCount < aktivitasList.StopRecord || SameString(aktivitasList.RowIndex, "$rowindex$")) { // Begin While
+    if (!eof && !SameString(aktivitasList.RowIndex, "$rowindex$") &&
+        (!aktivitasList.IsGridAdd || aktivitasList.CurrentMode == "copy") &&
+        (!((aktivitasList.IsCopy || aktivitasList.IsAdd) && aktivitasList.RowIndex is int rowIndex && rowIndex == 0))) // DN
+        eof = !await aktivitasList.Recordset.ReadAsync();
+    aktivitasList.RecordCount++;
+    if (aktivitasList.RecordCount >= aktivitasList.StartRecord) {
+        await aktivitasList.SetupRow();
+    <tr @Html.Raw(aktivitasList.RowAttributes)>
+    @* Render list options (body, left) *@
+    @aktivitasList.ListOptions.RenderBody("left", aktivitasList.RowCount)
+    @if (aktivitasList.No_Referensi.Visible) { // aktivitasList.No_Referensi.Visible (begin)
+        <td data-name="No_Referensi" @Html.Raw(aktivitasList.No_Referensi.CellAttributes)>
+<span id="el@(aktivitasList.RowIndex == "$rowindex$" ? "$rowindex$" : aktivitasList.RowCount)_Aktivitas_No_Referensi" class="el_Aktivitas_No_Referensi">
+<span @Html.Raw(aktivitasList.No_Referensi.ViewAttributes)>
+@Html.Raw(aktivitasList.No_Referensi.GetViewValue())</span>
+</span>
+</td>
+    } @* aktivitasList.No_Referensi.Visible (end) *@
+    @if (aktivitasList.IdProses.Visible) { // aktivitasList.IdProses.Visible (begin)
+        <td data-name="IdProses" @Html.Raw(aktivitasList.IdProses.CellAttributes)>
+<span id="el@(aktivitasList.RowIndex == "$rowindex$" ? "$rowindex$" : aktivitasList.RowCount)_Aktivitas_IdProses" class="el_Aktivitas_IdProses">
+<span @Html.Raw(aktivitasList.IdProses.ViewAttributes)>
+@Html.Raw(aktivitasList.IdProses.GetViewValue())</span>
+</span>
+</td>
+    } @* aktivitasList.IdProses.Visible (end) *@
+    @if (aktivitasList.Aktivitas2.Visible) { // aktivitasList.Aktivitas2.Visible (begin)
+        <td data-name="Aktivitas2" @Html.Raw(aktivitasList.Aktivitas2.CellAttributes)>
+<span id="el@(aktivitasList.RowIndex == "$rowindex$" ? "$rowindex$" : aktivitasList.RowCount)_Aktivitas_Aktivitas2" class="el_Aktivitas_Aktivitas2">
+<span @Html.Raw(aktivitasList.Aktivitas2.ViewAttributes)>
+@Html.Raw(aktivitasList.Aktivitas2.GetViewValue())</span>
+</span>
+</td>
+    } @* aktivitasList.Aktivitas2.Visible (end) *@
+    @if (aktivitasList.PIC.Visible) { // aktivitasList.PIC.Visible (begin)
+        <td data-name="PIC" @Html.Raw(aktivitasList.PIC.CellAttributes)>
+<span id="el@(aktivitasList.RowIndex == "$rowindex$" ? "$rowindex$" : aktivitasList.RowCount)_Aktivitas_PIC" class="el_Aktivitas_PIC">
+<span @Html.Raw(aktivitasList.PIC.ViewAttributes)>
+@Html.Raw(aktivitasList.PIC.GetViewValue())</span>
+</span>
+</td>
+    } @* aktivitasList.PIC.Visible (end) *@
+    @if (aktivitasList.TanggalMulai.Visible) { // aktivitasList.TanggalMulai.Visible (begin)
+        <td data-name="TanggalMulai" @Html.Raw(aktivitasList.TanggalMulai.CellAttributes)>
+<span id="el@(aktivitasList.RowIndex == "$rowindex$" ? "$rowindex$" : aktivitasList.RowCount)_Aktivitas_TanggalMulai" class="el_Aktivitas_TanggalMulai">
+<span @Html.Raw(aktivitasList.TanggalMulai.ViewAttributes)>
+@Html.Raw(aktivitasList.TanggalMulai.GetViewValue())</span>
+</span>
+</td>
+    } @* aktivitasList.TanggalMulai.Visible (end) *@
+    @if (aktivitasList.TanggalSelesai.Visible) { // aktivitasList.TanggalSelesai.Visible (begin)
+        <td data-name="TanggalSelesai" @Html.Raw(aktivitasList.TanggalSelesai.CellAttributes)>
+<span id="el@(aktivitasList.RowIndex == "$rowindex$" ? "$rowindex$" : aktivitasList.RowCount)_Aktivitas_TanggalSelesai" class="el_Aktivitas_TanggalSelesai">
+<span @Html.Raw(aktivitasList.TanggalSelesai.ViewAttributes)>
+@Html.Raw(aktivitasList.TanggalSelesai.GetViewValue())</span>
+</span>
+</td>
+    } @* aktivitasList.TanggalSelesai.Visible (end) *@
+    @if (aktivitasList.StatusAktivitas.Visible) { // aktivitasList.StatusAktivitas.Visible (begin)
+        <td data-name="StatusAktivitas" @Html.Raw(aktivitasList.StatusAktivitas.CellAttributes)>
+<span id="el@(aktivitasList.RowIndex == "$rowindex$" ? "$rowindex$" : aktivitasList.RowCount)_Aktivitas_StatusAktivitas" class="el_Aktivitas_StatusAktivitas">
+<span @Html.Raw(aktivitasList.StatusAktivitas.ViewAttributes)>
+@Html.Raw(aktivitasList.StatusAktivitas.GetViewValue())</span>
+</span>
+</td>
+    } @* aktivitasList.StatusAktivitas.Visible (end) *@
+    @if (aktivitasList.DibuatOleh.Visible) { // aktivitasList.DibuatOleh.Visible (begin)
+        <td data-name="DibuatOleh" @Html.Raw(aktivitasList.DibuatOleh.CellAttributes)>
+<span id="el@(aktivitasList.RowIndex == "$rowindex$" ? "$rowindex$" : aktivitasList.RowCount)_Aktivitas_DibuatOleh" class="el_Aktivitas_DibuatOleh">
+<span @Html.Raw(aktivitasList.DibuatOleh.ViewAttributes)>
+@Html.Raw(aktivitasList.DibuatOleh.GetViewValue())</span>
+</span>
+</td>
+    } @* aktivitasList.DibuatOleh.Visible (end) *@
+    @if (aktivitasList.TanggalDibuat.Visible) { // aktivitasList.TanggalDibuat.Visible (begin)
+        <td data-name="TanggalDibuat" @Html.Raw(aktivitasList.TanggalDibuat.CellAttributes)>
+<span id="el@(aktivitasList.RowIndex == "$rowindex$" ? "$rowindex$" : aktivitasList.RowCount)_Aktivitas_TanggalDibuat" class="el_Aktivitas_TanggalDibuat">
+<span @Html.Raw(aktivitasList.TanggalDibuat.ViewAttributes)>
+@Html.Raw(aktivitasList.TanggalDibuat.GetViewValue())</span>
+</span>
+</td>
+    } @* aktivitasList.TanggalDibuat.Visible (end) *@
+    @if (aktivitasList.DiperbaruiOleh.Visible) { // aktivitasList.DiperbaruiOleh.Visible (begin)
+        <td data-name="DiperbaruiOleh" @Html.Raw(aktivitasList.DiperbaruiOleh.CellAttributes)>
+<span id="el@(aktivitasList.RowIndex == "$rowindex$" ? "$rowindex$" : aktivitasList.RowCount)_Aktivitas_DiperbaruiOleh" class="el_Aktivitas_DiperbaruiOleh">
+<span @Html.Raw(aktivitasList.DiperbaruiOleh.ViewAttributes)>
+@Html.Raw(aktivitasList.DiperbaruiOleh.GetViewValue())</span>
+</span>
+</td>
+    } @* aktivitasList.DiperbaruiOleh.Visible (end) *@
+    @if (aktivitasList.TanggalDiperbarui.Visible) { // aktivitasList.TanggalDiperbarui.Visible (begin)
+        <td data-name="TanggalDiperbarui" @Html.Raw(aktivitasList.TanggalDiperbarui.CellAttributes)>
+<span id="el@(aktivitasList.RowIndex == "$rowindex$" ? "$rowindex$" : aktivitasList.RowCount)_Aktivitas_TanggalDiperbarui" class="el_Aktivitas_TanggalDiperbarui">
+<span @Html.Raw(aktivitasList.TanggalDiperbarui.ViewAttributes)>
+@Html.Raw(aktivitasList.TanggalDiperbarui.GetViewValue())</span>
+</span>
+</td>
+    } @* aktivitasList.TanggalDiperbarui.Visible (end) *@
+    @if (aktivitasList.TipeAktivitas.Visible) { // aktivitasList.TipeAktivitas.Visible (begin)
+        <td data-name="TipeAktivitas" @Html.Raw(aktivitasList.TipeAktivitas.CellAttributes)>
+<span id="el@(aktivitasList.RowIndex == "$rowindex$" ? "$rowindex$" : aktivitasList.RowCount)_Aktivitas_TipeAktivitas" class="el_Aktivitas_TipeAktivitas">
+<span @Html.Raw(aktivitasList.TipeAktivitas.ViewAttributes)>
+@Html.Raw(aktivitasList.TipeAktivitas.GetViewValue())</span>
+</span>
+</td>
+    } @* aktivitasList.TipeAktivitas.Visible (end) *@
+    @if (aktivitasList.Keterangan.Visible) { // aktivitasList.Keterangan.Visible (begin)
+        <td data-name="Keterangan" @Html.Raw(aktivitasList.Keterangan.CellAttributes)>
+<span id="el@(aktivitasList.RowIndex == "$rowindex$" ? "$rowindex$" : aktivitasList.RowCount)_Aktivitas_Keterangan" class="el_Aktivitas_Keterangan">
+<span @Html.Raw(aktivitasList.Keterangan.ViewAttributes)>
+@Html.Raw(aktivitasList.Keterangan.GetViewValue())</span>
+</span>
+</td>
+    } @* aktivitasList.Keterangan.Visible (end) *@
+    @if (aktivitasList.TipeProses.Visible) { // aktivitasList.TipeProses.Visible (begin)
+        <td data-name="TipeProses" @Html.Raw(aktivitasList.TipeProses.CellAttributes)>
+<span id="el@(aktivitasList.RowIndex == "$rowindex$" ? "$rowindex$" : aktivitasList.RowCount)_Aktivitas_TipeProses" class="el_Aktivitas_TipeProses">
+<span @Html.Raw(aktivitasList.TipeProses.ViewAttributes)>
+@Html.Raw(aktivitasList.TipeProses.GetViewValue())</span>
+</span>
+</td>
+    } @* aktivitasList.TipeProses.Visible (end) *@
+    @if (aktivitasList.Urutan.Visible) { // aktivitasList.Urutan.Visible (begin)
+        <td data-name="Urutan" @Html.Raw(aktivitasList.Urutan.CellAttributes)>
+<span id="el@(aktivitasList.RowIndex == "$rowindex$" ? "$rowindex$" : aktivitasList.RowCount)_Aktivitas_Urutan" class="el_Aktivitas_Urutan">
+<span @Html.Raw(aktivitasList.Urutan.ViewAttributes)>
+@Html.Raw(aktivitasList.Urutan.GetViewValue())</span>
+</span>
+</td>
+    } @* aktivitasList.Urutan.Visible (end) *@
+    @if (aktivitasList.IsNominationTankReceivingLineOpen.Visible) { // aktivitasList.IsNominationTankReceivingLineOpen.Visible (begin)
+        <td data-name="IsNominationTankReceivingLineOpen" @Html.Raw(aktivitasList.IsNominationTankReceivingLineOpen.CellAttributes)>
+<span id="el@(aktivitasList.RowIndex == "$rowindex$" ? "$rowindex$" : aktivitasList.RowCount)_Aktivitas_IsNominationTankReceivingLineOpen" class="el_Aktivitas_IsNominationTankReceivingLineOpen">
+<span @Html.Raw(aktivitasList.IsNominationTankReceivingLineOpen.ViewAttributes)>
+<i class="fa-regular @(ConvertToBool(aktivitasList.IsNominationTankReceivingLineOpen.CurrentValue) ? "fa-square-check" : "fa-square") ew-icon ew-boolean"></i>
+</span>
+</span>
+</td>
+    } @* aktivitasList.IsNominationTankReceivingLineOpen.Visible (end) *@
+    @if (aktivitasList.IsNonNominationReceivingLineClosedAndSealed.Visible) { // aktivitasList.IsNonNominationReceivingLineClosedAndSealed.Visible (begin)
+        <td data-name="IsNonNominationReceivingLineClosedAndSealed" @Html.Raw(aktivitasList.IsNonNominationReceivingLineClosedAndSealed.CellAttributes)>
+<span id="el@(aktivitasList.RowIndex == "$rowindex$" ? "$rowindex$" : aktivitasList.RowCount)_Aktivitas_IsNonNominationReceivingLineClosedAndSealed" class="el_Aktivitas_IsNonNominationReceivingLineClosedAndSealed">
+<span @Html.Raw(aktivitasList.IsNonNominationReceivingLineClosedAndSealed.ViewAttributes)>
+<i class="fa-regular @(ConvertToBool(aktivitasList.IsNonNominationReceivingLineClosedAndSealed.CurrentValue) ? "fa-square-check" : "fa-square") ew-icon ew-boolean"></i>
+</span>
+</span>
+</td>
+    } @* aktivitasList.IsNonNominationReceivingLineClosedAndSealed.Visible (end) *@
+    @if (aktivitasList.IsTankEmptyAndDry.Visible) { // aktivitasList.IsTankEmptyAndDry.Visible (begin)
+        <td data-name="IsTankEmptyAndDry" @Html.Raw(aktivitasList.IsTankEmptyAndDry.CellAttributes)>
+<span id="el@(aktivitasList.RowIndex == "$rowindex$" ? "$rowindex$" : aktivitasList.RowCount)_Aktivitas_IsTankEmptyAndDry" class="el_Aktivitas_IsTankEmptyAndDry">
+<span @Html.Raw(aktivitasList.IsTankEmptyAndDry.ViewAttributes)>
+<i class="fa-regular @(ConvertToBool(aktivitasList.IsTankEmptyAndDry.CurrentValue) ? "fa-square-check" : "fa-square") ew-icon ew-boolean"></i>
+</span>
+</span>
+</td>
+    } @* aktivitasList.IsTankEmptyAndDry.Visible (end) *@
+    @if (aktivitasList.IsDocumentationComplete.Visible) { // aktivitasList.IsDocumentationComplete.Visible (begin)
+        <td data-name="IsDocumentationComplete" @Html.Raw(aktivitasList.IsDocumentationComplete.CellAttributes)>
+<span id="el@(aktivitasList.RowIndex == "$rowindex$" ? "$rowindex$" : aktivitasList.RowCount)_Aktivitas_IsDocumentationComplete" class="el_Aktivitas_IsDocumentationComplete">
+<span @Html.Raw(aktivitasList.IsDocumentationComplete.ViewAttributes)>
+<i class="fa-regular @(ConvertToBool(aktivitasList.IsDocumentationComplete.CurrentValue) ? "fa-square-check" : "fa-square") ew-icon ew-boolean"></i>
+</span>
+</span>
+</td>
+    } @* aktivitasList.IsDocumentationComplete.Visible (end) *@
+    @* Render list options (body, right) *@
+    @aktivitasList.ListOptions.RenderBody("right", aktivitasList.RowCount)
+    </tr>
+    } @* End if *@
+
+    // Reset for template row
+    if (SameString(aktivitasList.RowIndex, "$rowindex$"))
+        aktivitasList.RowIndex = 0;
+
+    // Reset inline add/copy row
+    if ((aktivitasList.IsCopy || aktivitasList.IsAdd) && aktivitasList.RowIndex is int rowIndex2 && rowIndex2 == 0)
+        aktivitasList.RowIndex = 1;
+} @* End While *@
+</tbody>
+</table><!-- /.ew-table -->
+} @* End If TotalRecords > 0 *@
+</div><!-- /.ew-grid-middle-panel -->
+@if (Empty(aktivitasList.CurrentAction) && !aktivitasList.UseAjaxActions) {
+<input type="hidden" name="action" id="action" value="">
+}
+</form><!-- /.ew-list-form -->
+@{ aktivitasList.CloseRecordset(); }
+@if (!aktivitasList.IsExport()) {
+<div class="card-footer ew-grid-lower-panel">
+@if (!aktivitasList.IsGridAdd && !(aktivitasList.IsGridEdit && aktivitasList.ModalGridEdit) && !aktivitasList.IsMultiEdit) {
+@Html.Raw(aktivitasList.Pager.Render())
+}
+<div class="ew-list-other-options">
+@aktivitasList.OtherOptions.RenderBody("bottom")
+</div>
+</div>
+}
+</div><!-- /.ew-grid -->
+} else { // Show other options
+<div class="ew-list-other-options">
+@aktivitasList.OtherOptions.ForEach(opt => opt.ButtonClass = "").RenderBody()
+</div>
+}
+</div>
+<div id="ew-footer-options">
+    @aktivitasList.FooterOptions.RenderBody()
+</div>
+</main>
+@aktivitasList.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+@if (!aktivitasList.IsExport()) {
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("Aktivitas");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Startup script
+    $('[data-widget="expandable-table"]').removeAttr("data-widget");
+    $('[data-name="preview"]').hide();
+    $('[data-name="button"]').hide();
+    $('[data-name="detail_AktivitasDokumen"]').hide();
+    var IdReferensi = "@aktivitasList.No_Referensi.CurrentValue";
+    var TipeProses = "@aktivitasList.TipeProses.CurrentValue";
+    var TipeProsesView = "@aktivitasList.TipeProses.CurrentValue";
+    let iconProses = "";
+    if (TipeProses == "Penerimaan" || TipeProses == "PenerimaanSTSBBM" || TipeProses == "PenerimaanSTSLPG" || 
+        TipeProses == "PenerimaanPipa" || TipeProses == "PenerimaanSalesPipa" || TipeProses == "PenerimaanRTW" ||
+        TipeProses == "PenerimaanTruck" || TipeProses == "PenerimaanPipaRefinery") {
+        TipeProses = "Penerimaan";
+        TipeProsesView = "Penerimaan";
+        iconProses = "fa-box-open";
+    } else if (TipeProses == "Penyaluran" || TipeProses == "PenyaluranTasNgs" || TipeProses == "PenyaluranTruck" ||  
+               TipeProses == "PenyaluranLPGTASNGS" || TipeProses == "PenyaluranKonsinyasiSTSBBM" || 
+               TipeProses == "PenyaluranKonsinyasiSTSLPG" || TipeProses == "PenyaluranPipa" || TipeProses == "PenyaluranSalesPipa" ||
+               TipeProses == "PenyaluranPipaLPG" || TipeProses == "PenyaluranKonsinyasiRTW" || TipeProses == "PenyaluranPipaJarakDekat"){
+        TipeProses = "Penyaluran";
+        TipeProsesView = "Proses Penyaluran";
+        iconProses = "fa-truck-fast";
+    } else if (TipeProses == "RencanaPenyaluran" || TipeProses == "RencanaPenyaluranLPG" || TipeProses == "RencanaPenyaluranPipa") {
+        TipeProses = "RencanaPenyaluran";
+        TipeProsesView = "Rencana & Realisasi Penyaluran";
+        iconProses = "fa-solid fa-clipboard-list";
+    } else if (TipeProses == "SamplingLabTest") {
+        TipeProsesView = "Sampling Lab Test";
+        iconProses = "fa-flask";
+    } else if (TipeProses == "Penimbunan" || TipeProses == "PenyimpananPenerimaanLPG" || 
+               TipeProses == "PenyimpananPenerimaanSTSBBM" || TipeProses == "PenyimpananPenerimaanLPGSTS" || 
+               TipeProses == "PenyimpananPenerimaanPipa" || TipeProses == "PenyimpananPenerimaanPipaLPG" ||
+               TipeProses == "PenyimpananPenerimaanRTW" || TipeProses == "PenyimpananPenerimaanTruck") {
+        TipeProses = "Penimbunan";
+        TipeProsesView = "Proses Penerimaan";
+        iconProses = "fa-oil-can";
+    } else if (TipeProses == "PenimbunanPenyaluran" || TipeProses == "PenimbunanPenyaluranLPG" || 
+               TipeProses == "PenyimpananPenyaluranSalesSTSBBM" || TipeProses == "PenyimpananPenyaluranKonsinyasiSTSBBM" || 
+               TipeProses == "PenyimpananPenyaluranSalesPipa" || TipeProses == "PenyimpananPenyaluranKonsinyasiPipa" ||
+               TipeProses == "PenyimpananPenyaluranSalesSTSLPG" || TipeProses == "PenyimpananPenyaluranKonsinyasiSTSLPG" || TipeProses == "PenyimpananPenyaluranSalesRTW") {
+        TipeProses = "PenimbunanPenyaluran";
+        TipeProsesView = "Proses Penyaluran";
+        iconProses = "fa-route";
+    } else if (TipeProses == "ClosingStock" || TipeProses == "ClosingStockSTSBBM" || TipeProses == "ClosingStockSTSLPG") {
+        TipeProses = "ClosingStock";
+        TipeProsesView = "Closing Stock";
+        iconProses = "fa-inbox";
+    } else if (['PenyimpananPenyaluranKonsinyasiRTW', 'PenyimpananPenyaluranKonsinyasi'].includes(TipeProses)) {
+        TipeProses = 'PenimbunanPenyaluran';
+        TipeProsesView = 'Proses Penyaluran';
+        iconProses = 'fa-route';
+    } else if (['PenyaluranKonsinyasiTruck', 'PenyaluranKonsinyasiTruckTAS'].includes(TipeProses)) {
+        TipeProses = "Penyaluran";
+        TipeProsesView = "Proses Penyaluran";
+        iconProses = "fa-truck-fast";
+    }
+    var parent_url = ew.PATH_BASE;
+    var steps = [
+        { number: 1, label: TipeProsesView, url: `${parent_url}${TipeProses}List`, icon: iconProses },
+        { number: 2, label: "Proses", url: `${parent_url}ProsesList?cmd=search&x_IdReferensi%5B%5D=${IdReferensi}&search=&searchtype=`, icon: "fa-gears" },
+        { number: 3, label: "Aktivitas", url: '', icon: "fa-list-check" },
+    ];
+    var currentStep = 3;
+    $("<style>")
+        .prop("type", "text/css")
+        .html(`
+            .stepper {
+                display: flex;
+                counter-reset: step;
+            }
+            .step {
+                width: 150px;
+                text-align: center;
+                position: relative;
+            }
+            .step:not(:last-child)::after {
+                content: '';
+                position: absolute;
+                top: 20px;
+                right: -50%;
+                width: 100%;
+                height: 4px;
+                background-color: #ccc;
+                z-index: 0;
+            }
+            .step.completed:not(:last-child)::after {
+                background-color: #3c6dbd;
+            }
+            .step-icon {
+                width: 36px;
+                height: 36px;
+                line-height: 36px;
+                border-radius: 50%;
+                background: #ccc;
+                display: inline-block;
+                z-index: 1;
+                position: relative;
+                color: white;
+                font-weight: bold;
+            }
+            .step.active .step-icon {
+                background: #3c6dbd;
+            }
+            .step-label {
+                margin-top: 8px;
+                font-size: 14px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                gap: 6px;
+                color: #333;
+            }
+            .step-label {
+                color: #3c6dbd !important;
+                text-decoration: none;
+                margin: 0;
+                padding: 0;
+            }
+            .step-label-not-active {
+                color: #CCCCCC !important;
+            }
+
+            /* warna selector */
+            [data-bs-theme=light] .ew-grid .ew-table {
+                --bs-table-active-bg: #98caef;
+                --bs-table-active-color: #1d3343;
+            }
+            [data-bs-theme=light] .ew-grid .ew-table .table-active a  {
+                color: #1d3343; /* Sesuaikan dengan active-color */
+                text-decoration: underline; /* Optional */
+            }
+            [data-bs-theme=light] .ew-grid .ew-table a:hover {
+                color: #0d1a23; /* Lebih gelap saat hover (optional) */
+            }
+            .table-hover>tbody>tr.table-active:hover>* {
+                background-color: #77aacf !important;
+                color: var(--primary-white) !important;
+            }
+        `)
+        .appendTo("head");
+    var $stepperWrapper = $('<div class="d-flex border-bottom border-2 pb-2"><div class="stepper"></div></div>');
+    var $stepper = $stepperWrapper.find(".stepper");
+    steps.forEach(function (step, i) {
+        var isActive = step.number === currentStep;
+        var isCompleted = step.number < currentStep;
+        var stepClass = isActive ? "active" : isCompleted ? "completed" : "";
+        var icon, labelContent, html;
+        if (isActive) {
+            icon = `<div class="step-icon bg-success">${step.number}</div>`;
+            labelContent = `<div class="step-label"><p class="text-success mb-1"><i class="fa-solid ${step.icon} me-1 text-success"></i> ${step.label}</p></div>`;
+            html = `<div class="step ${stepClass} text-success">${icon}${labelContent}</div>`;
+        } else if (isCompleted) {
+            icon = `<div class="step-icon" style="background: #3c6dbd;">${step.number}</div>`;
+            labelContent = `<div class="step-label"><a href="${step.url}" class="text-primary"><i class="fa-solid ${step.icon} me-1"></i>${step.label}</a></div>`;
+            html = `<div class="step ${stepClass}">${icon}${labelContent}</div>`;
+        } else {
+            icon = `<div class="step-icon">${step.number}</div>`;
+            labelContent = `<div class="step-label-not-active"><p style="margin: 0;"><i class="fa-solid ${step.icon} me-1"></i>${step.label}</p></div>`;
+            html = `<div class="step ${stepClass} text-secondary">${icon}${labelContent}</div>`;
+        }
+        $stepper.append(html);
+    });
+    $(".content-header .container-fluid .row").append($stepperWrapper);
+    $(document).ready(function () {
+       let idProses = getURLParameter("x_IdProses[]") || [];
+        if (idProses.length > 0) {
+            idProses = idProses[0];
+            createTextProses(idProses);
+        }
+    });
+    function createTextProses(idReferensi) {
+        $.ajax({
+            url: parent_url + `api/LookUpList/get_referensi_detail?idProses=${idReferensi}`,
+            type: 'GET',
+            success: function (res) {
+                // let produk = res.NamaProduk;
+                // let tanggal = res.TanggalDibuat;
+                // let kapal = res.NomorKendaraan;
+                // let nomorPengiriman = res.NomorPengiriman;
+                // let tanggalAktifitas = res.TanggalAktifitas;
+                // let namaAktivitas = res.NamaAktivitas;
+
+                // let detail = "";
+
+                // // if (namaAktivitas) detail += ` Nama Aktivitas: <span style="color: red">${namaAktivitas}</span>`;
+                // if (produk) detail += ` Produk: <span style="color: red">${produk}</span>`;
+                // if (tanggal) detail += ` Dibuat: <span style="color: red">${tanggal}</span>`;
+                // if (kapal) detail += ` Kendaraan: <span style="color: red">${kapal}</span>`;
+                // if (nomorPengiriman) detail += ` No Pengiriman: <span style="color: red">${nomorPengiriman}</span>`;
+                // if (tanggalAktifitas) detail += ` Tanggal Aktifitas: <span style="color: red">${tanggalAktifitas}</span>`;
+
+                // if (detail) detail = ` , ${detail}`
+                let namaJudul = res.namaJudul;
+                let resultHtml = `<span class="ms-3" style="font-weight: bold; font-style: italic;">
+                                    ${namaJudul} 
+                                  </span>` ;
+
+                    // Sisipkan setelah tombol export
+                $(".ew-filter-option").after(resultHtml);
+            },
+            error: function (xhr, status, error) {
+                console.error('Gagal update status aktivitas:', status, error);
+            }
+        })
+    }
+    function getURLParameter(param) {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.has(param) ? urlParams.getAll(param) : null;
+    }
+});
+</script>
+}

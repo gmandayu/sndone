@@ -1,0 +1,343 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (setUserModEdit.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = setUserModEdit.UseLayout ? "_Layout" : "";
+}
+@setUserModEdit.ShowPageHeader()
+@setUserModEdit.ShowMessages()
+<main class="edit">
+<form name="fSetUserMODedit" id="fSetUserMODedit" class="@(setUserModEdit.FormClassName)" action="@AppPath(CurrentPageName())" method="post" novalidate autocomplete="off">
+<script>
+var currentTable = @Html.Raw(ConvertToJson(setUserModEdit.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { SetUserMOD: currentTable } });
+var currentPageID = ew.PAGE_ID = "edit";
+var currentForm;
+var fSetUserMODedit;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("fSetUserMODedit")
+        .setPageId("edit")
+
+        // Add fields
+        .setFields([
+
+            ["Plant", [fields.Plant.visible && fields.Plant.required ? ew.Validators.required(fields.Plant.caption) : null], fields.Plant.isInvalid],
+            ["LookupUserMod", [fields.LookupUserMod.visible && fields.LookupUserMod.required ? ew.Validators.required(fields.LookupUserMod.caption) : null], fields.LookupUserMod.isInvalid],
+            ["UserMOD", [fields.UserMOD.visible && fields.UserMOD.required ? ew.Validators.required(fields.UserMOD.caption) : null], fields.UserMOD.isInvalid],
+            ["userInput", [fields.userInput.visible && fields.userInput.required ? ew.Validators.required(fields.userInput.caption) : null], fields.userInput.isInvalid]
+        ])
+
+        // Form_CustomValidate
+        .setCustomValidate(
+            function(fobj) { // DO NOT CHANGE THIS LINE!
+                    // Your custom validation code here, return false if invalid.
+                    return true;
+                }
+        )
+
+        // Use JavaScript validation or not
+        .setValidateRequired(ew.CLIENT_VALIDATE)
+
+        // Dynamic selection lists
+        .setLists({
+            "LookupUserMod": @Html.Raw(setUserModEdit.LookupUserMod.ToClientList(setUserModEdit)),
+            "UserMOD": @Html.Raw(setUserModEdit.UserMOD.ToClientList(setUserModEdit)),
+        })
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Client script
+    // Write your client script here, no need to add script tags.
+    var parent_url = ew.PATH_BASE;
+    $('#x_LookupPlant').on("change", function () {
+        const selectedValue = $(this).val();
+        $('#x_Plant').val(selectedValue).trigger('change');
+        const lookupUserModId = $("#x_LookupUserMod");
+        $.ajax({
+            url: parent_url + 'api/LookUpList/get-dropdown/user-plant?plantId=' + selectedValue,
+            method: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                lookupUserModId.empty(); 
+                lookupUserModId.append('<option value="" selected>-- Pilih Plant --</option>');
+                $.each(data, function (index, item) {
+                    lookupUserModId.append(`<option value="${item.Value}">${item.Label}</option>`);
+                });
+            },
+            error: function (xhr, status, error) {
+                console.error("Gagal ambil data dropdown:", error);
+                lookupUserModId.empty();
+            }
+        });
+    });
+    $('#x_LookupUserMod').on("change", function () {
+        const selectedValue = $(this).val();
+        $('#x_UserMOD').val(selectedValue).trigger('change');
+    });
+});
+</script>
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+<input type="hidden" name="action" id="action" value="update">
+<input type="hidden" name="modal" value="@ConvertToInt(setUserModEdit.IsModal)">
+@if (IsJsonResponse()) {
+<input type="hidden" name="json" value="1">
+}
+<input type="hidden" name="@(setUserModEdit.OldKeyName)" value="@Html.Raw(setUserModEdit.OldKey)">
+<div class="ew-edit-div"><!-- page* -->
+@if (setUserModEdit.Plant.Visible) { // setUserModEdit.Plant.Visible (begin)
+    <div id="r_Plant" @Html.Raw(setUserModEdit.Plant.RowAttributes)>
+        <label id="elh_SetUserMOD_Plant" class="@(setUserModEdit.LeftColumnClass)">@Html.Raw(setUserModEdit.Plant.Caption)@Html.Raw(setUserModEdit.Plant.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(setUserModEdit.RightColumnClass)"><div @Html.Raw(setUserModEdit.Plant.CellAttributes)>
+<span id="el_SetUserMOD_Plant">
+<span @Html.Raw(setUserModEdit.Plant.ViewAttributes)>
+<span class="form-control-plaintext">@Html.Raw(setUserModEdit.Plant.DisplayValue(setUserModEdit.Plant.EditValue))</span></span>
+<input type="hidden" data-table="SetUserMOD" data-field="x_Plant" data-hidden="1" name="x_Plant" id="x_Plant" value="@Html.Raw(HtmlEncode(setUserModEdit.Plant.CurrentValue))">
+</span>
+</div></div>
+    </div>
+} @* setUserModEdit.Plant.Visible (end) *@
+@if (setUserModEdit.LookupUserMod.Visible) { // setUserModEdit.LookupUserMod.Visible (begin)
+    <div id="r_LookupUserMod" @Html.Raw(setUserModEdit.LookupUserMod.RowAttributes)>
+        <label id="elh_SetUserMOD_LookupUserMod" for="x_LookupUserMod" class="@(setUserModEdit.LeftColumnClass)">@Html.Raw(setUserModEdit.LookupUserMod.Caption)@Html.Raw(setUserModEdit.LookupUserMod.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(setUserModEdit.RightColumnClass)"><div @Html.Raw(setUserModEdit.LookupUserMod.CellAttributes)>
+<span id="el_SetUserMOD_LookupUserMod">
+    <select
+        id="x_LookupUserMod"
+        name="x_LookupUserMod"
+        class="form-select ew-select@(setUserModEdit.LookupUserMod.IsInvalidClass)"
+        data-select2-id="fSetUserMODedit_x_LookupUserMod"
+        data-table="SetUserMOD"
+        data-field="x_LookupUserMod"
+        data-value-separator="@(setUserModEdit.LookupUserMod.DisplayValueSeparatorAttribute)"
+        data-placeholder="@(HtmlEncode(setUserModEdit.LookupUserMod.PlaceHolder))"
+        @Html.Raw(setUserModEdit.LookupUserMod.EditAttributes)>
+        @(setUserModEdit.LookupUserMod.SelectOptionListHtml("x_LookupUserMod"))
+    </select>
+    @Html.Raw(setUserModEdit.LookupUserMod.GetCustomMessage)
+    <div class="invalid-feedback">@Html.Raw(setUserModEdit.LookupUserMod.GetErrorMessage())</div>
+<script>
+loadjs.ready("fSetUserMODedit", function() {
+    var options = { name: "x_LookupUserMod", selectId: "fSetUserMODedit_x_LookupUserMod" },
+        el = document.querySelector("select[data-select2-id='" + options.selectId + "']");
+    if (!el)
+        return;
+    options.closeOnSelect = !options.multiple;
+    options.dropdownParent = el.closest("#ew-modal-dialog, #ew-add-opt-dialog");
+    if (fSetUserMODedit.lists.LookupUserMod?.lookupOptions.length) {
+        options.data = { id: "x_LookupUserMod", form: "fSetUserMODedit" };
+    } else {
+        options.ajax = { id: "x_LookupUserMod", form: "fSetUserMODedit", limit: ew.LOOKUP_PAGE_SIZE };
+    }
+    options.minimumResultsForSearch = Infinity;
+    options = Object.assign({}, ew.selectOptions, options, ew.vars.tables.SetUserMOD.fields.LookupUserMod.selectOptions);
+    ew.createSelect(options);
+});
+</script>
+</span>
+</div></div>
+    </div>
+} @* setUserModEdit.LookupUserMod.Visible (end) *@
+@if (setUserModEdit.UserMOD.Visible) { // setUserModEdit.UserMOD.Visible (begin)
+    <div id="r_UserMOD" @Html.Raw(setUserModEdit.UserMOD.RowAttributes)>
+        <label id="elh_SetUserMOD_UserMOD" class="@(setUserModEdit.LeftColumnClass)">@Html.Raw(setUserModEdit.UserMOD.Caption)@Html.Raw(setUserModEdit.UserMOD.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(setUserModEdit.RightColumnClass)"><div @Html.Raw(setUserModEdit.UserMOD.CellAttributes)>
+<span id="el_SetUserMOD_UserMOD">
+<span>@{
+    if (IsRTL) {
+        setUserModEdit.UserMOD.EditAttrs["dir"] = "rtl";
+    }
+}</span>
+<span id="as_x_UserMOD" class="ew-auto-suggest">
+    <input type="text" class="form-control" name="sv_x_UserMOD" id="sv_x_UserMOD" value="@(RemoveHtml(ConvertToString(setUserModEdit.UserMOD.EditValue)))" autocomplete="off" size="30" placeholder="@Html.Raw(HtmlEncode(setUserModEdit.UserMOD.PlaceHolder))" data-placeholder="@Html.Raw(HtmlEncode(setUserModEdit.UserMOD.PlaceHolder))" data-format-pattern="@(setUserModEdit.UserMOD.FormatPattern)" @Html.Raw(setUserModEdit.UserMOD.EditAttributes) aria-describedby="x_UserMOD_help">
+</span>
+<selection-list hidden class="form-control" data-table="SetUserMOD" data-field="x_UserMOD" data-input="sv_x_UserMOD" data-value-separator="@(setUserModEdit.UserMOD.DisplayValueSeparatorAttribute)" name="x_UserMOD" id="x_UserMOD" value="@(HtmlEncode(setUserModEdit.UserMOD.CurrentValue))"></selection-list>
+@Html.Raw(setUserModEdit.UserMOD.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(setUserModEdit.UserMOD.GetErrorMessage())</div>
+<script>
+loadjs.ready(["fSetUserMODedit"], function() {
+    fSetUserMODedit.createAutoSuggest(Object.assign({"id":"x_UserMOD","forceSelect":true}, { lookupAllDisplayFields: @(setUserModEdit.UserMOD.Lookup.LookupAllDisplayFields ? "true" : "false") }, ew.vars.tables.SetUserMOD.fields.UserMOD.autoSuggestOptions));
+});
+</script>
+@Html.Raw(setUserModEdit.UserMOD.Lookup.GetParamTag(setUserModEdit, "p_x_UserMOD"))
+</span>
+</div></div>
+    </div>
+} @* setUserModEdit.UserMOD.Visible (end) *@
+@if (setUserModEdit.userInput.Visible) { // setUserModEdit.userInput.Visible (begin)
+    <div id="r_userInput" @Html.Raw(setUserModEdit.userInput.RowAttributes)>
+        <label id="elh_SetUserMOD_userInput" for="x_userInput" class="@(setUserModEdit.LeftColumnClass)">@Html.Raw(setUserModEdit.userInput.Caption)@Html.Raw(setUserModEdit.userInput.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(setUserModEdit.RightColumnClass)"><div @Html.Raw(setUserModEdit.userInput.CellAttributes)>
+<span id="el_SetUserMOD_userInput">
+<span @Html.Raw(setUserModEdit.userInput.ViewAttributes)>
+<input type="text" readonly class="form-control-plaintext" value="@Html.Raw(RemoveHtml(ConvertToString(setUserModEdit.userInput.EditValue)))"></span>
+<input type="hidden" data-table="SetUserMOD" data-field="x_userInput" data-hidden="1" name="x_userInput" id="x_userInput" value="@Html.Raw(HtmlEncode(setUserModEdit.userInput.CurrentValue))">
+</span>
+</div></div>
+    </div>
+} @* setUserModEdit.userInput.Visible (end) *@
+</div><!-- /page* -->
+    <input type="hidden" data-table="SetUserMOD" data-field="x_id" data-hidden="1" name="x_id" id="x_id" value="@Html.Raw(HtmlEncode(setUserModEdit.id.CurrentValue))">
+@{ setUserModEdit.CloseRecordset(); }
+@Html.Raw(setUserModEdit.IsModal ? "<template class=\"ew-modal-buttons\">" : "<div class=\"row ew-buttons\">")<!-- buttons .row -->
+    <div class="@(setUserModEdit.OffsetColumnClass)"><!-- buttons offset -->
+    <button class="btn btn-primary ew-btn" name="btn-action" id="btn-action" type="submit" form="fSetUserMODedit">@Html.Raw(Language.Phrase("SaveBtn"))</button>
+@if (IsJsonResponse()) {
+    <button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" data-bs-dismiss="modal">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+} else {
+    <button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" form="fSetUserMODedit" data-href="@AppPath(setUserModEdit.ReturnUrl)">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+}
+    </div><!-- /buttons offset -->
+@Html.Raw(setUserModEdit.IsModal ? "</template>" : "</div>")<!-- /buttons .row -->
+</form>
+</main>
+@setUserModEdit.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("SetUserMOD");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Startup script
+    // Write your table-specific startup script here
+    // document.write("page loaded");
+    var parent_url = ew.PATH_BASE;
+    $('#r_UserMOD').hide();
+    (function () {
+        const role = parseInt('@CurrentUserInfo("Rule")') || 0; // 0=Superadmin, 10=OH
+        const isAllowed = (role === 0 || role === 10);
+        console.log("Role = ", role)
+        if (isAllowed) return;
+
+        // ====== Blokir akses & tampilkan peringatan ======
+        const $container = $(".content .container-fluid").first();
+        const $form = $("form.ew-form").first();
+        const listUrl = ew.PATH_BASE + "SetUserMODList";
+
+        // Alert peringatan (Bootstrap)
+        const $alert = $(`
+          <div class="alert alert-warning d-flex align-items-start" role="alert" id="no-access-alert">
+            <i class="fa-solid fa-triangle-exclamation me-2 mt-1"></i>
+            <div>
+              <div class="fw-bold">Tidak ada akses untuk menyunting Set User MOD.</div>
+              <div class="small">
+                Hanya pengguna dengan peran <strong>Superadmin</strong> (Rule 0) atau <strong>OH</strong> (Rule 10) yang dapat menyunting data di halaman ini.
+                <br>Solusi: <em>Ganti Akun</em> atau <em>minta diberikan akses oleh OH</em>.
+              </div>
+              <div class="mt-2">
+                <a href="${ew.PATH_BASE}logout" class="btn btn-outline-secondary btn-sm me-2">
+                  <i class="fa-solid fa-right-from-bracket"></i> Ganti Akun
+                </a>
+                <a href="${listUrl}" class="btn btn-primary btn-sm">
+                  <i class="fa-solid fa-list"></i> Kembali ke List
+                </a>
+              </div>
+            </div>
+          </div>
+        `);
+
+        // Sisipkan alert di atas form
+        if ($container.length) $container.prepend($alert);
+        else $("body").prepend($alert);
+
+        // Nonaktifkan input & tombol di form
+        if ($form.length) {
+          // Blokir submit (klik, enter, dll.)
+          $form.on("submit", function (e) { e.preventDefault(); return false; });
+
+          // Disable semua kontrol
+          $form.find("input, select, textarea, button").prop("disabled", true);
+
+          // Re-enable tombol/link Cancel jika ada
+          $form.find('a.btn-secondary, a.ew-btn, a.btn')
+               .filter(function () {
+                  const href = (this.getAttribute("href") || "").toLowerCase();
+                  return href.includes("list") || href.includes("cancel");
+               })
+               .prop("disabled", false)
+               .removeClass("disabled");
+        }
+
+        // Bersihkan tombol Add/Save lain yang mungkin muncul
+        $(".ew-toolbar a.ew-add, .ew-grid-lower-panel a, button[name='btn-action'], button[name='btn-submit'], [name='btn-save'],.ew-btn[href*='update']").hide();
+
+        // Tambahan UX: scroll ke atas supaya alert terlihat
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    })();
+    function autoFillLookupUserMod() {
+        const lookupUserModId = $("#x_LookupUserMod");
+        const userModId = $("#x_UserMOD");
+        const plantId = $("#x_Plant");
+        const plantIdVal = plantId.val();
+        const userModVal = userModId.val();
+        const lookupUserModIdVal = lookupUserModId.val();
+        if (plantIdVal){
+            $.ajax({
+                url: parent_url + 'api/LookUpList/get-dropdown/user-plant?plantId=' + plantIdVal,
+                method: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    lookupUserModId.empty(); 
+                    $.each(data, function (index, item) {
+                        if (item.Value == userModVal){
+                            lookupUserModId.append(`<option selected value="${item.Value}">${item.Label}</option>`);
+                        } else {
+                            lookupUserModId.append(`<option value="${item.Value}">${item.Label}</option>`);
+                        }
+                    });
+                },
+                error: function (xhr, status, error) {
+                    console.error("Gagal ambil data dropdown:", error);
+                    lookupUserModId.empty();
+                }
+            });
+        }
+        const element = document.getElementById('datetimepicker_fSetUserMODedit_x_Tanggal');
+        if (!element) return;
+        const input = document.getElementById('x_Tanggal');
+        const formatPattern = input?.dataset.formatPattern || 'yyyy/MM/dd HH:mm:ss';
+        const options = {
+            localization: {
+                format: formatPattern
+            },
+            restrictions: {
+                minDate: tempusDominus.DateTime.convert(new Date())
+            },
+            display: {
+                components: {
+                    calendar: true,
+                    date: true,
+                    month: true,
+                    year: true,
+                    hours: true,
+                    minutes: true,
+                    seconds: true
+                }
+            }
+        };
+        new tempusDominus.TempusDominus(element, options);
+    }
+    autoFillLookupUserMod();
+});
+</script>

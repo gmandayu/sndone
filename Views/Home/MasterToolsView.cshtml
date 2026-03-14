@@ -1,0 +1,89 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (masterToolsView.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = masterToolsView.UseLayout ? "_Layout" : "";
+}
+@if (!masterToolsView.IsExport()) {
+<div class="btn-toolbar ew-toolbar">
+    @masterToolsView.ExportOptions.RenderBody()
+    @masterToolsView.OtherOptions.RenderBody()
+</div>
+}
+@masterToolsView.ShowPageHeader()
+@masterToolsView.ShowMessages()
+<main class="view">
+<form name="fMasterToolsview" id="fMasterToolsview" class="ew-form ew-view-form overlay-wrapper" action="@AppPath(CurrentPageName())" method="post" novalidate autocomplete="off">
+@if (!masterToolsView.IsExport()) {
+<script>
+var currentTable = @Html.Raw(ConvertToJson(masterToolsView.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { MasterTools: currentTable } });
+var currentPageID = ew.PAGE_ID = "view";
+var currentForm;
+var fMasterToolsview;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("fMasterToolsview")
+        .setPageId("view")
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Write your client script here, no need to add script tags.
+});
+</script>
+}
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+<input type="hidden" name="modal" value="@ConvertToInt(masterToolsView.IsModal)">
+<table class="@(masterToolsView.TableClass)">
+@if (masterToolsView.IdTools.Visible) { // masterToolsView.IdTools.Visible (begin)
+    <tr id="r_IdTools" @Html.Raw(masterToolsView.IdTools.RowAttributes)>
+        <td class="@(masterToolsView.TableLeftColumnClass)"><span id="elh_MasterTools_IdTools">@Html.Raw(masterToolsView.IdTools.Caption)</span></td>
+        <td data-name="IdTools" @Html.Raw(masterToolsView.IdTools.CellAttributes)>
+<span id="el_MasterTools_IdTools">
+<span @Html.Raw(masterToolsView.IdTools.ViewAttributes)>
+@Html.Raw(masterToolsView.IdTools.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* masterToolsView.IdTools.Visible (end) *@
+@if (masterToolsView.NamaTools.Visible) { // masterToolsView.NamaTools.Visible (begin)
+    <tr id="r_NamaTools" @Html.Raw(masterToolsView.NamaTools.RowAttributes)>
+        <td class="@(masterToolsView.TableLeftColumnClass)"><span id="elh_MasterTools_NamaTools">@Html.Raw(masterToolsView.NamaTools.Caption)</span></td>
+        <td data-name="NamaTools" @Html.Raw(masterToolsView.NamaTools.CellAttributes)>
+<span id="el_MasterTools_NamaTools">
+<span @Html.Raw(masterToolsView.NamaTools.ViewAttributes)>
+@Html.Raw(masterToolsView.NamaTools.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* masterToolsView.NamaTools.Visible (end) *@
+</table>
+@{ masterToolsView.CloseRecordset(); }
+</form>
+</main>
+@masterToolsView.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+@if (!masterToolsView.IsExport()) {
+<script>
+loadjs.ready("load", function() {
+    // Write your table-specific startup script here
+    // document.write("page loaded");
+});
+</script>
+}

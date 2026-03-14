@@ -1,0 +1,317 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (subaktivitasKapalBerangkatList.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = subaktivitasKapalBerangkatList.UseLayout ? "_Layout" : "";
+}
+@if (!subaktivitasKapalBerangkatList.IsExport()) {
+<script>
+var currentTable = @Html.Raw(ConvertToJson(subaktivitasKapalBerangkatList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { SubaktivitasKapalBerangkat: currentTable } });
+var currentPageID = ew.PAGE_ID = "list";
+var currentForm;
+var @(subaktivitasKapalBerangkatList.FormName);
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("@(subaktivitasKapalBerangkatList.FormName)")
+        .setPageId("list")
+        .setSubmitWithFetch(@(subaktivitasKapalBerangkatList.UseAjaxActions ? "true" : "false"))
+        .setFormKeyCountName("@(subaktivitasKapalBerangkatList.FormKeyCountName)")
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Write your client script here, no need to add script tags.
+});
+</script>
+}
+@if (!subaktivitasKapalBerangkatList.IsExport()) {
+<div class="btn-toolbar ew-toolbar">
+@if (subaktivitasKapalBerangkatList.TotalRecords > 0 && subaktivitasKapalBerangkatList.ExportOptions.Visible) {
+    subaktivitasKapalBerangkatList.ExportOptions.Render("body");
+}
+@if (subaktivitasKapalBerangkatList.ImportOptions.Visible) {
+    subaktivitasKapalBerangkatList.ImportOptions.Render("body");
+}
+@if (subaktivitasKapalBerangkatList.SearchOptions.Visible) {
+    subaktivitasKapalBerangkatList.SearchOptions.Render("body");
+}
+@if (subaktivitasKapalBerangkatList.FilterOptions.Visible) {
+    subaktivitasKapalBerangkatList.FilterOptions.Render("body");
+}
+</div>
+}
+@if (!subaktivitasKapalBerangkatList.IsModal) {
+<form name="fSubaktivitasKapalBerangkatsrch" id="fSubaktivitasKapalBerangkatsrch" class="ew-form ew-ext-search-form" action="@AppPath(CurrentPageName())" novalidate autocomplete="off">
+<div id="fSubaktivitasKapalBerangkatsrch_search_panel" class="mb-2 mb-sm-0 @(subaktivitasKapalBerangkatList.SearchPanelClass)"><!-- .ew-search-panel -->
+<script>
+var currentTable = @Html.Raw(ConvertToJson(subaktivitasKapalBerangkatList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { SubaktivitasKapalBerangkat: currentTable } });
+var currentForm;
+var fSubaktivitasKapalBerangkatsrch, currentSearchForm, currentAdvancedSearchForm;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery,
+        fields = currentTable.fields;
+
+    // Form object for search
+    let form = new ew.FormBuilder()
+        .setId("fSubaktivitasKapalBerangkatsrch")
+        .setPageId("list")
+@if (subaktivitasKapalBerangkatList.UseAjaxActions) {
+        <text>.setSubmitWithFetch(true)</text>
+}
+
+        // Dynamic selection lists
+        .setLists({
+        })
+
+        // Filters
+        .setFilterList(@Html.Raw(subaktivitasKapalBerangkatList.GetFilterList()))
+        .build();
+    window[form.id] = form;
+    currentSearchForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<input type="hidden" name="cmd" value="search">
+@if (Security.CanSearch) {
+if (!subaktivitasKapalBerangkatList.IsExport() && Empty(subaktivitasKapalBerangkatList.CurrentAction) && subaktivitasKapalBerangkatList.HasSearchFields()) { @* Show search form (begin) *@
+<div class="ew-extended-search container-fluid ps-2">
+<div class="row mb-0">
+    <div class="col-sm-auto px-0 pe-sm-2">
+        <div class="ew-basic-search input-group">
+            <input type="search" name="@(Config.TableBasicSearch)" id="@(Config.TableBasicSearch)" class="form-control ew-basic-search-keyword" value="@Html.Raw(HtmlEncode(subaktivitasKapalBerangkatList.BasicSearch.SessionKeyword))" placeholder="@(HtmlEncode(Language.Phrase("Search")))" aria-label="@(HtmlEncode(Language.Phrase("Search")))">
+            <input type="hidden" name="@(Config.TableBasicSearchType)" id="@(Config.TableBasicSearchType)" class="ew-basic-search-type" value="@(HtmlEncode(subaktivitasKapalBerangkatList.BasicSearch.SessionType))">
+            <button type="button" data-bs-toggle="dropdown" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split" aria-haspopup="true" aria-expanded="false">
+                <span id="searchtype">@Html.Raw(subaktivitasKapalBerangkatList.BasicSearch.TypeNameShort)</span>
+            </button>
+            <div class="dropdown-menu dropdown-menu-end">
+                <button type="button" class="dropdown-item@(subaktivitasKapalBerangkatList.BasicSearch.SessionType == "" ? " active" : "")" form="fSubaktivitasKapalBerangkatsrch" data-ew-action="search-type">@Html.Raw(Language.Phrase("QuickSearchAuto"))</button>
+                <button type="button" class="dropdown-item@(subaktivitasKapalBerangkatList.BasicSearch.SessionType == "=" ? " active" : "")" form="fSubaktivitasKapalBerangkatsrch" data-ew-action="search-type" data-search-type="=">@Html.Raw(Language.Phrase("QuickSearchExact"))</button>
+                <button type="button" class="dropdown-item@(subaktivitasKapalBerangkatList.BasicSearch.SessionType == "AND" ? " active" : "")" form="fSubaktivitasKapalBerangkatsrch" data-ew-action="search-type" data-search-type="AND">@Html.Raw(Language.Phrase("QuickSearchAll"))</button>
+                <button type="button" class="dropdown-item@(subaktivitasKapalBerangkatList.BasicSearch.SessionType == "OR" ? " active" : "")" form="fSubaktivitasKapalBerangkatsrch" data-ew-action="search-type" data-search-type="OR">@Html.Raw(Language.Phrase("QuickSearchAny"))</button>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-auto mb-3">
+        <button class="btn btn-primary" name="btn-submit" id="btn-submit" type="submit">@Html.Raw(Language.Phrase("SearchBtn"))</button>
+    </div>
+</div>
+</div><!-- /.ew-extended-search -->
+} @* Show search form (end) *@
+}
+</div><!-- /.ew-search-panel -->
+</form>
+}
+@subaktivitasKapalBerangkatList.ShowPageHeader()
+@subaktivitasKapalBerangkatList.ShowMessages()
+<main class="list @(subaktivitasKapalBerangkatList.TotalRecords == 0 && !subaktivitasKapalBerangkatList.IsAdd ? " ew-no-record" : "")">
+<div id="ew-header-options">
+    @subaktivitasKapalBerangkatList.HeaderOptions.RenderBody()
+</div>
+<div id="ew-list">
+@if (subaktivitasKapalBerangkatList.TotalRecords > 0 || !Empty(subaktivitasKapalBerangkatList.CurrentAction)) {
+<div class="card ew-card ew-grid@(subaktivitasKapalBerangkatList.IsAddOrEdit ? " ew-grid-add-edit" : "") @(subaktivitasKapalBerangkatList.TableGridClass)">
+<form name="@(subaktivitasKapalBerangkatList.FormName)" id="@(subaktivitasKapalBerangkatList.FormName)" class="ew-form ew-list-form" action="@AppPath(subaktivitasKapalBerangkatList.PageName)" method="post" novalidate autocomplete="off">
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+@if (subaktivitasKapalBerangkatList.IsModal) {
+<input type="hidden" name="modal" value="1">
+}
+<div id="gmp_SubaktivitasKapalBerangkat" class="card-body ew-grid-middle-panel @(subaktivitasKapalBerangkatList.TableContainerClass)" style="@(subaktivitasKapalBerangkatList.TableContainerStyle)">
+@if (subaktivitasKapalBerangkatList.TotalRecords > 0 || subaktivitasKapalBerangkatList.IsGridEdit || subaktivitasKapalBerangkatList.IsMultiEdit) {
+<table id="tbl_SubaktivitasKapalBerangkatlist" class="@(subaktivitasKapalBerangkatList.TableClass)"><!-- .ew-table -->
+<thead>
+    <tr class="ew-table-header">
+@{
+    // Header row
+    subaktivitasKapalBerangkatList.RowType = RowType.Header;
+
+    // Render list options
+    await subaktivitasKapalBerangkatList.RenderListOptions();
+}
+@* Render list options (header, left) *@
+@subaktivitasKapalBerangkatList.ListOptions.RenderHeader("left")
+@if (subaktivitasKapalBerangkatList.idAktifitas.Visible) { // subaktivitasKapalBerangkatList.idAktifitas.Visible (begin)
+        <th data-name="idAktifitas" class="@(subaktivitasKapalBerangkatList.idAktifitas.HeaderCellClass)"><div id="elh_SubaktivitasKapalBerangkat_idAktifitas" class="SubaktivitasKapalBerangkat_idAktifitas">@Html.Raw(subaktivitasKapalBerangkatList.RenderFieldHeader(subaktivitasKapalBerangkatList.idAktifitas))</div></th>
+} @* subaktivitasKapalBerangkatList.idAktifitas.Visible (end) *@
+@if (subaktivitasKapalBerangkatList.idProses.Visible) { // subaktivitasKapalBerangkatList.idProses.Visible (begin)
+        <th data-name="idProses" class="@(subaktivitasKapalBerangkatList.idProses.HeaderCellClass)"><div id="elh_SubaktivitasKapalBerangkat_idProses" class="SubaktivitasKapalBerangkat_idProses">@Html.Raw(subaktivitasKapalBerangkatList.RenderFieldHeader(subaktivitasKapalBerangkatList.idProses))</div></th>
+} @* subaktivitasKapalBerangkatList.idProses.Visible (end) *@
+@if (subaktivitasKapalBerangkatList.NoReferensi.Visible) { // subaktivitasKapalBerangkatList.NoReferensi.Visible (begin)
+        <th data-name="NoReferensi" class="@(subaktivitasKapalBerangkatList.NoReferensi.HeaderCellClass)"><div id="elh_SubaktivitasKapalBerangkat_NoReferensi" class="SubaktivitasKapalBerangkat_NoReferensi">@Html.Raw(subaktivitasKapalBerangkatList.RenderFieldHeader(subaktivitasKapalBerangkatList.NoReferensi))</div></th>
+} @* subaktivitasKapalBerangkatList.NoReferensi.Visible (end) *@
+@if (subaktivitasKapalBerangkatList.StatusAktivitas.Visible) { // subaktivitasKapalBerangkatList.StatusAktivitas.Visible (begin)
+        <th data-name="StatusAktivitas" class="@(subaktivitasKapalBerangkatList.StatusAktivitas.HeaderCellClass)"><div id="elh_SubaktivitasKapalBerangkat_StatusAktivitas" class="SubaktivitasKapalBerangkat_StatusAktivitas">@Html.Raw(subaktivitasKapalBerangkatList.RenderFieldHeader(subaktivitasKapalBerangkatList.StatusAktivitas))</div></th>
+} @* subaktivitasKapalBerangkatList.StatusAktivitas.Visible (end) *@
+@if (subaktivitasKapalBerangkatList.LastUpdatedBy.Visible) { // subaktivitasKapalBerangkatList.LastUpdatedBy.Visible (begin)
+        <th data-name="LastUpdatedBy" class="@(subaktivitasKapalBerangkatList.LastUpdatedBy.HeaderCellClass)"><div id="elh_SubaktivitasKapalBerangkat_LastUpdatedBy" class="SubaktivitasKapalBerangkat_LastUpdatedBy">@Html.Raw(subaktivitasKapalBerangkatList.RenderFieldHeader(subaktivitasKapalBerangkatList.LastUpdatedBy))</div></th>
+} @* subaktivitasKapalBerangkatList.LastUpdatedBy.Visible (end) *@
+@if (subaktivitasKapalBerangkatList.lastUpdatedDate.Visible) { // subaktivitasKapalBerangkatList.lastUpdatedDate.Visible (begin)
+        <th data-name="lastUpdatedDate" class="@(subaktivitasKapalBerangkatList.lastUpdatedDate.HeaderCellClass)"><div id="elh_SubaktivitasKapalBerangkat_lastUpdatedDate" class="SubaktivitasKapalBerangkat_lastUpdatedDate">@Html.Raw(subaktivitasKapalBerangkatList.RenderFieldHeader(subaktivitasKapalBerangkatList.lastUpdatedDate))</div></th>
+} @* subaktivitasKapalBerangkatList.lastUpdatedDate.Visible (end) *@
+@if (subaktivitasKapalBerangkatList.tglBerangkat.Visible) { // subaktivitasKapalBerangkatList.tglBerangkat.Visible (begin)
+        <th data-name="tglBerangkat" class="@(subaktivitasKapalBerangkatList.tglBerangkat.HeaderCellClass)"><div id="elh_SubaktivitasKapalBerangkat_tglBerangkat" class="SubaktivitasKapalBerangkat_tglBerangkat">@Html.Raw(subaktivitasKapalBerangkatList.RenderFieldHeader(subaktivitasKapalBerangkatList.tglBerangkat))</div></th>
+} @* subaktivitasKapalBerangkatList.tglBerangkat.Visible (end) *@
+@if (subaktivitasKapalBerangkatList.userInput.Visible) { // subaktivitasKapalBerangkatList.userInput.Visible (begin)
+        <th data-name="userInput" class="@(subaktivitasKapalBerangkatList.userInput.HeaderCellClass)"><div id="elh_SubaktivitasKapalBerangkat_userInput" class="SubaktivitasKapalBerangkat_userInput">@Html.Raw(subaktivitasKapalBerangkatList.RenderFieldHeader(subaktivitasKapalBerangkatList.userInput))</div></th>
+} @* subaktivitasKapalBerangkatList.userInput.Visible (end) *@
+@* Render list options (header, right) *@
+@subaktivitasKapalBerangkatList.ListOptions.RenderHeader("right")
+    </tr>
+</thead>
+<tbody data-page="@(subaktivitasKapalBerangkatList.PageNumber)">
+@{
+    await subaktivitasKapalBerangkatList.SetupGrid();
+    bool eof = subaktivitasKapalBerangkatList.Recordset == null; // DN
+}
+@while (subaktivitasKapalBerangkatList.RecordCount < subaktivitasKapalBerangkatList.StopRecord || SameString(subaktivitasKapalBerangkatList.RowIndex, "$rowindex$")) { // Begin While
+    if (!eof && !SameString(subaktivitasKapalBerangkatList.RowIndex, "$rowindex$") &&
+        (!subaktivitasKapalBerangkatList.IsGridAdd || subaktivitasKapalBerangkatList.CurrentMode == "copy") &&
+        (!((subaktivitasKapalBerangkatList.IsCopy || subaktivitasKapalBerangkatList.IsAdd) && subaktivitasKapalBerangkatList.RowIndex is int rowIndex && rowIndex == 0))) // DN
+        eof = !await subaktivitasKapalBerangkatList.Recordset.ReadAsync();
+    subaktivitasKapalBerangkatList.RecordCount++;
+    if (subaktivitasKapalBerangkatList.RecordCount >= subaktivitasKapalBerangkatList.StartRecord) {
+        await subaktivitasKapalBerangkatList.SetupRow();
+    <tr @Html.Raw(subaktivitasKapalBerangkatList.RowAttributes)>
+    @* Render list options (body, left) *@
+    @subaktivitasKapalBerangkatList.ListOptions.RenderBody("left", subaktivitasKapalBerangkatList.RowCount)
+    @if (subaktivitasKapalBerangkatList.idAktifitas.Visible) { // subaktivitasKapalBerangkatList.idAktifitas.Visible (begin)
+        <td data-name="idAktifitas" @Html.Raw(subaktivitasKapalBerangkatList.idAktifitas.CellAttributes)>
+<span id="el@(subaktivitasKapalBerangkatList.RowIndex == "$rowindex$" ? "$rowindex$" : subaktivitasKapalBerangkatList.RowCount)_SubaktivitasKapalBerangkat_idAktifitas" class="el_SubaktivitasKapalBerangkat_idAktifitas">
+<span @Html.Raw(subaktivitasKapalBerangkatList.idAktifitas.ViewAttributes)>
+@Html.Raw(subaktivitasKapalBerangkatList.idAktifitas.GetViewValue())</span>
+</span>
+</td>
+    } @* subaktivitasKapalBerangkatList.idAktifitas.Visible (end) *@
+    @if (subaktivitasKapalBerangkatList.idProses.Visible) { // subaktivitasKapalBerangkatList.idProses.Visible (begin)
+        <td data-name="idProses" @Html.Raw(subaktivitasKapalBerangkatList.idProses.CellAttributes)>
+<span id="el@(subaktivitasKapalBerangkatList.RowIndex == "$rowindex$" ? "$rowindex$" : subaktivitasKapalBerangkatList.RowCount)_SubaktivitasKapalBerangkat_idProses" class="el_SubaktivitasKapalBerangkat_idProses">
+<span @Html.Raw(subaktivitasKapalBerangkatList.idProses.ViewAttributes)>
+@Html.Raw(subaktivitasKapalBerangkatList.idProses.GetViewValue())</span>
+</span>
+</td>
+    } @* subaktivitasKapalBerangkatList.idProses.Visible (end) *@
+    @if (subaktivitasKapalBerangkatList.NoReferensi.Visible) { // subaktivitasKapalBerangkatList.NoReferensi.Visible (begin)
+        <td data-name="NoReferensi" @Html.Raw(subaktivitasKapalBerangkatList.NoReferensi.CellAttributes)>
+<span id="el@(subaktivitasKapalBerangkatList.RowIndex == "$rowindex$" ? "$rowindex$" : subaktivitasKapalBerangkatList.RowCount)_SubaktivitasKapalBerangkat_NoReferensi" class="el_SubaktivitasKapalBerangkat_NoReferensi">
+<span @Html.Raw(subaktivitasKapalBerangkatList.NoReferensi.ViewAttributes)>
+@Html.Raw(subaktivitasKapalBerangkatList.NoReferensi.GetViewValue())</span>
+</span>
+</td>
+    } @* subaktivitasKapalBerangkatList.NoReferensi.Visible (end) *@
+    @if (subaktivitasKapalBerangkatList.StatusAktivitas.Visible) { // subaktivitasKapalBerangkatList.StatusAktivitas.Visible (begin)
+        <td data-name="StatusAktivitas" @Html.Raw(subaktivitasKapalBerangkatList.StatusAktivitas.CellAttributes)>
+<span id="el@(subaktivitasKapalBerangkatList.RowIndex == "$rowindex$" ? "$rowindex$" : subaktivitasKapalBerangkatList.RowCount)_SubaktivitasKapalBerangkat_StatusAktivitas" class="el_SubaktivitasKapalBerangkat_StatusAktivitas">
+<span @Html.Raw(subaktivitasKapalBerangkatList.StatusAktivitas.ViewAttributes)>
+@Html.Raw(subaktivitasKapalBerangkatList.StatusAktivitas.GetViewValue())</span>
+</span>
+</td>
+    } @* subaktivitasKapalBerangkatList.StatusAktivitas.Visible (end) *@
+    @if (subaktivitasKapalBerangkatList.LastUpdatedBy.Visible) { // subaktivitasKapalBerangkatList.LastUpdatedBy.Visible (begin)
+        <td data-name="LastUpdatedBy" @Html.Raw(subaktivitasKapalBerangkatList.LastUpdatedBy.CellAttributes)>
+<span id="el@(subaktivitasKapalBerangkatList.RowIndex == "$rowindex$" ? "$rowindex$" : subaktivitasKapalBerangkatList.RowCount)_SubaktivitasKapalBerangkat_LastUpdatedBy" class="el_SubaktivitasKapalBerangkat_LastUpdatedBy">
+<span @Html.Raw(subaktivitasKapalBerangkatList.LastUpdatedBy.ViewAttributes)>
+@Html.Raw(subaktivitasKapalBerangkatList.LastUpdatedBy.GetViewValue())</span>
+</span>
+</td>
+    } @* subaktivitasKapalBerangkatList.LastUpdatedBy.Visible (end) *@
+    @if (subaktivitasKapalBerangkatList.lastUpdatedDate.Visible) { // subaktivitasKapalBerangkatList.lastUpdatedDate.Visible (begin)
+        <td data-name="lastUpdatedDate" @Html.Raw(subaktivitasKapalBerangkatList.lastUpdatedDate.CellAttributes)>
+<span id="el@(subaktivitasKapalBerangkatList.RowIndex == "$rowindex$" ? "$rowindex$" : subaktivitasKapalBerangkatList.RowCount)_SubaktivitasKapalBerangkat_lastUpdatedDate" class="el_SubaktivitasKapalBerangkat_lastUpdatedDate">
+<span @Html.Raw(subaktivitasKapalBerangkatList.lastUpdatedDate.ViewAttributes)>
+@Html.Raw(subaktivitasKapalBerangkatList.lastUpdatedDate.GetViewValue())</span>
+</span>
+</td>
+    } @* subaktivitasKapalBerangkatList.lastUpdatedDate.Visible (end) *@
+    @if (subaktivitasKapalBerangkatList.tglBerangkat.Visible) { // subaktivitasKapalBerangkatList.tglBerangkat.Visible (begin)
+        <td data-name="tglBerangkat" @Html.Raw(subaktivitasKapalBerangkatList.tglBerangkat.CellAttributes)>
+<span id="el@(subaktivitasKapalBerangkatList.RowIndex == "$rowindex$" ? "$rowindex$" : subaktivitasKapalBerangkatList.RowCount)_SubaktivitasKapalBerangkat_tglBerangkat" class="el_SubaktivitasKapalBerangkat_tglBerangkat">
+<span @Html.Raw(subaktivitasKapalBerangkatList.tglBerangkat.ViewAttributes)>
+@Html.Raw(subaktivitasKapalBerangkatList.tglBerangkat.GetViewValue())</span>
+</span>
+</td>
+    } @* subaktivitasKapalBerangkatList.tglBerangkat.Visible (end) *@
+    @if (subaktivitasKapalBerangkatList.userInput.Visible) { // subaktivitasKapalBerangkatList.userInput.Visible (begin)
+        <td data-name="userInput" @Html.Raw(subaktivitasKapalBerangkatList.userInput.CellAttributes)>
+<span id="el@(subaktivitasKapalBerangkatList.RowIndex == "$rowindex$" ? "$rowindex$" : subaktivitasKapalBerangkatList.RowCount)_SubaktivitasKapalBerangkat_userInput" class="el_SubaktivitasKapalBerangkat_userInput">
+<span @Html.Raw(subaktivitasKapalBerangkatList.userInput.ViewAttributes)>
+@Html.Raw(subaktivitasKapalBerangkatList.userInput.GetViewValue())</span>
+</span>
+</td>
+    } @* subaktivitasKapalBerangkatList.userInput.Visible (end) *@
+    @* Render list options (body, right) *@
+    @subaktivitasKapalBerangkatList.ListOptions.RenderBody("right", subaktivitasKapalBerangkatList.RowCount)
+    </tr>
+    } @* End if *@
+
+    // Reset for template row
+    if (SameString(subaktivitasKapalBerangkatList.RowIndex, "$rowindex$"))
+        subaktivitasKapalBerangkatList.RowIndex = 0;
+
+    // Reset inline add/copy row
+    if ((subaktivitasKapalBerangkatList.IsCopy || subaktivitasKapalBerangkatList.IsAdd) && subaktivitasKapalBerangkatList.RowIndex is int rowIndex2 && rowIndex2 == 0)
+        subaktivitasKapalBerangkatList.RowIndex = 1;
+} @* End While *@
+</tbody>
+</table><!-- /.ew-table -->
+} @* End If TotalRecords > 0 *@
+</div><!-- /.ew-grid-middle-panel -->
+@if (Empty(subaktivitasKapalBerangkatList.CurrentAction) && !subaktivitasKapalBerangkatList.UseAjaxActions) {
+<input type="hidden" name="action" id="action" value="">
+}
+</form><!-- /.ew-list-form -->
+@{ subaktivitasKapalBerangkatList.CloseRecordset(); }
+@if (!subaktivitasKapalBerangkatList.IsExport()) {
+<div class="card-footer ew-grid-lower-panel">
+@if (!subaktivitasKapalBerangkatList.IsGridAdd && !(subaktivitasKapalBerangkatList.IsGridEdit && subaktivitasKapalBerangkatList.ModalGridEdit) && !subaktivitasKapalBerangkatList.IsMultiEdit) {
+@Html.Raw(subaktivitasKapalBerangkatList.Pager.Render())
+}
+<div class="ew-list-other-options">
+@subaktivitasKapalBerangkatList.OtherOptions.RenderBody("bottom")
+</div>
+</div>
+}
+</div><!-- /.ew-grid -->
+} else { // Show other options
+<div class="ew-list-other-options">
+@subaktivitasKapalBerangkatList.OtherOptions.ForEach(opt => opt.ButtonClass = "").RenderBody()
+</div>
+}
+</div>
+<div id="ew-footer-options">
+    @subaktivitasKapalBerangkatList.FooterOptions.RenderBody()
+</div>
+</main>
+@subaktivitasKapalBerangkatList.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+@if (!subaktivitasKapalBerangkatList.IsExport()) {
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("SubaktivitasKapalBerangkat");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Write your table-specific startup script here
+    // document.write("page loaded");
+});
+</script>
+}

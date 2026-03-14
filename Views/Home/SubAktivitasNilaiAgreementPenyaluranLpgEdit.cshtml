@@ -1,0 +1,762 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (subAktivitasNilaiAgreementPenyaluranLpgEdit.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = subAktivitasNilaiAgreementPenyaluranLpgEdit.UseLayout ? "_Layout" : "";
+}
+@subAktivitasNilaiAgreementPenyaluranLpgEdit.ShowPageHeader()
+@subAktivitasNilaiAgreementPenyaluranLpgEdit.ShowMessages()
+<main class="edit">
+<form name="fSubAktivitasNilaiAgreementPenyaluranLPGedit" id="fSubAktivitasNilaiAgreementPenyaluranLPGedit" class="@(subAktivitasNilaiAgreementPenyaluranLpgEdit.FormClassName)" action="@AppPath(CurrentPageName())" method="post" novalidate autocomplete="off">
+<script>
+var currentTable = @Html.Raw(ConvertToJson(subAktivitasNilaiAgreementPenyaluranLpgEdit.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { SubAktivitasNilaiAgreementPenyaluranLPG: currentTable } });
+var currentPageID = ew.PAGE_ID = "edit";
+var currentForm;
+var fSubAktivitasNilaiAgreementPenyaluranLPGedit;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("fSubAktivitasNilaiAgreementPenyaluranLPGedit")
+        .setPageId("edit")
+
+        // Add fields
+        .setFields([
+
+            ["NoReferensi", [fields.NoReferensi.visible && fields.NoReferensi.required ? ew.Validators.required(fields.NoReferensi.caption) : null], fields.NoReferensi.isInvalid],
+            ["idProses", [fields.idProses.visible && fields.idProses.required ? ew.Validators.required(fields.idProses.caption) : null], fields.idProses.isInvalid],
+            ["idAktifitas", [fields.idAktifitas.visible && fields.idAktifitas.required ? ew.Validators.required(fields.idAktifitas.caption) : null], fields.idAktifitas.isInvalid],
+            ["StatusAktivitas", [fields.StatusAktivitas.visible && fields.StatusAktivitas.required ? ew.Validators.required(fields.StatusAktivitas.caption) : null], fields.StatusAktivitas.isInvalid],
+            ["LastUpdatedBy", [fields.LastUpdatedBy.visible && fields.LastUpdatedBy.required ? ew.Validators.required(fields.LastUpdatedBy.caption) : null], fields.LastUpdatedBy.isInvalid],
+            ["lastUpdatedDate", [fields.lastUpdatedDate.visible && fields.lastUpdatedDate.required ? ew.Validators.required(fields.lastUpdatedDate.caption) : null], fields.lastUpdatedDate.isInvalid],
+            ["Flowrate", [fields.Flowrate.visible && fields.Flowrate.required ? ew.Validators.required(fields.Flowrate.caption) : null], fields.Flowrate.isInvalid],
+            ["Pressure", [fields.Pressure.visible && fields.Pressure.required ? ew.Validators.required(fields.Pressure.caption) : null], fields.Pressure.isInvalid],
+            ["LamaPembongkaran", [fields.LamaPembongkaran.visible && fields.LamaPembongkaran.required ? ew.Validators.required(fields.LamaPembongkaran.caption) : null], fields.LamaPembongkaran.isInvalid],
+            ["ETC", [fields.ETC.visible && fields.ETC.required ? ew.Validators.required(fields.ETC.caption) : null], fields.ETC.isInvalid]
+        ])
+
+        // Form_CustomValidate
+        .setCustomValidate(
+            function(fobj) { // DO NOT CHANGE THIS LINE!
+                    // Your custom validation code here, return false if invalid.
+                    return true;
+                }
+        )
+
+        // Use JavaScript validation or not
+        .setValidateRequired(ew.CLIENT_VALIDATE)
+
+        // Dynamic selection lists
+        .setLists({
+        })
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Client script
+    // Write your client script here, no need to add script tags.
+    var parent_url = ew.PATH_BASE;
+    var NoReferensi = $("#x_NoReferensi").val();
+    var IdProses = $("#x_idProses").val();
+    var IdAktivitas = $("#x_idAktifitas").val();
+    function hideFeedback(el) {
+        let feedback = el.siblings('.invalid-feedback');
+        feedback.hide();
+    }
+    function handleCustomSubmit(status) {
+        let idAktivitas = $("#x_idAktifitas").val();
+        const originalStatus = document.querySelector('#el_SubAktivitasNilaiAgreementPenyaluranLPG_StatusAktivitas .form-control-plaintext').textContent;
+        var inputMap = {
+            "#x_Flowrate": "Flowrate"
+        };
+        let isValid = true;
+        $('.invalid-feedback').hide();
+        for (var id in inputMap) {
+            var el = $(id);
+            var label = inputMap[id];
+            var val = el.val().trim();
+            var feedback = el.siblings('.invalid-feedback');
+            if (val === "") {
+                feedback.text('*' + label + ' tidak boleh kosong.').show();
+                isValid = false;
+                continue;
+            }
+            if (isNaN(val)) {
+                feedback.text('*' + label + ' harus diisi dengan angka desimal yang valid.').show();
+                isValid = false;
+                continue;
+            }
+            var number = parseFloat(val);
+            if (number === 0) {
+                feedback.text('*' + label + ' tidak boleh bernilai 0.').show();
+                isValid = false;
+            }
+        }
+        if (!isValid) {
+            ew.alert('Nilai input harus berupa angka desimal yang valid.');
+            return;
+        }
+        $.ajax({
+            url: parent_url + `api/LookUpList/check_valid_status_aktivitas?idAktivitas=${idAktivitas}&originalStatus=${originalStatus}`,
+            type: 'GET',
+            beforeSend: function () {
+                showLoading();
+            },
+            success: function (response) {
+                if (!response.IsValid){
+                    hideLoading();
+                    ew.alert(response.Message ?? "Status aktivitas telah diubah oleh pengguna lain");
+                    return;
+                } else {
+                    let form = $("#fSubAktivitasNilaiAgreementPenyaluranLPGedit");
+                    $.ajax({
+                        url: form.attr("action"),
+                        type: form.attr("method"),
+                        data: form.serialize(),
+                        success: function (response) {
+                            updateStatus(idAktivitas, status);
+                        },
+                        error: function (xhr, status, error) {
+                            hideLoading();
+                            ew.alert("Gagal menyimpan data.");
+                            console.error("Form submit gagal:", error);
+                        }
+                    }); 
+                }
+            },
+            error: function (xhr, status, error) {
+                hideLoading();
+                ew.alert("Gagal menyimpan data.");
+                console.error("Form submit gagal:", error);
+            }
+        }); 
+    }
+    function updateStatus(idAktivitas, status) {
+        $.ajax({
+            url: parent_url + `api/LookUpList/update_status_aktivitas?idAktivitas=${idAktivitas}&statusAktivitas=${status}`,
+            type: 'POST',
+            success: function () {
+                $.ajax({
+                    url: parent_url + 'api/LookUpList/generate_etc_konsinyasi',
+                    method: 'POST',
+                    data: JSON.stringify({ 
+                        NoReferensi: NoReferensi,
+                        Jenis: "LPG"
+                    }),
+                    contentType: 'application/json',
+                    success: function (res) {
+                        setTimeout(function () {
+                            if (status == "Completed" || status == "Completed Edit") {
+                                window.location.href = `${parent_url}AktivitasList?cmd=search&x_IdProses%5B%5D=${IdProses}&search=&searchtype=`;
+                            } else {
+                                location.reload();
+                            }
+                        }, 1000);
+                    },
+                    error: function (err) {
+                        hideLoading();
+                        ew.alert('Perubahan gagal disimpan.');
+                        console.error(err);
+                    },
+                }); 
+            },
+            error: function (xhr, status, error) {
+                hideLoading();
+                ew.alert("Status gagal diperbarui.");
+                console.error("Update status gagal:", error);
+            }
+        });
+    }
+    function reverseStatus(status, catatan) {
+        showLoading();
+        let idAktivitas = $("#x_idAktifitas").val();
+        $.ajax({
+                url: parent_url + `api/LookUpList/update_status_aktivitas-v2`,
+                type: 'POST',
+                data: JSON.stringify({ IdAktivitas: idAktivitas, StatusAktivitas: status, Catatan: catatan ?? null }),
+                contentType: 'application/json',
+                success: function () {
+                    $.ajax({
+                        url: parent_url + 'api/LookUpList/generate_etc',
+                        method: 'POST',
+                        data: JSON.stringify({ NoReferensi: NoReferensi }),
+                        contentType: 'application/json',
+                        success: function (res) {
+                            setTimeout(function () {
+                                window.location.href = `${parent_url}AktivitasList?cmd=search&x_IdProses%5B%5D=${IdProses}&search=&searchtype=`;
+                            }, 1000);
+                        },
+                        error: function (err) {
+                            hideLoading();
+                            ew.alert('Perubahan gagal disimpan.');
+                            console.error(err);
+                        },
+                    });
+                },
+                error: function (xhr, status, error) {
+                    ew.alert("Status gagal diperbarui.");
+                    console.error("Update status gagal:", error);
+                },
+                complete: function () {
+                    hideLoading();
+                }
+            });
+        }
+    $(document).on("submit", "#reverseStatusEditingModalForm", function (e) {
+        e.preventDefault();
+        let catatanText = $("#catatanReverseStatusEditing").val();
+        reverseStatus("Editing", catatanText);
+    });
+    $(document).on("click", "#btn-draft", function () {
+        handleCustomSubmit("Draft");
+    });
+    $(document).on("click", "#btn-completed", function () {
+        handleCustomSubmit("Completed");
+    });
+    $(document).on("click", "#btn-editing", function () {
+        handleCustomSubmit("Editing");
+    });
+    $(document).on("click", "#btn-completedEdit", function () {
+        handleCustomSubmit("Completed Edit");
+    });
+    $(document).ready(function () {
+        $('#x_Flowrate, #x_Pressure')
+            .attr('inputmode', 'numeric')
+            .on('input', function () {
+                let val = $(this).val();
+                let isNegative = val.startsWith('-');
+                val = val.replace(',', '.');
+                val = val.replace(/[^0-9.]/g, '');
+                const parts = val.split('.');
+                if (parts.length > 2) {
+                    val = parts[0] + '.' + parts.slice(1).join('');
+                }
+                if (isNegative) {
+                    val = '-' + val;
+                }
+                $(this).val(val);
+            });
+        $('#x_Flowrate, #x_Pressure').on('focus', function () {
+            hideFeedback($(this));
+        });
+    });
+});
+</script>
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+<input type="hidden" name="action" id="action" value="update">
+<input type="hidden" name="modal" value="@ConvertToInt(subAktivitasNilaiAgreementPenyaluranLpgEdit.IsModal)">
+@if (IsJsonResponse()) {
+<input type="hidden" name="json" value="1">
+}
+<input type="hidden" name="@(subAktivitasNilaiAgreementPenyaluranLpgEdit.OldKeyName)" value="@Html.Raw(subAktivitasNilaiAgreementPenyaluranLpgEdit.OldKey)">
+<div class="ew-edit-div"><!-- page* -->
+@if (subAktivitasNilaiAgreementPenyaluranLpgEdit.NoReferensi.Visible) { // subAktivitasNilaiAgreementPenyaluranLpgEdit.NoReferensi.Visible (begin)
+    <div id="r_NoReferensi" @Html.Raw(subAktivitasNilaiAgreementPenyaluranLpgEdit.NoReferensi.RowAttributes)>
+        <label id="elh_SubAktivitasNilaiAgreementPenyaluranLPG_NoReferensi" for="x_NoReferensi" class="@(subAktivitasNilaiAgreementPenyaluranLpgEdit.LeftColumnClass)">@Html.Raw(subAktivitasNilaiAgreementPenyaluranLpgEdit.NoReferensi.Caption)@Html.Raw(subAktivitasNilaiAgreementPenyaluranLpgEdit.NoReferensi.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(subAktivitasNilaiAgreementPenyaluranLpgEdit.RightColumnClass)"><div @Html.Raw(subAktivitasNilaiAgreementPenyaluranLpgEdit.NoReferensi.CellAttributes)>
+<span id="el_SubAktivitasNilaiAgreementPenyaluranLPG_NoReferensi">
+<span @Html.Raw(subAktivitasNilaiAgreementPenyaluranLpgEdit.NoReferensi.ViewAttributes)>
+<input type="text" readonly class="form-control-plaintext" value="@Html.Raw(RemoveHtml(ConvertToString(subAktivitasNilaiAgreementPenyaluranLpgEdit.NoReferensi.EditValue)))"></span>
+<input type="hidden" data-table="SubAktivitasNilaiAgreementPenyaluranLPG" data-field="x_NoReferensi" data-hidden="1" name="x_NoReferensi" id="x_NoReferensi" value="@Html.Raw(HtmlEncode(subAktivitasNilaiAgreementPenyaluranLpgEdit.NoReferensi.CurrentValue))">
+</span>
+</div></div>
+    </div>
+} @* subAktivitasNilaiAgreementPenyaluranLpgEdit.NoReferensi.Visible (end) *@
+@if (subAktivitasNilaiAgreementPenyaluranLpgEdit.idProses.Visible) { // subAktivitasNilaiAgreementPenyaluranLpgEdit.idProses.Visible (begin)
+    <div id="r_idProses" @Html.Raw(subAktivitasNilaiAgreementPenyaluranLpgEdit.idProses.RowAttributes)>
+        <label id="elh_SubAktivitasNilaiAgreementPenyaluranLPG_idProses" for="x_idProses" class="@(subAktivitasNilaiAgreementPenyaluranLpgEdit.LeftColumnClass)">@Html.Raw(subAktivitasNilaiAgreementPenyaluranLpgEdit.idProses.Caption)@Html.Raw(subAktivitasNilaiAgreementPenyaluranLpgEdit.idProses.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(subAktivitasNilaiAgreementPenyaluranLpgEdit.RightColumnClass)"><div @Html.Raw(subAktivitasNilaiAgreementPenyaluranLpgEdit.idProses.CellAttributes)>
+<span id="el_SubAktivitasNilaiAgreementPenyaluranLPG_idProses">
+<span @Html.Raw(subAktivitasNilaiAgreementPenyaluranLpgEdit.idProses.ViewAttributes)>
+<span class="form-control-plaintext">@Html.Raw(subAktivitasNilaiAgreementPenyaluranLpgEdit.idProses.DisplayValue(subAktivitasNilaiAgreementPenyaluranLpgEdit.idProses.EditValue))</span></span>
+<input type="hidden" data-table="SubAktivitasNilaiAgreementPenyaluranLPG" data-field="x_idProses" data-hidden="1" name="x_idProses" id="x_idProses" value="@Html.Raw(HtmlEncode(subAktivitasNilaiAgreementPenyaluranLpgEdit.idProses.CurrentValue))">
+</span>
+</div></div>
+    </div>
+} @* subAktivitasNilaiAgreementPenyaluranLpgEdit.idProses.Visible (end) *@
+@if (subAktivitasNilaiAgreementPenyaluranLpgEdit.idAktifitas.Visible) { // subAktivitasNilaiAgreementPenyaluranLpgEdit.idAktifitas.Visible (begin)
+    <div id="r_idAktifitas" @Html.Raw(subAktivitasNilaiAgreementPenyaluranLpgEdit.idAktifitas.RowAttributes)>
+        <label id="elh_SubAktivitasNilaiAgreementPenyaluranLPG_idAktifitas" for="x_idAktifitas" class="@(subAktivitasNilaiAgreementPenyaluranLpgEdit.LeftColumnClass)">@Html.Raw(subAktivitasNilaiAgreementPenyaluranLpgEdit.idAktifitas.Caption)@Html.Raw(subAktivitasNilaiAgreementPenyaluranLpgEdit.idAktifitas.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(subAktivitasNilaiAgreementPenyaluranLpgEdit.RightColumnClass)"><div @Html.Raw(subAktivitasNilaiAgreementPenyaluranLpgEdit.idAktifitas.CellAttributes)>
+<span id="el_SubAktivitasNilaiAgreementPenyaluranLPG_idAktifitas">
+<span @Html.Raw(subAktivitasNilaiAgreementPenyaluranLpgEdit.idAktifitas.ViewAttributes)>
+<span class="form-control-plaintext">@Html.Raw(subAktivitasNilaiAgreementPenyaluranLpgEdit.idAktifitas.DisplayValue(subAktivitasNilaiAgreementPenyaluranLpgEdit.idAktifitas.EditValue))</span></span>
+<input type="hidden" data-table="SubAktivitasNilaiAgreementPenyaluranLPG" data-field="x_idAktifitas" data-hidden="1" name="x_idAktifitas" id="x_idAktifitas" value="@Html.Raw(HtmlEncode(subAktivitasNilaiAgreementPenyaluranLpgEdit.idAktifitas.CurrentValue))">
+</span>
+</div></div>
+    </div>
+} @* subAktivitasNilaiAgreementPenyaluranLpgEdit.idAktifitas.Visible (end) *@
+@if (subAktivitasNilaiAgreementPenyaluranLpgEdit.StatusAktivitas.Visible) { // subAktivitasNilaiAgreementPenyaluranLpgEdit.StatusAktivitas.Visible (begin)
+    <div id="r_StatusAktivitas" @Html.Raw(subAktivitasNilaiAgreementPenyaluranLpgEdit.StatusAktivitas.RowAttributes)>
+        <label id="elh_SubAktivitasNilaiAgreementPenyaluranLPG_StatusAktivitas" for="x_StatusAktivitas" class="@(subAktivitasNilaiAgreementPenyaluranLpgEdit.LeftColumnClass)">@Html.Raw(subAktivitasNilaiAgreementPenyaluranLpgEdit.StatusAktivitas.Caption)@Html.Raw(subAktivitasNilaiAgreementPenyaluranLpgEdit.StatusAktivitas.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(subAktivitasNilaiAgreementPenyaluranLpgEdit.RightColumnClass)"><div @Html.Raw(subAktivitasNilaiAgreementPenyaluranLpgEdit.StatusAktivitas.CellAttributes)>
+<span id="el_SubAktivitasNilaiAgreementPenyaluranLPG_StatusAktivitas">
+<span @Html.Raw(subAktivitasNilaiAgreementPenyaluranLpgEdit.StatusAktivitas.ViewAttributes)>
+<span class="form-control-plaintext">@Html.Raw(subAktivitasNilaiAgreementPenyaluranLpgEdit.StatusAktivitas.DisplayValue(subAktivitasNilaiAgreementPenyaluranLpgEdit.StatusAktivitas.EditValue))</span></span>
+<input type="hidden" data-table="SubAktivitasNilaiAgreementPenyaluranLPG" data-field="x_StatusAktivitas" data-hidden="1" name="x_StatusAktivitas" id="x_StatusAktivitas" value="@Html.Raw(HtmlEncode(subAktivitasNilaiAgreementPenyaluranLpgEdit.StatusAktivitas.CurrentValue))">
+</span>
+</div></div>
+    </div>
+} @* subAktivitasNilaiAgreementPenyaluranLpgEdit.StatusAktivitas.Visible (end) *@
+@if (subAktivitasNilaiAgreementPenyaluranLpgEdit.LastUpdatedBy.Visible) { // subAktivitasNilaiAgreementPenyaluranLpgEdit.LastUpdatedBy.Visible (begin)
+    <div id="r_LastUpdatedBy" @Html.Raw(subAktivitasNilaiAgreementPenyaluranLpgEdit.LastUpdatedBy.RowAttributes)>
+        <label id="elh_SubAktivitasNilaiAgreementPenyaluranLPG_LastUpdatedBy" for="x_LastUpdatedBy" class="@(subAktivitasNilaiAgreementPenyaluranLpgEdit.LeftColumnClass)">@Html.Raw(subAktivitasNilaiAgreementPenyaluranLpgEdit.LastUpdatedBy.Caption)@Html.Raw(subAktivitasNilaiAgreementPenyaluranLpgEdit.LastUpdatedBy.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(subAktivitasNilaiAgreementPenyaluranLpgEdit.RightColumnClass)"><div @Html.Raw(subAktivitasNilaiAgreementPenyaluranLpgEdit.LastUpdatedBy.CellAttributes)>
+<span id="el_SubAktivitasNilaiAgreementPenyaluranLPG_LastUpdatedBy">
+<span @Html.Raw(subAktivitasNilaiAgreementPenyaluranLpgEdit.LastUpdatedBy.ViewAttributes)>
+<input type="text" readonly class="form-control-plaintext" value="@Html.Raw(RemoveHtml(ConvertToString(subAktivitasNilaiAgreementPenyaluranLpgEdit.LastUpdatedBy.EditValue)))"></span>
+<input type="hidden" data-table="SubAktivitasNilaiAgreementPenyaluranLPG" data-field="x_LastUpdatedBy" data-hidden="1" name="x_LastUpdatedBy" id="x_LastUpdatedBy" value="@Html.Raw(HtmlEncode(subAktivitasNilaiAgreementPenyaluranLpgEdit.LastUpdatedBy.CurrentValue))">
+</span>
+</div></div>
+    </div>
+} @* subAktivitasNilaiAgreementPenyaluranLpgEdit.LastUpdatedBy.Visible (end) *@
+@if (subAktivitasNilaiAgreementPenyaluranLpgEdit.lastUpdatedDate.Visible) { // subAktivitasNilaiAgreementPenyaluranLpgEdit.lastUpdatedDate.Visible (begin)
+    <div id="r_lastUpdatedDate" @Html.Raw(subAktivitasNilaiAgreementPenyaluranLpgEdit.lastUpdatedDate.RowAttributes)>
+        <label id="elh_SubAktivitasNilaiAgreementPenyaluranLPG_lastUpdatedDate" for="x_lastUpdatedDate" class="@(subAktivitasNilaiAgreementPenyaluranLpgEdit.LeftColumnClass)">@Html.Raw(subAktivitasNilaiAgreementPenyaluranLpgEdit.lastUpdatedDate.Caption)@Html.Raw(subAktivitasNilaiAgreementPenyaluranLpgEdit.lastUpdatedDate.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(subAktivitasNilaiAgreementPenyaluranLpgEdit.RightColumnClass)"><div @Html.Raw(subAktivitasNilaiAgreementPenyaluranLpgEdit.lastUpdatedDate.CellAttributes)>
+<span id="el_SubAktivitasNilaiAgreementPenyaluranLPG_lastUpdatedDate">
+<span @Html.Raw(subAktivitasNilaiAgreementPenyaluranLpgEdit.lastUpdatedDate.ViewAttributes)>
+<input type="text" readonly class="form-control-plaintext" value="@Html.Raw(RemoveHtml(ConvertToString(subAktivitasNilaiAgreementPenyaluranLpgEdit.lastUpdatedDate.EditValue)))"></span>
+<input type="hidden" data-table="SubAktivitasNilaiAgreementPenyaluranLPG" data-field="x_lastUpdatedDate" data-hidden="1" name="x_lastUpdatedDate" id="x_lastUpdatedDate" value="@Html.Raw(HtmlEncode(subAktivitasNilaiAgreementPenyaluranLpgEdit.lastUpdatedDate.CurrentValue))">
+</span>
+</div></div>
+    </div>
+} @* subAktivitasNilaiAgreementPenyaluranLpgEdit.lastUpdatedDate.Visible (end) *@
+@if (subAktivitasNilaiAgreementPenyaluranLpgEdit.Flowrate.Visible) { // subAktivitasNilaiAgreementPenyaluranLpgEdit.Flowrate.Visible (begin)
+    <div id="r_Flowrate" @Html.Raw(subAktivitasNilaiAgreementPenyaluranLpgEdit.Flowrate.RowAttributes)>
+        <label id="elh_SubAktivitasNilaiAgreementPenyaluranLPG_Flowrate" for="x_Flowrate" class="@(subAktivitasNilaiAgreementPenyaluranLpgEdit.LeftColumnClass)">@Html.Raw(subAktivitasNilaiAgreementPenyaluranLpgEdit.Flowrate.Caption)@Html.Raw(subAktivitasNilaiAgreementPenyaluranLpgEdit.Flowrate.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(subAktivitasNilaiAgreementPenyaluranLpgEdit.RightColumnClass)"><div @Html.Raw(subAktivitasNilaiAgreementPenyaluranLpgEdit.Flowrate.CellAttributes)>
+<span id="el_SubAktivitasNilaiAgreementPenyaluranLPG_Flowrate">
+<input type="@(subAktivitasNilaiAgreementPenyaluranLpgEdit.Flowrate.InputTextType)" name="x_Flowrate" id="x_Flowrate" data-table="SubAktivitasNilaiAgreementPenyaluranLPG" data-field="x_Flowrate" value="@Html.Raw(subAktivitasNilaiAgreementPenyaluranLpgEdit.Flowrate.EditValue)" size="30" maxlength="50" placeholder="@Html.Raw(HtmlEncode(subAktivitasNilaiAgreementPenyaluranLpgEdit.Flowrate.PlaceHolder))" data-format-pattern="@(subAktivitasNilaiAgreementPenyaluranLpgEdit.Flowrate.FormatPattern)"@Html.Raw(subAktivitasNilaiAgreementPenyaluranLpgEdit.Flowrate.EditAttributes) aria-describedby="x_Flowrate_help">
+@Html.Raw(subAktivitasNilaiAgreementPenyaluranLpgEdit.Flowrate.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(subAktivitasNilaiAgreementPenyaluranLpgEdit.Flowrate.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* subAktivitasNilaiAgreementPenyaluranLpgEdit.Flowrate.Visible (end) *@
+@if (subAktivitasNilaiAgreementPenyaluranLpgEdit.Pressure.Visible) { // subAktivitasNilaiAgreementPenyaluranLpgEdit.Pressure.Visible (begin)
+    <div id="r_Pressure" @Html.Raw(subAktivitasNilaiAgreementPenyaluranLpgEdit.Pressure.RowAttributes)>
+        <label id="elh_SubAktivitasNilaiAgreementPenyaluranLPG_Pressure" for="x_Pressure" class="@(subAktivitasNilaiAgreementPenyaluranLpgEdit.LeftColumnClass)">@Html.Raw(subAktivitasNilaiAgreementPenyaluranLpgEdit.Pressure.Caption)@Html.Raw(subAktivitasNilaiAgreementPenyaluranLpgEdit.Pressure.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(subAktivitasNilaiAgreementPenyaluranLpgEdit.RightColumnClass)"><div @Html.Raw(subAktivitasNilaiAgreementPenyaluranLpgEdit.Pressure.CellAttributes)>
+<span id="el_SubAktivitasNilaiAgreementPenyaluranLPG_Pressure">
+<input type="@(subAktivitasNilaiAgreementPenyaluranLpgEdit.Pressure.InputTextType)" name="x_Pressure" id="x_Pressure" data-table="SubAktivitasNilaiAgreementPenyaluranLPG" data-field="x_Pressure" value="@Html.Raw(subAktivitasNilaiAgreementPenyaluranLpgEdit.Pressure.EditValue)" size="30" maxlength="50" placeholder="@Html.Raw(HtmlEncode(subAktivitasNilaiAgreementPenyaluranLpgEdit.Pressure.PlaceHolder))" data-format-pattern="@(subAktivitasNilaiAgreementPenyaluranLpgEdit.Pressure.FormatPattern)"@Html.Raw(subAktivitasNilaiAgreementPenyaluranLpgEdit.Pressure.EditAttributes) aria-describedby="x_Pressure_help">
+@Html.Raw(subAktivitasNilaiAgreementPenyaluranLpgEdit.Pressure.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(subAktivitasNilaiAgreementPenyaluranLpgEdit.Pressure.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* subAktivitasNilaiAgreementPenyaluranLpgEdit.Pressure.Visible (end) *@
+@if (subAktivitasNilaiAgreementPenyaluranLpgEdit.LamaPembongkaran.Visible) { // subAktivitasNilaiAgreementPenyaluranLpgEdit.LamaPembongkaran.Visible (begin)
+    <div id="r_LamaPembongkaran" @Html.Raw(subAktivitasNilaiAgreementPenyaluranLpgEdit.LamaPembongkaran.RowAttributes)>
+        <label id="elh_SubAktivitasNilaiAgreementPenyaluranLPG_LamaPembongkaran" for="x_LamaPembongkaran" class="@(subAktivitasNilaiAgreementPenyaluranLpgEdit.LeftColumnClass)">@Html.Raw(subAktivitasNilaiAgreementPenyaluranLpgEdit.LamaPembongkaran.Caption)@Html.Raw(subAktivitasNilaiAgreementPenyaluranLpgEdit.LamaPembongkaran.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(subAktivitasNilaiAgreementPenyaluranLpgEdit.RightColumnClass)"><div @Html.Raw(subAktivitasNilaiAgreementPenyaluranLpgEdit.LamaPembongkaran.CellAttributes)>
+<span id="el_SubAktivitasNilaiAgreementPenyaluranLPG_LamaPembongkaran">
+<span @Html.Raw(subAktivitasNilaiAgreementPenyaluranLpgEdit.LamaPembongkaran.ViewAttributes)>
+<input type="text" readonly class="form-control-plaintext" value="@Html.Raw(RemoveHtml(ConvertToString(subAktivitasNilaiAgreementPenyaluranLpgEdit.LamaPembongkaran.EditValue)))"></span>
+<input type="hidden" data-table="SubAktivitasNilaiAgreementPenyaluranLPG" data-field="x_LamaPembongkaran" data-hidden="1" name="x_LamaPembongkaran" id="x_LamaPembongkaran" value="@Html.Raw(HtmlEncode(subAktivitasNilaiAgreementPenyaluranLpgEdit.LamaPembongkaran.CurrentValue))">
+</span>
+</div></div>
+    </div>
+} @* subAktivitasNilaiAgreementPenyaluranLpgEdit.LamaPembongkaran.Visible (end) *@
+@if (subAktivitasNilaiAgreementPenyaluranLpgEdit.ETC.Visible) { // subAktivitasNilaiAgreementPenyaluranLpgEdit.ETC.Visible (begin)
+    <div id="r_ETC" @Html.Raw(subAktivitasNilaiAgreementPenyaluranLpgEdit.ETC.RowAttributes)>
+        <label id="elh_SubAktivitasNilaiAgreementPenyaluranLPG_ETC" for="x_ETC" class="@(subAktivitasNilaiAgreementPenyaluranLpgEdit.LeftColumnClass)">@Html.Raw(subAktivitasNilaiAgreementPenyaluranLpgEdit.ETC.Caption)@Html.Raw(subAktivitasNilaiAgreementPenyaluranLpgEdit.ETC.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(subAktivitasNilaiAgreementPenyaluranLpgEdit.RightColumnClass)"><div @Html.Raw(subAktivitasNilaiAgreementPenyaluranLpgEdit.ETC.CellAttributes)>
+<span id="el_SubAktivitasNilaiAgreementPenyaluranLPG_ETC">
+<span @Html.Raw(subAktivitasNilaiAgreementPenyaluranLpgEdit.ETC.ViewAttributes)>
+<input type="text" readonly class="form-control-plaintext" value="@Html.Raw(RemoveHtml(ConvertToString(subAktivitasNilaiAgreementPenyaluranLpgEdit.ETC.EditValue)))"></span>
+<input type="hidden" data-table="SubAktivitasNilaiAgreementPenyaluranLPG" data-field="x_ETC" data-hidden="1" name="x_ETC" id="x_ETC" value="@Html.Raw(HtmlEncode(subAktivitasNilaiAgreementPenyaluranLpgEdit.ETC.CurrentValue))">
+</span>
+</div></div>
+    </div>
+} @* subAktivitasNilaiAgreementPenyaluranLpgEdit.ETC.Visible (end) *@
+</div><!-- /page* -->
+    <input type="hidden" data-table="SubAktivitasNilaiAgreementPenyaluranLPG" data-field="x_id" data-hidden="1" name="x_id" id="x_id" value="@Html.Raw(HtmlEncode(subAktivitasNilaiAgreementPenyaluranLpgEdit.id.CurrentValue))">
+@{ subAktivitasNilaiAgreementPenyaluranLpgEdit.CloseRecordset(); }
+@Html.Raw(subAktivitasNilaiAgreementPenyaluranLpgEdit.IsModal ? "<template class=\"ew-modal-buttons\">" : "<div class=\"row ew-buttons\">")<!-- buttons .row -->
+    <div class="@(subAktivitasNilaiAgreementPenyaluranLpgEdit.OffsetColumnClass)"><!-- buttons offset -->
+    <button class="btn btn-primary ew-btn" name="btn-action" id="btn-action" type="submit" form="fSubAktivitasNilaiAgreementPenyaluranLPGedit">@Html.Raw(Language.Phrase("SaveBtn"))</button>
+@if (IsJsonResponse()) {
+    <button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" data-bs-dismiss="modal">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+} else {
+    <button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" form="fSubAktivitasNilaiAgreementPenyaluranLPGedit" data-href="@AppPath(subAktivitasNilaiAgreementPenyaluranLpgEdit.ReturnUrl)">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+}
+    </div><!-- /buttons offset -->
+@Html.Raw(subAktivitasNilaiAgreementPenyaluranLpgEdit.IsModal ? "</template>" : "</div>")<!-- /buttons .row -->
+</form>
+</main>
+@subAktivitasNilaiAgreementPenyaluranLpgEdit.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("SubAktivitasNilaiAgreementPenyaluranLPG");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Startup script
+    var IdReferensi = "@subAktivitasNilaiAgreementPenyaluranLpgEdit.NoReferensi.CurrentValue";
+    var IdProses = "@subAktivitasNilaiAgreementPenyaluranLpgEdit.idProses.CurrentValue";
+    var idAktivitas = "@subAktivitasNilaiAgreementPenyaluranLpgEdit.idAktifitas.CurrentValue";
+    var NamaAktivitas = $('#el_SubAktivitasNilaiAgreementPenyaluranLPG_idAktifitas').text();
+    var parent_url = ew.PATH_BASE;
+    const userLevel = "@CurrentUserLevel()";
+    let currentStatusAktivitas = "";
+    var steps = [
+        { number: 1, label: "Proses Penyaluran", url: `${parent_url}PenyaluranList`, icon: "fa-truck-fast" },
+        { number: 2, label: "Proses", url: `${parent_url}ProsesList?cmd=search&x_IdReferensi%5B%5D=${IdReferensi}&search=&searchtype=`, icon: "fa-gears" },
+        { number: 3, label: "Aktivitas", url: `${parent_url}AktivitasList?cmd=search&x_IdProses%5B%5D=${IdProses}&search=&searchtype=`, icon: "fa-list-check" },
+        { number: 4, label: NamaAktivitas, url: '', icon: "fa-file-circle-check" }
+    ];
+    var currentStep = 4;
+    $("<style>")
+        .prop("type", "text/css")
+        .html(`
+            .stepper {
+                display: flex;
+                counter-reset: step;
+                flex-wrap: nowrap;        /* jangan pecah ke bawah */
+                overflow-x: auto;         /* scroll horizontal */
+                -webkit-overflow-scrolling: touch; /* smooth scroll di mobile */
+                padding-bottom: 8px;      /* space biar scroll bar gak nempel */
+            }
+            .stepper::-webkit-scrollbar {
+            height: 6px; /* tipis */
+            }
+            .stepper::-webkit-scrollbar-thumb {
+                background-color: #ccc;
+                border-radius: 3px;
+            }
+            .step {
+                width: 150px;
+                text-align: center;
+                position: relative;
+            }
+            .step:not(:last-child)::after {
+                content: '';
+                position: absolute;
+                top: 20px;
+                right: -50%;
+                width: 100%;
+                height: 4px;
+                background-color: #ccc;
+                z-index: 0;
+            }
+            .step.completed:not(:last-child)::after {
+                background-color: #3c6dbd;
+            }
+            .step-icon {
+                width: 36px;
+                height: 36px;
+                line-height: 36px;
+                border-radius: 50%;
+                background: #ccc;
+                display: inline-block;
+                z-index: 1;
+                position: relative;
+                color: white;
+                font-weight: bold;
+            }
+            .step.active .step-icon {
+                background: #3c6dbd;
+            }
+            .step-label {
+                margin-top: 8px;
+                font-size: 14px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                gap: 6px;
+                color: #333;
+            }
+            .step-label {
+                color: #3c6dbd !important;
+                text-decoration: none;
+                margin: 0;
+                padding: 0;
+            }
+            .step-label-not-active {
+                color: #CCCCCC !important;
+            }
+            .ag-theme-quartz .ag-header {
+                background-color: #3c6dbd !important;
+            }
+            .ag-theme-quartz .ag-header-cell-label {
+                color: #ffffff !important;
+            }
+            .ag-theme-quartz .ag-icon-filter {
+                color: #ffffff !important;
+            }
+            .rotate-down {
+                transform: rotate(90deg);
+                transition: transform 0.3s ease;
+            }
+            .rotate-right {
+                transform: rotate(0deg);
+                transition: transform 0.3s ease;
+            }
+        `)
+        .appendTo("head");
+    var $stepperWrapper = $('<div class="d-flex border-bottom border-2 pb-2"><div class="stepper"></div></div>');
+    var $stepper = $stepperWrapper.find(".stepper");
+    steps.forEach(function (step, i) {
+        var isActive = step.number === currentStep;
+        var isCompleted = step.number < currentStep;
+        var stepClass = isActive ? "active" : isCompleted ? "completed" : "";
+        var icon, labelContent, html;
+        if (isActive) {
+            icon = `<div class="step-icon bg-success">${step.number}</div>`;
+            labelContent = `<div class="step-label"><p class="text-success mb-1"><i class="fa-solid ${step.icon} me-1 text-success"></i> ${step.label}</p></div>`;
+            html = `<div class="step ${stepClass} text-success">${icon}${labelContent}</div>`;
+        } else if (isCompleted) {
+            icon = `<div class="step-icon" style="background: #3c6dbd;">${step.number}</div>`;
+            labelContent = `<div class="step-label"><a href="${step.url}" class="text-primary"><i class="fa-solid ${step.icon} me-1"></i>${step.label}</a></div>`;
+            html = `<div class="step ${stepClass}">${icon}${labelContent}</div>`;
+        } else {
+            icon = `<div class="step-icon">${step.number}</div>`;
+            labelContent = `<div class="step-label-not-active"><p style="margin: 0;"><i class="fa-solid ${step.icon} me-1"></i>${step.label}</p></div>`;
+            html = `<div class="step ${stepClass} text-secondary">${icon}${labelContent}</div>`;
+        }
+        $stepper.append(html);
+    });
+    $(".content-header .container-fluid .row").append($stepperWrapper);
+    $("#btn-action").hide();
+    $("#btn-cancel").html('<i class="fa-solid fa-ban"></i></i> Cancel');
+    const $cancelButton = $("#btn-cancel");
+    const idAktifitas = $("#x_idAktifitas").val();
+
+    // --- log aktivitas start ---
+    $('#el_SubAktivitasNilaiAgreementPenyaluranLPG_LastUpdatedBy').addClass('d-flex gap-3');
+    $('#el_SubAktivitasNilaiAgreementPenyaluranLPG_LastUpdatedBy').append(`
+        <button type="button" class="btn btn-primary ew-btn ps-2" expand-log="false">
+            <i class="fa-solid fa-caret-right fa-2xl me-2 caret-icon rotate-right"></i>
+            Log History
+            <i class="fa-solid fa-clock-rotate-left ms-1"></i> 
+        </button>
+    `);
+    $(document).on('click', 'button[expand-log]', function () {
+        const $btn = $(this);
+        const isExpanded = $btn.attr('expand-log') === 'true';
+        const $row = $('#log-table-row');
+        const $wrapper = $('#log-table-wrapper');
+        const $caret = $btn.find('.caret-icon');
+        if (!isExpanded) {
+            $btn.attr('expand-log', 'true');
+            $row.removeClass('d-none');
+            setTimeout(() => {
+                $wrapper.css({
+                    maxHeight: '500px'
+                });
+            }, 10);
+            $caret.removeClass('rotate-right').addClass('rotate-down');
+        } else {
+            $btn.attr('expand-log', 'false');
+            $wrapper.css({
+                maxHeight: '0'
+            });
+            setTimeout(() => {
+                $row.addClass('d-none');
+            }, 600);
+            $caret.removeClass('rotate-down').addClass('rotate-right');
+        }
+    });
+    if (idAktivitas && idAktivitas !== "0") {
+        $.ajax({
+            url: parent_url + `api/LookUpList/sub-aktivitas/startup?idAktivitas=${idAktivitas}`,
+            type: 'GET',
+            success: function(response) {
+                // cek status
+                if ($cancelButton.length){
+                    let status = response.StatusAktivitas;
+                    currentStatusAktivitas = status;
+                    let $customButtons = ``;
+                    switch (status) {
+                        case "Waiting":
+                            $customButtons = `
+                                <button type="button" class="btn btn-primary ew-btn ml-2" id="btn-draft">
+                                    <i class="fas fa-save"></i> Save
+                                </button>
+                            `;
+                            break;
+                        case "Draft":
+                            $customButtons = `
+                                <button type="button" class="btn btn-primary ew-btn ml-2" id="btn-draft">
+                                    <i class="fas fa-save"></i> Save
+                                </button>
+                                <button type="button" class="btn btn-success ew-btn ml-2" id="btn-completed">
+                                    <i class="fas fa-paper-plane"></i> Submit
+                                </button>
+                            `
+                            break;
+                        case "Completed":
+                            $customButtons = `
+                                <button type="button" class="btn btn-primary ew-btn ml-2" id="btn-editing">
+                                    <i class="fa-solid fa-pen-to-square"></i> Edit
+                                </button>
+                                <button type="button" class="btn btn-success ew-btn ml-2" id="btn-completedEdit">
+                                    <i class="fas fa-paper-plane"></i> Submit
+                                </button>
+                            `;
+                            break;
+                        case "Editing":
+                            $customButtons = `
+                                <button type="button" class="btn btn-primary ew-btn ml-2" id="btn-editing">
+                                    <i class="fa-solid fa-pen-to-square"></i> Edit
+                                </button>
+                                <button type="button" class="btn btn-success ew-btn ml-2" id="btn-completedEdit">
+                                    <i class="fas fa-paper-plane"></i> Submit
+                                </button>
+                            `;
+                            break;
+                        case "Completed Edit":
+                            if (userLevel === '4'){
+                                $customButtons = `
+                                    <button type="button" class="btn btn-warning ew-btn ml-2" id="btn-reverse-status">
+                                        <i class="fa-solid fa-pen-to-square"></i> Edit 
+                                    </button>
+                                `;
+                            }
+                            break;
+                    }
+                    $cancelButton.before($customButtons);
+                }
+
+                // Cek is editable
+                if(!response.IsEditable || response.StatusAktivitas === "Completed Edit"){
+                    $("#btn-draft").hide();
+                    $("#btn-editing").hide();
+                    $("#btn-completed").hide();
+                    $("#btn-completedEdit").hide();
+                    $('input, select, textarea').prop('disabled', true);
+                    $('#catatanReverseStatusEditing').prop('disabled', false);
+                }
+
+                // Log
+                const mappedData = response.LogAktivitas.map(item => ({
+                    Aktivitas: item.Aktivitas,
+                    Username: item.UserName,
+                    StatusAktivitas: item.StatusAktivitas,
+                    Tanggal: item.Tanggal,
+                    Catatan: item.Catatan
+                }));
+                $.getScript('https://cdn.jsdelivr.net/npm/ag-grid-community/dist/ag-grid-community.min.js', function () {
+                        $('#r_LastUpdatedBy').after(`
+                            <div id="log-table-row" class="d-none row m-0">
+                                <div class="p-0 col-2"></div>
+                                <div class="p-0 col-10">
+                                    <div id="log-table-wrapper" style="overflow: hidden; transition: all 0.6s ease; max-height: 0;">
+                                        <div id="myGrid" class="ag-theme-quartz w-100 my-3" style="height: 300px;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        `);
+                        const gridOptions = {
+                            rowData: mappedData,
+                            columnDefs: [
+                                {
+                                    headerName: 'No.',
+                                    valueGetter: 'node.rowIndex + 1',
+                                    width: 80,
+                                    filter: false
+                                },
+                                {
+                                    headerName: 'Aktivitas',
+                                    field: 'Aktivitas',
+                                    flex: 1
+                                },
+                                {
+                                    headerName: 'Username',
+                                    field: 'Username',
+                                    flex: 1
+                                },
+                                {
+                                    headerName: 'Status Aktivitas',
+                                    field: 'StatusAktivitas',
+                                    flex: 1
+                                },
+                                {
+                                    headerName: 'Tanggal',
+                                    field: 'Tanggal',
+                                    flex: 1
+                                },
+                                {
+                                    headerName: 'Catatan',
+                                    field: 'Catatan',
+                                    flex: 1
+                                }
+                            ],
+                            defaultColDef: {
+                                sortable: false,
+                                suppressMovable: true,
+                                filter: true,
+                                resizable: false
+                            },
+                            rowSelection: 'multiple',
+                            suppressRowClickSelection: true,
+                            pagination: true,
+                            paginationPageSize: 10
+                        };
+                        const myGridElement = document.querySelector('#myGrid');
+                        agGrid.createGrid(myGridElement, gridOptions);
+                    });
+            },
+            error: function(xhr, status, error) {
+                ew.alert(xhr.responseJSON.message ?? "Terjadi kesalahan dalam memuat data");
+            }
+        });
+    } else {
+        console.warn("Skipping startup API: Invalid IdAktivitas");
+        $('button[expand-log]').hide(); 
+        $("#btn-draft, #btn-editing, #btn-completed, #btn-completedEdit").hide();
+        $('input, select, textarea').prop('disabled', true);
+    }
+    // --- log aktivitas end ---
+     let reverseStatusModal = `<div class="modal fade" id="confirmReverseStatusEditingModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                  <div class="modal-dialog">
+                    <div class="modal-content">
+                      <div class="modal-header bg-primary">
+                        <h1 class="modal-title fs-5" id="confirmReverseStatusEditingModalTitle">Konfirmasi Kembalikan Status</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                      </div>
+                      <form id="reverseStatusEditingModalForm">
+                        <div class="modal-body px-2 py-1">
+                            <div class="mb-3">
+                                <label for="message-text" class="col-form-label">Catatan:</label>
+                                <textarea class="form-control" id="catatanReverseStatusEditing" required rows="4"></textarea>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="btnReverseStatusEditingModalCancel">Batal</button>
+                            <button type="submit" class="btn btn-primary" id="btnReverseStatusEditingModalSubmit">Lanjutkan</button>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                </div>`
+    $("body").append(reverseStatusModal);
+    $("#btnReverseStatusEditingModalCancel").click(function (event) {
+        event.preventDefault();
+        $("#confirmReverseStatusEditingModal").modal("hide");
+    });
+    $(document).on("click", "#btn-reverse-status", function () {
+        $("#confirmReverseStatusEditingModal").modal("show");
+    });
+});
+</script>

@@ -1,0 +1,389 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (vAktifitasList.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = vAktifitasList.UseLayout ? "_Layout" : "";
+}
+@if (!vAktifitasList.IsExport()) {
+<script>
+var currentTable = @Html.Raw(ConvertToJson(vAktifitasList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { v_aktifitas: currentTable } });
+var currentPageID = ew.PAGE_ID = "list";
+var currentForm;
+var @(vAktifitasList.FormName);
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("@(vAktifitasList.FormName)")
+        .setPageId("list")
+        .setSubmitWithFetch(@(vAktifitasList.UseAjaxActions ? "true" : "false"))
+        .setFormKeyCountName("@(vAktifitasList.FormKeyCountName)")
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Write your client script here, no need to add script tags.
+});
+</script>
+}
+@if (!vAktifitasList.IsExport()) {
+<div class="btn-toolbar ew-toolbar">
+@if (vAktifitasList.TotalRecords > 0 && vAktifitasList.ExportOptions.Visible) {
+    vAktifitasList.ExportOptions.Render("body");
+}
+@if (vAktifitasList.ImportOptions.Visible) {
+    vAktifitasList.ImportOptions.Render("body");
+}
+@if (vAktifitasList.SearchOptions.Visible) {
+    vAktifitasList.SearchOptions.Render("body");
+}
+@if (vAktifitasList.FilterOptions.Visible) {
+    vAktifitasList.FilterOptions.Render("body");
+}
+</div>
+}
+@if (!vAktifitasList.IsModal) {
+<form name="fv_aktifitassrch" id="fv_aktifitassrch" class="ew-form ew-ext-search-form" action="@AppPath(CurrentPageName())" novalidate autocomplete="off">
+<div id="fv_aktifitassrch_search_panel" class="mb-2 mb-sm-0 @(vAktifitasList.SearchPanelClass)"><!-- .ew-search-panel -->
+<script>
+var currentTable = @Html.Raw(ConvertToJson(vAktifitasList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { v_aktifitas: currentTable } });
+var currentForm;
+var fv_aktifitassrch, currentSearchForm, currentAdvancedSearchForm;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery,
+        fields = currentTable.fields;
+
+    // Form object for search
+    let form = new ew.FormBuilder()
+        .setId("fv_aktifitassrch")
+        .setPageId("list")
+@if (vAktifitasList.UseAjaxActions) {
+        <text>.setSubmitWithFetch(true)</text>
+}
+
+        // Dynamic selection lists
+        .setLists({
+        })
+
+        // Filters
+        .setFilterList(@Html.Raw(vAktifitasList.GetFilterList()))
+        .build();
+    window[form.id] = form;
+    currentSearchForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<input type="hidden" name="cmd" value="search">
+@if (Security.CanSearch) {
+if (!vAktifitasList.IsExport() && Empty(vAktifitasList.CurrentAction) && vAktifitasList.HasSearchFields()) { @* Show search form (begin) *@
+<div class="ew-extended-search container-fluid ps-2">
+<div class="row mb-0">
+    <div class="col-sm-auto px-0 pe-sm-2">
+        <div class="ew-basic-search input-group">
+            <input type="search" name="@(Config.TableBasicSearch)" id="@(Config.TableBasicSearch)" class="form-control ew-basic-search-keyword" value="@Html.Raw(HtmlEncode(vAktifitasList.BasicSearch.SessionKeyword))" placeholder="@(HtmlEncode(Language.Phrase("Search")))" aria-label="@(HtmlEncode(Language.Phrase("Search")))">
+            <input type="hidden" name="@(Config.TableBasicSearchType)" id="@(Config.TableBasicSearchType)" class="ew-basic-search-type" value="@(HtmlEncode(vAktifitasList.BasicSearch.SessionType))">
+            <button type="button" data-bs-toggle="dropdown" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split" aria-haspopup="true" aria-expanded="false">
+                <span id="searchtype">@Html.Raw(vAktifitasList.BasicSearch.TypeNameShort)</span>
+            </button>
+            <div class="dropdown-menu dropdown-menu-end">
+                <button type="button" class="dropdown-item@(vAktifitasList.BasicSearch.SessionType == "" ? " active" : "")" form="fv_aktifitassrch" data-ew-action="search-type">@Html.Raw(Language.Phrase("QuickSearchAuto"))</button>
+                <button type="button" class="dropdown-item@(vAktifitasList.BasicSearch.SessionType == "=" ? " active" : "")" form="fv_aktifitassrch" data-ew-action="search-type" data-search-type="=">@Html.Raw(Language.Phrase("QuickSearchExact"))</button>
+                <button type="button" class="dropdown-item@(vAktifitasList.BasicSearch.SessionType == "AND" ? " active" : "")" form="fv_aktifitassrch" data-ew-action="search-type" data-search-type="AND">@Html.Raw(Language.Phrase("QuickSearchAll"))</button>
+                <button type="button" class="dropdown-item@(vAktifitasList.BasicSearch.SessionType == "OR" ? " active" : "")" form="fv_aktifitassrch" data-ew-action="search-type" data-search-type="OR">@Html.Raw(Language.Phrase("QuickSearchAny"))</button>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-auto mb-3">
+        <button class="btn btn-primary" name="btn-submit" id="btn-submit" type="submit">@Html.Raw(Language.Phrase("SearchBtn"))</button>
+    </div>
+</div>
+</div><!-- /.ew-extended-search -->
+} @* Show search form (end) *@
+}
+</div><!-- /.ew-search-panel -->
+</form>
+}
+@vAktifitasList.ShowPageHeader()
+@vAktifitasList.ShowMessages()
+<main class="list @(vAktifitasList.TotalRecords == 0 && !vAktifitasList.IsAdd ? " ew-no-record" : "")">
+<div id="ew-header-options">
+    @vAktifitasList.HeaderOptions.RenderBody()
+</div>
+<div id="ew-list">
+@if (vAktifitasList.TotalRecords > 0 || !Empty(vAktifitasList.CurrentAction)) {
+<div class="card ew-card ew-grid@(vAktifitasList.IsAddOrEdit ? " ew-grid-add-edit" : "") @(vAktifitasList.TableGridClass)">
+<form name="@(vAktifitasList.FormName)" id="@(vAktifitasList.FormName)" class="ew-form ew-list-form" action="@AppPath(vAktifitasList.PageName)" method="post" novalidate autocomplete="off">
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+@if (vAktifitasList.IsModal) {
+<input type="hidden" name="modal" value="1">
+}
+<div id="gmp_v_aktifitas" class="card-body ew-grid-middle-panel @(vAktifitasList.TableContainerClass)" style="@(vAktifitasList.TableContainerStyle)">
+@if (vAktifitasList.TotalRecords > 0 || vAktifitasList.IsGridEdit || vAktifitasList.IsMultiEdit) {
+<table id="tbl_v_aktifitaslist" class="@(vAktifitasList.TableClass)"><!-- .ew-table -->
+<thead>
+    <tr class="ew-table-header">
+@{
+    // Header row
+    vAktifitasList.RowType = RowType.Header;
+
+    // Render list options
+    await vAktifitasList.RenderListOptions();
+}
+@* Render list options (header, left) *@
+@vAktifitasList.ListOptions.RenderHeader("left")
+@if (vAktifitasList.NamaAktivitas.Visible) { // vAktifitasList.NamaAktivitas.Visible (begin)
+        <th data-name="NamaAktivitas" class="@(vAktifitasList.NamaAktivitas.HeaderCellClass)"><div id="elh_v_aktifitas_NamaAktivitas" class="v_aktifitas_NamaAktivitas">@Html.Raw(vAktifitasList.RenderFieldHeader(vAktifitasList.NamaAktivitas))</div></th>
+} @* vAktifitasList.NamaAktivitas.Visible (end) *@
+@if (vAktifitasList.Nama_Proses.Visible) { // vAktifitasList.Nama_Proses.Visible (begin)
+        <th data-name="Nama_Proses" class="@(vAktifitasList.Nama_Proses.HeaderCellClass)"><div id="elh_v_aktifitas_Nama_Proses" class="v_aktifitas_Nama_Proses">@Html.Raw(vAktifitasList.RenderFieldHeader(vAktifitasList.Nama_Proses))</div></th>
+} @* vAktifitasList.Nama_Proses.Visible (end) *@
+@if (vAktifitasList.No_referensi.Visible) { // vAktifitasList.No_referensi.Visible (begin)
+        <th data-name="No_referensi" class="@(vAktifitasList.No_referensi.HeaderCellClass)"><div id="elh_v_aktifitas_No_referensi" class="v_aktifitas_No_referensi">@Html.Raw(vAktifitasList.RenderFieldHeader(vAktifitasList.No_referensi))</div></th>
+} @* vAktifitasList.No_referensi.Visible (end) *@
+@if (vAktifitasList.Shipment.Visible) { // vAktifitasList.Shipment.Visible (begin)
+        <th data-name="Shipment" class="@(vAktifitasList.Shipment.HeaderCellClass)"><div id="elh_v_aktifitas_Shipment" class="v_aktifitas_Shipment">@Html.Raw(vAktifitasList.RenderFieldHeader(vAktifitasList.Shipment))</div></th>
+} @* vAktifitasList.Shipment.Visible (end) *@
+@if (vAktifitasList.Produk.Visible) { // vAktifitasList.Produk.Visible (begin)
+        <th data-name="Produk" class="@(vAktifitasList.Produk.HeaderCellClass)"><div id="elh_v_aktifitas_Produk" class="v_aktifitas_Produk">@Html.Raw(vAktifitasList.RenderFieldHeader(vAktifitasList.Produk))</div></th>
+} @* vAktifitasList.Produk.Visible (end) *@
+@if (vAktifitasList.StatusAktivitas.Visible) { // vAktifitasList.StatusAktivitas.Visible (begin)
+        <th data-name="StatusAktivitas" class="@(vAktifitasList.StatusAktivitas.HeaderCellClass)"><div id="elh_v_aktifitas_StatusAktivitas" class="v_aktifitas_StatusAktivitas">@Html.Raw(vAktifitasList.RenderFieldHeader(vAktifitasList.StatusAktivitas))</div></th>
+} @* vAktifitasList.StatusAktivitas.Visible (end) *@
+@* Render list options (header, right) *@
+@vAktifitasList.ListOptions.RenderHeader("right")
+    </tr>
+</thead>
+<tbody data-page="@(vAktifitasList.PageNumber)">
+@{
+    await vAktifitasList.SetupGrid();
+    bool eof = vAktifitasList.Recordset == null; // DN
+}
+@while (vAktifitasList.RecordCount < vAktifitasList.StopRecord || SameString(vAktifitasList.RowIndex, "$rowindex$")) { // Begin While
+    if (!eof && !SameString(vAktifitasList.RowIndex, "$rowindex$") &&
+        (!vAktifitasList.IsGridAdd || vAktifitasList.CurrentMode == "copy") &&
+        (!((vAktifitasList.IsCopy || vAktifitasList.IsAdd) && vAktifitasList.RowIndex is int rowIndex && rowIndex == 0))) // DN
+        eof = !await vAktifitasList.Recordset.ReadAsync();
+    vAktifitasList.RecordCount++;
+    if (vAktifitasList.RecordCount >= vAktifitasList.StartRecord) {
+        await vAktifitasList.SetupRow();
+    <tr @Html.Raw(vAktifitasList.RowAttributes)>
+    @* Render list options (body, left) *@
+    @vAktifitasList.ListOptions.RenderBody("left", vAktifitasList.RowCount)
+    @if (vAktifitasList.NamaAktivitas.Visible) { // vAktifitasList.NamaAktivitas.Visible (begin)
+        <td data-name="NamaAktivitas" @Html.Raw(vAktifitasList.NamaAktivitas.CellAttributes)>
+<span id="el@(vAktifitasList.RowIndex == "$rowindex$" ? "$rowindex$" : vAktifitasList.RowCount)_v_aktifitas_NamaAktivitas" class="el_v_aktifitas_NamaAktivitas">
+<span @Html.Raw(vAktifitasList.NamaAktivitas.ViewAttributes)>
+@Html.Raw(vAktifitasList.NamaAktivitas.GetViewValue())</span>
+</span>
+</td>
+    } @* vAktifitasList.NamaAktivitas.Visible (end) *@
+    @if (vAktifitasList.Nama_Proses.Visible) { // vAktifitasList.Nama_Proses.Visible (begin)
+        <td data-name="Nama_Proses" @Html.Raw(vAktifitasList.Nama_Proses.CellAttributes)>
+<span id="el@(vAktifitasList.RowIndex == "$rowindex$" ? "$rowindex$" : vAktifitasList.RowCount)_v_aktifitas_Nama_Proses" class="el_v_aktifitas_Nama_Proses">
+<span @Html.Raw(vAktifitasList.Nama_Proses.ViewAttributes)>
+@Html.Raw(vAktifitasList.Nama_Proses.GetViewValue())</span>
+</span>
+</td>
+    } @* vAktifitasList.Nama_Proses.Visible (end) *@
+    @if (vAktifitasList.No_referensi.Visible) { // vAktifitasList.No_referensi.Visible (begin)
+        <td data-name="No_referensi" @Html.Raw(vAktifitasList.No_referensi.CellAttributes)>
+<span id="el@(vAktifitasList.RowIndex == "$rowindex$" ? "$rowindex$" : vAktifitasList.RowCount)_v_aktifitas_No_referensi" class="el_v_aktifitas_No_referensi">
+<span @Html.Raw(vAktifitasList.No_referensi.ViewAttributes)>
+@Html.Raw(vAktifitasList.No_referensi.GetViewValue())</span>
+</span>
+</td>
+    } @* vAktifitasList.No_referensi.Visible (end) *@
+    @if (vAktifitasList.Shipment.Visible) { // vAktifitasList.Shipment.Visible (begin)
+        <td data-name="Shipment" @Html.Raw(vAktifitasList.Shipment.CellAttributes)>
+<span id="el@(vAktifitasList.RowIndex == "$rowindex$" ? "$rowindex$" : vAktifitasList.RowCount)_v_aktifitas_Shipment" class="el_v_aktifitas_Shipment">
+<span @Html.Raw(vAktifitasList.Shipment.ViewAttributes)>
+@Html.Raw(vAktifitasList.Shipment.GetViewValue())</span>
+</span>
+</td>
+    } @* vAktifitasList.Shipment.Visible (end) *@
+    @if (vAktifitasList.Produk.Visible) { // vAktifitasList.Produk.Visible (begin)
+        <td data-name="Produk" @Html.Raw(vAktifitasList.Produk.CellAttributes)>
+<span id="el@(vAktifitasList.RowIndex == "$rowindex$" ? "$rowindex$" : vAktifitasList.RowCount)_v_aktifitas_Produk" class="el_v_aktifitas_Produk">
+<span @Html.Raw(vAktifitasList.Produk.ViewAttributes)>
+@Html.Raw(vAktifitasList.Produk.GetViewValue())</span>
+</span>
+</td>
+    } @* vAktifitasList.Produk.Visible (end) *@
+    @if (vAktifitasList.StatusAktivitas.Visible) { // vAktifitasList.StatusAktivitas.Visible (begin)
+        <td data-name="StatusAktivitas" @Html.Raw(vAktifitasList.StatusAktivitas.CellAttributes)>
+<span id="el@(vAktifitasList.RowIndex == "$rowindex$" ? "$rowindex$" : vAktifitasList.RowCount)_v_aktifitas_StatusAktivitas" class="el_v_aktifitas_StatusAktivitas">
+<span @Html.Raw(vAktifitasList.StatusAktivitas.ViewAttributes)>
+@Html.Raw(vAktifitasList.StatusAktivitas.GetViewValue())</span>
+</span>
+</td>
+    } @* vAktifitasList.StatusAktivitas.Visible (end) *@
+    @* Render list options (body, right) *@
+    @vAktifitasList.ListOptions.RenderBody("right", vAktifitasList.RowCount)
+    </tr>
+    } @* End if *@
+
+    // Reset for template row
+    if (SameString(vAktifitasList.RowIndex, "$rowindex$"))
+        vAktifitasList.RowIndex = 0;
+
+    // Reset inline add/copy row
+    if ((vAktifitasList.IsCopy || vAktifitasList.IsAdd) && vAktifitasList.RowIndex is int rowIndex2 && rowIndex2 == 0)
+        vAktifitasList.RowIndex = 1;
+} @* End While *@
+</tbody>
+</table><!-- /.ew-table -->
+} @* End If TotalRecords > 0 *@
+</div><!-- /.ew-grid-middle-panel -->
+@if (Empty(vAktifitasList.CurrentAction) && !vAktifitasList.UseAjaxActions) {
+<input type="hidden" name="action" id="action" value="">
+}
+</form><!-- /.ew-list-form -->
+@{ vAktifitasList.CloseRecordset(); }
+@if (!vAktifitasList.IsExport()) {
+<div class="card-footer ew-grid-lower-panel">
+@if (!vAktifitasList.IsGridAdd && !(vAktifitasList.IsGridEdit && vAktifitasList.ModalGridEdit) && !vAktifitasList.IsMultiEdit) {
+@Html.Raw(vAktifitasList.Pager.Render())
+}
+<div class="ew-list-other-options">
+@vAktifitasList.OtherOptions.RenderBody("bottom")
+</div>
+</div>
+}
+</div><!-- /.ew-grid -->
+} else { // Show other options
+<div class="ew-list-other-options">
+@vAktifitasList.OtherOptions.ForEach(opt => opt.ButtonClass = "").RenderBody()
+</div>
+}
+</div>
+<div id="ew-footer-options">
+    @vAktifitasList.FooterOptions.RenderBody()
+</div>
+</main>
+@vAktifitasList.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+@if (!vAktifitasList.IsExport()) {
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("v_aktifitas");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Startup script
+    var IdReferensi = "@vAktifitasList.No_referensi.CurrentValue";
+    var IdAktivitas = "@vAktifitasList.IdAktivitas.CurrentValue";
+    var IdProses = "@vAktifitasList.IdProses.CurrentValue";
+    var parent_url = ew.PATH_BASE;
+    var steps = [
+        { number: 1, label: "Penerimaan", url: `${parent_url}PenerimaanList`, icon: "fa-box-open" },
+        { number: 2, label: "Proses", url: `${parent_url}ProsesList?cmd=search&x_IdReferensi%5B%5D=${IdReferensi}&search=&searchtype=`, icon: "fa-gears" },
+        { number: 3, label: "Aktivitas", url: '', icon: "fa-list-check" },
+        { number: 4, label: "Detail Aktivitas", url: '', icon: "fa-file-circle-check" }
+    ];
+    var currentStep = 3;
+    $("<style>")
+        .prop("type", "text/css")
+        .html(`
+            .stepper {
+                width: 50%;
+                display: flex;
+                counter-reset: step;
+            }
+            .step {
+                flex: 1;
+                text-align: center;
+                position: relative;
+            }
+            .step:not(:last-child)::after {
+                content: '';
+                position: absolute;
+                top: 20px;
+                right: -50%;
+                width: 100%;
+                height: 4px;
+                background-color: #ccc;
+                z-index: 0;
+            }
+            .step.completed:not(:last-child)::after {
+                background-color: #006BB7;
+            }
+            .step-icon {
+                width: 36px;
+                height: 36px;
+                line-height: 36px;
+                border-radius: 50%;
+                background: #ccc;
+                display: inline-block;
+                z-index: 1;
+                position: relative;
+                color: white;
+                font-weight: bold;
+            }
+            .step.active .step-icon {
+                background: #006BB7;
+            }
+            .step-label {
+                margin-top: 8px;
+                font-size: 14px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                gap: 6px;
+                color: #333;
+            }
+            .step-label {
+                color: #006BB7 !important;
+                text-decoration: none;
+                margin: 0;
+                padding: 0;
+            }
+            .step-label-not-active {
+                color: #CCCCCC !important;
+            }
+        `)
+        .appendTo("head");
+    var $stepperWrapper = $('<div class="d-flex border-bottom border-2 pb-2"><div class="stepper"></div></div>');
+    var $stepper = $stepperWrapper.find(".stepper");
+    steps.forEach(function (step, i) {
+        var isActive = step.number === currentStep;
+        var isCompleted = step.number < currentStep;
+        var stepClass = isActive ? "active" : isCompleted ? "completed" : "";
+        var icon, labelContent, html;
+        if (isActive) {
+            icon = `<div class="step-icon bg-success">${step.number}</div>`;
+            labelContent = `<div class="step-label"><p class="text-success mb-1"><i class="fa-solid ${step.icon} me-1 text-success"></i> ${step.label}</p></div>`;
+            html = `<div class="step ${stepClass} text-success">${icon}${labelContent}</div>`;
+        } else if (isCompleted) {
+            icon = `<div class="step-icon" style="background: #006BB7;">${step.number}</div>`;
+            labelContent = `<div><a href="${step.url}" class="step-label"><i class="fa-solid ${step.icon} me-1"></i>${step.label}</a></div>`;
+            html = `<div class="step ${stepClass}">${icon}${labelContent}</div>`;
+        } else {
+            icon = `<div class="step-icon">${step.number}</div>`;
+            labelContent = `<div class="step-label-not-active"><p style="margin: 0;"><i class="fa-solid ${step.icon} me-1"></i>${step.label}</p></div>`;
+            html = `<div class="step ${stepClass} text-secondary">${icon}${labelContent}</div>`;
+        }
+        $stepper.append(html);
+    });
+    $(".content-header .container-fluid .row").append($stepperWrapper);
+});
+</script>
+}

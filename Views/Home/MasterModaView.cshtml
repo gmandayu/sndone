@@ -1,0 +1,89 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (masterModaView.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = masterModaView.UseLayout ? "_Layout" : "";
+}
+@if (!masterModaView.IsExport()) {
+<div class="btn-toolbar ew-toolbar">
+    @masterModaView.ExportOptions.RenderBody()
+    @masterModaView.OtherOptions.RenderBody()
+</div>
+}
+@masterModaView.ShowPageHeader()
+@masterModaView.ShowMessages()
+<main class="view">
+<form name="fMasterModaview" id="fMasterModaview" class="ew-form ew-view-form overlay-wrapper" action="@AppPath(CurrentPageName())" method="post" novalidate autocomplete="off">
+@if (!masterModaView.IsExport()) {
+<script>
+var currentTable = @Html.Raw(ConvertToJson(masterModaView.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { MasterModa: currentTable } });
+var currentPageID = ew.PAGE_ID = "view";
+var currentForm;
+var fMasterModaview;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("fMasterModaview")
+        .setPageId("view")
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Write your client script here, no need to add script tags.
+});
+</script>
+}
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+<input type="hidden" name="modal" value="@ConvertToInt(masterModaView.IsModal)">
+<table class="@(masterModaView.TableClass)">
+@if (masterModaView.IdModa.Visible) { // masterModaView.IdModa.Visible (begin)
+    <tr id="r_IdModa" @Html.Raw(masterModaView.IdModa.RowAttributes)>
+        <td class="@(masterModaView.TableLeftColumnClass)"><span id="elh_MasterModa_IdModa">@Html.Raw(masterModaView.IdModa.Caption)</span></td>
+        <td data-name="IdModa" @Html.Raw(masterModaView.IdModa.CellAttributes)>
+<span id="el_MasterModa_IdModa">
+<span @Html.Raw(masterModaView.IdModa.ViewAttributes)>
+@Html.Raw(masterModaView.IdModa.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* masterModaView.IdModa.Visible (end) *@
+@if (masterModaView.NamaModa.Visible) { // masterModaView.NamaModa.Visible (begin)
+    <tr id="r_NamaModa" @Html.Raw(masterModaView.NamaModa.RowAttributes)>
+        <td class="@(masterModaView.TableLeftColumnClass)"><span id="elh_MasterModa_NamaModa">@Html.Raw(masterModaView.NamaModa.Caption)</span></td>
+        <td data-name="NamaModa" @Html.Raw(masterModaView.NamaModa.CellAttributes)>
+<span id="el_MasterModa_NamaModa">
+<span @Html.Raw(masterModaView.NamaModa.ViewAttributes)>
+@Html.Raw(masterModaView.NamaModa.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* masterModaView.NamaModa.Visible (end) *@
+</table>
+@{ masterModaView.CloseRecordset(); }
+</form>
+</main>
+@masterModaView.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+@if (!masterModaView.IsExport()) {
+<script>
+loadjs.ready("load", function() {
+    // Write your table-specific startup script here
+    // document.write("page loaded");
+});
+</script>
+}

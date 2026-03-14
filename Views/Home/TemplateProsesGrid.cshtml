@@ -1,0 +1,865 @@
+@{
+    // View
+    View = this;
+
+    // Set up CurrentGrid
+    CurrentGrid = templateProsesGrid;
+
+    // Run
+    await templateProsesGrid.Run();
+
+    // Check action result
+    if (templateProsesGrid.ActionResult is EmptyResult) // Terminate page
+        return;
+}
+@if (!templateProsesGrid.IsExport()) {
+<script>
+var fTemplateProsesgrid;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let currentTable = @Html.Raw(ConvertToJson(templateProsesGrid.ToClientVar()));
+    ew.deepAssign(ew.vars, { tables: { TemplateProses: currentTable } });
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("fTemplateProsesgrid")
+        .setPageId("grid")
+        .setFormKeyCountName("@(templateProsesGrid.FormKeyCountName)")
+
+        // Add fields
+        .setFields([
+
+            ["IdTemplate", [fields.IdTemplate.visible && fields.IdTemplate.required ? ew.Validators.required(fields.IdTemplate.caption) : null], fields.IdTemplate.isInvalid],
+            ["UrutanProses", [fields.UrutanProses.visible && fields.UrutanProses.required ? ew.Validators.required(fields.UrutanProses.caption) : null, ew.Validators.integer], fields.UrutanProses.isInvalid],
+            ["NamaProses", [fields.NamaProses.visible && fields.NamaProses.required ? ew.Validators.required(fields.NamaProses.caption) : null], fields.NamaProses.isInvalid],
+            ["IdPIC", [fields.IdPIC.visible && fields.IdPIC.required ? ew.Validators.required(fields.IdPIC.caption) : null], fields.IdPIC.isInvalid],
+            ["IdTools", [fields.IdTools.visible && fields.IdTools.required ? ew.Validators.required(fields.IdTools.caption) : null], fields.IdTools.isInvalid],
+            ["Keterangan", [fields.Keterangan.visible && fields.Keterangan.required ? ew.Validators.required(fields.Keterangan.caption) : null], fields.Keterangan.isInvalid],
+            ["DibuatOleh", [fields.DibuatOleh.visible && fields.DibuatOleh.required ? ew.Validators.required(fields.DibuatOleh.caption) : null], fields.DibuatOleh.isInvalid],
+            ["TanggalDibuat", [fields.TanggalDibuat.visible && fields.TanggalDibuat.required ? ew.Validators.required(fields.TanggalDibuat.caption) : null, ew.Validators.datetime(fields.TanggalDibuat.clientFormatPattern)], fields.TanggalDibuat.isInvalid],
+            ["DiperbaruiOleh", [fields.DiperbaruiOleh.visible && fields.DiperbaruiOleh.required ? ew.Validators.required(fields.DiperbaruiOleh.caption) : null], fields.DiperbaruiOleh.isInvalid],
+            ["TanggalDiperbarui", [fields.TanggalDiperbarui.visible && fields.TanggalDiperbarui.required ? ew.Validators.required(fields.TanggalDiperbarui.caption) : null, ew.Validators.datetime(fields.TanggalDiperbarui.clientFormatPattern)], fields.TanggalDiperbarui.isInvalid]
+        ])
+
+        // Check empty row
+        .setEmptyRow(
+            function (rowIndex) {
+                let fobj = this.getForm(),
+                    fields = [["IdTemplate",false],["UrutanProses",false],["NamaProses",false],["IdPIC",false],["IdTools",false],["Keterangan",false],["DibuatOleh",false],["TanggalDibuat",false],["DiperbaruiOleh",false],["TanggalDiperbarui",false]];
+                if (fields.some(field => ew.valueChanged(fobj, rowIndex, ...field)))
+                    return false;
+                return true;
+            }
+        )
+
+        // Form_CustomValidate
+        .setCustomValidate(
+            function(fobj) { // DO NOT CHANGE THIS LINE!
+                    // Your custom validation code here, return false if invalid.
+                    return true;
+                }
+        )
+
+        // Use JavaScript validation or not
+        .setValidateRequired(ew.CLIENT_VALIDATE)
+
+        // Dynamic selection lists
+        .setLists({
+            "IdTemplate": @Html.Raw(templateProsesGrid.IdTemplate.ToClientList(templateProsesGrid)),
+            "IdPIC": @Html.Raw(templateProsesGrid.IdPIC.ToClientList(templateProsesGrid)),
+            "IdTools": @Html.Raw(templateProsesGrid.IdTools.ToClientList(templateProsesGrid)),
+        })
+        .build();
+    window[form.id] = form;
+    loadjs.done(form.id);
+});
+</script>
+}
+<main class="list">
+<div id="ew-header-options">
+    @templateProsesGrid.HeaderOptions.RenderBody()
+</div>
+<div id="ew-list">
+@if (templateProsesGrid.TotalRecords > 0 || !Empty(templateProsesGrid.CurrentAction)) {
+<div class="card ew-card ew-grid@(templateProsesGrid.IsAddOrEdit ? " ew-grid-add-edit" : "") @(templateProsesGrid.TableGridClass)">
+<div id="fTemplateProsesgrid" class="ew-form ew-list-form">
+<div id="gmp_TemplateProses" class="card-body ew-grid-middle-panel @(templateProsesGrid.TableContainerClass)" style="@(templateProsesGrid.TableContainerStyle)">
+<table id="tbl_TemplateProsesgrid" class="@(templateProsesGrid.TableClass)"><!-- .ew-table -->
+<thead>
+    <tr class="ew-table-header">
+@{
+    // Header row
+    templateProsesGrid.RowType = RowType.Header;
+
+    // Render list options
+    await templateProsesGrid.RenderListOptions();
+}
+@* Render list options (header, left) *@
+@templateProsesGrid.ListOptions.RenderHeader("left")
+@if (templateProsesGrid.IdTemplate.Visible) { // templateProsesGrid.IdTemplate.Visible (begin)
+        <th data-name="IdTemplate" class="@(templateProsesGrid.IdTemplate.HeaderCellClass)"><div id="elh_TemplateProses_IdTemplate" class="TemplateProses_IdTemplate">@Html.Raw(templateProsesGrid.RenderFieldHeader(templateProsesGrid.IdTemplate))</div></th>
+} @* templateProsesGrid.IdTemplate.Visible (end) *@
+@if (templateProsesGrid.UrutanProses.Visible) { // templateProsesGrid.UrutanProses.Visible (begin)
+        <th data-name="UrutanProses" class="@(templateProsesGrid.UrutanProses.HeaderCellClass)"><div id="elh_TemplateProses_UrutanProses" class="TemplateProses_UrutanProses">@Html.Raw(templateProsesGrid.RenderFieldHeader(templateProsesGrid.UrutanProses))</div></th>
+} @* templateProsesGrid.UrutanProses.Visible (end) *@
+@if (templateProsesGrid.NamaProses.Visible) { // templateProsesGrid.NamaProses.Visible (begin)
+        <th data-name="NamaProses" class="@(templateProsesGrid.NamaProses.HeaderCellClass)"><div id="elh_TemplateProses_NamaProses" class="TemplateProses_NamaProses">@Html.Raw(templateProsesGrid.RenderFieldHeader(templateProsesGrid.NamaProses))</div></th>
+} @* templateProsesGrid.NamaProses.Visible (end) *@
+@if (templateProsesGrid.IdPIC.Visible) { // templateProsesGrid.IdPIC.Visible (begin)
+        <th data-name="IdPIC" class="@(templateProsesGrid.IdPIC.HeaderCellClass)"><div id="elh_TemplateProses_IdPIC" class="TemplateProses_IdPIC">@Html.Raw(templateProsesGrid.RenderFieldHeader(templateProsesGrid.IdPIC))</div></th>
+} @* templateProsesGrid.IdPIC.Visible (end) *@
+@if (templateProsesGrid.IdTools.Visible) { // templateProsesGrid.IdTools.Visible (begin)
+        <th data-name="IdTools" class="@(templateProsesGrid.IdTools.HeaderCellClass)"><div id="elh_TemplateProses_IdTools" class="TemplateProses_IdTools">@Html.Raw(templateProsesGrid.RenderFieldHeader(templateProsesGrid.IdTools))</div></th>
+} @* templateProsesGrid.IdTools.Visible (end) *@
+@if (templateProsesGrid.Keterangan.Visible) { // templateProsesGrid.Keterangan.Visible (begin)
+        <th data-name="Keterangan" class="@(templateProsesGrid.Keterangan.HeaderCellClass)"><div id="elh_TemplateProses_Keterangan" class="TemplateProses_Keterangan">@Html.Raw(templateProsesGrid.RenderFieldHeader(templateProsesGrid.Keterangan))</div></th>
+} @* templateProsesGrid.Keterangan.Visible (end) *@
+@if (templateProsesGrid.DibuatOleh.Visible) { // templateProsesGrid.DibuatOleh.Visible (begin)
+        <th data-name="DibuatOleh" class="@(templateProsesGrid.DibuatOleh.HeaderCellClass)"><div id="elh_TemplateProses_DibuatOleh" class="TemplateProses_DibuatOleh">@Html.Raw(templateProsesGrid.RenderFieldHeader(templateProsesGrid.DibuatOleh))</div></th>
+} @* templateProsesGrid.DibuatOleh.Visible (end) *@
+@if (templateProsesGrid.TanggalDibuat.Visible) { // templateProsesGrid.TanggalDibuat.Visible (begin)
+        <th data-name="TanggalDibuat" class="@(templateProsesGrid.TanggalDibuat.HeaderCellClass)"><div id="elh_TemplateProses_TanggalDibuat" class="TemplateProses_TanggalDibuat">@Html.Raw(templateProsesGrid.RenderFieldHeader(templateProsesGrid.TanggalDibuat))</div></th>
+} @* templateProsesGrid.TanggalDibuat.Visible (end) *@
+@if (templateProsesGrid.DiperbaruiOleh.Visible) { // templateProsesGrid.DiperbaruiOleh.Visible (begin)
+        <th data-name="DiperbaruiOleh" class="@(templateProsesGrid.DiperbaruiOleh.HeaderCellClass)"><div id="elh_TemplateProses_DiperbaruiOleh" class="TemplateProses_DiperbaruiOleh">@Html.Raw(templateProsesGrid.RenderFieldHeader(templateProsesGrid.DiperbaruiOleh))</div></th>
+} @* templateProsesGrid.DiperbaruiOleh.Visible (end) *@
+@if (templateProsesGrid.TanggalDiperbarui.Visible) { // templateProsesGrid.TanggalDiperbarui.Visible (begin)
+        <th data-name="TanggalDiperbarui" class="@(templateProsesGrid.TanggalDiperbarui.HeaderCellClass)"><div id="elh_TemplateProses_TanggalDiperbarui" class="TemplateProses_TanggalDiperbarui">@Html.Raw(templateProsesGrid.RenderFieldHeader(templateProsesGrid.TanggalDiperbarui))</div></th>
+} @* templateProsesGrid.TanggalDiperbarui.Visible (end) *@
+@* Render list options (header, right) *@
+@templateProsesGrid.ListOptions.RenderHeader("right")
+    </tr>
+</thead>
+<tbody data-page="@(templateProsesGrid.PageNumber)">
+@{
+    await templateProsesGrid.SetupGrid();
+    bool eof = templateProsesGrid.Recordset == null; // DN
+}
+@while (templateProsesGrid.RecordCount < templateProsesGrid.StopRecord || SameString(templateProsesGrid.RowIndex, "$rowindex$")) { // Begin While
+    if (!eof && !SameString(templateProsesGrid.RowIndex, "$rowindex$") &&
+        (!templateProsesGrid.IsGridAdd || templateProsesGrid.CurrentMode == "copy") &&
+        (!((templateProsesGrid.IsCopy || templateProsesGrid.IsAdd) && templateProsesGrid.RowIndex is int rowIndex && rowIndex == 0))) // DN
+        eof = !await templateProsesGrid.Recordset.ReadAsync();
+    templateProsesGrid.RecordCount++;
+    if (templateProsesGrid.RecordCount >= templateProsesGrid.StartRecord) {
+        await templateProsesGrid.SetupRow();
+
+        // Skip 1) delete row / empty row for confirm page, 2) hidden row
+        if (templateProsesGrid.RowAction != "delete" &&
+            templateProsesGrid.RowAction != "insertdelete" &&
+            !(templateProsesGrid.RowAction == "insert" && templateProsesGrid.IsConfirm && templateProsesGrid.EmptyRow()) &&
+            templateProsesGrid.RowAction != "hide") {
+    <tr @Html.Raw(templateProsesGrid.RowAttributes)>
+    @* Render list options (body, left) *@
+    @templateProsesGrid.ListOptions.RenderBody("left", templateProsesGrid.RowCount)
+    @if (templateProsesGrid.IdTemplate.Visible) { // templateProsesGrid.IdTemplate.Visible (begin)
+        <td data-name="IdTemplate" @Html.Raw(templateProsesGrid.IdTemplate.CellAttributes)>
+@if (templateProsesGrid.RowType == RowType.Add) { // Add (begin)
+    @* IdTemplate (begin) *@
+    @if (!Empty(templateProsesGrid.IdTemplate.SessionValue)) {
+    <span @Html.Raw(templateProsesGrid.IdTemplate.ViewAttributes)>
+    <span class="form-control-plaintext">@Html.Raw(templateProsesGrid.IdTemplate.DisplayValue(templateProsesGrid.IdTemplate.ViewValue))</span></span>
+    <input type="hidden" id="x@(templateProsesGrid.RowIndex)_IdTemplate" name="x@(templateProsesGrid.RowIndex)_IdTemplate" value="@(HtmlEncode(templateProsesGrid.IdTemplate.CurrentValue))" data-hidden="1">
+    } else {
+    <span id="el@(templateProsesGrid.RowIndex == "$rowindex$" ? "$rowindex$" : templateProsesGrid.RowCount)_TemplateProses_IdTemplate" class="el_TemplateProses_IdTemplate">
+        <select
+            id="x@(templateProsesGrid.RowIndex)_IdTemplate"
+            name="x@(templateProsesGrid.RowIndex)_IdTemplate"
+            class="form-select ew-select@(templateProsesGrid.IdTemplate.IsInvalidClass)"
+            data-select2-id="fTemplateProsesgrid_x@(templateProsesGrid.RowIndex)_IdTemplate"
+            data-table="TemplateProses"
+            data-field="x_IdTemplate"
+            data-value-separator="@(templateProsesGrid.IdTemplate.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(templateProsesGrid.IdTemplate.PlaceHolder))"
+            @Html.Raw(templateProsesGrid.IdTemplate.EditAttributes)>
+            @(templateProsesGrid.IdTemplate.SelectOptionListHtml("x" + templateProsesGrid.RowIndex + "_IdTemplate"))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(templateProsesGrid.IdTemplate.GetErrorMessage())</div>
+    @Html.Raw(templateProsesGrid.IdTemplate.Lookup.GetParamTag(templateProsesGrid, "p_x" + templateProsesGrid.RowIndex + "_IdTemplate"))
+    <script>
+    loadjs.ready("fTemplateProsesgrid", function() {
+        var options = { name: "x@(templateProsesGrid.RowIndex)_IdTemplate", selectId: "fTemplateProsesgrid_x@(templateProsesGrid.RowIndex)_IdTemplate" },
+            el = document.querySelector("select[data-select2-id='" + options.selectId + "']");
+        if (!el)
+            return;
+        options.closeOnSelect = !options.multiple;
+        options.dropdownParent = el.closest("#ew-modal-dialog, #ew-add-opt-dialog");
+        if (fTemplateProsesgrid.lists.IdTemplate?.lookupOptions.length) {
+            options.data = { id: "x@(templateProsesGrid.RowIndex)_IdTemplate", form: "fTemplateProsesgrid" };
+        } else {
+            options.ajax = { id: "x@(templateProsesGrid.RowIndex)_IdTemplate", form: "fTemplateProsesgrid", limit: ew.LOOKUP_PAGE_SIZE };
+        }
+        options.minimumInputLength = ew.selectMinimumInputLength;
+        options = Object.assign({}, ew.selectOptions, options, ew.vars.tables.TemplateProses.fields.IdTemplate.selectOptions);
+        ew.createSelect(options);
+    });
+    </script>
+    </span>
+    }
+    <input type="hidden" data-table="TemplateProses" data-field="x_IdTemplate" data-hidden="1" data-old name="o@(templateProsesGrid.RowIndex)_IdTemplate" id="o@(templateProsesGrid.RowIndex)_IdTemplate" value="@Html.Raw(HtmlEncode(templateProsesGrid.IdTemplate.OldValue))">
+    @* IdTemplate (end) *@
+} @* Add (end) *@
+@if (templateProsesGrid.RowType == RowType.Edit) { // Edit (begin)
+    @* IdTemplate (begin) *@
+    @if (!Empty(templateProsesGrid.IdTemplate.SessionValue)) {
+    <span @Html.Raw(templateProsesGrid.IdTemplate.ViewAttributes)>
+    <span class="form-control-plaintext">@Html.Raw(templateProsesGrid.IdTemplate.DisplayValue(templateProsesGrid.IdTemplate.ViewValue))</span></span>
+    <input type="hidden" id="x@(templateProsesGrid.RowIndex)_IdTemplate" name="x@(templateProsesGrid.RowIndex)_IdTemplate" value="@(HtmlEncode(templateProsesGrid.IdTemplate.CurrentValue))" data-hidden="1">
+    } else {
+    <span id="el@(templateProsesGrid.RowIndex == "$rowindex$" ? "$rowindex$" : templateProsesGrid.RowCount)_TemplateProses_IdTemplate" class="el_TemplateProses_IdTemplate">
+        <select
+            id="x@(templateProsesGrid.RowIndex)_IdTemplate"
+            name="x@(templateProsesGrid.RowIndex)_IdTemplate"
+            class="form-select ew-select@(templateProsesGrid.IdTemplate.IsInvalidClass)"
+            data-select2-id="fTemplateProsesgrid_x@(templateProsesGrid.RowIndex)_IdTemplate"
+            data-table="TemplateProses"
+            data-field="x_IdTemplate"
+            data-value-separator="@(templateProsesGrid.IdTemplate.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(templateProsesGrid.IdTemplate.PlaceHolder))"
+            @Html.Raw(templateProsesGrid.IdTemplate.EditAttributes)>
+            @(templateProsesGrid.IdTemplate.SelectOptionListHtml("x" + templateProsesGrid.RowIndex + "_IdTemplate"))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(templateProsesGrid.IdTemplate.GetErrorMessage())</div>
+    @Html.Raw(templateProsesGrid.IdTemplate.Lookup.GetParamTag(templateProsesGrid, "p_x" + templateProsesGrid.RowIndex + "_IdTemplate"))
+    <script>
+    loadjs.ready("fTemplateProsesgrid", function() {
+        var options = { name: "x@(templateProsesGrid.RowIndex)_IdTemplate", selectId: "fTemplateProsesgrid_x@(templateProsesGrid.RowIndex)_IdTemplate" },
+            el = document.querySelector("select[data-select2-id='" + options.selectId + "']");
+        if (!el)
+            return;
+        options.closeOnSelect = !options.multiple;
+        options.dropdownParent = el.closest("#ew-modal-dialog, #ew-add-opt-dialog");
+        if (fTemplateProsesgrid.lists.IdTemplate?.lookupOptions.length) {
+            options.data = { id: "x@(templateProsesGrid.RowIndex)_IdTemplate", form: "fTemplateProsesgrid" };
+        } else {
+            options.ajax = { id: "x@(templateProsesGrid.RowIndex)_IdTemplate", form: "fTemplateProsesgrid", limit: ew.LOOKUP_PAGE_SIZE };
+        }
+        options.minimumInputLength = ew.selectMinimumInputLength;
+        options = Object.assign({}, ew.selectOptions, options, ew.vars.tables.TemplateProses.fields.IdTemplate.selectOptions);
+        ew.createSelect(options);
+    });
+    </script>
+    </span>
+    }
+    @* IdTemplate (end) *@
+} @* Edit (end) *@
+@if (templateProsesGrid.RowType == RowType.View) { // View (begin)
+    @* IdTemplate (begin) *@
+    <span id="el@(templateProsesGrid.RowIndex == "$rowindex$" ? "$rowindex$" : templateProsesGrid.RowCount)_TemplateProses_IdTemplate" class="el_TemplateProses_IdTemplate">
+    <span @Html.Raw(templateProsesGrid.IdTemplate.ViewAttributes)>
+    @Html.Raw(templateProsesGrid.IdTemplate.GetViewValue())</span>
+    </span>
+    if (templateProsesGrid.IsConfirm) {
+    <input type="hidden" data-table="TemplateProses" data-field="x_IdTemplate" data-hidden="1" name="fTemplateProsesgrid$x@(templateProsesGrid.RowIndex)_IdTemplate" id="fTemplateProsesgrid$x@(templateProsesGrid.RowIndex)_IdTemplate" value="@Html.Raw(HtmlEncode(templateProsesGrid.IdTemplate.FormValue))">
+    <input type="hidden" data-table="TemplateProses" data-field="x_IdTemplate" data-hidden="1" data-old name="fTemplateProsesgrid$o@(templateProsesGrid.RowIndex)_IdTemplate" id="fTemplateProsesgrid$o@(templateProsesGrid.RowIndex)_IdTemplate" value="@Html.Raw(HtmlEncode(templateProsesGrid.IdTemplate.OldValue))">
+    }
+    @* IdTemplate (end) *@
+} @* View (end) *@
+</td>
+    } @* templateProsesGrid.IdTemplate.Visible (end) *@
+    @if (templateProsesGrid.UrutanProses.Visible) { // templateProsesGrid.UrutanProses.Visible (begin)
+        <td data-name="UrutanProses" @Html.Raw(templateProsesGrid.UrutanProses.CellAttributes)>
+@if (templateProsesGrid.RowType == RowType.Add) { // Add (begin)
+    @* UrutanProses (begin) *@
+    <span id="el@(templateProsesGrid.RowIndex == "$rowindex$" ? "$rowindex$" : templateProsesGrid.RowCount)_TemplateProses_UrutanProses" class="el_TemplateProses_UrutanProses">
+    <input type="@(templateProsesGrid.UrutanProses.InputTextType)" name="x@(templateProsesGrid.RowIndex)_UrutanProses" id="x@(templateProsesGrid.RowIndex)_UrutanProses" data-table="TemplateProses" data-field="x_UrutanProses" value="@Html.Raw(templateProsesGrid.UrutanProses.EditValue)" size="30" placeholder="@Html.Raw(HtmlEncode(templateProsesGrid.UrutanProses.PlaceHolder))" data-format-pattern="@(templateProsesGrid.UrutanProses.FormatPattern)"@Html.Raw(templateProsesGrid.UrutanProses.EditAttributes)>
+    <div class="invalid-feedback">@Html.Raw(templateProsesGrid.UrutanProses.GetErrorMessage())</div>
+    </span>
+    <input type="hidden" data-table="TemplateProses" data-field="x_UrutanProses" data-hidden="1" data-old name="o@(templateProsesGrid.RowIndex)_UrutanProses" id="o@(templateProsesGrid.RowIndex)_UrutanProses" value="@Html.Raw(HtmlEncode(templateProsesGrid.UrutanProses.OldValue))">
+    @* UrutanProses (end) *@
+} @* Add (end) *@
+@if (templateProsesGrid.RowType == RowType.Edit) { // Edit (begin)
+    @* UrutanProses (begin) *@
+    <span id="el@(templateProsesGrid.RowIndex == "$rowindex$" ? "$rowindex$" : templateProsesGrid.RowCount)_TemplateProses_UrutanProses" class="el_TemplateProses_UrutanProses">
+    <input type="@(templateProsesGrid.UrutanProses.InputTextType)" name="x@(templateProsesGrid.RowIndex)_UrutanProses" id="x@(templateProsesGrid.RowIndex)_UrutanProses" data-table="TemplateProses" data-field="x_UrutanProses" value="@Html.Raw(templateProsesGrid.UrutanProses.EditValue)" size="30" placeholder="@Html.Raw(HtmlEncode(templateProsesGrid.UrutanProses.PlaceHolder))" data-format-pattern="@(templateProsesGrid.UrutanProses.FormatPattern)"@Html.Raw(templateProsesGrid.UrutanProses.EditAttributes)>
+    <div class="invalid-feedback">@Html.Raw(templateProsesGrid.UrutanProses.GetErrorMessage())</div>
+    </span>
+    @* UrutanProses (end) *@
+} @* Edit (end) *@
+@if (templateProsesGrid.RowType == RowType.View) { // View (begin)
+    @* UrutanProses (begin) *@
+    <span id="el@(templateProsesGrid.RowIndex == "$rowindex$" ? "$rowindex$" : templateProsesGrid.RowCount)_TemplateProses_UrutanProses" class="el_TemplateProses_UrutanProses">
+    <span @Html.Raw(templateProsesGrid.UrutanProses.ViewAttributes)>
+    @Html.Raw(templateProsesGrid.UrutanProses.GetViewValue())</span>
+    </span>
+    if (templateProsesGrid.IsConfirm) {
+    <input type="hidden" data-table="TemplateProses" data-field="x_UrutanProses" data-hidden="1" name="fTemplateProsesgrid$x@(templateProsesGrid.RowIndex)_UrutanProses" id="fTemplateProsesgrid$x@(templateProsesGrid.RowIndex)_UrutanProses" value="@Html.Raw(HtmlEncode(templateProsesGrid.UrutanProses.FormValue))">
+    <input type="hidden" data-table="TemplateProses" data-field="x_UrutanProses" data-hidden="1" data-old name="fTemplateProsesgrid$o@(templateProsesGrid.RowIndex)_UrutanProses" id="fTemplateProsesgrid$o@(templateProsesGrid.RowIndex)_UrutanProses" value="@Html.Raw(HtmlEncode(templateProsesGrid.UrutanProses.OldValue))">
+    }
+    @* UrutanProses (end) *@
+} @* View (end) *@
+</td>
+    } @* templateProsesGrid.UrutanProses.Visible (end) *@
+    @if (templateProsesGrid.NamaProses.Visible) { // templateProsesGrid.NamaProses.Visible (begin)
+        <td data-name="NamaProses" @Html.Raw(templateProsesGrid.NamaProses.CellAttributes)>
+@if (templateProsesGrid.RowType == RowType.Add) { // Add (begin)
+    @* NamaProses (begin) *@
+    <span id="el@(templateProsesGrid.RowIndex == "$rowindex$" ? "$rowindex$" : templateProsesGrid.RowCount)_TemplateProses_NamaProses" class="el_TemplateProses_NamaProses">
+    <input type="@(templateProsesGrid.NamaProses.InputTextType)" name="x@(templateProsesGrid.RowIndex)_NamaProses" id="x@(templateProsesGrid.RowIndex)_NamaProses" data-table="TemplateProses" data-field="x_NamaProses" value="@Html.Raw(templateProsesGrid.NamaProses.EditValue)" size="30" maxlength="100" placeholder="@Html.Raw(HtmlEncode(templateProsesGrid.NamaProses.PlaceHolder))" data-format-pattern="@(templateProsesGrid.NamaProses.FormatPattern)"@Html.Raw(templateProsesGrid.NamaProses.EditAttributes)>
+    <div class="invalid-feedback">@Html.Raw(templateProsesGrid.NamaProses.GetErrorMessage())</div>
+    </span>
+    <input type="hidden" data-table="TemplateProses" data-field="x_NamaProses" data-hidden="1" data-old name="o@(templateProsesGrid.RowIndex)_NamaProses" id="o@(templateProsesGrid.RowIndex)_NamaProses" value="@Html.Raw(HtmlEncode(templateProsesGrid.NamaProses.OldValue))">
+    @* NamaProses (end) *@
+} @* Add (end) *@
+@if (templateProsesGrid.RowType == RowType.Edit) { // Edit (begin)
+    @* NamaProses (begin) *@
+    <span id="el@(templateProsesGrid.RowIndex == "$rowindex$" ? "$rowindex$" : templateProsesGrid.RowCount)_TemplateProses_NamaProses" class="el_TemplateProses_NamaProses">
+    <input type="@(templateProsesGrid.NamaProses.InputTextType)" name="x@(templateProsesGrid.RowIndex)_NamaProses" id="x@(templateProsesGrid.RowIndex)_NamaProses" data-table="TemplateProses" data-field="x_NamaProses" value="@Html.Raw(templateProsesGrid.NamaProses.EditValue)" size="30" maxlength="100" placeholder="@Html.Raw(HtmlEncode(templateProsesGrid.NamaProses.PlaceHolder))" data-format-pattern="@(templateProsesGrid.NamaProses.FormatPattern)"@Html.Raw(templateProsesGrid.NamaProses.EditAttributes)>
+    <div class="invalid-feedback">@Html.Raw(templateProsesGrid.NamaProses.GetErrorMessage())</div>
+    </span>
+    @* NamaProses (end) *@
+} @* Edit (end) *@
+@if (templateProsesGrid.RowType == RowType.View) { // View (begin)
+    @* NamaProses (begin) *@
+    <span id="el@(templateProsesGrid.RowIndex == "$rowindex$" ? "$rowindex$" : templateProsesGrid.RowCount)_TemplateProses_NamaProses" class="el_TemplateProses_NamaProses">
+    <span @Html.Raw(templateProsesGrid.NamaProses.ViewAttributes)>
+    @Html.Raw(templateProsesGrid.NamaProses.GetViewValue())</span>
+    </span>
+    if (templateProsesGrid.IsConfirm) {
+    <input type="hidden" data-table="TemplateProses" data-field="x_NamaProses" data-hidden="1" name="fTemplateProsesgrid$x@(templateProsesGrid.RowIndex)_NamaProses" id="fTemplateProsesgrid$x@(templateProsesGrid.RowIndex)_NamaProses" value="@Html.Raw(HtmlEncode(templateProsesGrid.NamaProses.FormValue))">
+    <input type="hidden" data-table="TemplateProses" data-field="x_NamaProses" data-hidden="1" data-old name="fTemplateProsesgrid$o@(templateProsesGrid.RowIndex)_NamaProses" id="fTemplateProsesgrid$o@(templateProsesGrid.RowIndex)_NamaProses" value="@Html.Raw(HtmlEncode(templateProsesGrid.NamaProses.OldValue))">
+    }
+    @* NamaProses (end) *@
+} @* View (end) *@
+</td>
+    } @* templateProsesGrid.NamaProses.Visible (end) *@
+    @if (templateProsesGrid.IdPIC.Visible) { // templateProsesGrid.IdPIC.Visible (begin)
+        <td data-name="IdPIC" @Html.Raw(templateProsesGrid.IdPIC.CellAttributes)>
+@if (templateProsesGrid.RowType == RowType.Add) { // Add (begin)
+    @* IdPIC (begin) *@
+    <span id="el@(templateProsesGrid.RowIndex == "$rowindex$" ? "$rowindex$" : templateProsesGrid.RowCount)_TemplateProses_IdPIC" class="el_TemplateProses_IdPIC">
+        <select
+            id="x@(templateProsesGrid.RowIndex)_IdPIC"
+            name="x@(templateProsesGrid.RowIndex)_IdPIC"
+            class="form-select ew-select@(templateProsesGrid.IdPIC.IsInvalidClass)"
+            data-select2-id="fTemplateProsesgrid_x@(templateProsesGrid.RowIndex)_IdPIC"
+            data-table="TemplateProses"
+            data-field="x_IdPIC"
+            data-value-separator="@(templateProsesGrid.IdPIC.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(templateProsesGrid.IdPIC.PlaceHolder))"
+            @Html.Raw(templateProsesGrid.IdPIC.EditAttributes)>
+            @(templateProsesGrid.IdPIC.SelectOptionListHtml("x" + templateProsesGrid.RowIndex + "_IdPIC"))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(templateProsesGrid.IdPIC.GetErrorMessage())</div>
+    @Html.Raw(templateProsesGrid.IdPIC.Lookup.GetParamTag(templateProsesGrid, "p_x" + templateProsesGrid.RowIndex + "_IdPIC"))
+    <script>
+    loadjs.ready("fTemplateProsesgrid", function() {
+        var options = { name: "x@(templateProsesGrid.RowIndex)_IdPIC", selectId: "fTemplateProsesgrid_x@(templateProsesGrid.RowIndex)_IdPIC" },
+            el = document.querySelector("select[data-select2-id='" + options.selectId + "']");
+        if (!el)
+            return;
+        options.closeOnSelect = !options.multiple;
+        options.dropdownParent = el.closest("#ew-modal-dialog, #ew-add-opt-dialog");
+        if (fTemplateProsesgrid.lists.IdPIC?.lookupOptions.length) {
+            options.data = { id: "x@(templateProsesGrid.RowIndex)_IdPIC", form: "fTemplateProsesgrid" };
+        } else {
+            options.ajax = { id: "x@(templateProsesGrid.RowIndex)_IdPIC", form: "fTemplateProsesgrid", limit: ew.LOOKUP_PAGE_SIZE };
+        }
+        options.minimumInputLength = ew.selectMinimumInputLength;
+        options = Object.assign({}, ew.selectOptions, options, ew.vars.tables.TemplateProses.fields.IdPIC.selectOptions);
+        ew.createSelect(options);
+    });
+    </script>
+    </span>
+    <input type="hidden" data-table="TemplateProses" data-field="x_IdPIC" data-hidden="1" data-old name="o@(templateProsesGrid.RowIndex)_IdPIC" id="o@(templateProsesGrid.RowIndex)_IdPIC" value="@Html.Raw(HtmlEncode(templateProsesGrid.IdPIC.OldValue))">
+    @* IdPIC (end) *@
+} @* Add (end) *@
+@if (templateProsesGrid.RowType == RowType.Edit) { // Edit (begin)
+    @* IdPIC (begin) *@
+    <span id="el@(templateProsesGrid.RowIndex == "$rowindex$" ? "$rowindex$" : templateProsesGrid.RowCount)_TemplateProses_IdPIC" class="el_TemplateProses_IdPIC">
+        <select
+            id="x@(templateProsesGrid.RowIndex)_IdPIC"
+            name="x@(templateProsesGrid.RowIndex)_IdPIC"
+            class="form-select ew-select@(templateProsesGrid.IdPIC.IsInvalidClass)"
+            data-select2-id="fTemplateProsesgrid_x@(templateProsesGrid.RowIndex)_IdPIC"
+            data-table="TemplateProses"
+            data-field="x_IdPIC"
+            data-value-separator="@(templateProsesGrid.IdPIC.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(templateProsesGrid.IdPIC.PlaceHolder))"
+            @Html.Raw(templateProsesGrid.IdPIC.EditAttributes)>
+            @(templateProsesGrid.IdPIC.SelectOptionListHtml("x" + templateProsesGrid.RowIndex + "_IdPIC"))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(templateProsesGrid.IdPIC.GetErrorMessage())</div>
+    @Html.Raw(templateProsesGrid.IdPIC.Lookup.GetParamTag(templateProsesGrid, "p_x" + templateProsesGrid.RowIndex + "_IdPIC"))
+    <script>
+    loadjs.ready("fTemplateProsesgrid", function() {
+        var options = { name: "x@(templateProsesGrid.RowIndex)_IdPIC", selectId: "fTemplateProsesgrid_x@(templateProsesGrid.RowIndex)_IdPIC" },
+            el = document.querySelector("select[data-select2-id='" + options.selectId + "']");
+        if (!el)
+            return;
+        options.closeOnSelect = !options.multiple;
+        options.dropdownParent = el.closest("#ew-modal-dialog, #ew-add-opt-dialog");
+        if (fTemplateProsesgrid.lists.IdPIC?.lookupOptions.length) {
+            options.data = { id: "x@(templateProsesGrid.RowIndex)_IdPIC", form: "fTemplateProsesgrid" };
+        } else {
+            options.ajax = { id: "x@(templateProsesGrid.RowIndex)_IdPIC", form: "fTemplateProsesgrid", limit: ew.LOOKUP_PAGE_SIZE };
+        }
+        options.minimumInputLength = ew.selectMinimumInputLength;
+        options = Object.assign({}, ew.selectOptions, options, ew.vars.tables.TemplateProses.fields.IdPIC.selectOptions);
+        ew.createSelect(options);
+    });
+    </script>
+    </span>
+    @* IdPIC (end) *@
+} @* Edit (end) *@
+@if (templateProsesGrid.RowType == RowType.View) { // View (begin)
+    @* IdPIC (begin) *@
+    <span id="el@(templateProsesGrid.RowIndex == "$rowindex$" ? "$rowindex$" : templateProsesGrid.RowCount)_TemplateProses_IdPIC" class="el_TemplateProses_IdPIC">
+    <span @Html.Raw(templateProsesGrid.IdPIC.ViewAttributes)>
+    @Html.Raw(templateProsesGrid.IdPIC.GetViewValue())</span>
+    </span>
+    if (templateProsesGrid.IsConfirm) {
+    <input type="hidden" data-table="TemplateProses" data-field="x_IdPIC" data-hidden="1" name="fTemplateProsesgrid$x@(templateProsesGrid.RowIndex)_IdPIC" id="fTemplateProsesgrid$x@(templateProsesGrid.RowIndex)_IdPIC" value="@Html.Raw(HtmlEncode(templateProsesGrid.IdPIC.FormValue))">
+    <input type="hidden" data-table="TemplateProses" data-field="x_IdPIC" data-hidden="1" data-old name="fTemplateProsesgrid$o@(templateProsesGrid.RowIndex)_IdPIC" id="fTemplateProsesgrid$o@(templateProsesGrid.RowIndex)_IdPIC" value="@Html.Raw(HtmlEncode(templateProsesGrid.IdPIC.OldValue))">
+    }
+    @* IdPIC (end) *@
+} @* View (end) *@
+</td>
+    } @* templateProsesGrid.IdPIC.Visible (end) *@
+    @if (templateProsesGrid.IdTools.Visible) { // templateProsesGrid.IdTools.Visible (begin)
+        <td data-name="IdTools" @Html.Raw(templateProsesGrid.IdTools.CellAttributes)>
+@if (templateProsesGrid.RowType == RowType.Add) { // Add (begin)
+    @* IdTools (begin) *@
+    <span id="el@(templateProsesGrid.RowIndex == "$rowindex$" ? "$rowindex$" : templateProsesGrid.RowCount)_TemplateProses_IdTools" class="el_TemplateProses_IdTools">
+        <select
+            id="x@(templateProsesGrid.RowIndex)_IdTools"
+            name="x@(templateProsesGrid.RowIndex)_IdTools"
+            class="form-select ew-select@(templateProsesGrid.IdTools.IsInvalidClass)"
+            data-select2-id="fTemplateProsesgrid_x@(templateProsesGrid.RowIndex)_IdTools"
+            data-table="TemplateProses"
+            data-field="x_IdTools"
+            data-value-separator="@(templateProsesGrid.IdTools.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(templateProsesGrid.IdTools.PlaceHolder))"
+            @Html.Raw(templateProsesGrid.IdTools.EditAttributes)>
+            @(templateProsesGrid.IdTools.SelectOptionListHtml("x" + templateProsesGrid.RowIndex + "_IdTools"))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(templateProsesGrid.IdTools.GetErrorMessage())</div>
+    @Html.Raw(templateProsesGrid.IdTools.Lookup.GetParamTag(templateProsesGrid, "p_x" + templateProsesGrid.RowIndex + "_IdTools"))
+    <script>
+    loadjs.ready("fTemplateProsesgrid", function() {
+        var options = { name: "x@(templateProsesGrid.RowIndex)_IdTools", selectId: "fTemplateProsesgrid_x@(templateProsesGrid.RowIndex)_IdTools" },
+            el = document.querySelector("select[data-select2-id='" + options.selectId + "']");
+        if (!el)
+            return;
+        options.closeOnSelect = !options.multiple;
+        options.dropdownParent = el.closest("#ew-modal-dialog, #ew-add-opt-dialog");
+        if (fTemplateProsesgrid.lists.IdTools?.lookupOptions.length) {
+            options.data = { id: "x@(templateProsesGrid.RowIndex)_IdTools", form: "fTemplateProsesgrid" };
+        } else {
+            options.ajax = { id: "x@(templateProsesGrid.RowIndex)_IdTools", form: "fTemplateProsesgrid", limit: ew.LOOKUP_PAGE_SIZE };
+        }
+        options.minimumInputLength = ew.selectMinimumInputLength;
+        options = Object.assign({}, ew.selectOptions, options, ew.vars.tables.TemplateProses.fields.IdTools.selectOptions);
+        ew.createSelect(options);
+    });
+    </script>
+    </span>
+    <input type="hidden" data-table="TemplateProses" data-field="x_IdTools" data-hidden="1" data-old name="o@(templateProsesGrid.RowIndex)_IdTools" id="o@(templateProsesGrid.RowIndex)_IdTools" value="@Html.Raw(HtmlEncode(templateProsesGrid.IdTools.OldValue))">
+    @* IdTools (end) *@
+} @* Add (end) *@
+@if (templateProsesGrid.RowType == RowType.Edit) { // Edit (begin)
+    @* IdTools (begin) *@
+    <span id="el@(templateProsesGrid.RowIndex == "$rowindex$" ? "$rowindex$" : templateProsesGrid.RowCount)_TemplateProses_IdTools" class="el_TemplateProses_IdTools">
+        <select
+            id="x@(templateProsesGrid.RowIndex)_IdTools"
+            name="x@(templateProsesGrid.RowIndex)_IdTools"
+            class="form-select ew-select@(templateProsesGrid.IdTools.IsInvalidClass)"
+            data-select2-id="fTemplateProsesgrid_x@(templateProsesGrid.RowIndex)_IdTools"
+            data-table="TemplateProses"
+            data-field="x_IdTools"
+            data-value-separator="@(templateProsesGrid.IdTools.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(templateProsesGrid.IdTools.PlaceHolder))"
+            @Html.Raw(templateProsesGrid.IdTools.EditAttributes)>
+            @(templateProsesGrid.IdTools.SelectOptionListHtml("x" + templateProsesGrid.RowIndex + "_IdTools"))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(templateProsesGrid.IdTools.GetErrorMessage())</div>
+    @Html.Raw(templateProsesGrid.IdTools.Lookup.GetParamTag(templateProsesGrid, "p_x" + templateProsesGrid.RowIndex + "_IdTools"))
+    <script>
+    loadjs.ready("fTemplateProsesgrid", function() {
+        var options = { name: "x@(templateProsesGrid.RowIndex)_IdTools", selectId: "fTemplateProsesgrid_x@(templateProsesGrid.RowIndex)_IdTools" },
+            el = document.querySelector("select[data-select2-id='" + options.selectId + "']");
+        if (!el)
+            return;
+        options.closeOnSelect = !options.multiple;
+        options.dropdownParent = el.closest("#ew-modal-dialog, #ew-add-opt-dialog");
+        if (fTemplateProsesgrid.lists.IdTools?.lookupOptions.length) {
+            options.data = { id: "x@(templateProsesGrid.RowIndex)_IdTools", form: "fTemplateProsesgrid" };
+        } else {
+            options.ajax = { id: "x@(templateProsesGrid.RowIndex)_IdTools", form: "fTemplateProsesgrid", limit: ew.LOOKUP_PAGE_SIZE };
+        }
+        options.minimumInputLength = ew.selectMinimumInputLength;
+        options = Object.assign({}, ew.selectOptions, options, ew.vars.tables.TemplateProses.fields.IdTools.selectOptions);
+        ew.createSelect(options);
+    });
+    </script>
+    </span>
+    @* IdTools (end) *@
+} @* Edit (end) *@
+@if (templateProsesGrid.RowType == RowType.View) { // View (begin)
+    @* IdTools (begin) *@
+    <span id="el@(templateProsesGrid.RowIndex == "$rowindex$" ? "$rowindex$" : templateProsesGrid.RowCount)_TemplateProses_IdTools" class="el_TemplateProses_IdTools">
+    <span @Html.Raw(templateProsesGrid.IdTools.ViewAttributes)>
+    @Html.Raw(templateProsesGrid.IdTools.GetViewValue())</span>
+    </span>
+    if (templateProsesGrid.IsConfirm) {
+    <input type="hidden" data-table="TemplateProses" data-field="x_IdTools" data-hidden="1" name="fTemplateProsesgrid$x@(templateProsesGrid.RowIndex)_IdTools" id="fTemplateProsesgrid$x@(templateProsesGrid.RowIndex)_IdTools" value="@Html.Raw(HtmlEncode(templateProsesGrid.IdTools.FormValue))">
+    <input type="hidden" data-table="TemplateProses" data-field="x_IdTools" data-hidden="1" data-old name="fTemplateProsesgrid$o@(templateProsesGrid.RowIndex)_IdTools" id="fTemplateProsesgrid$o@(templateProsesGrid.RowIndex)_IdTools" value="@Html.Raw(HtmlEncode(templateProsesGrid.IdTools.OldValue))">
+    }
+    @* IdTools (end) *@
+} @* View (end) *@
+</td>
+    } @* templateProsesGrid.IdTools.Visible (end) *@
+    @if (templateProsesGrid.Keterangan.Visible) { // templateProsesGrid.Keterangan.Visible (begin)
+        <td data-name="Keterangan" @Html.Raw(templateProsesGrid.Keterangan.CellAttributes)>
+@if (templateProsesGrid.RowType == RowType.Add) { // Add (begin)
+    @* Keterangan (begin) *@
+    <span id="el@(templateProsesGrid.RowIndex == "$rowindex$" ? "$rowindex$" : templateProsesGrid.RowCount)_TemplateProses_Keterangan" class="el_TemplateProses_Keterangan">
+    <textarea data-table="TemplateProses" data-field="x_Keterangan" name="x@(templateProsesGrid.RowIndex)_Keterangan" id="x@(templateProsesGrid.RowIndex)_Keterangan" cols="35" rows="4" placeholder="@Html.Raw(HtmlEncode(templateProsesGrid.Keterangan.PlaceHolder))"@Html.Raw(templateProsesGrid.Keterangan.EditAttributes)>@(templateProsesGrid.Keterangan.EditValue)</textarea>
+    <div class="invalid-feedback">@Html.Raw(templateProsesGrid.Keterangan.GetErrorMessage())</div>
+    </span>
+    <input type="hidden" data-table="TemplateProses" data-field="x_Keterangan" data-hidden="1" data-old name="o@(templateProsesGrid.RowIndex)_Keterangan" id="o@(templateProsesGrid.RowIndex)_Keterangan" value="@Html.Raw(HtmlEncode(templateProsesGrid.Keterangan.OldValue))">
+    @* Keterangan (end) *@
+} @* Add (end) *@
+@if (templateProsesGrid.RowType == RowType.Edit) { // Edit (begin)
+    @* Keterangan (begin) *@
+    <span id="el@(templateProsesGrid.RowIndex == "$rowindex$" ? "$rowindex$" : templateProsesGrid.RowCount)_TemplateProses_Keterangan" class="el_TemplateProses_Keterangan">
+    <textarea data-table="TemplateProses" data-field="x_Keterangan" name="x@(templateProsesGrid.RowIndex)_Keterangan" id="x@(templateProsesGrid.RowIndex)_Keterangan" cols="35" rows="4" placeholder="@Html.Raw(HtmlEncode(templateProsesGrid.Keterangan.PlaceHolder))"@Html.Raw(templateProsesGrid.Keterangan.EditAttributes)>@(templateProsesGrid.Keterangan.EditValue)</textarea>
+    <div class="invalid-feedback">@Html.Raw(templateProsesGrid.Keterangan.GetErrorMessage())</div>
+    </span>
+    @* Keterangan (end) *@
+} @* Edit (end) *@
+@if (templateProsesGrid.RowType == RowType.View) { // View (begin)
+    @* Keterangan (begin) *@
+    <span id="el@(templateProsesGrid.RowIndex == "$rowindex$" ? "$rowindex$" : templateProsesGrid.RowCount)_TemplateProses_Keterangan" class="el_TemplateProses_Keterangan">
+    <span @Html.Raw(templateProsesGrid.Keterangan.ViewAttributes)>
+    @Html.Raw(templateProsesGrid.Keterangan.GetViewValue())</span>
+    </span>
+    if (templateProsesGrid.IsConfirm) {
+    <input type="hidden" data-table="TemplateProses" data-field="x_Keterangan" data-hidden="1" name="fTemplateProsesgrid$x@(templateProsesGrid.RowIndex)_Keterangan" id="fTemplateProsesgrid$x@(templateProsesGrid.RowIndex)_Keterangan" value="@Html.Raw(HtmlEncode(templateProsesGrid.Keterangan.FormValue))">
+    <input type="hidden" data-table="TemplateProses" data-field="x_Keterangan" data-hidden="1" data-old name="fTemplateProsesgrid$o@(templateProsesGrid.RowIndex)_Keterangan" id="fTemplateProsesgrid$o@(templateProsesGrid.RowIndex)_Keterangan" value="@Html.Raw(HtmlEncode(templateProsesGrid.Keterangan.OldValue))">
+    }
+    @* Keterangan (end) *@
+} @* View (end) *@
+</td>
+    } @* templateProsesGrid.Keterangan.Visible (end) *@
+    @if (templateProsesGrid.DibuatOleh.Visible) { // templateProsesGrid.DibuatOleh.Visible (begin)
+        <td data-name="DibuatOleh" @Html.Raw(templateProsesGrid.DibuatOleh.CellAttributes)>
+@if (templateProsesGrid.RowType == RowType.Add) { // Add (begin)
+    @* DibuatOleh (begin) *@
+    <span id="el@(templateProsesGrid.RowIndex == "$rowindex$" ? "$rowindex$" : templateProsesGrid.RowCount)_TemplateProses_DibuatOleh" class="el_TemplateProses_DibuatOleh">
+    <input type="@(templateProsesGrid.DibuatOleh.InputTextType)" name="x@(templateProsesGrid.RowIndex)_DibuatOleh" id="x@(templateProsesGrid.RowIndex)_DibuatOleh" data-table="TemplateProses" data-field="x_DibuatOleh" value="@Html.Raw(templateProsesGrid.DibuatOleh.EditValue)" size="30" maxlength="100" placeholder="@Html.Raw(HtmlEncode(templateProsesGrid.DibuatOleh.PlaceHolder))" data-format-pattern="@(templateProsesGrid.DibuatOleh.FormatPattern)"@Html.Raw(templateProsesGrid.DibuatOleh.EditAttributes)>
+    <div class="invalid-feedback">@Html.Raw(templateProsesGrid.DibuatOleh.GetErrorMessage())</div>
+    </span>
+    <input type="hidden" data-table="TemplateProses" data-field="x_DibuatOleh" data-hidden="1" data-old name="o@(templateProsesGrid.RowIndex)_DibuatOleh" id="o@(templateProsesGrid.RowIndex)_DibuatOleh" value="@Html.Raw(HtmlEncode(templateProsesGrid.DibuatOleh.OldValue))">
+    @* DibuatOleh (end) *@
+} @* Add (end) *@
+@if (templateProsesGrid.RowType == RowType.Edit) { // Edit (begin)
+    @* DibuatOleh (begin) *@
+    <span id="el@(templateProsesGrid.RowIndex == "$rowindex$" ? "$rowindex$" : templateProsesGrid.RowCount)_TemplateProses_DibuatOleh" class="el_TemplateProses_DibuatOleh">
+    <input type="@(templateProsesGrid.DibuatOleh.InputTextType)" name="x@(templateProsesGrid.RowIndex)_DibuatOleh" id="x@(templateProsesGrid.RowIndex)_DibuatOleh" data-table="TemplateProses" data-field="x_DibuatOleh" value="@Html.Raw(templateProsesGrid.DibuatOleh.EditValue)" size="30" maxlength="100" placeholder="@Html.Raw(HtmlEncode(templateProsesGrid.DibuatOleh.PlaceHolder))" data-format-pattern="@(templateProsesGrid.DibuatOleh.FormatPattern)"@Html.Raw(templateProsesGrid.DibuatOleh.EditAttributes)>
+    <div class="invalid-feedback">@Html.Raw(templateProsesGrid.DibuatOleh.GetErrorMessage())</div>
+    </span>
+    @* DibuatOleh (end) *@
+} @* Edit (end) *@
+@if (templateProsesGrid.RowType == RowType.View) { // View (begin)
+    @* DibuatOleh (begin) *@
+    <span id="el@(templateProsesGrid.RowIndex == "$rowindex$" ? "$rowindex$" : templateProsesGrid.RowCount)_TemplateProses_DibuatOleh" class="el_TemplateProses_DibuatOleh">
+    <span @Html.Raw(templateProsesGrid.DibuatOleh.ViewAttributes)>
+    @Html.Raw(templateProsesGrid.DibuatOleh.GetViewValue())</span>
+    </span>
+    if (templateProsesGrid.IsConfirm) {
+    <input type="hidden" data-table="TemplateProses" data-field="x_DibuatOleh" data-hidden="1" name="fTemplateProsesgrid$x@(templateProsesGrid.RowIndex)_DibuatOleh" id="fTemplateProsesgrid$x@(templateProsesGrid.RowIndex)_DibuatOleh" value="@Html.Raw(HtmlEncode(templateProsesGrid.DibuatOleh.FormValue))">
+    <input type="hidden" data-table="TemplateProses" data-field="x_DibuatOleh" data-hidden="1" data-old name="fTemplateProsesgrid$o@(templateProsesGrid.RowIndex)_DibuatOleh" id="fTemplateProsesgrid$o@(templateProsesGrid.RowIndex)_DibuatOleh" value="@Html.Raw(HtmlEncode(templateProsesGrid.DibuatOleh.OldValue))">
+    }
+    @* DibuatOleh (end) *@
+} @* View (end) *@
+</td>
+    } @* templateProsesGrid.DibuatOleh.Visible (end) *@
+    @if (templateProsesGrid.TanggalDibuat.Visible) { // templateProsesGrid.TanggalDibuat.Visible (begin)
+        <td data-name="TanggalDibuat" @Html.Raw(templateProsesGrid.TanggalDibuat.CellAttributes)>
+@if (templateProsesGrid.RowType == RowType.Add) { // Add (begin)
+    @* TanggalDibuat (begin) *@
+    <span id="el@(templateProsesGrid.RowIndex == "$rowindex$" ? "$rowindex$" : templateProsesGrid.RowCount)_TemplateProses_TanggalDibuat" class="el_TemplateProses_TanggalDibuat">
+    <input type="@(templateProsesGrid.TanggalDibuat.InputTextType)" name="x@(templateProsesGrid.RowIndex)_TanggalDibuat" id="x@(templateProsesGrid.RowIndex)_TanggalDibuat" data-table="TemplateProses" data-field="x_TanggalDibuat" value="@Html.Raw(templateProsesGrid.TanggalDibuat.EditValue)" placeholder="@Html.Raw(HtmlEncode(templateProsesGrid.TanggalDibuat.PlaceHolder))" data-format-pattern="@(templateProsesGrid.TanggalDibuat.FormatPattern)"@Html.Raw(templateProsesGrid.TanggalDibuat.EditAttributes)>
+    <div class="invalid-feedback">@Html.Raw(templateProsesGrid.TanggalDibuat.GetErrorMessage())</div>
+    @if (!templateProsesGrid.TanggalDibuat.ReadOnly && !templateProsesGrid.TanggalDibuat.Disabled && !templateProsesGrid.TanggalDibuat.EditAttrs.Is("readonly") && !templateProsesGrid.TanggalDibuat.EditAttrs.Is("disabled")) {
+    <script>
+    loadjs.ready(["fTemplateProsesgrid", "datetimepicker"], function () {
+        let format = "@Html.Raw(DateFormat(9))", // DN
+            options = {
+                    localization: {
+                        locale: ew.LANGUAGE_ID + "-u-nu-" + ew.getNumberingSystem(),
+                        hourCycle: format.match(/H/) ? "h24" : "h12",
+                        format,
+                        ...ew.language.phrase("datetimepicker")
+                    },
+                    display: {
+                        icons: {
+                            previous: ew.IS_RTL ? "fa-solid fa-chevron-right" : "fa-solid fa-chevron-left",
+                            next: ew.IS_RTL ? "fa-solid fa-chevron-left" : "fa-solid fa-chevron-right"
+                        },
+                        components: {
+                            clock: !!format.match(/h/i) || !!format.match(/m/) || !!format.match(/s/i),
+                            hours: !!format.match(/h/i),
+                            minutes: !!format.match(/m/),
+                            seconds: !!format.match(/s/i)
+                        },
+                    theme: ew.getPreferredTheme()
+                    }
+                };
+        ew.createDateTimePicker("fTemplateProsesgrid", "x@(templateProsesGrid.RowIndex)_TanggalDibuat", ew.deepAssign({"useCurrent":false,"display":{"sideBySide":false}}, options));
+    });
+    </script>
+    }
+    </span>
+    <input type="hidden" data-table="TemplateProses" data-field="x_TanggalDibuat" data-hidden="1" data-old name="o@(templateProsesGrid.RowIndex)_TanggalDibuat" id="o@(templateProsesGrid.RowIndex)_TanggalDibuat" value="@Html.Raw(HtmlEncode(templateProsesGrid.TanggalDibuat.OldValue))">
+    @* TanggalDibuat (end) *@
+} @* Add (end) *@
+@if (templateProsesGrid.RowType == RowType.Edit) { // Edit (begin)
+    @* TanggalDibuat (begin) *@
+    <span id="el@(templateProsesGrid.RowIndex == "$rowindex$" ? "$rowindex$" : templateProsesGrid.RowCount)_TemplateProses_TanggalDibuat" class="el_TemplateProses_TanggalDibuat">
+    <input type="@(templateProsesGrid.TanggalDibuat.InputTextType)" name="x@(templateProsesGrid.RowIndex)_TanggalDibuat" id="x@(templateProsesGrid.RowIndex)_TanggalDibuat" data-table="TemplateProses" data-field="x_TanggalDibuat" value="@Html.Raw(templateProsesGrid.TanggalDibuat.EditValue)" placeholder="@Html.Raw(HtmlEncode(templateProsesGrid.TanggalDibuat.PlaceHolder))" data-format-pattern="@(templateProsesGrid.TanggalDibuat.FormatPattern)"@Html.Raw(templateProsesGrid.TanggalDibuat.EditAttributes)>
+    <div class="invalid-feedback">@Html.Raw(templateProsesGrid.TanggalDibuat.GetErrorMessage())</div>
+    @if (!templateProsesGrid.TanggalDibuat.ReadOnly && !templateProsesGrid.TanggalDibuat.Disabled && !templateProsesGrid.TanggalDibuat.EditAttrs.Is("readonly") && !templateProsesGrid.TanggalDibuat.EditAttrs.Is("disabled")) {
+    <script>
+    loadjs.ready(["fTemplateProsesgrid", "datetimepicker"], function () {
+        let format = "@Html.Raw(DateFormat(9))", // DN
+            options = {
+                    localization: {
+                        locale: ew.LANGUAGE_ID + "-u-nu-" + ew.getNumberingSystem(),
+                        hourCycle: format.match(/H/) ? "h24" : "h12",
+                        format,
+                        ...ew.language.phrase("datetimepicker")
+                    },
+                    display: {
+                        icons: {
+                            previous: ew.IS_RTL ? "fa-solid fa-chevron-right" : "fa-solid fa-chevron-left",
+                            next: ew.IS_RTL ? "fa-solid fa-chevron-left" : "fa-solid fa-chevron-right"
+                        },
+                        components: {
+                            clock: !!format.match(/h/i) || !!format.match(/m/) || !!format.match(/s/i),
+                            hours: !!format.match(/h/i),
+                            minutes: !!format.match(/m/),
+                            seconds: !!format.match(/s/i)
+                        },
+                    theme: ew.getPreferredTheme()
+                    }
+                };
+        ew.createDateTimePicker("fTemplateProsesgrid", "x@(templateProsesGrid.RowIndex)_TanggalDibuat", ew.deepAssign({"useCurrent":false,"display":{"sideBySide":false}}, options));
+    });
+    </script>
+    }
+    </span>
+    @* TanggalDibuat (end) *@
+} @* Edit (end) *@
+@if (templateProsesGrid.RowType == RowType.View) { // View (begin)
+    @* TanggalDibuat (begin) *@
+    <span id="el@(templateProsesGrid.RowIndex == "$rowindex$" ? "$rowindex$" : templateProsesGrid.RowCount)_TemplateProses_TanggalDibuat" class="el_TemplateProses_TanggalDibuat">
+    <span @Html.Raw(templateProsesGrid.TanggalDibuat.ViewAttributes)>
+    @Html.Raw(templateProsesGrid.TanggalDibuat.GetViewValue())</span>
+    </span>
+    if (templateProsesGrid.IsConfirm) {
+    <input type="hidden" data-table="TemplateProses" data-field="x_TanggalDibuat" data-hidden="1" name="fTemplateProsesgrid$x@(templateProsesGrid.RowIndex)_TanggalDibuat" id="fTemplateProsesgrid$x@(templateProsesGrid.RowIndex)_TanggalDibuat" value="@Html.Raw(HtmlEncode(templateProsesGrid.TanggalDibuat.FormValue))">
+    <input type="hidden" data-table="TemplateProses" data-field="x_TanggalDibuat" data-hidden="1" data-old name="fTemplateProsesgrid$o@(templateProsesGrid.RowIndex)_TanggalDibuat" id="fTemplateProsesgrid$o@(templateProsesGrid.RowIndex)_TanggalDibuat" value="@Html.Raw(HtmlEncode(templateProsesGrid.TanggalDibuat.OldValue))">
+    }
+    @* TanggalDibuat (end) *@
+} @* View (end) *@
+</td>
+    } @* templateProsesGrid.TanggalDibuat.Visible (end) *@
+    @if (templateProsesGrid.DiperbaruiOleh.Visible) { // templateProsesGrid.DiperbaruiOleh.Visible (begin)
+        <td data-name="DiperbaruiOleh" @Html.Raw(templateProsesGrid.DiperbaruiOleh.CellAttributes)>
+@if (templateProsesGrid.RowType == RowType.Add) { // Add (begin)
+    @* DiperbaruiOleh (begin) *@
+    <span id="el@(templateProsesGrid.RowIndex == "$rowindex$" ? "$rowindex$" : templateProsesGrid.RowCount)_TemplateProses_DiperbaruiOleh" class="el_TemplateProses_DiperbaruiOleh">
+    <input type="@(templateProsesGrid.DiperbaruiOleh.InputTextType)" name="x@(templateProsesGrid.RowIndex)_DiperbaruiOleh" id="x@(templateProsesGrid.RowIndex)_DiperbaruiOleh" data-table="TemplateProses" data-field="x_DiperbaruiOleh" value="@Html.Raw(templateProsesGrid.DiperbaruiOleh.EditValue)" size="30" maxlength="100" placeholder="@Html.Raw(HtmlEncode(templateProsesGrid.DiperbaruiOleh.PlaceHolder))" data-format-pattern="@(templateProsesGrid.DiperbaruiOleh.FormatPattern)"@Html.Raw(templateProsesGrid.DiperbaruiOleh.EditAttributes)>
+    <div class="invalid-feedback">@Html.Raw(templateProsesGrid.DiperbaruiOleh.GetErrorMessage())</div>
+    </span>
+    <input type="hidden" data-table="TemplateProses" data-field="x_DiperbaruiOleh" data-hidden="1" data-old name="o@(templateProsesGrid.RowIndex)_DiperbaruiOleh" id="o@(templateProsesGrid.RowIndex)_DiperbaruiOleh" value="@Html.Raw(HtmlEncode(templateProsesGrid.DiperbaruiOleh.OldValue))">
+    @* DiperbaruiOleh (end) *@
+} @* Add (end) *@
+@if (templateProsesGrid.RowType == RowType.Edit) { // Edit (begin)
+    @* DiperbaruiOleh (begin) *@
+    <span id="el@(templateProsesGrid.RowIndex == "$rowindex$" ? "$rowindex$" : templateProsesGrid.RowCount)_TemplateProses_DiperbaruiOleh" class="el_TemplateProses_DiperbaruiOleh">
+    <input type="@(templateProsesGrid.DiperbaruiOleh.InputTextType)" name="x@(templateProsesGrid.RowIndex)_DiperbaruiOleh" id="x@(templateProsesGrid.RowIndex)_DiperbaruiOleh" data-table="TemplateProses" data-field="x_DiperbaruiOleh" value="@Html.Raw(templateProsesGrid.DiperbaruiOleh.EditValue)" size="30" maxlength="100" placeholder="@Html.Raw(HtmlEncode(templateProsesGrid.DiperbaruiOleh.PlaceHolder))" data-format-pattern="@(templateProsesGrid.DiperbaruiOleh.FormatPattern)"@Html.Raw(templateProsesGrid.DiperbaruiOleh.EditAttributes)>
+    <div class="invalid-feedback">@Html.Raw(templateProsesGrid.DiperbaruiOleh.GetErrorMessage())</div>
+    </span>
+    @* DiperbaruiOleh (end) *@
+} @* Edit (end) *@
+@if (templateProsesGrid.RowType == RowType.View) { // View (begin)
+    @* DiperbaruiOleh (begin) *@
+    <span id="el@(templateProsesGrid.RowIndex == "$rowindex$" ? "$rowindex$" : templateProsesGrid.RowCount)_TemplateProses_DiperbaruiOleh" class="el_TemplateProses_DiperbaruiOleh">
+    <span @Html.Raw(templateProsesGrid.DiperbaruiOleh.ViewAttributes)>
+    @Html.Raw(templateProsesGrid.DiperbaruiOleh.GetViewValue())</span>
+    </span>
+    if (templateProsesGrid.IsConfirm) {
+    <input type="hidden" data-table="TemplateProses" data-field="x_DiperbaruiOleh" data-hidden="1" name="fTemplateProsesgrid$x@(templateProsesGrid.RowIndex)_DiperbaruiOleh" id="fTemplateProsesgrid$x@(templateProsesGrid.RowIndex)_DiperbaruiOleh" value="@Html.Raw(HtmlEncode(templateProsesGrid.DiperbaruiOleh.FormValue))">
+    <input type="hidden" data-table="TemplateProses" data-field="x_DiperbaruiOleh" data-hidden="1" data-old name="fTemplateProsesgrid$o@(templateProsesGrid.RowIndex)_DiperbaruiOleh" id="fTemplateProsesgrid$o@(templateProsesGrid.RowIndex)_DiperbaruiOleh" value="@Html.Raw(HtmlEncode(templateProsesGrid.DiperbaruiOleh.OldValue))">
+    }
+    @* DiperbaruiOleh (end) *@
+} @* View (end) *@
+</td>
+    } @* templateProsesGrid.DiperbaruiOleh.Visible (end) *@
+    @if (templateProsesGrid.TanggalDiperbarui.Visible) { // templateProsesGrid.TanggalDiperbarui.Visible (begin)
+        <td data-name="TanggalDiperbarui" @Html.Raw(templateProsesGrid.TanggalDiperbarui.CellAttributes)>
+@if (templateProsesGrid.RowType == RowType.Add) { // Add (begin)
+    @* TanggalDiperbarui (begin) *@
+    <span id="el@(templateProsesGrid.RowIndex == "$rowindex$" ? "$rowindex$" : templateProsesGrid.RowCount)_TemplateProses_TanggalDiperbarui" class="el_TemplateProses_TanggalDiperbarui">
+    <input type="@(templateProsesGrid.TanggalDiperbarui.InputTextType)" name="x@(templateProsesGrid.RowIndex)_TanggalDiperbarui" id="x@(templateProsesGrid.RowIndex)_TanggalDiperbarui" data-table="TemplateProses" data-field="x_TanggalDiperbarui" value="@Html.Raw(templateProsesGrid.TanggalDiperbarui.EditValue)" placeholder="@Html.Raw(HtmlEncode(templateProsesGrid.TanggalDiperbarui.PlaceHolder))" data-format-pattern="@(templateProsesGrid.TanggalDiperbarui.FormatPattern)"@Html.Raw(templateProsesGrid.TanggalDiperbarui.EditAttributes)>
+    <div class="invalid-feedback">@Html.Raw(templateProsesGrid.TanggalDiperbarui.GetErrorMessage())</div>
+    @if (!templateProsesGrid.TanggalDiperbarui.ReadOnly && !templateProsesGrid.TanggalDiperbarui.Disabled && !templateProsesGrid.TanggalDiperbarui.EditAttrs.Is("readonly") && !templateProsesGrid.TanggalDiperbarui.EditAttrs.Is("disabled")) {
+    <script>
+    loadjs.ready(["fTemplateProsesgrid", "datetimepicker"], function () {
+        let format = "@Html.Raw(DateFormat(9))", // DN
+            options = {
+                    localization: {
+                        locale: ew.LANGUAGE_ID + "-u-nu-" + ew.getNumberingSystem(),
+                        hourCycle: format.match(/H/) ? "h24" : "h12",
+                        format,
+                        ...ew.language.phrase("datetimepicker")
+                    },
+                    display: {
+                        icons: {
+                            previous: ew.IS_RTL ? "fa-solid fa-chevron-right" : "fa-solid fa-chevron-left",
+                            next: ew.IS_RTL ? "fa-solid fa-chevron-left" : "fa-solid fa-chevron-right"
+                        },
+                        components: {
+                            clock: !!format.match(/h/i) || !!format.match(/m/) || !!format.match(/s/i),
+                            hours: !!format.match(/h/i),
+                            minutes: !!format.match(/m/),
+                            seconds: !!format.match(/s/i)
+                        },
+                    theme: ew.getPreferredTheme()
+                    }
+                };
+        ew.createDateTimePicker("fTemplateProsesgrid", "x@(templateProsesGrid.RowIndex)_TanggalDiperbarui", ew.deepAssign({"useCurrent":false,"display":{"sideBySide":false}}, options));
+    });
+    </script>
+    }
+    </span>
+    <input type="hidden" data-table="TemplateProses" data-field="x_TanggalDiperbarui" data-hidden="1" data-old name="o@(templateProsesGrid.RowIndex)_TanggalDiperbarui" id="o@(templateProsesGrid.RowIndex)_TanggalDiperbarui" value="@Html.Raw(HtmlEncode(templateProsesGrid.TanggalDiperbarui.OldValue))">
+    @* TanggalDiperbarui (end) *@
+} @* Add (end) *@
+@if (templateProsesGrid.RowType == RowType.Edit) { // Edit (begin)
+    @* TanggalDiperbarui (begin) *@
+    <span id="el@(templateProsesGrid.RowIndex == "$rowindex$" ? "$rowindex$" : templateProsesGrid.RowCount)_TemplateProses_TanggalDiperbarui" class="el_TemplateProses_TanggalDiperbarui">
+    <input type="@(templateProsesGrid.TanggalDiperbarui.InputTextType)" name="x@(templateProsesGrid.RowIndex)_TanggalDiperbarui" id="x@(templateProsesGrid.RowIndex)_TanggalDiperbarui" data-table="TemplateProses" data-field="x_TanggalDiperbarui" value="@Html.Raw(templateProsesGrid.TanggalDiperbarui.EditValue)" placeholder="@Html.Raw(HtmlEncode(templateProsesGrid.TanggalDiperbarui.PlaceHolder))" data-format-pattern="@(templateProsesGrid.TanggalDiperbarui.FormatPattern)"@Html.Raw(templateProsesGrid.TanggalDiperbarui.EditAttributes)>
+    <div class="invalid-feedback">@Html.Raw(templateProsesGrid.TanggalDiperbarui.GetErrorMessage())</div>
+    @if (!templateProsesGrid.TanggalDiperbarui.ReadOnly && !templateProsesGrid.TanggalDiperbarui.Disabled && !templateProsesGrid.TanggalDiperbarui.EditAttrs.Is("readonly") && !templateProsesGrid.TanggalDiperbarui.EditAttrs.Is("disabled")) {
+    <script>
+    loadjs.ready(["fTemplateProsesgrid", "datetimepicker"], function () {
+        let format = "@Html.Raw(DateFormat(9))", // DN
+            options = {
+                    localization: {
+                        locale: ew.LANGUAGE_ID + "-u-nu-" + ew.getNumberingSystem(),
+                        hourCycle: format.match(/H/) ? "h24" : "h12",
+                        format,
+                        ...ew.language.phrase("datetimepicker")
+                    },
+                    display: {
+                        icons: {
+                            previous: ew.IS_RTL ? "fa-solid fa-chevron-right" : "fa-solid fa-chevron-left",
+                            next: ew.IS_RTL ? "fa-solid fa-chevron-left" : "fa-solid fa-chevron-right"
+                        },
+                        components: {
+                            clock: !!format.match(/h/i) || !!format.match(/m/) || !!format.match(/s/i),
+                            hours: !!format.match(/h/i),
+                            minutes: !!format.match(/m/),
+                            seconds: !!format.match(/s/i)
+                        },
+                    theme: ew.getPreferredTheme()
+                    }
+                };
+        ew.createDateTimePicker("fTemplateProsesgrid", "x@(templateProsesGrid.RowIndex)_TanggalDiperbarui", ew.deepAssign({"useCurrent":false,"display":{"sideBySide":false}}, options));
+    });
+    </script>
+    }
+    </span>
+    @* TanggalDiperbarui (end) *@
+} @* Edit (end) *@
+@if (templateProsesGrid.RowType == RowType.View) { // View (begin)
+    @* TanggalDiperbarui (begin) *@
+    <span id="el@(templateProsesGrid.RowIndex == "$rowindex$" ? "$rowindex$" : templateProsesGrid.RowCount)_TemplateProses_TanggalDiperbarui" class="el_TemplateProses_TanggalDiperbarui">
+    <span @Html.Raw(templateProsesGrid.TanggalDiperbarui.ViewAttributes)>
+    @Html.Raw(templateProsesGrid.TanggalDiperbarui.GetViewValue())</span>
+    </span>
+    if (templateProsesGrid.IsConfirm) {
+    <input type="hidden" data-table="TemplateProses" data-field="x_TanggalDiperbarui" data-hidden="1" name="fTemplateProsesgrid$x@(templateProsesGrid.RowIndex)_TanggalDiperbarui" id="fTemplateProsesgrid$x@(templateProsesGrid.RowIndex)_TanggalDiperbarui" value="@Html.Raw(HtmlEncode(templateProsesGrid.TanggalDiperbarui.FormValue))">
+    <input type="hidden" data-table="TemplateProses" data-field="x_TanggalDiperbarui" data-hidden="1" data-old name="fTemplateProsesgrid$o@(templateProsesGrid.RowIndex)_TanggalDiperbarui" id="fTemplateProsesgrid$o@(templateProsesGrid.RowIndex)_TanggalDiperbarui" value="@Html.Raw(HtmlEncode(templateProsesGrid.TanggalDiperbarui.OldValue))">
+    }
+    @* TanggalDiperbarui (end) *@
+} @* View (end) *@
+</td>
+    } @* templateProsesGrid.TanggalDiperbarui.Visible (end) *@
+    @* Render list options (body, right) *@
+    @templateProsesGrid.ListOptions.RenderBody("right", templateProsesGrid.RowCount)
+    </tr>
+if (templateProsesGrid.RowType == RowType.Add || templateProsesGrid.RowType == RowType.Edit) {
+<script>
+loadjs.ready(["fTemplateProsesgrid","load"], () => fTemplateProsesgrid.updateLists(@(templateProsesGrid.RowIndex)@(templateProsesGrid.IsAdd || templateProsesGrid.IsEdit || templateProsesGrid.IsCopy || SameString(templateProsesGrid.RowIndex, "$rowindex$") ? ", true" : "")));
+</script>
+}
+    } @* End delete row checking *@
+    } @* End if *@
+
+    // Reset for template row
+    if (SameString(templateProsesGrid.RowIndex, "$rowindex$"))
+        templateProsesGrid.RowIndex = 0;
+
+    // Reset inline add/copy row
+    if ((templateProsesGrid.IsCopy || templateProsesGrid.IsAdd) && templateProsesGrid.RowIndex is int rowIndex2 && rowIndex2 == 0)
+        templateProsesGrid.RowIndex = 1;
+} @* End While *@
+</tbody>
+</table><!-- /.ew-table -->
+@if (templateProsesGrid.CurrentMode == "add" || templateProsesGrid.CurrentMode == "copy") {
+<input type="hidden" name="@(templateProsesGrid.FormKeyCountName)" id="@(templateProsesGrid.FormKeyCountName)" value="@(templateProsesGrid.KeyCount)">
+@Html.Raw(templateProsesGrid.MultiSelectKey)
+}
+@if (templateProsesGrid.CurrentMode == "edit") {
+<input type="hidden" name="@(templateProsesGrid.FormKeyCountName)" id="@(templateProsesGrid.FormKeyCountName)" value="@(templateProsesGrid.KeyCount)">
+@Html.Raw(templateProsesGrid.MultiSelectKey)
+}
+</div><!-- /.ew-grid-middle-panel -->
+@if (Empty(templateProsesGrid.CurrentMode)) {
+<input type="hidden" name="action" id="action" value="">
+}
+<input type="hidden" name="detailpage" value="fTemplateProsesgrid">
+</div><!-- /.ew-list-form -->
+@{ templateProsesGrid.CloseRecordset(); }
+@if (templateProsesGrid.ShowOtherOptions) {
+<div class="card-footer ew-grid-lower-panel">
+    @templateProsesGrid.OtherOptions.RenderBody("bottom")
+</div>
+}
+</div><!-- /.ew-grid -->
+} else { // Show other options
+<div class="ew-list-other-options">
+@templateProsesGrid.OtherOptions.ForEach(opt => opt.ButtonClass = "").RenderBody()
+</div>
+}
+</div>
+<div id="ew-footer-options">
+    @templateProsesGrid.FooterOptions.RenderBody()
+</div>
+</main>
+@if (!templateProsesGrid.IsExport()) {
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("TemplateProses");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Write your table-specific startup script here
+    // document.write("page loaded");
+});
+</script>
+}
+@{
+    // Close Recordset
+    templateProsesGrid.CloseRecordset(); // DN
+    // Clear CurrentGrid
+    CurrentGrid = null;
+}

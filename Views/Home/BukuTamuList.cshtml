@@ -1,0 +1,2505 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (bukuTamuList.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = bukuTamuList.UseLayout ? "_Layout" : "";
+}
+@if (!bukuTamuList.IsExport()) {
+<script>
+var currentTable = @Html.Raw(ConvertToJson(bukuTamuList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { BukuTamu: currentTable } });
+var currentPageID = ew.PAGE_ID = "list";
+var currentForm;
+var @(bukuTamuList.FormName);
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("@(bukuTamuList.FormName)")
+        .setPageId("list")
+        .setSubmitWithFetch(@(bukuTamuList.UseAjaxActions ? "true" : "false"))
+        .setFormKeyCountName("@(bukuTamuList.FormKeyCountName)")
+
+        // Dynamic selection lists
+        .setLists({
+            "LinkRedirect": @Html.Raw(bukuTamuList.LinkRedirect.ToClientList(bukuTamuList)),
+            "Plant": @Html.Raw(bukuTamuList.Plant.ToClientList(bukuTamuList)),
+            "Tanggal": @Html.Raw(bukuTamuList.Tanggal.ToClientList(bukuTamuList)),
+            "StatusZona": @Html.Raw(bukuTamuList.StatusZona.ToClientList(bukuTamuList)),
+            "Nama": @Html.Raw(bukuTamuList.Nama.ToClientList(bukuTamuList)),
+            "AsalPerusahaan": @Html.Raw(bukuTamuList.AsalPerusahaan.ToClientList(bukuTamuList)),
+            "Jabatan": @Html.Raw(bukuTamuList.Jabatan.ToClientList(bukuTamuList)),
+            "FungsiygDikunjungi": @Html.Raw(bukuTamuList.FungsiygDikunjungi.ToClientList(bukuTamuList)),
+            "MaksudKunjungan": @Html.Raw(bukuTamuList.MaksudKunjungan.ToClientList(bukuTamuList)),
+            "TandaPengenal": @Html.Raw(bukuTamuList.TandaPengenal.ToClientList(bukuTamuList)),
+            "Keterangan": @Html.Raw(bukuTamuList.Keterangan.ToClientList(bukuTamuList)),
+            "PintuUtamaId": @Html.Raw(bukuTamuList.PintuUtamaId.ToClientList(bukuTamuList)),
+            "PintuUtamaInTanggal": @Html.Raw(bukuTamuList.PintuUtamaInTanggal.ToClientList(bukuTamuList)),
+            "PintuUtamaInUser": @Html.Raw(bukuTamuList.PintuUtamaInUser.ToClientList(bukuTamuList)),
+            "CustomPilihPintu": @Html.Raw(bukuTamuList.CustomPilihPintu.ToClientList(bukuTamuList)),
+            "PintuUtamaOutTanggal": @Html.Raw(bukuTamuList.PintuUtamaOutTanggal.ToClientList(bukuTamuList)),
+            "PintuUtamaOutUser": @Html.Raw(bukuTamuList.PintuUtamaOutUser.ToClientList(bukuTamuList)),
+            "LobbyUtamaId": @Html.Raw(bukuTamuList.LobbyUtamaId.ToClientList(bukuTamuList)),
+            "LobbyUtamaInTanggal": @Html.Raw(bukuTamuList.LobbyUtamaInTanggal.ToClientList(bukuTamuList)),
+            "LobbyUtamaInUser": @Html.Raw(bukuTamuList.LobbyUtamaInUser.ToClientList(bukuTamuList)),
+            "LobbyUtamaOutTanggal": @Html.Raw(bukuTamuList.LobbyUtamaOutTanggal.ToClientList(bukuTamuList)),
+            "LobbyUtamaOutUser": @Html.Raw(bukuTamuList.LobbyUtamaOutUser.ToClientList(bukuTamuList)),
+            "AreaTerlarangId": @Html.Raw(bukuTamuList.AreaTerlarangId.ToClientList(bukuTamuList)),
+            "AreaTerlarangInTanggal": @Html.Raw(bukuTamuList.AreaTerlarangInTanggal.ToClientList(bukuTamuList)),
+            "AreaTerlarangInUser": @Html.Raw(bukuTamuList.AreaTerlarangInUser.ToClientList(bukuTamuList)),
+            "AreaTerlarangOutTanggal": @Html.Raw(bukuTamuList.AreaTerlarangOutTanggal.ToClientList(bukuTamuList)),
+            "AreaTerlarangOutUser": @Html.Raw(bukuTamuList.AreaTerlarangOutUser.ToClientList(bukuTamuList)),
+            "etlDate": @Html.Raw(bukuTamuList.etlDate.ToClientList(bukuTamuList)),
+            "LastUpdatedBy": @Html.Raw(bukuTamuList.LastUpdatedBy.ToClientList(bukuTamuList)),
+            "lastUpdatedDate": @Html.Raw(bukuTamuList.lastUpdatedDate.ToClientList(bukuTamuList)),
+        })
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Client script
+    const parent_url = ew.PATH_BASE;
+    $(document).on('click', '.download-document', function (e) {
+        e.preventDefault();
+        const id = $(this).data('id');
+        const column = $(this).data('field');
+        if (!id) {
+            ew.alert("ID dokumen tidak ditemukan.");
+            return;
+        }
+        $.ajax({
+            url: parent_url + 'api/LookUpList/DownloadBukuTamu',
+            type: 'GET',
+            data: { 
+                id: id,
+                column: column
+            },
+            xhrFields: {
+                responseType: 'blob'
+            },
+            beforeSend: function () {
+                showLoading();
+            },
+            success: function (response, status, xhr) {
+                const disposition = xhr.getResponseHeader('Content-Disposition');
+                let fileName = "download_file";
+                if (disposition) {
+                    const fileNameMatch = disposition.match(/filename="?([^";]+)"?/);
+                    if (fileNameMatch && fileNameMatch[1]) {
+                        fileName = decodeURIComponent(fileNameMatch[1]);
+                    }
+                    const utf8FileNameMatch = disposition.match(/filename\*\s*=\s*UTF-8''([^;]+)/);
+                    if (utf8FileNameMatch && utf8FileNameMatch[1]) {
+                        fileName = decodeURIComponent(utf8FileNameMatch[1]);
+                    }
+                }
+                const blobUrl = window.URL.createObjectURL(response);
+                const a = document.createElement('a');
+                a.href = blobUrl;
+                a.download = fileName;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(blobUrl);
+                ew.alert("Download berhasil!");
+            },
+            error: function (xhr, status, error) {
+                if (xhr.status === 404) {
+                    ew.alert("File tidak ditemukan di server.");
+                } else if (xhr.status === 500) {
+                    ew.alert("Terjadi kesalahan server. Coba lagi nanti.");
+                } else {
+                    ew.alert("Gagal mendownload file. Error: " + xhr.responseText);
+                }
+            },
+            complete: function () {
+                hideLoading();
+            }
+        });
+    });
+});
+</script>
+}
+@if (!bukuTamuList.IsExport()) {
+<div class="btn-toolbar ew-toolbar">
+@if (bukuTamuList.TotalRecords > 0 && bukuTamuList.ExportOptions.Visible) {
+    bukuTamuList.ExportOptions.Render("body");
+}
+@if (bukuTamuList.ImportOptions.Visible) {
+    bukuTamuList.ImportOptions.Render("body");
+}
+@if (bukuTamuList.SearchOptions.Visible) {
+    bukuTamuList.SearchOptions.Render("body");
+}
+@if (bukuTamuList.FilterOptions.Visible) {
+    bukuTamuList.FilterOptions.Render("body");
+}
+</div>
+}
+@if (bukuTamuList.ShowCurrentFilter) {
+    bukuTamuList.ShowFilterList();
+}
+@if (!bukuTamuList.IsModal) {
+<form name="fBukuTamusrch" id="fBukuTamusrch" class="ew-form ew-ext-search-form" action="@AppPath(CurrentPageName())" novalidate autocomplete="off">
+<div id="fBukuTamusrch_search_panel" class="mb-2 mb-sm-0 @(bukuTamuList.SearchPanelClass)"><!-- .ew-search-panel -->
+<script>
+var currentTable = @Html.Raw(ConvertToJson(bukuTamuList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { BukuTamu: currentTable } });
+var currentForm;
+var fBukuTamusrch, currentSearchForm, currentAdvancedSearchForm;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery,
+        fields = currentTable.fields;
+
+    // Form object for search
+    let form = new ew.FormBuilder()
+        .setId("fBukuTamusrch")
+        .setPageId("list")
+@if (bukuTamuList.UseAjaxActions) {
+        <text>.setSubmitWithFetch(true)</text>
+}
+
+        // Add fields
+        .setFields([
+        ])
+        // Validate form
+        .setValidate(
+            async function () {
+                if (!this.validateRequired)
+                    return true; // Ignore validation
+                let fobj = this.getForm();
+
+                // Validate fields
+                if (!this.validateFields())
+                    return false;
+
+                // Call Form_CustomValidate event
+                if (!(await this.customValidate?.(fobj) ?? true)) {
+                    this.focus();
+                    return false;
+                }
+                return true;
+            }
+        )
+
+        // Form_CustomValidate
+        .setCustomValidate(
+            function(fobj) { // DO NOT CHANGE THIS LINE!
+                    // Your custom validation code here, return false if invalid.
+                    return true;
+                }
+        )
+
+        // Use JavaScript validation or not
+        .setValidateRequired(ew.CLIENT_VALIDATE)
+
+        // Dynamic selection lists
+        .setLists({
+            "NomorBukuTamu": @Html.Raw(bukuTamuList.NomorBukuTamu.ToClientList(bukuTamuList)),
+            "LinkRedirect": @Html.Raw(bukuTamuList.LinkRedirect.ToClientList(bukuTamuList)),
+            "Plant": @Html.Raw(bukuTamuList.Plant.ToClientList(bukuTamuList)),
+            "Tanggal": @Html.Raw(bukuTamuList.Tanggal.ToClientList(bukuTamuList)),
+            "StatusZona": @Html.Raw(bukuTamuList.StatusZona.ToClientList(bukuTamuList)),
+            "Nama": @Html.Raw(bukuTamuList.Nama.ToClientList(bukuTamuList)),
+            "AsalPerusahaan": @Html.Raw(bukuTamuList.AsalPerusahaan.ToClientList(bukuTamuList)),
+            "Jabatan": @Html.Raw(bukuTamuList.Jabatan.ToClientList(bukuTamuList)),
+            "FungsiygDikunjungi": @Html.Raw(bukuTamuList.FungsiygDikunjungi.ToClientList(bukuTamuList)),
+            "MaksudKunjungan": @Html.Raw(bukuTamuList.MaksudKunjungan.ToClientList(bukuTamuList)),
+            "TandaPengenal": @Html.Raw(bukuTamuList.TandaPengenal.ToClientList(bukuTamuList)),
+            "TandaTangan": @Html.Raw(bukuTamuList.TandaTangan.ToClientList(bukuTamuList)),
+            "Keterangan": @Html.Raw(bukuTamuList.Keterangan.ToClientList(bukuTamuList)),
+            "PintuUtamaId": @Html.Raw(bukuTamuList.PintuUtamaId.ToClientList(bukuTamuList)),
+            "PintuUtamaInTanggal": @Html.Raw(bukuTamuList.PintuUtamaInTanggal.ToClientList(bukuTamuList)),
+            "PintuUtamaInFoto": @Html.Raw(bukuTamuList.PintuUtamaInFoto.ToClientList(bukuTamuList)),
+            "PintuUtamaInUser": @Html.Raw(bukuTamuList.PintuUtamaInUser.ToClientList(bukuTamuList)),
+            "CustomPilihPintu": @Html.Raw(bukuTamuList.CustomPilihPintu.ToClientList(bukuTamuList)),
+            "PintuUtamaOutTanggal": @Html.Raw(bukuTamuList.PintuUtamaOutTanggal.ToClientList(bukuTamuList)),
+            "PintuUtamaOutFoto": @Html.Raw(bukuTamuList.PintuUtamaOutFoto.ToClientList(bukuTamuList)),
+            "PintuUtamaOutUser": @Html.Raw(bukuTamuList.PintuUtamaOutUser.ToClientList(bukuTamuList)),
+            "LobbyUtamaId": @Html.Raw(bukuTamuList.LobbyUtamaId.ToClientList(bukuTamuList)),
+            "LobbyUtamaInTanggal": @Html.Raw(bukuTamuList.LobbyUtamaInTanggal.ToClientList(bukuTamuList)),
+            "LobbyUtamaInFoto": @Html.Raw(bukuTamuList.LobbyUtamaInFoto.ToClientList(bukuTamuList)),
+            "LobbyUtamaInUser": @Html.Raw(bukuTamuList.LobbyUtamaInUser.ToClientList(bukuTamuList)),
+            "LobbyUtamaOutTanggal": @Html.Raw(bukuTamuList.LobbyUtamaOutTanggal.ToClientList(bukuTamuList)),
+            "LobbyUtamaOutFoto": @Html.Raw(bukuTamuList.LobbyUtamaOutFoto.ToClientList(bukuTamuList)),
+            "LobbyUtamaOutUser": @Html.Raw(bukuTamuList.LobbyUtamaOutUser.ToClientList(bukuTamuList)),
+            "AreaTerlarangId": @Html.Raw(bukuTamuList.AreaTerlarangId.ToClientList(bukuTamuList)),
+            "AreaTerlarangInTanggal": @Html.Raw(bukuTamuList.AreaTerlarangInTanggal.ToClientList(bukuTamuList)),
+            "AreaTerlarangInFoto": @Html.Raw(bukuTamuList.AreaTerlarangInFoto.ToClientList(bukuTamuList)),
+            "AreaTerlarangInUser": @Html.Raw(bukuTamuList.AreaTerlarangInUser.ToClientList(bukuTamuList)),
+            "AreaTerlarangOutTanggal": @Html.Raw(bukuTamuList.AreaTerlarangOutTanggal.ToClientList(bukuTamuList)),
+            "AreaTerlarangOutFoto": @Html.Raw(bukuTamuList.AreaTerlarangOutFoto.ToClientList(bukuTamuList)),
+            "AreaTerlarangOutUser": @Html.Raw(bukuTamuList.AreaTerlarangOutUser.ToClientList(bukuTamuList)),
+            "etlDate": @Html.Raw(bukuTamuList.etlDate.ToClientList(bukuTamuList)),
+            "LastUpdatedBy": @Html.Raw(bukuTamuList.LastUpdatedBy.ToClientList(bukuTamuList)),
+            "lastUpdatedDate": @Html.Raw(bukuTamuList.lastUpdatedDate.ToClientList(bukuTamuList)),
+        })
+
+        // Filters
+        .setFilterList(@Html.Raw(bukuTamuList.GetFilterList()))
+        .build();
+    window[form.id] = form;
+    currentSearchForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<input type="hidden" name="cmd" value="search">
+@if (Security.CanSearch) {
+if (!bukuTamuList.IsExport() && Empty(bukuTamuList.CurrentAction) && bukuTamuList.HasSearchFields()) { @* Show search form (begin) *@
+<div class="ew-extended-search container-fluid ps-2">
+<div class="row mb-0 d-none@(bukuTamuList.SearchFieldsPerRow > 0 ? " row-cols-sm-" + bukuTamuList.SearchFieldsPerRow : "")">
+@{
+    // Render search row
+    bukuTamuList.RowType = RowType.Search;
+    bukuTamuList.ResetAttributes();
+    await bukuTamuList.RenderRow();
+}
+@if (bukuTamuList.NomorBukuTamu.Visible) { // bukuTamuList.NomorBukuTamu.Visible (begin)
+    if (!bukuTamuList.NomorBukuTamu.UseFilter) {
+        bukuTamuList.SearchColumnCount++;
+    }
+    <div id="xs_NomorBukuTamu" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(bukuTamuList.NomorBukuTamu.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_NomorBukuTamu"
+            name="x_NomorBukuTamu[]"
+            class="form-control ew-select@(bukuTamuList.NomorBukuTamu.IsInvalidClass)"
+            data-select2-id="fBukuTamusrch_x_NomorBukuTamu"
+            data-table="BukuTamu"
+            data-field="x_NomorBukuTamu"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(bukuTamuList.NomorBukuTamu.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(bukuTamuList.NomorBukuTamu.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(bukuTamuList.NomorBukuTamu.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(bukuTamuList.NomorBukuTamu.EditAttributes)>
+            @(bukuTamuList.NomorBukuTamu.SelectOptionListHtml("x_NomorBukuTamu", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(bukuTamuList.NomorBukuTamu.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fBukuTamusrch", function() {
+            var options = {
+                name: "x_NomorBukuTamu",
+                selectId: "fBukuTamusrch_x_NomorBukuTamu",
+                ajax: { id: "x_NomorBukuTamu", form: "fBukuTamusrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.BukuTamu.fields.NomorBukuTamu.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* bukuTamuList.NomorBukuTamu.Visible (end) *@
+@if (bukuTamuList.LinkRedirect.Visible) { // bukuTamuList.LinkRedirect.Visible (begin)
+    if (!bukuTamuList.LinkRedirect.UseFilter) {
+        bukuTamuList.SearchColumnCount++;
+    }
+    <div id="xs_LinkRedirect" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(bukuTamuList.LinkRedirect.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_LinkRedirect"
+            name="x_LinkRedirect[]"
+            class="form-control ew-select@(bukuTamuList.LinkRedirect.IsInvalidClass)"
+            data-select2-id="fBukuTamusrch_x_LinkRedirect"
+            data-table="BukuTamu"
+            data-field="x_LinkRedirect"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(bukuTamuList.LinkRedirect.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(bukuTamuList.LinkRedirect.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(bukuTamuList.LinkRedirect.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(bukuTamuList.LinkRedirect.EditAttributes)>
+            @(bukuTamuList.LinkRedirect.SelectOptionListHtml("x_LinkRedirect", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(bukuTamuList.LinkRedirect.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fBukuTamusrch", function() {
+            var options = {
+                name: "x_LinkRedirect",
+                selectId: "fBukuTamusrch_x_LinkRedirect",
+                ajax: { id: "x_LinkRedirect", form: "fBukuTamusrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.BukuTamu.fields.LinkRedirect.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* bukuTamuList.LinkRedirect.Visible (end) *@
+@if (bukuTamuList.Plant.Visible) { // bukuTamuList.Plant.Visible (begin)
+    if (!bukuTamuList.Plant.UseFilter) {
+        bukuTamuList.SearchColumnCount++;
+    }
+    <div id="xs_Plant" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(bukuTamuList.Plant.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_Plant"
+            name="x_Plant[]"
+            class="form-control ew-select@(bukuTamuList.Plant.IsInvalidClass)"
+            data-select2-id="fBukuTamusrch_x_Plant"
+            data-table="BukuTamu"
+            data-field="x_Plant"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(bukuTamuList.Plant.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(bukuTamuList.Plant.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(bukuTamuList.Plant.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(bukuTamuList.Plant.EditAttributes)>
+            @(bukuTamuList.Plant.SelectOptionListHtml("x_Plant", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(bukuTamuList.Plant.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fBukuTamusrch", function() {
+            var options = {
+                name: "x_Plant",
+                selectId: "fBukuTamusrch_x_Plant",
+                ajax: { id: "x_Plant", form: "fBukuTamusrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.BukuTamu.fields.Plant.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* bukuTamuList.Plant.Visible (end) *@
+@if (bukuTamuList.Tanggal.Visible) { // bukuTamuList.Tanggal.Visible (begin)
+    if (!bukuTamuList.Tanggal.UseFilter) {
+        bukuTamuList.SearchColumnCount++;
+    }
+    <div id="xs_Tanggal" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(bukuTamuList.Tanggal.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_Tanggal"
+            name="x_Tanggal[]"
+            class="form-control ew-select@(bukuTamuList.Tanggal.IsInvalidClass)"
+            data-select2-id="fBukuTamusrch_x_Tanggal"
+            data-table="BukuTamu"
+            data-field="x_Tanggal"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(bukuTamuList.Tanggal.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(bukuTamuList.Tanggal.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(bukuTamuList.Tanggal.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(bukuTamuList.Tanggal.EditAttributes)>
+            @(bukuTamuList.Tanggal.SelectOptionListHtml("x_Tanggal", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(bukuTamuList.Tanggal.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fBukuTamusrch", function() {
+            var options = {
+                name: "x_Tanggal",
+                selectId: "fBukuTamusrch_x_Tanggal",
+                ajax: { id: "x_Tanggal", form: "fBukuTamusrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.BukuTamu.fields.Tanggal.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* bukuTamuList.Tanggal.Visible (end) *@
+@if (bukuTamuList.StatusZona.Visible) { // bukuTamuList.StatusZona.Visible (begin)
+    if (!bukuTamuList.StatusZona.UseFilter) {
+        bukuTamuList.SearchColumnCount++;
+    }
+    <div id="xs_StatusZona" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(bukuTamuList.StatusZona.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_StatusZona"
+            name="x_StatusZona[]"
+            class="form-control ew-select@(bukuTamuList.StatusZona.IsInvalidClass)"
+            data-select2-id="fBukuTamusrch_x_StatusZona"
+            data-table="BukuTamu"
+            data-field="x_StatusZona"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(bukuTamuList.StatusZona.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(bukuTamuList.StatusZona.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(bukuTamuList.StatusZona.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(bukuTamuList.StatusZona.EditAttributes)>
+            @(bukuTamuList.StatusZona.SelectOptionListHtml("x_StatusZona", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(bukuTamuList.StatusZona.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fBukuTamusrch", function() {
+            var options = {
+                name: "x_StatusZona",
+                selectId: "fBukuTamusrch_x_StatusZona",
+                ajax: { id: "x_StatusZona", form: "fBukuTamusrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.BukuTamu.fields.StatusZona.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* bukuTamuList.StatusZona.Visible (end) *@
+@if (bukuTamuList.Nama.Visible) { // bukuTamuList.Nama.Visible (begin)
+    if (!bukuTamuList.Nama.UseFilter) {
+        bukuTamuList.SearchColumnCount++;
+    }
+    <div id="xs_Nama" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(bukuTamuList.Nama.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_Nama"
+            name="x_Nama[]"
+            class="form-control ew-select@(bukuTamuList.Nama.IsInvalidClass)"
+            data-select2-id="fBukuTamusrch_x_Nama"
+            data-table="BukuTamu"
+            data-field="x_Nama"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(bukuTamuList.Nama.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(bukuTamuList.Nama.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(bukuTamuList.Nama.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(bukuTamuList.Nama.EditAttributes)>
+            @(bukuTamuList.Nama.SelectOptionListHtml("x_Nama", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(bukuTamuList.Nama.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fBukuTamusrch", function() {
+            var options = {
+                name: "x_Nama",
+                selectId: "fBukuTamusrch_x_Nama",
+                ajax: { id: "x_Nama", form: "fBukuTamusrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.BukuTamu.fields.Nama.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* bukuTamuList.Nama.Visible (end) *@
+@if (bukuTamuList.AsalPerusahaan.Visible) { // bukuTamuList.AsalPerusahaan.Visible (begin)
+    if (!bukuTamuList.AsalPerusahaan.UseFilter) {
+        bukuTamuList.SearchColumnCount++;
+    }
+    <div id="xs_AsalPerusahaan" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(bukuTamuList.AsalPerusahaan.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_AsalPerusahaan"
+            name="x_AsalPerusahaan[]"
+            class="form-control ew-select@(bukuTamuList.AsalPerusahaan.IsInvalidClass)"
+            data-select2-id="fBukuTamusrch_x_AsalPerusahaan"
+            data-table="BukuTamu"
+            data-field="x_AsalPerusahaan"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(bukuTamuList.AsalPerusahaan.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(bukuTamuList.AsalPerusahaan.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(bukuTamuList.AsalPerusahaan.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(bukuTamuList.AsalPerusahaan.EditAttributes)>
+            @(bukuTamuList.AsalPerusahaan.SelectOptionListHtml("x_AsalPerusahaan", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(bukuTamuList.AsalPerusahaan.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fBukuTamusrch", function() {
+            var options = {
+                name: "x_AsalPerusahaan",
+                selectId: "fBukuTamusrch_x_AsalPerusahaan",
+                ajax: { id: "x_AsalPerusahaan", form: "fBukuTamusrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.BukuTamu.fields.AsalPerusahaan.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* bukuTamuList.AsalPerusahaan.Visible (end) *@
+@if (bukuTamuList.Jabatan.Visible) { // bukuTamuList.Jabatan.Visible (begin)
+    if (!bukuTamuList.Jabatan.UseFilter) {
+        bukuTamuList.SearchColumnCount++;
+    }
+    <div id="xs_Jabatan" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(bukuTamuList.Jabatan.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_Jabatan"
+            name="x_Jabatan[]"
+            class="form-control ew-select@(bukuTamuList.Jabatan.IsInvalidClass)"
+            data-select2-id="fBukuTamusrch_x_Jabatan"
+            data-table="BukuTamu"
+            data-field="x_Jabatan"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(bukuTamuList.Jabatan.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(bukuTamuList.Jabatan.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(bukuTamuList.Jabatan.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(bukuTamuList.Jabatan.EditAttributes)>
+            @(bukuTamuList.Jabatan.SelectOptionListHtml("x_Jabatan", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(bukuTamuList.Jabatan.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fBukuTamusrch", function() {
+            var options = {
+                name: "x_Jabatan",
+                selectId: "fBukuTamusrch_x_Jabatan",
+                ajax: { id: "x_Jabatan", form: "fBukuTamusrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.BukuTamu.fields.Jabatan.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* bukuTamuList.Jabatan.Visible (end) *@
+@if (bukuTamuList.FungsiygDikunjungi.Visible) { // bukuTamuList.FungsiygDikunjungi.Visible (begin)
+    if (!bukuTamuList.FungsiygDikunjungi.UseFilter) {
+        bukuTamuList.SearchColumnCount++;
+    }
+    <div id="xs_FungsiygDikunjungi" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(bukuTamuList.FungsiygDikunjungi.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_FungsiygDikunjungi"
+            name="x_FungsiygDikunjungi[]"
+            class="form-control ew-select@(bukuTamuList.FungsiygDikunjungi.IsInvalidClass)"
+            data-select2-id="fBukuTamusrch_x_FungsiygDikunjungi"
+            data-table="BukuTamu"
+            data-field="x_FungsiygDikunjungi"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(bukuTamuList.FungsiygDikunjungi.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(bukuTamuList.FungsiygDikunjungi.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(bukuTamuList.FungsiygDikunjungi.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(bukuTamuList.FungsiygDikunjungi.EditAttributes)>
+            @(bukuTamuList.FungsiygDikunjungi.SelectOptionListHtml("x_FungsiygDikunjungi", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(bukuTamuList.FungsiygDikunjungi.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fBukuTamusrch", function() {
+            var options = {
+                name: "x_FungsiygDikunjungi",
+                selectId: "fBukuTamusrch_x_FungsiygDikunjungi",
+                ajax: { id: "x_FungsiygDikunjungi", form: "fBukuTamusrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.BukuTamu.fields.FungsiygDikunjungi.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* bukuTamuList.FungsiygDikunjungi.Visible (end) *@
+@if (bukuTamuList.MaksudKunjungan.Visible) { // bukuTamuList.MaksudKunjungan.Visible (begin)
+    if (!bukuTamuList.MaksudKunjungan.UseFilter) {
+        bukuTamuList.SearchColumnCount++;
+    }
+    <div id="xs_MaksudKunjungan" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(bukuTamuList.MaksudKunjungan.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_MaksudKunjungan"
+            name="x_MaksudKunjungan[]"
+            class="form-control ew-select@(bukuTamuList.MaksudKunjungan.IsInvalidClass)"
+            data-select2-id="fBukuTamusrch_x_MaksudKunjungan"
+            data-table="BukuTamu"
+            data-field="x_MaksudKunjungan"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(bukuTamuList.MaksudKunjungan.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(bukuTamuList.MaksudKunjungan.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(bukuTamuList.MaksudKunjungan.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(bukuTamuList.MaksudKunjungan.EditAttributes)>
+            @(bukuTamuList.MaksudKunjungan.SelectOptionListHtml("x_MaksudKunjungan", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(bukuTamuList.MaksudKunjungan.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fBukuTamusrch", function() {
+            var options = {
+                name: "x_MaksudKunjungan",
+                selectId: "fBukuTamusrch_x_MaksudKunjungan",
+                ajax: { id: "x_MaksudKunjungan", form: "fBukuTamusrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.BukuTamu.fields.MaksudKunjungan.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* bukuTamuList.MaksudKunjungan.Visible (end) *@
+@if (bukuTamuList.TandaPengenal.Visible) { // bukuTamuList.TandaPengenal.Visible (begin)
+    if (!bukuTamuList.TandaPengenal.UseFilter) {
+        bukuTamuList.SearchColumnCount++;
+    }
+    <div id="xs_TandaPengenal" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(bukuTamuList.TandaPengenal.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_TandaPengenal"
+            name="x_TandaPengenal[]"
+            class="form-control ew-select@(bukuTamuList.TandaPengenal.IsInvalidClass)"
+            data-select2-id="fBukuTamusrch_x_TandaPengenal"
+            data-table="BukuTamu"
+            data-field="x_TandaPengenal"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(bukuTamuList.TandaPengenal.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(bukuTamuList.TandaPengenal.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(bukuTamuList.TandaPengenal.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(bukuTamuList.TandaPengenal.EditAttributes)>
+            @(bukuTamuList.TandaPengenal.SelectOptionListHtml("x_TandaPengenal", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(bukuTamuList.TandaPengenal.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fBukuTamusrch", function() {
+            var options = {
+                name: "x_TandaPengenal",
+                selectId: "fBukuTamusrch_x_TandaPengenal",
+                ajax: { id: "x_TandaPengenal", form: "fBukuTamusrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.BukuTamu.fields.TandaPengenal.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* bukuTamuList.TandaPengenal.Visible (end) *@
+@if (bukuTamuList.TandaTangan.Visible) { // bukuTamuList.TandaTangan.Visible (begin)
+    if (!bukuTamuList.TandaTangan.UseFilter) {
+        bukuTamuList.SearchColumnCount++;
+    }
+    <div id="xs_TandaTangan" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(bukuTamuList.TandaTangan.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_TandaTangan"
+            name="x_TandaTangan[]"
+            class="form-control ew-select@(bukuTamuList.TandaTangan.IsInvalidClass)"
+            data-select2-id="fBukuTamusrch_x_TandaTangan"
+            data-table="BukuTamu"
+            data-field="x_TandaTangan"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(bukuTamuList.TandaTangan.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(bukuTamuList.TandaTangan.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(bukuTamuList.TandaTangan.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(bukuTamuList.TandaTangan.EditAttributes)>
+            @(bukuTamuList.TandaTangan.SelectOptionListHtml("x_TandaTangan", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(bukuTamuList.TandaTangan.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fBukuTamusrch", function() {
+            var options = {
+                name: "x_TandaTangan",
+                selectId: "fBukuTamusrch_x_TandaTangan",
+                ajax: { id: "x_TandaTangan", form: "fBukuTamusrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.BukuTamu.fields.TandaTangan.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* bukuTamuList.TandaTangan.Visible (end) *@
+@if (bukuTamuList.Keterangan.Visible) { // bukuTamuList.Keterangan.Visible (begin)
+    if (!bukuTamuList.Keterangan.UseFilter) {
+        bukuTamuList.SearchColumnCount++;
+    }
+    <div id="xs_Keterangan" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(bukuTamuList.Keterangan.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_Keterangan"
+            name="x_Keterangan[]"
+            class="form-control ew-select@(bukuTamuList.Keterangan.IsInvalidClass)"
+            data-select2-id="fBukuTamusrch_x_Keterangan"
+            data-table="BukuTamu"
+            data-field="x_Keterangan"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(bukuTamuList.Keterangan.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(bukuTamuList.Keterangan.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(bukuTamuList.Keterangan.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(bukuTamuList.Keterangan.EditAttributes)>
+            @(bukuTamuList.Keterangan.SelectOptionListHtml("x_Keterangan", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(bukuTamuList.Keterangan.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fBukuTamusrch", function() {
+            var options = {
+                name: "x_Keterangan",
+                selectId: "fBukuTamusrch_x_Keterangan",
+                ajax: { id: "x_Keterangan", form: "fBukuTamusrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.BukuTamu.fields.Keterangan.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* bukuTamuList.Keterangan.Visible (end) *@
+@if (bukuTamuList.PintuUtamaId.Visible) { // bukuTamuList.PintuUtamaId.Visible (begin)
+    if (!bukuTamuList.PintuUtamaId.UseFilter) {
+        bukuTamuList.SearchColumnCount++;
+    }
+    <div id="xs_PintuUtamaId" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(bukuTamuList.PintuUtamaId.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_PintuUtamaId"
+            name="x_PintuUtamaId[]"
+            class="form-control ew-select@(bukuTamuList.PintuUtamaId.IsInvalidClass)"
+            data-select2-id="fBukuTamusrch_x_PintuUtamaId"
+            data-table="BukuTamu"
+            data-field="x_PintuUtamaId"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(bukuTamuList.PintuUtamaId.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(bukuTamuList.PintuUtamaId.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(bukuTamuList.PintuUtamaId.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(bukuTamuList.PintuUtamaId.EditAttributes)>
+            @(bukuTamuList.PintuUtamaId.SelectOptionListHtml("x_PintuUtamaId", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(bukuTamuList.PintuUtamaId.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fBukuTamusrch", function() {
+            var options = {
+                name: "x_PintuUtamaId",
+                selectId: "fBukuTamusrch_x_PintuUtamaId",
+                ajax: { id: "x_PintuUtamaId", form: "fBukuTamusrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.BukuTamu.fields.PintuUtamaId.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* bukuTamuList.PintuUtamaId.Visible (end) *@
+@if (bukuTamuList.PintuUtamaInTanggal.Visible) { // bukuTamuList.PintuUtamaInTanggal.Visible (begin)
+    if (!bukuTamuList.PintuUtamaInTanggal.UseFilter) {
+        bukuTamuList.SearchColumnCount++;
+    }
+    <div id="xs_PintuUtamaInTanggal" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(bukuTamuList.PintuUtamaInTanggal.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_PintuUtamaInTanggal"
+            name="x_PintuUtamaInTanggal[]"
+            class="form-control ew-select@(bukuTamuList.PintuUtamaInTanggal.IsInvalidClass)"
+            data-select2-id="fBukuTamusrch_x_PintuUtamaInTanggal"
+            data-table="BukuTamu"
+            data-field="x_PintuUtamaInTanggal"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(bukuTamuList.PintuUtamaInTanggal.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(bukuTamuList.PintuUtamaInTanggal.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(bukuTamuList.PintuUtamaInTanggal.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(bukuTamuList.PintuUtamaInTanggal.EditAttributes)>
+            @(bukuTamuList.PintuUtamaInTanggal.SelectOptionListHtml("x_PintuUtamaInTanggal", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(bukuTamuList.PintuUtamaInTanggal.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fBukuTamusrch", function() {
+            var options = {
+                name: "x_PintuUtamaInTanggal",
+                selectId: "fBukuTamusrch_x_PintuUtamaInTanggal",
+                ajax: { id: "x_PintuUtamaInTanggal", form: "fBukuTamusrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.BukuTamu.fields.PintuUtamaInTanggal.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* bukuTamuList.PintuUtamaInTanggal.Visible (end) *@
+@if (bukuTamuList.PintuUtamaInFoto.Visible) { // bukuTamuList.PintuUtamaInFoto.Visible (begin)
+    if (!bukuTamuList.PintuUtamaInFoto.UseFilter) {
+        bukuTamuList.SearchColumnCount++;
+    }
+    <div id="xs_PintuUtamaInFoto" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(bukuTamuList.PintuUtamaInFoto.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_PintuUtamaInFoto"
+            name="x_PintuUtamaInFoto[]"
+            class="form-control ew-select@(bukuTamuList.PintuUtamaInFoto.IsInvalidClass)"
+            data-select2-id="fBukuTamusrch_x_PintuUtamaInFoto"
+            data-table="BukuTamu"
+            data-field="x_PintuUtamaInFoto"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(bukuTamuList.PintuUtamaInFoto.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(bukuTamuList.PintuUtamaInFoto.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(bukuTamuList.PintuUtamaInFoto.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(bukuTamuList.PintuUtamaInFoto.EditAttributes)>
+            @(bukuTamuList.PintuUtamaInFoto.SelectOptionListHtml("x_PintuUtamaInFoto", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(bukuTamuList.PintuUtamaInFoto.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fBukuTamusrch", function() {
+            var options = {
+                name: "x_PintuUtamaInFoto",
+                selectId: "fBukuTamusrch_x_PintuUtamaInFoto",
+                ajax: { id: "x_PintuUtamaInFoto", form: "fBukuTamusrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.BukuTamu.fields.PintuUtamaInFoto.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* bukuTamuList.PintuUtamaInFoto.Visible (end) *@
+@if (bukuTamuList.PintuUtamaInUser.Visible) { // bukuTamuList.PintuUtamaInUser.Visible (begin)
+    if (!bukuTamuList.PintuUtamaInUser.UseFilter) {
+        bukuTamuList.SearchColumnCount++;
+    }
+    <div id="xs_PintuUtamaInUser" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(bukuTamuList.PintuUtamaInUser.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_PintuUtamaInUser"
+            name="x_PintuUtamaInUser[]"
+            class="form-control ew-select@(bukuTamuList.PintuUtamaInUser.IsInvalidClass)"
+            data-select2-id="fBukuTamusrch_x_PintuUtamaInUser"
+            data-table="BukuTamu"
+            data-field="x_PintuUtamaInUser"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(bukuTamuList.PintuUtamaInUser.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(bukuTamuList.PintuUtamaInUser.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(bukuTamuList.PintuUtamaInUser.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(bukuTamuList.PintuUtamaInUser.EditAttributes)>
+            @(bukuTamuList.PintuUtamaInUser.SelectOptionListHtml("x_PintuUtamaInUser", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(bukuTamuList.PintuUtamaInUser.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fBukuTamusrch", function() {
+            var options = {
+                name: "x_PintuUtamaInUser",
+                selectId: "fBukuTamusrch_x_PintuUtamaInUser",
+                ajax: { id: "x_PintuUtamaInUser", form: "fBukuTamusrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.BukuTamu.fields.PintuUtamaInUser.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* bukuTamuList.PintuUtamaInUser.Visible (end) *@
+@if (bukuTamuList.CustomPilihPintu.Visible) { // bukuTamuList.CustomPilihPintu.Visible (begin)
+    if (!bukuTamuList.CustomPilihPintu.UseFilter) {
+        bukuTamuList.SearchColumnCount++;
+    }
+    <div id="xs_CustomPilihPintu" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(bukuTamuList.CustomPilihPintu.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_CustomPilihPintu"
+            name="x_CustomPilihPintu[]"
+            class="form-control ew-select@(bukuTamuList.CustomPilihPintu.IsInvalidClass)"
+            data-select2-id="fBukuTamusrch_x_CustomPilihPintu"
+            data-table="BukuTamu"
+            data-field="x_CustomPilihPintu"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(bukuTamuList.CustomPilihPintu.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(bukuTamuList.CustomPilihPintu.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(bukuTamuList.CustomPilihPintu.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(bukuTamuList.CustomPilihPintu.EditAttributes)>
+            @(bukuTamuList.CustomPilihPintu.SelectOptionListHtml("x_CustomPilihPintu", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(bukuTamuList.CustomPilihPintu.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fBukuTamusrch", function() {
+            var options = {
+                name: "x_CustomPilihPintu",
+                selectId: "fBukuTamusrch_x_CustomPilihPintu",
+                ajax: { id: "x_CustomPilihPintu", form: "fBukuTamusrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.BukuTamu.fields.CustomPilihPintu.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* bukuTamuList.CustomPilihPintu.Visible (end) *@
+@if (bukuTamuList.PintuUtamaOutTanggal.Visible) { // bukuTamuList.PintuUtamaOutTanggal.Visible (begin)
+    if (!bukuTamuList.PintuUtamaOutTanggal.UseFilter) {
+        bukuTamuList.SearchColumnCount++;
+    }
+    <div id="xs_PintuUtamaOutTanggal" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(bukuTamuList.PintuUtamaOutTanggal.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_PintuUtamaOutTanggal"
+            name="x_PintuUtamaOutTanggal[]"
+            class="form-control ew-select@(bukuTamuList.PintuUtamaOutTanggal.IsInvalidClass)"
+            data-select2-id="fBukuTamusrch_x_PintuUtamaOutTanggal"
+            data-table="BukuTamu"
+            data-field="x_PintuUtamaOutTanggal"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(bukuTamuList.PintuUtamaOutTanggal.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(bukuTamuList.PintuUtamaOutTanggal.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(bukuTamuList.PintuUtamaOutTanggal.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(bukuTamuList.PintuUtamaOutTanggal.EditAttributes)>
+            @(bukuTamuList.PintuUtamaOutTanggal.SelectOptionListHtml("x_PintuUtamaOutTanggal", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(bukuTamuList.PintuUtamaOutTanggal.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fBukuTamusrch", function() {
+            var options = {
+                name: "x_PintuUtamaOutTanggal",
+                selectId: "fBukuTamusrch_x_PintuUtamaOutTanggal",
+                ajax: { id: "x_PintuUtamaOutTanggal", form: "fBukuTamusrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.BukuTamu.fields.PintuUtamaOutTanggal.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* bukuTamuList.PintuUtamaOutTanggal.Visible (end) *@
+@if (bukuTamuList.PintuUtamaOutFoto.Visible) { // bukuTamuList.PintuUtamaOutFoto.Visible (begin)
+    if (!bukuTamuList.PintuUtamaOutFoto.UseFilter) {
+        bukuTamuList.SearchColumnCount++;
+    }
+    <div id="xs_PintuUtamaOutFoto" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(bukuTamuList.PintuUtamaOutFoto.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_PintuUtamaOutFoto"
+            name="x_PintuUtamaOutFoto[]"
+            class="form-control ew-select@(bukuTamuList.PintuUtamaOutFoto.IsInvalidClass)"
+            data-select2-id="fBukuTamusrch_x_PintuUtamaOutFoto"
+            data-table="BukuTamu"
+            data-field="x_PintuUtamaOutFoto"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(bukuTamuList.PintuUtamaOutFoto.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(bukuTamuList.PintuUtamaOutFoto.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(bukuTamuList.PintuUtamaOutFoto.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(bukuTamuList.PintuUtamaOutFoto.EditAttributes)>
+            @(bukuTamuList.PintuUtamaOutFoto.SelectOptionListHtml("x_PintuUtamaOutFoto", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(bukuTamuList.PintuUtamaOutFoto.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fBukuTamusrch", function() {
+            var options = {
+                name: "x_PintuUtamaOutFoto",
+                selectId: "fBukuTamusrch_x_PintuUtamaOutFoto",
+                ajax: { id: "x_PintuUtamaOutFoto", form: "fBukuTamusrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.BukuTamu.fields.PintuUtamaOutFoto.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* bukuTamuList.PintuUtamaOutFoto.Visible (end) *@
+@if (bukuTamuList.PintuUtamaOutUser.Visible) { // bukuTamuList.PintuUtamaOutUser.Visible (begin)
+    if (!bukuTamuList.PintuUtamaOutUser.UseFilter) {
+        bukuTamuList.SearchColumnCount++;
+    }
+    <div id="xs_PintuUtamaOutUser" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(bukuTamuList.PintuUtamaOutUser.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_PintuUtamaOutUser"
+            name="x_PintuUtamaOutUser[]"
+            class="form-control ew-select@(bukuTamuList.PintuUtamaOutUser.IsInvalidClass)"
+            data-select2-id="fBukuTamusrch_x_PintuUtamaOutUser"
+            data-table="BukuTamu"
+            data-field="x_PintuUtamaOutUser"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(bukuTamuList.PintuUtamaOutUser.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(bukuTamuList.PintuUtamaOutUser.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(bukuTamuList.PintuUtamaOutUser.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(bukuTamuList.PintuUtamaOutUser.EditAttributes)>
+            @(bukuTamuList.PintuUtamaOutUser.SelectOptionListHtml("x_PintuUtamaOutUser", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(bukuTamuList.PintuUtamaOutUser.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fBukuTamusrch", function() {
+            var options = {
+                name: "x_PintuUtamaOutUser",
+                selectId: "fBukuTamusrch_x_PintuUtamaOutUser",
+                ajax: { id: "x_PintuUtamaOutUser", form: "fBukuTamusrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.BukuTamu.fields.PintuUtamaOutUser.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* bukuTamuList.PintuUtamaOutUser.Visible (end) *@
+@if (bukuTamuList.LobbyUtamaId.Visible) { // bukuTamuList.LobbyUtamaId.Visible (begin)
+    if (!bukuTamuList.LobbyUtamaId.UseFilter) {
+        bukuTamuList.SearchColumnCount++;
+    }
+    <div id="xs_LobbyUtamaId" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(bukuTamuList.LobbyUtamaId.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_LobbyUtamaId"
+            name="x_LobbyUtamaId[]"
+            class="form-control ew-select@(bukuTamuList.LobbyUtamaId.IsInvalidClass)"
+            data-select2-id="fBukuTamusrch_x_LobbyUtamaId"
+            data-table="BukuTamu"
+            data-field="x_LobbyUtamaId"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(bukuTamuList.LobbyUtamaId.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(bukuTamuList.LobbyUtamaId.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(bukuTamuList.LobbyUtamaId.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(bukuTamuList.LobbyUtamaId.EditAttributes)>
+            @(bukuTamuList.LobbyUtamaId.SelectOptionListHtml("x_LobbyUtamaId", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(bukuTamuList.LobbyUtamaId.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fBukuTamusrch", function() {
+            var options = {
+                name: "x_LobbyUtamaId",
+                selectId: "fBukuTamusrch_x_LobbyUtamaId",
+                ajax: { id: "x_LobbyUtamaId", form: "fBukuTamusrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.BukuTamu.fields.LobbyUtamaId.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* bukuTamuList.LobbyUtamaId.Visible (end) *@
+@if (bukuTamuList.LobbyUtamaInTanggal.Visible) { // bukuTamuList.LobbyUtamaInTanggal.Visible (begin)
+    if (!bukuTamuList.LobbyUtamaInTanggal.UseFilter) {
+        bukuTamuList.SearchColumnCount++;
+    }
+    <div id="xs_LobbyUtamaInTanggal" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(bukuTamuList.LobbyUtamaInTanggal.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_LobbyUtamaInTanggal"
+            name="x_LobbyUtamaInTanggal[]"
+            class="form-control ew-select@(bukuTamuList.LobbyUtamaInTanggal.IsInvalidClass)"
+            data-select2-id="fBukuTamusrch_x_LobbyUtamaInTanggal"
+            data-table="BukuTamu"
+            data-field="x_LobbyUtamaInTanggal"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(bukuTamuList.LobbyUtamaInTanggal.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(bukuTamuList.LobbyUtamaInTanggal.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(bukuTamuList.LobbyUtamaInTanggal.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(bukuTamuList.LobbyUtamaInTanggal.EditAttributes)>
+            @(bukuTamuList.LobbyUtamaInTanggal.SelectOptionListHtml("x_LobbyUtamaInTanggal", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(bukuTamuList.LobbyUtamaInTanggal.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fBukuTamusrch", function() {
+            var options = {
+                name: "x_LobbyUtamaInTanggal",
+                selectId: "fBukuTamusrch_x_LobbyUtamaInTanggal",
+                ajax: { id: "x_LobbyUtamaInTanggal", form: "fBukuTamusrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.BukuTamu.fields.LobbyUtamaInTanggal.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* bukuTamuList.LobbyUtamaInTanggal.Visible (end) *@
+@if (bukuTamuList.LobbyUtamaInFoto.Visible) { // bukuTamuList.LobbyUtamaInFoto.Visible (begin)
+    if (!bukuTamuList.LobbyUtamaInFoto.UseFilter) {
+        bukuTamuList.SearchColumnCount++;
+    }
+    <div id="xs_LobbyUtamaInFoto" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(bukuTamuList.LobbyUtamaInFoto.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_LobbyUtamaInFoto"
+            name="x_LobbyUtamaInFoto[]"
+            class="form-control ew-select@(bukuTamuList.LobbyUtamaInFoto.IsInvalidClass)"
+            data-select2-id="fBukuTamusrch_x_LobbyUtamaInFoto"
+            data-table="BukuTamu"
+            data-field="x_LobbyUtamaInFoto"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(bukuTamuList.LobbyUtamaInFoto.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(bukuTamuList.LobbyUtamaInFoto.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(bukuTamuList.LobbyUtamaInFoto.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(bukuTamuList.LobbyUtamaInFoto.EditAttributes)>
+            @(bukuTamuList.LobbyUtamaInFoto.SelectOptionListHtml("x_LobbyUtamaInFoto", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(bukuTamuList.LobbyUtamaInFoto.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fBukuTamusrch", function() {
+            var options = {
+                name: "x_LobbyUtamaInFoto",
+                selectId: "fBukuTamusrch_x_LobbyUtamaInFoto",
+                ajax: { id: "x_LobbyUtamaInFoto", form: "fBukuTamusrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.BukuTamu.fields.LobbyUtamaInFoto.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* bukuTamuList.LobbyUtamaInFoto.Visible (end) *@
+@if (bukuTamuList.LobbyUtamaInUser.Visible) { // bukuTamuList.LobbyUtamaInUser.Visible (begin)
+    if (!bukuTamuList.LobbyUtamaInUser.UseFilter) {
+        bukuTamuList.SearchColumnCount++;
+    }
+    <div id="xs_LobbyUtamaInUser" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(bukuTamuList.LobbyUtamaInUser.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_LobbyUtamaInUser"
+            name="x_LobbyUtamaInUser[]"
+            class="form-control ew-select@(bukuTamuList.LobbyUtamaInUser.IsInvalidClass)"
+            data-select2-id="fBukuTamusrch_x_LobbyUtamaInUser"
+            data-table="BukuTamu"
+            data-field="x_LobbyUtamaInUser"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(bukuTamuList.LobbyUtamaInUser.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(bukuTamuList.LobbyUtamaInUser.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(bukuTamuList.LobbyUtamaInUser.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(bukuTamuList.LobbyUtamaInUser.EditAttributes)>
+            @(bukuTamuList.LobbyUtamaInUser.SelectOptionListHtml("x_LobbyUtamaInUser", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(bukuTamuList.LobbyUtamaInUser.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fBukuTamusrch", function() {
+            var options = {
+                name: "x_LobbyUtamaInUser",
+                selectId: "fBukuTamusrch_x_LobbyUtamaInUser",
+                ajax: { id: "x_LobbyUtamaInUser", form: "fBukuTamusrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.BukuTamu.fields.LobbyUtamaInUser.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* bukuTamuList.LobbyUtamaInUser.Visible (end) *@
+@if (bukuTamuList.LobbyUtamaOutTanggal.Visible) { // bukuTamuList.LobbyUtamaOutTanggal.Visible (begin)
+    if (!bukuTamuList.LobbyUtamaOutTanggal.UseFilter) {
+        bukuTamuList.SearchColumnCount++;
+    }
+    <div id="xs_LobbyUtamaOutTanggal" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(bukuTamuList.LobbyUtamaOutTanggal.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_LobbyUtamaOutTanggal"
+            name="x_LobbyUtamaOutTanggal[]"
+            class="form-control ew-select@(bukuTamuList.LobbyUtamaOutTanggal.IsInvalidClass)"
+            data-select2-id="fBukuTamusrch_x_LobbyUtamaOutTanggal"
+            data-table="BukuTamu"
+            data-field="x_LobbyUtamaOutTanggal"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(bukuTamuList.LobbyUtamaOutTanggal.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(bukuTamuList.LobbyUtamaOutTanggal.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(bukuTamuList.LobbyUtamaOutTanggal.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(bukuTamuList.LobbyUtamaOutTanggal.EditAttributes)>
+            @(bukuTamuList.LobbyUtamaOutTanggal.SelectOptionListHtml("x_LobbyUtamaOutTanggal", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(bukuTamuList.LobbyUtamaOutTanggal.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fBukuTamusrch", function() {
+            var options = {
+                name: "x_LobbyUtamaOutTanggal",
+                selectId: "fBukuTamusrch_x_LobbyUtamaOutTanggal",
+                ajax: { id: "x_LobbyUtamaOutTanggal", form: "fBukuTamusrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.BukuTamu.fields.LobbyUtamaOutTanggal.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* bukuTamuList.LobbyUtamaOutTanggal.Visible (end) *@
+@if (bukuTamuList.LobbyUtamaOutFoto.Visible) { // bukuTamuList.LobbyUtamaOutFoto.Visible (begin)
+    if (!bukuTamuList.LobbyUtamaOutFoto.UseFilter) {
+        bukuTamuList.SearchColumnCount++;
+    }
+    <div id="xs_LobbyUtamaOutFoto" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(bukuTamuList.LobbyUtamaOutFoto.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_LobbyUtamaOutFoto"
+            name="x_LobbyUtamaOutFoto[]"
+            class="form-control ew-select@(bukuTamuList.LobbyUtamaOutFoto.IsInvalidClass)"
+            data-select2-id="fBukuTamusrch_x_LobbyUtamaOutFoto"
+            data-table="BukuTamu"
+            data-field="x_LobbyUtamaOutFoto"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(bukuTamuList.LobbyUtamaOutFoto.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(bukuTamuList.LobbyUtamaOutFoto.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(bukuTamuList.LobbyUtamaOutFoto.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(bukuTamuList.LobbyUtamaOutFoto.EditAttributes)>
+            @(bukuTamuList.LobbyUtamaOutFoto.SelectOptionListHtml("x_LobbyUtamaOutFoto", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(bukuTamuList.LobbyUtamaOutFoto.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fBukuTamusrch", function() {
+            var options = {
+                name: "x_LobbyUtamaOutFoto",
+                selectId: "fBukuTamusrch_x_LobbyUtamaOutFoto",
+                ajax: { id: "x_LobbyUtamaOutFoto", form: "fBukuTamusrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.BukuTamu.fields.LobbyUtamaOutFoto.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* bukuTamuList.LobbyUtamaOutFoto.Visible (end) *@
+@if (bukuTamuList.LobbyUtamaOutUser.Visible) { // bukuTamuList.LobbyUtamaOutUser.Visible (begin)
+    if (!bukuTamuList.LobbyUtamaOutUser.UseFilter) {
+        bukuTamuList.SearchColumnCount++;
+    }
+    <div id="xs_LobbyUtamaOutUser" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(bukuTamuList.LobbyUtamaOutUser.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_LobbyUtamaOutUser"
+            name="x_LobbyUtamaOutUser[]"
+            class="form-control ew-select@(bukuTamuList.LobbyUtamaOutUser.IsInvalidClass)"
+            data-select2-id="fBukuTamusrch_x_LobbyUtamaOutUser"
+            data-table="BukuTamu"
+            data-field="x_LobbyUtamaOutUser"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(bukuTamuList.LobbyUtamaOutUser.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(bukuTamuList.LobbyUtamaOutUser.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(bukuTamuList.LobbyUtamaOutUser.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(bukuTamuList.LobbyUtamaOutUser.EditAttributes)>
+            @(bukuTamuList.LobbyUtamaOutUser.SelectOptionListHtml("x_LobbyUtamaOutUser", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(bukuTamuList.LobbyUtamaOutUser.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fBukuTamusrch", function() {
+            var options = {
+                name: "x_LobbyUtamaOutUser",
+                selectId: "fBukuTamusrch_x_LobbyUtamaOutUser",
+                ajax: { id: "x_LobbyUtamaOutUser", form: "fBukuTamusrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.BukuTamu.fields.LobbyUtamaOutUser.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* bukuTamuList.LobbyUtamaOutUser.Visible (end) *@
+@if (bukuTamuList.AreaTerlarangId.Visible) { // bukuTamuList.AreaTerlarangId.Visible (begin)
+    if (!bukuTamuList.AreaTerlarangId.UseFilter) {
+        bukuTamuList.SearchColumnCount++;
+    }
+    <div id="xs_AreaTerlarangId" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(bukuTamuList.AreaTerlarangId.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_AreaTerlarangId"
+            name="x_AreaTerlarangId[]"
+            class="form-control ew-select@(bukuTamuList.AreaTerlarangId.IsInvalidClass)"
+            data-select2-id="fBukuTamusrch_x_AreaTerlarangId"
+            data-table="BukuTamu"
+            data-field="x_AreaTerlarangId"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(bukuTamuList.AreaTerlarangId.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(bukuTamuList.AreaTerlarangId.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(bukuTamuList.AreaTerlarangId.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(bukuTamuList.AreaTerlarangId.EditAttributes)>
+            @(bukuTamuList.AreaTerlarangId.SelectOptionListHtml("x_AreaTerlarangId", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(bukuTamuList.AreaTerlarangId.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fBukuTamusrch", function() {
+            var options = {
+                name: "x_AreaTerlarangId",
+                selectId: "fBukuTamusrch_x_AreaTerlarangId",
+                ajax: { id: "x_AreaTerlarangId", form: "fBukuTamusrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.BukuTamu.fields.AreaTerlarangId.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* bukuTamuList.AreaTerlarangId.Visible (end) *@
+@if (bukuTamuList.AreaTerlarangInTanggal.Visible) { // bukuTamuList.AreaTerlarangInTanggal.Visible (begin)
+    if (!bukuTamuList.AreaTerlarangInTanggal.UseFilter) {
+        bukuTamuList.SearchColumnCount++;
+    }
+    <div id="xs_AreaTerlarangInTanggal" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(bukuTamuList.AreaTerlarangInTanggal.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_AreaTerlarangInTanggal"
+            name="x_AreaTerlarangInTanggal[]"
+            class="form-control ew-select@(bukuTamuList.AreaTerlarangInTanggal.IsInvalidClass)"
+            data-select2-id="fBukuTamusrch_x_AreaTerlarangInTanggal"
+            data-table="BukuTamu"
+            data-field="x_AreaTerlarangInTanggal"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(bukuTamuList.AreaTerlarangInTanggal.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(bukuTamuList.AreaTerlarangInTanggal.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(bukuTamuList.AreaTerlarangInTanggal.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(bukuTamuList.AreaTerlarangInTanggal.EditAttributes)>
+            @(bukuTamuList.AreaTerlarangInTanggal.SelectOptionListHtml("x_AreaTerlarangInTanggal", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(bukuTamuList.AreaTerlarangInTanggal.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fBukuTamusrch", function() {
+            var options = {
+                name: "x_AreaTerlarangInTanggal",
+                selectId: "fBukuTamusrch_x_AreaTerlarangInTanggal",
+                ajax: { id: "x_AreaTerlarangInTanggal", form: "fBukuTamusrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.BukuTamu.fields.AreaTerlarangInTanggal.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* bukuTamuList.AreaTerlarangInTanggal.Visible (end) *@
+@if (bukuTamuList.AreaTerlarangInFoto.Visible) { // bukuTamuList.AreaTerlarangInFoto.Visible (begin)
+    if (!bukuTamuList.AreaTerlarangInFoto.UseFilter) {
+        bukuTamuList.SearchColumnCount++;
+    }
+    <div id="xs_AreaTerlarangInFoto" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(bukuTamuList.AreaTerlarangInFoto.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_AreaTerlarangInFoto"
+            name="x_AreaTerlarangInFoto[]"
+            class="form-control ew-select@(bukuTamuList.AreaTerlarangInFoto.IsInvalidClass)"
+            data-select2-id="fBukuTamusrch_x_AreaTerlarangInFoto"
+            data-table="BukuTamu"
+            data-field="x_AreaTerlarangInFoto"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(bukuTamuList.AreaTerlarangInFoto.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(bukuTamuList.AreaTerlarangInFoto.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(bukuTamuList.AreaTerlarangInFoto.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(bukuTamuList.AreaTerlarangInFoto.EditAttributes)>
+            @(bukuTamuList.AreaTerlarangInFoto.SelectOptionListHtml("x_AreaTerlarangInFoto", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(bukuTamuList.AreaTerlarangInFoto.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fBukuTamusrch", function() {
+            var options = {
+                name: "x_AreaTerlarangInFoto",
+                selectId: "fBukuTamusrch_x_AreaTerlarangInFoto",
+                ajax: { id: "x_AreaTerlarangInFoto", form: "fBukuTamusrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.BukuTamu.fields.AreaTerlarangInFoto.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* bukuTamuList.AreaTerlarangInFoto.Visible (end) *@
+@if (bukuTamuList.AreaTerlarangInUser.Visible) { // bukuTamuList.AreaTerlarangInUser.Visible (begin)
+    if (!bukuTamuList.AreaTerlarangInUser.UseFilter) {
+        bukuTamuList.SearchColumnCount++;
+    }
+    <div id="xs_AreaTerlarangInUser" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(bukuTamuList.AreaTerlarangInUser.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_AreaTerlarangInUser"
+            name="x_AreaTerlarangInUser[]"
+            class="form-control ew-select@(bukuTamuList.AreaTerlarangInUser.IsInvalidClass)"
+            data-select2-id="fBukuTamusrch_x_AreaTerlarangInUser"
+            data-table="BukuTamu"
+            data-field="x_AreaTerlarangInUser"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(bukuTamuList.AreaTerlarangInUser.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(bukuTamuList.AreaTerlarangInUser.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(bukuTamuList.AreaTerlarangInUser.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(bukuTamuList.AreaTerlarangInUser.EditAttributes)>
+            @(bukuTamuList.AreaTerlarangInUser.SelectOptionListHtml("x_AreaTerlarangInUser", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(bukuTamuList.AreaTerlarangInUser.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fBukuTamusrch", function() {
+            var options = {
+                name: "x_AreaTerlarangInUser",
+                selectId: "fBukuTamusrch_x_AreaTerlarangInUser",
+                ajax: { id: "x_AreaTerlarangInUser", form: "fBukuTamusrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.BukuTamu.fields.AreaTerlarangInUser.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* bukuTamuList.AreaTerlarangInUser.Visible (end) *@
+@if (bukuTamuList.AreaTerlarangOutTanggal.Visible) { // bukuTamuList.AreaTerlarangOutTanggal.Visible (begin)
+    if (!bukuTamuList.AreaTerlarangOutTanggal.UseFilter) {
+        bukuTamuList.SearchColumnCount++;
+    }
+    <div id="xs_AreaTerlarangOutTanggal" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(bukuTamuList.AreaTerlarangOutTanggal.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_AreaTerlarangOutTanggal"
+            name="x_AreaTerlarangOutTanggal[]"
+            class="form-control ew-select@(bukuTamuList.AreaTerlarangOutTanggal.IsInvalidClass)"
+            data-select2-id="fBukuTamusrch_x_AreaTerlarangOutTanggal"
+            data-table="BukuTamu"
+            data-field="x_AreaTerlarangOutTanggal"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(bukuTamuList.AreaTerlarangOutTanggal.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(bukuTamuList.AreaTerlarangOutTanggal.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(bukuTamuList.AreaTerlarangOutTanggal.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(bukuTamuList.AreaTerlarangOutTanggal.EditAttributes)>
+            @(bukuTamuList.AreaTerlarangOutTanggal.SelectOptionListHtml("x_AreaTerlarangOutTanggal", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(bukuTamuList.AreaTerlarangOutTanggal.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fBukuTamusrch", function() {
+            var options = {
+                name: "x_AreaTerlarangOutTanggal",
+                selectId: "fBukuTamusrch_x_AreaTerlarangOutTanggal",
+                ajax: { id: "x_AreaTerlarangOutTanggal", form: "fBukuTamusrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.BukuTamu.fields.AreaTerlarangOutTanggal.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* bukuTamuList.AreaTerlarangOutTanggal.Visible (end) *@
+@if (bukuTamuList.AreaTerlarangOutFoto.Visible) { // bukuTamuList.AreaTerlarangOutFoto.Visible (begin)
+    if (!bukuTamuList.AreaTerlarangOutFoto.UseFilter) {
+        bukuTamuList.SearchColumnCount++;
+    }
+    <div id="xs_AreaTerlarangOutFoto" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(bukuTamuList.AreaTerlarangOutFoto.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_AreaTerlarangOutFoto"
+            name="x_AreaTerlarangOutFoto[]"
+            class="form-control ew-select@(bukuTamuList.AreaTerlarangOutFoto.IsInvalidClass)"
+            data-select2-id="fBukuTamusrch_x_AreaTerlarangOutFoto"
+            data-table="BukuTamu"
+            data-field="x_AreaTerlarangOutFoto"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(bukuTamuList.AreaTerlarangOutFoto.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(bukuTamuList.AreaTerlarangOutFoto.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(bukuTamuList.AreaTerlarangOutFoto.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(bukuTamuList.AreaTerlarangOutFoto.EditAttributes)>
+            @(bukuTamuList.AreaTerlarangOutFoto.SelectOptionListHtml("x_AreaTerlarangOutFoto", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(bukuTamuList.AreaTerlarangOutFoto.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fBukuTamusrch", function() {
+            var options = {
+                name: "x_AreaTerlarangOutFoto",
+                selectId: "fBukuTamusrch_x_AreaTerlarangOutFoto",
+                ajax: { id: "x_AreaTerlarangOutFoto", form: "fBukuTamusrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.BukuTamu.fields.AreaTerlarangOutFoto.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* bukuTamuList.AreaTerlarangOutFoto.Visible (end) *@
+@if (bukuTamuList.AreaTerlarangOutUser.Visible) { // bukuTamuList.AreaTerlarangOutUser.Visible (begin)
+    if (!bukuTamuList.AreaTerlarangOutUser.UseFilter) {
+        bukuTamuList.SearchColumnCount++;
+    }
+    <div id="xs_AreaTerlarangOutUser" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(bukuTamuList.AreaTerlarangOutUser.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_AreaTerlarangOutUser"
+            name="x_AreaTerlarangOutUser[]"
+            class="form-control ew-select@(bukuTamuList.AreaTerlarangOutUser.IsInvalidClass)"
+            data-select2-id="fBukuTamusrch_x_AreaTerlarangOutUser"
+            data-table="BukuTamu"
+            data-field="x_AreaTerlarangOutUser"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(bukuTamuList.AreaTerlarangOutUser.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(bukuTamuList.AreaTerlarangOutUser.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(bukuTamuList.AreaTerlarangOutUser.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(bukuTamuList.AreaTerlarangOutUser.EditAttributes)>
+            @(bukuTamuList.AreaTerlarangOutUser.SelectOptionListHtml("x_AreaTerlarangOutUser", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(bukuTamuList.AreaTerlarangOutUser.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fBukuTamusrch", function() {
+            var options = {
+                name: "x_AreaTerlarangOutUser",
+                selectId: "fBukuTamusrch_x_AreaTerlarangOutUser",
+                ajax: { id: "x_AreaTerlarangOutUser", form: "fBukuTamusrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.BukuTamu.fields.AreaTerlarangOutUser.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* bukuTamuList.AreaTerlarangOutUser.Visible (end) *@
+@if (bukuTamuList.etlDate.Visible) { // bukuTamuList.etlDate.Visible (begin)
+    if (!bukuTamuList.etlDate.UseFilter) {
+        bukuTamuList.SearchColumnCount++;
+    }
+    <div id="xs_etlDate" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(bukuTamuList.etlDate.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_etlDate"
+            name="x_etlDate[]"
+            class="form-control ew-select@(bukuTamuList.etlDate.IsInvalidClass)"
+            data-select2-id="fBukuTamusrch_x_etlDate"
+            data-table="BukuTamu"
+            data-field="x_etlDate"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(bukuTamuList.etlDate.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(bukuTamuList.etlDate.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(bukuTamuList.etlDate.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(bukuTamuList.etlDate.EditAttributes)>
+            @(bukuTamuList.etlDate.SelectOptionListHtml("x_etlDate", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(bukuTamuList.etlDate.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fBukuTamusrch", function() {
+            var options = {
+                name: "x_etlDate",
+                selectId: "fBukuTamusrch_x_etlDate",
+                ajax: { id: "x_etlDate", form: "fBukuTamusrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.BukuTamu.fields.etlDate.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* bukuTamuList.etlDate.Visible (end) *@
+@if (bukuTamuList.LastUpdatedBy.Visible) { // bukuTamuList.LastUpdatedBy.Visible (begin)
+    if (!bukuTamuList.LastUpdatedBy.UseFilter) {
+        bukuTamuList.SearchColumnCount++;
+    }
+    <div id="xs_LastUpdatedBy" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(bukuTamuList.LastUpdatedBy.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_LastUpdatedBy"
+            name="x_LastUpdatedBy[]"
+            class="form-control ew-select@(bukuTamuList.LastUpdatedBy.IsInvalidClass)"
+            data-select2-id="fBukuTamusrch_x_LastUpdatedBy"
+            data-table="BukuTamu"
+            data-field="x_LastUpdatedBy"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(bukuTamuList.LastUpdatedBy.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(bukuTamuList.LastUpdatedBy.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(bukuTamuList.LastUpdatedBy.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(bukuTamuList.LastUpdatedBy.EditAttributes)>
+            @(bukuTamuList.LastUpdatedBy.SelectOptionListHtml("x_LastUpdatedBy", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(bukuTamuList.LastUpdatedBy.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fBukuTamusrch", function() {
+            var options = {
+                name: "x_LastUpdatedBy",
+                selectId: "fBukuTamusrch_x_LastUpdatedBy",
+                ajax: { id: "x_LastUpdatedBy", form: "fBukuTamusrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.BukuTamu.fields.LastUpdatedBy.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* bukuTamuList.LastUpdatedBy.Visible (end) *@
+@if (bukuTamuList.lastUpdatedDate.Visible) { // bukuTamuList.lastUpdatedDate.Visible (begin)
+    if (!bukuTamuList.lastUpdatedDate.UseFilter) {
+        bukuTamuList.SearchColumnCount++;
+    }
+    <div id="xs_lastUpdatedDate" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(bukuTamuList.lastUpdatedDate.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_lastUpdatedDate"
+            name="x_lastUpdatedDate[]"
+            class="form-control ew-select@(bukuTamuList.lastUpdatedDate.IsInvalidClass)"
+            data-select2-id="fBukuTamusrch_x_lastUpdatedDate"
+            data-table="BukuTamu"
+            data-field="x_lastUpdatedDate"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(bukuTamuList.lastUpdatedDate.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(bukuTamuList.lastUpdatedDate.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(bukuTamuList.lastUpdatedDate.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(bukuTamuList.lastUpdatedDate.EditAttributes)>
+            @(bukuTamuList.lastUpdatedDate.SelectOptionListHtml("x_lastUpdatedDate", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(bukuTamuList.lastUpdatedDate.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fBukuTamusrch", function() {
+            var options = {
+                name: "x_lastUpdatedDate",
+                selectId: "fBukuTamusrch_x_lastUpdatedDate",
+                ajax: { id: "x_lastUpdatedDate", form: "fBukuTamusrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.BukuTamu.fields.lastUpdatedDate.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* bukuTamuList.lastUpdatedDate.Visible (end) *@
+</div><!-- /.row -->
+<div id="tpsd_BukuTamulist" class="ew-custom-template-search"></div>
+<template id="tpsm_BukuTamulist">
+<div id="BukuTamulist">@{
+    var userLevel = CurrentUserLevel();
+    var idPosition = CurrentUserInfo("IdPosition") ?? "0";
+    var regions = new List<object>();
+    var plants = new List<object>();
+    if (userLevel == "-1" || userLevel == "3")
+    {
+        regions = await DatabaseQueryHelper.ExecuteSelectListQueryAsync<object>(
+            "SELECT IdRegion, Region AS NamaRegion FROM MasterRegion ORDER BY Region",
+            reader => new {
+                idRegion = reader.GetInt32("IdRegion").ToString(),
+                namaRegion = reader.IsDBNull("NamaRegion") ? "" : reader.GetString("NamaRegion")
+            });
+        plants = await DatabaseQueryHelper.ExecuteSelectListQueryAsync<object>(
+            "SELECT IdPlant, Nama_Terminal AS NamaPlant, Region AS IdRegion FROM MasterPlant ORDER BY Nama_Terminal",
+            reader => new {
+                idPlant = reader.GetInt32("IdPlant").ToString(),
+                namaPlant = reader.IsDBNull("NamaPlant") ? "" : reader.GetString("NamaPlant"),
+                idRegion = reader.IsDBNull("IdRegion") ? "" : reader.GetString("IdRegion")
+            });
+    }
+    else if (idPosition != "0")
+    {
+        regions = await DatabaseQueryHelper.ExecuteSelectListQueryAsync<object>(
+            "SELECT DISTINCT MR.IdRegion, MR.Region AS NamaRegion FROM MasterRegion MR JOIN MappingPosition MP ON MP.IdRegion = MR.IdRegion WHERE MP.IdPosition = @IdPosition ORDER BY MR.Region",
+            reader => new {
+                idRegion = reader.GetInt32("IdRegion").ToString(),
+                namaRegion = reader.IsDBNull("NamaRegion") ? "" : reader.GetString("NamaRegion")
+            },
+            new Dictionary<string, object> {{ "@IdPosition", idPosition }});
+        plants = await DatabaseQueryHelper.ExecuteSelectListQueryAsync<object>(
+            "SELECT DISTINCT MP.IdPlant, MP.NamaPlant AS NamaPlant, MP.IdRegion AS IdRegion FROM MappingPosition MP WHERE MP.IdPosition = @IdPosition ORDER BY MP.NamaPlant",
+            reader => new {
+                idPlant = reader.GetInt32("IdPlant").ToString(),
+                namaPlant = reader.IsDBNull("NamaPlant") ? "" : reader.GetString("NamaPlant"),
+                idRegion = reader.GetInt32("IdRegion").ToString()
+            },
+            new Dictionary<string, object> {{ "@IdPosition", idPosition }});
+    }
+}
+<style>
+.select2-container--default .select2-results__option--highlighted[aria-selected],
+.select2-container--default .select2-results__option--highlighted[aria-selected]:hover {
+    background-color: #5897fb !important;
+    color: #fff !important;
+}
+.select2-container--default .select2-results__option--selected {
+    background-color: transparent !important;
+    color: inherit !important;
+}
+.select2-container--default .select2-results__option--highlighted[aria-selected] mark,
+.select2-container--default .select2-results__option--highlighted[aria-selected]:hover mark {
+    background: #ff0 !important;
+    color: #000 !important;
+    padding: 0;
+    font-weight: bold;
+}
+.select2-search--dropdown .select2-search__field {
+    border: 2px solid #5897fb !important;
+    border-radius: 4px !important;
+    padding: 6px 10px !important;
+    background-color: #f0f5ff !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%235897fb' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat !important;
+    background-position: 8px center !important;
+    padding-left: 28px !important;
+}
+.select2-search--dropdown .select2-search__field::placeholder {
+    color: #5897fb !important;
+    font-style: italic;
+}
+.select2-search--dropdown .select2-search__field:focus {
+    background-color: #fff !important;
+    box-shadow: 0 0 0 3px rgba(88,151,251,0.2) !important;
+}
+#xs_custom_BukuTamuFilter label {
+    text-align: center !important;
+    width: 100%;
+}
+</style>
+<script>
+window._bukuTamuFilterConfig = {
+    regions: @Html.Raw(Json.Serialize(regions)),
+    plants: @Html.Raw(Json.Serialize(plants))
+};
+</script>
+<div id="xs_custom_BukuTamuFilter" class="row mb-3 px-0 pe-sm-2">
+    <input type="hidden" name="x_filterRegion" id="x_filterRegion" value="">
+    <input type="hidden" name="x_filterPlant" id="x_filterPlant" value="">
+    <div class="col-sm-6">
+        <label class="ew-search-caption ew-label no-wrap d-block mb-1">Region</label>
+        <select id="filter-region" class="form-select">
+            <option value="All"> All </option>
+        </select>
+    </div>
+    <div class="col-sm-6">
+        <label class="ew-search-caption ew-label no-wrap d-block mb-1">Plant</label>
+        <select id="filter-plant" class="form-select">
+            <option value="All"> All </option>
+        </select>
+    </div>
+</div></div>
+</template>
+<div class="row mb-0">
+    <div class="col-sm-auto px-0 pe-sm-2">
+        <div class="ew-basic-search input-group">
+            <input type="search" name="@(Config.TableBasicSearch)" id="@(Config.TableBasicSearch)" class="form-control ew-basic-search-keyword" value="@Html.Raw(HtmlEncode(bukuTamuList.BasicSearch.SessionKeyword))" placeholder="@(HtmlEncode(Language.Phrase("Search")))" aria-label="@(HtmlEncode(Language.Phrase("Search")))">
+            <input type="hidden" name="@(Config.TableBasicSearchType)" id="@(Config.TableBasicSearchType)" class="ew-basic-search-type" value="@(HtmlEncode(bukuTamuList.BasicSearch.SessionType))">
+            <button type="button" data-bs-toggle="dropdown" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split" aria-haspopup="true" aria-expanded="false">
+                <span id="searchtype">@Html.Raw(bukuTamuList.BasicSearch.TypeNameShort)</span>
+            </button>
+            <div class="dropdown-menu dropdown-menu-end">
+                <button type="button" class="dropdown-item@(bukuTamuList.BasicSearch.SessionType == "" ? " active" : "")" form="fBukuTamusrch" data-ew-action="search-type">@Html.Raw(Language.Phrase("QuickSearchAuto"))</button>
+                <button type="button" class="dropdown-item@(bukuTamuList.BasicSearch.SessionType == "=" ? " active" : "")" form="fBukuTamusrch" data-ew-action="search-type" data-search-type="=">@Html.Raw(Language.Phrase("QuickSearchExact"))</button>
+                <button type="button" class="dropdown-item@(bukuTamuList.BasicSearch.SessionType == "AND" ? " active" : "")" form="fBukuTamusrch" data-ew-action="search-type" data-search-type="AND">@Html.Raw(Language.Phrase("QuickSearchAll"))</button>
+                <button type="button" class="dropdown-item@(bukuTamuList.BasicSearch.SessionType == "OR" ? " active" : "")" form="fBukuTamusrch" data-ew-action="search-type" data-search-type="OR">@Html.Raw(Language.Phrase("QuickSearchAny"))</button>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-auto mb-3">
+        <button class="btn btn-primary" name="btn-submit" id="btn-submit" type="submit">@Html.Raw(Language.Phrase("SearchBtn"))</button>
+    </div>
+</div>
+</div><!-- /.ew-extended-search -->
+<script>
+loadjs.ready(ew.applyTemplateId, () => ew.applyTemplate("tpsd_BukuTamulist", "tpsm_BukuTamulist"));
+</script>
+} @* Show search form (end) *@
+}
+</div><!-- /.ew-search-panel -->
+</form>
+}
+@bukuTamuList.ShowPageHeader()
+@bukuTamuList.ShowMessages()
+<main class="list @(bukuTamuList.TotalRecords == 0 && !bukuTamuList.IsAdd ? " ew-no-record" : "")">
+<div id="ew-header-options">
+    @bukuTamuList.HeaderOptions.RenderBody()
+</div>
+<div id="ew-list">
+@if (bukuTamuList.TotalRecords > 0 || !Empty(bukuTamuList.CurrentAction)) {
+<div class="card ew-card ew-grid@(bukuTamuList.IsAddOrEdit ? " ew-grid-add-edit" : "") @(bukuTamuList.TableGridClass)">
+<form name="@(bukuTamuList.FormName)" id="@(bukuTamuList.FormName)" class="ew-form ew-list-form" action="@AppPath(bukuTamuList.PageName)" method="post" novalidate autocomplete="off">
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+@if (bukuTamuList.IsModal) {
+<input type="hidden" name="modal" value="1">
+}
+<div id="gmp_BukuTamu" class="card-body ew-grid-middle-panel @(bukuTamuList.TableContainerClass)" style="@(bukuTamuList.TableContainerStyle)">
+@if (bukuTamuList.TotalRecords > 0 || bukuTamuList.IsGridEdit || bukuTamuList.IsMultiEdit) {
+<table id="tbl_BukuTamulist" class="@(bukuTamuList.TableClass)"><!-- .ew-table -->
+<thead>
+    <tr class="ew-table-header">
+@{
+    // Header row
+    bukuTamuList.RowType = RowType.Header;
+
+    // Render list options
+    await bukuTamuList.RenderListOptions();
+}
+@* Render list options (header, left) *@
+@bukuTamuList.ListOptions.RenderHeader("left")
+@if (bukuTamuList.LinkRedirect.Visible) { // bukuTamuList.LinkRedirect.Visible (begin)
+        <th data-name="LinkRedirect" class="@(bukuTamuList.LinkRedirect.HeaderCellClass)"><div id="elh_BukuTamu_LinkRedirect" class="BukuTamu_LinkRedirect">@Html.Raw(bukuTamuList.RenderFieldHeader(bukuTamuList.LinkRedirect))</div></th>
+} @* bukuTamuList.LinkRedirect.Visible (end) *@
+@if (bukuTamuList.Plant.Visible) { // bukuTamuList.Plant.Visible (begin)
+        <th data-name="Plant" class="@(bukuTamuList.Plant.HeaderCellClass)"><div id="elh_BukuTamu_Plant" class="BukuTamu_Plant">@Html.Raw(bukuTamuList.RenderFieldHeader(bukuTamuList.Plant))</div></th>
+} @* bukuTamuList.Plant.Visible (end) *@
+@if (bukuTamuList.Tanggal.Visible) { // bukuTamuList.Tanggal.Visible (begin)
+        <th data-name="Tanggal" class="@(bukuTamuList.Tanggal.HeaderCellClass)"><div id="elh_BukuTamu_Tanggal" class="BukuTamu_Tanggal">@Html.Raw(bukuTamuList.RenderFieldHeader(bukuTamuList.Tanggal))</div></th>
+} @* bukuTamuList.Tanggal.Visible (end) *@
+@if (bukuTamuList.StatusZona.Visible) { // bukuTamuList.StatusZona.Visible (begin)
+        <th data-name="StatusZona" class="@(bukuTamuList.StatusZona.HeaderCellClass)"><div id="elh_BukuTamu_StatusZona" class="BukuTamu_StatusZona">@Html.Raw(bukuTamuList.RenderFieldHeader(bukuTamuList.StatusZona))</div></th>
+} @* bukuTamuList.StatusZona.Visible (end) *@
+@if (bukuTamuList.Nama.Visible) { // bukuTamuList.Nama.Visible (begin)
+        <th data-name="Nama" class="@(bukuTamuList.Nama.HeaderCellClass)"><div id="elh_BukuTamu_Nama" class="BukuTamu_Nama">@Html.Raw(bukuTamuList.RenderFieldHeader(bukuTamuList.Nama))</div></th>
+} @* bukuTamuList.Nama.Visible (end) *@
+@if (bukuTamuList.AsalPerusahaan.Visible) { // bukuTamuList.AsalPerusahaan.Visible (begin)
+        <th data-name="AsalPerusahaan" class="@(bukuTamuList.AsalPerusahaan.HeaderCellClass)"><div id="elh_BukuTamu_AsalPerusahaan" class="BukuTamu_AsalPerusahaan">@Html.Raw(bukuTamuList.RenderFieldHeader(bukuTamuList.AsalPerusahaan))</div></th>
+} @* bukuTamuList.AsalPerusahaan.Visible (end) *@
+@if (bukuTamuList.Jabatan.Visible) { // bukuTamuList.Jabatan.Visible (begin)
+        <th data-name="Jabatan" class="@(bukuTamuList.Jabatan.HeaderCellClass)"><div id="elh_BukuTamu_Jabatan" class="BukuTamu_Jabatan">@Html.Raw(bukuTamuList.RenderFieldHeader(bukuTamuList.Jabatan))</div></th>
+} @* bukuTamuList.Jabatan.Visible (end) *@
+@if (bukuTamuList.FungsiygDikunjungi.Visible) { // bukuTamuList.FungsiygDikunjungi.Visible (begin)
+        <th data-name="FungsiygDikunjungi" class="@(bukuTamuList.FungsiygDikunjungi.HeaderCellClass)"><div id="elh_BukuTamu_FungsiygDikunjungi" class="BukuTamu_FungsiygDikunjungi">@Html.Raw(bukuTamuList.RenderFieldHeader(bukuTamuList.FungsiygDikunjungi))</div></th>
+} @* bukuTamuList.FungsiygDikunjungi.Visible (end) *@
+@if (bukuTamuList.MaksudKunjungan.Visible) { // bukuTamuList.MaksudKunjungan.Visible (begin)
+        <th data-name="MaksudKunjungan" class="@(bukuTamuList.MaksudKunjungan.HeaderCellClass)"><div id="elh_BukuTamu_MaksudKunjungan" class="BukuTamu_MaksudKunjungan">@Html.Raw(bukuTamuList.RenderFieldHeader(bukuTamuList.MaksudKunjungan))</div></th>
+} @* bukuTamuList.MaksudKunjungan.Visible (end) *@
+@if (bukuTamuList.TandaPengenal.Visible) { // bukuTamuList.TandaPengenal.Visible (begin)
+        <th data-name="TandaPengenal" class="@(bukuTamuList.TandaPengenal.HeaderCellClass)"><div id="elh_BukuTamu_TandaPengenal" class="BukuTamu_TandaPengenal">@Html.Raw(bukuTamuList.RenderFieldHeader(bukuTamuList.TandaPengenal))</div></th>
+} @* bukuTamuList.TandaPengenal.Visible (end) *@
+@if (bukuTamuList.TandaTanganDownload.Visible) { // bukuTamuList.TandaTanganDownload.Visible (begin)
+        <th data-name="TandaTanganDownload" class="@(bukuTamuList.TandaTanganDownload.HeaderCellClass)"><div id="elh_BukuTamu_TandaTanganDownload" class="BukuTamu_TandaTanganDownload">@Html.Raw(bukuTamuList.RenderFieldHeader(bukuTamuList.TandaTanganDownload))</div></th>
+} @* bukuTamuList.TandaTanganDownload.Visible (end) *@
+@if (bukuTamuList.Keterangan.Visible) { // bukuTamuList.Keterangan.Visible (begin)
+        <th data-name="Keterangan" class="@(bukuTamuList.Keterangan.HeaderCellClass)"><div id="elh_BukuTamu_Keterangan" class="BukuTamu_Keterangan">@Html.Raw(bukuTamuList.RenderFieldHeader(bukuTamuList.Keterangan))</div></th>
+} @* bukuTamuList.Keterangan.Visible (end) *@
+@if (bukuTamuList.PintuUtamaId.Visible) { // bukuTamuList.PintuUtamaId.Visible (begin)
+        <th data-name="PintuUtamaId" class="@(bukuTamuList.PintuUtamaId.HeaderCellClass)"><div id="elh_BukuTamu_PintuUtamaId" class="BukuTamu_PintuUtamaId">@Html.Raw(bukuTamuList.RenderFieldHeader(bukuTamuList.PintuUtamaId))</div></th>
+} @* bukuTamuList.PintuUtamaId.Visible (end) *@
+@if (bukuTamuList.PintuUtamaInTanggal.Visible) { // bukuTamuList.PintuUtamaInTanggal.Visible (begin)
+        <th data-name="PintuUtamaInTanggal" class="@(bukuTamuList.PintuUtamaInTanggal.HeaderCellClass)"><div id="elh_BukuTamu_PintuUtamaInTanggal" class="BukuTamu_PintuUtamaInTanggal">@Html.Raw(bukuTamuList.RenderFieldHeader(bukuTamuList.PintuUtamaInTanggal))</div></th>
+} @* bukuTamuList.PintuUtamaInTanggal.Visible (end) *@
+@if (bukuTamuList.PintuUtamaInFotoDownload.Visible) { // bukuTamuList.PintuUtamaInFotoDownload.Visible (begin)
+        <th data-name="PintuUtamaInFotoDownload" class="@(bukuTamuList.PintuUtamaInFotoDownload.HeaderCellClass)"><div id="elh_BukuTamu_PintuUtamaInFotoDownload" class="BukuTamu_PintuUtamaInFotoDownload">@Html.Raw(bukuTamuList.RenderFieldHeader(bukuTamuList.PintuUtamaInFotoDownload))</div></th>
+} @* bukuTamuList.PintuUtamaInFotoDownload.Visible (end) *@
+@if (bukuTamuList.PintuUtamaInUser.Visible) { // bukuTamuList.PintuUtamaInUser.Visible (begin)
+        <th data-name="PintuUtamaInUser" class="@(bukuTamuList.PintuUtamaInUser.HeaderCellClass)"><div id="elh_BukuTamu_PintuUtamaInUser" class="BukuTamu_PintuUtamaInUser">@Html.Raw(bukuTamuList.RenderFieldHeader(bukuTamuList.PintuUtamaInUser))</div></th>
+} @* bukuTamuList.PintuUtamaInUser.Visible (end) *@
+@if (bukuTamuList.CustomPilihPintu.Visible) { // bukuTamuList.CustomPilihPintu.Visible (begin)
+        <th data-name="CustomPilihPintu" class="@(bukuTamuList.CustomPilihPintu.HeaderCellClass)"><div id="elh_BukuTamu_CustomPilihPintu" class="BukuTamu_CustomPilihPintu">@Html.Raw(bukuTamuList.RenderFieldHeader(bukuTamuList.CustomPilihPintu))</div></th>
+} @* bukuTamuList.CustomPilihPintu.Visible (end) *@
+@if (bukuTamuList.PintuUtamaOutTanggal.Visible) { // bukuTamuList.PintuUtamaOutTanggal.Visible (begin)
+        <th data-name="PintuUtamaOutTanggal" class="@(bukuTamuList.PintuUtamaOutTanggal.HeaderCellClass)"><div id="elh_BukuTamu_PintuUtamaOutTanggal" class="BukuTamu_PintuUtamaOutTanggal">@Html.Raw(bukuTamuList.RenderFieldHeader(bukuTamuList.PintuUtamaOutTanggal))</div></th>
+} @* bukuTamuList.PintuUtamaOutTanggal.Visible (end) *@
+@if (bukuTamuList.PintuUtamaOutFotoDownload.Visible) { // bukuTamuList.PintuUtamaOutFotoDownload.Visible (begin)
+        <th data-name="PintuUtamaOutFotoDownload" class="@(bukuTamuList.PintuUtamaOutFotoDownload.HeaderCellClass)"><div id="elh_BukuTamu_PintuUtamaOutFotoDownload" class="BukuTamu_PintuUtamaOutFotoDownload">@Html.Raw(bukuTamuList.RenderFieldHeader(bukuTamuList.PintuUtamaOutFotoDownload))</div></th>
+} @* bukuTamuList.PintuUtamaOutFotoDownload.Visible (end) *@
+@if (bukuTamuList.PintuUtamaOutUser.Visible) { // bukuTamuList.PintuUtamaOutUser.Visible (begin)
+        <th data-name="PintuUtamaOutUser" class="@(bukuTamuList.PintuUtamaOutUser.HeaderCellClass)"><div id="elh_BukuTamu_PintuUtamaOutUser" class="BukuTamu_PintuUtamaOutUser">@Html.Raw(bukuTamuList.RenderFieldHeader(bukuTamuList.PintuUtamaOutUser))</div></th>
+} @* bukuTamuList.PintuUtamaOutUser.Visible (end) *@
+@if (bukuTamuList.LobbyUtamaId.Visible) { // bukuTamuList.LobbyUtamaId.Visible (begin)
+        <th data-name="LobbyUtamaId" class="@(bukuTamuList.LobbyUtamaId.HeaderCellClass)"><div id="elh_BukuTamu_LobbyUtamaId" class="BukuTamu_LobbyUtamaId">@Html.Raw(bukuTamuList.RenderFieldHeader(bukuTamuList.LobbyUtamaId))</div></th>
+} @* bukuTamuList.LobbyUtamaId.Visible (end) *@
+@if (bukuTamuList.LobbyUtamaInTanggal.Visible) { // bukuTamuList.LobbyUtamaInTanggal.Visible (begin)
+        <th data-name="LobbyUtamaInTanggal" class="@(bukuTamuList.LobbyUtamaInTanggal.HeaderCellClass)"><div id="elh_BukuTamu_LobbyUtamaInTanggal" class="BukuTamu_LobbyUtamaInTanggal">@Html.Raw(bukuTamuList.RenderFieldHeader(bukuTamuList.LobbyUtamaInTanggal))</div></th>
+} @* bukuTamuList.LobbyUtamaInTanggal.Visible (end) *@
+@if (bukuTamuList.LobbyUtamaInFotoDownload.Visible) { // bukuTamuList.LobbyUtamaInFotoDownload.Visible (begin)
+        <th data-name="LobbyUtamaInFotoDownload" class="@(bukuTamuList.LobbyUtamaInFotoDownload.HeaderCellClass)"><div id="elh_BukuTamu_LobbyUtamaInFotoDownload" class="BukuTamu_LobbyUtamaInFotoDownload">@Html.Raw(bukuTamuList.RenderFieldHeader(bukuTamuList.LobbyUtamaInFotoDownload))</div></th>
+} @* bukuTamuList.LobbyUtamaInFotoDownload.Visible (end) *@
+@if (bukuTamuList.LobbyUtamaInUser.Visible) { // bukuTamuList.LobbyUtamaInUser.Visible (begin)
+        <th data-name="LobbyUtamaInUser" class="@(bukuTamuList.LobbyUtamaInUser.HeaderCellClass)"><div id="elh_BukuTamu_LobbyUtamaInUser" class="BukuTamu_LobbyUtamaInUser">@Html.Raw(bukuTamuList.RenderFieldHeader(bukuTamuList.LobbyUtamaInUser))</div></th>
+} @* bukuTamuList.LobbyUtamaInUser.Visible (end) *@
+@if (bukuTamuList.LobbyUtamaOutTanggal.Visible) { // bukuTamuList.LobbyUtamaOutTanggal.Visible (begin)
+        <th data-name="LobbyUtamaOutTanggal" class="@(bukuTamuList.LobbyUtamaOutTanggal.HeaderCellClass)"><div id="elh_BukuTamu_LobbyUtamaOutTanggal" class="BukuTamu_LobbyUtamaOutTanggal">@Html.Raw(bukuTamuList.RenderFieldHeader(bukuTamuList.LobbyUtamaOutTanggal))</div></th>
+} @* bukuTamuList.LobbyUtamaOutTanggal.Visible (end) *@
+@if (bukuTamuList.LobbyUtamaOutFotoDownload.Visible) { // bukuTamuList.LobbyUtamaOutFotoDownload.Visible (begin)
+        <th data-name="LobbyUtamaOutFotoDownload" class="@(bukuTamuList.LobbyUtamaOutFotoDownload.HeaderCellClass)"><div id="elh_BukuTamu_LobbyUtamaOutFotoDownload" class="BukuTamu_LobbyUtamaOutFotoDownload">@Html.Raw(bukuTamuList.RenderFieldHeader(bukuTamuList.LobbyUtamaOutFotoDownload))</div></th>
+} @* bukuTamuList.LobbyUtamaOutFotoDownload.Visible (end) *@
+@if (bukuTamuList.LobbyUtamaOutUser.Visible) { // bukuTamuList.LobbyUtamaOutUser.Visible (begin)
+        <th data-name="LobbyUtamaOutUser" class="@(bukuTamuList.LobbyUtamaOutUser.HeaderCellClass)"><div id="elh_BukuTamu_LobbyUtamaOutUser" class="BukuTamu_LobbyUtamaOutUser">@Html.Raw(bukuTamuList.RenderFieldHeader(bukuTamuList.LobbyUtamaOutUser))</div></th>
+} @* bukuTamuList.LobbyUtamaOutUser.Visible (end) *@
+@if (bukuTamuList.AreaTerlarangId.Visible) { // bukuTamuList.AreaTerlarangId.Visible (begin)
+        <th data-name="AreaTerlarangId" class="@(bukuTamuList.AreaTerlarangId.HeaderCellClass)"><div id="elh_BukuTamu_AreaTerlarangId" class="BukuTamu_AreaTerlarangId">@Html.Raw(bukuTamuList.RenderFieldHeader(bukuTamuList.AreaTerlarangId))</div></th>
+} @* bukuTamuList.AreaTerlarangId.Visible (end) *@
+@if (bukuTamuList.AreaTerlarangInTanggal.Visible) { // bukuTamuList.AreaTerlarangInTanggal.Visible (begin)
+        <th data-name="AreaTerlarangInTanggal" class="@(bukuTamuList.AreaTerlarangInTanggal.HeaderCellClass)"><div id="elh_BukuTamu_AreaTerlarangInTanggal" class="BukuTamu_AreaTerlarangInTanggal">@Html.Raw(bukuTamuList.RenderFieldHeader(bukuTamuList.AreaTerlarangInTanggal))</div></th>
+} @* bukuTamuList.AreaTerlarangInTanggal.Visible (end) *@
+@if (bukuTamuList.AreaTerlarangInFotoDownload.Visible) { // bukuTamuList.AreaTerlarangInFotoDownload.Visible (begin)
+        <th data-name="AreaTerlarangInFotoDownload" class="@(bukuTamuList.AreaTerlarangInFotoDownload.HeaderCellClass)"><div id="elh_BukuTamu_AreaTerlarangInFotoDownload" class="BukuTamu_AreaTerlarangInFotoDownload">@Html.Raw(bukuTamuList.RenderFieldHeader(bukuTamuList.AreaTerlarangInFotoDownload))</div></th>
+} @* bukuTamuList.AreaTerlarangInFotoDownload.Visible (end) *@
+@if (bukuTamuList.AreaTerlarangInUser.Visible) { // bukuTamuList.AreaTerlarangInUser.Visible (begin)
+        <th data-name="AreaTerlarangInUser" class="@(bukuTamuList.AreaTerlarangInUser.HeaderCellClass)"><div id="elh_BukuTamu_AreaTerlarangInUser" class="BukuTamu_AreaTerlarangInUser">@Html.Raw(bukuTamuList.RenderFieldHeader(bukuTamuList.AreaTerlarangInUser))</div></th>
+} @* bukuTamuList.AreaTerlarangInUser.Visible (end) *@
+@if (bukuTamuList.AreaTerlarangOutTanggal.Visible) { // bukuTamuList.AreaTerlarangOutTanggal.Visible (begin)
+        <th data-name="AreaTerlarangOutTanggal" class="@(bukuTamuList.AreaTerlarangOutTanggal.HeaderCellClass)"><div id="elh_BukuTamu_AreaTerlarangOutTanggal" class="BukuTamu_AreaTerlarangOutTanggal">@Html.Raw(bukuTamuList.RenderFieldHeader(bukuTamuList.AreaTerlarangOutTanggal))</div></th>
+} @* bukuTamuList.AreaTerlarangOutTanggal.Visible (end) *@
+@if (bukuTamuList.AreaTerlarangOutFotoDownload.Visible) { // bukuTamuList.AreaTerlarangOutFotoDownload.Visible (begin)
+        <th data-name="AreaTerlarangOutFotoDownload" class="@(bukuTamuList.AreaTerlarangOutFotoDownload.HeaderCellClass)"><div id="elh_BukuTamu_AreaTerlarangOutFotoDownload" class="BukuTamu_AreaTerlarangOutFotoDownload">@Html.Raw(bukuTamuList.RenderFieldHeader(bukuTamuList.AreaTerlarangOutFotoDownload))</div></th>
+} @* bukuTamuList.AreaTerlarangOutFotoDownload.Visible (end) *@
+@if (bukuTamuList.AreaTerlarangOutUser.Visible) { // bukuTamuList.AreaTerlarangOutUser.Visible (begin)
+        <th data-name="AreaTerlarangOutUser" class="@(bukuTamuList.AreaTerlarangOutUser.HeaderCellClass)"><div id="elh_BukuTamu_AreaTerlarangOutUser" class="BukuTamu_AreaTerlarangOutUser">@Html.Raw(bukuTamuList.RenderFieldHeader(bukuTamuList.AreaTerlarangOutUser))</div></th>
+} @* bukuTamuList.AreaTerlarangOutUser.Visible (end) *@
+@if (bukuTamuList.etlDate.Visible) { // bukuTamuList.etlDate.Visible (begin)
+        <th data-name="etlDate" class="@(bukuTamuList.etlDate.HeaderCellClass)"><div id="elh_BukuTamu_etlDate" class="BukuTamu_etlDate">@Html.Raw(bukuTamuList.RenderFieldHeader(bukuTamuList.etlDate))</div></th>
+} @* bukuTamuList.etlDate.Visible (end) *@
+@if (bukuTamuList.LastUpdatedBy.Visible) { // bukuTamuList.LastUpdatedBy.Visible (begin)
+        <th data-name="LastUpdatedBy" class="@(bukuTamuList.LastUpdatedBy.HeaderCellClass)"><div id="elh_BukuTamu_LastUpdatedBy" class="BukuTamu_LastUpdatedBy">@Html.Raw(bukuTamuList.RenderFieldHeader(bukuTamuList.LastUpdatedBy))</div></th>
+} @* bukuTamuList.LastUpdatedBy.Visible (end) *@
+@if (bukuTamuList.lastUpdatedDate.Visible) { // bukuTamuList.lastUpdatedDate.Visible (begin)
+        <th data-name="lastUpdatedDate" class="@(bukuTamuList.lastUpdatedDate.HeaderCellClass)"><div id="elh_BukuTamu_lastUpdatedDate" class="BukuTamu_lastUpdatedDate">@Html.Raw(bukuTamuList.RenderFieldHeader(bukuTamuList.lastUpdatedDate))</div></th>
+} @* bukuTamuList.lastUpdatedDate.Visible (end) *@
+@* Render list options (header, right) *@
+@bukuTamuList.ListOptions.RenderHeader("right")
+    </tr>
+</thead>
+<tbody data-page="@(bukuTamuList.PageNumber)">
+@{
+    await bukuTamuList.SetupGrid();
+    bool eof = bukuTamuList.Recordset == null; // DN
+}
+@while (bukuTamuList.RecordCount < bukuTamuList.StopRecord || SameString(bukuTamuList.RowIndex, "$rowindex$")) { // Begin While
+    if (!eof && !SameString(bukuTamuList.RowIndex, "$rowindex$") &&
+        (!bukuTamuList.IsGridAdd || bukuTamuList.CurrentMode == "copy") &&
+        (!((bukuTamuList.IsCopy || bukuTamuList.IsAdd) && bukuTamuList.RowIndex is int rowIndex && rowIndex == 0))) // DN
+        eof = !await bukuTamuList.Recordset.ReadAsync();
+    bukuTamuList.RecordCount++;
+    if (bukuTamuList.RecordCount >= bukuTamuList.StartRecord) {
+        await bukuTamuList.SetupRow();
+    <tr @Html.Raw(bukuTamuList.RowAttributes)>
+    @* Render list options (body, left) *@
+    @bukuTamuList.ListOptions.RenderBody("left", bukuTamuList.RowCount)
+    @if (bukuTamuList.LinkRedirect.Visible) { // bukuTamuList.LinkRedirect.Visible (begin)
+        <td data-name="LinkRedirect" @Html.Raw(bukuTamuList.LinkRedirect.CellAttributes)>
+<span id="el@(bukuTamuList.RowIndex == "$rowindex$" ? "$rowindex$" : bukuTamuList.RowCount)_BukuTamu_LinkRedirect" class="el_BukuTamu_LinkRedirect">
+<span @Html.Raw(bukuTamuList.LinkRedirect.ViewAttributes)>
+@Html.Raw(bukuTamuList.LinkRedirect.GetViewValue())</span>
+</span>
+</td>
+    } @* bukuTamuList.LinkRedirect.Visible (end) *@
+    @if (bukuTamuList.Plant.Visible) { // bukuTamuList.Plant.Visible (begin)
+        <td data-name="Plant" @Html.Raw(bukuTamuList.Plant.CellAttributes)>
+<span id="el@(bukuTamuList.RowIndex == "$rowindex$" ? "$rowindex$" : bukuTamuList.RowCount)_BukuTamu_Plant" class="el_BukuTamu_Plant">
+<span @Html.Raw(bukuTamuList.Plant.ViewAttributes)>
+@Html.Raw(bukuTamuList.Plant.GetViewValue())</span>
+</span>
+</td>
+    } @* bukuTamuList.Plant.Visible (end) *@
+    @if (bukuTamuList.Tanggal.Visible) { // bukuTamuList.Tanggal.Visible (begin)
+        <td data-name="Tanggal" @Html.Raw(bukuTamuList.Tanggal.CellAttributes)>
+<span id="el@(bukuTamuList.RowIndex == "$rowindex$" ? "$rowindex$" : bukuTamuList.RowCount)_BukuTamu_Tanggal" class="el_BukuTamu_Tanggal">
+<span @Html.Raw(bukuTamuList.Tanggal.ViewAttributes)>
+@Html.Raw(bukuTamuList.Tanggal.GetViewValue())</span>
+</span>
+</td>
+    } @* bukuTamuList.Tanggal.Visible (end) *@
+    @if (bukuTamuList.StatusZona.Visible) { // bukuTamuList.StatusZona.Visible (begin)
+        <td data-name="StatusZona" @Html.Raw(bukuTamuList.StatusZona.CellAttributes)>
+<span id="el@(bukuTamuList.RowIndex == "$rowindex$" ? "$rowindex$" : bukuTamuList.RowCount)_BukuTamu_StatusZona" class="el_BukuTamu_StatusZona">
+<span @Html.Raw(bukuTamuList.StatusZona.ViewAttributes)>
+@Html.Raw(bukuTamuList.StatusZona.GetViewValue())</span>
+</span>
+</td>
+    } @* bukuTamuList.StatusZona.Visible (end) *@
+    @if (bukuTamuList.Nama.Visible) { // bukuTamuList.Nama.Visible (begin)
+        <td data-name="Nama" @Html.Raw(bukuTamuList.Nama.CellAttributes)>
+<span id="el@(bukuTamuList.RowIndex == "$rowindex$" ? "$rowindex$" : bukuTamuList.RowCount)_BukuTamu_Nama" class="el_BukuTamu_Nama">
+<span @Html.Raw(bukuTamuList.Nama.ViewAttributes)>
+@Html.Raw(bukuTamuList.Nama.GetViewValue())</span>
+</span>
+</td>
+    } @* bukuTamuList.Nama.Visible (end) *@
+    @if (bukuTamuList.AsalPerusahaan.Visible) { // bukuTamuList.AsalPerusahaan.Visible (begin)
+        <td data-name="AsalPerusahaan" @Html.Raw(bukuTamuList.AsalPerusahaan.CellAttributes)>
+<span id="el@(bukuTamuList.RowIndex == "$rowindex$" ? "$rowindex$" : bukuTamuList.RowCount)_BukuTamu_AsalPerusahaan" class="el_BukuTamu_AsalPerusahaan">
+<span @Html.Raw(bukuTamuList.AsalPerusahaan.ViewAttributes)>
+@Html.Raw(bukuTamuList.AsalPerusahaan.GetViewValue())</span>
+</span>
+</td>
+    } @* bukuTamuList.AsalPerusahaan.Visible (end) *@
+    @if (bukuTamuList.Jabatan.Visible) { // bukuTamuList.Jabatan.Visible (begin)
+        <td data-name="Jabatan" @Html.Raw(bukuTamuList.Jabatan.CellAttributes)>
+<span id="el@(bukuTamuList.RowIndex == "$rowindex$" ? "$rowindex$" : bukuTamuList.RowCount)_BukuTamu_Jabatan" class="el_BukuTamu_Jabatan">
+<span @Html.Raw(bukuTamuList.Jabatan.ViewAttributes)>
+@Html.Raw(bukuTamuList.Jabatan.GetViewValue())</span>
+</span>
+</td>
+    } @* bukuTamuList.Jabatan.Visible (end) *@
+    @if (bukuTamuList.FungsiygDikunjungi.Visible) { // bukuTamuList.FungsiygDikunjungi.Visible (begin)
+        <td data-name="FungsiygDikunjungi" @Html.Raw(bukuTamuList.FungsiygDikunjungi.CellAttributes)>
+<span id="el@(bukuTamuList.RowIndex == "$rowindex$" ? "$rowindex$" : bukuTamuList.RowCount)_BukuTamu_FungsiygDikunjungi" class="el_BukuTamu_FungsiygDikunjungi">
+<span @Html.Raw(bukuTamuList.FungsiygDikunjungi.ViewAttributes)>
+@Html.Raw(bukuTamuList.FungsiygDikunjungi.GetViewValue())</span>
+</span>
+</td>
+    } @* bukuTamuList.FungsiygDikunjungi.Visible (end) *@
+    @if (bukuTamuList.MaksudKunjungan.Visible) { // bukuTamuList.MaksudKunjungan.Visible (begin)
+        <td data-name="MaksudKunjungan" @Html.Raw(bukuTamuList.MaksudKunjungan.CellAttributes)>
+<span id="el@(bukuTamuList.RowIndex == "$rowindex$" ? "$rowindex$" : bukuTamuList.RowCount)_BukuTamu_MaksudKunjungan" class="el_BukuTamu_MaksudKunjungan">
+<span @Html.Raw(bukuTamuList.MaksudKunjungan.ViewAttributes)>
+@Html.Raw(bukuTamuList.MaksudKunjungan.GetViewValue())</span>
+</span>
+</td>
+    } @* bukuTamuList.MaksudKunjungan.Visible (end) *@
+    @if (bukuTamuList.TandaPengenal.Visible) { // bukuTamuList.TandaPengenal.Visible (begin)
+        <td data-name="TandaPengenal" @Html.Raw(bukuTamuList.TandaPengenal.CellAttributes)>
+<span id="el@(bukuTamuList.RowIndex == "$rowindex$" ? "$rowindex$" : bukuTamuList.RowCount)_BukuTamu_TandaPengenal" class="el_BukuTamu_TandaPengenal">
+<span @Html.Raw(bukuTamuList.TandaPengenal.ViewAttributes)>
+@Html.Raw(bukuTamuList.TandaPengenal.GetViewValue())</span>
+</span>
+</td>
+    } @* bukuTamuList.TandaPengenal.Visible (end) *@
+    @if (bukuTamuList.TandaTanganDownload.Visible) { // bukuTamuList.TandaTanganDownload.Visible (begin)
+        <td data-name="TandaTanganDownload" @Html.Raw(bukuTamuList.TandaTanganDownload.CellAttributes)>
+<span id="el@(bukuTamuList.RowIndex == "$rowindex$" ? "$rowindex$" : bukuTamuList.RowCount)_BukuTamu_TandaTanganDownload" class="el_BukuTamu_TandaTanganDownload">
+<span @Html.Raw(bukuTamuList.TandaTanganDownload.ViewAttributes)>
+@Html.Raw(bukuTamuList.TandaTanganDownload.GetViewValue())</span>
+</span>
+</td>
+    } @* bukuTamuList.TandaTanganDownload.Visible (end) *@
+    @if (bukuTamuList.Keterangan.Visible) { // bukuTamuList.Keterangan.Visible (begin)
+        <td data-name="Keterangan" @Html.Raw(bukuTamuList.Keterangan.CellAttributes)>
+<span id="el@(bukuTamuList.RowIndex == "$rowindex$" ? "$rowindex$" : bukuTamuList.RowCount)_BukuTamu_Keterangan" class="el_BukuTamu_Keterangan">
+<span @Html.Raw(bukuTamuList.Keterangan.ViewAttributes)>
+@Html.Raw(bukuTamuList.Keterangan.GetViewValue())</span>
+</span>
+</td>
+    } @* bukuTamuList.Keterangan.Visible (end) *@
+    @if (bukuTamuList.PintuUtamaId.Visible) { // bukuTamuList.PintuUtamaId.Visible (begin)
+        <td data-name="PintuUtamaId" @Html.Raw(bukuTamuList.PintuUtamaId.CellAttributes)>
+<span id="el@(bukuTamuList.RowIndex == "$rowindex$" ? "$rowindex$" : bukuTamuList.RowCount)_BukuTamu_PintuUtamaId" class="el_BukuTamu_PintuUtamaId">
+<span @Html.Raw(bukuTamuList.PintuUtamaId.ViewAttributes)>
+@Html.Raw(bukuTamuList.PintuUtamaId.GetViewValue())</span>
+</span>
+</td>
+    } @* bukuTamuList.PintuUtamaId.Visible (end) *@
+    @if (bukuTamuList.PintuUtamaInTanggal.Visible) { // bukuTamuList.PintuUtamaInTanggal.Visible (begin)
+        <td data-name="PintuUtamaInTanggal" @Html.Raw(bukuTamuList.PintuUtamaInTanggal.CellAttributes)>
+<span id="el@(bukuTamuList.RowIndex == "$rowindex$" ? "$rowindex$" : bukuTamuList.RowCount)_BukuTamu_PintuUtamaInTanggal" class="el_BukuTamu_PintuUtamaInTanggal">
+<span @Html.Raw(bukuTamuList.PintuUtamaInTanggal.ViewAttributes)>
+@Html.Raw(bukuTamuList.PintuUtamaInTanggal.GetViewValue())</span>
+</span>
+</td>
+    } @* bukuTamuList.PintuUtamaInTanggal.Visible (end) *@
+    @if (bukuTamuList.PintuUtamaInFotoDownload.Visible) { // bukuTamuList.PintuUtamaInFotoDownload.Visible (begin)
+        <td data-name="PintuUtamaInFotoDownload" @Html.Raw(bukuTamuList.PintuUtamaInFotoDownload.CellAttributes)>
+<span id="el@(bukuTamuList.RowIndex == "$rowindex$" ? "$rowindex$" : bukuTamuList.RowCount)_BukuTamu_PintuUtamaInFotoDownload" class="el_BukuTamu_PintuUtamaInFotoDownload">
+<span @Html.Raw(bukuTamuList.PintuUtamaInFotoDownload.ViewAttributes)>
+@Html.Raw(bukuTamuList.PintuUtamaInFotoDownload.GetViewValue())</span>
+</span>
+</td>
+    } @* bukuTamuList.PintuUtamaInFotoDownload.Visible (end) *@
+    @if (bukuTamuList.PintuUtamaInUser.Visible) { // bukuTamuList.PintuUtamaInUser.Visible (begin)
+        <td data-name="PintuUtamaInUser" @Html.Raw(bukuTamuList.PintuUtamaInUser.CellAttributes)>
+<span id="el@(bukuTamuList.RowIndex == "$rowindex$" ? "$rowindex$" : bukuTamuList.RowCount)_BukuTamu_PintuUtamaInUser" class="el_BukuTamu_PintuUtamaInUser">
+<span @Html.Raw(bukuTamuList.PintuUtamaInUser.ViewAttributes)>
+@Html.Raw(bukuTamuList.PintuUtamaInUser.GetViewValue())</span>
+</span>
+</td>
+    } @* bukuTamuList.PintuUtamaInUser.Visible (end) *@
+    @if (bukuTamuList.CustomPilihPintu.Visible) { // bukuTamuList.CustomPilihPintu.Visible (begin)
+        <td data-name="CustomPilihPintu" @Html.Raw(bukuTamuList.CustomPilihPintu.CellAttributes)>
+<span id="el@(bukuTamuList.RowIndex == "$rowindex$" ? "$rowindex$" : bukuTamuList.RowCount)_BukuTamu_CustomPilihPintu" class="el_BukuTamu_CustomPilihPintu">
+<span @Html.Raw(bukuTamuList.CustomPilihPintu.ViewAttributes)>
+@Html.Raw(bukuTamuList.CustomPilihPintu.GetViewValue())</span>
+</span>
+</td>
+    } @* bukuTamuList.CustomPilihPintu.Visible (end) *@
+    @if (bukuTamuList.PintuUtamaOutTanggal.Visible) { // bukuTamuList.PintuUtamaOutTanggal.Visible (begin)
+        <td data-name="PintuUtamaOutTanggal" @Html.Raw(bukuTamuList.PintuUtamaOutTanggal.CellAttributes)>
+<span id="el@(bukuTamuList.RowIndex == "$rowindex$" ? "$rowindex$" : bukuTamuList.RowCount)_BukuTamu_PintuUtamaOutTanggal" class="el_BukuTamu_PintuUtamaOutTanggal">
+<span @Html.Raw(bukuTamuList.PintuUtamaOutTanggal.ViewAttributes)>
+@Html.Raw(bukuTamuList.PintuUtamaOutTanggal.GetViewValue())</span>
+</span>
+</td>
+    } @* bukuTamuList.PintuUtamaOutTanggal.Visible (end) *@
+    @if (bukuTamuList.PintuUtamaOutFotoDownload.Visible) { // bukuTamuList.PintuUtamaOutFotoDownload.Visible (begin)
+        <td data-name="PintuUtamaOutFotoDownload" @Html.Raw(bukuTamuList.PintuUtamaOutFotoDownload.CellAttributes)>
+<span id="el@(bukuTamuList.RowIndex == "$rowindex$" ? "$rowindex$" : bukuTamuList.RowCount)_BukuTamu_PintuUtamaOutFotoDownload" class="el_BukuTamu_PintuUtamaOutFotoDownload">
+<span @Html.Raw(bukuTamuList.PintuUtamaOutFotoDownload.ViewAttributes)>
+@Html.Raw(bukuTamuList.PintuUtamaOutFotoDownload.GetViewValue())</span>
+</span>
+</td>
+    } @* bukuTamuList.PintuUtamaOutFotoDownload.Visible (end) *@
+    @if (bukuTamuList.PintuUtamaOutUser.Visible) { // bukuTamuList.PintuUtamaOutUser.Visible (begin)
+        <td data-name="PintuUtamaOutUser" @Html.Raw(bukuTamuList.PintuUtamaOutUser.CellAttributes)>
+<span id="el@(bukuTamuList.RowIndex == "$rowindex$" ? "$rowindex$" : bukuTamuList.RowCount)_BukuTamu_PintuUtamaOutUser" class="el_BukuTamu_PintuUtamaOutUser">
+<span @Html.Raw(bukuTamuList.PintuUtamaOutUser.ViewAttributes)>
+@Html.Raw(bukuTamuList.PintuUtamaOutUser.GetViewValue())</span>
+</span>
+</td>
+    } @* bukuTamuList.PintuUtamaOutUser.Visible (end) *@
+    @if (bukuTamuList.LobbyUtamaId.Visible) { // bukuTamuList.LobbyUtamaId.Visible (begin)
+        <td data-name="LobbyUtamaId" @Html.Raw(bukuTamuList.LobbyUtamaId.CellAttributes)>
+<span id="el@(bukuTamuList.RowIndex == "$rowindex$" ? "$rowindex$" : bukuTamuList.RowCount)_BukuTamu_LobbyUtamaId" class="el_BukuTamu_LobbyUtamaId">
+<span @Html.Raw(bukuTamuList.LobbyUtamaId.ViewAttributes)>
+@Html.Raw(bukuTamuList.LobbyUtamaId.GetViewValue())</span>
+</span>
+</td>
+    } @* bukuTamuList.LobbyUtamaId.Visible (end) *@
+    @if (bukuTamuList.LobbyUtamaInTanggal.Visible) { // bukuTamuList.LobbyUtamaInTanggal.Visible (begin)
+        <td data-name="LobbyUtamaInTanggal" @Html.Raw(bukuTamuList.LobbyUtamaInTanggal.CellAttributes)>
+<span id="el@(bukuTamuList.RowIndex == "$rowindex$" ? "$rowindex$" : bukuTamuList.RowCount)_BukuTamu_LobbyUtamaInTanggal" class="el_BukuTamu_LobbyUtamaInTanggal">
+<span @Html.Raw(bukuTamuList.LobbyUtamaInTanggal.ViewAttributes)>
+@Html.Raw(bukuTamuList.LobbyUtamaInTanggal.GetViewValue())</span>
+</span>
+</td>
+    } @* bukuTamuList.LobbyUtamaInTanggal.Visible (end) *@
+    @if (bukuTamuList.LobbyUtamaInFotoDownload.Visible) { // bukuTamuList.LobbyUtamaInFotoDownload.Visible (begin)
+        <td data-name="LobbyUtamaInFotoDownload" @Html.Raw(bukuTamuList.LobbyUtamaInFotoDownload.CellAttributes)>
+<span id="el@(bukuTamuList.RowIndex == "$rowindex$" ? "$rowindex$" : bukuTamuList.RowCount)_BukuTamu_LobbyUtamaInFotoDownload" class="el_BukuTamu_LobbyUtamaInFotoDownload">
+<span @Html.Raw(bukuTamuList.LobbyUtamaInFotoDownload.ViewAttributes)>
+@Html.Raw(bukuTamuList.LobbyUtamaInFotoDownload.GetViewValue())</span>
+</span>
+</td>
+    } @* bukuTamuList.LobbyUtamaInFotoDownload.Visible (end) *@
+    @if (bukuTamuList.LobbyUtamaInUser.Visible) { // bukuTamuList.LobbyUtamaInUser.Visible (begin)
+        <td data-name="LobbyUtamaInUser" @Html.Raw(bukuTamuList.LobbyUtamaInUser.CellAttributes)>
+<span id="el@(bukuTamuList.RowIndex == "$rowindex$" ? "$rowindex$" : bukuTamuList.RowCount)_BukuTamu_LobbyUtamaInUser" class="el_BukuTamu_LobbyUtamaInUser">
+<span @Html.Raw(bukuTamuList.LobbyUtamaInUser.ViewAttributes)>
+@Html.Raw(bukuTamuList.LobbyUtamaInUser.GetViewValue())</span>
+</span>
+</td>
+    } @* bukuTamuList.LobbyUtamaInUser.Visible (end) *@
+    @if (bukuTamuList.LobbyUtamaOutTanggal.Visible) { // bukuTamuList.LobbyUtamaOutTanggal.Visible (begin)
+        <td data-name="LobbyUtamaOutTanggal" @Html.Raw(bukuTamuList.LobbyUtamaOutTanggal.CellAttributes)>
+<span id="el@(bukuTamuList.RowIndex == "$rowindex$" ? "$rowindex$" : bukuTamuList.RowCount)_BukuTamu_LobbyUtamaOutTanggal" class="el_BukuTamu_LobbyUtamaOutTanggal">
+<span @Html.Raw(bukuTamuList.LobbyUtamaOutTanggal.ViewAttributes)>
+@Html.Raw(bukuTamuList.LobbyUtamaOutTanggal.GetViewValue())</span>
+</span>
+</td>
+    } @* bukuTamuList.LobbyUtamaOutTanggal.Visible (end) *@
+    @if (bukuTamuList.LobbyUtamaOutFotoDownload.Visible) { // bukuTamuList.LobbyUtamaOutFotoDownload.Visible (begin)
+        <td data-name="LobbyUtamaOutFotoDownload" @Html.Raw(bukuTamuList.LobbyUtamaOutFotoDownload.CellAttributes)>
+<span id="el@(bukuTamuList.RowIndex == "$rowindex$" ? "$rowindex$" : bukuTamuList.RowCount)_BukuTamu_LobbyUtamaOutFotoDownload" class="el_BukuTamu_LobbyUtamaOutFotoDownload">
+<span @Html.Raw(bukuTamuList.LobbyUtamaOutFotoDownload.ViewAttributes)>
+@Html.Raw(bukuTamuList.LobbyUtamaOutFotoDownload.GetViewValue())</span>
+</span>
+</td>
+    } @* bukuTamuList.LobbyUtamaOutFotoDownload.Visible (end) *@
+    @if (bukuTamuList.LobbyUtamaOutUser.Visible) { // bukuTamuList.LobbyUtamaOutUser.Visible (begin)
+        <td data-name="LobbyUtamaOutUser" @Html.Raw(bukuTamuList.LobbyUtamaOutUser.CellAttributes)>
+<span id="el@(bukuTamuList.RowIndex == "$rowindex$" ? "$rowindex$" : bukuTamuList.RowCount)_BukuTamu_LobbyUtamaOutUser" class="el_BukuTamu_LobbyUtamaOutUser">
+<span @Html.Raw(bukuTamuList.LobbyUtamaOutUser.ViewAttributes)>
+@Html.Raw(bukuTamuList.LobbyUtamaOutUser.GetViewValue())</span>
+</span>
+</td>
+    } @* bukuTamuList.LobbyUtamaOutUser.Visible (end) *@
+    @if (bukuTamuList.AreaTerlarangId.Visible) { // bukuTamuList.AreaTerlarangId.Visible (begin)
+        <td data-name="AreaTerlarangId" @Html.Raw(bukuTamuList.AreaTerlarangId.CellAttributes)>
+<span id="el@(bukuTamuList.RowIndex == "$rowindex$" ? "$rowindex$" : bukuTamuList.RowCount)_BukuTamu_AreaTerlarangId" class="el_BukuTamu_AreaTerlarangId">
+<span @Html.Raw(bukuTamuList.AreaTerlarangId.ViewAttributes)>
+@Html.Raw(bukuTamuList.AreaTerlarangId.GetViewValue())</span>
+</span>
+</td>
+    } @* bukuTamuList.AreaTerlarangId.Visible (end) *@
+    @if (bukuTamuList.AreaTerlarangInTanggal.Visible) { // bukuTamuList.AreaTerlarangInTanggal.Visible (begin)
+        <td data-name="AreaTerlarangInTanggal" @Html.Raw(bukuTamuList.AreaTerlarangInTanggal.CellAttributes)>
+<span id="el@(bukuTamuList.RowIndex == "$rowindex$" ? "$rowindex$" : bukuTamuList.RowCount)_BukuTamu_AreaTerlarangInTanggal" class="el_BukuTamu_AreaTerlarangInTanggal">
+<span @Html.Raw(bukuTamuList.AreaTerlarangInTanggal.ViewAttributes)>
+@Html.Raw(bukuTamuList.AreaTerlarangInTanggal.GetViewValue())</span>
+</span>
+</td>
+    } @* bukuTamuList.AreaTerlarangInTanggal.Visible (end) *@
+    @if (bukuTamuList.AreaTerlarangInFotoDownload.Visible) { // bukuTamuList.AreaTerlarangInFotoDownload.Visible (begin)
+        <td data-name="AreaTerlarangInFotoDownload" @Html.Raw(bukuTamuList.AreaTerlarangInFotoDownload.CellAttributes)>
+<span id="el@(bukuTamuList.RowIndex == "$rowindex$" ? "$rowindex$" : bukuTamuList.RowCount)_BukuTamu_AreaTerlarangInFotoDownload" class="el_BukuTamu_AreaTerlarangInFotoDownload">
+<span @Html.Raw(bukuTamuList.AreaTerlarangInFotoDownload.ViewAttributes)>
+@Html.Raw(bukuTamuList.AreaTerlarangInFotoDownload.GetViewValue())</span>
+</span>
+</td>
+    } @* bukuTamuList.AreaTerlarangInFotoDownload.Visible (end) *@
+    @if (bukuTamuList.AreaTerlarangInUser.Visible) { // bukuTamuList.AreaTerlarangInUser.Visible (begin)
+        <td data-name="AreaTerlarangInUser" @Html.Raw(bukuTamuList.AreaTerlarangInUser.CellAttributes)>
+<span id="el@(bukuTamuList.RowIndex == "$rowindex$" ? "$rowindex$" : bukuTamuList.RowCount)_BukuTamu_AreaTerlarangInUser" class="el_BukuTamu_AreaTerlarangInUser">
+<span @Html.Raw(bukuTamuList.AreaTerlarangInUser.ViewAttributes)>
+@Html.Raw(bukuTamuList.AreaTerlarangInUser.GetViewValue())</span>
+</span>
+</td>
+    } @* bukuTamuList.AreaTerlarangInUser.Visible (end) *@
+    @if (bukuTamuList.AreaTerlarangOutTanggal.Visible) { // bukuTamuList.AreaTerlarangOutTanggal.Visible (begin)
+        <td data-name="AreaTerlarangOutTanggal" @Html.Raw(bukuTamuList.AreaTerlarangOutTanggal.CellAttributes)>
+<span id="el@(bukuTamuList.RowIndex == "$rowindex$" ? "$rowindex$" : bukuTamuList.RowCount)_BukuTamu_AreaTerlarangOutTanggal" class="el_BukuTamu_AreaTerlarangOutTanggal">
+<span @Html.Raw(bukuTamuList.AreaTerlarangOutTanggal.ViewAttributes)>
+@Html.Raw(bukuTamuList.AreaTerlarangOutTanggal.GetViewValue())</span>
+</span>
+</td>
+    } @* bukuTamuList.AreaTerlarangOutTanggal.Visible (end) *@
+    @if (bukuTamuList.AreaTerlarangOutFotoDownload.Visible) { // bukuTamuList.AreaTerlarangOutFotoDownload.Visible (begin)
+        <td data-name="AreaTerlarangOutFotoDownload" @Html.Raw(bukuTamuList.AreaTerlarangOutFotoDownload.CellAttributes)>
+<span id="el@(bukuTamuList.RowIndex == "$rowindex$" ? "$rowindex$" : bukuTamuList.RowCount)_BukuTamu_AreaTerlarangOutFotoDownload" class="el_BukuTamu_AreaTerlarangOutFotoDownload">
+<span @Html.Raw(bukuTamuList.AreaTerlarangOutFotoDownload.ViewAttributes)>
+@Html.Raw(bukuTamuList.AreaTerlarangOutFotoDownload.GetViewValue())</span>
+</span>
+</td>
+    } @* bukuTamuList.AreaTerlarangOutFotoDownload.Visible (end) *@
+    @if (bukuTamuList.AreaTerlarangOutUser.Visible) { // bukuTamuList.AreaTerlarangOutUser.Visible (begin)
+        <td data-name="AreaTerlarangOutUser" @Html.Raw(bukuTamuList.AreaTerlarangOutUser.CellAttributes)>
+<span id="el@(bukuTamuList.RowIndex == "$rowindex$" ? "$rowindex$" : bukuTamuList.RowCount)_BukuTamu_AreaTerlarangOutUser" class="el_BukuTamu_AreaTerlarangOutUser">
+<span @Html.Raw(bukuTamuList.AreaTerlarangOutUser.ViewAttributes)>
+@Html.Raw(bukuTamuList.AreaTerlarangOutUser.GetViewValue())</span>
+</span>
+</td>
+    } @* bukuTamuList.AreaTerlarangOutUser.Visible (end) *@
+    @if (bukuTamuList.etlDate.Visible) { // bukuTamuList.etlDate.Visible (begin)
+        <td data-name="etlDate" @Html.Raw(bukuTamuList.etlDate.CellAttributes)>
+<span id="el@(bukuTamuList.RowIndex == "$rowindex$" ? "$rowindex$" : bukuTamuList.RowCount)_BukuTamu_etlDate" class="el_BukuTamu_etlDate">
+<span @Html.Raw(bukuTamuList.etlDate.ViewAttributes)>
+@Html.Raw(bukuTamuList.etlDate.GetViewValue())</span>
+</span>
+</td>
+    } @* bukuTamuList.etlDate.Visible (end) *@
+    @if (bukuTamuList.LastUpdatedBy.Visible) { // bukuTamuList.LastUpdatedBy.Visible (begin)
+        <td data-name="LastUpdatedBy" @Html.Raw(bukuTamuList.LastUpdatedBy.CellAttributes)>
+<span id="el@(bukuTamuList.RowIndex == "$rowindex$" ? "$rowindex$" : bukuTamuList.RowCount)_BukuTamu_LastUpdatedBy" class="el_BukuTamu_LastUpdatedBy">
+<span @Html.Raw(bukuTamuList.LastUpdatedBy.ViewAttributes)>
+@Html.Raw(bukuTamuList.LastUpdatedBy.GetViewValue())</span>
+</span>
+</td>
+    } @* bukuTamuList.LastUpdatedBy.Visible (end) *@
+    @if (bukuTamuList.lastUpdatedDate.Visible) { // bukuTamuList.lastUpdatedDate.Visible (begin)
+        <td data-name="lastUpdatedDate" @Html.Raw(bukuTamuList.lastUpdatedDate.CellAttributes)>
+<span id="el@(bukuTamuList.RowIndex == "$rowindex$" ? "$rowindex$" : bukuTamuList.RowCount)_BukuTamu_lastUpdatedDate" class="el_BukuTamu_lastUpdatedDate">
+<span @Html.Raw(bukuTamuList.lastUpdatedDate.ViewAttributes)>
+@Html.Raw(bukuTamuList.lastUpdatedDate.GetViewValue())</span>
+</span>
+</td>
+    } @* bukuTamuList.lastUpdatedDate.Visible (end) *@
+    @* Render list options (body, right) *@
+    @bukuTamuList.ListOptions.RenderBody("right", bukuTamuList.RowCount)
+    </tr>
+    } @* End if *@
+
+    // Reset for template row
+    if (SameString(bukuTamuList.RowIndex, "$rowindex$"))
+        bukuTamuList.RowIndex = 0;
+
+    // Reset inline add/copy row
+    if ((bukuTamuList.IsCopy || bukuTamuList.IsAdd) && bukuTamuList.RowIndex is int rowIndex2 && rowIndex2 == 0)
+        bukuTamuList.RowIndex = 1;
+} @* End While *@
+</tbody>
+</table><!-- /.ew-table -->
+} @* End If TotalRecords > 0 *@
+</div><!-- /.ew-grid-middle-panel -->
+@if (Empty(bukuTamuList.CurrentAction) && !bukuTamuList.UseAjaxActions) {
+<input type="hidden" name="action" id="action" value="">
+}
+</form><!-- /.ew-list-form -->
+@{ bukuTamuList.CloseRecordset(); }
+@if (!bukuTamuList.IsExport()) {
+<div class="card-footer ew-grid-lower-panel">
+@if (!bukuTamuList.IsGridAdd && !(bukuTamuList.IsGridEdit && bukuTamuList.ModalGridEdit) && !bukuTamuList.IsMultiEdit) {
+@Html.Raw(bukuTamuList.Pager.Render())
+}
+<div class="ew-list-other-options">
+@bukuTamuList.OtherOptions.RenderBody("bottom")
+</div>
+</div>
+}
+</div><!-- /.ew-grid -->
+} else { // Show other options
+<div class="ew-list-other-options">
+@bukuTamuList.OtherOptions.ForEach(opt => opt.ButtonClass = "").RenderBody()
+</div>
+}
+</div>
+<div id="ew-footer-options">
+    @bukuTamuList.FooterOptions.RenderBody()
+</div>
+</main>
+@bukuTamuList.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+@if (!bukuTamuList.IsExport()) {
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("BukuTamu");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Startup script
+    const parent_url = ew.PATH_BASE;
+    (function () {
+        var originalSubmit = HTMLFormElement.prototype.submit;
+        HTMLFormElement.prototype.submit = function () {
+            if (this.id === 'fBukuTamusrch') {
+                var regionVal = $('#filter-region').val() || 'All';
+                var plantVal = $('#filter-plant').val() || 'All';
+                $('#x_filterRegion', this).val(regionVal);
+                $('#x_filterPlant', this).val(plantVal);
+            }
+            return originalSubmit.apply(this, arguments);
+        };
+    })();
+    $(document).ready(function () {
+        // Add New button
+        var oldButton = $('button.btn-primary[name="btn-submit"]');
+        var addButton = $('<button class="btn btn-success ms-1" id="btn-add-custom"><i class="fas fa-plus"></i> Add New</button>');
+        addButton.on('click', function (e) {
+            e.preventDefault();
+            window.location.href = parent_url + 'BukuTamuAdd';
+        });
+        oldButton.parent().append(addButton);
+
+        // Dropdown setup
+        const cfg = window._bukuTamuFilterConfig;
+        const regions = cfg?.regions ?? [];
+        const plants = cfg?.plants ?? [];
+        const $regionSelect = $('#filter-region');
+        const $plantSelect = $('#filter-plant');
+
+        // Populate regions
+        regions.forEach(r => $regionSelect.append($('<option>').val(r.idRegion).text(r.namaRegion)));
+        function loadPlants(regionId) {
+            $plantSelect.empty().append('<option value="All"> All </option>');
+            const filtered = (!regionId || regionId === 'All')
+                ? plants
+                : plants.filter(p => p.idRegion === regionId);
+            filtered.forEach(p => $plantSelect.append($('<option>').val(p.idPlant).text(p.namaPlant)));
+        }
+        loadPlants('All');
+
+        // Fungsi highlight
+        function highlightMatch(text, search) {
+            if (!search) return $('<span>').text(text);
+            var regex = new RegExp('(' + search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
+            var $span = $('<span>');
+            $span.html(
+                $('<span>').text(text).html()
+                    .replace(regex, '<mark style="background:#ff0;padding:0;font-weight:bold;">$1</mark>')
+            );
+            return $span;
+        }
+
+        // Apply Select2
+        $regionSelect.select2({
+            placeholder: ' All ',
+            allowClear: true,
+            width: '100%',
+            templateResult: function (data) {
+                if (!data.id) return data.text;
+                var search = $('.select2-search--dropdown .select2-search__field').val() || '';
+                return highlightMatch(data.text, search);
+            }
+        });
+        $plantSelect.select2({
+            placeholder: ' All ',
+            allowClear: true,
+            width: '100%',
+            templateResult: function (data) {
+                if (!data.id) return data.text;
+                var search = $('.select2-search--dropdown .select2-search__field').val() || '';
+                return highlightMatch(data.text, search);
+            }
+        });
+        // Tutup dropdown lain saat salah satu dibuka
+        $regionSelect.on('select2:open', function () {
+            $plantSelect.select2('close');
+        });
+        $plantSelect.on('select2:open', function () {
+            $regionSelect.select2('close');
+        });
+
+        // Tutup semua dropdown saat klik X
+        $regionSelect.on('select2:clear', function () {
+            $plantSelect.select2('close');
+        });
+        $plantSelect.on('select2:clear', function () {
+            $regionSelect.select2('close');
+        });
+
+        // Region change handler — dengan validasi plant
+        $regionSelect.on('change', function () {
+            var val = $(this).val() || 'All';
+            var currentPlant = $plantSelect.val();
+            loadPlants(val);
+            if (currentPlant && currentPlant !== 'All') {
+                var plantExistsInRegion = $plantSelect.find('option[value="' + currentPlant + '"]').length > 0;
+                if (plantExistsInRegion) {
+                    $plantSelect.val(currentPlant).trigger('change');
+                } else {
+                    $plantSelect.val(null).trigger('change');
+                }
+            } else {
+                $plantSelect.val(null).trigger('change');
+            }
+            updateResetButton();
+        });
+        $plantSelect.on('change', function () {
+            updateResetButton();
+        });
+        function updateResetButton() {
+            var urlParams = new URLSearchParams(window.location.search);
+            var activeRegion = urlParams.get('x_filterRegion') || 'All';
+            var activePlant = urlParams.get('x_filterPlant') || 'All';
+            var $resetBtn = $('#btn-custom-reset');
+            if (activeRegion !== 'All' || activePlant !== 'All') {
+                $('.ew-show-all').hide();
+                if ($resetBtn.length === 0) {
+                    var $btn = $('<a id="btn-custom-reset" class="btn btn-default btn-sm" role="button" title="Show all" data-bs-placement="bottom" style="cursor:pointer"><i class="icon-reset-search ew-icon"></i></a>');
+                    $('.ew-search-option .btn-group-sm').append($btn);
+                    new bootstrap.Tooltip($btn[0], { placement: 'bottom' });
+                }
+                $('#btn-custom-reset').show();
+            } else {
+                $('.ew-show-all').show();
+                $resetBtn.hide();
+            }
+        }
+
+        // Inject filter ke export links
+        function updateExportLinks() {
+            var urlParams = new URLSearchParams(window.location.search);
+            var regionVal = urlParams.get('x_filterRegion') || 'All';
+            var plantVal = urlParams.get('x_filterPlant') || 'All';
+            if (regionVal === 'All' && plantVal === 'All') return;
+            $('.ew-export-link').each(function () {
+                try {
+                    var url = new URL($(this).attr('href'), window.location.origin);
+                    url.searchParams.set('x_filterRegion', regionVal);
+                    url.searchParams.set('x_filterPlant', plantVal);
+                    $(this).attr('href', url.toString());
+                } catch (e) { }
+            });
+        }
+
+        // Restore dari URL
+        const urlParams = new URLSearchParams(window.location.search);
+        var savedRegion = urlParams.get('x_filterRegion') || 'All';
+        var savedPlant = urlParams.get('x_filterPlant') || 'All';
+        if (savedRegion !== 'All') {
+            $regionSelect.val(savedRegion).trigger('change');
+            loadPlants(savedRegion);
+        }
+        setTimeout(function () {
+            if (savedPlant !== 'All') $plantSelect.val(savedPlant).trigger('change');
+            if (savedRegion !== 'All' || savedPlant !== 'All') updateResetButton();
+            updateExportLinks();
+        }, 100);
+
+        // Intercept semua aksi EW (sort, pagination, page size)
+        $(document).on('click', '[data-ew-action="redirect"],[data-ew-action="sort"],[data-ew-action="change-page-size"]', function (e) {
+            var regionVal = $regionSelect.val() || 'All';
+            var plantVal = $plantSelect.val() || 'All';
+            if (regionVal === 'All' && plantVal === 'All') return;
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            var targetUrl = $(this).data('url') || $(this).data('sort-url') || $(this).attr('href');
+            if (!targetUrl) return;
+            try {
+                var u = new URL(targetUrl, window.location.origin);
+                u.searchParams.set('x_filterRegion', regionVal);
+                u.searchParams.set('x_filterPlant', plantVal);
+                window.location.href = u.toString();
+            } catch (err) { }
+        });
+
+        // Override ew.redirect sebagai fallback
+        var _origRedirect = ew.redirect;
+        ew.redirect = function (url) {
+            try {
+                var regionVal = $regionSelect.val() || 'All';
+                var plantVal = $plantSelect.val() || 'All';
+                if (regionVal === 'All' && plantVal === 'All') return _origRedirect.call(this, url);
+                var u = new URL(url, window.location.origin);
+                u.searchParams.set('x_filterRegion', regionVal);
+                u.searchParams.set('x_filterPlant', plantVal);
+                return _origRedirect.call(this, u.toString());
+            } catch (e) { return _origRedirect.call(this, url); }
+        };
+
+        // Clear column filter
+        $(document).on('click', '.ew-filter-clear', function (e) {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            var regionVal = $regionSelect.val() || 'All';
+            var plantVal = $plantSelect.val() || 'All';
+            var url = new URL(window.location.href);
+            Array.from(url.searchParams.keys()).forEach(function (key) {
+                if (key.startsWith('x_') && key !== 'x_filterRegion' && key !== 'x_filterPlant')
+                    url.searchParams.delete(key);
+            });
+            url.searchParams.delete('cmd');
+            if (regionVal !== 'All') url.searchParams.set('x_filterRegion', regionVal);
+            else url.searchParams.delete('x_filterRegion');
+            if (plantVal !== 'All') url.searchParams.set('x_filterPlant', plantVal);
+            else url.searchParams.delete('x_filterPlant');
+            window.location.href = url.toString();
+        });
+
+        // Reset / Show all
+        $(document).on('click', '#btn-custom-reset', function (e) {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            $regionSelect.val(null).trigger('change');
+            $plantSelect.val(null).trigger('change');
+            window.location.href = parent_url + 'BukuTamuList?cmd=reset';
+        });
+    });
+});
+</script>
+}

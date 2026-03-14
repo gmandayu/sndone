@@ -1,0 +1,639 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (vSampleOperasionalList.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = vSampleOperasionalList.UseLayout ? "_Layout" : "";
+}
+@if (!vSampleOperasionalList.IsExport()) {
+<script>
+var currentTable = @Html.Raw(ConvertToJson(vSampleOperasionalList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { VSampleOperasional: currentTable } });
+var currentPageID = ew.PAGE_ID = "list";
+var currentForm;
+var @(vSampleOperasionalList.FormName);
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("@(vSampleOperasionalList.FormName)")
+        .setPageId("list")
+        .setSubmitWithFetch(@(vSampleOperasionalList.UseAjaxActions ? "true" : "false"))
+        .setFormKeyCountName("@(vSampleOperasionalList.FormKeyCountName)")
+
+        // Dynamic selection lists
+        .setLists({
+            "RedirectLink": @Html.Raw(vSampleOperasionalList.RedirectLink.ToClientList(vSampleOperasionalList)),
+            "Proses2": @Html.Raw(vSampleOperasionalList.Proses2.ToClientList(vSampleOperasionalList)),
+            "Plant": @Html.Raw(vSampleOperasionalList.Plant.ToClientList(vSampleOperasionalList)),
+            "Moda": @Html.Raw(vSampleOperasionalList.Moda.ToClientList(vSampleOperasionalList)),
+            "Tanggal": @Html.Raw(vSampleOperasionalList.Tanggal.ToClientList(vSampleOperasionalList)),
+            "NamaDokumen": @Html.Raw(vSampleOperasionalList.NamaDokumen.ToClientList(vSampleOperasionalList)),
+        })
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Client script
+    let parent_url = ew.PATH_BASE;
+    $(document).on('click', '.download-document', function (e) {
+        let IdAktivitasDokumen = $(this).attr('IdAktivitasDokumen');
+        e.preventDefault();
+        $.ajax({
+            url: parent_url + 'api/LookUpList/DownloadDocumentZip',
+            type: 'GET',
+            data: { 
+                idRef: IdAktivitasDokumen,
+                table: 'AktivitasDokumenDetail',
+                colRef: 'IdAktivitasDokumen',
+                path: 'ActivityDocument'
+            },
+            xhrFields: {
+                responseType: 'blob'
+            },
+            beforeSend: function () {
+                showLoading();
+            },
+            success: function (response, status, xhr) {
+                const disposition = xhr.getResponseHeader('Content-Disposition');
+                let fileName = "download_file";
+                if (disposition) {
+                    const fileNameMatch = disposition.match(/filename="?([^";]+)"?/);
+                    if (fileNameMatch && fileNameMatch[1]) {
+                        fileName = decodeURIComponent(fileNameMatch[1]);
+                    }
+                    const utf8FileNameMatch = disposition.match(/filename\*\s*=\s*UTF-8''([^;]+)/);
+                    if (utf8FileNameMatch && utf8FileNameMatch[1]) {
+                        fileName = decodeURIComponent(utf8FileNameMatch[1]);
+                    }
+                }
+                const blobUrl = window.URL.createObjectURL(response);
+                const a = document.createElement('a');
+                a.href = blobUrl;
+                a.download = fileName;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(blobUrl);
+                ew.alert("Download berhasil!");
+            },
+            error: function (xhr, status, error) {
+                if (xhr.status === 404) {
+                    ew.alert("File tidak ditemukan di server.");
+                } else if (xhr.status === 500) {
+                    ew.alert("Terjadi kesalahan server. Coba lagi nanti.");
+                } else {
+                    ew.alert("Gagal mendownload file. Error: " + xhr.responseText);
+                }
+            },
+            complete: function () {
+                hideLoading();
+            }
+        });
+    });
+});
+</script>
+}
+@if (!vSampleOperasionalList.IsExport()) {
+<div class="btn-toolbar ew-toolbar">
+@if (vSampleOperasionalList.TotalRecords > 0 && vSampleOperasionalList.ExportOptions.Visible) {
+    vSampleOperasionalList.ExportOptions.Render("body");
+}
+@if (vSampleOperasionalList.ImportOptions.Visible) {
+    vSampleOperasionalList.ImportOptions.Render("body");
+}
+@if (vSampleOperasionalList.SearchOptions.Visible) {
+    vSampleOperasionalList.SearchOptions.Render("body");
+}
+@if (vSampleOperasionalList.FilterOptions.Visible) {
+    vSampleOperasionalList.FilterOptions.Render("body");
+}
+</div>
+}
+@if (vSampleOperasionalList.ShowCurrentFilter) {
+    vSampleOperasionalList.ShowFilterList();
+}
+@if (!vSampleOperasionalList.IsModal) {
+<form name="fVSampleOperasionalsrch" id="fVSampleOperasionalsrch" class="ew-form ew-ext-search-form" action="@AppPath(CurrentPageName())" novalidate autocomplete="off">
+<div id="fVSampleOperasionalsrch_search_panel" class="mb-2 mb-sm-0 @(vSampleOperasionalList.SearchPanelClass)"><!-- .ew-search-panel -->
+<script>
+var currentTable = @Html.Raw(ConvertToJson(vSampleOperasionalList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { VSampleOperasional: currentTable } });
+var currentForm;
+var fVSampleOperasionalsrch, currentSearchForm, currentAdvancedSearchForm;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery,
+        fields = currentTable.fields;
+
+    // Form object for search
+    let form = new ew.FormBuilder()
+        .setId("fVSampleOperasionalsrch")
+        .setPageId("list")
+@if (vSampleOperasionalList.UseAjaxActions) {
+        <text>.setSubmitWithFetch(true)</text>
+}
+
+        // Add fields
+        .setFields([
+        ])
+        // Validate form
+        .setValidate(
+            async function () {
+                if (!this.validateRequired)
+                    return true; // Ignore validation
+                let fobj = this.getForm();
+
+                // Validate fields
+                if (!this.validateFields())
+                    return false;
+
+                // Call Form_CustomValidate event
+                if (!(await this.customValidate?.(fobj) ?? true)) {
+                    this.focus();
+                    return false;
+                }
+                return true;
+            }
+        )
+
+        // Form_CustomValidate
+        .setCustomValidate(
+            function(fobj) { // DO NOT CHANGE THIS LINE!
+                    // Your custom validation code here, return false if invalid.
+                    return true;
+                }
+        )
+
+        // Use JavaScript validation or not
+        .setValidateRequired(ew.CLIENT_VALIDATE)
+
+        // Dynamic selection lists
+        .setLists({
+            "RedirectLink": @Html.Raw(vSampleOperasionalList.RedirectLink.ToClientList(vSampleOperasionalList)),
+            "Proses2": @Html.Raw(vSampleOperasionalList.Proses2.ToClientList(vSampleOperasionalList)),
+            "Plant": @Html.Raw(vSampleOperasionalList.Plant.ToClientList(vSampleOperasionalList)),
+            "Moda": @Html.Raw(vSampleOperasionalList.Moda.ToClientList(vSampleOperasionalList)),
+            "Tanggal": @Html.Raw(vSampleOperasionalList.Tanggal.ToClientList(vSampleOperasionalList)),
+            "NamaDokumen": @Html.Raw(vSampleOperasionalList.NamaDokumen.ToClientList(vSampleOperasionalList)),
+        })
+
+        // Filters
+        .setFilterList(@Html.Raw(vSampleOperasionalList.GetFilterList()))
+        .build();
+    window[form.id] = form;
+    currentSearchForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<input type="hidden" name="cmd" value="search">
+@if (Security.CanSearch) {
+if (!vSampleOperasionalList.IsExport() && Empty(vSampleOperasionalList.CurrentAction) && vSampleOperasionalList.HasSearchFields()) { @* Show search form (begin) *@
+<div class="ew-extended-search container-fluid ps-2">
+<div class="row mb-0@(vSampleOperasionalList.SearchFieldsPerRow > 0 ? " row-cols-sm-" + vSampleOperasionalList.SearchFieldsPerRow : "")">
+@{
+    // Render search row
+    vSampleOperasionalList.RowType = RowType.Search;
+    vSampleOperasionalList.ResetAttributes();
+    await vSampleOperasionalList.RenderRow();
+}
+@if (vSampleOperasionalList.RedirectLink.Visible) { // vSampleOperasionalList.RedirectLink.Visible (begin)
+    if (!vSampleOperasionalList.RedirectLink.UseFilter) {
+        vSampleOperasionalList.SearchColumnCount++;
+    }
+    <div id="xs_RedirectLink" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(vSampleOperasionalList.RedirectLink.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_RedirectLink"
+            name="x_RedirectLink[]"
+            class="form-control ew-select@(vSampleOperasionalList.RedirectLink.IsInvalidClass)"
+            data-select2-id="fVSampleOperasionalsrch_x_RedirectLink"
+            data-table="VSampleOperasional"
+            data-field="x_RedirectLink"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(vSampleOperasionalList.RedirectLink.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(vSampleOperasionalList.RedirectLink.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(vSampleOperasionalList.RedirectLink.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(vSampleOperasionalList.RedirectLink.EditAttributes)>
+            @(vSampleOperasionalList.RedirectLink.SelectOptionListHtml("x_RedirectLink", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(vSampleOperasionalList.RedirectLink.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fVSampleOperasionalsrch", function() {
+            var options = {
+                name: "x_RedirectLink",
+                selectId: "fVSampleOperasionalsrch_x_RedirectLink",
+                ajax: { id: "x_RedirectLink", form: "fVSampleOperasionalsrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.VSampleOperasional.fields.RedirectLink.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* vSampleOperasionalList.RedirectLink.Visible (end) *@
+@if (vSampleOperasionalList.Proses2.Visible) { // vSampleOperasionalList.Proses2.Visible (begin)
+    if (!vSampleOperasionalList.Proses2.UseFilter) {
+        vSampleOperasionalList.SearchColumnCount++;
+    }
+    <div id="xs_Proses2" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(vSampleOperasionalList.Proses2.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_Proses2"
+            name="x_Proses2[]"
+            class="form-control ew-select@(vSampleOperasionalList.Proses2.IsInvalidClass)"
+            data-select2-id="fVSampleOperasionalsrch_x_Proses2"
+            data-table="VSampleOperasional"
+            data-field="x_Proses2"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(vSampleOperasionalList.Proses2.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(vSampleOperasionalList.Proses2.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(vSampleOperasionalList.Proses2.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(vSampleOperasionalList.Proses2.EditAttributes)>
+            @(vSampleOperasionalList.Proses2.SelectOptionListHtml("x_Proses2", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(vSampleOperasionalList.Proses2.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fVSampleOperasionalsrch", function() {
+            var options = {
+                name: "x_Proses2",
+                selectId: "fVSampleOperasionalsrch_x_Proses2",
+                ajax: { id: "x_Proses2", form: "fVSampleOperasionalsrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.VSampleOperasional.fields.Proses2.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* vSampleOperasionalList.Proses2.Visible (end) *@
+@if (vSampleOperasionalList.Plant.Visible) { // vSampleOperasionalList.Plant.Visible (begin)
+    if (!vSampleOperasionalList.Plant.UseFilter) {
+        vSampleOperasionalList.SearchColumnCount++;
+    }
+    <div id="xs_Plant" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(vSampleOperasionalList.Plant.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_Plant"
+            name="x_Plant[]"
+            class="form-control ew-select@(vSampleOperasionalList.Plant.IsInvalidClass)"
+            data-select2-id="fVSampleOperasionalsrch_x_Plant"
+            data-table="VSampleOperasional"
+            data-field="x_Plant"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(vSampleOperasionalList.Plant.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(vSampleOperasionalList.Plant.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(vSampleOperasionalList.Plant.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(vSampleOperasionalList.Plant.EditAttributes)>
+            @(vSampleOperasionalList.Plant.SelectOptionListHtml("x_Plant", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(vSampleOperasionalList.Plant.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fVSampleOperasionalsrch", function() {
+            var options = {
+                name: "x_Plant",
+                selectId: "fVSampleOperasionalsrch_x_Plant",
+                ajax: { id: "x_Plant", form: "fVSampleOperasionalsrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.VSampleOperasional.fields.Plant.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* vSampleOperasionalList.Plant.Visible (end) *@
+@if (vSampleOperasionalList.Moda.Visible) { // vSampleOperasionalList.Moda.Visible (begin)
+    if (!vSampleOperasionalList.Moda.UseFilter) {
+        vSampleOperasionalList.SearchColumnCount++;
+    }
+    <div id="xs_Moda" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(vSampleOperasionalList.Moda.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_Moda"
+            name="x_Moda[]"
+            class="form-control ew-select@(vSampleOperasionalList.Moda.IsInvalidClass)"
+            data-select2-id="fVSampleOperasionalsrch_x_Moda"
+            data-table="VSampleOperasional"
+            data-field="x_Moda"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(vSampleOperasionalList.Moda.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(vSampleOperasionalList.Moda.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(vSampleOperasionalList.Moda.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(vSampleOperasionalList.Moda.EditAttributes)>
+            @(vSampleOperasionalList.Moda.SelectOptionListHtml("x_Moda", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(vSampleOperasionalList.Moda.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fVSampleOperasionalsrch", function() {
+            var options = {
+                name: "x_Moda",
+                selectId: "fVSampleOperasionalsrch_x_Moda",
+                ajax: { id: "x_Moda", form: "fVSampleOperasionalsrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.VSampleOperasional.fields.Moda.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* vSampleOperasionalList.Moda.Visible (end) *@
+@if (vSampleOperasionalList.Tanggal.Visible) { // vSampleOperasionalList.Tanggal.Visible (begin)
+    if (!vSampleOperasionalList.Tanggal.UseFilter) {
+        vSampleOperasionalList.SearchColumnCount++;
+    }
+    <div id="xs_Tanggal" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(vSampleOperasionalList.Tanggal.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_Tanggal"
+            name="x_Tanggal[]"
+            class="form-control ew-select@(vSampleOperasionalList.Tanggal.IsInvalidClass)"
+            data-select2-id="fVSampleOperasionalsrch_x_Tanggal"
+            data-table="VSampleOperasional"
+            data-field="x_Tanggal"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(vSampleOperasionalList.Tanggal.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(vSampleOperasionalList.Tanggal.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(vSampleOperasionalList.Tanggal.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(vSampleOperasionalList.Tanggal.EditAttributes)>
+            @(vSampleOperasionalList.Tanggal.SelectOptionListHtml("x_Tanggal", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(vSampleOperasionalList.Tanggal.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fVSampleOperasionalsrch", function() {
+            var options = {
+                name: "x_Tanggal",
+                selectId: "fVSampleOperasionalsrch_x_Tanggal",
+                ajax: { id: "x_Tanggal", form: "fVSampleOperasionalsrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.VSampleOperasional.fields.Tanggal.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* vSampleOperasionalList.Tanggal.Visible (end) *@
+@if (vSampleOperasionalList.NamaDokumen.Visible) { // vSampleOperasionalList.NamaDokumen.Visible (begin)
+    if (!vSampleOperasionalList.NamaDokumen.UseFilter) {
+        vSampleOperasionalList.SearchColumnCount++;
+    }
+    <div id="xs_NamaDokumen" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(vSampleOperasionalList.NamaDokumen.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_NamaDokumen"
+            name="x_NamaDokumen[]"
+            class="form-control ew-select@(vSampleOperasionalList.NamaDokumen.IsInvalidClass)"
+            data-select2-id="fVSampleOperasionalsrch_x_NamaDokumen"
+            data-table="VSampleOperasional"
+            data-field="x_NamaDokumen"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(vSampleOperasionalList.NamaDokumen.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(vSampleOperasionalList.NamaDokumen.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(vSampleOperasionalList.NamaDokumen.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(vSampleOperasionalList.NamaDokumen.EditAttributes)>
+            @(vSampleOperasionalList.NamaDokumen.SelectOptionListHtml("x_NamaDokumen", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(vSampleOperasionalList.NamaDokumen.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fVSampleOperasionalsrch", function() {
+            var options = {
+                name: "x_NamaDokumen",
+                selectId: "fVSampleOperasionalsrch_x_NamaDokumen",
+                ajax: { id: "x_NamaDokumen", form: "fVSampleOperasionalsrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.VSampleOperasional.fields.NamaDokumen.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* vSampleOperasionalList.NamaDokumen.Visible (end) *@
+</div><!-- /.row -->
+<div class="row mb-0">
+    <div class="col-sm-auto px-0 pe-sm-2">
+        <div class="ew-basic-search input-group">
+            <input type="search" name="@(Config.TableBasicSearch)" id="@(Config.TableBasicSearch)" class="form-control ew-basic-search-keyword" value="@Html.Raw(HtmlEncode(vSampleOperasionalList.BasicSearch.SessionKeyword))" placeholder="@(HtmlEncode(Language.Phrase("Search")))" aria-label="@(HtmlEncode(Language.Phrase("Search")))">
+            <input type="hidden" name="@(Config.TableBasicSearchType)" id="@(Config.TableBasicSearchType)" class="ew-basic-search-type" value="@(HtmlEncode(vSampleOperasionalList.BasicSearch.SessionType))">
+            <button type="button" data-bs-toggle="dropdown" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split" aria-haspopup="true" aria-expanded="false">
+                <span id="searchtype">@Html.Raw(vSampleOperasionalList.BasicSearch.TypeNameShort)</span>
+            </button>
+            <div class="dropdown-menu dropdown-menu-end">
+                <button type="button" class="dropdown-item@(vSampleOperasionalList.BasicSearch.SessionType == "" ? " active" : "")" form="fVSampleOperasionalsrch" data-ew-action="search-type">@Html.Raw(Language.Phrase("QuickSearchAuto"))</button>
+                <button type="button" class="dropdown-item@(vSampleOperasionalList.BasicSearch.SessionType == "=" ? " active" : "")" form="fVSampleOperasionalsrch" data-ew-action="search-type" data-search-type="=">@Html.Raw(Language.Phrase("QuickSearchExact"))</button>
+                <button type="button" class="dropdown-item@(vSampleOperasionalList.BasicSearch.SessionType == "AND" ? " active" : "")" form="fVSampleOperasionalsrch" data-ew-action="search-type" data-search-type="AND">@Html.Raw(Language.Phrase("QuickSearchAll"))</button>
+                <button type="button" class="dropdown-item@(vSampleOperasionalList.BasicSearch.SessionType == "OR" ? " active" : "")" form="fVSampleOperasionalsrch" data-ew-action="search-type" data-search-type="OR">@Html.Raw(Language.Phrase("QuickSearchAny"))</button>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-auto mb-3">
+        <button class="btn btn-primary" name="btn-submit" id="btn-submit" type="submit">@Html.Raw(Language.Phrase("SearchBtn"))</button>
+    </div>
+</div>
+</div><!-- /.ew-extended-search -->
+} @* Show search form (end) *@
+}
+</div><!-- /.ew-search-panel -->
+</form>
+}
+@vSampleOperasionalList.ShowPageHeader()
+@vSampleOperasionalList.ShowMessages()
+<main class="list @(vSampleOperasionalList.TotalRecords == 0 && !vSampleOperasionalList.IsAdd ? " ew-no-record" : "")">
+<div id="ew-header-options">
+    @vSampleOperasionalList.HeaderOptions.RenderBody()
+</div>
+<div id="ew-list">
+@if (vSampleOperasionalList.TotalRecords > 0 || !Empty(vSampleOperasionalList.CurrentAction)) {
+<div class="card ew-card ew-grid@(vSampleOperasionalList.IsAddOrEdit ? " ew-grid-add-edit" : "") @(vSampleOperasionalList.TableGridClass)">
+<form name="@(vSampleOperasionalList.FormName)" id="@(vSampleOperasionalList.FormName)" class="ew-form ew-list-form" action="@AppPath(vSampleOperasionalList.PageName)" method="post" novalidate autocomplete="off">
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+@if (vSampleOperasionalList.IsModal) {
+<input type="hidden" name="modal" value="1">
+}
+<div id="gmp_VSampleOperasional" class="card-body ew-grid-middle-panel @(vSampleOperasionalList.TableContainerClass)" style="@(vSampleOperasionalList.TableContainerStyle)">
+@if (vSampleOperasionalList.TotalRecords > 0 || vSampleOperasionalList.IsGridEdit || vSampleOperasionalList.IsMultiEdit) {
+<table id="tbl_VSampleOperasionallist" class="@(vSampleOperasionalList.TableClass)"><!-- .ew-table -->
+<thead>
+    <tr class="ew-table-header">
+@{
+    // Header row
+    vSampleOperasionalList.RowType = RowType.Header;
+
+    // Render list options
+    await vSampleOperasionalList.RenderListOptions();
+}
+@* Render list options (header, left) *@
+@vSampleOperasionalList.ListOptions.RenderHeader("left")
+@if (vSampleOperasionalList.RedirectLink.Visible) { // vSampleOperasionalList.RedirectLink.Visible (begin)
+        <th data-name="RedirectLink" class="@(vSampleOperasionalList.RedirectLink.HeaderCellClass)"><div id="elh_VSampleOperasional_RedirectLink" class="VSampleOperasional_RedirectLink">@Html.Raw(vSampleOperasionalList.RenderFieldHeader(vSampleOperasionalList.RedirectLink))</div></th>
+} @* vSampleOperasionalList.RedirectLink.Visible (end) *@
+@if (vSampleOperasionalList.Proses2.Visible) { // vSampleOperasionalList.Proses2.Visible (begin)
+        <th data-name="Proses2" class="@(vSampleOperasionalList.Proses2.HeaderCellClass)"><div id="elh_VSampleOperasional_Proses2" class="VSampleOperasional_Proses2">@Html.Raw(vSampleOperasionalList.RenderFieldHeader(vSampleOperasionalList.Proses2))</div></th>
+} @* vSampleOperasionalList.Proses2.Visible (end) *@
+@if (vSampleOperasionalList.Plant.Visible) { // vSampleOperasionalList.Plant.Visible (begin)
+        <th data-name="Plant" class="@(vSampleOperasionalList.Plant.HeaderCellClass)"><div id="elh_VSampleOperasional_Plant" class="VSampleOperasional_Plant">@Html.Raw(vSampleOperasionalList.RenderFieldHeader(vSampleOperasionalList.Plant))</div></th>
+} @* vSampleOperasionalList.Plant.Visible (end) *@
+@if (vSampleOperasionalList.Moda.Visible) { // vSampleOperasionalList.Moda.Visible (begin)
+        <th data-name="Moda" class="@(vSampleOperasionalList.Moda.HeaderCellClass)"><div id="elh_VSampleOperasional_Moda" class="VSampleOperasional_Moda">@Html.Raw(vSampleOperasionalList.RenderFieldHeader(vSampleOperasionalList.Moda))</div></th>
+} @* vSampleOperasionalList.Moda.Visible (end) *@
+@if (vSampleOperasionalList.Tanggal.Visible) { // vSampleOperasionalList.Tanggal.Visible (begin)
+        <th data-name="Tanggal" class="@(vSampleOperasionalList.Tanggal.HeaderCellClass)"><div id="elh_VSampleOperasional_Tanggal" class="VSampleOperasional_Tanggal">@Html.Raw(vSampleOperasionalList.RenderFieldHeader(vSampleOperasionalList.Tanggal))</div></th>
+} @* vSampleOperasionalList.Tanggal.Visible (end) *@
+@if (vSampleOperasionalList.NamaDokumen.Visible) { // vSampleOperasionalList.NamaDokumen.Visible (begin)
+        <th data-name="NamaDokumen" class="@(vSampleOperasionalList.NamaDokumen.HeaderCellClass)"><div id="elh_VSampleOperasional_NamaDokumen" class="VSampleOperasional_NamaDokumen">@Html.Raw(vSampleOperasionalList.RenderFieldHeader(vSampleOperasionalList.NamaDokumen))</div></th>
+} @* vSampleOperasionalList.NamaDokumen.Visible (end) *@
+@if (vSampleOperasionalList.DownloadDokumen.Visible) { // vSampleOperasionalList.DownloadDokumen.Visible (begin)
+        <th data-name="DownloadDokumen" class="@(vSampleOperasionalList.DownloadDokumen.HeaderCellClass)" style="white-space: nowrap;"><div id="elh_VSampleOperasional_DownloadDokumen" class="VSampleOperasional_DownloadDokumen">@Html.Raw(vSampleOperasionalList.RenderFieldHeader(vSampleOperasionalList.DownloadDokumen))</div></th>
+} @* vSampleOperasionalList.DownloadDokumen.Visible (end) *@
+@* Render list options (header, right) *@
+@vSampleOperasionalList.ListOptions.RenderHeader("right")
+    </tr>
+</thead>
+<tbody data-page="@(vSampleOperasionalList.PageNumber)">
+@{
+    await vSampleOperasionalList.SetupGrid();
+    bool eof = vSampleOperasionalList.Recordset == null; // DN
+}
+@while (vSampleOperasionalList.RecordCount < vSampleOperasionalList.StopRecord || SameString(vSampleOperasionalList.RowIndex, "$rowindex$")) { // Begin While
+    if (!eof && !SameString(vSampleOperasionalList.RowIndex, "$rowindex$") &&
+        (!vSampleOperasionalList.IsGridAdd || vSampleOperasionalList.CurrentMode == "copy") &&
+        (!((vSampleOperasionalList.IsCopy || vSampleOperasionalList.IsAdd) && vSampleOperasionalList.RowIndex is int rowIndex && rowIndex == 0))) // DN
+        eof = !await vSampleOperasionalList.Recordset.ReadAsync();
+    vSampleOperasionalList.RecordCount++;
+    if (vSampleOperasionalList.RecordCount >= vSampleOperasionalList.StartRecord) {
+        await vSampleOperasionalList.SetupRow();
+    <tr @Html.Raw(vSampleOperasionalList.RowAttributes)>
+    @* Render list options (body, left) *@
+    @vSampleOperasionalList.ListOptions.RenderBody("left", vSampleOperasionalList.RowCount)
+    @if (vSampleOperasionalList.RedirectLink.Visible) { // vSampleOperasionalList.RedirectLink.Visible (begin)
+        <td data-name="RedirectLink" @Html.Raw(vSampleOperasionalList.RedirectLink.CellAttributes)>
+<span id="el@(vSampleOperasionalList.RowIndex == "$rowindex$" ? "$rowindex$" : vSampleOperasionalList.RowCount)_VSampleOperasional_RedirectLink" class="el_VSampleOperasional_RedirectLink">
+<span @Html.Raw(vSampleOperasionalList.RedirectLink.ViewAttributes)>
+@Html.Raw(vSampleOperasionalList.RedirectLink.GetViewValue())</span>
+</span>
+</td>
+    } @* vSampleOperasionalList.RedirectLink.Visible (end) *@
+    @if (vSampleOperasionalList.Proses2.Visible) { // vSampleOperasionalList.Proses2.Visible (begin)
+        <td data-name="Proses2" @Html.Raw(vSampleOperasionalList.Proses2.CellAttributes)>
+<span id="el@(vSampleOperasionalList.RowIndex == "$rowindex$" ? "$rowindex$" : vSampleOperasionalList.RowCount)_VSampleOperasional_Proses2" class="el_VSampleOperasional_Proses2">
+<span @Html.Raw(vSampleOperasionalList.Proses2.ViewAttributes)>
+@Html.Raw(vSampleOperasionalList.Proses2.GetViewValue())</span>
+</span>
+</td>
+    } @* vSampleOperasionalList.Proses2.Visible (end) *@
+    @if (vSampleOperasionalList.Plant.Visible) { // vSampleOperasionalList.Plant.Visible (begin)
+        <td data-name="Plant" @Html.Raw(vSampleOperasionalList.Plant.CellAttributes)>
+<span id="el@(vSampleOperasionalList.RowIndex == "$rowindex$" ? "$rowindex$" : vSampleOperasionalList.RowCount)_VSampleOperasional_Plant" class="el_VSampleOperasional_Plant">
+<span @Html.Raw(vSampleOperasionalList.Plant.ViewAttributes)>
+@Html.Raw(vSampleOperasionalList.Plant.GetViewValue())</span>
+</span>
+</td>
+    } @* vSampleOperasionalList.Plant.Visible (end) *@
+    @if (vSampleOperasionalList.Moda.Visible) { // vSampleOperasionalList.Moda.Visible (begin)
+        <td data-name="Moda" @Html.Raw(vSampleOperasionalList.Moda.CellAttributes)>
+<span id="el@(vSampleOperasionalList.RowIndex == "$rowindex$" ? "$rowindex$" : vSampleOperasionalList.RowCount)_VSampleOperasional_Moda" class="el_VSampleOperasional_Moda">
+<span @Html.Raw(vSampleOperasionalList.Moda.ViewAttributes)>
+@Html.Raw(vSampleOperasionalList.Moda.GetViewValue())</span>
+</span>
+</td>
+    } @* vSampleOperasionalList.Moda.Visible (end) *@
+    @if (vSampleOperasionalList.Tanggal.Visible) { // vSampleOperasionalList.Tanggal.Visible (begin)
+        <td data-name="Tanggal" @Html.Raw(vSampleOperasionalList.Tanggal.CellAttributes)>
+<span id="el@(vSampleOperasionalList.RowIndex == "$rowindex$" ? "$rowindex$" : vSampleOperasionalList.RowCount)_VSampleOperasional_Tanggal" class="el_VSampleOperasional_Tanggal">
+<span @Html.Raw(vSampleOperasionalList.Tanggal.ViewAttributes)>
+@Html.Raw(vSampleOperasionalList.Tanggal.GetViewValue())</span>
+</span>
+</td>
+    } @* vSampleOperasionalList.Tanggal.Visible (end) *@
+    @if (vSampleOperasionalList.NamaDokumen.Visible) { // vSampleOperasionalList.NamaDokumen.Visible (begin)
+        <td data-name="NamaDokumen" @Html.Raw(vSampleOperasionalList.NamaDokumen.CellAttributes)>
+<span id="el@(vSampleOperasionalList.RowIndex == "$rowindex$" ? "$rowindex$" : vSampleOperasionalList.RowCount)_VSampleOperasional_NamaDokumen" class="el_VSampleOperasional_NamaDokumen">
+<span @Html.Raw(vSampleOperasionalList.NamaDokumen.ViewAttributes)>
+@Html.Raw(vSampleOperasionalList.NamaDokumen.GetViewValue())</span>
+</span>
+</td>
+    } @* vSampleOperasionalList.NamaDokumen.Visible (end) *@
+    @if (vSampleOperasionalList.DownloadDokumen.Visible) { // vSampleOperasionalList.DownloadDokumen.Visible (begin)
+        <td data-name="DownloadDokumen" @Html.Raw(vSampleOperasionalList.DownloadDokumen.CellAttributes)>
+<span id="el@(vSampleOperasionalList.RowIndex == "$rowindex$" ? "$rowindex$" : vSampleOperasionalList.RowCount)_VSampleOperasional_DownloadDokumen" class="el_VSampleOperasional_DownloadDokumen">
+<span @Html.Raw(vSampleOperasionalList.DownloadDokumen.ViewAttributes)>
+@Html.Raw(vSampleOperasionalList.DownloadDokumen.GetViewValue())</span>
+</span>
+</td>
+    } @* vSampleOperasionalList.DownloadDokumen.Visible (end) *@
+    @* Render list options (body, right) *@
+    @vSampleOperasionalList.ListOptions.RenderBody("right", vSampleOperasionalList.RowCount)
+    </tr>
+    } @* End if *@
+
+    // Reset for template row
+    if (SameString(vSampleOperasionalList.RowIndex, "$rowindex$"))
+        vSampleOperasionalList.RowIndex = 0;
+
+    // Reset inline add/copy row
+    if ((vSampleOperasionalList.IsCopy || vSampleOperasionalList.IsAdd) && vSampleOperasionalList.RowIndex is int rowIndex2 && rowIndex2 == 0)
+        vSampleOperasionalList.RowIndex = 1;
+} @* End While *@
+</tbody>
+</table><!-- /.ew-table -->
+} @* End If TotalRecords > 0 *@
+</div><!-- /.ew-grid-middle-panel -->
+@if (Empty(vSampleOperasionalList.CurrentAction) && !vSampleOperasionalList.UseAjaxActions) {
+<input type="hidden" name="action" id="action" value="">
+}
+</form><!-- /.ew-list-form -->
+@{ vSampleOperasionalList.CloseRecordset(); }
+@if (!vSampleOperasionalList.IsExport()) {
+<div class="card-footer ew-grid-lower-panel">
+@if (!vSampleOperasionalList.IsGridAdd && !(vSampleOperasionalList.IsGridEdit && vSampleOperasionalList.ModalGridEdit) && !vSampleOperasionalList.IsMultiEdit) {
+@Html.Raw(vSampleOperasionalList.Pager.Render())
+}
+<div class="ew-list-other-options">
+@vSampleOperasionalList.OtherOptions.RenderBody("bottom")
+</div>
+</div>
+}
+</div><!-- /.ew-grid -->
+} else { // Show other options
+<div class="ew-list-other-options">
+@vSampleOperasionalList.OtherOptions.ForEach(opt => opt.ButtonClass = "").RenderBody()
+</div>
+}
+</div>
+<div id="ew-footer-options">
+    @vSampleOperasionalList.FooterOptions.RenderBody()
+</div>
+</main>
+@vSampleOperasionalList.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+@if (!vSampleOperasionalList.IsExport()) {
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("VSampleOperasional");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Write your table-specific startup script here
+    // document.write("page loaded");
+});
+</script>
+}

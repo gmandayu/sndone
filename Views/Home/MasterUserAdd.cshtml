@@ -1,0 +1,762 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (masterUserAdd.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = masterUserAdd.UseLayout ? "_Layout" : "";
+}
+<script>
+var currentTable = @Html.Raw(ConvertToJson(masterUserAdd.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { MasterUser: currentTable } });
+var currentPageID = ew.PAGE_ID = "add";
+var currentForm;
+var fMasterUseradd;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("fMasterUseradd")
+        .setPageId("add")
+
+        // Add fields
+        .setFields([
+
+            ["_Email", [fields._Email.visible && fields._Email.required ? ew.Validators.required(fields._Email.caption) : null, ew.Validators.email], fields._Email.isInvalid],
+            ["_Username", [fields._Username.visible && fields._Username.required ? ew.Validators.required(fields._Username.caption) : null], fields._Username.isInvalid],
+            ["PasswordHash", [fields.PasswordHash.visible && fields.PasswordHash.required ? ew.Validators.required(fields.PasswordHash.caption) : null], fields.PasswordHash.isInvalid],
+            ["NamaLengkap", [fields.NamaLengkap.visible && fields.NamaLengkap.required ? ew.Validators.required(fields.NamaLengkap.caption) : null], fields.NamaLengkap.isInvalid],
+            ["_UserLevel", [fields._UserLevel.visible && fields._UserLevel.required ? ew.Validators.required(fields._UserLevel.caption) : null], fields._UserLevel.isInvalid],
+            ["Rule", [fields.Rule.visible && fields.Rule.required ? ew.Validators.required(fields.Rule.caption) : null], fields.Rule.isInvalid],
+            ["IdPosition", [fields.IdPosition.visible && fields.IdPosition.required ? ew.Validators.required(fields.IdPosition.caption) : null, ew.Validators.integer], fields.IdPosition.isInvalid],
+            ["Region", [fields.Region.visible && fields.Region.required ? ew.Validators.required(fields.Region.caption) : null], fields.Region.isInvalid],
+            ["Plant", [fields.Plant.visible && fields.Plant.required ? ew.Validators.required(fields.Plant.caption) : null], fields.Plant.isInvalid],
+            ["LookupPosition", [fields.LookupPosition.visible && fields.LookupPosition.required ? ew.Validators.required(fields.LookupPosition.caption) : null], fields.LookupPosition.isInvalid],
+            ["StatusAktif", [fields.StatusAktif.visible && fields.StatusAktif.required ? ew.Validators.required(fields.StatusAktif.caption) : null], fields.StatusAktif.isInvalid],
+            ["Keterangan", [fields.Keterangan.visible && fields.Keterangan.required ? ew.Validators.required(fields.Keterangan.caption) : null], fields.Keterangan.isInvalid],
+            ["IdIdaman", [fields.IdIdaman.visible && fields.IdIdaman.required ? ew.Validators.required(fields.IdIdaman.caption) : null], fields.IdIdaman.isInvalid]
+        ])
+
+        // Form_CustomValidate
+        .setCustomValidate(
+            function(fobj) { // DO NOT CHANGE THIS LINE!
+                    // Your custom validation code here, return false if invalid.
+                    return true;
+                }
+        )
+
+        // Use JavaScript validation or not
+        .setValidateRequired(ew.CLIENT_VALIDATE)
+
+        // Dynamic selection lists
+        .setLists({
+            "_UserLevel": @Html.Raw(masterUserAdd._UserLevel.ToClientList(masterUserAdd)),
+            "Rule": @Html.Raw(masterUserAdd.Rule.ToClientList(masterUserAdd)),
+            "IdPosition": @Html.Raw(masterUserAdd.IdPosition.ToClientList(masterUserAdd)),
+            "Region": @Html.Raw(masterUserAdd.Region.ToClientList(masterUserAdd)),
+            "Plant": @Html.Raw(masterUserAdd.Plant.ToClientList(masterUserAdd)),
+            "LookupPosition": @Html.Raw(masterUserAdd.LookupPosition.ToClientList(masterUserAdd)),
+            "StatusAktif": @Html.Raw(masterUserAdd.StatusAktif.ToClientList(masterUserAdd)),
+        })
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Client script
+    // Write your client script here, no need to add script tags.
+    const parent_url = ew.PATH_BASE;
+    const userLevel = "@CurrentUserLevel()";
+    let isAutoFillingFromApi = false;
+    function setLookupSelect2Value($el, value, text) {
+        if (!$el.length || value == null || value === '') return;
+        const stringValue = String(value);
+        const stringText = String(text ?? value);
+        let $opt = $el.find(`option[value="${stringValue}"]`);
+        if (!$opt.length) {
+            $opt = $(new Option(stringText, stringValue, true, true));
+            $el.append($opt);
+        } else {
+            $opt.text(stringText).prop('selected', true);
+        }
+        $el.val(stringValue).trigger('change');
+        $el.trigger('change.select2');
+    }
+    $('#x_LookupPosition').on('change', function () {
+        hideFeedback($(this));
+        $('#x_IdPosition').val($(this).val());
+    });
+    function disabledPosition() {
+        const $positionLookup = $('#x_LookupPosition');
+        $('#r_LookupPosition').show();
+        $positionLookup.empty();
+        $positionLookup.append('<option value="">-- Pilih Position --</option>');
+        $positionLookup.val('').trigger('change');
+        $('#x_IdPosition').val('');
+        $positionLookup.prop('disabled', false);
+    }
+    function getPosition(userLevel, role, region, plant, selectedPositionId = null) {
+        const $positionLookup = $('#x_LookupPosition');
+        $positionLookup.empty();
+        $positionLookup.prop('disabled', false);
+        $positionLookup.append('<option value="">Loading...</option>');
+        $('#r_LookupPosition').show();
+        let requestUrl = `${parent_url}api/LookUpList/get-dropdown/user-position?UserLevel=${encodeURIComponent(userLevel)}`;
+        if (role) {
+            requestUrl += `&IdRule=${encodeURIComponent(role)}`;
+        }
+        if (region) {
+            requestUrl += `&IdRegion=${encodeURIComponent(region)}`;
+        }
+        if (plant) {
+            requestUrl += `&IdPlant=${encodeURIComponent(plant)}`;
+        }
+        $.ajax({
+            url: requestUrl,
+            method: 'GET',
+            dataType: 'json',
+            beforeSend: function () {
+                showLoading();
+            },
+            success: function (response) {
+                $positionLookup.empty();
+                $positionLookup.append('<option value="">-- Pilih Position --</option>');
+                if ($.isArray(response) && response.length > 0) {
+                    $.each(response, function (index, item) {
+                        $positionLookup.append(`<option value="${item.Value}">${item.Label}</option>`);
+                    });
+                } else {
+                    $positionLookup.append('<option value="">Data position tidak tersedia</option>');
+                }
+                if (selectedPositionId != null && selectedPositionId !== '') {
+                    const selectedPositionIdString = String(selectedPositionId);
+                    if ($positionLookup.find(`option[value="${selectedPositionIdString}"]`).length > 0) {
+                        $positionLookup.val(selectedPositionIdString).trigger('change');
+                        $('#x_IdPosition').val(selectedPositionIdString);
+                    } else {
+                        $positionLookup.val('');
+                        $('#x_IdPosition').val('');
+                    }
+                } else {
+                    $positionLookup.val('');
+                    $('#x_IdPosition').val('');
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error('Gagal ambil data dropdown:', error);
+                $positionLookup.empty();
+                $positionLookup.append('<option value="">Gagal memuat data</option>');
+                $('#x_IdPosition').val('');
+            },
+            complete: function () {
+                hideLoading();
+            },
+        });
+    }
+    function resetPositionDependencies() {
+        setLookupSelect2Value($('#x__UserLevel'), '', '');
+        $('#x__UserLevel').val('').trigger('change');
+        setLookupSelect2Value($('#x_Rule'), '', '');
+        $('#x_Rule').val('').trigger('change');
+        setLookupSelect2Value($('#x_Region'), '', '');
+        $('#x_Region').val('').trigger('change');
+        setLookupSelect2Value($('#x_Plant'), '', '');
+        $('#x_Plant').val('').trigger('change');
+        $('#x_LookupPosition').empty().append('<option value="">-- Pilih Position --</option>').val('').trigger('change');
+        $('#x_IdPosition').val('');
+    }
+    function handleUserLevelDependencies(selectedUserLevel) {
+        if (!selectedUserLevel) {
+            $('#r_Plant').hide();
+            $('#r_Region').hide();
+            $('#x_Plant').val('');
+            $('#x_Region').val('');
+            $('#x_Region').prop('disabled', true);
+            $('#x_Plant').prop('disabled', true);
+            return;
+        }
+        if (selectedUserLevel === '3') {
+            $('#r_Plant').hide();
+            $('#r_Region').hide();
+            $('#x_Plant').val('');
+            $('#x_Region').val('');
+            $('#x_Region').prop('disabled', true);
+            $('#x_Plant').prop('disabled', true);
+            return;
+        }
+        if (selectedUserLevel === '4') {
+            $('#r_Region').show();
+            $('#r_Plant').hide();
+            $('#x_Plant').val('');
+            $('#x_Region').prop('disabled', false);
+            $('#x_Plant').prop('disabled', true);
+            return;
+        }
+        $('#r_Plant').show();
+        $('#r_Region').show();
+        $('#x_Region').prop('disabled', false);
+        if (!$('#x_Region').val()) {
+            $('#x_Plant').val('');
+            $('#x_Plant').prop('disabled', true);
+        } else {
+            $('#x_Plant').prop('disabled', false);
+        }
+    }
+    $('#x__UserLevel, #x_Rule, #x_Region, #x_Plant').on('change', function () {
+        hideFeedback($(this));
+        const selectedUserLevel = $('#x__UserLevel').val();
+        const selectedRole = $('#x_Rule').val();
+        const selectedRegion = $('#x_Region').val();
+        const selectedPlant = $('#x_Plant').val();
+        const selectedPositionId = isAutoFillingFromApi ? $('#x_IdPosition').val() : null;
+        handleUserLevelDependencies(selectedUserLevel);
+        if (!selectedUserLevel) {
+            $('#x_IdPosition').val('');
+            $('#x_LookupPosition').val('').trigger('change');
+            disabledPosition();
+            return;
+        }
+        if (!isAutoFillingFromApi) {
+            $('#x_IdPosition').val('');
+            $('#x_LookupPosition').val('').trigger('change');
+        }
+        getPosition(selectedUserLevel, selectedRole, selectedRegion, selectedPlant, selectedPositionId);
+    });
+    function hideFeedback($element) {
+        const $feedback = $element.siblings('.invalid-feedback');
+        $element.removeClass('is-invalid');
+        $feedback.hide();
+    }
+    $('#fMasterUseradd').on('submit', function (e) {
+        e.preventDefault();
+        const selectedUserLevel = $('#x__UserLevel').val();
+        const selectedPositionId = $('#x_IdPosition').val();
+        const selectedRole = $('#x_Rule').val();
+        if (!selectedUserLevel) {
+            $('#x__UserLevel').addClass('is-invalid');
+            $('#x__UserLevel').siblings('.invalid-feedback').text('User level harus dipilih.').show();
+            return false;
+        }
+        if (!selectedRole) {
+            $('#x_Rule').addClass('is-invalid');
+            $('#x_Rule').siblings('.invalid-feedback').text('Role harus dipilih.').show();
+            return false;
+        }
+        if (!selectedPositionId) {
+            $('#x_LookupPosition').addClass('is-invalid');
+            $('#x_LookupPosition').siblings('.invalid-feedback').text('Position harus dipilih.').show();
+            return false;
+        }
+        showLoading();
+        setTimeout(() => {
+            hideLoading();
+        }, 3000);
+        HTMLFormElement.prototype.submit.call(this);
+    });
+    if (userLevel === '-1') {
+        const style = `
+                <style>
+                    #r__Email .input-group .form-control {
+                        border-top-right-radius: 0;
+                        border-bottom-right-radius: 0;
+                    }
+                    #r__Email .input-group .btn {
+                        border-top-left-radius: 0;
+                        border-bottom-left-radius: 0;
+                        white-space: nowrap;
+                    }
+                </style>
+            `;
+        $('head').append(style);
+        const $emailInput = $('#x__Email');
+        const checkPositionButtonHtml = `
+                <button type="button" class="btn btn-success" id="btn-email-check" title="Cek Jabatan">
+                    <i class="fas fa-search"></i> Cek Jabatan
+                </button>
+            `;
+        if (!$emailInput.length || $('#btn-email-check').length) {
+            console.warn('Button tidak ter-generate.');
+        } else {
+            $emailInput.wrap('<div class="input-group w-100"></div>');
+            $emailInput.after(checkPositionButtonHtml);
+        }
+        $(document).on('click', '#btn-email-check', function (e) {
+            e.preventDefault();
+            resetPositionDependencies();
+            const emailAddress = ($('#x__Email').val() || '').trim();
+            if (!emailAddress) {
+                ew.alert('Email wajib diisi.');
+                $('#x__Email').focus();
+                return;
+            }
+            const $button = $(this);
+            const originalButtonHtml = $button.html();
+            $button.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Checking...');
+            $.ajax({
+                url: `${ew.PATH_BASE}api/LookUpList/position-by-email`,
+                type: 'POST',
+                contentType: 'application/json',
+                dataType: 'json',
+                data: JSON.stringify({ email: emailAddress }),
+                success: function (response) {
+                    if (!response.success) {
+                        ew.alert(response.message || 'Gagal cek jabatan.');
+                        return;
+                    }
+                    const responseData = response.data || {};
+                    const userData = responseData.user || {};
+                    const levelData = userData.level || {};
+                    const roleData = userData.role || {};
+                    const idamanData = userData.idaman || {};
+                    const positionData = idamanData.position || {};
+                    const resolvedEmail = userData.email || '';
+                    const resolvedUserName = userData.userName || '';
+                    const resolvedFullName = userData.fullName || '';
+                    const alreadyExistsInMasterUser = userData.exists === true;
+                    const isPjs = userData.isPjs === true;
+                    const resolvedUserLevel = levelData.id;
+                    const resolvedUserLevelName = levelData.name || '';
+                    const resolvedRole = roleData.id;
+                    const resolvedRoleName = roleData.name || '';
+                    const resolvedIdIdaman = idamanData.id || '';
+                    const resolvedPositionId = positionData.id;
+                    const resolvedPositionName = positionData.name || '';
+                    isAutoFillingFromApi = true;
+                    if ($('#x__Email').length && resolvedEmail) {
+                        $('#x__Email').val(resolvedEmail);
+                    }
+                    if ($('#x__Username').length && resolvedUserName) {
+                        $('#x__Username').val(resolvedUserName);
+                    }
+                    if ($('#x_NamaLengkap').length && resolvedFullName) {
+                        $('#x_NamaLengkap').val(resolvedFullName);
+                    }
+                    if ($('#x_IdPosition').length && resolvedPositionId != null) {
+                        $('#x_IdPosition').val(String(resolvedPositionId));
+                    }
+                    if ($('#x__UserLevel').length && resolvedUserLevel != null) {
+                        setLookupSelect2Value($('#x__UserLevel'), resolvedUserLevel, resolvedUserLevelName || resolvedUserLevel);
+                    }
+                    if ($('#x_Rule').length && resolvedRole != null) {
+                        setLookupSelect2Value($('#x_Rule'), resolvedRole, resolvedRoleName || resolvedRole);
+                    }
+                    // id idaman di-hide
+                    if ($('#x_IdIdaman').length && resolvedIdIdaman) {
+                        $('#x_IdIdaman').val(resolvedIdIdaman);
+                    }
+                    handleUserLevelDependencies(String(resolvedUserLevel ?? ''));
+                    const selectedRegion = $('#x_Region').val();
+                    const selectedPlant = $('#x_Plant').val();
+                    if (resolvedUserLevel != null) {
+                        getPosition(String(resolvedUserLevel), resolvedRole != null ? String(resolvedRole) : $('#x_Rule').val(), selectedRegion, selectedPlant, resolvedPositionId != null ? String(resolvedPositionId) : null);
+                    }
+                    let message = 'Jabatan berhasil ditemukan.';
+                    if (alreadyExistsInMasterUser) {
+                        message += ' Pengguna dengan email ini sudah ada di dalam sistem.';
+                    }
+                    if (isPjs) {
+                        message += ' Pengguna termasuk Pengguna PJS.';
+                    }
+                    ew.alert(message);
+                },
+                error: function (xhr, status, error) {
+                    console.error(error);
+                    ew.alert('Terjadi error saat menghubungi server.');
+                },
+                complete: function () {
+                    isAutoFillingFromApi = false;
+                    $button.prop('disabled', false).html(originalButtonHtml);
+                },
+            });
+        });
+    }
+});
+</script>
+@masterUserAdd.ShowPageHeader()
+@masterUserAdd.ShowMessages()
+<form name="fMasterUseradd" id="fMasterUseradd" class="@(masterUserAdd.FormClassName)" action="@AppPath(CurrentPageName())" method="post" novalidate autocomplete="off">
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+<input type="hidden" name="action" id="action" value="insert">
+<input type="hidden" name="modal" value="@ConvertToInt(masterUserAdd.IsModal)">
+@if (IsJsonResponse()) {
+<input type="hidden" name="json" value="1">
+}
+<input type="hidden" name="@(masterUserAdd.OldKeyName)" value="@Html.Raw(masterUserAdd.OldKey)">
+<div class="ew-add-div"><!-- page* -->
+@if (masterUserAdd._Email.Visible) { // masterUserAdd._Email.Visible (begin)
+    <div id="r__Email" @Html.Raw(masterUserAdd._Email.RowAttributes)>
+        <label id="elh_MasterUser__Email" for="x__Email" class="@(masterUserAdd.LeftColumnClass)">@Html.Raw(masterUserAdd._Email.Caption)@Html.Raw(masterUserAdd._Email.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(masterUserAdd.RightColumnClass)"><div @Html.Raw(masterUserAdd._Email.CellAttributes)>
+<span id="el_MasterUser__Email">
+<input type="@(masterUserAdd._Email.InputTextType)" name="x__Email" id="x__Email" data-table="MasterUser" data-field="x__Email" value="@Html.Raw(masterUserAdd._Email.EditValue)" size="30" maxlength="100" placeholder="@Html.Raw(HtmlEncode(masterUserAdd._Email.PlaceHolder))" data-format-pattern="@(masterUserAdd._Email.FormatPattern)"@Html.Raw(masterUserAdd._Email.EditAttributes) aria-describedby="x__Email_help">
+@Html.Raw(masterUserAdd._Email.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(masterUserAdd._Email.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* masterUserAdd._Email.Visible (end) *@
+@if (masterUserAdd._Username.Visible) { // masterUserAdd._Username.Visible (begin)
+    <div id="r__Username" @Html.Raw(masterUserAdd._Username.RowAttributes)>
+        <label id="elh_MasterUser__Username" for="x__Username" class="@(masterUserAdd.LeftColumnClass)">@Html.Raw(masterUserAdd._Username.Caption)@Html.Raw(masterUserAdd._Username.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(masterUserAdd.RightColumnClass)"><div @Html.Raw(masterUserAdd._Username.CellAttributes)>
+<span id="el_MasterUser__Username">
+<input type="@(masterUserAdd._Username.InputTextType)" name="x__Username" id="x__Username" data-table="MasterUser" data-field="x__Username" value="@Html.Raw(masterUserAdd._Username.EditValue)" size="30" maxlength="50" placeholder="@Html.Raw(HtmlEncode(masterUserAdd._Username.PlaceHolder))" data-format-pattern="@(masterUserAdd._Username.FormatPattern)"@Html.Raw(masterUserAdd._Username.EditAttributes) aria-describedby="x__Username_help">
+@Html.Raw(masterUserAdd._Username.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(masterUserAdd._Username.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* masterUserAdd._Username.Visible (end) *@
+@if (masterUserAdd.PasswordHash.Visible) { // masterUserAdd.PasswordHash.Visible (begin)
+    <div id="r_PasswordHash" @Html.Raw(masterUserAdd.PasswordHash.RowAttributes)>
+        <label id="elh_MasterUser_PasswordHash" for="x_PasswordHash" class="@(masterUserAdd.LeftColumnClass)">@Html.Raw(masterUserAdd.PasswordHash.Caption)@Html.Raw(masterUserAdd.PasswordHash.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(masterUserAdd.RightColumnClass)"><div @Html.Raw(masterUserAdd.PasswordHash.CellAttributes)>
+<span id="el_MasterUser_PasswordHash">
+<div class="input-group">
+    <input type="password" name="x_PasswordHash" id="x_PasswordHash" autocomplete="new-password" data-field="x_PasswordHash" size="30" maxlength="255" placeholder="@(HtmlEncode(masterUserAdd.PasswordHash.PlaceHolder))"@Html.Raw(masterUserAdd.PasswordHash.EditAttributes) aria-describedby="x_PasswordHash_help">
+    <button type="button" class="btn btn-default ew-toggle-password rounded-end" data-ew-action="password"><i class="fa-solid fa-eye"></i></button>
+</div>
+@Html.Raw(masterUserAdd.PasswordHash.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(masterUserAdd.PasswordHash.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* masterUserAdd.PasswordHash.Visible (end) *@
+@if (masterUserAdd.NamaLengkap.Visible) { // masterUserAdd.NamaLengkap.Visible (begin)
+    <div id="r_NamaLengkap" @Html.Raw(masterUserAdd.NamaLengkap.RowAttributes)>
+        <label id="elh_MasterUser_NamaLengkap" for="x_NamaLengkap" class="@(masterUserAdd.LeftColumnClass)">@Html.Raw(masterUserAdd.NamaLengkap.Caption)@Html.Raw(masterUserAdd.NamaLengkap.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(masterUserAdd.RightColumnClass)"><div @Html.Raw(masterUserAdd.NamaLengkap.CellAttributes)>
+<span id="el_MasterUser_NamaLengkap">
+<input type="@(masterUserAdd.NamaLengkap.InputTextType)" name="x_NamaLengkap" id="x_NamaLengkap" data-table="MasterUser" data-field="x_NamaLengkap" value="@Html.Raw(masterUserAdd.NamaLengkap.EditValue)" size="30" maxlength="100" placeholder="@Html.Raw(HtmlEncode(masterUserAdd.NamaLengkap.PlaceHolder))" data-format-pattern="@(masterUserAdd.NamaLengkap.FormatPattern)"@Html.Raw(masterUserAdd.NamaLengkap.EditAttributes) aria-describedby="x_NamaLengkap_help">
+@Html.Raw(masterUserAdd.NamaLengkap.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(masterUserAdd.NamaLengkap.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* masterUserAdd.NamaLengkap.Visible (end) *@
+@if (masterUserAdd._UserLevel.Visible) { // masterUserAdd._UserLevel.Visible (begin)
+    <div id="r__UserLevel" @Html.Raw(masterUserAdd._UserLevel.RowAttributes)>
+        <label id="elh_MasterUser__UserLevel" for="x__UserLevel" class="@(masterUserAdd.LeftColumnClass)">@Html.Raw(masterUserAdd._UserLevel.Caption)@Html.Raw(masterUserAdd._UserLevel.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(masterUserAdd.RightColumnClass)"><div @Html.Raw(masterUserAdd._UserLevel.CellAttributes)>
+@if (!Security.IsAdmin && Security.IsLoggedIn) { // Non system admin
+<span id="el_MasterUser__UserLevel">
+<span class="form-control-plaintext">@Html.Raw(masterUserAdd._UserLevel.DisplayValue(masterUserAdd._UserLevel.EditValue))</span>
+</span>
+} else {
+<span id="el_MasterUser__UserLevel">
+    <select
+        id="x__UserLevel"
+        name="x__UserLevel"
+        class="form-select ew-select@(masterUserAdd._UserLevel.IsInvalidClass)"
+        data-select2-id="fMasterUseradd_x__UserLevel"
+        data-table="MasterUser"
+        data-field="x__UserLevel"
+        data-value-separator="@(masterUserAdd._UserLevel.DisplayValueSeparatorAttribute)"
+        data-placeholder="@(HtmlEncode(masterUserAdd._UserLevel.PlaceHolder))"
+        @Html.Raw(masterUserAdd._UserLevel.EditAttributes)>
+        @(masterUserAdd._UserLevel.SelectOptionListHtml("x__UserLevel"))
+    </select>
+    @Html.Raw(masterUserAdd._UserLevel.GetCustomMessage)
+    <div class="invalid-feedback">@Html.Raw(masterUserAdd._UserLevel.GetErrorMessage())</div>
+@Html.Raw(masterUserAdd._UserLevel.Lookup.GetParamTag(masterUserAdd, "p_x__UserLevel"))
+<script>
+loadjs.ready("fMasterUseradd", function() {
+    var options = { name: "x__UserLevel", selectId: "fMasterUseradd_x__UserLevel" },
+        el = document.querySelector("select[data-select2-id='" + options.selectId + "']");
+    if (!el)
+        return;
+    options.closeOnSelect = !options.multiple;
+    options.dropdownParent = el.closest("#ew-modal-dialog, #ew-add-opt-dialog");
+    if (fMasterUseradd.lists._UserLevel?.lookupOptions.length) {
+        options.data = { id: "x__UserLevel", form: "fMasterUseradd" };
+    } else {
+        options.ajax = { id: "x__UserLevel", form: "fMasterUseradd", limit: ew.LOOKUP_PAGE_SIZE };
+    }
+    options.minimumInputLength = ew.selectMinimumInputLength;
+    options = Object.assign({}, ew.selectOptions, options, ew.vars.tables.MasterUser.fields._UserLevel.selectOptions);
+    ew.createSelect(options);
+});
+</script>
+</span>
+}
+</div></div>
+    </div>
+} @* masterUserAdd._UserLevel.Visible (end) *@
+@if (masterUserAdd.Rule.Visible) { // masterUserAdd.Rule.Visible (begin)
+    <div id="r_Rule" @Html.Raw(masterUserAdd.Rule.RowAttributes)>
+        <label id="elh_MasterUser_Rule" for="x_Rule" class="@(masterUserAdd.LeftColumnClass)">@Html.Raw(masterUserAdd.Rule.Caption)@Html.Raw(masterUserAdd.Rule.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(masterUserAdd.RightColumnClass)"><div @Html.Raw(masterUserAdd.Rule.CellAttributes)>
+<span id="el_MasterUser_Rule">
+    <select
+        id="x_Rule"
+        name="x_Rule"
+        class="form-select ew-select@(masterUserAdd.Rule.IsInvalidClass)"
+        data-select2-id="fMasterUseradd_x_Rule"
+        data-table="MasterUser"
+        data-field="x_Rule"
+        data-value-separator="@(masterUserAdd.Rule.DisplayValueSeparatorAttribute)"
+        data-placeholder="@(HtmlEncode(masterUserAdd.Rule.PlaceHolder))"
+        @Html.Raw(masterUserAdd.Rule.EditAttributes)>
+        @(masterUserAdd.Rule.SelectOptionListHtml("x_Rule"))
+    </select>
+    @Html.Raw(masterUserAdd.Rule.GetCustomMessage)
+    <div class="invalid-feedback">@Html.Raw(masterUserAdd.Rule.GetErrorMessage())</div>
+@Html.Raw(masterUserAdd.Rule.Lookup.GetParamTag(masterUserAdd, "p_x_Rule"))
+<script>
+loadjs.ready("fMasterUseradd", function() {
+    var options = { name: "x_Rule", selectId: "fMasterUseradd_x_Rule" },
+        el = document.querySelector("select[data-select2-id='" + options.selectId + "']");
+    if (!el)
+        return;
+    options.closeOnSelect = !options.multiple;
+    options.dropdownParent = el.closest("#ew-modal-dialog, #ew-add-opt-dialog");
+    if (fMasterUseradd.lists.Rule?.lookupOptions.length) {
+        options.data = { id: "x_Rule", form: "fMasterUseradd" };
+    } else {
+        options.ajax = { id: "x_Rule", form: "fMasterUseradd", limit: ew.LOOKUP_PAGE_SIZE };
+    }
+    options.minimumInputLength = ew.selectMinimumInputLength;
+    options = Object.assign({}, ew.selectOptions, options, ew.vars.tables.MasterUser.fields.Rule.selectOptions);
+    ew.createSelect(options);
+});
+</script>
+</span>
+</div></div>
+    </div>
+} @* masterUserAdd.Rule.Visible (end) *@
+@if (masterUserAdd.IdPosition.Visible) { // masterUserAdd.IdPosition.Visible (begin)
+    <div id="r_IdPosition" @Html.Raw(masterUserAdd.IdPosition.RowAttributes)>
+        <label id="elh_MasterUser_IdPosition" class="@(masterUserAdd.LeftColumnClass)">@Html.Raw(masterUserAdd.IdPosition.Caption)@Html.Raw(masterUserAdd.IdPosition.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(masterUserAdd.RightColumnClass)"><div @Html.Raw(masterUserAdd.IdPosition.CellAttributes)>
+<span id="el_MasterUser_IdPosition">
+<span>@{
+    if (IsRTL) {
+        masterUserAdd.IdPosition.EditAttrs["dir"] = "rtl";
+    }
+}</span>
+<span id="as_x_IdPosition" class="ew-auto-suggest">
+    <input type="text" class="form-control" name="sv_x_IdPosition" id="sv_x_IdPosition" value="@(RemoveHtml(ConvertToString(masterUserAdd.IdPosition.EditValue)))" autocomplete="off" size="30" placeholder="@Html.Raw(HtmlEncode(masterUserAdd.IdPosition.PlaceHolder))" data-placeholder="@Html.Raw(HtmlEncode(masterUserAdd.IdPosition.PlaceHolder))" data-format-pattern="@(masterUserAdd.IdPosition.FormatPattern)" @Html.Raw(masterUserAdd.IdPosition.EditAttributes) aria-describedby="x_IdPosition_help">
+</span>
+<selection-list hidden class="form-control" data-table="MasterUser" data-field="x_IdPosition" data-input="sv_x_IdPosition" data-value-separator="@(masterUserAdd.IdPosition.DisplayValueSeparatorAttribute)" name="x_IdPosition" id="x_IdPosition" value="@(HtmlEncode(masterUserAdd.IdPosition.CurrentValue))"></selection-list>
+@Html.Raw(masterUserAdd.IdPosition.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(masterUserAdd.IdPosition.GetErrorMessage())</div>
+<script>
+loadjs.ready(["fMasterUseradd"], function() {
+    fMasterUseradd.createAutoSuggest(Object.assign({"id":"x_IdPosition","forceSelect":false}, { lookupAllDisplayFields: @(masterUserAdd.IdPosition.Lookup.LookupAllDisplayFields ? "true" : "false") }, ew.vars.tables.MasterUser.fields.IdPosition.autoSuggestOptions));
+});
+</script>
+@Html.Raw(masterUserAdd.IdPosition.Lookup.GetParamTag(masterUserAdd, "p_x_IdPosition"))
+</span>
+</div></div>
+    </div>
+} @* masterUserAdd.IdPosition.Visible (end) *@
+@if (masterUserAdd.Region.Visible) { // masterUserAdd.Region.Visible (begin)
+    <div id="r_Region" @Html.Raw(masterUserAdd.Region.RowAttributes)>
+        <label id="elh_MasterUser_Region" for="x_Region" class="@(masterUserAdd.LeftColumnClass)">@Html.Raw(masterUserAdd.Region.Caption)@Html.Raw(masterUserAdd.Region.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(masterUserAdd.RightColumnClass)"><div @Html.Raw(masterUserAdd.Region.CellAttributes)>
+<span id="el_MasterUser_Region">
+    <select
+        id="x_Region"
+        name="x_Region"
+        class="form-select ew-select@(masterUserAdd.Region.IsInvalidClass)"
+        data-select2-id="fMasterUseradd_x_Region"
+        data-table="MasterUser"
+        data-field="x_Region"
+        data-value-separator="@(masterUserAdd.Region.DisplayValueSeparatorAttribute)"
+        data-placeholder="@(HtmlEncode(masterUserAdd.Region.PlaceHolder))"
+        data-ew-action="update-options"
+        @Html.Raw(masterUserAdd.Region.EditAttributes)>
+        @(masterUserAdd.Region.SelectOptionListHtml("x_Region"))
+    </select>
+    @Html.Raw(masterUserAdd.Region.GetCustomMessage)
+    <div class="invalid-feedback">@Html.Raw(masterUserAdd.Region.GetErrorMessage())</div>
+@Html.Raw(masterUserAdd.Region.Lookup.GetParamTag(masterUserAdd, "p_x_Region"))
+<script>
+loadjs.ready("fMasterUseradd", function() {
+    var options = { name: "x_Region", selectId: "fMasterUseradd_x_Region" },
+        el = document.querySelector("select[data-select2-id='" + options.selectId + "']");
+    if (!el)
+        return;
+    options.closeOnSelect = !options.multiple;
+    options.dropdownParent = el.closest("#ew-modal-dialog, #ew-add-opt-dialog");
+    if (fMasterUseradd.lists.Region?.lookupOptions.length) {
+        options.data = { id: "x_Region", form: "fMasterUseradd" };
+    } else {
+        options.ajax = { id: "x_Region", form: "fMasterUseradd", limit: ew.LOOKUP_PAGE_SIZE };
+    }
+    options.minimumInputLength = ew.selectMinimumInputLength;
+    options = Object.assign({}, ew.selectOptions, options, ew.vars.tables.MasterUser.fields.Region.selectOptions);
+    ew.createSelect(options);
+});
+</script>
+</span>
+</div></div>
+    </div>
+} @* masterUserAdd.Region.Visible (end) *@
+@if (masterUserAdd.Plant.Visible) { // masterUserAdd.Plant.Visible (begin)
+    <div id="r_Plant" @Html.Raw(masterUserAdd.Plant.RowAttributes)>
+        <label id="elh_MasterUser_Plant" for="x_Plant" class="@(masterUserAdd.LeftColumnClass)">@Html.Raw(masterUserAdd.Plant.Caption)@Html.Raw(masterUserAdd.Plant.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(masterUserAdd.RightColumnClass)"><div @Html.Raw(masterUserAdd.Plant.CellAttributes)>
+<span id="el_MasterUser_Plant">
+    <select
+        id="x_Plant"
+        name="x_Plant"
+        class="form-select ew-select@(masterUserAdd.Plant.IsInvalidClass)"
+        data-select2-id="fMasterUseradd_x_Plant"
+        data-table="MasterUser"
+        data-field="x_Plant"
+        data-value-separator="@(masterUserAdd.Plant.DisplayValueSeparatorAttribute)"
+        data-placeholder="@(HtmlEncode(masterUserAdd.Plant.PlaceHolder))"
+        @Html.Raw(masterUserAdd.Plant.EditAttributes)>
+        @(masterUserAdd.Plant.SelectOptionListHtml("x_Plant"))
+    </select>
+    @Html.Raw(masterUserAdd.Plant.GetCustomMessage)
+    <div class="invalid-feedback">@Html.Raw(masterUserAdd.Plant.GetErrorMessage())</div>
+@Html.Raw(masterUserAdd.Plant.Lookup.GetParamTag(masterUserAdd, "p_x_Plant"))
+<script>
+loadjs.ready("fMasterUseradd", function() {
+    var options = { name: "x_Plant", selectId: "fMasterUseradd_x_Plant" },
+        el = document.querySelector("select[data-select2-id='" + options.selectId + "']");
+    if (!el)
+        return;
+    options.closeOnSelect = !options.multiple;
+    options.dropdownParent = el.closest("#ew-modal-dialog, #ew-add-opt-dialog");
+    if (fMasterUseradd.lists.Plant?.lookupOptions.length) {
+        options.data = { id: "x_Plant", form: "fMasterUseradd" };
+    } else {
+        options.ajax = { id: "x_Plant", form: "fMasterUseradd", limit: ew.LOOKUP_PAGE_SIZE };
+    }
+    options.minimumInputLength = ew.selectMinimumInputLength;
+    options = Object.assign({}, ew.selectOptions, options, ew.vars.tables.MasterUser.fields.Plant.selectOptions);
+    ew.createSelect(options);
+});
+</script>
+</span>
+</div></div>
+    </div>
+} @* masterUserAdd.Plant.Visible (end) *@
+@if (masterUserAdd.LookupPosition.Visible) { // masterUserAdd.LookupPosition.Visible (begin)
+    <div id="r_LookupPosition" @Html.Raw(masterUserAdd.LookupPosition.RowAttributes)>
+        <label id="elh_MasterUser_LookupPosition" for="x_LookupPosition" class="@(masterUserAdd.LeftColumnClass)">@Html.Raw(masterUserAdd.LookupPosition.Caption)@Html.Raw(masterUserAdd.LookupPosition.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(masterUserAdd.RightColumnClass)"><div @Html.Raw(masterUserAdd.LookupPosition.CellAttributes)>
+<span id="el_MasterUser_LookupPosition">
+    <select
+        id="x_LookupPosition"
+        name="x_LookupPosition"
+        class="form-select ew-select@(masterUserAdd.LookupPosition.IsInvalidClass)"
+        data-select2-id="fMasterUseradd_x_LookupPosition"
+        data-table="MasterUser"
+        data-field="x_LookupPosition"
+        data-value-separator="@(masterUserAdd.LookupPosition.DisplayValueSeparatorAttribute)"
+        data-placeholder="@(HtmlEncode(masterUserAdd.LookupPosition.PlaceHolder))"
+        @Html.Raw(masterUserAdd.LookupPosition.EditAttributes)>
+        @(masterUserAdd.LookupPosition.SelectOptionListHtml("x_LookupPosition"))
+    </select>
+    @Html.Raw(masterUserAdd.LookupPosition.GetCustomMessage)
+    <div class="invalid-feedback">@Html.Raw(masterUserAdd.LookupPosition.GetErrorMessage())</div>
+<script>
+loadjs.ready("fMasterUseradd", function() {
+    var options = { name: "x_LookupPosition", selectId: "fMasterUseradd_x_LookupPosition" },
+        el = document.querySelector("select[data-select2-id='" + options.selectId + "']");
+    if (!el)
+        return;
+    options.closeOnSelect = !options.multiple;
+    options.dropdownParent = el.closest("#ew-modal-dialog, #ew-add-opt-dialog");
+    if (fMasterUseradd.lists.LookupPosition?.lookupOptions.length) {
+        options.data = { id: "x_LookupPosition", form: "fMasterUseradd" };
+    } else {
+        options.ajax = { id: "x_LookupPosition", form: "fMasterUseradd", limit: ew.LOOKUP_PAGE_SIZE };
+    }
+    options.minimumInputLength = ew.selectMinimumInputLength;
+    options = Object.assign({}, ew.selectOptions, options, ew.vars.tables.MasterUser.fields.LookupPosition.selectOptions);
+    ew.createSelect(options);
+});
+</script>
+</span>
+</div></div>
+    </div>
+} @* masterUserAdd.LookupPosition.Visible (end) *@
+@if (masterUserAdd.StatusAktif.Visible) { // masterUserAdd.StatusAktif.Visible (begin)
+    <div id="r_StatusAktif" @Html.Raw(masterUserAdd.StatusAktif.RowAttributes)>
+        <label id="elh_MasterUser_StatusAktif" class="@(masterUserAdd.LeftColumnClass)">@Html.Raw(masterUserAdd.StatusAktif.Caption)@Html.Raw(masterUserAdd.StatusAktif.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(masterUserAdd.RightColumnClass)"><div @Html.Raw(masterUserAdd.StatusAktif.CellAttributes)>
+<span id="el_MasterUser_StatusAktif">
+<div class="form-check d-inline-block">
+    <input type="checkbox" class="form-check-input@(masterUserAdd.StatusAktif.IsInvalidClass)" data-table="MasterUser" data-field="x_StatusAktif" data-boolean name="x_StatusAktif" id="x_StatusAktif" value="1" checked="@ConvertToBool(masterUserAdd.StatusAktif.CurrentValue)" @Html.Raw(masterUserAdd.StatusAktif.EditAttributes) aria-describedby="x_StatusAktif_help">
+    <div class="invalid-feedback">@Html.Raw(masterUserAdd.StatusAktif.GetErrorMessage())</div>
+</div>
+@Html.Raw(masterUserAdd.StatusAktif.GetCustomMessage)
+</span>
+</div></div>
+    </div>
+} @* masterUserAdd.StatusAktif.Visible (end) *@
+@if (masterUserAdd.Keterangan.Visible) { // masterUserAdd.Keterangan.Visible (begin)
+    <div id="r_Keterangan" @Html.Raw(masterUserAdd.Keterangan.RowAttributes)>
+        <label id="elh_MasterUser_Keterangan" for="x_Keterangan" class="@(masterUserAdd.LeftColumnClass)">@Html.Raw(masterUserAdd.Keterangan.Caption)@Html.Raw(masterUserAdd.Keterangan.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(masterUserAdd.RightColumnClass)"><div @Html.Raw(masterUserAdd.Keterangan.CellAttributes)>
+<span id="el_MasterUser_Keterangan">
+<textarea data-table="MasterUser" data-field="x_Keterangan" name="x_Keterangan" id="x_Keterangan" cols="35" rows="4" placeholder="@Html.Raw(HtmlEncode(masterUserAdd.Keterangan.PlaceHolder))"@Html.Raw(masterUserAdd.Keterangan.EditAttributes) aria-describedby="x_Keterangan_help">@(masterUserAdd.Keterangan.EditValue)</textarea>
+@Html.Raw(masterUserAdd.Keterangan.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(masterUserAdd.Keterangan.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* masterUserAdd.Keterangan.Visible (end) *@
+@if (masterUserAdd.IdIdaman.Visible) { // masterUserAdd.IdIdaman.Visible (begin)
+    <div id="r_IdIdaman" @Html.Raw(masterUserAdd.IdIdaman.RowAttributes)>
+        <label id="elh_MasterUser_IdIdaman" for="x_IdIdaman" class="@(masterUserAdd.LeftColumnClass)">@Html.Raw(masterUserAdd.IdIdaman.Caption)@Html.Raw(masterUserAdd.IdIdaman.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(masterUserAdd.RightColumnClass)"><div @Html.Raw(masterUserAdd.IdIdaman.CellAttributes)>
+<span id="el_MasterUser_IdIdaman">
+<input type="@(masterUserAdd.IdIdaman.InputTextType)" name="x_IdIdaman" id="x_IdIdaman" data-table="MasterUser" data-field="x_IdIdaman" value="@Html.Raw(masterUserAdd.IdIdaman.EditValue)" size="30" maxlength="100" placeholder="@Html.Raw(HtmlEncode(masterUserAdd.IdIdaman.PlaceHolder))" data-format-pattern="@(masterUserAdd.IdIdaman.FormatPattern)"@Html.Raw(masterUserAdd.IdIdaman.EditAttributes) aria-describedby="x_IdIdaman_help">
+@Html.Raw(masterUserAdd.IdIdaman.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(masterUserAdd.IdIdaman.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* masterUserAdd.IdIdaman.Visible (end) *@
+</div><!-- /page* -->
+@{ masterUserAdd.CloseRecordset(); }
+@Html.Raw(masterUserAdd.IsModal ? "<template class=\"ew-modal-buttons\">" : "<div class=\"row ew-buttons\">")<!-- buttons .row -->
+    <div class="@(masterUserAdd.OffsetColumnClass)"><!-- buttons offset -->
+    <button class="btn btn-primary ew-btn" name="btn-action" id="btn-action" type="submit" form="fMasterUseradd">@Html.Raw(Language.Phrase("AddBtn"))</button>
+@if (IsJsonResponse()) {
+    <button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" data-bs-dismiss="modal">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+} else {
+    <button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" form="fMasterUseradd" data-href="@AppPath(masterUserAdd.ReturnUrl)">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+}
+    </div><!-- /buttons offset -->
+@Html.Raw(masterUserAdd.IsModal ? "</template>" : "</div>")<!-- /buttons .row -->
+</form>
+@masterUserAdd.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("MasterUser");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Startup script
+    $('#r_Plant').hide();
+    $('#r_Region').hide();
+    $('#r_IdPosition').hide();
+    $("#r_LookupPosition").hide();
+    $("#x_LookupPosition").empty();
+    $("#x_LookupPosition").prop('disable', true);
+    $('#r_Plant').prop('disable', true);
+    $('#r_Region').prop('disable', true);
+});
+</script>

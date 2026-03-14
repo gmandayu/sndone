@@ -1,0 +1,872 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (formInputGoodHouseKeepingList.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = formInputGoodHouseKeepingList.UseLayout ? "_Layout" : "";
+}
+@if (!formInputGoodHouseKeepingList.IsExport()) {
+<script>
+var currentTable = @Html.Raw(ConvertToJson(formInputGoodHouseKeepingList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { FormInputGoodHouseKeeping: currentTable } });
+var currentPageID = ew.PAGE_ID = "list";
+var currentForm;
+var @(formInputGoodHouseKeepingList.FormName);
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("@(formInputGoodHouseKeepingList.FormName)")
+        .setPageId("list")
+        .setSubmitWithFetch(@(formInputGoodHouseKeepingList.UseAjaxActions ? "true" : "false"))
+        .setFormKeyCountName("@(formInputGoodHouseKeepingList.FormKeyCountName)")
+
+        // Dynamic selection lists
+        .setLists({
+            "NoReferensi": @Html.Raw(formInputGoodHouseKeepingList.NoReferensi.ToClientList(formInputGoodHouseKeepingList)),
+            "tgltiba": @Html.Raw(formInputGoodHouseKeepingList.tgltiba.ToClientList(formInputGoodHouseKeepingList)),
+            "Lokasi": @Html.Raw(formInputGoodHouseKeepingList.Lokasi.ToClientList(formInputGoodHouseKeepingList)),
+            "Keterangan": @Html.Raw(formInputGoodHouseKeepingList.Keterangan.ToClientList(formInputGoodHouseKeepingList)),
+            "userInput": @Html.Raw(formInputGoodHouseKeepingList.userInput.ToClientList(formInputGoodHouseKeepingList)),
+            "etlDate": @Html.Raw(formInputGoodHouseKeepingList.etlDate.ToClientList(formInputGoodHouseKeepingList)),
+            "lastUpdatedBy": @Html.Raw(formInputGoodHouseKeepingList.lastUpdatedBy.ToClientList(formInputGoodHouseKeepingList)),
+            "lastUpdatedDate": @Html.Raw(formInputGoodHouseKeepingList.lastUpdatedDate.ToClientList(formInputGoodHouseKeepingList)),
+        })
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Client script
+    const parent_url = ew.PATH_BASE;
+    $(document).on('click', '.download-document', function (e) {
+        e.preventDefault();
+        const idGHK = $(this).data('id');
+        if (!idGHK) {
+            ew.alert("ID dokumen tidak ditemukan.");
+            return;
+        }
+        $.ajax({
+            url: parent_url + 'api/LookUpList/DownloadDocumentZip',
+            type: 'GET',
+            data: { 
+                idRef: idGHK,
+                table: 'DetailUploadGHK',
+                colRef: 'idGHK',
+                path: 'GHKDocument'
+            },
+            xhrFields: {
+                responseType: 'blob'
+            },
+            beforeSend: function () {
+                showLoading();
+            },
+            success: function (response, status, xhr) {
+                const disposition = xhr.getResponseHeader('Content-Disposition');
+                let fileName = "download_file";
+                if (disposition) {
+                    const fileNameMatch = disposition.match(/filename="?([^";]+)"?/);
+                    if (fileNameMatch && fileNameMatch[1]) {
+                        fileName = decodeURIComponent(fileNameMatch[1]);
+                    }
+                    const utf8FileNameMatch = disposition.match(/filename\*\s*=\s*UTF-8''([^;]+)/);
+                    if (utf8FileNameMatch && utf8FileNameMatch[1]) {
+                        fileName = decodeURIComponent(utf8FileNameMatch[1]);
+                    }
+                }
+                const blobUrl = window.URL.createObjectURL(response);
+                const a = document.createElement('a');
+                a.href = blobUrl;
+                a.download = fileName;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(blobUrl);
+                ew.alert("Download berhasil!");
+            },
+            error: function (xhr, status, error) {
+                if (xhr.status === 404) {
+                    ew.alert("File tidak ditemukan di server.");
+                } else if (xhr.status === 500) {
+                    ew.alert("Terjadi kesalahan server. Coba lagi nanti.");
+                } else {
+                    ew.alert("Gagal mendownload file. Error: " + xhr.responseText);
+                }
+            },
+            complete: function () {
+                hideLoading();
+            }
+        });
+    });
+});
+</script>
+}
+@if (!formInputGoodHouseKeepingList.IsExport()) {
+<div class="btn-toolbar ew-toolbar">
+@if (formInputGoodHouseKeepingList.TotalRecords > 0 && formInputGoodHouseKeepingList.ExportOptions.Visible) {
+    formInputGoodHouseKeepingList.ExportOptions.Render("body");
+}
+@if (formInputGoodHouseKeepingList.ImportOptions.Visible) {
+    formInputGoodHouseKeepingList.ImportOptions.Render("body");
+}
+@if (formInputGoodHouseKeepingList.SearchOptions.Visible) {
+    formInputGoodHouseKeepingList.SearchOptions.Render("body");
+}
+@if (formInputGoodHouseKeepingList.FilterOptions.Visible) {
+    formInputGoodHouseKeepingList.FilterOptions.Render("body");
+}
+</div>
+}
+@if (formInputGoodHouseKeepingList.ShowCurrentFilter) {
+    formInputGoodHouseKeepingList.ShowFilterList();
+}
+@if (!formInputGoodHouseKeepingList.IsModal) {
+<form name="fFormInputGoodHouseKeepingsrch" id="fFormInputGoodHouseKeepingsrch" class="ew-form ew-ext-search-form" action="@AppPath(CurrentPageName())" novalidate autocomplete="off">
+<div id="fFormInputGoodHouseKeepingsrch_search_panel" class="mb-2 mb-sm-0 @(formInputGoodHouseKeepingList.SearchPanelClass)"><!-- .ew-search-panel -->
+<script>
+var currentTable = @Html.Raw(ConvertToJson(formInputGoodHouseKeepingList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { FormInputGoodHouseKeeping: currentTable } });
+var currentForm;
+var fFormInputGoodHouseKeepingsrch, currentSearchForm, currentAdvancedSearchForm;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery,
+        fields = currentTable.fields;
+
+    // Form object for search
+    let form = new ew.FormBuilder()
+        .setId("fFormInputGoodHouseKeepingsrch")
+        .setPageId("list")
+@if (formInputGoodHouseKeepingList.UseAjaxActions) {
+        <text>.setSubmitWithFetch(true)</text>
+}
+
+        // Add fields
+        .setFields([
+        ])
+        // Validate form
+        .setValidate(
+            async function () {
+                if (!this.validateRequired)
+                    return true; // Ignore validation
+                let fobj = this.getForm();
+
+                // Validate fields
+                if (!this.validateFields())
+                    return false;
+
+                // Call Form_CustomValidate event
+                if (!(await this.customValidate?.(fobj) ?? true)) {
+                    this.focus();
+                    return false;
+                }
+                return true;
+            }
+        )
+
+        // Form_CustomValidate
+        .setCustomValidate(
+            function(fobj) { // DO NOT CHANGE THIS LINE!
+                    // Your custom validation code here, return false if invalid.
+                    return true;
+                }
+        )
+
+        // Use JavaScript validation or not
+        .setValidateRequired(ew.CLIENT_VALIDATE)
+
+        // Dynamic selection lists
+        .setLists({
+            "NoReferensi": @Html.Raw(formInputGoodHouseKeepingList.NoReferensi.ToClientList(formInputGoodHouseKeepingList)),
+            "tgltiba": @Html.Raw(formInputGoodHouseKeepingList.tgltiba.ToClientList(formInputGoodHouseKeepingList)),
+            "Lokasi": @Html.Raw(formInputGoodHouseKeepingList.Lokasi.ToClientList(formInputGoodHouseKeepingList)),
+            "Keterangan": @Html.Raw(formInputGoodHouseKeepingList.Keterangan.ToClientList(formInputGoodHouseKeepingList)),
+            "userInput": @Html.Raw(formInputGoodHouseKeepingList.userInput.ToClientList(formInputGoodHouseKeepingList)),
+            "etlDate": @Html.Raw(formInputGoodHouseKeepingList.etlDate.ToClientList(formInputGoodHouseKeepingList)),
+            "lastUpdatedBy": @Html.Raw(formInputGoodHouseKeepingList.lastUpdatedBy.ToClientList(formInputGoodHouseKeepingList)),
+            "lastUpdatedDate": @Html.Raw(formInputGoodHouseKeepingList.lastUpdatedDate.ToClientList(formInputGoodHouseKeepingList)),
+        })
+
+        // Filters
+        .setFilterList(@Html.Raw(formInputGoodHouseKeepingList.GetFilterList()))
+        .build();
+    window[form.id] = form;
+    currentSearchForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<input type="hidden" name="cmd" value="search">
+@if (Security.CanSearch) {
+if (!formInputGoodHouseKeepingList.IsExport() && Empty(formInputGoodHouseKeepingList.CurrentAction) && formInputGoodHouseKeepingList.HasSearchFields()) { @* Show search form (begin) *@
+<div class="ew-extended-search container-fluid ps-2">
+<div class="row mb-0@(formInputGoodHouseKeepingList.SearchFieldsPerRow > 0 ? " row-cols-sm-" + formInputGoodHouseKeepingList.SearchFieldsPerRow : "")">
+@{
+    // Render search row
+    formInputGoodHouseKeepingList.RowType = RowType.Search;
+    formInputGoodHouseKeepingList.ResetAttributes();
+    await formInputGoodHouseKeepingList.RenderRow();
+}
+@if (formInputGoodHouseKeepingList.NoReferensi.Visible) { // formInputGoodHouseKeepingList.NoReferensi.Visible (begin)
+    if (!formInputGoodHouseKeepingList.NoReferensi.UseFilter) {
+        formInputGoodHouseKeepingList.SearchColumnCount++;
+    }
+    <div id="xs_NoReferensi" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(formInputGoodHouseKeepingList.NoReferensi.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_NoReferensi"
+            name="x_NoReferensi[]"
+            class="form-control ew-select@(formInputGoodHouseKeepingList.NoReferensi.IsInvalidClass)"
+            data-select2-id="fFormInputGoodHouseKeepingsrch_x_NoReferensi"
+            data-table="FormInputGoodHouseKeeping"
+            data-field="x_NoReferensi"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(formInputGoodHouseKeepingList.NoReferensi.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(formInputGoodHouseKeepingList.NoReferensi.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(formInputGoodHouseKeepingList.NoReferensi.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(formInputGoodHouseKeepingList.NoReferensi.EditAttributes)>
+            @(formInputGoodHouseKeepingList.NoReferensi.SelectOptionListHtml("x_NoReferensi", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(formInputGoodHouseKeepingList.NoReferensi.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fFormInputGoodHouseKeepingsrch", function() {
+            var options = {
+                name: "x_NoReferensi",
+                selectId: "fFormInputGoodHouseKeepingsrch_x_NoReferensi",
+                ajax: { id: "x_NoReferensi", form: "fFormInputGoodHouseKeepingsrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.FormInputGoodHouseKeeping.fields.NoReferensi.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* formInputGoodHouseKeepingList.NoReferensi.Visible (end) *@
+@if (formInputGoodHouseKeepingList.tgltiba.Visible) { // formInputGoodHouseKeepingList.tgltiba.Visible (begin)
+    if (!formInputGoodHouseKeepingList.tgltiba.UseFilter) {
+        formInputGoodHouseKeepingList.SearchColumnCount++;
+    }
+    <div id="xs_tgltiba" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(formInputGoodHouseKeepingList.tgltiba.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_tgltiba"
+            name="x_tgltiba[]"
+            class="form-control ew-select@(formInputGoodHouseKeepingList.tgltiba.IsInvalidClass)"
+            data-select2-id="fFormInputGoodHouseKeepingsrch_x_tgltiba"
+            data-table="FormInputGoodHouseKeeping"
+            data-field="x_tgltiba"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(formInputGoodHouseKeepingList.tgltiba.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(formInputGoodHouseKeepingList.tgltiba.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(formInputGoodHouseKeepingList.tgltiba.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(formInputGoodHouseKeepingList.tgltiba.EditAttributes)>
+            @(formInputGoodHouseKeepingList.tgltiba.SelectOptionListHtml("x_tgltiba", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(formInputGoodHouseKeepingList.tgltiba.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fFormInputGoodHouseKeepingsrch", function() {
+            var options = {
+                name: "x_tgltiba",
+                selectId: "fFormInputGoodHouseKeepingsrch_x_tgltiba",
+                ajax: { id: "x_tgltiba", form: "fFormInputGoodHouseKeepingsrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.FormInputGoodHouseKeeping.fields.tgltiba.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* formInputGoodHouseKeepingList.tgltiba.Visible (end) *@
+@if (formInputGoodHouseKeepingList.Lokasi.Visible) { // formInputGoodHouseKeepingList.Lokasi.Visible (begin)
+    if (!formInputGoodHouseKeepingList.Lokasi.UseFilter) {
+        formInputGoodHouseKeepingList.SearchColumnCount++;
+    }
+    <div id="xs_Lokasi" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(formInputGoodHouseKeepingList.Lokasi.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_Lokasi"
+            name="x_Lokasi[]"
+            class="form-control ew-select@(formInputGoodHouseKeepingList.Lokasi.IsInvalidClass)"
+            data-select2-id="fFormInputGoodHouseKeepingsrch_x_Lokasi"
+            data-table="FormInputGoodHouseKeeping"
+            data-field="x_Lokasi"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(formInputGoodHouseKeepingList.Lokasi.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(formInputGoodHouseKeepingList.Lokasi.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(formInputGoodHouseKeepingList.Lokasi.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(formInputGoodHouseKeepingList.Lokasi.EditAttributes)>
+            @(formInputGoodHouseKeepingList.Lokasi.SelectOptionListHtml("x_Lokasi", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(formInputGoodHouseKeepingList.Lokasi.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fFormInputGoodHouseKeepingsrch", function() {
+            var options = {
+                name: "x_Lokasi",
+                selectId: "fFormInputGoodHouseKeepingsrch_x_Lokasi",
+                ajax: { id: "x_Lokasi", form: "fFormInputGoodHouseKeepingsrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.FormInputGoodHouseKeeping.fields.Lokasi.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* formInputGoodHouseKeepingList.Lokasi.Visible (end) *@
+@if (formInputGoodHouseKeepingList.Keterangan.Visible) { // formInputGoodHouseKeepingList.Keterangan.Visible (begin)
+    if (!formInputGoodHouseKeepingList.Keterangan.UseFilter) {
+        formInputGoodHouseKeepingList.SearchColumnCount++;
+    }
+    <div id="xs_Keterangan" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(formInputGoodHouseKeepingList.Keterangan.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_Keterangan"
+            name="x_Keterangan[]"
+            class="form-control ew-select@(formInputGoodHouseKeepingList.Keterangan.IsInvalidClass)"
+            data-select2-id="fFormInputGoodHouseKeepingsrch_x_Keterangan"
+            data-table="FormInputGoodHouseKeeping"
+            data-field="x_Keterangan"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(formInputGoodHouseKeepingList.Keterangan.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(formInputGoodHouseKeepingList.Keterangan.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(formInputGoodHouseKeepingList.Keterangan.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(formInputGoodHouseKeepingList.Keterangan.EditAttributes)>
+            @(formInputGoodHouseKeepingList.Keterangan.SelectOptionListHtml("x_Keterangan", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(formInputGoodHouseKeepingList.Keterangan.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fFormInputGoodHouseKeepingsrch", function() {
+            var options = {
+                name: "x_Keterangan",
+                selectId: "fFormInputGoodHouseKeepingsrch_x_Keterangan",
+                ajax: { id: "x_Keterangan", form: "fFormInputGoodHouseKeepingsrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.FormInputGoodHouseKeeping.fields.Keterangan.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* formInputGoodHouseKeepingList.Keterangan.Visible (end) *@
+@if (formInputGoodHouseKeepingList.userInput.Visible) { // formInputGoodHouseKeepingList.userInput.Visible (begin)
+    if (!formInputGoodHouseKeepingList.userInput.UseFilter) {
+        formInputGoodHouseKeepingList.SearchColumnCount++;
+    }
+    <div id="xs_userInput" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(formInputGoodHouseKeepingList.userInput.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_userInput"
+            name="x_userInput[]"
+            class="form-control ew-select@(formInputGoodHouseKeepingList.userInput.IsInvalidClass)"
+            data-select2-id="fFormInputGoodHouseKeepingsrch_x_userInput"
+            data-table="FormInputGoodHouseKeeping"
+            data-field="x_userInput"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(formInputGoodHouseKeepingList.userInput.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(formInputGoodHouseKeepingList.userInput.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(formInputGoodHouseKeepingList.userInput.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(formInputGoodHouseKeepingList.userInput.EditAttributes)>
+            @(formInputGoodHouseKeepingList.userInput.SelectOptionListHtml("x_userInput", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(formInputGoodHouseKeepingList.userInput.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fFormInputGoodHouseKeepingsrch", function() {
+            var options = {
+                name: "x_userInput",
+                selectId: "fFormInputGoodHouseKeepingsrch_x_userInput",
+                ajax: { id: "x_userInput", form: "fFormInputGoodHouseKeepingsrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.FormInputGoodHouseKeeping.fields.userInput.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* formInputGoodHouseKeepingList.userInput.Visible (end) *@
+@if (formInputGoodHouseKeepingList.etlDate.Visible) { // formInputGoodHouseKeepingList.etlDate.Visible (begin)
+    if (!formInputGoodHouseKeepingList.etlDate.UseFilter) {
+        formInputGoodHouseKeepingList.SearchColumnCount++;
+    }
+    <div id="xs_etlDate" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(formInputGoodHouseKeepingList.etlDate.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_etlDate"
+            name="x_etlDate[]"
+            class="form-control ew-select@(formInputGoodHouseKeepingList.etlDate.IsInvalidClass)"
+            data-select2-id="fFormInputGoodHouseKeepingsrch_x_etlDate"
+            data-table="FormInputGoodHouseKeeping"
+            data-field="x_etlDate"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(formInputGoodHouseKeepingList.etlDate.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(formInputGoodHouseKeepingList.etlDate.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(formInputGoodHouseKeepingList.etlDate.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(formInputGoodHouseKeepingList.etlDate.EditAttributes)>
+            @(formInputGoodHouseKeepingList.etlDate.SelectOptionListHtml("x_etlDate", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(formInputGoodHouseKeepingList.etlDate.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fFormInputGoodHouseKeepingsrch", function() {
+            var options = {
+                name: "x_etlDate",
+                selectId: "fFormInputGoodHouseKeepingsrch_x_etlDate",
+                ajax: { id: "x_etlDate", form: "fFormInputGoodHouseKeepingsrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.FormInputGoodHouseKeeping.fields.etlDate.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* formInputGoodHouseKeepingList.etlDate.Visible (end) *@
+@if (formInputGoodHouseKeepingList.lastUpdatedBy.Visible) { // formInputGoodHouseKeepingList.lastUpdatedBy.Visible (begin)
+    if (!formInputGoodHouseKeepingList.lastUpdatedBy.UseFilter) {
+        formInputGoodHouseKeepingList.SearchColumnCount++;
+    }
+    <div id="xs_lastUpdatedBy" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(formInputGoodHouseKeepingList.lastUpdatedBy.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_lastUpdatedBy"
+            name="x_lastUpdatedBy[]"
+            class="form-control ew-select@(formInputGoodHouseKeepingList.lastUpdatedBy.IsInvalidClass)"
+            data-select2-id="fFormInputGoodHouseKeepingsrch_x_lastUpdatedBy"
+            data-table="FormInputGoodHouseKeeping"
+            data-field="x_lastUpdatedBy"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(formInputGoodHouseKeepingList.lastUpdatedBy.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(formInputGoodHouseKeepingList.lastUpdatedBy.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(formInputGoodHouseKeepingList.lastUpdatedBy.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(formInputGoodHouseKeepingList.lastUpdatedBy.EditAttributes)>
+            @(formInputGoodHouseKeepingList.lastUpdatedBy.SelectOptionListHtml("x_lastUpdatedBy", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(formInputGoodHouseKeepingList.lastUpdatedBy.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fFormInputGoodHouseKeepingsrch", function() {
+            var options = {
+                name: "x_lastUpdatedBy",
+                selectId: "fFormInputGoodHouseKeepingsrch_x_lastUpdatedBy",
+                ajax: { id: "x_lastUpdatedBy", form: "fFormInputGoodHouseKeepingsrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.FormInputGoodHouseKeeping.fields.lastUpdatedBy.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* formInputGoodHouseKeepingList.lastUpdatedBy.Visible (end) *@
+@if (formInputGoodHouseKeepingList.lastUpdatedDate.Visible) { // formInputGoodHouseKeepingList.lastUpdatedDate.Visible (begin)
+    if (!formInputGoodHouseKeepingList.lastUpdatedDate.UseFilter) {
+        formInputGoodHouseKeepingList.SearchColumnCount++;
+    }
+    <div id="xs_lastUpdatedDate" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(formInputGoodHouseKeepingList.lastUpdatedDate.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_lastUpdatedDate"
+            name="x_lastUpdatedDate[]"
+            class="form-control ew-select@(formInputGoodHouseKeepingList.lastUpdatedDate.IsInvalidClass)"
+            data-select2-id="fFormInputGoodHouseKeepingsrch_x_lastUpdatedDate"
+            data-table="FormInputGoodHouseKeeping"
+            data-field="x_lastUpdatedDate"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(formInputGoodHouseKeepingList.lastUpdatedDate.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(formInputGoodHouseKeepingList.lastUpdatedDate.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(formInputGoodHouseKeepingList.lastUpdatedDate.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(formInputGoodHouseKeepingList.lastUpdatedDate.EditAttributes)>
+            @(formInputGoodHouseKeepingList.lastUpdatedDate.SelectOptionListHtml("x_lastUpdatedDate", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(formInputGoodHouseKeepingList.lastUpdatedDate.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fFormInputGoodHouseKeepingsrch", function() {
+            var options = {
+                name: "x_lastUpdatedDate",
+                selectId: "fFormInputGoodHouseKeepingsrch_x_lastUpdatedDate",
+                ajax: { id: "x_lastUpdatedDate", form: "fFormInputGoodHouseKeepingsrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.FormInputGoodHouseKeeping.fields.lastUpdatedDate.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* formInputGoodHouseKeepingList.lastUpdatedDate.Visible (end) *@
+</div><!-- /.row -->
+<div class="row mb-0">
+    <div class="col-sm-auto px-0 pe-sm-2">
+        <div class="ew-basic-search input-group">
+            <input type="search" name="@(Config.TableBasicSearch)" id="@(Config.TableBasicSearch)" class="form-control ew-basic-search-keyword" value="@Html.Raw(HtmlEncode(formInputGoodHouseKeepingList.BasicSearch.SessionKeyword))" placeholder="@(HtmlEncode(Language.Phrase("Search")))" aria-label="@(HtmlEncode(Language.Phrase("Search")))">
+            <input type="hidden" name="@(Config.TableBasicSearchType)" id="@(Config.TableBasicSearchType)" class="ew-basic-search-type" value="@(HtmlEncode(formInputGoodHouseKeepingList.BasicSearch.SessionType))">
+            <button type="button" data-bs-toggle="dropdown" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split" aria-haspopup="true" aria-expanded="false">
+                <span id="searchtype">@Html.Raw(formInputGoodHouseKeepingList.BasicSearch.TypeNameShort)</span>
+            </button>
+            <div class="dropdown-menu dropdown-menu-end">
+                <button type="button" class="dropdown-item@(formInputGoodHouseKeepingList.BasicSearch.SessionType == "" ? " active" : "")" form="fFormInputGoodHouseKeepingsrch" data-ew-action="search-type">@Html.Raw(Language.Phrase("QuickSearchAuto"))</button>
+                <button type="button" class="dropdown-item@(formInputGoodHouseKeepingList.BasicSearch.SessionType == "=" ? " active" : "")" form="fFormInputGoodHouseKeepingsrch" data-ew-action="search-type" data-search-type="=">@Html.Raw(Language.Phrase("QuickSearchExact"))</button>
+                <button type="button" class="dropdown-item@(formInputGoodHouseKeepingList.BasicSearch.SessionType == "AND" ? " active" : "")" form="fFormInputGoodHouseKeepingsrch" data-ew-action="search-type" data-search-type="AND">@Html.Raw(Language.Phrase("QuickSearchAll"))</button>
+                <button type="button" class="dropdown-item@(formInputGoodHouseKeepingList.BasicSearch.SessionType == "OR" ? " active" : "")" form="fFormInputGoodHouseKeepingsrch" data-ew-action="search-type" data-search-type="OR">@Html.Raw(Language.Phrase("QuickSearchAny"))</button>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-auto mb-3">
+        <button class="btn btn-primary" name="btn-submit" id="btn-submit" type="submit">@Html.Raw(Language.Phrase("SearchBtn"))</button>
+    </div>
+</div>
+</div><!-- /.ew-extended-search -->
+} @* Show search form (end) *@
+}
+</div><!-- /.ew-search-panel -->
+</form>
+}
+@formInputGoodHouseKeepingList.ShowPageHeader()
+@formInputGoodHouseKeepingList.ShowMessages()
+<main class="list @(formInputGoodHouseKeepingList.TotalRecords == 0 && !formInputGoodHouseKeepingList.IsAdd ? " ew-no-record" : "")">
+<div id="ew-header-options">
+    @formInputGoodHouseKeepingList.HeaderOptions.RenderBody()
+</div>
+<div id="ew-list">
+@if (formInputGoodHouseKeepingList.TotalRecords > 0 || !Empty(formInputGoodHouseKeepingList.CurrentAction)) {
+<div class="card ew-card ew-grid@(formInputGoodHouseKeepingList.IsAddOrEdit ? " ew-grid-add-edit" : "") @(formInputGoodHouseKeepingList.TableGridClass)">
+<form name="@(formInputGoodHouseKeepingList.FormName)" id="@(formInputGoodHouseKeepingList.FormName)" class="ew-form ew-list-form" action="@AppPath(formInputGoodHouseKeepingList.PageName)" method="post" novalidate autocomplete="off">
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+@if (formInputGoodHouseKeepingList.IsModal) {
+<input type="hidden" name="modal" value="1">
+}
+<div id="gmp_FormInputGoodHouseKeeping" class="card-body ew-grid-middle-panel @(formInputGoodHouseKeepingList.TableContainerClass)" style="@(formInputGoodHouseKeepingList.TableContainerStyle)">
+@if (formInputGoodHouseKeepingList.TotalRecords > 0 || formInputGoodHouseKeepingList.IsGridEdit || formInputGoodHouseKeepingList.IsMultiEdit) {
+<table id="tbl_FormInputGoodHouseKeepinglist" class="@(formInputGoodHouseKeepingList.TableClass)"><!-- .ew-table -->
+<thead>
+    <tr class="ew-table-header">
+@{
+    // Header row
+    formInputGoodHouseKeepingList.RowType = RowType.Header;
+
+    // Render list options
+    await formInputGoodHouseKeepingList.RenderListOptions();
+}
+@* Render list options (header, left) *@
+@formInputGoodHouseKeepingList.ListOptions.RenderHeader("left")
+@if (formInputGoodHouseKeepingList.NoReferensi.Visible) { // formInputGoodHouseKeepingList.NoReferensi.Visible (begin)
+        <th data-name="NoReferensi" class="@(formInputGoodHouseKeepingList.NoReferensi.HeaderCellClass)"><div id="elh_FormInputGoodHouseKeeping_NoReferensi" class="FormInputGoodHouseKeeping_NoReferensi">@Html.Raw(formInputGoodHouseKeepingList.RenderFieldHeader(formInputGoodHouseKeepingList.NoReferensi))</div></th>
+} @* formInputGoodHouseKeepingList.NoReferensi.Visible (end) *@
+@if (formInputGoodHouseKeepingList.tgltiba.Visible) { // formInputGoodHouseKeepingList.tgltiba.Visible (begin)
+        <th data-name="tgltiba" class="@(formInputGoodHouseKeepingList.tgltiba.HeaderCellClass)"><div id="elh_FormInputGoodHouseKeeping_tgltiba" class="FormInputGoodHouseKeeping_tgltiba">@Html.Raw(formInputGoodHouseKeepingList.RenderFieldHeader(formInputGoodHouseKeepingList.tgltiba))</div></th>
+} @* formInputGoodHouseKeepingList.tgltiba.Visible (end) *@
+@if (formInputGoodHouseKeepingList.Lokasi.Visible) { // formInputGoodHouseKeepingList.Lokasi.Visible (begin)
+        <th data-name="Lokasi" class="@(formInputGoodHouseKeepingList.Lokasi.HeaderCellClass)"><div id="elh_FormInputGoodHouseKeeping_Lokasi" class="FormInputGoodHouseKeeping_Lokasi">@Html.Raw(formInputGoodHouseKeepingList.RenderFieldHeader(formInputGoodHouseKeepingList.Lokasi))</div></th>
+} @* formInputGoodHouseKeepingList.Lokasi.Visible (end) *@
+@if (formInputGoodHouseKeepingList.DownloadDokumen.Visible) { // formInputGoodHouseKeepingList.DownloadDokumen.Visible (begin)
+        <th data-name="DownloadDokumen" class="@(formInputGoodHouseKeepingList.DownloadDokumen.HeaderCellClass)" style="white-space: nowrap;"><div id="elh_FormInputGoodHouseKeeping_DownloadDokumen" class="FormInputGoodHouseKeeping_DownloadDokumen">@Html.Raw(formInputGoodHouseKeepingList.RenderFieldHeader(formInputGoodHouseKeepingList.DownloadDokumen))</div></th>
+} @* formInputGoodHouseKeepingList.DownloadDokumen.Visible (end) *@
+@if (formInputGoodHouseKeepingList.Keterangan.Visible) { // formInputGoodHouseKeepingList.Keterangan.Visible (begin)
+        <th data-name="Keterangan" class="@(formInputGoodHouseKeepingList.Keterangan.HeaderCellClass)"><div id="elh_FormInputGoodHouseKeeping_Keterangan" class="FormInputGoodHouseKeeping_Keterangan">@Html.Raw(formInputGoodHouseKeepingList.RenderFieldHeader(formInputGoodHouseKeepingList.Keterangan))</div></th>
+} @* formInputGoodHouseKeepingList.Keterangan.Visible (end) *@
+@if (formInputGoodHouseKeepingList.userInput.Visible) { // formInputGoodHouseKeepingList.userInput.Visible (begin)
+        <th data-name="userInput" class="@(formInputGoodHouseKeepingList.userInput.HeaderCellClass)"><div id="elh_FormInputGoodHouseKeeping_userInput" class="FormInputGoodHouseKeeping_userInput">@Html.Raw(formInputGoodHouseKeepingList.RenderFieldHeader(formInputGoodHouseKeepingList.userInput))</div></th>
+} @* formInputGoodHouseKeepingList.userInput.Visible (end) *@
+@if (formInputGoodHouseKeepingList.etlDate.Visible) { // formInputGoodHouseKeepingList.etlDate.Visible (begin)
+        <th data-name="etlDate" class="@(formInputGoodHouseKeepingList.etlDate.HeaderCellClass)"><div id="elh_FormInputGoodHouseKeeping_etlDate" class="FormInputGoodHouseKeeping_etlDate">@Html.Raw(formInputGoodHouseKeepingList.RenderFieldHeader(formInputGoodHouseKeepingList.etlDate))</div></th>
+} @* formInputGoodHouseKeepingList.etlDate.Visible (end) *@
+@if (formInputGoodHouseKeepingList.lastUpdatedBy.Visible) { // formInputGoodHouseKeepingList.lastUpdatedBy.Visible (begin)
+        <th data-name="lastUpdatedBy" class="@(formInputGoodHouseKeepingList.lastUpdatedBy.HeaderCellClass)"><div id="elh_FormInputGoodHouseKeeping_lastUpdatedBy" class="FormInputGoodHouseKeeping_lastUpdatedBy">@Html.Raw(formInputGoodHouseKeepingList.RenderFieldHeader(formInputGoodHouseKeepingList.lastUpdatedBy))</div></th>
+} @* formInputGoodHouseKeepingList.lastUpdatedBy.Visible (end) *@
+@if (formInputGoodHouseKeepingList.lastUpdatedDate.Visible) { // formInputGoodHouseKeepingList.lastUpdatedDate.Visible (begin)
+        <th data-name="lastUpdatedDate" class="@(formInputGoodHouseKeepingList.lastUpdatedDate.HeaderCellClass)"><div id="elh_FormInputGoodHouseKeeping_lastUpdatedDate" class="FormInputGoodHouseKeeping_lastUpdatedDate">@Html.Raw(formInputGoodHouseKeepingList.RenderFieldHeader(formInputGoodHouseKeepingList.lastUpdatedDate))</div></th>
+} @* formInputGoodHouseKeepingList.lastUpdatedDate.Visible (end) *@
+@* Render list options (header, right) *@
+@formInputGoodHouseKeepingList.ListOptions.RenderHeader("right")
+    </tr>
+</thead>
+<tbody data-page="@(formInputGoodHouseKeepingList.PageNumber)">
+@{
+    await formInputGoodHouseKeepingList.SetupGrid();
+    bool eof = formInputGoodHouseKeepingList.Recordset == null; // DN
+}
+@while (formInputGoodHouseKeepingList.RecordCount < formInputGoodHouseKeepingList.StopRecord || SameString(formInputGoodHouseKeepingList.RowIndex, "$rowindex$")) { // Begin While
+    if (!eof && !SameString(formInputGoodHouseKeepingList.RowIndex, "$rowindex$") &&
+        (!formInputGoodHouseKeepingList.IsGridAdd || formInputGoodHouseKeepingList.CurrentMode == "copy") &&
+        (!((formInputGoodHouseKeepingList.IsCopy || formInputGoodHouseKeepingList.IsAdd) && formInputGoodHouseKeepingList.RowIndex is int rowIndex && rowIndex == 0))) // DN
+        eof = !await formInputGoodHouseKeepingList.Recordset.ReadAsync();
+    formInputGoodHouseKeepingList.RecordCount++;
+    if (formInputGoodHouseKeepingList.RecordCount >= formInputGoodHouseKeepingList.StartRecord) {
+        await formInputGoodHouseKeepingList.SetupRow();
+    <tr @Html.Raw(formInputGoodHouseKeepingList.RowAttributes)>
+    @* Render list options (body, left) *@
+    @formInputGoodHouseKeepingList.ListOptions.RenderBody("left", formInputGoodHouseKeepingList.RowCount)
+    @if (formInputGoodHouseKeepingList.NoReferensi.Visible) { // formInputGoodHouseKeepingList.NoReferensi.Visible (begin)
+        <td data-name="NoReferensi" @Html.Raw(formInputGoodHouseKeepingList.NoReferensi.CellAttributes)>
+<span id="el@(formInputGoodHouseKeepingList.RowIndex == "$rowindex$" ? "$rowindex$" : formInputGoodHouseKeepingList.RowCount)_FormInputGoodHouseKeeping_NoReferensi" class="el_FormInputGoodHouseKeeping_NoReferensi">
+<span @Html.Raw(formInputGoodHouseKeepingList.NoReferensi.ViewAttributes)>
+@Html.Raw(formInputGoodHouseKeepingList.NoReferensi.GetViewValue())</span>
+</span>
+</td>
+    } @* formInputGoodHouseKeepingList.NoReferensi.Visible (end) *@
+    @if (formInputGoodHouseKeepingList.tgltiba.Visible) { // formInputGoodHouseKeepingList.tgltiba.Visible (begin)
+        <td data-name="tgltiba" @Html.Raw(formInputGoodHouseKeepingList.tgltiba.CellAttributes)>
+<span id="el@(formInputGoodHouseKeepingList.RowIndex == "$rowindex$" ? "$rowindex$" : formInputGoodHouseKeepingList.RowCount)_FormInputGoodHouseKeeping_tgltiba" class="el_FormInputGoodHouseKeeping_tgltiba">
+<span @Html.Raw(formInputGoodHouseKeepingList.tgltiba.ViewAttributes)>
+@Html.Raw(formInputGoodHouseKeepingList.tgltiba.GetViewValue())</span>
+</span>
+</td>
+    } @* formInputGoodHouseKeepingList.tgltiba.Visible (end) *@
+    @if (formInputGoodHouseKeepingList.Lokasi.Visible) { // formInputGoodHouseKeepingList.Lokasi.Visible (begin)
+        <td data-name="Lokasi" @Html.Raw(formInputGoodHouseKeepingList.Lokasi.CellAttributes)>
+<span id="el@(formInputGoodHouseKeepingList.RowIndex == "$rowindex$" ? "$rowindex$" : formInputGoodHouseKeepingList.RowCount)_FormInputGoodHouseKeeping_Lokasi" class="el_FormInputGoodHouseKeeping_Lokasi">
+<span @Html.Raw(formInputGoodHouseKeepingList.Lokasi.ViewAttributes)>
+@Html.Raw(formInputGoodHouseKeepingList.Lokasi.GetViewValue())</span>
+</span>
+</td>
+    } @* formInputGoodHouseKeepingList.Lokasi.Visible (end) *@
+    @if (formInputGoodHouseKeepingList.DownloadDokumen.Visible) { // formInputGoodHouseKeepingList.DownloadDokumen.Visible (begin)
+        <td data-name="DownloadDokumen" @Html.Raw(formInputGoodHouseKeepingList.DownloadDokumen.CellAttributes)>
+<span id="el@(formInputGoodHouseKeepingList.RowIndex == "$rowindex$" ? "$rowindex$" : formInputGoodHouseKeepingList.RowCount)_FormInputGoodHouseKeeping_DownloadDokumen" class="el_FormInputGoodHouseKeeping_DownloadDokumen">
+<span @Html.Raw(formInputGoodHouseKeepingList.DownloadDokumen.ViewAttributes)>
+@Html.Raw(formInputGoodHouseKeepingList.DownloadDokumen.GetViewValue())</span>
+</span>
+</td>
+    } @* formInputGoodHouseKeepingList.DownloadDokumen.Visible (end) *@
+    @if (formInputGoodHouseKeepingList.Keterangan.Visible) { // formInputGoodHouseKeepingList.Keterangan.Visible (begin)
+        <td data-name="Keterangan" @Html.Raw(formInputGoodHouseKeepingList.Keterangan.CellAttributes)>
+<span id="el@(formInputGoodHouseKeepingList.RowIndex == "$rowindex$" ? "$rowindex$" : formInputGoodHouseKeepingList.RowCount)_FormInputGoodHouseKeeping_Keterangan" class="el_FormInputGoodHouseKeeping_Keterangan">
+<span @Html.Raw(formInputGoodHouseKeepingList.Keterangan.ViewAttributes)>
+@Html.Raw(formInputGoodHouseKeepingList.Keterangan.GetViewValue())</span>
+</span>
+</td>
+    } @* formInputGoodHouseKeepingList.Keterangan.Visible (end) *@
+    @if (formInputGoodHouseKeepingList.userInput.Visible) { // formInputGoodHouseKeepingList.userInput.Visible (begin)
+        <td data-name="userInput" @Html.Raw(formInputGoodHouseKeepingList.userInput.CellAttributes)>
+<span id="el@(formInputGoodHouseKeepingList.RowIndex == "$rowindex$" ? "$rowindex$" : formInputGoodHouseKeepingList.RowCount)_FormInputGoodHouseKeeping_userInput" class="el_FormInputGoodHouseKeeping_userInput">
+<span @Html.Raw(formInputGoodHouseKeepingList.userInput.ViewAttributes)>
+@Html.Raw(formInputGoodHouseKeepingList.userInput.GetViewValue())</span>
+</span>
+</td>
+    } @* formInputGoodHouseKeepingList.userInput.Visible (end) *@
+    @if (formInputGoodHouseKeepingList.etlDate.Visible) { // formInputGoodHouseKeepingList.etlDate.Visible (begin)
+        <td data-name="etlDate" @Html.Raw(formInputGoodHouseKeepingList.etlDate.CellAttributes)>
+<span id="el@(formInputGoodHouseKeepingList.RowIndex == "$rowindex$" ? "$rowindex$" : formInputGoodHouseKeepingList.RowCount)_FormInputGoodHouseKeeping_etlDate" class="el_FormInputGoodHouseKeeping_etlDate">
+<span @Html.Raw(formInputGoodHouseKeepingList.etlDate.ViewAttributes)>
+@Html.Raw(formInputGoodHouseKeepingList.etlDate.GetViewValue())</span>
+</span>
+</td>
+    } @* formInputGoodHouseKeepingList.etlDate.Visible (end) *@
+    @if (formInputGoodHouseKeepingList.lastUpdatedBy.Visible) { // formInputGoodHouseKeepingList.lastUpdatedBy.Visible (begin)
+        <td data-name="lastUpdatedBy" @Html.Raw(formInputGoodHouseKeepingList.lastUpdatedBy.CellAttributes)>
+<span id="el@(formInputGoodHouseKeepingList.RowIndex == "$rowindex$" ? "$rowindex$" : formInputGoodHouseKeepingList.RowCount)_FormInputGoodHouseKeeping_lastUpdatedBy" class="el_FormInputGoodHouseKeeping_lastUpdatedBy">
+<span @Html.Raw(formInputGoodHouseKeepingList.lastUpdatedBy.ViewAttributes)>
+@Html.Raw(formInputGoodHouseKeepingList.lastUpdatedBy.GetViewValue())</span>
+</span>
+</td>
+    } @* formInputGoodHouseKeepingList.lastUpdatedBy.Visible (end) *@
+    @if (formInputGoodHouseKeepingList.lastUpdatedDate.Visible) { // formInputGoodHouseKeepingList.lastUpdatedDate.Visible (begin)
+        <td data-name="lastUpdatedDate" @Html.Raw(formInputGoodHouseKeepingList.lastUpdatedDate.CellAttributes)>
+<span id="el@(formInputGoodHouseKeepingList.RowIndex == "$rowindex$" ? "$rowindex$" : formInputGoodHouseKeepingList.RowCount)_FormInputGoodHouseKeeping_lastUpdatedDate" class="el_FormInputGoodHouseKeeping_lastUpdatedDate">
+<span @Html.Raw(formInputGoodHouseKeepingList.lastUpdatedDate.ViewAttributes)>
+@Html.Raw(formInputGoodHouseKeepingList.lastUpdatedDate.GetViewValue())</span>
+</span>
+</td>
+    } @* formInputGoodHouseKeepingList.lastUpdatedDate.Visible (end) *@
+    @* Render list options (body, right) *@
+    @formInputGoodHouseKeepingList.ListOptions.RenderBody("right", formInputGoodHouseKeepingList.RowCount)
+    </tr>
+    } @* End if *@
+
+    // Reset for template row
+    if (SameString(formInputGoodHouseKeepingList.RowIndex, "$rowindex$"))
+        formInputGoodHouseKeepingList.RowIndex = 0;
+
+    // Reset inline add/copy row
+    if ((formInputGoodHouseKeepingList.IsCopy || formInputGoodHouseKeepingList.IsAdd) && formInputGoodHouseKeepingList.RowIndex is int rowIndex2 && rowIndex2 == 0)
+        formInputGoodHouseKeepingList.RowIndex = 1;
+} @* End While *@
+</tbody>
+</table><!-- /.ew-table -->
+} @* End If TotalRecords > 0 *@
+</div><!-- /.ew-grid-middle-panel -->
+@if (Empty(formInputGoodHouseKeepingList.CurrentAction) && !formInputGoodHouseKeepingList.UseAjaxActions) {
+<input type="hidden" name="action" id="action" value="">
+}
+</form><!-- /.ew-list-form -->
+@{ formInputGoodHouseKeepingList.CloseRecordset(); }
+@if (!formInputGoodHouseKeepingList.IsExport()) {
+<div class="card-footer ew-grid-lower-panel">
+@if (!formInputGoodHouseKeepingList.IsGridAdd && !(formInputGoodHouseKeepingList.IsGridEdit && formInputGoodHouseKeepingList.ModalGridEdit) && !formInputGoodHouseKeepingList.IsMultiEdit) {
+@Html.Raw(formInputGoodHouseKeepingList.Pager.Render())
+}
+<div class="ew-list-other-options">
+@formInputGoodHouseKeepingList.OtherOptions.RenderBody("bottom")
+</div>
+</div>
+}
+</div><!-- /.ew-grid -->
+} else { // Show other options
+<div class="ew-list-other-options">
+@formInputGoodHouseKeepingList.OtherOptions.ForEach(opt => opt.ButtonClass = "").RenderBody()
+</div>
+}
+</div>
+<div id="ew-footer-options">
+    @formInputGoodHouseKeepingList.FooterOptions.RenderBody()
+</div>
+</main>
+@formInputGoodHouseKeepingList.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+@if (!formInputGoodHouseKeepingList.IsExport()) {
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("FormInputGoodHouseKeeping");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Startup script
+    const parent_url = ew.PATH_BASE;
+    const NoReferensi = "@HttpContext.Request.Query["x_NoReferensi[]"]";
+    (function() {
+        const steps = [
+            { number: 1, label: "Good House Keeping", url: parent_url + 'GoodHouseKeepingList', icon: "fa-clipboard-list" },
+            { number: 2, label: "Input Data", url: "",                               icon: "fa-pen-to-square" }
+        ];
+        const currentStep = 2;
+        if (!document.querySelector("style[data-hsse-stepper]")) {
+            $("<style data-hsse-stepper>")
+              .prop("type", "text/css")
+              .html(`
+                .stepper{display:flex;counter-reset:step}
+                .step{width:150px;text-align:center;position:relative}
+                .step:not(:last-child)::after{content:'';position:absolute;top:20px;right:-50%;width:100%;height:4px;background-color:#ccc;z-index:0}
+                .step.completed:not(:last-child)::after{background-color:#3c6dbd}
+                .step-icon{width:36px;height:36px;line-height:36px;border-radius:50%;background:#ccc;display:inline-block;z-index:1;position:relative;color:#fff;font-weight:bold}
+                .step.active .step-icon{background:#28a745} /* hijau utk step aktif */
+                .step-label{margin-top:8px;font-size:14px;display:flex;justify-content:center;align-items:center;gap:6px;color:#3c6dbd;text-decoration:none}
+                .step-label-not-active{color:#CCC!important}
+            `).appendTo("head");
+        }
+        const $wrapper = $('<div class="d-flex border-bottom border-2 pb-2"><div class="stepper"></div></div>');
+        const $stepper = $wrapper.find(".stepper");
+        steps.forEach(step => {
+            const isActive = step.number === currentStep;
+            const isCompleted = step.number < currentStep;
+            let icon, label, html;
+            if (isActive) {
+                // step aktif = hijau
+                icon = `<div class="step-icon bg-success">${step.number}</div>`;
+                label = `<div class="step-label text-success"><i class="fa-solid ${step.icon} me-1 text-success"></i>${step.label}</div>`;
+                html = `<div class="step active text-success">${icon}${label}</div>`;
+            } else if (isCompleted) {
+                // step selesai = biru (sama dgn garis)
+                icon = `<div class="step-icon" style="background:#3c6dbd">${step.number}</div>`;
+                label = `<div class="step-label"><a href="${step.url}" class="text-primary"><i class="fa-solid ${step.icon} me-1"></i>${step.label}</a></div>`;
+                html = `<div class="step completed text-primary">${icon}${label}</div>`;
+            } else {
+                // step belum mulai
+                icon = `<div class="step-icon">${step.number}</div>`;
+                label = `<div class="step-label-not-active"><i class="fa-solid ${step.icon} me-1"></i>${step.label}</div>`;
+                html = `<div class="step text-secondary">${icon}${label}</div>`;
+            }
+            $stepper.append(html);
+        });
+        $(".content-header .container-fluid .row").append($wrapper);
+    })();
+
+    // text judul samping fillter
+    (function () {
+      let info = {};
+      $("table.ew-master-table tr").each(function () {
+        const tds = $(this).find("td");
+        const label = (tds[0] && $(tds[0]).text().trim()) || "";
+        const value = (tds[1] && $(tds[1]).text().trim()) || "";
+        if (label) info[label] = value;
+      });
+      const nomor = info["Nomor Good House Keeping"] || "";
+      const plant = info["Plant"] || "";
+      const tiba  = info["Tanggal Tiba"] || "";
+      const nomorHtml = nomor ? `<span style="color: red">${nomor}</span>` : "";
+      const plantHtml = plant ? `<span style="color: red">${plant}</span>` : "";
+      const tibaHtml  = tiba  ? `<span style="color: red">${tiba}</span>`  : "";
+      const deskripsi =
+        `GOOD HOUSE KEEPING ${nomorHtml}, ` +
+        `Plant: ${plantHtml}` +
+        (tiba ? `, Tanggal Tiba: ${tibaHtml}` : "");
+      const $anchor = $(".ew-filter-option").first();
+      if ($anchor.length && nomor) {
+        $anchor.after(`<span class="ms-3 fw-bold fst-italic">${deskripsi}</span>`);
+      }
+    })();
+    let $btn = $(`a.btn.btn-default.ew-add-edit.ew-add[href="${parent_url}FormInputGoodHouseKeepingAdd"]`);
+    if ($btn.length) {
+        $btn.remove();
+        let oldButton = $('button.btn-primary[name="btn-submit"]');
+        let addButton = $(`
+            <button class="btn btn-success ms-2" id="btn-add-ghk">
+                <i class="fas fa-plus"></i> Add New
+            </button>
+        `);
+        addButton.on('click', function (e) {
+            e.preventDefault();
+            window.location.href = `${parent_url}FormInputGoodHouseKeepingAdd?NoReferensi=${NoReferensi}`;
+        });
+        oldButton.parent().append(addButton);
+    }
+
+    // === Judul "Plant & Tanggal" via API ===
+    (function () {
+      const parent_url = ew.PATH_BASE;
+
+      // Cegah judul ganda saat partial reload
+      if (document.getElementById("title-ghk-plant-date")) return;
+
+      // Ambil Nomor Good House Keeping dari QS (detail list)
+      const qs = new URLSearchParams(window.location.search);
+      let noRef = (qs.getAll("x_NoReferensi[]")[0] || "").trim();
+
+      // Fallback: baca dari master DOM jika ada
+      if (!noRef) {
+        const info = {};
+        $("table.ew-master-table tr").each(function () {
+          const tds = $(this).find("td");
+          const label = (tds[0] && $(tds[0]).text().trim()) || "";
+          const value = (tds[1] && $(tds[1]).text().trim()) || "";
+          if (label) info[label] = value;
+        });
+        noRef = (info["Nomor Good House Keeping"] || "").trim();
+      }
+      if (!noRef) return;
+      $.ajax({
+        url: parent_url + "api/LookUpList/get_ghk_header",
+        type: "GET",
+        data: { nomorReferensi: noRef }
+      })
+      .done(function (res) {
+        let label = "Plant: -, Tanggal: -";
+        if (res && res.success) {
+          // contoh: res.plant = "1106 - Fuel Terminal Gunung Sitoli", res.tanggal = "16/09/2025"
+          label = `Plant: <span style="color:red">${res.plant || "-"}</span>, ` +
+                  `Tanggal: <span style="color:red">${res.tanggal || "-"}</span>`;
+        }
+        const html = `<span id="title-ghk-plant-date" class="ms-3 fw-bold fst-italic">${label}</span>`;
+        $(".ew-filter-option").first().after(html);
+      })
+      .fail(function () {
+        const html = `<span id="title-ghk-plant-date" class="ms-3 fw-bold fst-italic">Plant: -, Tanggal: -</span>`;
+        $(".ew-filter-option").first().after(html);
+      });
+    })();
+});
+</script>
+}

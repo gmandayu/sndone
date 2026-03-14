@@ -1,0 +1,111 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (masterFungsiKunjunganAdd.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = masterFungsiKunjunganAdd.UseLayout ? "_Layout" : "";
+}
+<script>
+var currentTable = @Html.Raw(ConvertToJson(masterFungsiKunjunganAdd.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { MasterFungsiKunjungan: currentTable } });
+var currentPageID = ew.PAGE_ID = "add";
+var currentForm;
+var fMasterFungsiKunjunganadd;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("fMasterFungsiKunjunganadd")
+        .setPageId("add")
+
+        // Add fields
+        .setFields([
+
+            ["FungsiKunjungan", [fields.FungsiKunjungan.visible && fields.FungsiKunjungan.required ? ew.Validators.required(fields.FungsiKunjungan.caption) : null], fields.FungsiKunjungan.isInvalid]
+        ])
+
+        // Form_CustomValidate
+        .setCustomValidate(
+            function(fobj) { // DO NOT CHANGE THIS LINE!
+                    // Your custom validation code here, return false if invalid.
+                    return true;
+                }
+        )
+
+        // Use JavaScript validation or not
+        .setValidateRequired(ew.CLIENT_VALIDATE)
+
+        // Dynamic selection lists
+        .setLists({
+        })
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Write your client script here, no need to add script tags.
+});
+</script>
+@masterFungsiKunjunganAdd.ShowPageHeader()
+@masterFungsiKunjunganAdd.ShowMessages()
+<form name="fMasterFungsiKunjunganadd" id="fMasterFungsiKunjunganadd" class="@(masterFungsiKunjunganAdd.FormClassName)" action="@AppPath(CurrentPageName())" method="post" novalidate autocomplete="off">
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+<input type="hidden" name="action" id="action" value="insert">
+<input type="hidden" name="modal" value="@ConvertToInt(masterFungsiKunjunganAdd.IsModal)">
+@if (IsJsonResponse()) {
+<input type="hidden" name="json" value="1">
+}
+<input type="hidden" name="@(masterFungsiKunjunganAdd.OldKeyName)" value="@Html.Raw(masterFungsiKunjunganAdd.OldKey)">
+<div class="ew-add-div"><!-- page* -->
+@if (masterFungsiKunjunganAdd.FungsiKunjungan.Visible) { // masterFungsiKunjunganAdd.FungsiKunjungan.Visible (begin)
+    <div id="r_FungsiKunjungan" @Html.Raw(masterFungsiKunjunganAdd.FungsiKunjungan.RowAttributes)>
+        <label id="elh_MasterFungsiKunjungan_FungsiKunjungan" for="x_FungsiKunjungan" class="@(masterFungsiKunjunganAdd.LeftColumnClass)">@Html.Raw(masterFungsiKunjunganAdd.FungsiKunjungan.Caption)@Html.Raw(masterFungsiKunjunganAdd.FungsiKunjungan.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(masterFungsiKunjunganAdd.RightColumnClass)"><div @Html.Raw(masterFungsiKunjunganAdd.FungsiKunjungan.CellAttributes)>
+<span id="el_MasterFungsiKunjungan_FungsiKunjungan">
+<input type="@(masterFungsiKunjunganAdd.FungsiKunjungan.InputTextType)" name="x_FungsiKunjungan" id="x_FungsiKunjungan" data-table="MasterFungsiKunjungan" data-field="x_FungsiKunjungan" value="@Html.Raw(masterFungsiKunjunganAdd.FungsiKunjungan.EditValue)" size="30" maxlength="50" placeholder="@Html.Raw(HtmlEncode(masterFungsiKunjunganAdd.FungsiKunjungan.PlaceHolder))" data-format-pattern="@(masterFungsiKunjunganAdd.FungsiKunjungan.FormatPattern)"@Html.Raw(masterFungsiKunjunganAdd.FungsiKunjungan.EditAttributes) aria-describedby="x_FungsiKunjungan_help">
+@Html.Raw(masterFungsiKunjunganAdd.FungsiKunjungan.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(masterFungsiKunjunganAdd.FungsiKunjungan.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* masterFungsiKunjunganAdd.FungsiKunjungan.Visible (end) *@
+</div><!-- /page* -->
+@{ masterFungsiKunjunganAdd.CloseRecordset(); }
+@Html.Raw(masterFungsiKunjunganAdd.IsModal ? "<template class=\"ew-modal-buttons\">" : "<div class=\"row ew-buttons\">")<!-- buttons .row -->
+    <div class="@(masterFungsiKunjunganAdd.OffsetColumnClass)"><!-- buttons offset -->
+    <button class="btn btn-primary ew-btn" name="btn-action" id="btn-action" type="submit" form="fMasterFungsiKunjunganadd">@Html.Raw(Language.Phrase("AddBtn"))</button>
+@if (IsJsonResponse()) {
+    <button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" data-bs-dismiss="modal">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+} else {
+    <button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" form="fMasterFungsiKunjunganadd" data-href="@AppPath(masterFungsiKunjunganAdd.ReturnUrl)">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+}
+    </div><!-- /buttons offset -->
+@Html.Raw(masterFungsiKunjunganAdd.IsModal ? "</template>" : "</div>")<!-- /buttons .row -->
+</form>
+@masterFungsiKunjunganAdd.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("MasterFungsiKunjungan");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Write your table-specific startup script here
+    // document.write("page loaded");
+});
+</script>

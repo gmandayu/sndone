@@ -1,0 +1,551 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (mwtOnlineAdd.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = mwtOnlineAdd.UseLayout ? "_Layout" : "";
+}
+<script>
+var currentTable = @Html.Raw(ConvertToJson(mwtOnlineAdd.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { MWTOnline: currentTable } });
+var currentPageID = ew.PAGE_ID = "add";
+var currentForm;
+var fMWTOnlineadd;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("fMWTOnlineadd")
+        .setPageId("add")
+
+        // Add fields
+        .setFields([
+
+            ["LinkRedirect", [fields.LinkRedirect.visible && fields.LinkRedirect.required ? ew.Validators.required(fields.LinkRedirect.caption) : null], fields.LinkRedirect.isInvalid],
+            ["LookupPlant", [fields.LookupPlant.visible && fields.LookupPlant.required ? ew.Validators.required(fields.LookupPlant.caption) : null], fields.LookupPlant.isInvalid],
+            ["TaskList", [fields.TaskList.visible && fields.TaskList.required ? ew.Validators.required(fields.TaskList.caption) : null], fields.TaskList.isInvalid],
+            ["KeteranganFile", [fields.KeteranganFile.visible && fields.KeteranganFile.required ? ew.Validators.required(fields.KeteranganFile.caption) : null], fields.KeteranganFile.isInvalid]
+        ])
+
+        // Form_CustomValidate
+        .setCustomValidate(
+            function(fobj) { // DO NOT CHANGE THIS LINE!
+                    // Your custom validation code here, return false if invalid.
+                    return true;
+                }
+        )
+
+        // Use JavaScript validation or not
+        .setValidateRequired(ew.CLIENT_VALIDATE)
+
+        // Dynamic selection lists
+        .setLists({
+            "LookupPlant": @Html.Raw(mwtOnlineAdd.LookupPlant.ToClientList(mwtOnlineAdd)),
+        })
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Client script
+    const parent_url = ew.PATH_BASE;
+    $("#File-Name").on("click", function (e) {
+        $("#File").trigger("click");
+    });
+    $("#File").on("change", function(e) {
+        const file = $(this)[0].files[0];
+        $("#File-Name").val(file.name);
+    });
+    $(document).on("click", "#btn-cancel-custom", function(){
+        window.location.href = `${parent_url}MWTOnlineList`;
+    });
+
+    // ===========
+    let selectedFiles = []; // { id, file }
+    const bytesToSize = (bytes) => {
+        if (bytes === 0) return "0 B";
+        const sizes = ["B", "KB", "MB", "GB"];
+        const i = Math.floor(Math.log(bytes) / Math.log(1024));
+        return (bytes / Math.pow(1024, i)).toFixed(1) + " " + sizes[i];
+    };
+    const renderFileList = () => {
+        const $table = $("#file-list-table");
+        const $tbody = $table.find("tbody");
+        $tbody.empty();
+        if (!selectedFiles.length) {
+            $table.hide();
+            $("#File-Name").val("Add File");
+            $('#keterangan-file').hide();
+            return;
+        }
+        selectedFiles.forEach((item) => {
+            const f = item.file;
+            const row = `
+                <tr data-id="${item.id}">
+                    <td title="${f.name}">${f.name}</td>
+                    <td>${bytesToSize(f.size)}</td>
+                    <td>${f.type || "-"}</td>
+                    <td class="text-end">
+                        <button type="button" class="btn btn-sm btn-outline-danger btn-remove-file">
+                            <i class="fa-solid fa-trash-can me-1"></i> Remove
+                        </button>
+                    </td>
+                </tr>`;
+            $tbody.append(row);
+        });
+        $table.show();
+        $('#keterangan-file').show();
+        if (selectedFiles.length === 1) {
+            $("#File-Name").val(selectedFiles[0].file.name);
+        } else {
+            $("#File-Name").val(selectedFiles.length + " files selected");
+        }
+    };
+    $("#File").on("change", function () {
+        const files = this.files;
+        if (!files || !files.length) return;
+        Array.from(files).forEach(f => {
+            if (f.size > 20 * 1024 * 1024) {
+                ew.alert("File `" + f.name + "` is larger than 20 MB and will be skipped.");
+                return;
+            }
+            selectedFiles.push({
+                id: crypto.randomUUID ? crypto.randomUUID() : (Date.now() + "_" + Math.random()),
+                file: f
+            });
+        });
+        $(this).val("");
+        renderFileList();
+    });
+
+        // remove single file from list
+    $(document).on("click", ".btn-remove-file", function () {
+        const rowId = $(this).closest("tr").data("id");
+        selectedFiles = selectedFiles.filter(x => x.id !== rowId);
+        renderFileList();
+    });
+    $(document).on("click", "#btn-submit-custom", function(){
+        const Plant = $('#x_LookupPlant').val();
+        const Deskripsi = $('#x_TaskList').val().trim();
+        const DeskripsiFile = $('#x_KeteranganFile').val().trim();
+        if (!Plant) return ew.alert("Plant tidak boleh kosong!");
+        let formData = new FormData();
+        formData.append("Plant", Plant);
+        formData.append("Deskripsi", Deskripsi);
+        formData.append("DeskripsiFile", DeskripsiFile);
+        selectedFiles.forEach((item, idx) => {
+            formData.append(`Files`, item.file);
+        });
+        showLoading();
+        $.ajax({
+            url: parent_url + "api/LookUpList/v2/AddMWTOnline",
+            type: "POST",
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(rs) {
+                hideLoading();
+                if (rs.success) {
+                    ew.alert(rs.message);
+                    setTimeout(function() {
+                        if (rs.id) {
+                            window.location.href = `${parent_url}MwtOnlineEdit/${rs.id}`;
+                        } else {
+                            window.location.href = `${parent_url}MWTOnlineList`;
+                        }
+                    }, 2000);
+                } else {
+                    ew.alert(rs.message);
+                }
+            },
+            error: function(xhr) {
+                hideLoading();
+                ew.alert("Gagal menambah data: " + xhr.responseText);
+            }
+        });
+    });
+});
+</script>
+@mwtOnlineAdd.ShowPageHeader()
+@mwtOnlineAdd.ShowMessages()
+<form name="fMWTOnlineadd" id="fMWTOnlineadd" class="@(mwtOnlineAdd.FormClassName)" action="@AppPath(CurrentPageName())" method="post" novalidate autocomplete="off">
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+<input type="hidden" name="action" id="action" value="insert">
+<input type="hidden" name="modal" value="@ConvertToInt(mwtOnlineAdd.IsModal)">
+@if (IsJsonResponse()) {
+<input type="hidden" name="json" value="1">
+}
+<input type="hidden" name="@(mwtOnlineAdd.OldKeyName)" value="@Html.Raw(mwtOnlineAdd.OldKey)">
+<div class="ew-add-div d-none"><!-- page* -->
+@if (mwtOnlineAdd.LinkRedirect.Visible) { // mwtOnlineAdd.LinkRedirect.Visible (begin)
+    <div id="r_LinkRedirect" @Html.Raw(mwtOnlineAdd.LinkRedirect.RowAttributes)>
+        <label id="elh_MWTOnline_LinkRedirect" for="x_LinkRedirect" class="@(mwtOnlineAdd.LeftColumnClass)"><template id="tpc_MWTOnline_LinkRedirect">@Html.Raw(mwtOnlineAdd.LinkRedirect.Caption)@Html.Raw(mwtOnlineAdd.LinkRedirect.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(mwtOnlineAdd.RightColumnClass)"><div @Html.Raw(mwtOnlineAdd.LinkRedirect.CellAttributes)>
+<template id="tpx_MWTOnline_LinkRedirect"><span id="el_MWTOnline_LinkRedirect">
+<input type="@(mwtOnlineAdd.LinkRedirect.InputTextType)" name="x_LinkRedirect" id="x_LinkRedirect" data-table="MWTOnline" data-field="x_LinkRedirect" value="@Html.Raw(mwtOnlineAdd.LinkRedirect.EditValue)" size="30" maxlength="177" placeholder="@Html.Raw(HtmlEncode(mwtOnlineAdd.LinkRedirect.PlaceHolder))" data-format-pattern="@(mwtOnlineAdd.LinkRedirect.FormatPattern)"@Html.Raw(mwtOnlineAdd.LinkRedirect.EditAttributes) aria-describedby="x_LinkRedirect_help">
+@Html.Raw(mwtOnlineAdd.LinkRedirect.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(mwtOnlineAdd.LinkRedirect.GetErrorMessage())</div>
+</span></template>
+</div></div>
+    </div>
+} @* mwtOnlineAdd.LinkRedirect.Visible (end) *@
+@if (mwtOnlineAdd.LookupPlant.Visible) { // mwtOnlineAdd.LookupPlant.Visible (begin)
+    <div id="r_LookupPlant" @Html.Raw(mwtOnlineAdd.LookupPlant.RowAttributes)>
+        <label id="elh_MWTOnline_LookupPlant" for="x_LookupPlant" class="@(mwtOnlineAdd.LeftColumnClass)"><template id="tpc_MWTOnline_LookupPlant">@Html.Raw(mwtOnlineAdd.LookupPlant.Caption)@Html.Raw(mwtOnlineAdd.LookupPlant.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(mwtOnlineAdd.RightColumnClass)"><div @Html.Raw(mwtOnlineAdd.LookupPlant.CellAttributes)>
+<template id="tpx_MWTOnline_LookupPlant"><span id="el_MWTOnline_LookupPlant">
+    <select
+        id="x_LookupPlant"
+        name="x_LookupPlant"
+        class="form-select ew-select@(mwtOnlineAdd.LookupPlant.IsInvalidClass)"
+        data-select2-id="fMWTOnlineadd_x_LookupPlant"
+        data-table="MWTOnline"
+        data-field="x_LookupPlant"
+        data-value-separator="@(mwtOnlineAdd.LookupPlant.DisplayValueSeparatorAttribute)"
+        data-placeholder="@(HtmlEncode(mwtOnlineAdd.LookupPlant.PlaceHolder))"
+        @Html.Raw(mwtOnlineAdd.LookupPlant.EditAttributes)>
+        @(mwtOnlineAdd.LookupPlant.SelectOptionListHtml("x_LookupPlant"))
+    </select>
+    @Html.Raw(mwtOnlineAdd.LookupPlant.GetCustomMessage)
+    <div class="invalid-feedback">@Html.Raw(mwtOnlineAdd.LookupPlant.GetErrorMessage())</div>
+<script>
+loadjs.ready("fMWTOnlineadd", function() {
+    var options = { name: "x_LookupPlant", selectId: "fMWTOnlineadd_x_LookupPlant" },
+        el = document.querySelector("select[data-select2-id='" + options.selectId + "']");
+    if (!el)
+        return;
+    options.closeOnSelect = !options.multiple;
+    options.dropdownParent = el.closest("#ew-modal-dialog, #ew-add-opt-dialog");
+    if (fMWTOnlineadd.lists.LookupPlant?.lookupOptions.length) {
+        options.data = { id: "x_LookupPlant", form: "fMWTOnlineadd" };
+    } else {
+        options.ajax = { id: "x_LookupPlant", form: "fMWTOnlineadd", limit: ew.LOOKUP_PAGE_SIZE };
+    }
+    options.minimumInputLength = ew.selectMinimumInputLength;
+    options = Object.assign({}, ew.selectOptions, options, ew.vars.tables.MWTOnline.fields.LookupPlant.selectOptions);
+    ew.createSelect(options);
+});
+</script>
+</span></template>
+</div></div>
+    </div>
+} @* mwtOnlineAdd.LookupPlant.Visible (end) *@
+@if (mwtOnlineAdd.TaskList.Visible) { // mwtOnlineAdd.TaskList.Visible (begin)
+    <div id="r_TaskList" @Html.Raw(mwtOnlineAdd.TaskList.RowAttributes)>
+        <label id="elh_MWTOnline_TaskList" for="x_TaskList" class="@(mwtOnlineAdd.LeftColumnClass)"><template id="tpc_MWTOnline_TaskList">@Html.Raw(mwtOnlineAdd.TaskList.Caption)@Html.Raw(mwtOnlineAdd.TaskList.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(mwtOnlineAdd.RightColumnClass)"><div @Html.Raw(mwtOnlineAdd.TaskList.CellAttributes)>
+<template id="tpx_MWTOnline_TaskList"><span id="el_MWTOnline_TaskList">
+<textarea data-table="MWTOnline" data-field="x_TaskList" name="x_TaskList" id="x_TaskList" cols="35" rows="4" placeholder="@Html.Raw(HtmlEncode(mwtOnlineAdd.TaskList.PlaceHolder))"@Html.Raw(mwtOnlineAdd.TaskList.EditAttributes) aria-describedby="x_TaskList_help">@(mwtOnlineAdd.TaskList.EditValue)</textarea>
+@Html.Raw(mwtOnlineAdd.TaskList.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(mwtOnlineAdd.TaskList.GetErrorMessage())</div>
+</span></template>
+</div></div>
+    </div>
+} @* mwtOnlineAdd.TaskList.Visible (end) *@
+@if (mwtOnlineAdd.KeteranganFile.Visible) { // mwtOnlineAdd.KeteranganFile.Visible (begin)
+    <div id="r_KeteranganFile" @Html.Raw(mwtOnlineAdd.KeteranganFile.RowAttributes)>
+        <label id="elh_MWTOnline_KeteranganFile" for="x_KeteranganFile" class="@(mwtOnlineAdd.LeftColumnClass)"><template id="tpc_MWTOnline_KeteranganFile">@Html.Raw(mwtOnlineAdd.KeteranganFile.Caption)@Html.Raw(mwtOnlineAdd.KeteranganFile.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(mwtOnlineAdd.RightColumnClass)"><div @Html.Raw(mwtOnlineAdd.KeteranganFile.CellAttributes)>
+<template id="tpx_MWTOnline_KeteranganFile"><span id="el_MWTOnline_KeteranganFile">
+<textarea data-table="MWTOnline" data-field="x_KeteranganFile" name="x_KeteranganFile" id="x_KeteranganFile" cols="35" rows="4" placeholder="@Html.Raw(HtmlEncode(mwtOnlineAdd.KeteranganFile.PlaceHolder))"@Html.Raw(mwtOnlineAdd.KeteranganFile.EditAttributes) aria-describedby="x_KeteranganFile_help">@(mwtOnlineAdd.KeteranganFile.EditValue)</textarea>
+@Html.Raw(mwtOnlineAdd.KeteranganFile.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(mwtOnlineAdd.KeteranganFile.GetErrorMessage())</div>
+</span></template>
+</div></div>
+    </div>
+} @* mwtOnlineAdd.KeteranganFile.Visible (end) *@
+</div><!-- /page* -->
+<div id="tpd_MWTOnlineadd" class="ew-custom-template"></div>
+<template id="tpm_MWTOnlineadd">
+<div id="ct_mwtOnlineAdd"><style>
+    .stepper {
+        display: flex;
+        counter-reset: step;
+        flex-wrap: nowrap;
+        overflow-x: auto; 
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 8px;
+    }
+    .stepper::-webkit-scrollbar {
+        height: 6px;
+    }
+    .stepper::-webkit-scrollbar-thumb {
+        background-color: #ccc;
+        border-radius: 3px;
+    }
+    .step {
+        width: 150px;
+        text-align: center;
+        position: relative;
+    }
+    .step:not(:last-child)::after {
+        content: '';
+        position: absolute;
+        top: 20px;
+        right: -50%;
+        width: 100%;
+        height: 4px;
+        background-color: #ccc;
+        z-index: 0;
+    }
+    .step.completed:not(:last-child)::after {
+        background-color: #3c6dbd;
+    }
+    .step-icon {
+        width: 36px;
+        height: 36px;
+        line-height: 36px;
+        border-radius: 50%;
+        background: #ccc;
+        display: inline-block;
+        z-index: 1;
+        position: relative;
+        color: white;
+        font-weight: bold;
+    }
+    .step.active .step-icon {
+        background: #3c6dbd;
+    }
+    .step-label {
+        margin-top: 8px;
+        font-size: 14px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 6px;
+        color: #333;
+    }
+    .step-label {
+        color: #3c6dbd !important;
+        text-decoration: none;
+        margin: 0;
+        padding: 0;
+    }
+    .step-label-not-active {
+        color: #CCCCCC !important;
+    }
+    .ag-theme-quartz .ag-header {
+        background-color: #3c6dbd !important;
+    }
+    .ag-theme-quartz .ag-header-cell-label {
+        color: #ffffff !important;
+    }
+    .ag-theme-quartz .ag-icon-filter {
+        color: #ffffff !important;
+    }
+    .rotate-down {
+        transform: rotate(90deg);
+        transition: transform 0.3s ease;
+    }
+    .rotate-right {
+        transform: rotate(0deg);
+        transition: transform 0.3s ease;
+    }
+    .ag-header-cell-text {
+        font-size: 12.5px;
+    }
+    .ag-row.stripe {
+       background-color: #E0F0FB;
+    }
+    #btn-action {
+        display: none;
+    }
+    #btn-cancel {
+        display: none;
+    }
+    #el_MWTOnline_LookupPlant {
+        width: 100%;
+    }
+    #el_MWTOnline_TaskList {
+        width: 100%;
+    }
+    #el_MWTOnline_KeteranganFile {
+        width: 100%;
+    }
+    .btn {
+        white-space: nowrap;
+    }
+    .file-input-wrapper {
+        border: 1px solid #ced4da;
+        border-radius: .375rem;
+        overflow: hidden;
+        transition: border-color .15s, box-shadow .15s;
+    }
+    .file-input-wrapper:focus-within {
+        border-color: #86b7fe;
+        box-shadow: 0 0 0 .25rem rgba(13,110,253,.25);
+    }
+    .file-input-wrapper .btn {
+        border-radius: 0;
+    }
+    .file-input-wrapper .form-control {
+        border: none;
+        box-shadow: none !important;
+    }
+</style>
+<form id="CustomMWTOnline" autocomplete="off">
+    <div class="row">
+        <div class="col-2 fw-bold d-flex" id="nomor-tipe-proses">
+            Plant
+        </div>
+        <div class="col-10 d-flex gap-3">
+            <slot class="ew-slot" name="tpx_MWTOnline_LookupPlant"></slot>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-2 fw-bold d-flex">
+            Task List
+        </div>
+        <div class="col-10 d-flex gap-3">
+            <slot class="ew-slot" name="tpx_MWTOnline_TaskList"></slot>
+        </div>
+    </div>
+    <div class="row mb-3">
+        <div class="col-2 fw-bold d-flex gap-2">
+            File
+        </div>
+        <div class="col-10">
+            <div class="input-group file-input-wrapper">
+                <label class="btn btn-primary" style="width: 80px;">
+                    Add File <input type="file" id="File" hidden multiple>
+                </label>
+                <input type="text" class="form-control" id="File-Name" style="cursor: pointer;" value="Add File" readonly>
+            </div>
+            <small class="text-muted">Maximum file size: 20 MB</small>
+            <!-- file list -->
+            <div class="mt-3">
+                <table class="table table-sm table-hover align-middle mb-0" id="file-list-table" style="display:none;">
+                    <thead class="table-light">
+                    <tr>
+                        <th style="width:50%;">File name</th>
+                        <th style="width:20%;">Size</th>
+                        <th style="width:20%;">Type</th>
+                        <th style="width:10%;"></th>
+                    </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="row" id="keterangan-file" style="display:none;">
+        <div class="col-2 fw-bold d-flex">
+            Keterangan File
+        </div>
+        <div class="col-10 d-flex gap-3">
+            <slot class="ew-slot" name="tpx_MWTOnline_KeteranganFile"></slot>
+        </div>
+    </div>
+    <div class="row pt-3 pb-1">
+        <div class="col-2">
+        </div>
+        <div class="col-10">
+            <div class="d-flex gap-2 pt-1 pb-3">
+                <button id="btn-submit-custom" type="button" class="btn btn-primary ew-btn">
+                    <i class="fa-solid fa-plus me-1"></i> Add
+                </button>
+                <button id="btn-cancel-custom" type="button" class="btn btn-default ew-btn">
+                    <i class="fa-solid fa-ban me-1"></i> Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+</form></div>
+</template>
+@{ mwtOnlineAdd.CloseRecordset(); }
+@Html.Raw(mwtOnlineAdd.IsModal ? "<template class=\"ew-modal-buttons\">" : "<div class=\"row ew-buttons\">")<!-- buttons .row -->
+    <div class="@(mwtOnlineAdd.OffsetColumnClass)"><!-- buttons offset -->
+    <button class="btn btn-primary ew-btn" name="btn-action" id="btn-action" type="submit" form="fMWTOnlineadd">@Html.Raw(Language.Phrase("AddBtn"))</button>
+@if (IsJsonResponse()) {
+    <button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" data-bs-dismiss="modal">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+} else {
+    <button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" form="fMWTOnlineadd" data-href="@AppPath(mwtOnlineAdd.ReturnUrl)">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+}
+    </div><!-- /buttons offset -->
+@Html.Raw(mwtOnlineAdd.IsModal ? "</template>" : "</div>")<!-- /buttons .row -->
+</form>
+<script class="ew-apply-template">
+loadjs.ready(ew.applyTemplateId, function() {
+    var $ = jQuery;
+    ew.templateData = { rows: @Html.Raw(ConvertToJson(mwtOnlineAdd.Rows)) };
+    ew.applyTemplate("tpd_MWTOnlineadd", "tpm_MWTOnlineadd", "MWTOnlineadd", "@(mwtOnlineAdd.Export)", "MWTOnline", ew.templateData.rows[0], @(mwtOnlineAdd.IsModal ? "true" : "false"));
+    loadjs.done("customtemplate");
+});
+</script>
+@mwtOnlineAdd.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("MWTOnline");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Startup script
+    var parent_url = ew.PATH_BASE;
+    $(document).ready(function () {
+        const ddl = $("#x_LookupPlant");
+        ddl.empty();
+        ddl.append('<option value="">Loading...</option>');
+        $.ajax({
+            url: parent_url + 'api/LookUpList/get-dropdown/plant?Menu=MWTOnline',
+            method: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                ddl.empty(); 
+                $.each(data, function (index, item) {
+                    let selectedAttr = index === 0 ? 'selected' : '';
+                    ddl.append(`<option value="${item.Value}" ${selectedAttr}>${item.Label}</option>`);
+                });
+            },
+            error: function (xhr, status, error) {
+                console.error("Gagal ambil data dropdown:", error);
+                ddl.empty();
+            }        
+        });
+    });
+    var steps = [
+        { number: 1, label: "MWT Online", url: '', icon: "fa-comment-dots" },
+    ];
+    var currentStep = 1;
+    var $stepperWrapper = $('<div id="bread-crumb-nav" class="d-flex border-bottom border-2 pb-2"><div class="stepper"></div></div>');
+    var $stepper = $stepperWrapper.find(".stepper");
+    steps.forEach(function (step, i) {
+        var isActive = step.number === currentStep;
+        var isCompleted = step.number < currentStep;
+        var stepClass = isActive ? "active" : isCompleted ? "completed" : "";
+        var icon, labelContent, html;
+        if (isActive) {
+            icon = `<div class="step-icon bg-success">${step.number}</div>`;
+            labelContent = `<div class="step-label"><p class="text-success mb-1"><i class="fa-solid ${step.icon} me-1 text-success"></i> ${step.label}</p></div>`;
+            html = `<div class="step ${stepClass} text-success">${icon}${labelContent}</div>`;
+        } else if (isCompleted) {
+            icon = `<div class="step-icon" style="background: #3c6dbd;">${step.number}</div>`;
+            labelContent = `<div><a href="${step.url}" class="step-label"><i class="fa-solid ${step.icon} me-1"></i>${step.label}</a></div>`;
+            html = `<div class="step ${stepClass}">${icon}${labelContent}</div>`;
+        } else {
+            icon = `<div class="step-icon">${step.number}</div>`;
+            labelContent = `<div class="step-label-not-active"><p style="margin: 0;"><i class="fa-solid ${step.icon} me-1"></i>${step.label}</p></div>`;
+            html = `<div class="step ${stepClass} text-secondary">${icon}${labelContent}</div>`;
+        }
+        $stepper.append(html);
+    });
+    if ($('#bread-crumb-nav').length == 0) {
+        $(".content-header .container-fluid .row").append($stepperWrapper);
+    }
+});
+</script>

@@ -1,0 +1,2234 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (aktivitasDokumenList.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = aktivitasDokumenList.UseLayout ? "_Layout" : "";
+}
+@if (!aktivitasDokumenList.IsExport()) {
+<script>
+var currentTable = @Html.Raw(ConvertToJson(aktivitasDokumenList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { AktivitasDokumen: currentTable } });
+var currentPageID = ew.PAGE_ID = "list";
+var currentForm;
+var @(aktivitasDokumenList.FormName);
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("@(aktivitasDokumenList.FormName)")
+        .setPageId("list")
+        .setSubmitWithFetch(@(aktivitasDokumenList.UseAjaxActions ? "true" : "false"))
+        .setFormKeyCountName("@(aktivitasDokumenList.FormKeyCountName)")
+
+        // Dynamic selection lists
+        .setLists({
+            "NoReferensi": @Html.Raw(aktivitasDokumenList.NoReferensi.ToClientList(aktivitasDokumenList)),
+            "IdProses": @Html.Raw(aktivitasDokumenList.IdProses.ToClientList(aktivitasDokumenList)),
+            "IdAktivitas": @Html.Raw(aktivitasDokumenList.IdAktivitas.ToClientList(aktivitasDokumenList)),
+            "NamaDokumen": @Html.Raw(aktivitasDokumenList.NamaDokumen.ToClientList(aktivitasDokumenList)),
+            "UploadDokumen": @Html.Raw(aktivitasDokumenList.UploadDokumen.ToClientList(aktivitasDokumenList)),
+            "DownloadDokumen": @Html.Raw(aktivitasDokumenList.DownloadDokumen.ToClientList(aktivitasDokumenList)),
+            "DiunggahOleh": @Html.Raw(aktivitasDokumenList.DiunggahOleh.ToClientList(aktivitasDokumenList)),
+            "TanggalUpload": @Html.Raw(aktivitasDokumenList.TanggalUpload.ToClientList(aktivitasDokumenList)),
+            "DiperbaruiOleh": @Html.Raw(aktivitasDokumenList.DiperbaruiOleh.ToClientList(aktivitasDokumenList)),
+            "TanggalDiperbarui": @Html.Raw(aktivitasDokumenList.TanggalDiperbarui.ToClientList(aktivitasDokumenList)),
+            "WajibUpload": @Html.Raw(aktivitasDokumenList.WajibUpload.ToClientList(aktivitasDokumenList)),
+            "TipeProses": @Html.Raw(aktivitasDokumenList.TipeProses.ToClientList(aktivitasDokumenList)),
+        })
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Client script
+    // Write your client script here, no need to add script tags.
+    let parent_url = ew.PATH_BASE;
+    let IdProses = "@aktivitasDokumenList.IdProses.CurrentValue";
+    let prosesId = "@aktivitasDokumenList.IdProses.CurrentValue";
+    $(document).on("click", ".download-document", function (e) {
+        let IdAktivitasDokumen = $(this).attr("IdAktivitasDokumen");
+        e.preventDefault();
+        $.ajax({
+            url: parent_url + "api/LookUpList/DownloadDocumentZip",
+            type: "GET",
+            data: {
+                idRef: IdAktivitasDokumen,
+                table: "AktivitasDokumenDetail",
+                colRef: "IdAktivitasDokumen",
+                path: "ActivityDocument",
+            },
+            xhrFields: {
+                responseType: "blob",
+            },
+            beforeSend: function () {
+                showLoading();
+            },
+            success: function (response, status, xhr) {
+                const disposition = xhr.getResponseHeader("Content-Disposition");
+                let fileName = "download_file";
+                if (disposition) {
+                    const fileNameMatch = disposition.match(/filename="?([^";]+)"?/);
+                    if (fileNameMatch && fileNameMatch[1]) {
+                        fileName = decodeURIComponent(fileNameMatch[1]);
+                    }
+                    const utf8FileNameMatch = disposition.match(/filename\*\s*=\s*UTF-8''([^;]+)/);
+                    if (utf8FileNameMatch && utf8FileNameMatch[1]) {
+                        fileName = decodeURIComponent(utf8FileNameMatch[1]);
+                    }
+                }
+                const blobUrl = window.URL.createObjectURL(response);
+                const a = document.createElement("a");
+                a.href = blobUrl;
+                a.download = fileName;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(blobUrl);
+                ew.alert("Download berhasil!");
+            },
+            error: function (xhr, status, error) {
+                if (xhr.status === 404) {
+                    ew.alert("File tidak ditemukan di server.");
+                } else if (xhr.status === 500) {
+                    ew.alert("Terjadi kesalahan server. Coba lagi nanti.");
+                } else {
+                    ew.alert("Gagal mendownload file. Error: " + xhr.responseText);
+                }
+            },
+            complete: function () {
+                hideLoading();
+            },
+        });
+    });
+    $(document).on("click", ".btn-download-single", function (e) {
+        e.preventDefault();
+        const id = $(this).data("id");
+        if (!id) {
+            ew.alert("ID dokumen tidak ditemukan.");
+            return;
+        }
+        $.ajax({
+            url: parent_url + "api/LookUpList/DownloadSingleDocument",
+            type: "GET",
+            data: {
+                id: id,
+                menu: "AktivitasDokumen",
+            },
+            xhrFields: {
+                responseType: "blob",
+            },
+            beforeSend: function () {
+                showLoading();
+            },
+            success: function (response, status, xhr) {
+                const disposition = xhr.getResponseHeader("Content-Disposition");
+                let fileName = "download_file";
+                if (disposition) {
+                    const fileNameMatch = disposition.match(/filename="?([^";]+)"?/);
+                    if (fileNameMatch && fileNameMatch[1]) {
+                        fileName = decodeURIComponent(fileNameMatch[1]);
+                    }
+                    const utf8FileNameMatch = disposition.match(/filename\*\s*=\s*UTF-8''([^;]+)/);
+                    if (utf8FileNameMatch && utf8FileNameMatch[1]) {
+                        fileName = decodeURIComponent(utf8FileNameMatch[1]);
+                    }
+                }
+                const blobUrl = window.URL.createObjectURL(response);
+                const a = document.createElement("a");
+                a.href = blobUrl;
+                a.download = fileName;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(blobUrl);
+                ew.alert("Download berhasil!");
+            },
+            error: function (xhr, status, error) {
+                if (xhr.status === 404) {
+                    ew.alert("File tidak ditemukan di server.");
+                } else if (xhr.status === 500) {
+                    ew.alert("Terjadi kesalahan server. Coba lagi nanti.");
+                } else {
+                    ew.alert("Gagal mendownload file. Error: " + xhr.responseText);
+                }
+            },
+            complete: function () {
+                hideLoading();
+            },
+        });
+    });
+    let IdAktivitas = "@aktivitasDokumenList.IdAktivitas.CurrentValue";
+    let StatusAktivitas = $("#el_Aktivitas_StatusAktivitas").text().trim();
+    function updateStatusDokumen() {
+        let formData = new FormData();
+        formData.append("IdAktivitas", IdAktivitas);
+        const originalStatus = document.querySelector("#el_Aktivitas_StatusAktivitas span").textContent;
+        let keterangan = $("#InputKeterangan").val();
+        if (!keterangan) {
+            keterangan = "";
+        }
+        formData.append("Keterangan", keterangan);
+        if (StatusAktivitas == "Completed") {
+            formData.append("StatusAktivitas", "Editing");
+        } else if (StatusAktivitas == "Editing" || StatusAktivitas == "Completed Edit") {
+            formData.append("StatusAktivitas", "Editing");
+        } else {
+            formData.append("StatusAktivitas", "Draft");
+        }
+        const idTemplateAktivitas = "@aktivitas.IdTemplateAktivitas.CurrentValue";
+        const isNonNominationReceivingLineClosedAndSealed = $("#InputIsNonNominationReceivingLineClosedAndSealed").is(":checked");
+        const isNominationTankReceivingLineOpen = $("#InputIsNominationTankReceivingLineOpen").is(":checked");
+        const isTankEmptyAndDry = $("#InputIsTankEmptyAndDry").is(":checked");
+        const isDocumentationComplete = $("#InputIsDocumentationComplete").is(":checked");
+        if (["306", "460"].includes(idTemplateAktivitas) && !isNominationTankReceivingLineOpen) {
+            return ew.alert("Jalur penerimaan yang berhubungan dengan Tangki Nominasi BELUM TERBUKA.");
+        }
+        if (["306", "460"].includes(idTemplateAktivitas) && !isNonNominationReceivingLineClosedAndSealed) {
+            return ew.alert("Jalur penerimaan yang TIDAK berhubungan dengan Tangki Nominasi BELUM TERTUTUP dan TERSEGEL.");
+        }
+        if (["429"].includes(idTemplateAktivitas)) {
+            if (!isTankEmptyAndDry) return ew.alert(`Tangki mobil <strong>belum dalam kondisi kering</strong> dan <strong>masih terdapat sisa muatan</strong>.` );
+            if (!isDocumentationComplete) return ew.alert(`Seluruh dokumen <strong>belum</strong> didokumentasikan dengan baik.`);
+        }
+        formData.append("IsNominationTankReceivingLineOpen", isNominationTankReceivingLineOpen);
+        formData.append("IsNonNominationReceivingLineClosedAndSealed", isNonNominationReceivingLineClosedAndSealed);
+        formData.append("IsTankEmptyAndDry", isTankEmptyAndDry);
+        formData.append("IsDocumentationComplete", isDocumentationComplete);
+        $.ajax({
+            url: parent_url + `api/LookUpList/check_valid_status_aktivitas?idAktivitas=${IdAktivitas}&originalStatus=${originalStatus}`,
+            type: "GET",
+            beforeSend: function () {
+                showLoading();
+            },
+            success: function (response) {
+                if (!response.IsValid) {
+                    hideLoading();
+                    ew.alert(response.Message ?? "Status aktivitas telah diubah oleh pengguna lain");
+                    return;
+                } else {
+                    $.ajax({
+                        url: parent_url + "api/LookUpList/UpdateStatusAktivitasByDocument",
+                        type: "POST",
+                        data: formData,
+                        contentType: false,
+                        processData: false,
+                        success: function (rs) {
+                            ew.alert(rs.message);
+                            if (rs.success) {
+                                setTimeout(function () {
+                                    if (formData.get("StatusAktivitas") == "Completed" || formData.get("StatusAktivitas") == "Completed Edit") {
+                                        window.location.href = `${parent_url}AktivitasList?cmd=search&x_IdProses%5B%5D=${prosesId}&search=&searchtype=`;
+                                    } else {
+                                        location.reload();
+                                    }
+                                }, 1000);
+                            }
+                        },
+                        error: function (xhr, status, error) {
+                            ew.alert("Error: " + xhr.responseText);
+                        },
+                        complete: function () {
+                            hideLoading();
+                        },
+                    });
+                }
+            },
+            error: function (xhr, status, error) {
+                ew.alert("Gagal menyimpan data.");
+                console.error("Form submit gagal:", error);
+            },
+        });
+    }
+    $(document).on("click", "#btn-save-keterangan", function () {
+        event.preventDefault();
+        updateStatusDokumen();
+    });
+});
+</script>
+}
+@if (!aktivitasDokumenList.IsExport()) {
+<div class="btn-toolbar ew-toolbar">
+@if (aktivitasDokumenList.TotalRecords > 0 && aktivitasDokumenList.ExportOptions.Visible) {
+    aktivitasDokumenList.ExportOptions.Render("body");
+}
+@if (aktivitasDokumenList.ImportOptions.Visible) {
+    aktivitasDokumenList.ImportOptions.Render("body");
+}
+@if (aktivitasDokumenList.SearchOptions.Visible) {
+    aktivitasDokumenList.SearchOptions.Render("body");
+}
+@if (aktivitasDokumenList.FilterOptions.Visible) {
+    aktivitasDokumenList.FilterOptions.Render("body");
+}
+</div>
+}
+@if (!aktivitasDokumenList.IsExport() || Config.ExportMasterRecord && aktivitasDokumenList.IsExport("print")) {
+if (!Empty(aktivitasDokumenList.DbMasterFilter) && aktivitasDokumenList.CurrentMasterTable == "Aktivitas") {
+    if (aktivitasDokumenList.MasterRecordExists) {
+        @await Html.PartialAsync("AktivitasMaster.cshtml")
+    }
+}
+}
+@if (aktivitasDokumenList.ShowCurrentFilter) {
+    aktivitasDokumenList.ShowFilterList();
+}
+@if (!aktivitasDokumenList.IsModal) {
+<form name="fAktivitasDokumensrch" id="fAktivitasDokumensrch" class="ew-form ew-ext-search-form" action="@AppPath(CurrentPageName())" novalidate autocomplete="off">
+<div id="fAktivitasDokumensrch_search_panel" class="mb-2 mb-sm-0 @(aktivitasDokumenList.SearchPanelClass)"><!-- .ew-search-panel -->
+<script>
+var currentTable = @Html.Raw(ConvertToJson(aktivitasDokumenList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { AktivitasDokumen: currentTable } });
+var currentForm;
+var fAktivitasDokumensrch, currentSearchForm, currentAdvancedSearchForm;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery,
+        fields = currentTable.fields;
+
+    // Form object for search
+    let form = new ew.FormBuilder()
+        .setId("fAktivitasDokumensrch")
+        .setPageId("list")
+@if (aktivitasDokumenList.UseAjaxActions) {
+        <text>.setSubmitWithFetch(true)</text>
+}
+
+        // Add fields
+        .setFields([
+        ])
+        // Validate form
+        .setValidate(
+            async function () {
+                if (!this.validateRequired)
+                    return true; // Ignore validation
+                let fobj = this.getForm();
+
+                // Validate fields
+                if (!this.validateFields())
+                    return false;
+
+                // Call Form_CustomValidate event
+                if (!(await this.customValidate?.(fobj) ?? true)) {
+                    this.focus();
+                    return false;
+                }
+                return true;
+            }
+        )
+
+        // Form_CustomValidate
+        .setCustomValidate(
+            function(fobj) { // DO NOT CHANGE THIS LINE!
+                    // Your custom validation code here, return false if invalid.
+                    return true;
+                }
+        )
+
+        // Use JavaScript validation or not
+        .setValidateRequired(ew.CLIENT_VALIDATE)
+
+        // Dynamic selection lists
+        .setLists({
+            "NoReferensi": @Html.Raw(aktivitasDokumenList.NoReferensi.ToClientList(aktivitasDokumenList)),
+            "IdProses": @Html.Raw(aktivitasDokumenList.IdProses.ToClientList(aktivitasDokumenList)),
+            "IdAktivitas": @Html.Raw(aktivitasDokumenList.IdAktivitas.ToClientList(aktivitasDokumenList)),
+            "IdDokumen": @Html.Raw(aktivitasDokumenList.IdDokumen.ToClientList(aktivitasDokumenList)),
+            "NamaDokumen": @Html.Raw(aktivitasDokumenList.NamaDokumen.ToClientList(aktivitasDokumenList)),
+            "TemplateDokumen": @Html.Raw(aktivitasDokumenList.TemplateDokumen.ToClientList(aktivitasDokumenList)),
+            "UploadDokumen": @Html.Raw(aktivitasDokumenList.UploadDokumen.ToClientList(aktivitasDokumenList)),
+            "DownloadDokumen": @Html.Raw(aktivitasDokumenList.DownloadDokumen.ToClientList(aktivitasDokumenList)),
+            "Keterangan": @Html.Raw(aktivitasDokumenList.Keterangan.ToClientList(aktivitasDokumenList)),
+            "PathFile": @Html.Raw(aktivitasDokumenList.PathFile.ToClientList(aktivitasDokumenList)),
+            "StatusUpload": @Html.Raw(aktivitasDokumenList.StatusUpload.ToClientList(aktivitasDokumenList)),
+            "DiunggahOleh": @Html.Raw(aktivitasDokumenList.DiunggahOleh.ToClientList(aktivitasDokumenList)),
+            "TanggalUpload": @Html.Raw(aktivitasDokumenList.TanggalUpload.ToClientList(aktivitasDokumenList)),
+            "DiperbaruiOleh": @Html.Raw(aktivitasDokumenList.DiperbaruiOleh.ToClientList(aktivitasDokumenList)),
+            "TanggalDiperbarui": @Html.Raw(aktivitasDokumenList.TanggalDiperbarui.ToClientList(aktivitasDokumenList)),
+            "IdTemplateAktivitasDokumen": @Html.Raw(aktivitasDokumenList.IdTemplateAktivitasDokumen.ToClientList(aktivitasDokumenList)),
+            "WajibUpload": @Html.Raw(aktivitasDokumenList.WajibUpload.ToClientList(aktivitasDokumenList)),
+            "TipeProses": @Html.Raw(aktivitasDokumenList.TipeProses.ToClientList(aktivitasDokumenList)),
+        })
+
+        // Filters
+        .setFilterList(@Html.Raw(aktivitasDokumenList.GetFilterList()))
+        .build();
+    window[form.id] = form;
+    currentSearchForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<input type="hidden" name="cmd" value="search">
+@if (Security.CanSearch) {
+if (!aktivitasDokumenList.IsExport() && Empty(aktivitasDokumenList.CurrentAction) && aktivitasDokumenList.HasSearchFields()) { @* Show search form (begin) *@
+<div class="ew-extended-search container-fluid ps-2">
+<div class="row mb-0@(aktivitasDokumenList.SearchFieldsPerRow > 0 ? " row-cols-sm-" + aktivitasDokumenList.SearchFieldsPerRow : "")">
+@{
+    // Render search row
+    aktivitasDokumenList.RowType = RowType.Search;
+    aktivitasDokumenList.ResetAttributes();
+    await aktivitasDokumenList.RenderRow();
+}
+@if (aktivitasDokumenList.NoReferensi.Visible) { // aktivitasDokumenList.NoReferensi.Visible (begin)
+    if (!aktivitasDokumenList.NoReferensi.UseFilter) {
+        aktivitasDokumenList.SearchColumnCount++;
+    }
+    <div id="xs_NoReferensi" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(aktivitasDokumenList.NoReferensi.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_NoReferensi"
+            name="x_NoReferensi[]"
+            class="form-control ew-select@(aktivitasDokumenList.NoReferensi.IsInvalidClass)"
+            data-select2-id="fAktivitasDokumensrch_x_NoReferensi"
+            data-table="AktivitasDokumen"
+            data-field="x_NoReferensi"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(aktivitasDokumenList.NoReferensi.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(aktivitasDokumenList.NoReferensi.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(aktivitasDokumenList.NoReferensi.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(aktivitasDokumenList.NoReferensi.EditAttributes)>
+            @(aktivitasDokumenList.NoReferensi.SelectOptionListHtml("x_NoReferensi", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(aktivitasDokumenList.NoReferensi.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fAktivitasDokumensrch", function() {
+            var options = {
+                name: "x_NoReferensi",
+                selectId: "fAktivitasDokumensrch_x_NoReferensi",
+                ajax: { id: "x_NoReferensi", form: "fAktivitasDokumensrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.AktivitasDokumen.fields.NoReferensi.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* aktivitasDokumenList.NoReferensi.Visible (end) *@
+@if (aktivitasDokumenList.IdProses.Visible) { // aktivitasDokumenList.IdProses.Visible (begin)
+    if (!aktivitasDokumenList.IdProses.UseFilter) {
+        aktivitasDokumenList.SearchColumnCount++;
+    }
+    <div id="xs_IdProses" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(aktivitasDokumenList.IdProses.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_IdProses"
+            name="x_IdProses[]"
+            class="form-control ew-select@(aktivitasDokumenList.IdProses.IsInvalidClass)"
+            data-select2-id="fAktivitasDokumensrch_x_IdProses"
+            data-table="AktivitasDokumen"
+            data-field="x_IdProses"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(aktivitasDokumenList.IdProses.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(aktivitasDokumenList.IdProses.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(aktivitasDokumenList.IdProses.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(aktivitasDokumenList.IdProses.EditAttributes)>
+            @(aktivitasDokumenList.IdProses.SelectOptionListHtml("x_IdProses", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(aktivitasDokumenList.IdProses.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fAktivitasDokumensrch", function() {
+            var options = {
+                name: "x_IdProses",
+                selectId: "fAktivitasDokumensrch_x_IdProses",
+                ajax: { id: "x_IdProses", form: "fAktivitasDokumensrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.AktivitasDokumen.fields.IdProses.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* aktivitasDokumenList.IdProses.Visible (end) *@
+@if (aktivitasDokumenList.IdAktivitas.Visible) { // aktivitasDokumenList.IdAktivitas.Visible (begin)
+    if (!aktivitasDokumenList.IdAktivitas.UseFilter) {
+        aktivitasDokumenList.SearchColumnCount++;
+    }
+    <div id="xs_IdAktivitas" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(aktivitasDokumenList.IdAktivitas.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_IdAktivitas"
+            name="x_IdAktivitas[]"
+            class="form-control ew-select@(aktivitasDokumenList.IdAktivitas.IsInvalidClass)"
+            data-select2-id="fAktivitasDokumensrch_x_IdAktivitas"
+            data-table="AktivitasDokumen"
+            data-field="x_IdAktivitas"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(aktivitasDokumenList.IdAktivitas.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(aktivitasDokumenList.IdAktivitas.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(aktivitasDokumenList.IdAktivitas.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(aktivitasDokumenList.IdAktivitas.EditAttributes)>
+            @(aktivitasDokumenList.IdAktivitas.SelectOptionListHtml("x_IdAktivitas", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(aktivitasDokumenList.IdAktivitas.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fAktivitasDokumensrch", function() {
+            var options = {
+                name: "x_IdAktivitas",
+                selectId: "fAktivitasDokumensrch_x_IdAktivitas",
+                ajax: { id: "x_IdAktivitas", form: "fAktivitasDokumensrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.AktivitasDokumen.fields.IdAktivitas.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* aktivitasDokumenList.IdAktivitas.Visible (end) *@
+@if (aktivitasDokumenList.IdDokumen.Visible) { // aktivitasDokumenList.IdDokumen.Visible (begin)
+    if (!aktivitasDokumenList.IdDokumen.UseFilter) {
+        aktivitasDokumenList.SearchColumnCount++;
+    }
+    <div id="xs_IdDokumen" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(aktivitasDokumenList.IdDokumen.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_IdDokumen"
+            name="x_IdDokumen[]"
+            class="form-control ew-select@(aktivitasDokumenList.IdDokumen.IsInvalidClass)"
+            data-select2-id="fAktivitasDokumensrch_x_IdDokumen"
+            data-table="AktivitasDokumen"
+            data-field="x_IdDokumen"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(aktivitasDokumenList.IdDokumen.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(aktivitasDokumenList.IdDokumen.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(aktivitasDokumenList.IdDokumen.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(aktivitasDokumenList.IdDokumen.EditAttributes)>
+            @(aktivitasDokumenList.IdDokumen.SelectOptionListHtml("x_IdDokumen", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(aktivitasDokumenList.IdDokumen.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fAktivitasDokumensrch", function() {
+            var options = {
+                name: "x_IdDokumen",
+                selectId: "fAktivitasDokumensrch_x_IdDokumen",
+                ajax: { id: "x_IdDokumen", form: "fAktivitasDokumensrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.AktivitasDokumen.fields.IdDokumen.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* aktivitasDokumenList.IdDokumen.Visible (end) *@
+@if (aktivitasDokumenList.NamaDokumen.Visible) { // aktivitasDokumenList.NamaDokumen.Visible (begin)
+    if (!aktivitasDokumenList.NamaDokumen.UseFilter) {
+        aktivitasDokumenList.SearchColumnCount++;
+    }
+    <div id="xs_NamaDokumen" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(aktivitasDokumenList.NamaDokumen.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_NamaDokumen"
+            name="x_NamaDokumen[]"
+            class="form-control ew-select@(aktivitasDokumenList.NamaDokumen.IsInvalidClass)"
+            data-select2-id="fAktivitasDokumensrch_x_NamaDokumen"
+            data-table="AktivitasDokumen"
+            data-field="x_NamaDokumen"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(aktivitasDokumenList.NamaDokumen.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(aktivitasDokumenList.NamaDokumen.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(aktivitasDokumenList.NamaDokumen.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(aktivitasDokumenList.NamaDokumen.EditAttributes)>
+            @(aktivitasDokumenList.NamaDokumen.SelectOptionListHtml("x_NamaDokumen", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(aktivitasDokumenList.NamaDokumen.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fAktivitasDokumensrch", function() {
+            var options = {
+                name: "x_NamaDokumen",
+                selectId: "fAktivitasDokumensrch_x_NamaDokumen",
+                ajax: { id: "x_NamaDokumen", form: "fAktivitasDokumensrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.AktivitasDokumen.fields.NamaDokumen.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* aktivitasDokumenList.NamaDokumen.Visible (end) *@
+@if (aktivitasDokumenList.TemplateDokumen.Visible) { // aktivitasDokumenList.TemplateDokumen.Visible (begin)
+    if (!aktivitasDokumenList.TemplateDokumen.UseFilter) {
+        aktivitasDokumenList.SearchColumnCount++;
+    }
+    <div id="xs_TemplateDokumen" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(aktivitasDokumenList.TemplateDokumen.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_TemplateDokumen"
+            name="x_TemplateDokumen[]"
+            class="form-control ew-select@(aktivitasDokumenList.TemplateDokumen.IsInvalidClass)"
+            data-select2-id="fAktivitasDokumensrch_x_TemplateDokumen"
+            data-table="AktivitasDokumen"
+            data-field="x_TemplateDokumen"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(aktivitasDokumenList.TemplateDokumen.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(aktivitasDokumenList.TemplateDokumen.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(aktivitasDokumenList.TemplateDokumen.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(aktivitasDokumenList.TemplateDokumen.EditAttributes)>
+            @(aktivitasDokumenList.TemplateDokumen.SelectOptionListHtml("x_TemplateDokumen", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(aktivitasDokumenList.TemplateDokumen.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fAktivitasDokumensrch", function() {
+            var options = {
+                name: "x_TemplateDokumen",
+                selectId: "fAktivitasDokumensrch_x_TemplateDokumen",
+                ajax: { id: "x_TemplateDokumen", form: "fAktivitasDokumensrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.AktivitasDokumen.fields.TemplateDokumen.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* aktivitasDokumenList.TemplateDokumen.Visible (end) *@
+@if (aktivitasDokumenList.UploadDokumen.Visible) { // aktivitasDokumenList.UploadDokumen.Visible (begin)
+    if (!aktivitasDokumenList.UploadDokumen.UseFilter) {
+        aktivitasDokumenList.SearchColumnCount++;
+    }
+    <div id="xs_UploadDokumen" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(aktivitasDokumenList.UploadDokumen.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_UploadDokumen"
+            name="x_UploadDokumen[]"
+            class="form-control ew-select@(aktivitasDokumenList.UploadDokumen.IsInvalidClass)"
+            data-select2-id="fAktivitasDokumensrch_x_UploadDokumen"
+            data-table="AktivitasDokumen"
+            data-field="x_UploadDokumen"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(aktivitasDokumenList.UploadDokumen.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(aktivitasDokumenList.UploadDokumen.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(aktivitasDokumenList.UploadDokumen.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(aktivitasDokumenList.UploadDokumen.EditAttributes)>
+            @(aktivitasDokumenList.UploadDokumen.SelectOptionListHtml("x_UploadDokumen", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(aktivitasDokumenList.UploadDokumen.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fAktivitasDokumensrch", function() {
+            var options = {
+                name: "x_UploadDokumen",
+                selectId: "fAktivitasDokumensrch_x_UploadDokumen",
+                ajax: { id: "x_UploadDokumen", form: "fAktivitasDokumensrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.AktivitasDokumen.fields.UploadDokumen.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* aktivitasDokumenList.UploadDokumen.Visible (end) *@
+@if (aktivitasDokumenList.DownloadDokumen.Visible) { // aktivitasDokumenList.DownloadDokumen.Visible (begin)
+    if (!aktivitasDokumenList.DownloadDokumen.UseFilter) {
+        aktivitasDokumenList.SearchColumnCount++;
+    }
+    <div id="xs_DownloadDokumen" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(aktivitasDokumenList.DownloadDokumen.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_DownloadDokumen"
+            name="x_DownloadDokumen[]"
+            class="form-control ew-select@(aktivitasDokumenList.DownloadDokumen.IsInvalidClass)"
+            data-select2-id="fAktivitasDokumensrch_x_DownloadDokumen"
+            data-table="AktivitasDokumen"
+            data-field="x_DownloadDokumen"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(aktivitasDokumenList.DownloadDokumen.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(aktivitasDokumenList.DownloadDokumen.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(aktivitasDokumenList.DownloadDokumen.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(aktivitasDokumenList.DownloadDokumen.EditAttributes)>
+            @(aktivitasDokumenList.DownloadDokumen.SelectOptionListHtml("x_DownloadDokumen", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(aktivitasDokumenList.DownloadDokumen.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fAktivitasDokumensrch", function() {
+            var options = {
+                name: "x_DownloadDokumen",
+                selectId: "fAktivitasDokumensrch_x_DownloadDokumen",
+                ajax: { id: "x_DownloadDokumen", form: "fAktivitasDokumensrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.AktivitasDokumen.fields.DownloadDokumen.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* aktivitasDokumenList.DownloadDokumen.Visible (end) *@
+@if (aktivitasDokumenList.Keterangan.Visible) { // aktivitasDokumenList.Keterangan.Visible (begin)
+    if (!aktivitasDokumenList.Keterangan.UseFilter) {
+        aktivitasDokumenList.SearchColumnCount++;
+    }
+    <div id="xs_Keterangan" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(aktivitasDokumenList.Keterangan.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_Keterangan"
+            name="x_Keterangan[]"
+            class="form-control ew-select@(aktivitasDokumenList.Keterangan.IsInvalidClass)"
+            data-select2-id="fAktivitasDokumensrch_x_Keterangan"
+            data-table="AktivitasDokumen"
+            data-field="x_Keterangan"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(aktivitasDokumenList.Keterangan.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(aktivitasDokumenList.Keterangan.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(aktivitasDokumenList.Keterangan.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(aktivitasDokumenList.Keterangan.EditAttributes)>
+            @(aktivitasDokumenList.Keterangan.SelectOptionListHtml("x_Keterangan", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(aktivitasDokumenList.Keterangan.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fAktivitasDokumensrch", function() {
+            var options = {
+                name: "x_Keterangan",
+                selectId: "fAktivitasDokumensrch_x_Keterangan",
+                ajax: { id: "x_Keterangan", form: "fAktivitasDokumensrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.AktivitasDokumen.fields.Keterangan.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* aktivitasDokumenList.Keterangan.Visible (end) *@
+@if (aktivitasDokumenList.PathFile.Visible) { // aktivitasDokumenList.PathFile.Visible (begin)
+    if (!aktivitasDokumenList.PathFile.UseFilter) {
+        aktivitasDokumenList.SearchColumnCount++;
+    }
+    <div id="xs_PathFile" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(aktivitasDokumenList.PathFile.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_PathFile"
+            name="x_PathFile[]"
+            class="form-control ew-select@(aktivitasDokumenList.PathFile.IsInvalidClass)"
+            data-select2-id="fAktivitasDokumensrch_x_PathFile"
+            data-table="AktivitasDokumen"
+            data-field="x_PathFile"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(aktivitasDokumenList.PathFile.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(aktivitasDokumenList.PathFile.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(aktivitasDokumenList.PathFile.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(aktivitasDokumenList.PathFile.EditAttributes)>
+            @(aktivitasDokumenList.PathFile.SelectOptionListHtml("x_PathFile", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(aktivitasDokumenList.PathFile.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fAktivitasDokumensrch", function() {
+            var options = {
+                name: "x_PathFile",
+                selectId: "fAktivitasDokumensrch_x_PathFile",
+                ajax: { id: "x_PathFile", form: "fAktivitasDokumensrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.AktivitasDokumen.fields.PathFile.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* aktivitasDokumenList.PathFile.Visible (end) *@
+@if (aktivitasDokumenList.StatusUpload.Visible) { // aktivitasDokumenList.StatusUpload.Visible (begin)
+    if (!aktivitasDokumenList.StatusUpload.UseFilter) {
+        aktivitasDokumenList.SearchColumnCount++;
+    }
+    <div id="xs_StatusUpload" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(aktivitasDokumenList.StatusUpload.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_StatusUpload"
+            name="x_StatusUpload[]"
+            class="form-control ew-select@(aktivitasDokumenList.StatusUpload.IsInvalidClass)"
+            data-select2-id="fAktivitasDokumensrch_x_StatusUpload"
+            data-table="AktivitasDokumen"
+            data-field="x_StatusUpload"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(aktivitasDokumenList.StatusUpload.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(aktivitasDokumenList.StatusUpload.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(aktivitasDokumenList.StatusUpload.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(aktivitasDokumenList.StatusUpload.EditAttributes)>
+            @(aktivitasDokumenList.StatusUpload.SelectOptionListHtml("x_StatusUpload", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(aktivitasDokumenList.StatusUpload.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fAktivitasDokumensrch", function() {
+            var options = {
+                name: "x_StatusUpload",
+                selectId: "fAktivitasDokumensrch_x_StatusUpload",
+                ajax: { id: "x_StatusUpload", form: "fAktivitasDokumensrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.AktivitasDokumen.fields.StatusUpload.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* aktivitasDokumenList.StatusUpload.Visible (end) *@
+@if (aktivitasDokumenList.DiunggahOleh.Visible) { // aktivitasDokumenList.DiunggahOleh.Visible (begin)
+    if (!aktivitasDokumenList.DiunggahOleh.UseFilter) {
+        aktivitasDokumenList.SearchColumnCount++;
+    }
+    <div id="xs_DiunggahOleh" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(aktivitasDokumenList.DiunggahOleh.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_DiunggahOleh"
+            name="x_DiunggahOleh[]"
+            class="form-control ew-select@(aktivitasDokumenList.DiunggahOleh.IsInvalidClass)"
+            data-select2-id="fAktivitasDokumensrch_x_DiunggahOleh"
+            data-table="AktivitasDokumen"
+            data-field="x_DiunggahOleh"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(aktivitasDokumenList.DiunggahOleh.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(aktivitasDokumenList.DiunggahOleh.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(aktivitasDokumenList.DiunggahOleh.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(aktivitasDokumenList.DiunggahOleh.EditAttributes)>
+            @(aktivitasDokumenList.DiunggahOleh.SelectOptionListHtml("x_DiunggahOleh", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(aktivitasDokumenList.DiunggahOleh.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fAktivitasDokumensrch", function() {
+            var options = {
+                name: "x_DiunggahOleh",
+                selectId: "fAktivitasDokumensrch_x_DiunggahOleh",
+                ajax: { id: "x_DiunggahOleh", form: "fAktivitasDokumensrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.AktivitasDokumen.fields.DiunggahOleh.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* aktivitasDokumenList.DiunggahOleh.Visible (end) *@
+@if (aktivitasDokumenList.TanggalUpload.Visible) { // aktivitasDokumenList.TanggalUpload.Visible (begin)
+    if (!aktivitasDokumenList.TanggalUpload.UseFilter) {
+        aktivitasDokumenList.SearchColumnCount++;
+    }
+    <div id="xs_TanggalUpload" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(aktivitasDokumenList.TanggalUpload.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_TanggalUpload"
+            name="x_TanggalUpload[]"
+            class="form-control ew-select@(aktivitasDokumenList.TanggalUpload.IsInvalidClass)"
+            data-select2-id="fAktivitasDokumensrch_x_TanggalUpload"
+            data-table="AktivitasDokumen"
+            data-field="x_TanggalUpload"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(aktivitasDokumenList.TanggalUpload.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(aktivitasDokumenList.TanggalUpload.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(aktivitasDokumenList.TanggalUpload.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(aktivitasDokumenList.TanggalUpload.EditAttributes)>
+            @(aktivitasDokumenList.TanggalUpload.SelectOptionListHtml("x_TanggalUpload", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(aktivitasDokumenList.TanggalUpload.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fAktivitasDokumensrch", function() {
+            var options = {
+                name: "x_TanggalUpload",
+                selectId: "fAktivitasDokumensrch_x_TanggalUpload",
+                ajax: { id: "x_TanggalUpload", form: "fAktivitasDokumensrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.AktivitasDokumen.fields.TanggalUpload.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* aktivitasDokumenList.TanggalUpload.Visible (end) *@
+@if (aktivitasDokumenList.DiperbaruiOleh.Visible) { // aktivitasDokumenList.DiperbaruiOleh.Visible (begin)
+    if (!aktivitasDokumenList.DiperbaruiOleh.UseFilter) {
+        aktivitasDokumenList.SearchColumnCount++;
+    }
+    <div id="xs_DiperbaruiOleh" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(aktivitasDokumenList.DiperbaruiOleh.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_DiperbaruiOleh"
+            name="x_DiperbaruiOleh[]"
+            class="form-control ew-select@(aktivitasDokumenList.DiperbaruiOleh.IsInvalidClass)"
+            data-select2-id="fAktivitasDokumensrch_x_DiperbaruiOleh"
+            data-table="AktivitasDokumen"
+            data-field="x_DiperbaruiOleh"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(aktivitasDokumenList.DiperbaruiOleh.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(aktivitasDokumenList.DiperbaruiOleh.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(aktivitasDokumenList.DiperbaruiOleh.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(aktivitasDokumenList.DiperbaruiOleh.EditAttributes)>
+            @(aktivitasDokumenList.DiperbaruiOleh.SelectOptionListHtml("x_DiperbaruiOleh", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(aktivitasDokumenList.DiperbaruiOleh.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fAktivitasDokumensrch", function() {
+            var options = {
+                name: "x_DiperbaruiOleh",
+                selectId: "fAktivitasDokumensrch_x_DiperbaruiOleh",
+                ajax: { id: "x_DiperbaruiOleh", form: "fAktivitasDokumensrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.AktivitasDokumen.fields.DiperbaruiOleh.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* aktivitasDokumenList.DiperbaruiOleh.Visible (end) *@
+@if (aktivitasDokumenList.TanggalDiperbarui.Visible) { // aktivitasDokumenList.TanggalDiperbarui.Visible (begin)
+    if (!aktivitasDokumenList.TanggalDiperbarui.UseFilter) {
+        aktivitasDokumenList.SearchColumnCount++;
+    }
+    <div id="xs_TanggalDiperbarui" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(aktivitasDokumenList.TanggalDiperbarui.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_TanggalDiperbarui"
+            name="x_TanggalDiperbarui[]"
+            class="form-control ew-select@(aktivitasDokumenList.TanggalDiperbarui.IsInvalidClass)"
+            data-select2-id="fAktivitasDokumensrch_x_TanggalDiperbarui"
+            data-table="AktivitasDokumen"
+            data-field="x_TanggalDiperbarui"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(aktivitasDokumenList.TanggalDiperbarui.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(aktivitasDokumenList.TanggalDiperbarui.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(aktivitasDokumenList.TanggalDiperbarui.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(aktivitasDokumenList.TanggalDiperbarui.EditAttributes)>
+            @(aktivitasDokumenList.TanggalDiperbarui.SelectOptionListHtml("x_TanggalDiperbarui", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(aktivitasDokumenList.TanggalDiperbarui.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fAktivitasDokumensrch", function() {
+            var options = {
+                name: "x_TanggalDiperbarui",
+                selectId: "fAktivitasDokumensrch_x_TanggalDiperbarui",
+                ajax: { id: "x_TanggalDiperbarui", form: "fAktivitasDokumensrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.AktivitasDokumen.fields.TanggalDiperbarui.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* aktivitasDokumenList.TanggalDiperbarui.Visible (end) *@
+@if (aktivitasDokumenList.IdTemplateAktivitasDokumen.Visible) { // aktivitasDokumenList.IdTemplateAktivitasDokumen.Visible (begin)
+    if (!aktivitasDokumenList.IdTemplateAktivitasDokumen.UseFilter) {
+        aktivitasDokumenList.SearchColumnCount++;
+    }
+    <div id="xs_IdTemplateAktivitasDokumen" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(aktivitasDokumenList.IdTemplateAktivitasDokumen.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_IdTemplateAktivitasDokumen"
+            name="x_IdTemplateAktivitasDokumen[]"
+            class="form-control ew-select@(aktivitasDokumenList.IdTemplateAktivitasDokumen.IsInvalidClass)"
+            data-select2-id="fAktivitasDokumensrch_x_IdTemplateAktivitasDokumen"
+            data-table="AktivitasDokumen"
+            data-field="x_IdTemplateAktivitasDokumen"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(aktivitasDokumenList.IdTemplateAktivitasDokumen.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(aktivitasDokumenList.IdTemplateAktivitasDokumen.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(aktivitasDokumenList.IdTemplateAktivitasDokumen.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(aktivitasDokumenList.IdTemplateAktivitasDokumen.EditAttributes)>
+            @(aktivitasDokumenList.IdTemplateAktivitasDokumen.SelectOptionListHtml("x_IdTemplateAktivitasDokumen", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(aktivitasDokumenList.IdTemplateAktivitasDokumen.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fAktivitasDokumensrch", function() {
+            var options = {
+                name: "x_IdTemplateAktivitasDokumen",
+                selectId: "fAktivitasDokumensrch_x_IdTemplateAktivitasDokumen",
+                ajax: { id: "x_IdTemplateAktivitasDokumen", form: "fAktivitasDokumensrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.AktivitasDokumen.fields.IdTemplateAktivitasDokumen.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* aktivitasDokumenList.IdTemplateAktivitasDokumen.Visible (end) *@
+@if (aktivitasDokumenList.WajibUpload.Visible) { // aktivitasDokumenList.WajibUpload.Visible (begin)
+    if (!aktivitasDokumenList.WajibUpload.UseFilter) {
+        aktivitasDokumenList.SearchColumnCount++;
+    }
+    <div id="xs_WajibUpload" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(aktivitasDokumenList.WajibUpload.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_WajibUpload"
+            name="x_WajibUpload[]"
+            class="form-control ew-select@(aktivitasDokumenList.WajibUpload.IsInvalidClass)"
+            data-select2-id="fAktivitasDokumensrch_x_WajibUpload"
+            data-table="AktivitasDokumen"
+            data-field="x_WajibUpload"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(aktivitasDokumenList.WajibUpload.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(aktivitasDokumenList.WajibUpload.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(aktivitasDokumenList.WajibUpload.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(aktivitasDokumenList.WajibUpload.EditAttributes)>
+            @(aktivitasDokumenList.WajibUpload.SelectOptionListHtml("x_WajibUpload", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(aktivitasDokumenList.WajibUpload.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fAktivitasDokumensrch", function() {
+            var options = {
+                name: "x_WajibUpload",
+                selectId: "fAktivitasDokumensrch_x_WajibUpload",
+                ajax: { id: "x_WajibUpload", form: "fAktivitasDokumensrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.AktivitasDokumen.fields.WajibUpload.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* aktivitasDokumenList.WajibUpload.Visible (end) *@
+@if (aktivitasDokumenList.TipeProses.Visible) { // aktivitasDokumenList.TipeProses.Visible (begin)
+    if (!aktivitasDokumenList.TipeProses.UseFilter) {
+        aktivitasDokumenList.SearchColumnCount++;
+    }
+    <div id="xs_TipeProses" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(aktivitasDokumenList.TipeProses.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_TipeProses"
+            name="x_TipeProses[]"
+            class="form-control ew-select@(aktivitasDokumenList.TipeProses.IsInvalidClass)"
+            data-select2-id="fAktivitasDokumensrch_x_TipeProses"
+            data-table="AktivitasDokumen"
+            data-field="x_TipeProses"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(aktivitasDokumenList.TipeProses.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(aktivitasDokumenList.TipeProses.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(aktivitasDokumenList.TipeProses.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(aktivitasDokumenList.TipeProses.EditAttributes)>
+            @(aktivitasDokumenList.TipeProses.SelectOptionListHtml("x_TipeProses", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(aktivitasDokumenList.TipeProses.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fAktivitasDokumensrch", function() {
+            var options = {
+                name: "x_TipeProses",
+                selectId: "fAktivitasDokumensrch_x_TipeProses",
+                ajax: { id: "x_TipeProses", form: "fAktivitasDokumensrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.AktivitasDokumen.fields.TipeProses.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* aktivitasDokumenList.TipeProses.Visible (end) *@
+</div><!-- /.row -->
+<div class="row mb-0">
+    <div class="col-sm-auto px-0 pe-sm-2">
+        <div class="ew-basic-search input-group">
+            <input type="search" name="@(Config.TableBasicSearch)" id="@(Config.TableBasicSearch)" class="form-control ew-basic-search-keyword" value="@Html.Raw(HtmlEncode(aktivitasDokumenList.BasicSearch.SessionKeyword))" placeholder="@(HtmlEncode(Language.Phrase("Search")))" aria-label="@(HtmlEncode(Language.Phrase("Search")))">
+            <input type="hidden" name="@(Config.TableBasicSearchType)" id="@(Config.TableBasicSearchType)" class="ew-basic-search-type" value="@(HtmlEncode(aktivitasDokumenList.BasicSearch.SessionType))">
+            <button type="button" data-bs-toggle="dropdown" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split" aria-haspopup="true" aria-expanded="false">
+                <span id="searchtype">@Html.Raw(aktivitasDokumenList.BasicSearch.TypeNameShort)</span>
+            </button>
+            <div class="dropdown-menu dropdown-menu-end">
+                <button type="button" class="dropdown-item@(aktivitasDokumenList.BasicSearch.SessionType == "" ? " active" : "")" form="fAktivitasDokumensrch" data-ew-action="search-type">@Html.Raw(Language.Phrase("QuickSearchAuto"))</button>
+                <button type="button" class="dropdown-item@(aktivitasDokumenList.BasicSearch.SessionType == "=" ? " active" : "")" form="fAktivitasDokumensrch" data-ew-action="search-type" data-search-type="=">@Html.Raw(Language.Phrase("QuickSearchExact"))</button>
+                <button type="button" class="dropdown-item@(aktivitasDokumenList.BasicSearch.SessionType == "AND" ? " active" : "")" form="fAktivitasDokumensrch" data-ew-action="search-type" data-search-type="AND">@Html.Raw(Language.Phrase("QuickSearchAll"))</button>
+                <button type="button" class="dropdown-item@(aktivitasDokumenList.BasicSearch.SessionType == "OR" ? " active" : "")" form="fAktivitasDokumensrch" data-ew-action="search-type" data-search-type="OR">@Html.Raw(Language.Phrase("QuickSearchAny"))</button>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-auto mb-3">
+        <button class="btn btn-primary" name="btn-submit" id="btn-submit" type="submit">@Html.Raw(Language.Phrase("SearchBtn"))</button>
+    </div>
+</div>
+</div><!-- /.ew-extended-search -->
+} @* Show search form (end) *@
+}
+</div><!-- /.ew-search-panel -->
+</form>
+}
+@aktivitasDokumenList.ShowPageHeader()
+@aktivitasDokumenList.ShowMessages()
+<main class="list @(aktivitasDokumenList.TotalRecords == 0 && !aktivitasDokumenList.IsAdd ? " ew-no-record" : "")">
+<div id="ew-header-options">
+    @aktivitasDokumenList.HeaderOptions.RenderBody()
+</div>
+<div id="ew-list">
+@if (aktivitasDokumenList.TotalRecords > 0 || !Empty(aktivitasDokumenList.CurrentAction)) {
+<div class="card ew-card ew-grid@(aktivitasDokumenList.IsAddOrEdit ? " ew-grid-add-edit" : "") @(aktivitasDokumenList.TableGridClass)">
+<form name="@(aktivitasDokumenList.FormName)" id="@(aktivitasDokumenList.FormName)" class="ew-form ew-list-form" action="@AppPath(aktivitasDokumenList.PageName)" method="post" novalidate autocomplete="off">
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+@if (aktivitasDokumenList.IsModal) {
+<input type="hidden" name="modal" value="1">
+}
+@if (aktivitasDokumenList.CurrentMasterTable == "Aktivitas" && !Empty(aktivitasDokumenList.CurrentAction)) {
+<input type="hidden" name="@(Config.TableShowMaster)" value="Aktivitas">
+<input type="hidden" name="fk_IdAktivitas" value="@(HtmlEncode(aktivitasDokumenList.IdAktivitas.SessionValue))">
+}
+<div id="gmp_AktivitasDokumen" class="card-body ew-grid-middle-panel @(aktivitasDokumenList.TableContainerClass)" style="@(aktivitasDokumenList.TableContainerStyle)">
+@if (aktivitasDokumenList.TotalRecords > 0 || aktivitasDokumenList.IsGridEdit || aktivitasDokumenList.IsMultiEdit) {
+<table id="tbl_AktivitasDokumenlist" class="@(aktivitasDokumenList.TableClass)"><!-- .ew-table -->
+<thead>
+    <tr class="ew-table-header">
+@{
+    // Header row
+    aktivitasDokumenList.RowType = RowType.Header;
+
+    // Render list options
+    await aktivitasDokumenList.RenderListOptions();
+}
+@* Render list options (header, left) *@
+@aktivitasDokumenList.ListOptions.RenderHeader("left")
+@if (aktivitasDokumenList.NoReferensi.Visible) { // aktivitasDokumenList.NoReferensi.Visible (begin)
+        <th data-name="NoReferensi" class="@(aktivitasDokumenList.NoReferensi.HeaderCellClass)"><div id="elh_AktivitasDokumen_NoReferensi" class="AktivitasDokumen_NoReferensi">@Html.Raw(aktivitasDokumenList.RenderFieldHeader(aktivitasDokumenList.NoReferensi))</div></th>
+} @* aktivitasDokumenList.NoReferensi.Visible (end) *@
+@if (aktivitasDokumenList.IdProses.Visible) { // aktivitasDokumenList.IdProses.Visible (begin)
+        <th data-name="IdProses" class="@(aktivitasDokumenList.IdProses.HeaderCellClass)"><div id="elh_AktivitasDokumen_IdProses" class="AktivitasDokumen_IdProses">@Html.Raw(aktivitasDokumenList.RenderFieldHeader(aktivitasDokumenList.IdProses))</div></th>
+} @* aktivitasDokumenList.IdProses.Visible (end) *@
+@if (aktivitasDokumenList.IdAktivitas.Visible) { // aktivitasDokumenList.IdAktivitas.Visible (begin)
+        <th data-name="IdAktivitas" class="@(aktivitasDokumenList.IdAktivitas.HeaderCellClass)"><div id="elh_AktivitasDokumen_IdAktivitas" class="AktivitasDokumen_IdAktivitas">@Html.Raw(aktivitasDokumenList.RenderFieldHeader(aktivitasDokumenList.IdAktivitas))</div></th>
+} @* aktivitasDokumenList.IdAktivitas.Visible (end) *@
+@if (aktivitasDokumenList.NamaDokumen.Visible) { // aktivitasDokumenList.NamaDokumen.Visible (begin)
+        <th data-name="NamaDokumen" class="@(aktivitasDokumenList.NamaDokumen.HeaderCellClass)"><div id="elh_AktivitasDokumen_NamaDokumen" class="AktivitasDokumen_NamaDokumen">@Html.Raw(aktivitasDokumenList.RenderFieldHeader(aktivitasDokumenList.NamaDokumen))</div></th>
+} @* aktivitasDokumenList.NamaDokumen.Visible (end) *@
+@if (aktivitasDokumenList.UploadDokumen.Visible) { // aktivitasDokumenList.UploadDokumen.Visible (begin)
+        <th data-name="UploadDokumen" class="@(aktivitasDokumenList.UploadDokumen.HeaderCellClass)"><div id="elh_AktivitasDokumen_UploadDokumen" class="AktivitasDokumen_UploadDokumen">@Html.Raw(aktivitasDokumenList.RenderFieldHeader(aktivitasDokumenList.UploadDokumen))</div></th>
+} @* aktivitasDokumenList.UploadDokumen.Visible (end) *@
+@if (aktivitasDokumenList.DownloadDokumen.Visible) { // aktivitasDokumenList.DownloadDokumen.Visible (begin)
+        <th data-name="DownloadDokumen" class="@(aktivitasDokumenList.DownloadDokumen.HeaderCellClass)"><div id="elh_AktivitasDokumen_DownloadDokumen" class="AktivitasDokumen_DownloadDokumen">@Html.Raw(aktivitasDokumenList.RenderFieldHeader(aktivitasDokumenList.DownloadDokumen))</div></th>
+} @* aktivitasDokumenList.DownloadDokumen.Visible (end) *@
+@if (aktivitasDokumenList.DiunggahOleh.Visible) { // aktivitasDokumenList.DiunggahOleh.Visible (begin)
+        <th data-name="DiunggahOleh" class="@(aktivitasDokumenList.DiunggahOleh.HeaderCellClass)"><div id="elh_AktivitasDokumen_DiunggahOleh" class="AktivitasDokumen_DiunggahOleh">@Html.Raw(aktivitasDokumenList.RenderFieldHeader(aktivitasDokumenList.DiunggahOleh))</div></th>
+} @* aktivitasDokumenList.DiunggahOleh.Visible (end) *@
+@if (aktivitasDokumenList.TanggalUpload.Visible) { // aktivitasDokumenList.TanggalUpload.Visible (begin)
+        <th data-name="TanggalUpload" class="@(aktivitasDokumenList.TanggalUpload.HeaderCellClass)"><div id="elh_AktivitasDokumen_TanggalUpload" class="AktivitasDokumen_TanggalUpload">@Html.Raw(aktivitasDokumenList.RenderFieldHeader(aktivitasDokumenList.TanggalUpload))</div></th>
+} @* aktivitasDokumenList.TanggalUpload.Visible (end) *@
+@if (aktivitasDokumenList.DiperbaruiOleh.Visible) { // aktivitasDokumenList.DiperbaruiOleh.Visible (begin)
+        <th data-name="DiperbaruiOleh" class="@(aktivitasDokumenList.DiperbaruiOleh.HeaderCellClass)"><div id="elh_AktivitasDokumen_DiperbaruiOleh" class="AktivitasDokumen_DiperbaruiOleh">@Html.Raw(aktivitasDokumenList.RenderFieldHeader(aktivitasDokumenList.DiperbaruiOleh))</div></th>
+} @* aktivitasDokumenList.DiperbaruiOleh.Visible (end) *@
+@if (aktivitasDokumenList.TanggalDiperbarui.Visible) { // aktivitasDokumenList.TanggalDiperbarui.Visible (begin)
+        <th data-name="TanggalDiperbarui" class="@(aktivitasDokumenList.TanggalDiperbarui.HeaderCellClass)"><div id="elh_AktivitasDokumen_TanggalDiperbarui" class="AktivitasDokumen_TanggalDiperbarui">@Html.Raw(aktivitasDokumenList.RenderFieldHeader(aktivitasDokumenList.TanggalDiperbarui))</div></th>
+} @* aktivitasDokumenList.TanggalDiperbarui.Visible (end) *@
+@if (aktivitasDokumenList.WajibUpload.Visible) { // aktivitasDokumenList.WajibUpload.Visible (begin)
+        <th data-name="WajibUpload" class="@(aktivitasDokumenList.WajibUpload.HeaderCellClass)"><div id="elh_AktivitasDokumen_WajibUpload" class="AktivitasDokumen_WajibUpload">@Html.Raw(aktivitasDokumenList.RenderFieldHeader(aktivitasDokumenList.WajibUpload))</div></th>
+} @* aktivitasDokumenList.WajibUpload.Visible (end) *@
+@if (aktivitasDokumenList.TipeProses.Visible) { // aktivitasDokumenList.TipeProses.Visible (begin)
+        <th data-name="TipeProses" class="@(aktivitasDokumenList.TipeProses.HeaderCellClass)"><div id="elh_AktivitasDokumen_TipeProses" class="AktivitasDokumen_TipeProses">@Html.Raw(aktivitasDokumenList.RenderFieldHeader(aktivitasDokumenList.TipeProses))</div></th>
+} @* aktivitasDokumenList.TipeProses.Visible (end) *@
+@* Render list options (header, right) *@
+@aktivitasDokumenList.ListOptions.RenderHeader("right")
+    </tr>
+</thead>
+<tbody data-page="@(aktivitasDokumenList.PageNumber)">
+@{
+    await aktivitasDokumenList.SetupGrid();
+    bool eof = aktivitasDokumenList.Recordset == null; // DN
+}
+@while (aktivitasDokumenList.RecordCount < aktivitasDokumenList.StopRecord || SameString(aktivitasDokumenList.RowIndex, "$rowindex$")) { // Begin While
+    if (!eof && !SameString(aktivitasDokumenList.RowIndex, "$rowindex$") &&
+        (!aktivitasDokumenList.IsGridAdd || aktivitasDokumenList.CurrentMode == "copy") &&
+        (!((aktivitasDokumenList.IsCopy || aktivitasDokumenList.IsAdd) && aktivitasDokumenList.RowIndex is int rowIndex && rowIndex == 0))) // DN
+        eof = !await aktivitasDokumenList.Recordset.ReadAsync();
+    aktivitasDokumenList.RecordCount++;
+    if (aktivitasDokumenList.RecordCount >= aktivitasDokumenList.StartRecord) {
+        await aktivitasDokumenList.SetupRow();
+    <tr @Html.Raw(aktivitasDokumenList.RowAttributes)>
+    @* Render list options (body, left) *@
+    @aktivitasDokumenList.ListOptions.RenderBody("left", aktivitasDokumenList.RowCount)
+    @if (aktivitasDokumenList.NoReferensi.Visible) { // aktivitasDokumenList.NoReferensi.Visible (begin)
+        <td data-name="NoReferensi" @Html.Raw(aktivitasDokumenList.NoReferensi.CellAttributes)>
+<span id="el@(aktivitasDokumenList.RowIndex == "$rowindex$" ? "$rowindex$" : aktivitasDokumenList.RowCount)_AktivitasDokumen_NoReferensi" class="el_AktivitasDokumen_NoReferensi">
+<span @Html.Raw(aktivitasDokumenList.NoReferensi.ViewAttributes)>
+@Html.Raw(aktivitasDokumenList.NoReferensi.GetViewValue())</span>
+</span>
+</td>
+    } @* aktivitasDokumenList.NoReferensi.Visible (end) *@
+    @if (aktivitasDokumenList.IdProses.Visible) { // aktivitasDokumenList.IdProses.Visible (begin)
+        <td data-name="IdProses" @Html.Raw(aktivitasDokumenList.IdProses.CellAttributes)>
+<span id="el@(aktivitasDokumenList.RowIndex == "$rowindex$" ? "$rowindex$" : aktivitasDokumenList.RowCount)_AktivitasDokumen_IdProses" class="el_AktivitasDokumen_IdProses">
+<span @Html.Raw(aktivitasDokumenList.IdProses.ViewAttributes)>
+@Html.Raw(aktivitasDokumenList.IdProses.GetViewValue())</span>
+</span>
+</td>
+    } @* aktivitasDokumenList.IdProses.Visible (end) *@
+    @if (aktivitasDokumenList.IdAktivitas.Visible) { // aktivitasDokumenList.IdAktivitas.Visible (begin)
+        <td data-name="IdAktivitas" @Html.Raw(aktivitasDokumenList.IdAktivitas.CellAttributes)>
+<span id="el@(aktivitasDokumenList.RowIndex == "$rowindex$" ? "$rowindex$" : aktivitasDokumenList.RowCount)_AktivitasDokumen_IdAktivitas" class="el_AktivitasDokumen_IdAktivitas">
+<span @Html.Raw(aktivitasDokumenList.IdAktivitas.ViewAttributes)>
+@Html.Raw(aktivitasDokumenList.IdAktivitas.GetViewValue())</span>
+</span>
+</td>
+    } @* aktivitasDokumenList.IdAktivitas.Visible (end) *@
+    @if (aktivitasDokumenList.NamaDokumen.Visible) { // aktivitasDokumenList.NamaDokumen.Visible (begin)
+        <td data-name="NamaDokumen" @Html.Raw(aktivitasDokumenList.NamaDokumen.CellAttributes)>
+<span id="el@(aktivitasDokumenList.RowIndex == "$rowindex$" ? "$rowindex$" : aktivitasDokumenList.RowCount)_AktivitasDokumen_NamaDokumen" class="el_AktivitasDokumen_NamaDokumen">
+<span @Html.Raw(aktivitasDokumenList.NamaDokumen.ViewAttributes)>
+@Html.Raw(aktivitasDokumenList.NamaDokumen.GetViewValue())</span>
+</span>
+</td>
+    } @* aktivitasDokumenList.NamaDokumen.Visible (end) *@
+    @if (aktivitasDokumenList.UploadDokumen.Visible) { // aktivitasDokumenList.UploadDokumen.Visible (begin)
+        <td data-name="UploadDokumen" @Html.Raw(aktivitasDokumenList.UploadDokumen.CellAttributes)>
+<span id="el@(aktivitasDokumenList.RowIndex == "$rowindex$" ? "$rowindex$" : aktivitasDokumenList.RowCount)_AktivitasDokumen_UploadDokumen" class="el_AktivitasDokumen_UploadDokumen">
+<span @Html.Raw(aktivitasDokumenList.UploadDokumen.ViewAttributes)>
+@Html.Raw(aktivitasDokumenList.UploadDokumen.GetViewValue())</span>
+</span>
+</td>
+    } @* aktivitasDokumenList.UploadDokumen.Visible (end) *@
+    @if (aktivitasDokumenList.DownloadDokumen.Visible) { // aktivitasDokumenList.DownloadDokumen.Visible (begin)
+        <td data-name="DownloadDokumen" @Html.Raw(aktivitasDokumenList.DownloadDokumen.CellAttributes)>
+<span id="el@(aktivitasDokumenList.RowIndex == "$rowindex$" ? "$rowindex$" : aktivitasDokumenList.RowCount)_AktivitasDokumen_DownloadDokumen" class="el_AktivitasDokumen_DownloadDokumen">
+<span @Html.Raw(aktivitasDokumenList.DownloadDokumen.ViewAttributes)>
+@Html.Raw(aktivitasDokumenList.DownloadDokumen.GetViewValue())</span>
+</span>
+</td>
+    } @* aktivitasDokumenList.DownloadDokumen.Visible (end) *@
+    @if (aktivitasDokumenList.DiunggahOleh.Visible) { // aktivitasDokumenList.DiunggahOleh.Visible (begin)
+        <td data-name="DiunggahOleh" @Html.Raw(aktivitasDokumenList.DiunggahOleh.CellAttributes)>
+<span id="el@(aktivitasDokumenList.RowIndex == "$rowindex$" ? "$rowindex$" : aktivitasDokumenList.RowCount)_AktivitasDokumen_DiunggahOleh" class="el_AktivitasDokumen_DiunggahOleh">
+<span @Html.Raw(aktivitasDokumenList.DiunggahOleh.ViewAttributes)>
+@Html.Raw(aktivitasDokumenList.DiunggahOleh.GetViewValue())</span>
+</span>
+</td>
+    } @* aktivitasDokumenList.DiunggahOleh.Visible (end) *@
+    @if (aktivitasDokumenList.TanggalUpload.Visible) { // aktivitasDokumenList.TanggalUpload.Visible (begin)
+        <td data-name="TanggalUpload" @Html.Raw(aktivitasDokumenList.TanggalUpload.CellAttributes)>
+<span id="el@(aktivitasDokumenList.RowIndex == "$rowindex$" ? "$rowindex$" : aktivitasDokumenList.RowCount)_AktivitasDokumen_TanggalUpload" class="el_AktivitasDokumen_TanggalUpload">
+<span @Html.Raw(aktivitasDokumenList.TanggalUpload.ViewAttributes)>
+@Html.Raw(aktivitasDokumenList.TanggalUpload.GetViewValue())</span>
+</span>
+</td>
+    } @* aktivitasDokumenList.TanggalUpload.Visible (end) *@
+    @if (aktivitasDokumenList.DiperbaruiOleh.Visible) { // aktivitasDokumenList.DiperbaruiOleh.Visible (begin)
+        <td data-name="DiperbaruiOleh" @Html.Raw(aktivitasDokumenList.DiperbaruiOleh.CellAttributes)>
+<span id="el@(aktivitasDokumenList.RowIndex == "$rowindex$" ? "$rowindex$" : aktivitasDokumenList.RowCount)_AktivitasDokumen_DiperbaruiOleh" class="el_AktivitasDokumen_DiperbaruiOleh">
+<span @Html.Raw(aktivitasDokumenList.DiperbaruiOleh.ViewAttributes)>
+@Html.Raw(aktivitasDokumenList.DiperbaruiOleh.GetViewValue())</span>
+</span>
+</td>
+    } @* aktivitasDokumenList.DiperbaruiOleh.Visible (end) *@
+    @if (aktivitasDokumenList.TanggalDiperbarui.Visible) { // aktivitasDokumenList.TanggalDiperbarui.Visible (begin)
+        <td data-name="TanggalDiperbarui" @Html.Raw(aktivitasDokumenList.TanggalDiperbarui.CellAttributes)>
+<span id="el@(aktivitasDokumenList.RowIndex == "$rowindex$" ? "$rowindex$" : aktivitasDokumenList.RowCount)_AktivitasDokumen_TanggalDiperbarui" class="el_AktivitasDokumen_TanggalDiperbarui">
+<span @Html.Raw(aktivitasDokumenList.TanggalDiperbarui.ViewAttributes)>
+@Html.Raw(aktivitasDokumenList.TanggalDiperbarui.GetViewValue())</span>
+</span>
+</td>
+    } @* aktivitasDokumenList.TanggalDiperbarui.Visible (end) *@
+    @if (aktivitasDokumenList.WajibUpload.Visible) { // aktivitasDokumenList.WajibUpload.Visible (begin)
+        <td data-name="WajibUpload" @Html.Raw(aktivitasDokumenList.WajibUpload.CellAttributes)>
+<span id="el@(aktivitasDokumenList.RowIndex == "$rowindex$" ? "$rowindex$" : aktivitasDokumenList.RowCount)_AktivitasDokumen_WajibUpload" class="el_AktivitasDokumen_WajibUpload">
+<span @Html.Raw(aktivitasDokumenList.WajibUpload.ViewAttributes)>
+<i class="fa-regular @(ConvertToBool(aktivitasDokumenList.WajibUpload.CurrentValue) ? "fa-square-check" : "fa-square") ew-icon ew-boolean"></i>
+</span>
+</span>
+</td>
+    } @* aktivitasDokumenList.WajibUpload.Visible (end) *@
+    @if (aktivitasDokumenList.TipeProses.Visible) { // aktivitasDokumenList.TipeProses.Visible (begin)
+        <td data-name="TipeProses" @Html.Raw(aktivitasDokumenList.TipeProses.CellAttributes)>
+<span id="el@(aktivitasDokumenList.RowIndex == "$rowindex$" ? "$rowindex$" : aktivitasDokumenList.RowCount)_AktivitasDokumen_TipeProses" class="el_AktivitasDokumen_TipeProses">
+<span @Html.Raw(aktivitasDokumenList.TipeProses.ViewAttributes)>
+@Html.Raw(aktivitasDokumenList.TipeProses.GetViewValue())</span>
+</span>
+</td>
+    } @* aktivitasDokumenList.TipeProses.Visible (end) *@
+    @* Render list options (body, right) *@
+    @aktivitasDokumenList.ListOptions.RenderBody("right", aktivitasDokumenList.RowCount)
+    </tr>
+    } @* End if *@
+
+    // Reset for template row
+    if (SameString(aktivitasDokumenList.RowIndex, "$rowindex$"))
+        aktivitasDokumenList.RowIndex = 0;
+
+    // Reset inline add/copy row
+    if ((aktivitasDokumenList.IsCopy || aktivitasDokumenList.IsAdd) && aktivitasDokumenList.RowIndex is int rowIndex2 && rowIndex2 == 0)
+        aktivitasDokumenList.RowIndex = 1;
+} @* End While *@
+</tbody>
+</table><!-- /.ew-table -->
+} @* End If TotalRecords > 0 *@
+</div><!-- /.ew-grid-middle-panel -->
+@if (Empty(aktivitasDokumenList.CurrentAction) && !aktivitasDokumenList.UseAjaxActions) {
+<input type="hidden" name="action" id="action" value="">
+}
+</form><!-- /.ew-list-form -->
+@{ aktivitasDokumenList.CloseRecordset(); }
+@if (!aktivitasDokumenList.IsExport()) {
+<div class="card-footer ew-grid-lower-panel">
+@if (!aktivitasDokumenList.IsGridAdd && !(aktivitasDokumenList.IsGridEdit && aktivitasDokumenList.ModalGridEdit) && !aktivitasDokumenList.IsMultiEdit) {
+@Html.Raw(aktivitasDokumenList.Pager.Render())
+}
+<div class="ew-list-other-options">
+@aktivitasDokumenList.OtherOptions.RenderBody("bottom")
+</div>
+</div>
+}
+</div><!-- /.ew-grid -->
+} else { // Show other options
+<div class="ew-list-other-options">
+@aktivitasDokumenList.OtherOptions.ForEach(opt => opt.ButtonClass = "").RenderBody()
+</div>
+}
+</div>
+<div id="ew-footer-options">
+    @aktivitasDokumenList.FooterOptions.RenderBody()
+</div>
+</main>
+@aktivitasDokumenList.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+@if (!aktivitasDokumenList.IsExport()) {
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("AktivitasDokumen");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Startup script
+    // Write your table-specific startup script here
+    // document.write("page loaded");
+    $("#r_TipeProses").hide();
+    $("#r_Urutan").hide();
+    $(".btn-toolbar.ew-toolbar").hide();
+    $('[data-name="button"]').hide();
+    $("#el_Aktivitas_Aktivitas2 a").removeAttr("href");
+    const parent_url = ew.PATH_BASE;
+    let IdReferensi = "@aktivitasDokumenList.NoReferensi.CurrentValue";
+    let idAktivitas = "@aktivitasDokumenList.IdAktivitas.CurrentValue";
+    let IdProses = "@aktivitasDokumenList.IdProses.CurrentValue";
+    let TipeProses = "@aktivitasDokumenList.TipeProses.CurrentValue";
+    let TipeProsesAsli = "@aktivitasDokumenList.TipeProses.CurrentValue";
+    let TipeProsesView = "@aktivitasDokumenList.TipeProses.CurrentValue";
+    let IdAktivitasDokumen = "";
+    let IdAktivitas = "";
+    let NamaDokumen = "";
+    let iconProses = "";
+    const userLevel = "@CurrentUserLevel()";
+    let currentStatusAktivitas = "";
+    let filesArr = [];
+    let deleteIds = [];
+    if (
+        TipeProses == "Penerimaan" ||
+        TipeProses == "PenerimaanSTSBBM" ||
+        TipeProses == "PenerimaanSTSLPG" ||
+        TipeProses == "PenerimaanPipa" ||
+        TipeProses == "PenerimaanSalesPipa" ||
+        TipeProses == "PenerimaanRTW" ||
+        TipeProses == "PenerimaanTruck" ||
+        TipeProses == "PenerimaanPipaRefinery"
+    ) {
+        TipeProses = "Penerimaan";
+        TipeProsesView = "Penerimaan";
+        iconProses = "fa-box-open";
+    } else if (
+        TipeProses == "Penyaluran" ||
+        TipeProses == "PenyaluranTasNgs" ||
+        TipeProses == "PenyaluranTruck" ||
+        TipeProses == "PenyaluranLPGTASNGS" ||
+        TipeProses == "PenyaluranKonsinyasiSTSBBM" ||
+        TipeProses == "PenyaluranKonsinyasiSTSLPG" ||
+        TipeProses == "PenyaluranPipa" ||
+        TipeProses == "PenyaluranSalesPipa" ||
+        TipeProses == "PenyaluranPipaLPG" || 
+        TipeProses == "PenyaluranPipaJarakDekat"
+    ) {
+        TipeProses = "Penyaluran";
+        TipeProsesView = "Proses Penyaluran";
+        iconProses = "fa-truck-fast";
+    } else if (TipeProses == "RencanaPenyaluran" || TipeProses == "RencanaPenyaluranLPG" || TipeProses == "RencanaPenyaluranPipa") {
+        TipeProses = "RencanaPenyaluran";
+        TipeProsesView = "Rencana & Realisasi Penyaluran";
+        iconProses = "fa-solid fa-clipboard-list";
+    } else if (TipeProses == "SamplingLabTest") {
+        TipeProsesView = "Sampling Lab Test";
+        iconProses = "fa-flask";
+    } else if (
+        TipeProses == "Penimbunan" ||
+        TipeProses == "PenyimpananPenerimaanLPG" ||
+        TipeProses == "PenyimpananPenerimaanSTSBBM" ||
+        TipeProses == "PenyimpananPenerimaanLPGSTS" ||
+        TipeProses == "PenyimpananPenerimaanPipa" ||
+        TipeProses == "PenyimpananPenerimaanPipaLPG" ||
+        TipeProses == "PenyimpananPenerimaanRTW" ||
+        TipeProses == "PenyimpananPenerimaanTruck"
+    ) {
+        TipeProses = "Penimbunan";
+        TipeProsesView = "Proses Penerimaan";
+        iconProses = "fa-oil-can";
+    } else if (
+        TipeProses == "PenimbunanPenyaluran" ||
+        TipeProses == "PenimbunanPenyaluranLPG" ||
+        TipeProses == "PenyimpananPenyaluranSalesSTSBBM" ||
+        TipeProses == "PenyimpananPenyaluranKonsinyasiSTSBBM" ||
+        TipeProses == "PenyimpananPenyaluranSalesPipa" ||
+        TipeProses == "PenyimpananPenyaluranKonsinyasiPipa" ||
+        TipeProses == "PenyimpananPenyaluranSalesSTSLPG" ||
+        TipeProses == "PenyimpananPenyaluranKonsinyasiSTSLPG" ||
+        TipeProses == "PenyimpananPenyaluranSalesRTW"
+    ) {
+        TipeProses = "PenimbunanPenyaluran";
+        TipeProsesView = "Proses Penyaluran";
+        iconProses = "fa-route";
+    } else if (TipeProses == "ClosingStock" || TipeProses == "ClosingStockSTSBBM" || TipeProses == "ClosingStockSTSLPG") {
+        TipeProses = "ClosingStock";
+        TipeProsesView = "Closing Stock";
+        iconProses = "fa-inbox";
+    } else if (["PenyimpananPenyaluranKonsinyasiRTW", "PenyimpananPenyaluranKonsinyasi"].includes(TipeProses)) {
+        TipeProses = "PenimbunanPenyaluran";
+        TipeProsesView = "Proses Penyaluran";
+        iconProses = "fa-route";
+    } else if (["PenyaluranKonsinyasiTruck", "PenyaluranKonsinyasiTruckTAS", "PenyaluranKonsinyasiRTW"].includes(TipeProses)) {
+        TipeProses = "Penyaluran";
+        TipeProsesView = "Proses Penyaluran";
+        iconProses = "fa-truck-fast";
+    }
+    let NamaAktivitas = $("#el_Aktivitas_Aktivitas2 a").text();
+    let StatusAktivitas = $("#el_Aktivitas_StatusAktivitas").text().trim();
+    let hasNotUploaded = $(".not-uploaded").length > 0;
+    let steps = [
+        { number: 1, label: TipeProsesView, url: `${parent_url}${TipeProses}List`, icon: iconProses },
+        { number: 2, label: "Proses", url: `${parent_url}ProsesList?cmd=search&x_IdReferensi%5B%5D=${IdReferensi}&search=&searchtype=`, icon: "fa-gears" },
+        { number: 3, label: "Aktivitas", url: `${parent_url}AktivitasList?cmd=search&x_IdProses%5B%5D=${IdProses}&search=&searchtype=`, icon: "fa-list-check" },
+        { number: 4, label: NamaAktivitas, url: "", icon: "fa-file-circle-check" },
+    ];
+    let currentStep = 4;
+    $("<style>")
+        .prop("type", "text/css")
+        .html(
+            `
+                .stepper {
+                    display: flex;
+                    counter-reset: step;
+                }
+                .step {
+                    width: 150px;
+                    text-align: center;
+                    position: relative;
+                }
+                .step:not(:last-child)::after {
+                    content: '';
+                    position: absolute;
+                    top: 20px;
+                    right: -50%;
+                    width: 100%;
+                    height: 4px;
+                    background-color: #ccc;
+                    z-index: 0;
+                }
+                .step.completed:not(:last-child)::after {
+                    background-color: #3c6dbd;
+                }
+                .step-icon {
+                    width: 36px;
+                    height: 36px;
+                    line-height: 36px;
+                    border-radius: 50%;
+                    background: #ccc;
+                    display: inline-block;
+                    z-index: 1;
+                    position: relative;
+                    color: white;
+                    font-weight: bold;
+                }
+                .step.active .step-icon {
+                    background: #3c6dbd;
+                }
+                .step-label {
+                    margin-top: 8px;
+                    font-size: 14px;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    gap: 6px;
+                    color: #333;
+                }
+                .step-label {
+                    color: #3c6dbd !important;
+                    text-decoration: none;
+                    margin: 0;
+                    padding: 0;
+                }
+                .step-label-not-active {
+                    color: #CCCCCC !important;
+                }
+                .ag-theme-quartz .ag-header {
+                    background-color: #3c6dbd !important;
+                }
+                .ag-theme-quartz .ag-header-cell-label {
+                    color: #ffffff !important;
+                }
+                .ag-theme-quartz .ag-icon-filter {
+                    color: #ffffff !important;
+                }
+                .rotate-down {
+                    transform: rotate(90deg);
+                    transition: transform 0.3s ease;
+                }
+                .rotate-right {
+                    transform: rotate(0deg);
+                    transition: transform 0.3s ease;
+                }
+                .view-page-table td {
+                    white-space: normal !important;
+                    word-wrap: break-word;
+                }
+                .view-page-table th {
+                    background-color: #006BB7;
+                }
+                .body-table {
+                    background-color: #fff;
+                }
+                .header-table {
+                    background-color: #006BB7 !important;
+                    color: #fff !important;
+                }
+                .view-page-table {
+                    table-layout: fixed;
+                }
+                .btn {
+                    white-space: nowrap;
+                }
+                .file-input-wrapper {
+                    border: 1px solid #ced4da;
+                    border-radius: .375rem;
+                    overflow: hidden;
+                    transition: border-color .15s, box-shadow .15s;
+                }
+                .file-input-wrapper:focus-within {
+                    border-color: #86b7fe;
+                    box-shadow: 0 0 0 .25rem rgba(13,110,253,.25);
+                }
+                .file-input-wrapper .btn {
+                    border-radius: 0;
+                }
+                .file-input-wrapper .form-control {
+                    border: none;
+                    box-shadow: none !important;
+                }
+            `,
+        )
+        .appendTo("head");
+    let $stepperWrapper = $('<div class="d-flex border-bottom border-2 pb-2"><div class="stepper"></div></div>');
+    let $stepper = $stepperWrapper.find(".stepper");
+    steps.forEach(function (step, i) {
+        let isActive = step.number === currentStep;
+        let isCompleted = step.number < currentStep;
+        let stepClass = isActive ? "active" : isCompleted ? "completed" : "";
+        let icon, labelContent, html;
+        if (isActive) {
+            icon = `<div class="step-icon bg-success">${step.number}</div>`;
+            labelContent = `<div class="step-label"><p class="text-success mb-1"><i class="fa-solid ${step.icon} me-1 text-success"></i> ${step.label}</p></div>`;
+            html = `<div class="step ${stepClass} text-success">${icon}${labelContent}</div>`;
+        } else if (isCompleted) {
+            icon = `<div class="step-icon" style="background: #3c6dbd;">${step.number}</div>`;
+            labelContent = `<div class="step-label"><a href="${step.url}" class="text-primary"><i class="fa-solid ${step.icon} me-1"></i>${step.label}</a></div>`;
+            html = `<div class="step ${stepClass}">${icon}${labelContent}</div>`;
+        } else {
+            icon = `<div class="step-icon">${step.number}</div>`;
+            labelContent = `<div class="step-label-not-active"><p style="margin: 0;"><i class="fa-solid ${step.icon} me-1"></i>${step.label}</p></div>`;
+            html = `<div class="step ${stepClass} text-secondary">${icon}${labelContent}</div>`;
+        }
+        $stepper.append(html);
+    });
+    $(".content-header .container-fluid .row").append($stepperWrapper);
+    let uploadModal = `
+        <div class="modal modal-lg fade" id="uploadModal" tabindex="-1" aria-labelledby="uploadModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header" style="background-color: #3c6dbd; color: white;">
+                        <h5 class="modal-title" id="uploadModalLabel"></h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body mx-0 px-0">
+                        <form id="uploadForm">
+                            <div class="pt-2 pb-4 border-bottom px-3">
+                                <div class="input-group file-input-wrapper">
+                                    <label class="btn btn-primary mb-0">
+                                        Add Document <input type="file" id="fileInput" hidden multiple>
+                                    </label>
+                                    <input type="text" class="form-control" style="cursor: pointer;" id="fileName" value="Add Document" readonly>
+                                </div>
+                                <small class="text-muted">Maximum file size: 20 MB</small>
+                                <div class="border rounded p-0 mt-2" id="row-table" style="display: none;">
+                                    <table aria-hidden="true" class="table table-hover view-page-table w-100 m-0" id="fileTable">
+                                        <thead>
+                                            <tr>
+                                                <th width="5%" class="fw-bold header-table">No</th>
+                                                <th class="fw-bold header-table">Nama File</th>
+                                                <th width="10%" class="fw-bold header-table"></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <!-- js render -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="pt-2 px-3 d-flex justify-content-end gap-2">
+                                <button type="submit" class="btn btn-primary" id="btn-submit-modal"><i class="fas fa-upload"></i> Upload</button>
+                                <button id="btn-cancel-modal" class="btn btn-default ew-btn"><i class="fas fa-ban"></i> Cancel</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        `;
+    $("body").append(uploadModal);
+    $(".upload-document").click(function (event) {
+        event.preventDefault();
+        if (StatusAktivitas == "Completed Edit") {
+            ew.alert("Aktivitas telah Completed dan tidak dapat diedit lagi.");
+            return;
+        }
+        IdAktivitasDokumen = $(this).attr("IdAktivitasDokumen");
+        IdAktivitas = $(this).attr("IdAktivitas");
+        NamaDokumen = $(this).attr("NamaDokumen");
+        $("#uploadModalLabel").text("Upload Dokumen " + NamaDokumen);
+        $.ajax({
+            url: parent_url + `api/LookUpList/GetAktivitasDokumenDetail?IdAktivitasDokumen=${IdAktivitasDokumen}`,
+            method: "GET",
+            beforeSend: function () {
+                showLoading();
+            },
+            success: function (rs) {
+                rs.dataDokumen.forEach((item) => {
+                    if (item.FileName) {
+                        filesArr.push({
+                            id: item.id,
+                            FileName: item.FileName,
+                        });
+                    }
+                });
+                renderTable();
+                $("#uploadModal").modal("show");
+            },
+            error: function (xhr, status, error) {
+                hideLoading();
+                console.error("API call failed:", status, error);
+            },
+            complete: function () {
+                hideLoading();
+            },
+        });
+    });
+    $("#btn-cancel-modal").click(function (event) {
+        event.preventDefault();
+        ResetUpload();
+        $("#uploadModal").modal("hide");
+    });
+    $(document).on("submit", "#uploadForm", function (e) {
+        e.preventDefault();
+        if (filesArr.length === 0 && deleteIds.length === 0) {
+            ew.alert("Tidak ada perubahan file!");
+            return;
+        }
+        let formData = new FormData();
+        formData.append("IdAktivitasDokumen", IdAktivitasDokumen);
+        formData.append("IdAktivitas", idAktivitas);
+        formData.append("NoReferensi", IdReferensi);
+        filesArr.forEach((item) => {
+            if (item.file) {
+                formData.append("files", item.file);
+            }
+        });
+        deleteIds.forEach((id) => {
+            formData.append("DeletedIds", id);
+        });
+        let parent_url = ew.PATH_BASE;
+        $.ajax({
+            url: parent_url + "api/LookUpList/UploadAktivitasDokumen",
+            type: "POST",
+            data: formData,
+            contentType: false,
+            processData: false,
+            beforeSend: function () {
+                showLoading();
+            },
+            success: function (rs) {
+                ew.alert({
+                    title: null,
+                    text: rs.message,
+                    icon: null,
+                    timer: 1000,
+                });
+                if (rs.success) {
+                    let $target = $('.not-uploaded[IdAktivitasDokumen="' + IdAktivitasDokumen + '"]');
+                    $target.replaceWith(`
+                            <a class="download-document btn btn-primary" IdAktivitasDokumen="${IdAktivitasDokumen}">
+                                <i class="fas fa-download me-2"></i> Download Document
+                            </a>
+                        `);
+                    let target2 = $("#btn-submit-keterangan");
+                    if (rs.NotUploadedCount == 0 && target2.length == 0 && StatusAktivitas != "Waiting" && StatusAktivitas != "Completed Edit") {
+                        let $btnSave = $("#btn-save-keterangan");
+                        $btnSave.after(`
+                                <button type="button" class="btn btn-success ew-btn ml-2" id="btn-submit-keterangan">
+                                    <i class="fas fa-paper-plane"></i> Submit
+                                </button>
+                            `);
+                    }
+                }
+            },
+            error: function (xhr, status, error) {
+                ew.alert("Error: " + xhr.responseText);
+            },
+            complete: function () {
+                hideLoading();
+            },
+        });
+        ResetUpload();
+        $("#uploadModal").modal("hide");
+    });
+    $("#btn-submit-custom").on("click", function () {
+        if (filesArr.length === 0 && deleteIds.length === 0) {
+            ew.alert("Tidak ada perubahan file!");
+            return;
+        }
+        if ($("#NoReferensi-custom").val() === "") {
+            ew.alert("Nomor Good House Keeping tidak boleh kosong!");
+            return;
+        }
+        if ($("#x_tgltiba").val() === "") {
+            ew.alert("Tanggal Tiba tidak boleh kosong!");
+            return;
+        }
+        if ($("#x_Lokasi").val() === "") {
+            ew.alert("Lokasi tidak boleh kosong!");
+            return;
+        }
+        showLoading();
+        let formData = new FormData();
+        formData.append("idGHK", id);
+        formData.append("NoReferensi", $("#NoReferensi-custom").val());
+        formData.append("tglTiba", $("#x_tgltiba").val());
+        formData.append("Lokasi", $("#x_Lokasi").val());
+        formData.append("Keterangan", $("#x_Keterangan").val());
+        filesArr.forEach((item) => {
+            if (item.file) {
+                formData.append("files", item.file);
+            }
+        });
+        deleteIds.forEach((id) => {
+            formData.append("DeletedIds", id);
+        });
+        $.ajax({
+            url: parent_url + "api/LookUpList/UpdateDocumentGHK",
+            type: "POST",
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function (rs) {
+                hideLoading();
+                if (rs.success) {
+                    ew.alert(rs.message);
+                    setTimeout(function () {
+                        window.location.href = `${parent_url}FormInputGoodHouseKeepingList?cmd=search&x_NoReferensi%5B%5D=${NoReferensi}&search=&searchtype=`;
+                    }, 2000);
+                } else {
+                    ew.alert(rs.message);
+                }
+            },
+            error: function (xhr) {
+                hideLoading();
+                ew.alert("Upload gagal: " + xhr.responseText);
+            },
+        });
+    });
+    let keterangan = $("#el_Aktivitas_Keterangan").text();
+    $("#el_Aktivitas_Keterangan").empty();
+    $("#el_Aktivitas_Keterangan").append(`
+            <textarea id="InputKeterangan" class="form-control" rows="3">${keterangan.trim()}</textarea>
+        `);
+    function makeMasterCheckboxEditable(trSelector, elSelector, inputId) {
+        const $tr = $(trSelector);
+        const $captionTd = $tr.find("td.w-col-2").first();
+        const labelText = $captionTd.text().trim();
+        const $el = $(elSelector);
+        const $i = $el.find("i").first();
+        const checked = $i.hasClass("fa-square-check") || $i.hasClass("fa-check-square");
+        $tr.empty();
+        $tr.append(`
+                <td colspan="2">
+                    <div class="d-flex align-items-start gap-2">
+                        <input
+                            class="form-check-input m-0"
+                            type="checkbox"
+                            id="${inputId}" ${checked ? "checked" : ""}
+                        >
+                        <label
+                            class="mb-0"
+                            for="${inputId}"
+                            style="line-height:1.4; white-space:normal;"
+                        >
+                            ${labelText}
+                        </label>
+                    </div>
+                </td>
+            `);
+    }
+    const idTemplateAktivitas = "@aktivitas.IdTemplateAktivitas.CurrentValue";
+    if (["306", "460"].includes(idTemplateAktivitas)) {
+        $("#r_IsTankEmptyAndDry").remove();
+        $("#r_IsDocumentationComplete").remove();
+        makeMasterCheckboxEditable("#r_IsNominationTankReceivingLineOpen", "#el_Aktivitas_IsNominationTankReceivingLineOpen", "InputIsNominationTankReceivingLineOpen");
+        makeMasterCheckboxEditable("#r_IsNonNominationReceivingLineClosedAndSealed", "#el_Aktivitas_IsNonNominationReceivingLineClosedAndSealed", "InputIsNonNominationReceivingLineClosedAndSealed");
+    } else if (["429"].includes(idTemplateAktivitas)) {
+        $("#r_IsNominationTankReceivingLineOpen").remove();
+        $("#r_IsNonNominationReceivingLineClosedAndSealed").remove();
+        makeMasterCheckboxEditable("#r_IsTankEmptyAndDry", "#el_Aktivitas_IsTankEmptyAndDry", "InputIsTankEmptyAndDry");
+        makeMasterCheckboxEditable("#r_IsDocumentationComplete", "#el_Aktivitas_IsDocumentationComplete", "InputIsDocumentationComplete");
+    } else {
+        $("#r_IsNominationTankReceivingLineOpen").remove();
+        $("#r_IsNonNominationReceivingLineClosedAndSealed").remove();
+        $("#r_IsTankEmptyAndDry").remove();
+        $("#r_IsDocumentationComplete").remove();
+    }
+    if (StatusAktivitas == "Completed Edit") {
+        let reverseStatusButton = ``;
+        if (userLevel === "4") {
+            reverseStatusButton = `<button type="button" class="btn btn-warning ew-btn ml-2" id="btn-reverse-status">
+                                        <i class="fa-solid fa-pen-to-square"></i> Edit 
+                                    </button>`;
+        }
+        $(".content").append(`
+            <div id="custom-buttons" class="d-flex gap-2 mb-3 ms-2">
+                ${reverseStatusButton}
+                <a class="btn btn-default ew-btn" href="${parent_url}AktivitasList?cmd=search&x_IdProses%5B%5D=${IdProses}&search=&searchtype=">
+                    <i class="fas fa-ban"></i> Cancel
+                </a>
+            </div>
+            `);
+        $(".upload-document").prop("disabled", true);
+    } else if (StatusAktivitas == "Waiting") {
+        $(".content").append(`
+            <div id="custom-buttons" class="d-flex gap-2 mb-3 ms-2">
+                <button type="button" class="btn btn-primary ew-btn" id="btn-save-keterangan">
+                    <i class="fas fa-save"></i> Save
+                </button>
+                <a class="btn btn-default ew-btn" href="${parent_url}AktivitasList?cmd=search&x_IdProses%5B%5D=${IdProses}&search=&searchtype=">
+                    <i class="fas fa-ban"></i> Cancel
+                </a>
+            </div>
+            `);
+    } else if (!hasNotUploaded && StatusAktivitas == "Draft") {
+        $(".content").append(`
+            <div id="custom-buttons" class="d-flex gap-2 mb-3 ms-2">
+                <button type="button" class="btn btn-primary ew-btn" id="btn-save-keterangan">
+                    <i class="fas fa-save"></i> Save
+                </button>
+                <button type="button" class="btn btn-success ew-btn ml-2" id="btn-submit-keterangan">
+                    <i class="fas fa-paper-plane"></i> Submit
+                </button>
+                <a class="btn btn-default ew-btn" href="${parent_url}AktivitasList?cmd=search&x_IdProses%5B%5D=${IdProses}&search=&searchtype=">
+                    <i class="fas fa-ban"></i> Cancel
+                </a>
+            </div>
+            `);
+    } else if (StatusAktivitas == "Editing" || StatusAktivitas == "Completed") {
+        $(".content").append(`
+            <div id="custom-buttons" class="d-flex gap-2 mb-3 ms-2">
+                <button type="button" class="btn btn-primary ew-btn" id="btn-save-keterangan">
+                    <i class="fa-solid fa-pen-to-square"></i> Edit
+                </button>
+                <button type="button" class="btn btn-success ew-btn ml-2" id="btn-submit-keterangan">
+                    <i class="fas fa-paper-plane"></i> Submit
+                </button>
+                <a class="btn btn-default ew-btn" href="${parent_url}AktivitasList?cmd=search&x_IdProses%5B%5D=${IdProses}&search=&searchtype=">
+                    <i class="fas fa-ban"></i> Cancel
+                </a>
+            </div>
+            `);
+    } else if (hasNotUploaded) {
+        let WajibUpload = false;
+        $(".not-uploaded").each(function () {
+            const wajib = $(this).attr("WajibUpload");
+            if (wajib === "1") {
+                WajibUpload = true;
+                return;
+            }
+        });
+        if (!WajibUpload && StatusAktivitas != "Waiting") {
+            $(".content").append(`
+                <div id="custom-buttons" class="d-flex gap-2 mb-3 ms-2">
+                    <button type="button" class="btn btn-primary ew-btn" id="btn-save-keterangan">
+                        <i class="fas fa-save"></i> Save
+                    </button>
+                    <button type="button" class="btn btn-success ew-btn ml-2" id="btn-submit-keterangan">
+                        <i class="fas fa-paper-plane"></i> Submit
+                    </button>
+                    <a class="btn btn-default ew-btn" href="${parent_url}AktivitasList?cmd=search&x_IdProses%5B%5D=${IdProses}&search=&searchtype=">
+                        <i class="fas fa-ban"></i> Cancel
+                    </a>
+                </div>
+                `);
+        } else {
+            $(".content").append(`
+                <div id="custom-buttons" class="d-flex gap-2 mb-3 ms-2">
+                    <button type="button" class="btn btn-primary ew-btn" id="btn-save-keterangan">
+                        <i class="fas fa-save"></i> Save
+                    </button>
+                    <a class="btn btn-default ew-btn" href="${parent_url}AktivitasList?cmd=search&x_IdProses%5B%5D=${IdProses}&search=&searchtype=">
+                        <i class="fas fa-ban"></i> Cancel
+                    </a>
+                </div>
+                `);
+        }
+    }
+    $(document).on("click", "#btn-submit-keterangan", function () {
+        submitAktivitasDokumen();
+    });
+    $(document).on("submit", "#reverseStatusEditingModalForm", function () {
+        submitAktivitasDokumen();
+    });
+    function submitAktivitasDokumen() {
+        event.preventDefault();
+        let formData = new FormData();
+        formData.append("IdAktivitas", idAktivitas);
+        const originalStatus = document.querySelector("#el_Aktivitas_StatusAktivitas span").textContent;
+        let keterangan = $("#InputKeterangan").val();
+        if (!keterangan) {
+            keterangan = "";
+        }
+        let catatanText = $("#catatanReverseStatusEditing").val();
+        if (!catatanText) {
+            catatanText = "";
+        }
+        formData.append("Keterangan", keterangan);
+        formData.append("Catatan", catatanText);
+        if (StatusAktivitas == "Completed" || StatusAktivitas == "Editing") {
+            formData.append("StatusAktivitas", "Completed Edit");
+        } else if (StatusAktivitas == "Completed Edit") {
+            formData.append("StatusAktivitas", "Editing");
+        } else {
+            formData.append("StatusAktivitas", "Completed");
+        }
+        const isNonNominationReceivingLineClosedAndSealed = $("#InputIsNonNominationReceivingLineClosedAndSealed").is(":checked");
+        const isNominationTankReceivingLineOpen = $("#InputIsNominationTankReceivingLineOpen").is(":checked");
+        const isTankEmptyAndDry = $("#InputIsTankEmptyAndDry").is(":checked");
+        const isDocumentationComplete = $("#InputIsDocumentationComplete").is(":checked");
+        if (["306", "460"].includes(idTemplateAktivitas) && !isNominationTankReceivingLineOpen) {
+            return ew.alert("Jalur penerimaan yang berhubungan dengan Tangki Nominasi BELUM TERBUKA.");
+        }
+        if (["306", "460"].includes(idTemplateAktivitas) && !isNonNominationReceivingLineClosedAndSealed) {
+            return ew.alert("Jalur penerimaan yang TIDAK berhubungan dengan Tangki Nominasi BELUM TERTUTUP dan TERSEGEL.");
+        }
+        if (["429"].includes(idTemplateAktivitas)) {
+            if (!isTankEmptyAndDry) return ew.alert(`Tangki mobil <strong>belum dalam kondisi kering</strong> dan <strong>masih terdapat sisa muatan</strong>.` );
+            if (!isDocumentationComplete) return ew.alert(`Seluruh dokumen <strong>belum</strong> didokumentasikan dengan baik.`);
+        }
+        formData.append("IsNominationTankReceivingLineOpen", isNominationTankReceivingLineOpen);
+        formData.append("IsNonNominationReceivingLineClosedAndSealed", isNonNominationReceivingLineClosedAndSealed);
+        formData.append("IsTankEmptyAndDry", isTankEmptyAndDry);
+        formData.append("IsDocumentationComplete", isDocumentationComplete);
+        $.ajax({
+            url: parent_url + `api/LookUpList/check_valid_status_aktivitas?idAktivitas=${idAktivitas}&originalStatus=${originalStatus}`,
+            type: "GET",
+            beforeSend: function () {
+                showLoading();
+            },
+            success: function (response) {
+                if (!response.IsValid) {
+                    hideLoading();
+                    ew.alert(response.Message ?? "Status aktivitas telah diubah oleh pengguna lain");
+                    return;
+                } else {
+                    $.ajax({
+                        url: parent_url + "api/LookUpList/UpdateStatusAktivitasByDocument",
+                        type: "POST",
+                        data: formData,
+                        contentType: false,
+                        processData: false,
+                        success: function (rs) {
+                            ew.alert(rs.message);
+                            if (rs.success) {
+                                setTimeout(function () {
+                                    window.location = `${parent_url}AktivitasList?cmd=search&x_IdProses%5B%5D=${IdProses}&search=&searchtype=`;
+                                }, 1000);
+                            }
+                        },
+                        error: function (xhr, status, error) {
+                            ew.alert("Error: " + xhr.responseText);
+                        },
+                        complete: function () {
+                            hideLoading();
+                        },
+                    });
+                }
+            },
+            error: function (xhr, status, error) {
+                hideLoading();
+                ew.alert("Gagal menyimpan data.");
+                console.error("Form submit gagal:", error);
+            },
+        });
+    }
+
+    // --- log aktivitas start ---
+    $("#el_Aktivitas_DiperbaruiOleh").append(`
+            <button type="button" class="ms-3 btn btn-primary ew-btn ps-2" expand-log="false" id="btn-log-history">
+                <i class="fa-solid fa-caret-right fa-2xl me-2 caret-icon rotate-right"></i>
+                Log History
+                <i class="fa-solid fa-clock-rotate-left ms-1"></i> 
+            </button>
+        `);
+    $(document).on("click", "button[expand-log]", function () {
+        const $btn = $(this);
+        const isExpanded = $btn.attr("expand-log") === "true";
+        const $row = $("#log-table-row");
+        const $wrapper = $("#log-table-wrapper");
+        const $caret = $btn.find(".caret-icon");
+        if (!isExpanded) {
+            $btn.attr("expand-log", "true");
+            $row.removeClass("d-none");
+            setTimeout(() => {
+                $wrapper.css({
+                    maxHeight: "500px",
+                });
+            }, 10);
+            $caret.removeClass("rotate-right").addClass("rotate-down");
+        } else {
+            $btn.attr("expand-log", "false");
+            $wrapper.css({
+                maxHeight: "0",
+            });
+            setTimeout(() => {
+                $row.addClass("d-none");
+            }, 400);
+            $caret.removeClass("rotate-down").addClass("rotate-right");
+        }
+    });
+    if (idAktivitas && idAktivitas !== "0") {
+        $.ajax({
+            url: parent_url + `api/LookUpList/sub-aktivitas/startup?IdAktivitas=${idAktivitas}`,
+            method: "GET",
+            success: function (response) {
+                // Cek is editable
+                if (!response.IsEditable || response.StatusAktivitas === "Completed Edit") {
+                    $("#btn-draft, #btn-editing, #btn-completed, #btn-completedEdit").hide();
+                    $("input, select, textarea, button").prop("disabled", true);
+                    $("#btn-cancel, #btn-log-history, #btn-cancel-modal, #catatanReverseStatusEditing, #btnReverseStatusEditingModalSubmit, #btn-reverse-status, #btnReverseStatusEditingModalCancel, #closeReverseModal").prop("disabled", false);
+                    $(".upload-document").prop("disabled", true);
+                }
+                const mappedData = response.LogAktivitas.map((item) => ({
+                    Aktivitas: item.Aktivitas,
+                    Username: item.UserName,
+                    StatusAktivitas: item.StatusAktivitas,
+                    Tanggal: item.Tanggal,
+                    Catatan: item.Catatan,
+                }));
+                $.getScript("https://cdn.jsdelivr.net/npm/ag-grid-community/dist/ag-grid-community.min.js", function () {
+                    $("#r_DiperbaruiOleh").after(`
+                        <tr id="log-table-row" class="d-none">
+                            <td class="p-0"></td>
+                            <td class="p-0">
+                                <div id="log-table-wrapper" style="overflow: hidden; transition: all 0.6s ease; max-height: 0;">
+                                    <div id="myGrid" class="ag-theme-quartz w-100 my-3" style="height: 300px;"></div>
+                                </div>
+                            </td>
+                        </tr>
+                    `);
+                    const gridOptions = {
+                        rowData: mappedData,
+                        columnDefs: [
+                            {
+                                headerName: "No.",
+                                valueGetter: "node.rowIndex + 1",
+                                width: 80,
+                                filter: false,
+                            },
+                            {
+                                headerName: "Aktivitas",
+                                field: "Aktivitas",
+                                flex: 1,
+                            },
+                            {
+                                headerName: "Username",
+                                field: "Username",
+                                flex: 1,
+                            },
+                            {
+                                headerName: "Status Aktivitas",
+                                field: "StatusAktivitas",
+                                flex: 1,
+                            },
+                            {
+                                headerName: "Tanggal",
+                                field: "Tanggal",
+                                flex: 1,
+                            },
+                            {
+                                headerName: "Catatan",
+                                field: "Catatan",
+                                flex: 1,
+                            },
+                        ],
+                        defaultColDef: {
+                            sortable: false,
+                            suppressMovable: true,
+                            filter: true,
+                            resizable: false,
+                        },
+                        rowSelection: "multiple",
+                        suppressRowClickSelection: true,
+                        pagination: true,
+                        paginationPageSize: 10,
+                    };
+                    const myGridElement = document.querySelector("#myGrid");
+                    agGrid.createGrid(myGridElement, gridOptions);
+                });
+            },
+            error: function (xhr, status, error) {
+                console.error("API call failed:", status, error);
+            },
+        });
+    } else {
+        console.warn("Skipping startup API call: Invalid IdAktivitas");
+        $("input, select, textarea, button").prop("disabled", true);
+    }
+    // --- log aktivitas end ---
+    // Reverse Status to Editing
+    let reverseModal = `<div class="modal fade" id="confirmReverseStatusEditingModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header bg-primary">
+                        <h1 class="modal-title fs-5" id="confirmReverseStatusEditingModalTitle">Konfirmasi Kembalikan Status</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" id="closeReverseModal" aria-label="Close"></button>
+                        </div>
+                        <form id="reverseStatusEditingModalForm">
+                        <div class="modal-body px-2 py-1">
+                            <div class="mb-3">
+                                <label for="message-text" class="col-form-label">Catatan:</label>
+                                <textarea class="form-control" id="catatanReverseStatusEditing" required rows="4"></textarea>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="btnReverseStatusEditingModalCancel">Batal</button>
+                            <button type="submit" class="btn btn-primary" id="btnReverseStatusEditingModalSubmit">Lanjutkan</button>
+                        </div>
+                        </form>
+                    </div>
+                    </div>
+                </div>`;
+    $("body").append(reverseModal);
+    $("#btnReverseStatusEditingModalCancel").click(function (event) {
+        event.preventDefault();
+        $("#confirmReverseStatusEditingModal").modal("hide");
+    });
+    $(document).on("click", "#btn-reverse-status", function () {
+        $("#confirmReverseStatusEditingModal").modal("show");
+    });
+    if (TipeProsesAsli === "PenyaluranTasNgs") {
+        let elemenInformasi = `
+            <div class="mt-2">
+                <div class="card border-primary shadow-sm" style="max-width: 850px;">
+                    <div class="card-header bg-primary text-white py-2 px-3">
+                        <strong>Informasi Pengisian Dokumen</strong>
+                    </div>
+                    <div class="card-body py-2 px-3 text-dark">
+                        <p class="mb-2">
+                            Pengunggahan dokumen pada <strong>Penyaluran Sales TAS/NGS</strong> dilakukan dengan menggunakan dokumen yang berasal dari 
+                            <strong>SIOD/TAS/NGS/ETEDA</strong>.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            `;
+        $(".ew-list-form").before(elemenInformasi);
+    }
+    if (TipeProsesAsli === "PenyaluranLPGTASNGS") {
+        let elemenInformasi = `
+            <div class="mt-2">
+                <div class="card border-primary shadow-sm" style="max-width: 850px;">
+                    <div class="card-header bg-primary text-white py-2 px-3">
+                        <strong>Informasi Pengisian Dokumen</strong>
+                    </div>
+                    <div class="card-body py-2 px-3 text-dark">
+                        <p class="mb-2">
+                            Pengunggahan dokumen pada <strong>Penyaluran Sales TAS/NGS</strong> dilakukan dengan menggunakan dokumen yang berasal dari 
+                            <strong>SIOD/TAS/NGS/ETEDA</strong>.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            `;
+        $(".ew-list-form").before(elemenInformasi);
+    }
+    function ResetUpload() {
+        $("#fileInput").val("");
+        filesArr.length = 0;
+        deleteIds.length = 0;
+    }
+    $(document).on("click", "#fileName", function () {
+        $("#fileInput").trigger("click");
+    });
+    $(document).on("change", "#fileInput", function (e) {
+        let newFiles = Array.from(e.target.files);
+        let mapped = [];
+        for (let f of newFiles) {
+            if (f.size > 20 * 1024 * 1024) {
+                ew.alert(`File "${f.name}" melebihi 20 MB dan tidak dapat diupload.`);
+                continue;
+            }
+            mapped.push({
+                file: f,
+                FileName: f.name,
+            });
+        }
+        if (mapped.length > 0) {
+            filesArr = filesArr.concat(mapped);
+            renderTable();
+        }
+        $(this).val("");
+    });
+    function renderTable() {
+        let $table = $("#fileTable");
+        let $tbody = $table.find("tbody");
+        $tbody.empty();
+        if (filesArr.length === 0) {
+            $("#row-table").hide();
+            return;
+        }
+        $("#row-table").show();
+        filesArr.forEach((item, index) => {
+            let FileEl = item.id ? `<button class="btn text-primary btn-download-single p-0" type="button" data-id="${item.id}">${item.FileName}</button>` : item.FileName;
+            let row = `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td>${FileEl}</td>
+                        <td>
+                            <button class="btn text-danger btn-delete" 
+                                    type="button" 
+                                    data-index="${index}" 
+                                    data-id="${item.id || ""}">
+                                <i class="fa-solid fa-times"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            $tbody.append(row);
+        });
+    }
+    $(document).on("click", ".btn-delete", function () {
+        let index = $(this).data("index");
+        let id = $(this).data("id");
+        if (id) {
+            deleteIds.push(id);
+        }
+        filesArr.splice(index, 1);
+        renderTable();
+    });
+});
+</script>
+}

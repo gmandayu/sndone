@@ -1,0 +1,89 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (masterAreaView.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = masterAreaView.UseLayout ? "_Layout" : "";
+}
+@if (!masterAreaView.IsExport()) {
+<div class="btn-toolbar ew-toolbar">
+    @masterAreaView.ExportOptions.RenderBody()
+    @masterAreaView.OtherOptions.RenderBody()
+</div>
+}
+@masterAreaView.ShowPageHeader()
+@masterAreaView.ShowMessages()
+<main class="view">
+<form name="fMasterAreaview" id="fMasterAreaview" class="ew-form ew-view-form overlay-wrapper" action="@AppPath(CurrentPageName())" method="post" novalidate autocomplete="off">
+@if (!masterAreaView.IsExport()) {
+<script>
+var currentTable = @Html.Raw(ConvertToJson(masterAreaView.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { MasterArea: currentTable } });
+var currentPageID = ew.PAGE_ID = "view";
+var currentForm;
+var fMasterAreaview;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("fMasterAreaview")
+        .setPageId("view")
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Write your client script here, no need to add script tags.
+});
+</script>
+}
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+<input type="hidden" name="modal" value="@ConvertToInt(masterAreaView.IsModal)">
+<table class="@(masterAreaView.TableClass)">
+@if (masterAreaView.ID.Visible) { // masterAreaView.ID.Visible (begin)
+    <tr id="r_ID" @Html.Raw(masterAreaView.ID.RowAttributes)>
+        <td class="@(masterAreaView.TableLeftColumnClass)"><span id="elh_MasterArea_ID">@Html.Raw(masterAreaView.ID.Caption)</span></td>
+        <td data-name="ID" @Html.Raw(masterAreaView.ID.CellAttributes)>
+<span id="el_MasterArea_ID">
+<span @Html.Raw(masterAreaView.ID.ViewAttributes)>
+@Html.Raw(masterAreaView.ID.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* masterAreaView.ID.Visible (end) *@
+@if (masterAreaView.Area.Visible) { // masterAreaView.Area.Visible (begin)
+    <tr id="r_Area" @Html.Raw(masterAreaView.Area.RowAttributes)>
+        <td class="@(masterAreaView.TableLeftColumnClass)"><span id="elh_MasterArea_Area">@Html.Raw(masterAreaView.Area.Caption)</span></td>
+        <td data-name="Area" @Html.Raw(masterAreaView.Area.CellAttributes)>
+<span id="el_MasterArea_Area">
+<span @Html.Raw(masterAreaView.Area.ViewAttributes)>
+@Html.Raw(masterAreaView.Area.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* masterAreaView.Area.Visible (end) *@
+</table>
+@{ masterAreaView.CloseRecordset(); }
+</form>
+</main>
+@masterAreaView.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+@if (!masterAreaView.IsExport()) {
+<script>
+loadjs.ready("load", function() {
+    // Write your table-specific startup script here
+    // document.write("page loaded");
+});
+</script>
+}

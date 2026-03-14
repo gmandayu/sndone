@@ -1,0 +1,717 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (subAktivitasTotalRencanaPenyaluranEdit.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = subAktivitasTotalRencanaPenyaluranEdit.UseLayout ? "_Layout" : "";
+}
+@subAktivitasTotalRencanaPenyaluranEdit.ShowPageHeader()
+@subAktivitasTotalRencanaPenyaluranEdit.ShowMessages()
+<main class="edit">
+<form name="fSubAktivitasTotalRencanaPenyaluranedit" id="fSubAktivitasTotalRencanaPenyaluranedit" class="@(subAktivitasTotalRencanaPenyaluranEdit.FormClassName)" action="@AppPath(CurrentPageName())" method="post" novalidate autocomplete="off">
+<script>
+var currentTable = @Html.Raw(ConvertToJson(subAktivitasTotalRencanaPenyaluranEdit.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { SubAktivitasTotalRencanaPenyaluran: currentTable } });
+var currentPageID = ew.PAGE_ID = "edit";
+var currentForm;
+var fSubAktivitasTotalRencanaPenyaluranedit;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("fSubAktivitasTotalRencanaPenyaluranedit")
+        .setPageId("edit")
+
+        // Add fields
+        .setFields([
+
+            ["id", [fields.id.visible && fields.id.required ? ew.Validators.required(fields.id.caption) : null], fields.id.isInvalid],
+            ["idProses", [fields.idProses.visible && fields.idProses.required ? ew.Validators.required(fields.idProses.caption) : null, ew.Validators.integer], fields.idProses.isInvalid],
+            ["idAktifitas", [fields.idAktifitas.visible && fields.idAktifitas.required ? ew.Validators.required(fields.idAktifitas.caption) : null, ew.Validators.integer], fields.idAktifitas.isInvalid],
+            ["NoReferensi", [fields.NoReferensi.visible && fields.NoReferensi.required ? ew.Validators.required(fields.NoReferensi.caption) : null], fields.NoReferensi.isInvalid],
+            ["TanggalJam", [fields.TanggalJam.visible && fields.TanggalJam.required ? ew.Validators.required(fields.TanggalJam.caption) : null, ew.Validators.datetime(fields.TanggalJam.clientFormatPattern)], fields.TanggalJam.isInvalid],
+            ["Produk", [fields.Produk.visible && fields.Produk.required ? ew.Validators.required(fields.Produk.caption) : null], fields.Produk.isInvalid],
+            ["RencanaPenyaluranKL", [fields.RencanaPenyaluranKL.visible && fields.RencanaPenyaluranKL.required ? ew.Validators.required(fields.RencanaPenyaluranKL.caption) : null], fields.RencanaPenyaluranKL.isInvalid],
+            ["userInput", [fields.userInput.visible && fields.userInput.required ? ew.Validators.required(fields.userInput.caption) : null], fields.userInput.isInvalid],
+            ["etlDate", [fields.etlDate.visible && fields.etlDate.required ? ew.Validators.required(fields.etlDate.caption) : null, ew.Validators.datetime(fields.etlDate.clientFormatPattern)], fields.etlDate.isInvalid],
+            ["LastUpdatedBy", [fields.LastUpdatedBy.visible && fields.LastUpdatedBy.required ? ew.Validators.required(fields.LastUpdatedBy.caption) : null], fields.LastUpdatedBy.isInvalid],
+            ["lastUpdatedDate", [fields.lastUpdatedDate.visible && fields.lastUpdatedDate.required ? ew.Validators.required(fields.lastUpdatedDate.caption) : null, ew.Validators.datetime(fields.lastUpdatedDate.clientFormatPattern)], fields.lastUpdatedDate.isInvalid]
+        ])
+
+        // Form_CustomValidate
+        .setCustomValidate(
+            function(fobj) { // DO NOT CHANGE THIS LINE!
+                    // Your custom validation code here, return false if invalid.
+                    return true;
+                }
+        )
+
+        // Use JavaScript validation or not
+        .setValidateRequired(ew.CLIENT_VALIDATE)
+
+        // Dynamic selection lists
+        .setLists({
+        })
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Client script
+    // Write your client script here, no need to add script tags.
+    var parent_url = ew.PATH_BASE;
+    var IdProses = "@subAktivitasTotalRencanaPenyaluranEdit.idProses.CurrentValue";
+    function handleCustomSubmit(status) {
+        let idAktivitas = $("#x_idAktifitas").val();
+        const originalStatus = document.querySelector('#el_SubAktivitasTotalRencanaPenyaluran_StatusAktivitas .form-control-plaintext').textContent;
+        $.ajax({
+            url: parent_url + `api/LookUpList/check_valid_status_aktivitas?idAktivitas=${idAktivitas}&originalStatus=${originalStatus}`,
+            type: 'GET',
+            beforeSend: function () {
+                showLoading();
+            },
+            success: function (response) {
+                if (!response.IsValid){
+                    hideLoading();
+                    ew.alert(response.Message ?? "Status aktivitas telah diubah oleh pengguna lain");
+                    return;
+                } else {
+                    let form = $("#fSubAktivitasTotalRencanaPenyaluranedit");
+                    $.ajax({
+                        url: form.attr("action"),
+                        type: form.attr("method"),
+                        data: form.serialize(),
+                        success: function (response) {
+                            updateStatus(idAktivitas, status);
+                        },
+                        error: function (xhr, status, error) {
+                            hideLoading();
+                            ew.alert("Gagal menyimpan data.");
+                            console.error("Form submit gagal:", error);
+                        }
+                    });
+                }
+            },
+            error: function (xhr, status, error) {
+                hideLoading();
+                ew.alert("Gagal menyimpan data.");
+                console.error("Form submit gagal:", error);
+            }
+        });
+    }
+    function updateStatus(idAktivitas, status) {
+        $.ajax({
+            url: parent_url + `api/LookUpList/update_status_aktivitas?idAktivitas=${idAktivitas}&statusAktivitas=${status}`,
+            type: 'POST',
+            success: function () {
+                console.log("Status berhasil diperbarui.");
+                if (status == "Completed" || status == "Completed Edit") {
+                    window.location.href = `${parent_url}AktivitasList?cmd=search&x_IdProses%5B%5D=${IdProses}&search=&searchtype=`;
+                } else {
+                    location.reload();
+                }
+            },
+            error: function (xhr, status, error) {
+                ew.alert("Status gagal diperbarui.");
+                console.error("Update status gagal:", error);
+            },
+            complete: function () {
+                hideLoading();
+            }
+        });
+    }
+    $(document).on("click", "#btn-draft", function () {
+        handleCustomSubmit("Draft");
+    });
+    $(document).on("click", "#btn-completed", function () {
+        handleCustomSubmit("Completed");
+    });
+    $(document).on("click", "#btn-editing", function () {
+        handleCustomSubmit("Editing");
+    });
+    $(document).on("click", "#btn-completedEdit", function () {
+        handleCustomSubmit("Completed Edit");
+    });
+});
+</script>
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+<input type="hidden" name="action" id="action" value="update">
+<input type="hidden" name="modal" value="@ConvertToInt(subAktivitasTotalRencanaPenyaluranEdit.IsModal)">
+@if (IsJsonResponse()) {
+<input type="hidden" name="json" value="1">
+}
+<input type="hidden" name="@(subAktivitasTotalRencanaPenyaluranEdit.OldKeyName)" value="@Html.Raw(subAktivitasTotalRencanaPenyaluranEdit.OldKey)">
+<div class="ew-edit-div"><!-- page* -->
+@if (subAktivitasTotalRencanaPenyaluranEdit.id.Visible) { // subAktivitasTotalRencanaPenyaluranEdit.id.Visible (begin)
+    <div id="r_id" @Html.Raw(subAktivitasTotalRencanaPenyaluranEdit.id.RowAttributes)>
+        <label id="elh_SubAktivitasTotalRencanaPenyaluran_id" class="@(subAktivitasTotalRencanaPenyaluranEdit.LeftColumnClass)">@Html.Raw(subAktivitasTotalRencanaPenyaluranEdit.id.Caption)@Html.Raw(subAktivitasTotalRencanaPenyaluranEdit.id.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(subAktivitasTotalRencanaPenyaluranEdit.RightColumnClass)"><div @Html.Raw(subAktivitasTotalRencanaPenyaluranEdit.id.CellAttributes)>
+<span id="el_SubAktivitasTotalRencanaPenyaluran_id">
+<span @Html.Raw(subAktivitasTotalRencanaPenyaluranEdit.id.ViewAttributes)>
+<input type="text" readonly class="form-control-plaintext" value="@Html.Raw(RemoveHtml(ConvertToString(subAktivitasTotalRencanaPenyaluranEdit.id.EditValue)))"></span>
+<input type="hidden" data-table="SubAktivitasTotalRencanaPenyaluran" data-field="x_id" data-hidden="1" name="x_id" id="x_id" value="@Html.Raw(HtmlEncode(subAktivitasTotalRencanaPenyaluranEdit.id.CurrentValue))">
+</span>
+</div></div>
+    </div>
+} @* subAktivitasTotalRencanaPenyaluranEdit.id.Visible (end) *@
+@if (subAktivitasTotalRencanaPenyaluranEdit.idProses.Visible) { // subAktivitasTotalRencanaPenyaluranEdit.idProses.Visible (begin)
+    <div id="r_idProses" @Html.Raw(subAktivitasTotalRencanaPenyaluranEdit.idProses.RowAttributes)>
+        <label id="elh_SubAktivitasTotalRencanaPenyaluran_idProses" for="x_idProses" class="@(subAktivitasTotalRencanaPenyaluranEdit.LeftColumnClass)">@Html.Raw(subAktivitasTotalRencanaPenyaluranEdit.idProses.Caption)@Html.Raw(subAktivitasTotalRencanaPenyaluranEdit.idProses.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(subAktivitasTotalRencanaPenyaluranEdit.RightColumnClass)"><div @Html.Raw(subAktivitasTotalRencanaPenyaluranEdit.idProses.CellAttributes)>
+<span id="el_SubAktivitasTotalRencanaPenyaluran_idProses">
+<input type="@(subAktivitasTotalRencanaPenyaluranEdit.idProses.InputTextType)" name="x_idProses" id="x_idProses" data-table="SubAktivitasTotalRencanaPenyaluran" data-field="x_idProses" value="@Html.Raw(subAktivitasTotalRencanaPenyaluranEdit.idProses.EditValue)" size="30" placeholder="@Html.Raw(HtmlEncode(subAktivitasTotalRencanaPenyaluranEdit.idProses.PlaceHolder))" data-format-pattern="@(subAktivitasTotalRencanaPenyaluranEdit.idProses.FormatPattern)"@Html.Raw(subAktivitasTotalRencanaPenyaluranEdit.idProses.EditAttributes) aria-describedby="x_idProses_help">
+@Html.Raw(subAktivitasTotalRencanaPenyaluranEdit.idProses.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(subAktivitasTotalRencanaPenyaluranEdit.idProses.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* subAktivitasTotalRencanaPenyaluranEdit.idProses.Visible (end) *@
+@if (subAktivitasTotalRencanaPenyaluranEdit.idAktifitas.Visible) { // subAktivitasTotalRencanaPenyaluranEdit.idAktifitas.Visible (begin)
+    <div id="r_idAktifitas" @Html.Raw(subAktivitasTotalRencanaPenyaluranEdit.idAktifitas.RowAttributes)>
+        <label id="elh_SubAktivitasTotalRencanaPenyaluran_idAktifitas" for="x_idAktifitas" class="@(subAktivitasTotalRencanaPenyaluranEdit.LeftColumnClass)">@Html.Raw(subAktivitasTotalRencanaPenyaluranEdit.idAktifitas.Caption)@Html.Raw(subAktivitasTotalRencanaPenyaluranEdit.idAktifitas.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(subAktivitasTotalRencanaPenyaluranEdit.RightColumnClass)"><div @Html.Raw(subAktivitasTotalRencanaPenyaluranEdit.idAktifitas.CellAttributes)>
+<span id="el_SubAktivitasTotalRencanaPenyaluran_idAktifitas">
+<input type="@(subAktivitasTotalRencanaPenyaluranEdit.idAktifitas.InputTextType)" name="x_idAktifitas" id="x_idAktifitas" data-table="SubAktivitasTotalRencanaPenyaluran" data-field="x_idAktifitas" value="@Html.Raw(subAktivitasTotalRencanaPenyaluranEdit.idAktifitas.EditValue)" size="30" placeholder="@Html.Raw(HtmlEncode(subAktivitasTotalRencanaPenyaluranEdit.idAktifitas.PlaceHolder))" data-format-pattern="@(subAktivitasTotalRencanaPenyaluranEdit.idAktifitas.FormatPattern)"@Html.Raw(subAktivitasTotalRencanaPenyaluranEdit.idAktifitas.EditAttributes) aria-describedby="x_idAktifitas_help">
+@Html.Raw(subAktivitasTotalRencanaPenyaluranEdit.idAktifitas.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(subAktivitasTotalRencanaPenyaluranEdit.idAktifitas.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* subAktivitasTotalRencanaPenyaluranEdit.idAktifitas.Visible (end) *@
+@if (subAktivitasTotalRencanaPenyaluranEdit.NoReferensi.Visible) { // subAktivitasTotalRencanaPenyaluranEdit.NoReferensi.Visible (begin)
+    <div id="r_NoReferensi" @Html.Raw(subAktivitasTotalRencanaPenyaluranEdit.NoReferensi.RowAttributes)>
+        <label id="elh_SubAktivitasTotalRencanaPenyaluran_NoReferensi" for="x_NoReferensi" class="@(subAktivitasTotalRencanaPenyaluranEdit.LeftColumnClass)">@Html.Raw(subAktivitasTotalRencanaPenyaluranEdit.NoReferensi.Caption)@Html.Raw(subAktivitasTotalRencanaPenyaluranEdit.NoReferensi.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(subAktivitasTotalRencanaPenyaluranEdit.RightColumnClass)"><div @Html.Raw(subAktivitasTotalRencanaPenyaluranEdit.NoReferensi.CellAttributes)>
+<span id="el_SubAktivitasTotalRencanaPenyaluran_NoReferensi">
+<input type="@(subAktivitasTotalRencanaPenyaluranEdit.NoReferensi.InputTextType)" name="x_NoReferensi" id="x_NoReferensi" data-table="SubAktivitasTotalRencanaPenyaluran" data-field="x_NoReferensi" value="@Html.Raw(subAktivitasTotalRencanaPenyaluranEdit.NoReferensi.EditValue)" size="30" maxlength="100" placeholder="@Html.Raw(HtmlEncode(subAktivitasTotalRencanaPenyaluranEdit.NoReferensi.PlaceHolder))" data-format-pattern="@(subAktivitasTotalRencanaPenyaluranEdit.NoReferensi.FormatPattern)"@Html.Raw(subAktivitasTotalRencanaPenyaluranEdit.NoReferensi.EditAttributes) aria-describedby="x_NoReferensi_help">
+@Html.Raw(subAktivitasTotalRencanaPenyaluranEdit.NoReferensi.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(subAktivitasTotalRencanaPenyaluranEdit.NoReferensi.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* subAktivitasTotalRencanaPenyaluranEdit.NoReferensi.Visible (end) *@
+@if (subAktivitasTotalRencanaPenyaluranEdit.TanggalJam.Visible) { // subAktivitasTotalRencanaPenyaluranEdit.TanggalJam.Visible (begin)
+    <div id="r_TanggalJam" @Html.Raw(subAktivitasTotalRencanaPenyaluranEdit.TanggalJam.RowAttributes)>
+        <label id="elh_SubAktivitasTotalRencanaPenyaluran_TanggalJam" for="x_TanggalJam" class="@(subAktivitasTotalRencanaPenyaluranEdit.LeftColumnClass)">@Html.Raw(subAktivitasTotalRencanaPenyaluranEdit.TanggalJam.Caption)@Html.Raw(subAktivitasTotalRencanaPenyaluranEdit.TanggalJam.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(subAktivitasTotalRencanaPenyaluranEdit.RightColumnClass)"><div @Html.Raw(subAktivitasTotalRencanaPenyaluranEdit.TanggalJam.CellAttributes)>
+<span id="el_SubAktivitasTotalRencanaPenyaluran_TanggalJam">
+<input type="@(subAktivitasTotalRencanaPenyaluranEdit.TanggalJam.InputTextType)" name="x_TanggalJam" id="x_TanggalJam" data-table="SubAktivitasTotalRencanaPenyaluran" data-field="x_TanggalJam" value="@Html.Raw(subAktivitasTotalRencanaPenyaluranEdit.TanggalJam.EditValue)" placeholder="@Html.Raw(HtmlEncode(subAktivitasTotalRencanaPenyaluranEdit.TanggalJam.PlaceHolder))" data-format-pattern="@(subAktivitasTotalRencanaPenyaluranEdit.TanggalJam.FormatPattern)"@Html.Raw(subAktivitasTotalRencanaPenyaluranEdit.TanggalJam.EditAttributes) aria-describedby="x_TanggalJam_help">
+@Html.Raw(subAktivitasTotalRencanaPenyaluranEdit.TanggalJam.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(subAktivitasTotalRencanaPenyaluranEdit.TanggalJam.GetErrorMessage())</div>
+@if (!subAktivitasTotalRencanaPenyaluranEdit.TanggalJam.ReadOnly && !subAktivitasTotalRencanaPenyaluranEdit.TanggalJam.Disabled && !subAktivitasTotalRencanaPenyaluranEdit.TanggalJam.EditAttrs.Is("readonly") && !subAktivitasTotalRencanaPenyaluranEdit.TanggalJam.EditAttrs.Is("disabled")) {
+<script>
+loadjs.ready(["fSubAktivitasTotalRencanaPenyaluranedit", "datetimepicker"], function () {
+    let format = "@Html.Raw(DateFormat(0))", // DN
+        options = {
+                localization: {
+                    locale: ew.LANGUAGE_ID + "-u-nu-" + ew.getNumberingSystem(),
+                    hourCycle: format.match(/H/) ? "h24" : "h12",
+                    format,
+                    ...ew.language.phrase("datetimepicker")
+                },
+                display: {
+                    icons: {
+                        previous: ew.IS_RTL ? "fa-solid fa-chevron-right" : "fa-solid fa-chevron-left",
+                        next: ew.IS_RTL ? "fa-solid fa-chevron-left" : "fa-solid fa-chevron-right"
+                    },
+                    components: {
+                        clock: !!format.match(/h/i) || !!format.match(/m/) || !!format.match(/s/i),
+                        hours: !!format.match(/h/i),
+                        minutes: !!format.match(/m/),
+                        seconds: !!format.match(/s/i)
+                    },
+                theme: ew.getPreferredTheme()
+                }
+            };
+    ew.createDateTimePicker("fSubAktivitasTotalRencanaPenyaluranedit", "x_TanggalJam", ew.deepAssign({"useCurrent":false,"display":{"sideBySide":false}}, options));
+});
+</script>
+}
+</span>
+</div></div>
+    </div>
+} @* subAktivitasTotalRencanaPenyaluranEdit.TanggalJam.Visible (end) *@
+@if (subAktivitasTotalRencanaPenyaluranEdit.Produk.Visible) { // subAktivitasTotalRencanaPenyaluranEdit.Produk.Visible (begin)
+    <div id="r_Produk" @Html.Raw(subAktivitasTotalRencanaPenyaluranEdit.Produk.RowAttributes)>
+        <label id="elh_SubAktivitasTotalRencanaPenyaluran_Produk" for="x_Produk" class="@(subAktivitasTotalRencanaPenyaluranEdit.LeftColumnClass)">@Html.Raw(subAktivitasTotalRencanaPenyaluranEdit.Produk.Caption)@Html.Raw(subAktivitasTotalRencanaPenyaluranEdit.Produk.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(subAktivitasTotalRencanaPenyaluranEdit.RightColumnClass)"><div @Html.Raw(subAktivitasTotalRencanaPenyaluranEdit.Produk.CellAttributes)>
+<span id="el_SubAktivitasTotalRencanaPenyaluran_Produk">
+<input type="@(subAktivitasTotalRencanaPenyaluranEdit.Produk.InputTextType)" name="x_Produk" id="x_Produk" data-table="SubAktivitasTotalRencanaPenyaluran" data-field="x_Produk" value="@Html.Raw(subAktivitasTotalRencanaPenyaluranEdit.Produk.EditValue)" size="30" maxlength="100" placeholder="@Html.Raw(HtmlEncode(subAktivitasTotalRencanaPenyaluranEdit.Produk.PlaceHolder))" data-format-pattern="@(subAktivitasTotalRencanaPenyaluranEdit.Produk.FormatPattern)"@Html.Raw(subAktivitasTotalRencanaPenyaluranEdit.Produk.EditAttributes) aria-describedby="x_Produk_help">
+@Html.Raw(subAktivitasTotalRencanaPenyaluranEdit.Produk.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(subAktivitasTotalRencanaPenyaluranEdit.Produk.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* subAktivitasTotalRencanaPenyaluranEdit.Produk.Visible (end) *@
+@if (subAktivitasTotalRencanaPenyaluranEdit.RencanaPenyaluranKL.Visible) { // subAktivitasTotalRencanaPenyaluranEdit.RencanaPenyaluranKL.Visible (begin)
+    <div id="r_RencanaPenyaluranKL" @Html.Raw(subAktivitasTotalRencanaPenyaluranEdit.RencanaPenyaluranKL.RowAttributes)>
+        <label id="elh_SubAktivitasTotalRencanaPenyaluran_RencanaPenyaluranKL" for="x_RencanaPenyaluranKL" class="@(subAktivitasTotalRencanaPenyaluranEdit.LeftColumnClass)">@Html.Raw(subAktivitasTotalRencanaPenyaluranEdit.RencanaPenyaluranKL.Caption)@Html.Raw(subAktivitasTotalRencanaPenyaluranEdit.RencanaPenyaluranKL.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(subAktivitasTotalRencanaPenyaluranEdit.RightColumnClass)"><div @Html.Raw(subAktivitasTotalRencanaPenyaluranEdit.RencanaPenyaluranKL.CellAttributes)>
+<span id="el_SubAktivitasTotalRencanaPenyaluran_RencanaPenyaluranKL">
+<input type="@(subAktivitasTotalRencanaPenyaluranEdit.RencanaPenyaluranKL.InputTextType)" name="x_RencanaPenyaluranKL" id="x_RencanaPenyaluranKL" data-table="SubAktivitasTotalRencanaPenyaluran" data-field="x_RencanaPenyaluranKL" value="@Html.Raw(subAktivitasTotalRencanaPenyaluranEdit.RencanaPenyaluranKL.EditValue)" size="30" maxlength="50" placeholder="@Html.Raw(HtmlEncode(subAktivitasTotalRencanaPenyaluranEdit.RencanaPenyaluranKL.PlaceHolder))" data-format-pattern="@(subAktivitasTotalRencanaPenyaluranEdit.RencanaPenyaluranKL.FormatPattern)"@Html.Raw(subAktivitasTotalRencanaPenyaluranEdit.RencanaPenyaluranKL.EditAttributes) aria-describedby="x_RencanaPenyaluranKL_help">
+@Html.Raw(subAktivitasTotalRencanaPenyaluranEdit.RencanaPenyaluranKL.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(subAktivitasTotalRencanaPenyaluranEdit.RencanaPenyaluranKL.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* subAktivitasTotalRencanaPenyaluranEdit.RencanaPenyaluranKL.Visible (end) *@
+@if (subAktivitasTotalRencanaPenyaluranEdit.userInput.Visible) { // subAktivitasTotalRencanaPenyaluranEdit.userInput.Visible (begin)
+    <div id="r_userInput" @Html.Raw(subAktivitasTotalRencanaPenyaluranEdit.userInput.RowAttributes)>
+        <label id="elh_SubAktivitasTotalRencanaPenyaluran_userInput" for="x_userInput" class="@(subAktivitasTotalRencanaPenyaluranEdit.LeftColumnClass)">@Html.Raw(subAktivitasTotalRencanaPenyaluranEdit.userInput.Caption)@Html.Raw(subAktivitasTotalRencanaPenyaluranEdit.userInput.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(subAktivitasTotalRencanaPenyaluranEdit.RightColumnClass)"><div @Html.Raw(subAktivitasTotalRencanaPenyaluranEdit.userInput.CellAttributes)>
+<span id="el_SubAktivitasTotalRencanaPenyaluran_userInput">
+<input type="@(subAktivitasTotalRencanaPenyaluranEdit.userInput.InputTextType)" name="x_userInput" id="x_userInput" data-table="SubAktivitasTotalRencanaPenyaluran" data-field="x_userInput" value="@Html.Raw(subAktivitasTotalRencanaPenyaluranEdit.userInput.EditValue)" size="30" maxlength="100" placeholder="@Html.Raw(HtmlEncode(subAktivitasTotalRencanaPenyaluranEdit.userInput.PlaceHolder))" data-format-pattern="@(subAktivitasTotalRencanaPenyaluranEdit.userInput.FormatPattern)"@Html.Raw(subAktivitasTotalRencanaPenyaluranEdit.userInput.EditAttributes) aria-describedby="x_userInput_help">
+@Html.Raw(subAktivitasTotalRencanaPenyaluranEdit.userInput.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(subAktivitasTotalRencanaPenyaluranEdit.userInput.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* subAktivitasTotalRencanaPenyaluranEdit.userInput.Visible (end) *@
+@if (subAktivitasTotalRencanaPenyaluranEdit.etlDate.Visible) { // subAktivitasTotalRencanaPenyaluranEdit.etlDate.Visible (begin)
+    <div id="r_etlDate" @Html.Raw(subAktivitasTotalRencanaPenyaluranEdit.etlDate.RowAttributes)>
+        <label id="elh_SubAktivitasTotalRencanaPenyaluran_etlDate" for="x_etlDate" class="@(subAktivitasTotalRencanaPenyaluranEdit.LeftColumnClass)">@Html.Raw(subAktivitasTotalRencanaPenyaluranEdit.etlDate.Caption)@Html.Raw(subAktivitasTotalRencanaPenyaluranEdit.etlDate.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(subAktivitasTotalRencanaPenyaluranEdit.RightColumnClass)"><div @Html.Raw(subAktivitasTotalRencanaPenyaluranEdit.etlDate.CellAttributes)>
+<span id="el_SubAktivitasTotalRencanaPenyaluran_etlDate">
+<input type="@(subAktivitasTotalRencanaPenyaluranEdit.etlDate.InputTextType)" name="x_etlDate" id="x_etlDate" data-table="SubAktivitasTotalRencanaPenyaluran" data-field="x_etlDate" value="@Html.Raw(subAktivitasTotalRencanaPenyaluranEdit.etlDate.EditValue)" placeholder="@Html.Raw(HtmlEncode(subAktivitasTotalRencanaPenyaluranEdit.etlDate.PlaceHolder))" data-format-pattern="@(subAktivitasTotalRencanaPenyaluranEdit.etlDate.FormatPattern)"@Html.Raw(subAktivitasTotalRencanaPenyaluranEdit.etlDate.EditAttributes) aria-describedby="x_etlDate_help">
+@Html.Raw(subAktivitasTotalRencanaPenyaluranEdit.etlDate.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(subAktivitasTotalRencanaPenyaluranEdit.etlDate.GetErrorMessage())</div>
+@if (!subAktivitasTotalRencanaPenyaluranEdit.etlDate.ReadOnly && !subAktivitasTotalRencanaPenyaluranEdit.etlDate.Disabled && !subAktivitasTotalRencanaPenyaluranEdit.etlDate.EditAttrs.Is("readonly") && !subAktivitasTotalRencanaPenyaluranEdit.etlDate.EditAttrs.Is("disabled")) {
+<script>
+loadjs.ready(["fSubAktivitasTotalRencanaPenyaluranedit", "datetimepicker"], function () {
+    let format = "@Html.Raw(DateFormat(0))", // DN
+        options = {
+                localization: {
+                    locale: ew.LANGUAGE_ID + "-u-nu-" + ew.getNumberingSystem(),
+                    hourCycle: format.match(/H/) ? "h24" : "h12",
+                    format,
+                    ...ew.language.phrase("datetimepicker")
+                },
+                display: {
+                    icons: {
+                        previous: ew.IS_RTL ? "fa-solid fa-chevron-right" : "fa-solid fa-chevron-left",
+                        next: ew.IS_RTL ? "fa-solid fa-chevron-left" : "fa-solid fa-chevron-right"
+                    },
+                    components: {
+                        clock: !!format.match(/h/i) || !!format.match(/m/) || !!format.match(/s/i),
+                        hours: !!format.match(/h/i),
+                        minutes: !!format.match(/m/),
+                        seconds: !!format.match(/s/i)
+                    },
+                theme: ew.getPreferredTheme()
+                }
+            };
+    ew.createDateTimePicker("fSubAktivitasTotalRencanaPenyaluranedit", "x_etlDate", ew.deepAssign({"useCurrent":false,"display":{"sideBySide":false}}, options));
+});
+</script>
+}
+</span>
+</div></div>
+    </div>
+} @* subAktivitasTotalRencanaPenyaluranEdit.etlDate.Visible (end) *@
+@if (subAktivitasTotalRencanaPenyaluranEdit.LastUpdatedBy.Visible) { // subAktivitasTotalRencanaPenyaluranEdit.LastUpdatedBy.Visible (begin)
+    <div id="r_LastUpdatedBy" @Html.Raw(subAktivitasTotalRencanaPenyaluranEdit.LastUpdatedBy.RowAttributes)>
+        <label id="elh_SubAktivitasTotalRencanaPenyaluran_LastUpdatedBy" for="x_LastUpdatedBy" class="@(subAktivitasTotalRencanaPenyaluranEdit.LeftColumnClass)">@Html.Raw(subAktivitasTotalRencanaPenyaluranEdit.LastUpdatedBy.Caption)@Html.Raw(subAktivitasTotalRencanaPenyaluranEdit.LastUpdatedBy.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(subAktivitasTotalRencanaPenyaluranEdit.RightColumnClass)"><div @Html.Raw(subAktivitasTotalRencanaPenyaluranEdit.LastUpdatedBy.CellAttributes)>
+<span id="el_SubAktivitasTotalRencanaPenyaluran_LastUpdatedBy">
+<input type="@(subAktivitasTotalRencanaPenyaluranEdit.LastUpdatedBy.InputTextType)" name="x_LastUpdatedBy" id="x_LastUpdatedBy" data-table="SubAktivitasTotalRencanaPenyaluran" data-field="x_LastUpdatedBy" value="@Html.Raw(subAktivitasTotalRencanaPenyaluranEdit.LastUpdatedBy.EditValue)" size="30" maxlength="100" placeholder="@Html.Raw(HtmlEncode(subAktivitasTotalRencanaPenyaluranEdit.LastUpdatedBy.PlaceHolder))" data-format-pattern="@(subAktivitasTotalRencanaPenyaluranEdit.LastUpdatedBy.FormatPattern)"@Html.Raw(subAktivitasTotalRencanaPenyaluranEdit.LastUpdatedBy.EditAttributes) aria-describedby="x_LastUpdatedBy_help">
+@Html.Raw(subAktivitasTotalRencanaPenyaluranEdit.LastUpdatedBy.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(subAktivitasTotalRencanaPenyaluranEdit.LastUpdatedBy.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* subAktivitasTotalRencanaPenyaluranEdit.LastUpdatedBy.Visible (end) *@
+@if (subAktivitasTotalRencanaPenyaluranEdit.lastUpdatedDate.Visible) { // subAktivitasTotalRencanaPenyaluranEdit.lastUpdatedDate.Visible (begin)
+    <div id="r_lastUpdatedDate" @Html.Raw(subAktivitasTotalRencanaPenyaluranEdit.lastUpdatedDate.RowAttributes)>
+        <label id="elh_SubAktivitasTotalRencanaPenyaluran_lastUpdatedDate" for="x_lastUpdatedDate" class="@(subAktivitasTotalRencanaPenyaluranEdit.LeftColumnClass)">@Html.Raw(subAktivitasTotalRencanaPenyaluranEdit.lastUpdatedDate.Caption)@Html.Raw(subAktivitasTotalRencanaPenyaluranEdit.lastUpdatedDate.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(subAktivitasTotalRencanaPenyaluranEdit.RightColumnClass)"><div @Html.Raw(subAktivitasTotalRencanaPenyaluranEdit.lastUpdatedDate.CellAttributes)>
+<span id="el_SubAktivitasTotalRencanaPenyaluran_lastUpdatedDate">
+<input type="@(subAktivitasTotalRencanaPenyaluranEdit.lastUpdatedDate.InputTextType)" name="x_lastUpdatedDate" id="x_lastUpdatedDate" data-table="SubAktivitasTotalRencanaPenyaluran" data-field="x_lastUpdatedDate" value="@Html.Raw(subAktivitasTotalRencanaPenyaluranEdit.lastUpdatedDate.EditValue)" placeholder="@Html.Raw(HtmlEncode(subAktivitasTotalRencanaPenyaluranEdit.lastUpdatedDate.PlaceHolder))" data-format-pattern="@(subAktivitasTotalRencanaPenyaluranEdit.lastUpdatedDate.FormatPattern)"@Html.Raw(subAktivitasTotalRencanaPenyaluranEdit.lastUpdatedDate.EditAttributes) aria-describedby="x_lastUpdatedDate_help">
+@Html.Raw(subAktivitasTotalRencanaPenyaluranEdit.lastUpdatedDate.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(subAktivitasTotalRencanaPenyaluranEdit.lastUpdatedDate.GetErrorMessage())</div>
+@if (!subAktivitasTotalRencanaPenyaluranEdit.lastUpdatedDate.ReadOnly && !subAktivitasTotalRencanaPenyaluranEdit.lastUpdatedDate.Disabled && !subAktivitasTotalRencanaPenyaluranEdit.lastUpdatedDate.EditAttrs.Is("readonly") && !subAktivitasTotalRencanaPenyaluranEdit.lastUpdatedDate.EditAttrs.Is("disabled")) {
+<script>
+loadjs.ready(["fSubAktivitasTotalRencanaPenyaluranedit", "datetimepicker"], function () {
+    let format = "@Html.Raw(DateFormat(0))", // DN
+        options = {
+                localization: {
+                    locale: ew.LANGUAGE_ID + "-u-nu-" + ew.getNumberingSystem(),
+                    hourCycle: format.match(/H/) ? "h24" : "h12",
+                    format,
+                    ...ew.language.phrase("datetimepicker")
+                },
+                display: {
+                    icons: {
+                        previous: ew.IS_RTL ? "fa-solid fa-chevron-right" : "fa-solid fa-chevron-left",
+                        next: ew.IS_RTL ? "fa-solid fa-chevron-left" : "fa-solid fa-chevron-right"
+                    },
+                    components: {
+                        clock: !!format.match(/h/i) || !!format.match(/m/) || !!format.match(/s/i),
+                        hours: !!format.match(/h/i),
+                        minutes: !!format.match(/m/),
+                        seconds: !!format.match(/s/i)
+                    },
+                theme: ew.getPreferredTheme()
+                }
+            };
+    ew.createDateTimePicker("fSubAktivitasTotalRencanaPenyaluranedit", "x_lastUpdatedDate", ew.deepAssign({"useCurrent":false,"display":{"sideBySide":false}}, options));
+});
+</script>
+}
+</span>
+</div></div>
+    </div>
+} @* subAktivitasTotalRencanaPenyaluranEdit.lastUpdatedDate.Visible (end) *@
+</div><!-- /page* -->
+@{ subAktivitasTotalRencanaPenyaluranEdit.CloseRecordset(); }
+@Html.Raw(subAktivitasTotalRencanaPenyaluranEdit.IsModal ? "<template class=\"ew-modal-buttons\">" : "<div class=\"row ew-buttons\">")<!-- buttons .row -->
+    <div class="@(subAktivitasTotalRencanaPenyaluranEdit.OffsetColumnClass)"><!-- buttons offset -->
+    <button class="btn btn-primary ew-btn" name="btn-action" id="btn-action" type="submit" form="fSubAktivitasTotalRencanaPenyaluranedit">@Html.Raw(Language.Phrase("SaveBtn"))</button>
+@if (IsJsonResponse()) {
+    <button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" data-bs-dismiss="modal">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+} else {
+    <button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" form="fSubAktivitasTotalRencanaPenyaluranedit" data-href="@AppPath(subAktivitasTotalRencanaPenyaluranEdit.ReturnUrl)">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+}
+    </div><!-- /buttons offset -->
+@Html.Raw(subAktivitasTotalRencanaPenyaluranEdit.IsModal ? "</template>" : "</div>")<!-- /buttons .row -->
+</form>
+</main>
+@subAktivitasTotalRencanaPenyaluranEdit.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("SubAktivitasTotalRencanaPenyaluran");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Startup script
+    var IdReferensi = "@subAktivitasTotalRencanaPenyaluranEdit.NoReferensi.CurrentValue";
+    var IdProses = "@subAktivitasTotalRencanaPenyaluranEdit.idProses.CurrentValue";
+    var idAktivitas = "@subAktivitasTotalRencanaPenyaluranEdit.idAktifitas.CurrentValue";
+    var NamaAktivitas = $('#el_SubAktivitasTotalRencanaPenyaluran_idAktifitas').text();
+    var parent_url = ew.PATH_BASE;
+    var steps = [
+        { number: 1, label: "Rencana Penyaluran", url: `${parent_url}RencanaPenyaluranList`, icon: "fa-solid fa-clipboard-list" },
+        { number: 2, label: "Proses", url: `${parent_url}ProsesList?cmd=search&x_IdReferensi%5B%5D=${IdReferensi}&search=&searchtype=`, icon: "fa-gears" },
+        { number: 3, label: "Aktivitas", url: `${parent_url}AktivitasList?cmd=search&x_IdProses%5B%5D=${IdProses}&search=&searchtype=`, icon: "fa-list-check" },
+        { number: 4, label: NamaAktivitas, url: '', icon: "fa-file-circle-check" }
+    ];
+    var currentStep = 4;
+    $("<style>")
+        .prop("type", "text/css")
+        .html(`
+            .stepper {
+                display: flex;
+                counter-reset: step;
+                flex-wrap: nowrap;        /* jangan pecah ke bawah */
+                overflow-x: auto;         /* scroll horizontal */
+                -webkit-overflow-scrolling: touch; /* smooth scroll di mobile */
+                padding-bottom: 8px;      /* space biar scroll bar gak nempel */
+            }
+            .stepper::-webkit-scrollbar {
+            height: 6px; /* tipis */
+            }
+            .stepper::-webkit-scrollbar-thumb {
+                background-color: #ccc;
+                border-radius: 3px;
+            }
+            .step {
+                width: 150px;
+                text-align: center;
+                position: relative;
+            }
+            .step:not(:last-child)::after {
+                content: '';
+                position: absolute;
+                top: 20px;
+                right: -50%;
+                width: 100%;
+                height: 4px;
+                background-color: #ccc;
+                z-index: 0;
+            }
+            .step.completed:not(:last-child)::after {
+                background-color: #3c6dbd;
+            }
+            .step-icon {
+                width: 36px;
+                height: 36px;
+                line-height: 36px;
+                border-radius: 50%;
+                background: #ccc;
+                display: inline-block;
+                z-index: 1;
+                position: relative;
+                color: white;
+                font-weight: bold;
+            }
+            .step.active .step-icon {
+                background: #3c6dbd;
+            }
+            .step-label {
+                margin-top: 8px;
+                font-size: 14px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                gap: 6px;
+                color: #333;
+            }
+            .step-label {
+                color: #3c6dbd !important;
+                text-decoration: none;
+                margin: 0;
+                padding: 0;
+            }
+            .step-label-not-active {
+                color: #CCCCCC !important;
+            }
+            .ag-theme-quartz .ag-header {
+                background-color: #3c6dbd !important;
+            }
+            .ag-theme-quartz .ag-header-cell-label {
+                color: #ffffff !important;
+            }
+            .ag-theme-quartz .ag-icon-filter {
+                color: #ffffff !important;
+            }
+            .rotate-down {
+                transform: rotate(90deg);
+                transition: transform 0.3s ease;
+            }
+            .rotate-right {
+                transform: rotate(0deg);
+                transition: transform 0.3s ease;
+            }
+        `)
+        .appendTo("head");
+    var $stepperWrapper = $('<div class="d-flex border-bottom border-2 pb-2"><div class="stepper"></div></div>');
+    var $stepper = $stepperWrapper.find(".stepper");
+    steps.forEach(function (step, i) {
+        var isActive = step.number === currentStep;
+        var isCompleted = step.number < currentStep;
+        var stepClass = isActive ? "active" : isCompleted ? "completed" : "";
+        var icon, labelContent, html;
+        if (isActive) {
+            icon = `<div class="step-icon bg-success">${step.number}</div>`;
+            labelContent = `<div class="step-label"><p class="text-success mb-1"><i class="fa-solid ${step.icon} me-1 text-success"></i> ${step.label}</p></div>`;
+            html = `<div class="step ${stepClass} text-success">${icon}${labelContent}</div>`;
+        } else if (isCompleted) {
+            icon = `<div class="step-icon" style="background: #3c6dbd;">${step.number}</div>`;
+            labelContent = `<div class="step-label"><a href="${step.url}" class="text-primary"><i class="fa-solid ${step.icon} me-1"></i>${step.label}</a></div>`;
+            html = `<div class="step ${stepClass}">${icon}${labelContent}</div>`;
+        } else {
+            icon = `<div class="step-icon">${step.number}</div>`;
+            labelContent = `<div class="step-label-not-active"><p style="margin: 0;"><i class="fa-solid ${step.icon} me-1"></i>${step.label}</p></div>`;
+            html = `<div class="step ${stepClass} text-secondary">${icon}${labelContent}</div>`;
+        }
+        $stepper.append(html);
+    });
+    $(".content-header .container-fluid .row").append($stepperWrapper);
+    $("#btn-action").hide();
+    $("#btn-cancel").html('<i class="fa-solid fa-ban"></i></i> Cancel');
+    const $cancelButton = $("#btn-cancel");
+    const idAktifitas = $("#x_idAktifitas").val();
+    let StatusAktivitas = $('#el_SubAktivitasTotalRencanaPenyaluran_StatusAktivitas').text().trim();
+
+    // --- log aktivitas start ---
+    $('#el_SubAktivitasTotalRencanaPenyaluran_LastUpdatedBy').addClass('d-flex gap-3');
+    $('#el_SubAktivitasTotalRencanaPenyaluran_LastUpdatedBy').append(`
+        <button type="button" class="btn btn-primary ew-btn ps-2" expand-log="false">
+            <i class="fa-solid fa-caret-right fa-2xl me-2 caret-icon rotate-right"></i>
+            Log History
+            <i class="fa-solid fa-clock-rotate-left ms-1"></i> 
+        </button>
+    `);
+    $(document).on('click', 'button[expand-log]', function () {
+        const $btn = $(this);
+        const isExpanded = $btn.attr('expand-log') === 'true';
+        const $row = $('#log-table-row');
+        const $wrapper = $('#log-table-wrapper');
+        const $caret = $btn.find('.caret-icon');
+        if (!isExpanded) {
+            $btn.attr('expand-log', 'true');
+            $row.removeClass('d-none');
+            setTimeout(() => {
+                $wrapper.css({
+                    maxHeight: '500px'
+                });
+            }, 10);
+            $caret.removeClass('rotate-right').addClass('rotate-down');
+        } else {
+            $btn.attr('expand-log', 'false');
+            $wrapper.css({
+                maxHeight: '0'
+            });
+            setTimeout(() => {
+                $row.addClass('d-none');
+            }, 600);
+            $caret.removeClass('rotate-down').addClass('rotate-right');
+        }
+    });
+    if (idAktivitas && idAktivitas !== "0") {
+        $.ajax({
+            url: parent_url + `api/LookUpList/sub-aktivitas/startup?idAktivitas=${idAktivitas}`,
+            type: 'GET',
+            success: function(response) {
+                // cek status
+                if ($cancelButton.length){
+                    let status = response.StatusAktivitas;
+                    currentStatusAktivitas = status;
+                    let $customButtons = ``;
+                    switch (status) {
+                        case "Waiting":
+                            $customButtons = `
+                                <button type="button" class="btn btn-primary ew-btn ml-2" id="btn-draft">
+                                    <i class="fas fa-save"></i> Save
+                                </button>
+                            `;
+                            break;
+                        case "Draft":
+                            $customButtons = `
+                                <button type="button" class="btn btn-primary ew-btn ml-2" id="btn-draft">
+                                    <i class="fas fa-save"></i> Save
+                                </button>
+                                <button type="button" class="btn btn-success ew-btn ml-2" id="btn-completed">
+                                    <i class="fas fa-paper-plane"></i> Submit
+                                </button>
+                            `
+                            break;
+                        case "Completed":
+                            $customButtons = `
+                                <button type="button" class="btn btn-primary ew-btn ml-2" id="btn-editing">
+                                    <i class="fa-solid fa-pen-to-square"></i> Edit
+                                </button>
+                                <button type="button" class="btn btn-success ew-btn ml-2" id="btn-completedEdit">
+                                    <i class="fas fa-paper-plane"></i> Submit
+                                </button>
+                            `;
+                            break;
+                        case "Editing":
+                            $customButtons = `
+                                <button type="button" class="btn btn-primary ew-btn ml-2" id="btn-editing">
+                                    <i class="fa-solid fa-pen-to-square"></i> Edit
+                                </button>
+                                <button type="button" class="btn btn-success ew-btn ml-2" id="btn-completedEdit">
+                                    <i class="fas fa-paper-plane"></i> Submit
+                                </button>
+                            `;
+                            break;
+                        case "Completed Edit":
+                            if (userLevel === '4'){
+                                $customButtons = `
+                                    <button type="button" class="btn btn-warning ew-btn ml-2" id="btn-reverse-status">
+                                        <i class="fa-solid fa-pen-to-square"></i> Edit 
+                                    </button>
+                                `;
+                            }
+                            break;
+                    }
+                    $cancelButton.before($customButtons);
+                }
+
+                // Cek is editable
+                if(!response.IsEditable || response.StatusAktivitas === "Completed Edit"){
+                    $("#btn-draft").hide();
+                    $("#btn-editing").hide();
+                    $("#btn-completed").hide();
+                    $("#btn-completedEdit").hide();
+                    $('input, select, textarea').prop('disabled', true);
+                }
+
+                // Log
+                const mappedData = response.LogAktivitas.map(item => ({
+                    Aktivitas: item.Aktivitas,
+                    Username: item.UserName,
+                    StatusAktivitas: item.StatusAktivitas,
+                    Tanggal: item.Tanggal,
+                    Catatan: item.Catatan
+                }));
+                $.getScript('https://cdn.jsdelivr.net/npm/ag-grid-community/dist/ag-grid-community.min.js', function () {
+                        $('#r_LastUpdatedBy').after(`
+                            <div id="log-table-row" class="d-none row m-0">
+                                <div class="p-0 col-2"></div>
+                                <div class="p-0 col-10">
+                                    <div id="log-table-wrapper" style="overflow: hidden; transition: all 0.6s ease; max-height: 0;">
+                                        <div id="myGrid" class="ag-theme-quartz w-100 my-3" style="height: 300px;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        `);
+                        const gridOptions = {
+                            rowData: mappedData,
+                            columnDefs: [
+                                {
+                                    headerName: 'No.',
+                                    valueGetter: 'node.rowIndex + 1',
+                                    width: 80,
+                                    filter: false
+                                },
+                                {
+                                    headerName: 'Aktivitas',
+                                    field: 'Aktivitas',
+                                    flex: 1
+                                },
+                                {
+                                    headerName: 'Username',
+                                    field: 'Username',
+                                    flex: 1
+                                },
+                                {
+                                    headerName: 'Status Aktivitas',
+                                    field: 'StatusAktivitas',
+                                    flex: 1
+                                },
+                                {
+                                    headerName: 'Tanggal',
+                                    field: 'Tanggal',
+                                    flex: 1
+                                },
+                                {
+                                    headerName: 'Catatan',
+                                    field: 'Catatan',
+                                    flex: 1
+                                }
+                            ],
+                            defaultColDef: {
+                                sortable: false,
+                                suppressMovable: true,
+                                filter: true,
+                                resizable: false
+                            },
+                            rowSelection: 'multiple',
+                            suppressRowClickSelection: true,
+                            pagination: true,
+                            paginationPageSize: 10
+                        };
+                        const myGridElement = document.querySelector('#myGrid');
+                        agGrid.createGrid(myGridElement, gridOptions);
+                    });
+            },
+            error: function(xhr, status, error) {
+                ew.alert(xhr.responseJSON.message ?? "Terjadi kesalahan dalam memuat data");
+            }
+        });
+    } else {
+        console.warn("Skipping startup API: Invalid IdAktivitas");
+        $('button[expand-log]').hide(); 
+        $("#btn-draft, #btn-editing, #btn-completed, #btn-completedEdit").hide();
+        $('input, select, textarea').prop('disabled', true);
+    }
+    // --- log aktivitas end ---
+});
+</script>

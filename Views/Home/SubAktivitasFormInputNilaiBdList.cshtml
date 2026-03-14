@@ -1,0 +1,383 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (subAktivitasFormInputNilaiBdList.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = subAktivitasFormInputNilaiBdList.UseLayout ? "_Layout" : "";
+}
+@if (!subAktivitasFormInputNilaiBdList.IsExport()) {
+<script>
+var currentTable = @Html.Raw(ConvertToJson(subAktivitasFormInputNilaiBdList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { SubAktivitasFormInputNilaiBD: currentTable } });
+var currentPageID = ew.PAGE_ID = "list";
+var currentForm;
+var @(subAktivitasFormInputNilaiBdList.FormName);
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("@(subAktivitasFormInputNilaiBdList.FormName)")
+        .setPageId("list")
+        .setSubmitWithFetch(@(subAktivitasFormInputNilaiBdList.UseAjaxActions ? "true" : "false"))
+        .setFormKeyCountName("@(subAktivitasFormInputNilaiBdList.FormKeyCountName)")
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Write your client script here, no need to add script tags.
+});
+</script>
+}
+@if (!subAktivitasFormInputNilaiBdList.IsExport()) {
+<div class="btn-toolbar ew-toolbar">
+@if (subAktivitasFormInputNilaiBdList.TotalRecords > 0 && subAktivitasFormInputNilaiBdList.ExportOptions.Visible) {
+    subAktivitasFormInputNilaiBdList.ExportOptions.Render("body");
+}
+@if (subAktivitasFormInputNilaiBdList.ImportOptions.Visible) {
+    subAktivitasFormInputNilaiBdList.ImportOptions.Render("body");
+}
+@if (subAktivitasFormInputNilaiBdList.SearchOptions.Visible) {
+    subAktivitasFormInputNilaiBdList.SearchOptions.Render("body");
+}
+@if (subAktivitasFormInputNilaiBdList.FilterOptions.Visible) {
+    subAktivitasFormInputNilaiBdList.FilterOptions.Render("body");
+}
+</div>
+}
+@if (!subAktivitasFormInputNilaiBdList.IsModal) {
+<form name="fSubAktivitasFormInputNilaiBDsrch" id="fSubAktivitasFormInputNilaiBDsrch" class="ew-form ew-ext-search-form" action="@AppPath(CurrentPageName())" novalidate autocomplete="off">
+<div id="fSubAktivitasFormInputNilaiBDsrch_search_panel" class="mb-2 mb-sm-0 @(subAktivitasFormInputNilaiBdList.SearchPanelClass)"><!-- .ew-search-panel -->
+<script>
+var currentTable = @Html.Raw(ConvertToJson(subAktivitasFormInputNilaiBdList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { SubAktivitasFormInputNilaiBD: currentTable } });
+var currentForm;
+var fSubAktivitasFormInputNilaiBDsrch, currentSearchForm, currentAdvancedSearchForm;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery,
+        fields = currentTable.fields;
+
+    // Form object for search
+    let form = new ew.FormBuilder()
+        .setId("fSubAktivitasFormInputNilaiBDsrch")
+        .setPageId("list")
+@if (subAktivitasFormInputNilaiBdList.UseAjaxActions) {
+        <text>.setSubmitWithFetch(true)</text>
+}
+
+        // Dynamic selection lists
+        .setLists({
+        })
+
+        // Filters
+        .setFilterList(@Html.Raw(subAktivitasFormInputNilaiBdList.GetFilterList()))
+        .build();
+    window[form.id] = form;
+    currentSearchForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<input type="hidden" name="cmd" value="search">
+@if (Security.CanSearch) {
+if (!subAktivitasFormInputNilaiBdList.IsExport() && Empty(subAktivitasFormInputNilaiBdList.CurrentAction) && subAktivitasFormInputNilaiBdList.HasSearchFields()) { @* Show search form (begin) *@
+<div class="ew-extended-search container-fluid ps-2">
+<div class="row mb-0">
+    <div class="col-sm-auto px-0 pe-sm-2">
+        <div class="ew-basic-search input-group">
+            <input type="search" name="@(Config.TableBasicSearch)" id="@(Config.TableBasicSearch)" class="form-control ew-basic-search-keyword" value="@Html.Raw(HtmlEncode(subAktivitasFormInputNilaiBdList.BasicSearch.SessionKeyword))" placeholder="@(HtmlEncode(Language.Phrase("Search")))" aria-label="@(HtmlEncode(Language.Phrase("Search")))">
+            <input type="hidden" name="@(Config.TableBasicSearchType)" id="@(Config.TableBasicSearchType)" class="ew-basic-search-type" value="@(HtmlEncode(subAktivitasFormInputNilaiBdList.BasicSearch.SessionType))">
+            <button type="button" data-bs-toggle="dropdown" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split" aria-haspopup="true" aria-expanded="false">
+                <span id="searchtype">@Html.Raw(subAktivitasFormInputNilaiBdList.BasicSearch.TypeNameShort)</span>
+            </button>
+            <div class="dropdown-menu dropdown-menu-end">
+                <button type="button" class="dropdown-item@(subAktivitasFormInputNilaiBdList.BasicSearch.SessionType == "" ? " active" : "")" form="fSubAktivitasFormInputNilaiBDsrch" data-ew-action="search-type">@Html.Raw(Language.Phrase("QuickSearchAuto"))</button>
+                <button type="button" class="dropdown-item@(subAktivitasFormInputNilaiBdList.BasicSearch.SessionType == "=" ? " active" : "")" form="fSubAktivitasFormInputNilaiBDsrch" data-ew-action="search-type" data-search-type="=">@Html.Raw(Language.Phrase("QuickSearchExact"))</button>
+                <button type="button" class="dropdown-item@(subAktivitasFormInputNilaiBdList.BasicSearch.SessionType == "AND" ? " active" : "")" form="fSubAktivitasFormInputNilaiBDsrch" data-ew-action="search-type" data-search-type="AND">@Html.Raw(Language.Phrase("QuickSearchAll"))</button>
+                <button type="button" class="dropdown-item@(subAktivitasFormInputNilaiBdList.BasicSearch.SessionType == "OR" ? " active" : "")" form="fSubAktivitasFormInputNilaiBDsrch" data-ew-action="search-type" data-search-type="OR">@Html.Raw(Language.Phrase("QuickSearchAny"))</button>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-auto mb-3">
+        <button class="btn btn-primary" name="btn-submit" id="btn-submit" type="submit">@Html.Raw(Language.Phrase("SearchBtn"))</button>
+    </div>
+</div>
+</div><!-- /.ew-extended-search -->
+} @* Show search form (end) *@
+}
+</div><!-- /.ew-search-panel -->
+</form>
+}
+@subAktivitasFormInputNilaiBdList.ShowPageHeader()
+@subAktivitasFormInputNilaiBdList.ShowMessages()
+<main class="list @(subAktivitasFormInputNilaiBdList.TotalRecords == 0 && !subAktivitasFormInputNilaiBdList.IsAdd ? " ew-no-record" : "")">
+<div id="ew-header-options">
+    @subAktivitasFormInputNilaiBdList.HeaderOptions.RenderBody()
+</div>
+<div id="ew-list">
+@if (subAktivitasFormInputNilaiBdList.TotalRecords > 0 || !Empty(subAktivitasFormInputNilaiBdList.CurrentAction)) {
+<div class="card ew-card ew-grid@(subAktivitasFormInputNilaiBdList.IsAddOrEdit ? " ew-grid-add-edit" : "") @(subAktivitasFormInputNilaiBdList.TableGridClass)">
+<form name="@(subAktivitasFormInputNilaiBdList.FormName)" id="@(subAktivitasFormInputNilaiBdList.FormName)" class="ew-form ew-list-form" action="@AppPath(subAktivitasFormInputNilaiBdList.PageName)" method="post" novalidate autocomplete="off">
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+@if (subAktivitasFormInputNilaiBdList.IsModal) {
+<input type="hidden" name="modal" value="1">
+}
+<div id="gmp_SubAktivitasFormInputNilaiBD" class="card-body ew-grid-middle-panel @(subAktivitasFormInputNilaiBdList.TableContainerClass)" style="@(subAktivitasFormInputNilaiBdList.TableContainerStyle)">
+@if (subAktivitasFormInputNilaiBdList.TotalRecords > 0 || subAktivitasFormInputNilaiBdList.IsGridEdit || subAktivitasFormInputNilaiBdList.IsMultiEdit) {
+<table id="tbl_SubAktivitasFormInputNilaiBDlist" class="@(subAktivitasFormInputNilaiBdList.TableClass)"><!-- .ew-table -->
+<thead>
+    <tr class="ew-table-header">
+@{
+    // Header row
+    subAktivitasFormInputNilaiBdList.RowType = RowType.Header;
+
+    // Render list options
+    await subAktivitasFormInputNilaiBdList.RenderListOptions();
+}
+@* Render list options (header, left) *@
+@subAktivitasFormInputNilaiBdList.ListOptions.RenderHeader("left")
+@if (subAktivitasFormInputNilaiBdList.id.Visible) { // subAktivitasFormInputNilaiBdList.id.Visible (begin)
+        <th data-name="id" class="@(subAktivitasFormInputNilaiBdList.id.HeaderCellClass)"><div id="elh_SubAktivitasFormInputNilaiBD_id" class="SubAktivitasFormInputNilaiBD_id">@Html.Raw(subAktivitasFormInputNilaiBdList.RenderFieldHeader(subAktivitasFormInputNilaiBdList.id))</div></th>
+} @* subAktivitasFormInputNilaiBdList.id.Visible (end) *@
+@if (subAktivitasFormInputNilaiBdList.idAktifitas.Visible) { // subAktivitasFormInputNilaiBdList.idAktifitas.Visible (begin)
+        <th data-name="idAktifitas" class="@(subAktivitasFormInputNilaiBdList.idAktifitas.HeaderCellClass)"><div id="elh_SubAktivitasFormInputNilaiBD_idAktifitas" class="SubAktivitasFormInputNilaiBD_idAktifitas">@Html.Raw(subAktivitasFormInputNilaiBdList.RenderFieldHeader(subAktivitasFormInputNilaiBdList.idAktifitas))</div></th>
+} @* subAktivitasFormInputNilaiBdList.idAktifitas.Visible (end) *@
+@if (subAktivitasFormInputNilaiBdList.idProses.Visible) { // subAktivitasFormInputNilaiBdList.idProses.Visible (begin)
+        <th data-name="idProses" class="@(subAktivitasFormInputNilaiBdList.idProses.HeaderCellClass)"><div id="elh_SubAktivitasFormInputNilaiBD_idProses" class="SubAktivitasFormInputNilaiBD_idProses">@Html.Raw(subAktivitasFormInputNilaiBdList.RenderFieldHeader(subAktivitasFormInputNilaiBdList.idProses))</div></th>
+} @* subAktivitasFormInputNilaiBdList.idProses.Visible (end) *@
+@if (subAktivitasFormInputNilaiBdList.NoReferensi.Visible) { // subAktivitasFormInputNilaiBdList.NoReferensi.Visible (begin)
+        <th data-name="NoReferensi" class="@(subAktivitasFormInputNilaiBdList.NoReferensi.HeaderCellClass)"><div id="elh_SubAktivitasFormInputNilaiBD_NoReferensi" class="SubAktivitasFormInputNilaiBD_NoReferensi">@Html.Raw(subAktivitasFormInputNilaiBdList.RenderFieldHeader(subAktivitasFormInputNilaiBdList.NoReferensi))</div></th>
+} @* subAktivitasFormInputNilaiBdList.NoReferensi.Visible (end) *@
+@if (subAktivitasFormInputNilaiBdList.BD_KLObs.Visible) { // subAktivitasFormInputNilaiBdList.BD_KLObs.Visible (begin)
+        <th data-name="BD_KLObs" class="@(subAktivitasFormInputNilaiBdList.BD_KLObs.HeaderCellClass)"><div id="elh_SubAktivitasFormInputNilaiBD_BD_KLObs" class="SubAktivitasFormInputNilaiBD_BD_KLObs">@Html.Raw(subAktivitasFormInputNilaiBdList.RenderFieldHeader(subAktivitasFormInputNilaiBdList.BD_KLObs))</div></th>
+} @* subAktivitasFormInputNilaiBdList.BD_KLObs.Visible (end) *@
+@if (subAktivitasFormInputNilaiBdList.BD_KL15.Visible) { // subAktivitasFormInputNilaiBdList.BD_KL15.Visible (begin)
+        <th data-name="BD_KL15" class="@(subAktivitasFormInputNilaiBdList.BD_KL15.HeaderCellClass)"><div id="elh_SubAktivitasFormInputNilaiBD_BD_KL15" class="SubAktivitasFormInputNilaiBD_BD_KL15">@Html.Raw(subAktivitasFormInputNilaiBdList.RenderFieldHeader(subAktivitasFormInputNilaiBdList.BD_KL15))</div></th>
+} @* subAktivitasFormInputNilaiBdList.BD_KL15.Visible (end) *@
+@if (subAktivitasFormInputNilaiBdList.BD_Barrels.Visible) { // subAktivitasFormInputNilaiBdList.BD_Barrels.Visible (begin)
+        <th data-name="BD_Barrels" class="@(subAktivitasFormInputNilaiBdList.BD_Barrels.HeaderCellClass)"><div id="elh_SubAktivitasFormInputNilaiBD_BD_Barrels" class="SubAktivitasFormInputNilaiBD_BD_Barrels">@Html.Raw(subAktivitasFormInputNilaiBdList.RenderFieldHeader(subAktivitasFormInputNilaiBdList.BD_Barrels))</div></th>
+} @* subAktivitasFormInputNilaiBdList.BD_Barrels.Visible (end) *@
+@if (subAktivitasFormInputNilaiBdList.BD_LT.Visible) { // subAktivitasFormInputNilaiBdList.BD_LT.Visible (begin)
+        <th data-name="BD_LT" class="@(subAktivitasFormInputNilaiBdList.BD_LT.HeaderCellClass)"><div id="elh_SubAktivitasFormInputNilaiBD_BD_LT" class="SubAktivitasFormInputNilaiBD_BD_LT">@Html.Raw(subAktivitasFormInputNilaiBdList.RenderFieldHeader(subAktivitasFormInputNilaiBdList.BD_LT))</div></th>
+} @* subAktivitasFormInputNilaiBdList.BD_LT.Visible (end) *@
+@if (subAktivitasFormInputNilaiBdList.BD_MT.Visible) { // subAktivitasFormInputNilaiBdList.BD_MT.Visible (begin)
+        <th data-name="BD_MT" class="@(subAktivitasFormInputNilaiBdList.BD_MT.HeaderCellClass)"><div id="elh_SubAktivitasFormInputNilaiBD_BD_MT" class="SubAktivitasFormInputNilaiBD_BD_MT">@Html.Raw(subAktivitasFormInputNilaiBdList.RenderFieldHeader(subAktivitasFormInputNilaiBdList.BD_MT))</div></th>
+} @* subAktivitasFormInputNilaiBdList.BD_MT.Visible (end) *@
+@if (subAktivitasFormInputNilaiBdList.userInput.Visible) { // subAktivitasFormInputNilaiBdList.userInput.Visible (begin)
+        <th data-name="userInput" class="@(subAktivitasFormInputNilaiBdList.userInput.HeaderCellClass)"><div id="elh_SubAktivitasFormInputNilaiBD_userInput" class="SubAktivitasFormInputNilaiBD_userInput">@Html.Raw(subAktivitasFormInputNilaiBdList.RenderFieldHeader(subAktivitasFormInputNilaiBdList.userInput))</div></th>
+} @* subAktivitasFormInputNilaiBdList.userInput.Visible (end) *@
+@if (subAktivitasFormInputNilaiBdList.etlDate.Visible) { // subAktivitasFormInputNilaiBdList.etlDate.Visible (begin)
+        <th data-name="etlDate" class="@(subAktivitasFormInputNilaiBdList.etlDate.HeaderCellClass)"><div id="elh_SubAktivitasFormInputNilaiBD_etlDate" class="SubAktivitasFormInputNilaiBD_etlDate">@Html.Raw(subAktivitasFormInputNilaiBdList.RenderFieldHeader(subAktivitasFormInputNilaiBdList.etlDate))</div></th>
+} @* subAktivitasFormInputNilaiBdList.etlDate.Visible (end) *@
+@if (subAktivitasFormInputNilaiBdList.LastUpdatedBy.Visible) { // subAktivitasFormInputNilaiBdList.LastUpdatedBy.Visible (begin)
+        <th data-name="LastUpdatedBy" class="@(subAktivitasFormInputNilaiBdList.LastUpdatedBy.HeaderCellClass)"><div id="elh_SubAktivitasFormInputNilaiBD_LastUpdatedBy" class="SubAktivitasFormInputNilaiBD_LastUpdatedBy">@Html.Raw(subAktivitasFormInputNilaiBdList.RenderFieldHeader(subAktivitasFormInputNilaiBdList.LastUpdatedBy))</div></th>
+} @* subAktivitasFormInputNilaiBdList.LastUpdatedBy.Visible (end) *@
+@if (subAktivitasFormInputNilaiBdList.lastUpdatedDate.Visible) { // subAktivitasFormInputNilaiBdList.lastUpdatedDate.Visible (begin)
+        <th data-name="lastUpdatedDate" class="@(subAktivitasFormInputNilaiBdList.lastUpdatedDate.HeaderCellClass)"><div id="elh_SubAktivitasFormInputNilaiBD_lastUpdatedDate" class="SubAktivitasFormInputNilaiBD_lastUpdatedDate">@Html.Raw(subAktivitasFormInputNilaiBdList.RenderFieldHeader(subAktivitasFormInputNilaiBdList.lastUpdatedDate))</div></th>
+} @* subAktivitasFormInputNilaiBdList.lastUpdatedDate.Visible (end) *@
+@if (subAktivitasFormInputNilaiBdList.StatusAktivitas.Visible) { // subAktivitasFormInputNilaiBdList.StatusAktivitas.Visible (begin)
+        <th data-name="StatusAktivitas" class="@(subAktivitasFormInputNilaiBdList.StatusAktivitas.HeaderCellClass)"><div id="elh_SubAktivitasFormInputNilaiBD_StatusAktivitas" class="SubAktivitasFormInputNilaiBD_StatusAktivitas">@Html.Raw(subAktivitasFormInputNilaiBdList.RenderFieldHeader(subAktivitasFormInputNilaiBdList.StatusAktivitas))</div></th>
+} @* subAktivitasFormInputNilaiBdList.StatusAktivitas.Visible (end) *@
+@* Render list options (header, right) *@
+@subAktivitasFormInputNilaiBdList.ListOptions.RenderHeader("right")
+    </tr>
+</thead>
+<tbody data-page="@(subAktivitasFormInputNilaiBdList.PageNumber)">
+@{
+    await subAktivitasFormInputNilaiBdList.SetupGrid();
+    bool eof = subAktivitasFormInputNilaiBdList.Recordset == null; // DN
+}
+@while (subAktivitasFormInputNilaiBdList.RecordCount < subAktivitasFormInputNilaiBdList.StopRecord || SameString(subAktivitasFormInputNilaiBdList.RowIndex, "$rowindex$")) { // Begin While
+    if (!eof && !SameString(subAktivitasFormInputNilaiBdList.RowIndex, "$rowindex$") &&
+        (!subAktivitasFormInputNilaiBdList.IsGridAdd || subAktivitasFormInputNilaiBdList.CurrentMode == "copy") &&
+        (!((subAktivitasFormInputNilaiBdList.IsCopy || subAktivitasFormInputNilaiBdList.IsAdd) && subAktivitasFormInputNilaiBdList.RowIndex is int rowIndex && rowIndex == 0))) // DN
+        eof = !await subAktivitasFormInputNilaiBdList.Recordset.ReadAsync();
+    subAktivitasFormInputNilaiBdList.RecordCount++;
+    if (subAktivitasFormInputNilaiBdList.RecordCount >= subAktivitasFormInputNilaiBdList.StartRecord) {
+        await subAktivitasFormInputNilaiBdList.SetupRow();
+    <tr @Html.Raw(subAktivitasFormInputNilaiBdList.RowAttributes)>
+    @* Render list options (body, left) *@
+    @subAktivitasFormInputNilaiBdList.ListOptions.RenderBody("left", subAktivitasFormInputNilaiBdList.RowCount)
+    @if (subAktivitasFormInputNilaiBdList.id.Visible) { // subAktivitasFormInputNilaiBdList.id.Visible (begin)
+        <td data-name="id" @Html.Raw(subAktivitasFormInputNilaiBdList.id.CellAttributes)>
+<span id="el@(subAktivitasFormInputNilaiBdList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasFormInputNilaiBdList.RowCount)_SubAktivitasFormInputNilaiBD_id" class="el_SubAktivitasFormInputNilaiBD_id">
+<span @Html.Raw(subAktivitasFormInputNilaiBdList.id.ViewAttributes)>
+@Html.Raw(subAktivitasFormInputNilaiBdList.id.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasFormInputNilaiBdList.id.Visible (end) *@
+    @if (subAktivitasFormInputNilaiBdList.idAktifitas.Visible) { // subAktivitasFormInputNilaiBdList.idAktifitas.Visible (begin)
+        <td data-name="idAktifitas" @Html.Raw(subAktivitasFormInputNilaiBdList.idAktifitas.CellAttributes)>
+<span id="el@(subAktivitasFormInputNilaiBdList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasFormInputNilaiBdList.RowCount)_SubAktivitasFormInputNilaiBD_idAktifitas" class="el_SubAktivitasFormInputNilaiBD_idAktifitas">
+<span @Html.Raw(subAktivitasFormInputNilaiBdList.idAktifitas.ViewAttributes)>
+@Html.Raw(subAktivitasFormInputNilaiBdList.idAktifitas.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasFormInputNilaiBdList.idAktifitas.Visible (end) *@
+    @if (subAktivitasFormInputNilaiBdList.idProses.Visible) { // subAktivitasFormInputNilaiBdList.idProses.Visible (begin)
+        <td data-name="idProses" @Html.Raw(subAktivitasFormInputNilaiBdList.idProses.CellAttributes)>
+<span id="el@(subAktivitasFormInputNilaiBdList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasFormInputNilaiBdList.RowCount)_SubAktivitasFormInputNilaiBD_idProses" class="el_SubAktivitasFormInputNilaiBD_idProses">
+<span @Html.Raw(subAktivitasFormInputNilaiBdList.idProses.ViewAttributes)>
+@Html.Raw(subAktivitasFormInputNilaiBdList.idProses.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasFormInputNilaiBdList.idProses.Visible (end) *@
+    @if (subAktivitasFormInputNilaiBdList.NoReferensi.Visible) { // subAktivitasFormInputNilaiBdList.NoReferensi.Visible (begin)
+        <td data-name="NoReferensi" @Html.Raw(subAktivitasFormInputNilaiBdList.NoReferensi.CellAttributes)>
+<span id="el@(subAktivitasFormInputNilaiBdList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasFormInputNilaiBdList.RowCount)_SubAktivitasFormInputNilaiBD_NoReferensi" class="el_SubAktivitasFormInputNilaiBD_NoReferensi">
+<span @Html.Raw(subAktivitasFormInputNilaiBdList.NoReferensi.ViewAttributes)>
+@Html.Raw(subAktivitasFormInputNilaiBdList.NoReferensi.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasFormInputNilaiBdList.NoReferensi.Visible (end) *@
+    @if (subAktivitasFormInputNilaiBdList.BD_KLObs.Visible) { // subAktivitasFormInputNilaiBdList.BD_KLObs.Visible (begin)
+        <td data-name="BD_KLObs" @Html.Raw(subAktivitasFormInputNilaiBdList.BD_KLObs.CellAttributes)>
+<span id="el@(subAktivitasFormInputNilaiBdList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasFormInputNilaiBdList.RowCount)_SubAktivitasFormInputNilaiBD_BD_KLObs" class="el_SubAktivitasFormInputNilaiBD_BD_KLObs">
+<span @Html.Raw(subAktivitasFormInputNilaiBdList.BD_KLObs.ViewAttributes)>
+@Html.Raw(subAktivitasFormInputNilaiBdList.BD_KLObs.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasFormInputNilaiBdList.BD_KLObs.Visible (end) *@
+    @if (subAktivitasFormInputNilaiBdList.BD_KL15.Visible) { // subAktivitasFormInputNilaiBdList.BD_KL15.Visible (begin)
+        <td data-name="BD_KL15" @Html.Raw(subAktivitasFormInputNilaiBdList.BD_KL15.CellAttributes)>
+<span id="el@(subAktivitasFormInputNilaiBdList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasFormInputNilaiBdList.RowCount)_SubAktivitasFormInputNilaiBD_BD_KL15" class="el_SubAktivitasFormInputNilaiBD_BD_KL15">
+<span @Html.Raw(subAktivitasFormInputNilaiBdList.BD_KL15.ViewAttributes)>
+@Html.Raw(subAktivitasFormInputNilaiBdList.BD_KL15.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasFormInputNilaiBdList.BD_KL15.Visible (end) *@
+    @if (subAktivitasFormInputNilaiBdList.BD_Barrels.Visible) { // subAktivitasFormInputNilaiBdList.BD_Barrels.Visible (begin)
+        <td data-name="BD_Barrels" @Html.Raw(subAktivitasFormInputNilaiBdList.BD_Barrels.CellAttributes)>
+<span id="el@(subAktivitasFormInputNilaiBdList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasFormInputNilaiBdList.RowCount)_SubAktivitasFormInputNilaiBD_BD_Barrels" class="el_SubAktivitasFormInputNilaiBD_BD_Barrels">
+<span @Html.Raw(subAktivitasFormInputNilaiBdList.BD_Barrels.ViewAttributes)>
+@Html.Raw(subAktivitasFormInputNilaiBdList.BD_Barrels.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasFormInputNilaiBdList.BD_Barrels.Visible (end) *@
+    @if (subAktivitasFormInputNilaiBdList.BD_LT.Visible) { // subAktivitasFormInputNilaiBdList.BD_LT.Visible (begin)
+        <td data-name="BD_LT" @Html.Raw(subAktivitasFormInputNilaiBdList.BD_LT.CellAttributes)>
+<span id="el@(subAktivitasFormInputNilaiBdList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasFormInputNilaiBdList.RowCount)_SubAktivitasFormInputNilaiBD_BD_LT" class="el_SubAktivitasFormInputNilaiBD_BD_LT">
+<span @Html.Raw(subAktivitasFormInputNilaiBdList.BD_LT.ViewAttributes)>
+@Html.Raw(subAktivitasFormInputNilaiBdList.BD_LT.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasFormInputNilaiBdList.BD_LT.Visible (end) *@
+    @if (subAktivitasFormInputNilaiBdList.BD_MT.Visible) { // subAktivitasFormInputNilaiBdList.BD_MT.Visible (begin)
+        <td data-name="BD_MT" @Html.Raw(subAktivitasFormInputNilaiBdList.BD_MT.CellAttributes)>
+<span id="el@(subAktivitasFormInputNilaiBdList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasFormInputNilaiBdList.RowCount)_SubAktivitasFormInputNilaiBD_BD_MT" class="el_SubAktivitasFormInputNilaiBD_BD_MT">
+<span @Html.Raw(subAktivitasFormInputNilaiBdList.BD_MT.ViewAttributes)>
+@Html.Raw(subAktivitasFormInputNilaiBdList.BD_MT.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasFormInputNilaiBdList.BD_MT.Visible (end) *@
+    @if (subAktivitasFormInputNilaiBdList.userInput.Visible) { // subAktivitasFormInputNilaiBdList.userInput.Visible (begin)
+        <td data-name="userInput" @Html.Raw(subAktivitasFormInputNilaiBdList.userInput.CellAttributes)>
+<span id="el@(subAktivitasFormInputNilaiBdList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasFormInputNilaiBdList.RowCount)_SubAktivitasFormInputNilaiBD_userInput" class="el_SubAktivitasFormInputNilaiBD_userInput">
+<span @Html.Raw(subAktivitasFormInputNilaiBdList.userInput.ViewAttributes)>
+@Html.Raw(subAktivitasFormInputNilaiBdList.userInput.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasFormInputNilaiBdList.userInput.Visible (end) *@
+    @if (subAktivitasFormInputNilaiBdList.etlDate.Visible) { // subAktivitasFormInputNilaiBdList.etlDate.Visible (begin)
+        <td data-name="etlDate" @Html.Raw(subAktivitasFormInputNilaiBdList.etlDate.CellAttributes)>
+<span id="el@(subAktivitasFormInputNilaiBdList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasFormInputNilaiBdList.RowCount)_SubAktivitasFormInputNilaiBD_etlDate" class="el_SubAktivitasFormInputNilaiBD_etlDate">
+<span @Html.Raw(subAktivitasFormInputNilaiBdList.etlDate.ViewAttributes)>
+@Html.Raw(subAktivitasFormInputNilaiBdList.etlDate.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasFormInputNilaiBdList.etlDate.Visible (end) *@
+    @if (subAktivitasFormInputNilaiBdList.LastUpdatedBy.Visible) { // subAktivitasFormInputNilaiBdList.LastUpdatedBy.Visible (begin)
+        <td data-name="LastUpdatedBy" @Html.Raw(subAktivitasFormInputNilaiBdList.LastUpdatedBy.CellAttributes)>
+<span id="el@(subAktivitasFormInputNilaiBdList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasFormInputNilaiBdList.RowCount)_SubAktivitasFormInputNilaiBD_LastUpdatedBy" class="el_SubAktivitasFormInputNilaiBD_LastUpdatedBy">
+<span @Html.Raw(subAktivitasFormInputNilaiBdList.LastUpdatedBy.ViewAttributes)>
+@Html.Raw(subAktivitasFormInputNilaiBdList.LastUpdatedBy.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasFormInputNilaiBdList.LastUpdatedBy.Visible (end) *@
+    @if (subAktivitasFormInputNilaiBdList.lastUpdatedDate.Visible) { // subAktivitasFormInputNilaiBdList.lastUpdatedDate.Visible (begin)
+        <td data-name="lastUpdatedDate" @Html.Raw(subAktivitasFormInputNilaiBdList.lastUpdatedDate.CellAttributes)>
+<span id="el@(subAktivitasFormInputNilaiBdList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasFormInputNilaiBdList.RowCount)_SubAktivitasFormInputNilaiBD_lastUpdatedDate" class="el_SubAktivitasFormInputNilaiBD_lastUpdatedDate">
+<span @Html.Raw(subAktivitasFormInputNilaiBdList.lastUpdatedDate.ViewAttributes)>
+@Html.Raw(subAktivitasFormInputNilaiBdList.lastUpdatedDate.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasFormInputNilaiBdList.lastUpdatedDate.Visible (end) *@
+    @if (subAktivitasFormInputNilaiBdList.StatusAktivitas.Visible) { // subAktivitasFormInputNilaiBdList.StatusAktivitas.Visible (begin)
+        <td data-name="StatusAktivitas" @Html.Raw(subAktivitasFormInputNilaiBdList.StatusAktivitas.CellAttributes)>
+<span id="el@(subAktivitasFormInputNilaiBdList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasFormInputNilaiBdList.RowCount)_SubAktivitasFormInputNilaiBD_StatusAktivitas" class="el_SubAktivitasFormInputNilaiBD_StatusAktivitas">
+<span @Html.Raw(subAktivitasFormInputNilaiBdList.StatusAktivitas.ViewAttributes)>
+@Html.Raw(subAktivitasFormInputNilaiBdList.StatusAktivitas.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasFormInputNilaiBdList.StatusAktivitas.Visible (end) *@
+    @* Render list options (body, right) *@
+    @subAktivitasFormInputNilaiBdList.ListOptions.RenderBody("right", subAktivitasFormInputNilaiBdList.RowCount)
+    </tr>
+    } @* End if *@
+
+    // Reset for template row
+    if (SameString(subAktivitasFormInputNilaiBdList.RowIndex, "$rowindex$"))
+        subAktivitasFormInputNilaiBdList.RowIndex = 0;
+
+    // Reset inline add/copy row
+    if ((subAktivitasFormInputNilaiBdList.IsCopy || subAktivitasFormInputNilaiBdList.IsAdd) && subAktivitasFormInputNilaiBdList.RowIndex is int rowIndex2 && rowIndex2 == 0)
+        subAktivitasFormInputNilaiBdList.RowIndex = 1;
+} @* End While *@
+</tbody>
+</table><!-- /.ew-table -->
+} @* End If TotalRecords > 0 *@
+</div><!-- /.ew-grid-middle-panel -->
+@if (Empty(subAktivitasFormInputNilaiBdList.CurrentAction) && !subAktivitasFormInputNilaiBdList.UseAjaxActions) {
+<input type="hidden" name="action" id="action" value="">
+}
+</form><!-- /.ew-list-form -->
+@{ subAktivitasFormInputNilaiBdList.CloseRecordset(); }
+@if (!subAktivitasFormInputNilaiBdList.IsExport()) {
+<div class="card-footer ew-grid-lower-panel">
+@if (!subAktivitasFormInputNilaiBdList.IsGridAdd && !(subAktivitasFormInputNilaiBdList.IsGridEdit && subAktivitasFormInputNilaiBdList.ModalGridEdit) && !subAktivitasFormInputNilaiBdList.IsMultiEdit) {
+@Html.Raw(subAktivitasFormInputNilaiBdList.Pager.Render())
+}
+<div class="ew-list-other-options">
+@subAktivitasFormInputNilaiBdList.OtherOptions.RenderBody("bottom")
+</div>
+</div>
+}
+</div><!-- /.ew-grid -->
+} else { // Show other options
+<div class="ew-list-other-options">
+@subAktivitasFormInputNilaiBdList.OtherOptions.ForEach(opt => opt.ButtonClass = "").RenderBody()
+</div>
+}
+</div>
+<div id="ew-footer-options">
+    @subAktivitasFormInputNilaiBdList.FooterOptions.RenderBody()
+</div>
+</main>
+@subAktivitasFormInputNilaiBdList.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+@if (!subAktivitasFormInputNilaiBdList.IsExport()) {
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("SubAktivitasFormInputNilaiBD");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Write your table-specific startup script here
+    // document.write("page loaded");
+});
+</script>
+}

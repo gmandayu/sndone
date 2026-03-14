@@ -1,0 +1,906 @@
+@{
+    // View
+    View = this;
+
+    // Set up CurrentGrid
+    CurrentGrid = templateAktivitasGrid;
+
+    // Run
+    await templateAktivitasGrid.Run();
+
+    // Check action result
+    if (templateAktivitasGrid.ActionResult is EmptyResult) // Terminate page
+        return;
+}
+@if (!templateAktivitasGrid.IsExport()) {
+<script>
+var fTemplateAktivitasgrid;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let currentTable = @Html.Raw(ConvertToJson(templateAktivitasGrid.ToClientVar()));
+    ew.deepAssign(ew.vars, { tables: { TemplateAktivitas: currentTable } });
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("fTemplateAktivitasgrid")
+        .setPageId("grid")
+        .setFormKeyCountName("@(templateAktivitasGrid.FormKeyCountName)")
+
+        // Add fields
+        .setFields([
+
+            ["IdTemplateProses", [fields.IdTemplateProses.visible && fields.IdTemplateProses.required ? ew.Validators.required(fields.IdTemplateProses.caption) : null], fields.IdTemplateProses.isInvalid],
+            ["UrutanAktivitas", [fields.UrutanAktivitas.visible && fields.UrutanAktivitas.required ? ew.Validators.required(fields.UrutanAktivitas.caption) : null, ew.Validators.integer], fields.UrutanAktivitas.isInvalid],
+            ["NamaAktivitas", [fields.NamaAktivitas.visible && fields.NamaAktivitas.required ? ew.Validators.required(fields.NamaAktivitas.caption) : null], fields.NamaAktivitas.isInvalid],
+            ["IdPIC", [fields.IdPIC.visible && fields.IdPIC.required ? ew.Validators.required(fields.IdPIC.caption) : null], fields.IdPIC.isInvalid],
+            ["Keterangan", [fields.Keterangan.visible && fields.Keterangan.required ? ew.Validators.required(fields.Keterangan.caption) : null], fields.Keterangan.isInvalid],
+            ["DibuatOleh", [fields.DibuatOleh.visible && fields.DibuatOleh.required ? ew.Validators.required(fields.DibuatOleh.caption) : null], fields.DibuatOleh.isInvalid],
+            ["TanggalDibuat", [fields.TanggalDibuat.visible && fields.TanggalDibuat.required ? ew.Validators.required(fields.TanggalDibuat.caption) : null, ew.Validators.datetime(fields.TanggalDibuat.clientFormatPattern)], fields.TanggalDibuat.isInvalid],
+            ["DiperbaruiOleh", [fields.DiperbaruiOleh.visible && fields.DiperbaruiOleh.required ? ew.Validators.required(fields.DiperbaruiOleh.caption) : null], fields.DiperbaruiOleh.isInvalid],
+            ["TanggalDiperbarui", [fields.TanggalDiperbarui.visible && fields.TanggalDiperbarui.required ? ew.Validators.required(fields.TanggalDiperbarui.caption) : null, ew.Validators.datetime(fields.TanggalDiperbarui.clientFormatPattern)], fields.TanggalDiperbarui.isInvalid],
+            ["TipeAktivitas", [fields.TipeAktivitas.visible && fields.TipeAktivitas.required ? ew.Validators.required(fields.TipeAktivitas.caption) : null], fields.TipeAktivitas.isInvalid],
+            ["_URL", [fields._URL.visible && fields._URL.required ? ew.Validators.required(fields._URL.caption) : null], fields._URL.isInvalid]
+        ])
+
+        // Check empty row
+        .setEmptyRow(
+            function (rowIndex) {
+                let fobj = this.getForm(),
+                    fields = [["IdTemplateProses",false],["UrutanAktivitas",false],["NamaAktivitas",false],["IdPIC[]",false],["Keterangan",false],["DibuatOleh",false],["TanggalDibuat",false],["DiperbaruiOleh",false],["TanggalDiperbarui",false],["TipeAktivitas",false],["_URL",false]];
+                if (fields.some(field => ew.valueChanged(fobj, rowIndex, ...field)))
+                    return false;
+                return true;
+            }
+        )
+
+        // Form_CustomValidate
+        .setCustomValidate(
+            function(fobj) { // DO NOT CHANGE THIS LINE!
+                    // Your custom validation code here, return false if invalid.
+                    return true;
+                }
+        )
+
+        // Use JavaScript validation or not
+        .setValidateRequired(ew.CLIENT_VALIDATE)
+
+        // Dynamic selection lists
+        .setLists({
+            "IdTemplateProses": @Html.Raw(templateAktivitasGrid.IdTemplateProses.ToClientList(templateAktivitasGrid)),
+            "IdPIC": @Html.Raw(templateAktivitasGrid.IdPIC.ToClientList(templateAktivitasGrid)),
+            "TipeAktivitas": @Html.Raw(templateAktivitasGrid.TipeAktivitas.ToClientList(templateAktivitasGrid)),
+        })
+        .build();
+    window[form.id] = form;
+    loadjs.done(form.id);
+});
+</script>
+}
+<main class="list">
+<div id="ew-header-options">
+    @templateAktivitasGrid.HeaderOptions.RenderBody()
+</div>
+<div id="ew-list">
+@if (templateAktivitasGrid.TotalRecords > 0 || !Empty(templateAktivitasGrid.CurrentAction)) {
+<div class="card ew-card ew-grid@(templateAktivitasGrid.IsAddOrEdit ? " ew-grid-add-edit" : "") @(templateAktivitasGrid.TableGridClass)">
+<div id="fTemplateAktivitasgrid" class="ew-form ew-list-form">
+<div id="gmp_TemplateAktivitas" class="card-body ew-grid-middle-panel @(templateAktivitasGrid.TableContainerClass)" style="@(templateAktivitasGrid.TableContainerStyle)">
+<table id="tbl_TemplateAktivitasgrid" class="@(templateAktivitasGrid.TableClass)"><!-- .ew-table -->
+<thead>
+    <tr class="ew-table-header">
+@{
+    // Header row
+    templateAktivitasGrid.RowType = RowType.Header;
+
+    // Render list options
+    await templateAktivitasGrid.RenderListOptions();
+}
+@* Render list options (header, left) *@
+@templateAktivitasGrid.ListOptions.RenderHeader("left")
+@if (templateAktivitasGrid.IdTemplateProses.Visible) { // templateAktivitasGrid.IdTemplateProses.Visible (begin)
+        <th data-name="IdTemplateProses" class="@(templateAktivitasGrid.IdTemplateProses.HeaderCellClass)"><div id="elh_TemplateAktivitas_IdTemplateProses" class="TemplateAktivitas_IdTemplateProses">@Html.Raw(templateAktivitasGrid.RenderFieldHeader(templateAktivitasGrid.IdTemplateProses))</div></th>
+} @* templateAktivitasGrid.IdTemplateProses.Visible (end) *@
+@if (templateAktivitasGrid.UrutanAktivitas.Visible) { // templateAktivitasGrid.UrutanAktivitas.Visible (begin)
+        <th data-name="UrutanAktivitas" class="@(templateAktivitasGrid.UrutanAktivitas.HeaderCellClass)"><div id="elh_TemplateAktivitas_UrutanAktivitas" class="TemplateAktivitas_UrutanAktivitas">@Html.Raw(templateAktivitasGrid.RenderFieldHeader(templateAktivitasGrid.UrutanAktivitas))</div></th>
+} @* templateAktivitasGrid.UrutanAktivitas.Visible (end) *@
+@if (templateAktivitasGrid.NamaAktivitas.Visible) { // templateAktivitasGrid.NamaAktivitas.Visible (begin)
+        <th data-name="NamaAktivitas" class="@(templateAktivitasGrid.NamaAktivitas.HeaderCellClass)"><div id="elh_TemplateAktivitas_NamaAktivitas" class="TemplateAktivitas_NamaAktivitas">@Html.Raw(templateAktivitasGrid.RenderFieldHeader(templateAktivitasGrid.NamaAktivitas))</div></th>
+} @* templateAktivitasGrid.NamaAktivitas.Visible (end) *@
+@if (templateAktivitasGrid.IdPIC.Visible) { // templateAktivitasGrid.IdPIC.Visible (begin)
+        <th data-name="IdPIC" class="@(templateAktivitasGrid.IdPIC.HeaderCellClass)"><div id="elh_TemplateAktivitas_IdPIC" class="TemplateAktivitas_IdPIC">@Html.Raw(templateAktivitasGrid.RenderFieldHeader(templateAktivitasGrid.IdPIC))</div></th>
+} @* templateAktivitasGrid.IdPIC.Visible (end) *@
+@if (templateAktivitasGrid.Keterangan.Visible) { // templateAktivitasGrid.Keterangan.Visible (begin)
+        <th data-name="Keterangan" class="@(templateAktivitasGrid.Keterangan.HeaderCellClass)"><div id="elh_TemplateAktivitas_Keterangan" class="TemplateAktivitas_Keterangan">@Html.Raw(templateAktivitasGrid.RenderFieldHeader(templateAktivitasGrid.Keterangan))</div></th>
+} @* templateAktivitasGrid.Keterangan.Visible (end) *@
+@if (templateAktivitasGrid.DibuatOleh.Visible) { // templateAktivitasGrid.DibuatOleh.Visible (begin)
+        <th data-name="DibuatOleh" class="@(templateAktivitasGrid.DibuatOleh.HeaderCellClass)"><div id="elh_TemplateAktivitas_DibuatOleh" class="TemplateAktivitas_DibuatOleh">@Html.Raw(templateAktivitasGrid.RenderFieldHeader(templateAktivitasGrid.DibuatOleh))</div></th>
+} @* templateAktivitasGrid.DibuatOleh.Visible (end) *@
+@if (templateAktivitasGrid.TanggalDibuat.Visible) { // templateAktivitasGrid.TanggalDibuat.Visible (begin)
+        <th data-name="TanggalDibuat" class="@(templateAktivitasGrid.TanggalDibuat.HeaderCellClass)"><div id="elh_TemplateAktivitas_TanggalDibuat" class="TemplateAktivitas_TanggalDibuat">@Html.Raw(templateAktivitasGrid.RenderFieldHeader(templateAktivitasGrid.TanggalDibuat))</div></th>
+} @* templateAktivitasGrid.TanggalDibuat.Visible (end) *@
+@if (templateAktivitasGrid.DiperbaruiOleh.Visible) { // templateAktivitasGrid.DiperbaruiOleh.Visible (begin)
+        <th data-name="DiperbaruiOleh" class="@(templateAktivitasGrid.DiperbaruiOleh.HeaderCellClass)"><div id="elh_TemplateAktivitas_DiperbaruiOleh" class="TemplateAktivitas_DiperbaruiOleh">@Html.Raw(templateAktivitasGrid.RenderFieldHeader(templateAktivitasGrid.DiperbaruiOleh))</div></th>
+} @* templateAktivitasGrid.DiperbaruiOleh.Visible (end) *@
+@if (templateAktivitasGrid.TanggalDiperbarui.Visible) { // templateAktivitasGrid.TanggalDiperbarui.Visible (begin)
+        <th data-name="TanggalDiperbarui" class="@(templateAktivitasGrid.TanggalDiperbarui.HeaderCellClass)"><div id="elh_TemplateAktivitas_TanggalDiperbarui" class="TemplateAktivitas_TanggalDiperbarui">@Html.Raw(templateAktivitasGrid.RenderFieldHeader(templateAktivitasGrid.TanggalDiperbarui))</div></th>
+} @* templateAktivitasGrid.TanggalDiperbarui.Visible (end) *@
+@if (templateAktivitasGrid.TipeAktivitas.Visible) { // templateAktivitasGrid.TipeAktivitas.Visible (begin)
+        <th data-name="TipeAktivitas" class="@(templateAktivitasGrid.TipeAktivitas.HeaderCellClass)"><div id="elh_TemplateAktivitas_TipeAktivitas" class="TemplateAktivitas_TipeAktivitas">@Html.Raw(templateAktivitasGrid.RenderFieldHeader(templateAktivitasGrid.TipeAktivitas))</div></th>
+} @* templateAktivitasGrid.TipeAktivitas.Visible (end) *@
+@if (templateAktivitasGrid._URL.Visible) { // templateAktivitasGrid._URL.Visible (begin)
+        <th data-name="_URL" class="@(templateAktivitasGrid._URL.HeaderCellClass)"><div id="elh_TemplateAktivitas__URL" class="TemplateAktivitas__URL">@Html.Raw(templateAktivitasGrid.RenderFieldHeader(templateAktivitasGrid._URL))</div></th>
+} @* templateAktivitasGrid._URL.Visible (end) *@
+@* Render list options (header, right) *@
+@templateAktivitasGrid.ListOptions.RenderHeader("right")
+    </tr>
+</thead>
+<tbody data-page="@(templateAktivitasGrid.PageNumber)">
+@{
+    await templateAktivitasGrid.SetupGrid();
+    bool eof = templateAktivitasGrid.Recordset == null; // DN
+}
+@while (templateAktivitasGrid.RecordCount < templateAktivitasGrid.StopRecord || SameString(templateAktivitasGrid.RowIndex, "$rowindex$")) { // Begin While
+    if (!eof && !SameString(templateAktivitasGrid.RowIndex, "$rowindex$") &&
+        (!templateAktivitasGrid.IsGridAdd || templateAktivitasGrid.CurrentMode == "copy") &&
+        (!((templateAktivitasGrid.IsCopy || templateAktivitasGrid.IsAdd) && templateAktivitasGrid.RowIndex is int rowIndex && rowIndex == 0))) // DN
+        eof = !await templateAktivitasGrid.Recordset.ReadAsync();
+    templateAktivitasGrid.RecordCount++;
+    if (templateAktivitasGrid.RecordCount >= templateAktivitasGrid.StartRecord) {
+        await templateAktivitasGrid.SetupRow();
+
+        // Skip 1) delete row / empty row for confirm page, 2) hidden row
+        if (templateAktivitasGrid.RowAction != "delete" &&
+            templateAktivitasGrid.RowAction != "insertdelete" &&
+            !(templateAktivitasGrid.RowAction == "insert" && templateAktivitasGrid.IsConfirm && templateAktivitasGrid.EmptyRow()) &&
+            templateAktivitasGrid.RowAction != "hide") {
+    <tr @Html.Raw(templateAktivitasGrid.RowAttributes)>
+    @* Render list options (body, left) *@
+    @templateAktivitasGrid.ListOptions.RenderBody("left", templateAktivitasGrid.RowCount)
+    @if (templateAktivitasGrid.IdTemplateProses.Visible) { // templateAktivitasGrid.IdTemplateProses.Visible (begin)
+        <td data-name="IdTemplateProses" @Html.Raw(templateAktivitasGrid.IdTemplateProses.CellAttributes)>
+@if (templateAktivitasGrid.RowType == RowType.Add) { // Add (begin)
+    @* IdTemplateProses (begin) *@
+    @if (!Empty(templateAktivitasGrid.IdTemplateProses.SessionValue)) {
+    <span @Html.Raw(templateAktivitasGrid.IdTemplateProses.ViewAttributes)>
+    <span class="form-control-plaintext">@Html.Raw(templateAktivitasGrid.IdTemplateProses.DisplayValue(templateAktivitasGrid.IdTemplateProses.ViewValue))</span></span>
+    <input type="hidden" id="x@(templateAktivitasGrid.RowIndex)_IdTemplateProses" name="x@(templateAktivitasGrid.RowIndex)_IdTemplateProses" value="@(HtmlEncode(templateAktivitasGrid.IdTemplateProses.CurrentValue))" data-hidden="1">
+    } else {
+    <span id="el@(templateAktivitasGrid.RowIndex == "$rowindex$" ? "$rowindex$" : templateAktivitasGrid.RowCount)_TemplateAktivitas_IdTemplateProses" class="el_TemplateAktivitas_IdTemplateProses">
+        <select
+            id="x@(templateAktivitasGrid.RowIndex)_IdTemplateProses"
+            name="x@(templateAktivitasGrid.RowIndex)_IdTemplateProses"
+            class="form-select ew-select@(templateAktivitasGrid.IdTemplateProses.IsInvalidClass)"
+            data-select2-id="fTemplateAktivitasgrid_x@(templateAktivitasGrid.RowIndex)_IdTemplateProses"
+            data-table="TemplateAktivitas"
+            data-field="x_IdTemplateProses"
+            data-value-separator="@(templateAktivitasGrid.IdTemplateProses.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(templateAktivitasGrid.IdTemplateProses.PlaceHolder))"
+            @Html.Raw(templateAktivitasGrid.IdTemplateProses.EditAttributes)>
+            @(templateAktivitasGrid.IdTemplateProses.SelectOptionListHtml("x" + templateAktivitasGrid.RowIndex + "_IdTemplateProses"))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(templateAktivitasGrid.IdTemplateProses.GetErrorMessage())</div>
+    @Html.Raw(templateAktivitasGrid.IdTemplateProses.Lookup.GetParamTag(templateAktivitasGrid, "p_x" + templateAktivitasGrid.RowIndex + "_IdTemplateProses"))
+    <script>
+    loadjs.ready("fTemplateAktivitasgrid", function() {
+        var options = { name: "x@(templateAktivitasGrid.RowIndex)_IdTemplateProses", selectId: "fTemplateAktivitasgrid_x@(templateAktivitasGrid.RowIndex)_IdTemplateProses" },
+            el = document.querySelector("select[data-select2-id='" + options.selectId + "']");
+        if (!el)
+            return;
+        options.closeOnSelect = !options.multiple;
+        options.dropdownParent = el.closest("#ew-modal-dialog, #ew-add-opt-dialog");
+        if (fTemplateAktivitasgrid.lists.IdTemplateProses?.lookupOptions.length) {
+            options.data = { id: "x@(templateAktivitasGrid.RowIndex)_IdTemplateProses", form: "fTemplateAktivitasgrid" };
+        } else {
+            options.ajax = { id: "x@(templateAktivitasGrid.RowIndex)_IdTemplateProses", form: "fTemplateAktivitasgrid", limit: ew.LOOKUP_PAGE_SIZE };
+        }
+        options.minimumInputLength = ew.selectMinimumInputLength;
+        options = Object.assign({}, ew.selectOptions, options, ew.vars.tables.TemplateAktivitas.fields.IdTemplateProses.selectOptions);
+        ew.createSelect(options);
+    });
+    </script>
+    </span>
+    }
+    <input type="hidden" data-table="TemplateAktivitas" data-field="x_IdTemplateProses" data-hidden="1" data-old name="o@(templateAktivitasGrid.RowIndex)_IdTemplateProses" id="o@(templateAktivitasGrid.RowIndex)_IdTemplateProses" value="@Html.Raw(HtmlEncode(templateAktivitasGrid.IdTemplateProses.OldValue))">
+    @* IdTemplateProses (end) *@
+} @* Add (end) *@
+@if (templateAktivitasGrid.RowType == RowType.Edit) { // Edit (begin)
+    @* IdTemplateProses (begin) *@
+    @if (!Empty(templateAktivitasGrid.IdTemplateProses.SessionValue)) {
+    <span @Html.Raw(templateAktivitasGrid.IdTemplateProses.ViewAttributes)>
+    <span class="form-control-plaintext">@Html.Raw(templateAktivitasGrid.IdTemplateProses.DisplayValue(templateAktivitasGrid.IdTemplateProses.ViewValue))</span></span>
+    <input type="hidden" id="x@(templateAktivitasGrid.RowIndex)_IdTemplateProses" name="x@(templateAktivitasGrid.RowIndex)_IdTemplateProses" value="@(HtmlEncode(templateAktivitasGrid.IdTemplateProses.CurrentValue))" data-hidden="1">
+    } else {
+    <span id="el@(templateAktivitasGrid.RowIndex == "$rowindex$" ? "$rowindex$" : templateAktivitasGrid.RowCount)_TemplateAktivitas_IdTemplateProses" class="el_TemplateAktivitas_IdTemplateProses">
+        <select
+            id="x@(templateAktivitasGrid.RowIndex)_IdTemplateProses"
+            name="x@(templateAktivitasGrid.RowIndex)_IdTemplateProses"
+            class="form-select ew-select@(templateAktivitasGrid.IdTemplateProses.IsInvalidClass)"
+            data-select2-id="fTemplateAktivitasgrid_x@(templateAktivitasGrid.RowIndex)_IdTemplateProses"
+            data-table="TemplateAktivitas"
+            data-field="x_IdTemplateProses"
+            data-value-separator="@(templateAktivitasGrid.IdTemplateProses.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(templateAktivitasGrid.IdTemplateProses.PlaceHolder))"
+            @Html.Raw(templateAktivitasGrid.IdTemplateProses.EditAttributes)>
+            @(templateAktivitasGrid.IdTemplateProses.SelectOptionListHtml("x" + templateAktivitasGrid.RowIndex + "_IdTemplateProses"))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(templateAktivitasGrid.IdTemplateProses.GetErrorMessage())</div>
+    @Html.Raw(templateAktivitasGrid.IdTemplateProses.Lookup.GetParamTag(templateAktivitasGrid, "p_x" + templateAktivitasGrid.RowIndex + "_IdTemplateProses"))
+    <script>
+    loadjs.ready("fTemplateAktivitasgrid", function() {
+        var options = { name: "x@(templateAktivitasGrid.RowIndex)_IdTemplateProses", selectId: "fTemplateAktivitasgrid_x@(templateAktivitasGrid.RowIndex)_IdTemplateProses" },
+            el = document.querySelector("select[data-select2-id='" + options.selectId + "']");
+        if (!el)
+            return;
+        options.closeOnSelect = !options.multiple;
+        options.dropdownParent = el.closest("#ew-modal-dialog, #ew-add-opt-dialog");
+        if (fTemplateAktivitasgrid.lists.IdTemplateProses?.lookupOptions.length) {
+            options.data = { id: "x@(templateAktivitasGrid.RowIndex)_IdTemplateProses", form: "fTemplateAktivitasgrid" };
+        } else {
+            options.ajax = { id: "x@(templateAktivitasGrid.RowIndex)_IdTemplateProses", form: "fTemplateAktivitasgrid", limit: ew.LOOKUP_PAGE_SIZE };
+        }
+        options.minimumInputLength = ew.selectMinimumInputLength;
+        options = Object.assign({}, ew.selectOptions, options, ew.vars.tables.TemplateAktivitas.fields.IdTemplateProses.selectOptions);
+        ew.createSelect(options);
+    });
+    </script>
+    </span>
+    }
+    @* IdTemplateProses (end) *@
+} @* Edit (end) *@
+@if (templateAktivitasGrid.RowType == RowType.View) { // View (begin)
+    @* IdTemplateProses (begin) *@
+    <span id="el@(templateAktivitasGrid.RowIndex == "$rowindex$" ? "$rowindex$" : templateAktivitasGrid.RowCount)_TemplateAktivitas_IdTemplateProses" class="el_TemplateAktivitas_IdTemplateProses">
+    <span @Html.Raw(templateAktivitasGrid.IdTemplateProses.ViewAttributes)>
+    @Html.Raw(templateAktivitasGrid.IdTemplateProses.GetViewValue())</span>
+    </span>
+    if (templateAktivitasGrid.IsConfirm) {
+    <input type="hidden" data-table="TemplateAktivitas" data-field="x_IdTemplateProses" data-hidden="1" name="fTemplateAktivitasgrid$x@(templateAktivitasGrid.RowIndex)_IdTemplateProses" id="fTemplateAktivitasgrid$x@(templateAktivitasGrid.RowIndex)_IdTemplateProses" value="@Html.Raw(HtmlEncode(templateAktivitasGrid.IdTemplateProses.FormValue))">
+    <input type="hidden" data-table="TemplateAktivitas" data-field="x_IdTemplateProses" data-hidden="1" data-old name="fTemplateAktivitasgrid$o@(templateAktivitasGrid.RowIndex)_IdTemplateProses" id="fTemplateAktivitasgrid$o@(templateAktivitasGrid.RowIndex)_IdTemplateProses" value="@Html.Raw(HtmlEncode(templateAktivitasGrid.IdTemplateProses.OldValue))">
+    }
+    @* IdTemplateProses (end) *@
+} @* View (end) *@
+</td>
+    } @* templateAktivitasGrid.IdTemplateProses.Visible (end) *@
+    @if (templateAktivitasGrid.UrutanAktivitas.Visible) { // templateAktivitasGrid.UrutanAktivitas.Visible (begin)
+        <td data-name="UrutanAktivitas" @Html.Raw(templateAktivitasGrid.UrutanAktivitas.CellAttributes)>
+@if (templateAktivitasGrid.RowType == RowType.Add) { // Add (begin)
+    @* UrutanAktivitas (begin) *@
+    <span id="el@(templateAktivitasGrid.RowIndex == "$rowindex$" ? "$rowindex$" : templateAktivitasGrid.RowCount)_TemplateAktivitas_UrutanAktivitas" class="el_TemplateAktivitas_UrutanAktivitas">
+    <input type="@(templateAktivitasGrid.UrutanAktivitas.InputTextType)" name="x@(templateAktivitasGrid.RowIndex)_UrutanAktivitas" id="x@(templateAktivitasGrid.RowIndex)_UrutanAktivitas" data-table="TemplateAktivitas" data-field="x_UrutanAktivitas" value="@Html.Raw(templateAktivitasGrid.UrutanAktivitas.EditValue)" size="30" placeholder="@Html.Raw(HtmlEncode(templateAktivitasGrid.UrutanAktivitas.PlaceHolder))" data-format-pattern="@(templateAktivitasGrid.UrutanAktivitas.FormatPattern)"@Html.Raw(templateAktivitasGrid.UrutanAktivitas.EditAttributes)>
+    <div class="invalid-feedback">@Html.Raw(templateAktivitasGrid.UrutanAktivitas.GetErrorMessage())</div>
+    </span>
+    <input type="hidden" data-table="TemplateAktivitas" data-field="x_UrutanAktivitas" data-hidden="1" data-old name="o@(templateAktivitasGrid.RowIndex)_UrutanAktivitas" id="o@(templateAktivitasGrid.RowIndex)_UrutanAktivitas" value="@Html.Raw(HtmlEncode(templateAktivitasGrid.UrutanAktivitas.OldValue))">
+    @* UrutanAktivitas (end) *@
+} @* Add (end) *@
+@if (templateAktivitasGrid.RowType == RowType.Edit) { // Edit (begin)
+    @* UrutanAktivitas (begin) *@
+    <span id="el@(templateAktivitasGrid.RowIndex == "$rowindex$" ? "$rowindex$" : templateAktivitasGrid.RowCount)_TemplateAktivitas_UrutanAktivitas" class="el_TemplateAktivitas_UrutanAktivitas">
+    <input type="@(templateAktivitasGrid.UrutanAktivitas.InputTextType)" name="x@(templateAktivitasGrid.RowIndex)_UrutanAktivitas" id="x@(templateAktivitasGrid.RowIndex)_UrutanAktivitas" data-table="TemplateAktivitas" data-field="x_UrutanAktivitas" value="@Html.Raw(templateAktivitasGrid.UrutanAktivitas.EditValue)" size="30" placeholder="@Html.Raw(HtmlEncode(templateAktivitasGrid.UrutanAktivitas.PlaceHolder))" data-format-pattern="@(templateAktivitasGrid.UrutanAktivitas.FormatPattern)"@Html.Raw(templateAktivitasGrid.UrutanAktivitas.EditAttributes)>
+    <div class="invalid-feedback">@Html.Raw(templateAktivitasGrid.UrutanAktivitas.GetErrorMessage())</div>
+    </span>
+    @* UrutanAktivitas (end) *@
+} @* Edit (end) *@
+@if (templateAktivitasGrid.RowType == RowType.View) { // View (begin)
+    @* UrutanAktivitas (begin) *@
+    <span id="el@(templateAktivitasGrid.RowIndex == "$rowindex$" ? "$rowindex$" : templateAktivitasGrid.RowCount)_TemplateAktivitas_UrutanAktivitas" class="el_TemplateAktivitas_UrutanAktivitas">
+    <span @Html.Raw(templateAktivitasGrid.UrutanAktivitas.ViewAttributes)>
+    @Html.Raw(templateAktivitasGrid.UrutanAktivitas.GetViewValue())</span>
+    </span>
+    if (templateAktivitasGrid.IsConfirm) {
+    <input type="hidden" data-table="TemplateAktivitas" data-field="x_UrutanAktivitas" data-hidden="1" name="fTemplateAktivitasgrid$x@(templateAktivitasGrid.RowIndex)_UrutanAktivitas" id="fTemplateAktivitasgrid$x@(templateAktivitasGrid.RowIndex)_UrutanAktivitas" value="@Html.Raw(HtmlEncode(templateAktivitasGrid.UrutanAktivitas.FormValue))">
+    <input type="hidden" data-table="TemplateAktivitas" data-field="x_UrutanAktivitas" data-hidden="1" data-old name="fTemplateAktivitasgrid$o@(templateAktivitasGrid.RowIndex)_UrutanAktivitas" id="fTemplateAktivitasgrid$o@(templateAktivitasGrid.RowIndex)_UrutanAktivitas" value="@Html.Raw(HtmlEncode(templateAktivitasGrid.UrutanAktivitas.OldValue))">
+    }
+    @* UrutanAktivitas (end) *@
+} @* View (end) *@
+</td>
+    } @* templateAktivitasGrid.UrutanAktivitas.Visible (end) *@
+    @if (templateAktivitasGrid.NamaAktivitas.Visible) { // templateAktivitasGrid.NamaAktivitas.Visible (begin)
+        <td data-name="NamaAktivitas" @Html.Raw(templateAktivitasGrid.NamaAktivitas.CellAttributes)>
+@if (templateAktivitasGrid.RowType == RowType.Add) { // Add (begin)
+    @* NamaAktivitas (begin) *@
+    <span id="el@(templateAktivitasGrid.RowIndex == "$rowindex$" ? "$rowindex$" : templateAktivitasGrid.RowCount)_TemplateAktivitas_NamaAktivitas" class="el_TemplateAktivitas_NamaAktivitas">
+    <input type="@(templateAktivitasGrid.NamaAktivitas.InputTextType)" name="x@(templateAktivitasGrid.RowIndex)_NamaAktivitas" id="x@(templateAktivitasGrid.RowIndex)_NamaAktivitas" data-table="TemplateAktivitas" data-field="x_NamaAktivitas" value="@Html.Raw(templateAktivitasGrid.NamaAktivitas.EditValue)" size="30" maxlength="255" placeholder="@Html.Raw(HtmlEncode(templateAktivitasGrid.NamaAktivitas.PlaceHolder))" data-format-pattern="@(templateAktivitasGrid.NamaAktivitas.FormatPattern)"@Html.Raw(templateAktivitasGrid.NamaAktivitas.EditAttributes)>
+    <div class="invalid-feedback">@Html.Raw(templateAktivitasGrid.NamaAktivitas.GetErrorMessage())</div>
+    </span>
+    <input type="hidden" data-table="TemplateAktivitas" data-field="x_NamaAktivitas" data-hidden="1" data-old name="o@(templateAktivitasGrid.RowIndex)_NamaAktivitas" id="o@(templateAktivitasGrid.RowIndex)_NamaAktivitas" value="@Html.Raw(HtmlEncode(templateAktivitasGrid.NamaAktivitas.OldValue))">
+    @* NamaAktivitas (end) *@
+} @* Add (end) *@
+@if (templateAktivitasGrid.RowType == RowType.Edit) { // Edit (begin)
+    @* NamaAktivitas (begin) *@
+    <span id="el@(templateAktivitasGrid.RowIndex == "$rowindex$" ? "$rowindex$" : templateAktivitasGrid.RowCount)_TemplateAktivitas_NamaAktivitas" class="el_TemplateAktivitas_NamaAktivitas">
+    <input type="@(templateAktivitasGrid.NamaAktivitas.InputTextType)" name="x@(templateAktivitasGrid.RowIndex)_NamaAktivitas" id="x@(templateAktivitasGrid.RowIndex)_NamaAktivitas" data-table="TemplateAktivitas" data-field="x_NamaAktivitas" value="@Html.Raw(templateAktivitasGrid.NamaAktivitas.EditValue)" size="30" maxlength="255" placeholder="@Html.Raw(HtmlEncode(templateAktivitasGrid.NamaAktivitas.PlaceHolder))" data-format-pattern="@(templateAktivitasGrid.NamaAktivitas.FormatPattern)"@Html.Raw(templateAktivitasGrid.NamaAktivitas.EditAttributes)>
+    <div class="invalid-feedback">@Html.Raw(templateAktivitasGrid.NamaAktivitas.GetErrorMessage())</div>
+    </span>
+    @* NamaAktivitas (end) *@
+} @* Edit (end) *@
+@if (templateAktivitasGrid.RowType == RowType.View) { // View (begin)
+    @* NamaAktivitas (begin) *@
+    <span id="el@(templateAktivitasGrid.RowIndex == "$rowindex$" ? "$rowindex$" : templateAktivitasGrid.RowCount)_TemplateAktivitas_NamaAktivitas" class="el_TemplateAktivitas_NamaAktivitas">
+    <span @Html.Raw(templateAktivitasGrid.NamaAktivitas.ViewAttributes)>
+    @Html.Raw(templateAktivitasGrid.NamaAktivitas.GetViewValue())</span>
+    </span>
+    if (templateAktivitasGrid.IsConfirm) {
+    <input type="hidden" data-table="TemplateAktivitas" data-field="x_NamaAktivitas" data-hidden="1" name="fTemplateAktivitasgrid$x@(templateAktivitasGrid.RowIndex)_NamaAktivitas" id="fTemplateAktivitasgrid$x@(templateAktivitasGrid.RowIndex)_NamaAktivitas" value="@Html.Raw(HtmlEncode(templateAktivitasGrid.NamaAktivitas.FormValue))">
+    <input type="hidden" data-table="TemplateAktivitas" data-field="x_NamaAktivitas" data-hidden="1" data-old name="fTemplateAktivitasgrid$o@(templateAktivitasGrid.RowIndex)_NamaAktivitas" id="fTemplateAktivitasgrid$o@(templateAktivitasGrid.RowIndex)_NamaAktivitas" value="@Html.Raw(HtmlEncode(templateAktivitasGrid.NamaAktivitas.OldValue))">
+    }
+    @* NamaAktivitas (end) *@
+} @* View (end) *@
+</td>
+    } @* templateAktivitasGrid.NamaAktivitas.Visible (end) *@
+    @if (templateAktivitasGrid.IdPIC.Visible) { // templateAktivitasGrid.IdPIC.Visible (begin)
+        <td data-name="IdPIC" @Html.Raw(templateAktivitasGrid.IdPIC.CellAttributes)>
+@if (templateAktivitasGrid.RowType == RowType.Add) { // Add (begin)
+    @* IdPIC (begin) *@
+    <span id="el@(templateAktivitasGrid.RowIndex == "$rowindex$" ? "$rowindex$" : templateAktivitasGrid.RowCount)_TemplateAktivitas_IdPIC" class="el_TemplateAktivitas_IdPIC">
+        <select
+            id="x@(templateAktivitasGrid.RowIndex)_IdPIC[]"
+            name="x@(templateAktivitasGrid.RowIndex)_IdPIC[]"
+            class="form-select ew-select@(templateAktivitasGrid.IdPIC.IsInvalidClass)"
+            data-select2-id="fTemplateAktivitasgrid_x@(templateAktivitasGrid.RowIndex)_IdPIC[]"
+            data-table="TemplateAktivitas"
+            data-field="x_IdPIC"
+            multiple
+            size="1"
+            data-value-separator="@(templateAktivitasGrid.IdPIC.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(templateAktivitasGrid.IdPIC.PlaceHolder))"
+            @Html.Raw(templateAktivitasGrid.IdPIC.EditAttributes)>
+            @(templateAktivitasGrid.IdPIC.SelectOptionListHtml("x" + templateAktivitasGrid.RowIndex + "_IdPIC[]"))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(templateAktivitasGrid.IdPIC.GetErrorMessage())</div>
+    @Html.Raw(templateAktivitasGrid.IdPIC.Lookup.GetParamTag(templateAktivitasGrid, "p_x" + templateAktivitasGrid.RowIndex + "_IdPIC"))
+    <script>
+    loadjs.ready("fTemplateAktivitasgrid", function() {
+        var options = { name: "x@(templateAktivitasGrid.RowIndex)_IdPIC[]", selectId: "fTemplateAktivitasgrid_x@(templateAktivitasGrid.RowIndex)_IdPIC[]" },
+            el = document.querySelector("select[data-select2-id='" + options.selectId + "']");
+        if (!el)
+            return;
+        options.multiple = true;
+        options.closeOnSelect = !options.multiple;
+        options.dropdownParent = el.closest("#ew-modal-dialog, #ew-add-opt-dialog");
+        if (fTemplateAktivitasgrid.lists.IdPIC?.lookupOptions.length) {
+            options.data = { id: "x@(templateAktivitasGrid.RowIndex)_IdPIC[]", form: "fTemplateAktivitasgrid" };
+        } else {
+            options.ajax = { id: "x@(templateAktivitasGrid.RowIndex)_IdPIC[]", form: "fTemplateAktivitasgrid", limit: ew.LOOKUP_PAGE_SIZE };
+        }
+        options.minimumInputLength = ew.selectMinimumInputLength;
+        options = Object.assign({}, ew.selectOptions, options, ew.vars.tables.TemplateAktivitas.fields.IdPIC.selectOptions);
+        ew.createSelect(options);
+    });
+    </script>
+    </span>
+    <input type="hidden" data-table="TemplateAktivitas" data-field="x_IdPIC" data-hidden="1" data-old name="o@(templateAktivitasGrid.RowIndex)_IdPIC[]" id="o@(templateAktivitasGrid.RowIndex)_IdPIC[]" value="@Html.Raw(HtmlEncode(templateAktivitasGrid.IdPIC.OldValue))">
+    @* IdPIC (end) *@
+} @* Add (end) *@
+@if (templateAktivitasGrid.RowType == RowType.Edit) { // Edit (begin)
+    @* IdPIC (begin) *@
+    <span id="el@(templateAktivitasGrid.RowIndex == "$rowindex$" ? "$rowindex$" : templateAktivitasGrid.RowCount)_TemplateAktivitas_IdPIC" class="el_TemplateAktivitas_IdPIC">
+        <select
+            id="x@(templateAktivitasGrid.RowIndex)_IdPIC[]"
+            name="x@(templateAktivitasGrid.RowIndex)_IdPIC[]"
+            class="form-select ew-select@(templateAktivitasGrid.IdPIC.IsInvalidClass)"
+            data-select2-id="fTemplateAktivitasgrid_x@(templateAktivitasGrid.RowIndex)_IdPIC[]"
+            data-table="TemplateAktivitas"
+            data-field="x_IdPIC"
+            multiple
+            size="1"
+            data-value-separator="@(templateAktivitasGrid.IdPIC.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(templateAktivitasGrid.IdPIC.PlaceHolder))"
+            @Html.Raw(templateAktivitasGrid.IdPIC.EditAttributes)>
+            @(templateAktivitasGrid.IdPIC.SelectOptionListHtml("x" + templateAktivitasGrid.RowIndex + "_IdPIC[]"))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(templateAktivitasGrid.IdPIC.GetErrorMessage())</div>
+    @Html.Raw(templateAktivitasGrid.IdPIC.Lookup.GetParamTag(templateAktivitasGrid, "p_x" + templateAktivitasGrid.RowIndex + "_IdPIC"))
+    <script>
+    loadjs.ready("fTemplateAktivitasgrid", function() {
+        var options = { name: "x@(templateAktivitasGrid.RowIndex)_IdPIC[]", selectId: "fTemplateAktivitasgrid_x@(templateAktivitasGrid.RowIndex)_IdPIC[]" },
+            el = document.querySelector("select[data-select2-id='" + options.selectId + "']");
+        if (!el)
+            return;
+        options.multiple = true;
+        options.closeOnSelect = !options.multiple;
+        options.dropdownParent = el.closest("#ew-modal-dialog, #ew-add-opt-dialog");
+        if (fTemplateAktivitasgrid.lists.IdPIC?.lookupOptions.length) {
+            options.data = { id: "x@(templateAktivitasGrid.RowIndex)_IdPIC[]", form: "fTemplateAktivitasgrid" };
+        } else {
+            options.ajax = { id: "x@(templateAktivitasGrid.RowIndex)_IdPIC[]", form: "fTemplateAktivitasgrid", limit: ew.LOOKUP_PAGE_SIZE };
+        }
+        options.minimumInputLength = ew.selectMinimumInputLength;
+        options = Object.assign({}, ew.selectOptions, options, ew.vars.tables.TemplateAktivitas.fields.IdPIC.selectOptions);
+        ew.createSelect(options);
+    });
+    </script>
+    </span>
+    @* IdPIC (end) *@
+} @* Edit (end) *@
+@if (templateAktivitasGrid.RowType == RowType.View) { // View (begin)
+    @* IdPIC (begin) *@
+    <span id="el@(templateAktivitasGrid.RowIndex == "$rowindex$" ? "$rowindex$" : templateAktivitasGrid.RowCount)_TemplateAktivitas_IdPIC" class="el_TemplateAktivitas_IdPIC">
+    <span @Html.Raw(templateAktivitasGrid.IdPIC.ViewAttributes)>
+    @Html.Raw(templateAktivitasGrid.IdPIC.GetViewValue())</span>
+    </span>
+    if (templateAktivitasGrid.IsConfirm) {
+    <input type="hidden" data-table="TemplateAktivitas" data-field="x_IdPIC" data-hidden="1" name="fTemplateAktivitasgrid$x@(templateAktivitasGrid.RowIndex)_IdPIC" id="fTemplateAktivitasgrid$x@(templateAktivitasGrid.RowIndex)_IdPIC" value="@Html.Raw(HtmlEncode(templateAktivitasGrid.IdPIC.FormValue))">
+    <input type="hidden" data-table="TemplateAktivitas" data-field="x_IdPIC" data-hidden="1" data-old name="fTemplateAktivitasgrid$o@(templateAktivitasGrid.RowIndex)_IdPIC[]" id="fTemplateAktivitasgrid$o@(templateAktivitasGrid.RowIndex)_IdPIC[]" value="@Html.Raw(HtmlEncode(templateAktivitasGrid.IdPIC.OldValue))">
+    }
+    @* IdPIC (end) *@
+} @* View (end) *@
+</td>
+    } @* templateAktivitasGrid.IdPIC.Visible (end) *@
+    @if (templateAktivitasGrid.Keterangan.Visible) { // templateAktivitasGrid.Keterangan.Visible (begin)
+        <td data-name="Keterangan" @Html.Raw(templateAktivitasGrid.Keterangan.CellAttributes)>
+@if (templateAktivitasGrid.RowType == RowType.Add) { // Add (begin)
+    @* Keterangan (begin) *@
+    <span id="el@(templateAktivitasGrid.RowIndex == "$rowindex$" ? "$rowindex$" : templateAktivitasGrid.RowCount)_TemplateAktivitas_Keterangan" class="el_TemplateAktivitas_Keterangan">
+    <input type="@(templateAktivitasGrid.Keterangan.InputTextType)" name="x@(templateAktivitasGrid.RowIndex)_Keterangan" id="x@(templateAktivitasGrid.RowIndex)_Keterangan" data-table="TemplateAktivitas" data-field="x_Keterangan" value="@Html.Raw(templateAktivitasGrid.Keterangan.EditValue)" size="30" maxlength="255" placeholder="@Html.Raw(HtmlEncode(templateAktivitasGrid.Keterangan.PlaceHolder))" data-format-pattern="@(templateAktivitasGrid.Keterangan.FormatPattern)"@Html.Raw(templateAktivitasGrid.Keterangan.EditAttributes)>
+    <div class="invalid-feedback">@Html.Raw(templateAktivitasGrid.Keterangan.GetErrorMessage())</div>
+    </span>
+    <input type="hidden" data-table="TemplateAktivitas" data-field="x_Keterangan" data-hidden="1" data-old name="o@(templateAktivitasGrid.RowIndex)_Keterangan" id="o@(templateAktivitasGrid.RowIndex)_Keterangan" value="@Html.Raw(HtmlEncode(templateAktivitasGrid.Keterangan.OldValue))">
+    @* Keterangan (end) *@
+} @* Add (end) *@
+@if (templateAktivitasGrid.RowType == RowType.Edit) { // Edit (begin)
+    @* Keterangan (begin) *@
+    <span id="el@(templateAktivitasGrid.RowIndex == "$rowindex$" ? "$rowindex$" : templateAktivitasGrid.RowCount)_TemplateAktivitas_Keterangan" class="el_TemplateAktivitas_Keterangan">
+    <input type="@(templateAktivitasGrid.Keterangan.InputTextType)" name="x@(templateAktivitasGrid.RowIndex)_Keterangan" id="x@(templateAktivitasGrid.RowIndex)_Keterangan" data-table="TemplateAktivitas" data-field="x_Keterangan" value="@Html.Raw(templateAktivitasGrid.Keterangan.EditValue)" size="30" maxlength="255" placeholder="@Html.Raw(HtmlEncode(templateAktivitasGrid.Keterangan.PlaceHolder))" data-format-pattern="@(templateAktivitasGrid.Keterangan.FormatPattern)"@Html.Raw(templateAktivitasGrid.Keterangan.EditAttributes)>
+    <div class="invalid-feedback">@Html.Raw(templateAktivitasGrid.Keterangan.GetErrorMessage())</div>
+    </span>
+    @* Keterangan (end) *@
+} @* Edit (end) *@
+@if (templateAktivitasGrid.RowType == RowType.View) { // View (begin)
+    @* Keterangan (begin) *@
+    <span id="el@(templateAktivitasGrid.RowIndex == "$rowindex$" ? "$rowindex$" : templateAktivitasGrid.RowCount)_TemplateAktivitas_Keterangan" class="el_TemplateAktivitas_Keterangan">
+    <span @Html.Raw(templateAktivitasGrid.Keterangan.ViewAttributes)>
+    @Html.Raw(templateAktivitasGrid.Keterangan.GetViewValue())</span>
+    </span>
+    if (templateAktivitasGrid.IsConfirm) {
+    <input type="hidden" data-table="TemplateAktivitas" data-field="x_Keterangan" data-hidden="1" name="fTemplateAktivitasgrid$x@(templateAktivitasGrid.RowIndex)_Keterangan" id="fTemplateAktivitasgrid$x@(templateAktivitasGrid.RowIndex)_Keterangan" value="@Html.Raw(HtmlEncode(templateAktivitasGrid.Keterangan.FormValue))">
+    <input type="hidden" data-table="TemplateAktivitas" data-field="x_Keterangan" data-hidden="1" data-old name="fTemplateAktivitasgrid$o@(templateAktivitasGrid.RowIndex)_Keterangan" id="fTemplateAktivitasgrid$o@(templateAktivitasGrid.RowIndex)_Keterangan" value="@Html.Raw(HtmlEncode(templateAktivitasGrid.Keterangan.OldValue))">
+    }
+    @* Keterangan (end) *@
+} @* View (end) *@
+</td>
+    } @* templateAktivitasGrid.Keterangan.Visible (end) *@
+    @if (templateAktivitasGrid.DibuatOleh.Visible) { // templateAktivitasGrid.DibuatOleh.Visible (begin)
+        <td data-name="DibuatOleh" @Html.Raw(templateAktivitasGrid.DibuatOleh.CellAttributes)>
+@if (templateAktivitasGrid.RowType == RowType.Add) { // Add (begin)
+    @* DibuatOleh (begin) *@
+    <span id="el@(templateAktivitasGrid.RowIndex == "$rowindex$" ? "$rowindex$" : templateAktivitasGrid.RowCount)_TemplateAktivitas_DibuatOleh" class="el_TemplateAktivitas_DibuatOleh">
+    <input type="@(templateAktivitasGrid.DibuatOleh.InputTextType)" name="x@(templateAktivitasGrid.RowIndex)_DibuatOleh" id="x@(templateAktivitasGrid.RowIndex)_DibuatOleh" data-table="TemplateAktivitas" data-field="x_DibuatOleh" value="@Html.Raw(templateAktivitasGrid.DibuatOleh.EditValue)" size="30" maxlength="100" placeholder="@Html.Raw(HtmlEncode(templateAktivitasGrid.DibuatOleh.PlaceHolder))" data-format-pattern="@(templateAktivitasGrid.DibuatOleh.FormatPattern)"@Html.Raw(templateAktivitasGrid.DibuatOleh.EditAttributes)>
+    <div class="invalid-feedback">@Html.Raw(templateAktivitasGrid.DibuatOleh.GetErrorMessage())</div>
+    </span>
+    <input type="hidden" data-table="TemplateAktivitas" data-field="x_DibuatOleh" data-hidden="1" data-old name="o@(templateAktivitasGrid.RowIndex)_DibuatOleh" id="o@(templateAktivitasGrid.RowIndex)_DibuatOleh" value="@Html.Raw(HtmlEncode(templateAktivitasGrid.DibuatOleh.OldValue))">
+    @* DibuatOleh (end) *@
+} @* Add (end) *@
+@if (templateAktivitasGrid.RowType == RowType.Edit) { // Edit (begin)
+    @* DibuatOleh (begin) *@
+    <span id="el@(templateAktivitasGrid.RowIndex == "$rowindex$" ? "$rowindex$" : templateAktivitasGrid.RowCount)_TemplateAktivitas_DibuatOleh" class="el_TemplateAktivitas_DibuatOleh">
+    <input type="@(templateAktivitasGrid.DibuatOleh.InputTextType)" name="x@(templateAktivitasGrid.RowIndex)_DibuatOleh" id="x@(templateAktivitasGrid.RowIndex)_DibuatOleh" data-table="TemplateAktivitas" data-field="x_DibuatOleh" value="@Html.Raw(templateAktivitasGrid.DibuatOleh.EditValue)" size="30" maxlength="100" placeholder="@Html.Raw(HtmlEncode(templateAktivitasGrid.DibuatOleh.PlaceHolder))" data-format-pattern="@(templateAktivitasGrid.DibuatOleh.FormatPattern)"@Html.Raw(templateAktivitasGrid.DibuatOleh.EditAttributes)>
+    <div class="invalid-feedback">@Html.Raw(templateAktivitasGrid.DibuatOleh.GetErrorMessage())</div>
+    </span>
+    @* DibuatOleh (end) *@
+} @* Edit (end) *@
+@if (templateAktivitasGrid.RowType == RowType.View) { // View (begin)
+    @* DibuatOleh (begin) *@
+    <span id="el@(templateAktivitasGrid.RowIndex == "$rowindex$" ? "$rowindex$" : templateAktivitasGrid.RowCount)_TemplateAktivitas_DibuatOleh" class="el_TemplateAktivitas_DibuatOleh">
+    <span @Html.Raw(templateAktivitasGrid.DibuatOleh.ViewAttributes)>
+    @Html.Raw(templateAktivitasGrid.DibuatOleh.GetViewValue())</span>
+    </span>
+    if (templateAktivitasGrid.IsConfirm) {
+    <input type="hidden" data-table="TemplateAktivitas" data-field="x_DibuatOleh" data-hidden="1" name="fTemplateAktivitasgrid$x@(templateAktivitasGrid.RowIndex)_DibuatOleh" id="fTemplateAktivitasgrid$x@(templateAktivitasGrid.RowIndex)_DibuatOleh" value="@Html.Raw(HtmlEncode(templateAktivitasGrid.DibuatOleh.FormValue))">
+    <input type="hidden" data-table="TemplateAktivitas" data-field="x_DibuatOleh" data-hidden="1" data-old name="fTemplateAktivitasgrid$o@(templateAktivitasGrid.RowIndex)_DibuatOleh" id="fTemplateAktivitasgrid$o@(templateAktivitasGrid.RowIndex)_DibuatOleh" value="@Html.Raw(HtmlEncode(templateAktivitasGrid.DibuatOleh.OldValue))">
+    }
+    @* DibuatOleh (end) *@
+} @* View (end) *@
+</td>
+    } @* templateAktivitasGrid.DibuatOleh.Visible (end) *@
+    @if (templateAktivitasGrid.TanggalDibuat.Visible) { // templateAktivitasGrid.TanggalDibuat.Visible (begin)
+        <td data-name="TanggalDibuat" @Html.Raw(templateAktivitasGrid.TanggalDibuat.CellAttributes)>
+@if (templateAktivitasGrid.RowType == RowType.Add) { // Add (begin)
+    @* TanggalDibuat (begin) *@
+    <span id="el@(templateAktivitasGrid.RowIndex == "$rowindex$" ? "$rowindex$" : templateAktivitasGrid.RowCount)_TemplateAktivitas_TanggalDibuat" class="el_TemplateAktivitas_TanggalDibuat">
+    <input type="@(templateAktivitasGrid.TanggalDibuat.InputTextType)" name="x@(templateAktivitasGrid.RowIndex)_TanggalDibuat" id="x@(templateAktivitasGrid.RowIndex)_TanggalDibuat" data-table="TemplateAktivitas" data-field="x_TanggalDibuat" value="@Html.Raw(templateAktivitasGrid.TanggalDibuat.EditValue)" placeholder="@Html.Raw(HtmlEncode(templateAktivitasGrid.TanggalDibuat.PlaceHolder))" data-format-pattern="@(templateAktivitasGrid.TanggalDibuat.FormatPattern)"@Html.Raw(templateAktivitasGrid.TanggalDibuat.EditAttributes)>
+    <div class="invalid-feedback">@Html.Raw(templateAktivitasGrid.TanggalDibuat.GetErrorMessage())</div>
+    @if (!templateAktivitasGrid.TanggalDibuat.ReadOnly && !templateAktivitasGrid.TanggalDibuat.Disabled && !templateAktivitasGrid.TanggalDibuat.EditAttrs.Is("readonly") && !templateAktivitasGrid.TanggalDibuat.EditAttrs.Is("disabled")) {
+    <script>
+    loadjs.ready(["fTemplateAktivitasgrid", "datetimepicker"], function () {
+        let format = "@Html.Raw(DateFormat(9))", // DN
+            options = {
+                    localization: {
+                        locale: ew.LANGUAGE_ID + "-u-nu-" + ew.getNumberingSystem(),
+                        hourCycle: format.match(/H/) ? "h24" : "h12",
+                        format,
+                        ...ew.language.phrase("datetimepicker")
+                    },
+                    display: {
+                        icons: {
+                            previous: ew.IS_RTL ? "fa-solid fa-chevron-right" : "fa-solid fa-chevron-left",
+                            next: ew.IS_RTL ? "fa-solid fa-chevron-left" : "fa-solid fa-chevron-right"
+                        },
+                        components: {
+                            clock: !!format.match(/h/i) || !!format.match(/m/) || !!format.match(/s/i),
+                            hours: !!format.match(/h/i),
+                            minutes: !!format.match(/m/),
+                            seconds: !!format.match(/s/i)
+                        },
+                    theme: ew.getPreferredTheme()
+                    }
+                };
+        ew.createDateTimePicker("fTemplateAktivitasgrid", "x@(templateAktivitasGrid.RowIndex)_TanggalDibuat", ew.deepAssign({"useCurrent":false,"display":{"sideBySide":false}}, options));
+    });
+    </script>
+    }
+    </span>
+    <input type="hidden" data-table="TemplateAktivitas" data-field="x_TanggalDibuat" data-hidden="1" data-old name="o@(templateAktivitasGrid.RowIndex)_TanggalDibuat" id="o@(templateAktivitasGrid.RowIndex)_TanggalDibuat" value="@Html.Raw(HtmlEncode(templateAktivitasGrid.TanggalDibuat.OldValue))">
+    @* TanggalDibuat (end) *@
+} @* Add (end) *@
+@if (templateAktivitasGrid.RowType == RowType.Edit) { // Edit (begin)
+    @* TanggalDibuat (begin) *@
+    <span id="el@(templateAktivitasGrid.RowIndex == "$rowindex$" ? "$rowindex$" : templateAktivitasGrid.RowCount)_TemplateAktivitas_TanggalDibuat" class="el_TemplateAktivitas_TanggalDibuat">
+    <input type="@(templateAktivitasGrid.TanggalDibuat.InputTextType)" name="x@(templateAktivitasGrid.RowIndex)_TanggalDibuat" id="x@(templateAktivitasGrid.RowIndex)_TanggalDibuat" data-table="TemplateAktivitas" data-field="x_TanggalDibuat" value="@Html.Raw(templateAktivitasGrid.TanggalDibuat.EditValue)" placeholder="@Html.Raw(HtmlEncode(templateAktivitasGrid.TanggalDibuat.PlaceHolder))" data-format-pattern="@(templateAktivitasGrid.TanggalDibuat.FormatPattern)"@Html.Raw(templateAktivitasGrid.TanggalDibuat.EditAttributes)>
+    <div class="invalid-feedback">@Html.Raw(templateAktivitasGrid.TanggalDibuat.GetErrorMessage())</div>
+    @if (!templateAktivitasGrid.TanggalDibuat.ReadOnly && !templateAktivitasGrid.TanggalDibuat.Disabled && !templateAktivitasGrid.TanggalDibuat.EditAttrs.Is("readonly") && !templateAktivitasGrid.TanggalDibuat.EditAttrs.Is("disabled")) {
+    <script>
+    loadjs.ready(["fTemplateAktivitasgrid", "datetimepicker"], function () {
+        let format = "@Html.Raw(DateFormat(9))", // DN
+            options = {
+                    localization: {
+                        locale: ew.LANGUAGE_ID + "-u-nu-" + ew.getNumberingSystem(),
+                        hourCycle: format.match(/H/) ? "h24" : "h12",
+                        format,
+                        ...ew.language.phrase("datetimepicker")
+                    },
+                    display: {
+                        icons: {
+                            previous: ew.IS_RTL ? "fa-solid fa-chevron-right" : "fa-solid fa-chevron-left",
+                            next: ew.IS_RTL ? "fa-solid fa-chevron-left" : "fa-solid fa-chevron-right"
+                        },
+                        components: {
+                            clock: !!format.match(/h/i) || !!format.match(/m/) || !!format.match(/s/i),
+                            hours: !!format.match(/h/i),
+                            minutes: !!format.match(/m/),
+                            seconds: !!format.match(/s/i)
+                        },
+                    theme: ew.getPreferredTheme()
+                    }
+                };
+        ew.createDateTimePicker("fTemplateAktivitasgrid", "x@(templateAktivitasGrid.RowIndex)_TanggalDibuat", ew.deepAssign({"useCurrent":false,"display":{"sideBySide":false}}, options));
+    });
+    </script>
+    }
+    </span>
+    @* TanggalDibuat (end) *@
+} @* Edit (end) *@
+@if (templateAktivitasGrid.RowType == RowType.View) { // View (begin)
+    @* TanggalDibuat (begin) *@
+    <span id="el@(templateAktivitasGrid.RowIndex == "$rowindex$" ? "$rowindex$" : templateAktivitasGrid.RowCount)_TemplateAktivitas_TanggalDibuat" class="el_TemplateAktivitas_TanggalDibuat">
+    <span @Html.Raw(templateAktivitasGrid.TanggalDibuat.ViewAttributes)>
+    @Html.Raw(templateAktivitasGrid.TanggalDibuat.GetViewValue())</span>
+    </span>
+    if (templateAktivitasGrid.IsConfirm) {
+    <input type="hidden" data-table="TemplateAktivitas" data-field="x_TanggalDibuat" data-hidden="1" name="fTemplateAktivitasgrid$x@(templateAktivitasGrid.RowIndex)_TanggalDibuat" id="fTemplateAktivitasgrid$x@(templateAktivitasGrid.RowIndex)_TanggalDibuat" value="@Html.Raw(HtmlEncode(templateAktivitasGrid.TanggalDibuat.FormValue))">
+    <input type="hidden" data-table="TemplateAktivitas" data-field="x_TanggalDibuat" data-hidden="1" data-old name="fTemplateAktivitasgrid$o@(templateAktivitasGrid.RowIndex)_TanggalDibuat" id="fTemplateAktivitasgrid$o@(templateAktivitasGrid.RowIndex)_TanggalDibuat" value="@Html.Raw(HtmlEncode(templateAktivitasGrid.TanggalDibuat.OldValue))">
+    }
+    @* TanggalDibuat (end) *@
+} @* View (end) *@
+</td>
+    } @* templateAktivitasGrid.TanggalDibuat.Visible (end) *@
+    @if (templateAktivitasGrid.DiperbaruiOleh.Visible) { // templateAktivitasGrid.DiperbaruiOleh.Visible (begin)
+        <td data-name="DiperbaruiOleh" @Html.Raw(templateAktivitasGrid.DiperbaruiOleh.CellAttributes)>
+@if (templateAktivitasGrid.RowType == RowType.Add) { // Add (begin)
+    @* DiperbaruiOleh (begin) *@
+    <span id="el@(templateAktivitasGrid.RowIndex == "$rowindex$" ? "$rowindex$" : templateAktivitasGrid.RowCount)_TemplateAktivitas_DiperbaruiOleh" class="el_TemplateAktivitas_DiperbaruiOleh">
+    <input type="@(templateAktivitasGrid.DiperbaruiOleh.InputTextType)" name="x@(templateAktivitasGrid.RowIndex)_DiperbaruiOleh" id="x@(templateAktivitasGrid.RowIndex)_DiperbaruiOleh" data-table="TemplateAktivitas" data-field="x_DiperbaruiOleh" value="@Html.Raw(templateAktivitasGrid.DiperbaruiOleh.EditValue)" size="30" maxlength="100" placeholder="@Html.Raw(HtmlEncode(templateAktivitasGrid.DiperbaruiOleh.PlaceHolder))" data-format-pattern="@(templateAktivitasGrid.DiperbaruiOleh.FormatPattern)"@Html.Raw(templateAktivitasGrid.DiperbaruiOleh.EditAttributes)>
+    <div class="invalid-feedback">@Html.Raw(templateAktivitasGrid.DiperbaruiOleh.GetErrorMessage())</div>
+    </span>
+    <input type="hidden" data-table="TemplateAktivitas" data-field="x_DiperbaruiOleh" data-hidden="1" data-old name="o@(templateAktivitasGrid.RowIndex)_DiperbaruiOleh" id="o@(templateAktivitasGrid.RowIndex)_DiperbaruiOleh" value="@Html.Raw(HtmlEncode(templateAktivitasGrid.DiperbaruiOleh.OldValue))">
+    @* DiperbaruiOleh (end) *@
+} @* Add (end) *@
+@if (templateAktivitasGrid.RowType == RowType.Edit) { // Edit (begin)
+    @* DiperbaruiOleh (begin) *@
+    <span id="el@(templateAktivitasGrid.RowIndex == "$rowindex$" ? "$rowindex$" : templateAktivitasGrid.RowCount)_TemplateAktivitas_DiperbaruiOleh" class="el_TemplateAktivitas_DiperbaruiOleh">
+    <input type="@(templateAktivitasGrid.DiperbaruiOleh.InputTextType)" name="x@(templateAktivitasGrid.RowIndex)_DiperbaruiOleh" id="x@(templateAktivitasGrid.RowIndex)_DiperbaruiOleh" data-table="TemplateAktivitas" data-field="x_DiperbaruiOleh" value="@Html.Raw(templateAktivitasGrid.DiperbaruiOleh.EditValue)" size="30" maxlength="100" placeholder="@Html.Raw(HtmlEncode(templateAktivitasGrid.DiperbaruiOleh.PlaceHolder))" data-format-pattern="@(templateAktivitasGrid.DiperbaruiOleh.FormatPattern)"@Html.Raw(templateAktivitasGrid.DiperbaruiOleh.EditAttributes)>
+    <div class="invalid-feedback">@Html.Raw(templateAktivitasGrid.DiperbaruiOleh.GetErrorMessage())</div>
+    </span>
+    @* DiperbaruiOleh (end) *@
+} @* Edit (end) *@
+@if (templateAktivitasGrid.RowType == RowType.View) { // View (begin)
+    @* DiperbaruiOleh (begin) *@
+    <span id="el@(templateAktivitasGrid.RowIndex == "$rowindex$" ? "$rowindex$" : templateAktivitasGrid.RowCount)_TemplateAktivitas_DiperbaruiOleh" class="el_TemplateAktivitas_DiperbaruiOleh">
+    <span @Html.Raw(templateAktivitasGrid.DiperbaruiOleh.ViewAttributes)>
+    @Html.Raw(templateAktivitasGrid.DiperbaruiOleh.GetViewValue())</span>
+    </span>
+    if (templateAktivitasGrid.IsConfirm) {
+    <input type="hidden" data-table="TemplateAktivitas" data-field="x_DiperbaruiOleh" data-hidden="1" name="fTemplateAktivitasgrid$x@(templateAktivitasGrid.RowIndex)_DiperbaruiOleh" id="fTemplateAktivitasgrid$x@(templateAktivitasGrid.RowIndex)_DiperbaruiOleh" value="@Html.Raw(HtmlEncode(templateAktivitasGrid.DiperbaruiOleh.FormValue))">
+    <input type="hidden" data-table="TemplateAktivitas" data-field="x_DiperbaruiOleh" data-hidden="1" data-old name="fTemplateAktivitasgrid$o@(templateAktivitasGrid.RowIndex)_DiperbaruiOleh" id="fTemplateAktivitasgrid$o@(templateAktivitasGrid.RowIndex)_DiperbaruiOleh" value="@Html.Raw(HtmlEncode(templateAktivitasGrid.DiperbaruiOleh.OldValue))">
+    }
+    @* DiperbaruiOleh (end) *@
+} @* View (end) *@
+</td>
+    } @* templateAktivitasGrid.DiperbaruiOleh.Visible (end) *@
+    @if (templateAktivitasGrid.TanggalDiperbarui.Visible) { // templateAktivitasGrid.TanggalDiperbarui.Visible (begin)
+        <td data-name="TanggalDiperbarui" @Html.Raw(templateAktivitasGrid.TanggalDiperbarui.CellAttributes)>
+@if (templateAktivitasGrid.RowType == RowType.Add) { // Add (begin)
+    @* TanggalDiperbarui (begin) *@
+    <span id="el@(templateAktivitasGrid.RowIndex == "$rowindex$" ? "$rowindex$" : templateAktivitasGrid.RowCount)_TemplateAktivitas_TanggalDiperbarui" class="el_TemplateAktivitas_TanggalDiperbarui">
+    <input type="@(templateAktivitasGrid.TanggalDiperbarui.InputTextType)" name="x@(templateAktivitasGrid.RowIndex)_TanggalDiperbarui" id="x@(templateAktivitasGrid.RowIndex)_TanggalDiperbarui" data-table="TemplateAktivitas" data-field="x_TanggalDiperbarui" value="@Html.Raw(templateAktivitasGrid.TanggalDiperbarui.EditValue)" placeholder="@Html.Raw(HtmlEncode(templateAktivitasGrid.TanggalDiperbarui.PlaceHolder))" data-format-pattern="@(templateAktivitasGrid.TanggalDiperbarui.FormatPattern)"@Html.Raw(templateAktivitasGrid.TanggalDiperbarui.EditAttributes)>
+    <div class="invalid-feedback">@Html.Raw(templateAktivitasGrid.TanggalDiperbarui.GetErrorMessage())</div>
+    @if (!templateAktivitasGrid.TanggalDiperbarui.ReadOnly && !templateAktivitasGrid.TanggalDiperbarui.Disabled && !templateAktivitasGrid.TanggalDiperbarui.EditAttrs.Is("readonly") && !templateAktivitasGrid.TanggalDiperbarui.EditAttrs.Is("disabled")) {
+    <script>
+    loadjs.ready(["fTemplateAktivitasgrid", "datetimepicker"], function () {
+        let format = "@Html.Raw(DateFormat(9))", // DN
+            options = {
+                    localization: {
+                        locale: ew.LANGUAGE_ID + "-u-nu-" + ew.getNumberingSystem(),
+                        hourCycle: format.match(/H/) ? "h24" : "h12",
+                        format,
+                        ...ew.language.phrase("datetimepicker")
+                    },
+                    display: {
+                        icons: {
+                            previous: ew.IS_RTL ? "fa-solid fa-chevron-right" : "fa-solid fa-chevron-left",
+                            next: ew.IS_RTL ? "fa-solid fa-chevron-left" : "fa-solid fa-chevron-right"
+                        },
+                        components: {
+                            clock: !!format.match(/h/i) || !!format.match(/m/) || !!format.match(/s/i),
+                            hours: !!format.match(/h/i),
+                            minutes: !!format.match(/m/),
+                            seconds: !!format.match(/s/i)
+                        },
+                    theme: ew.getPreferredTheme()
+                    }
+                };
+        ew.createDateTimePicker("fTemplateAktivitasgrid", "x@(templateAktivitasGrid.RowIndex)_TanggalDiperbarui", ew.deepAssign({"useCurrent":false,"display":{"sideBySide":false}}, options));
+    });
+    </script>
+    }
+    </span>
+    <input type="hidden" data-table="TemplateAktivitas" data-field="x_TanggalDiperbarui" data-hidden="1" data-old name="o@(templateAktivitasGrid.RowIndex)_TanggalDiperbarui" id="o@(templateAktivitasGrid.RowIndex)_TanggalDiperbarui" value="@Html.Raw(HtmlEncode(templateAktivitasGrid.TanggalDiperbarui.OldValue))">
+    @* TanggalDiperbarui (end) *@
+} @* Add (end) *@
+@if (templateAktivitasGrid.RowType == RowType.Edit) { // Edit (begin)
+    @* TanggalDiperbarui (begin) *@
+    <span id="el@(templateAktivitasGrid.RowIndex == "$rowindex$" ? "$rowindex$" : templateAktivitasGrid.RowCount)_TemplateAktivitas_TanggalDiperbarui" class="el_TemplateAktivitas_TanggalDiperbarui">
+    <input type="@(templateAktivitasGrid.TanggalDiperbarui.InputTextType)" name="x@(templateAktivitasGrid.RowIndex)_TanggalDiperbarui" id="x@(templateAktivitasGrid.RowIndex)_TanggalDiperbarui" data-table="TemplateAktivitas" data-field="x_TanggalDiperbarui" value="@Html.Raw(templateAktivitasGrid.TanggalDiperbarui.EditValue)" placeholder="@Html.Raw(HtmlEncode(templateAktivitasGrid.TanggalDiperbarui.PlaceHolder))" data-format-pattern="@(templateAktivitasGrid.TanggalDiperbarui.FormatPattern)"@Html.Raw(templateAktivitasGrid.TanggalDiperbarui.EditAttributes)>
+    <div class="invalid-feedback">@Html.Raw(templateAktivitasGrid.TanggalDiperbarui.GetErrorMessage())</div>
+    @if (!templateAktivitasGrid.TanggalDiperbarui.ReadOnly && !templateAktivitasGrid.TanggalDiperbarui.Disabled && !templateAktivitasGrid.TanggalDiperbarui.EditAttrs.Is("readonly") && !templateAktivitasGrid.TanggalDiperbarui.EditAttrs.Is("disabled")) {
+    <script>
+    loadjs.ready(["fTemplateAktivitasgrid", "datetimepicker"], function () {
+        let format = "@Html.Raw(DateFormat(9))", // DN
+            options = {
+                    localization: {
+                        locale: ew.LANGUAGE_ID + "-u-nu-" + ew.getNumberingSystem(),
+                        hourCycle: format.match(/H/) ? "h24" : "h12",
+                        format,
+                        ...ew.language.phrase("datetimepicker")
+                    },
+                    display: {
+                        icons: {
+                            previous: ew.IS_RTL ? "fa-solid fa-chevron-right" : "fa-solid fa-chevron-left",
+                            next: ew.IS_RTL ? "fa-solid fa-chevron-left" : "fa-solid fa-chevron-right"
+                        },
+                        components: {
+                            clock: !!format.match(/h/i) || !!format.match(/m/) || !!format.match(/s/i),
+                            hours: !!format.match(/h/i),
+                            minutes: !!format.match(/m/),
+                            seconds: !!format.match(/s/i)
+                        },
+                    theme: ew.getPreferredTheme()
+                    }
+                };
+        ew.createDateTimePicker("fTemplateAktivitasgrid", "x@(templateAktivitasGrid.RowIndex)_TanggalDiperbarui", ew.deepAssign({"useCurrent":false,"display":{"sideBySide":false}}, options));
+    });
+    </script>
+    }
+    </span>
+    @* TanggalDiperbarui (end) *@
+} @* Edit (end) *@
+@if (templateAktivitasGrid.RowType == RowType.View) { // View (begin)
+    @* TanggalDiperbarui (begin) *@
+    <span id="el@(templateAktivitasGrid.RowIndex == "$rowindex$" ? "$rowindex$" : templateAktivitasGrid.RowCount)_TemplateAktivitas_TanggalDiperbarui" class="el_TemplateAktivitas_TanggalDiperbarui">
+    <span @Html.Raw(templateAktivitasGrid.TanggalDiperbarui.ViewAttributes)>
+    @Html.Raw(templateAktivitasGrid.TanggalDiperbarui.GetViewValue())</span>
+    </span>
+    if (templateAktivitasGrid.IsConfirm) {
+    <input type="hidden" data-table="TemplateAktivitas" data-field="x_TanggalDiperbarui" data-hidden="1" name="fTemplateAktivitasgrid$x@(templateAktivitasGrid.RowIndex)_TanggalDiperbarui" id="fTemplateAktivitasgrid$x@(templateAktivitasGrid.RowIndex)_TanggalDiperbarui" value="@Html.Raw(HtmlEncode(templateAktivitasGrid.TanggalDiperbarui.FormValue))">
+    <input type="hidden" data-table="TemplateAktivitas" data-field="x_TanggalDiperbarui" data-hidden="1" data-old name="fTemplateAktivitasgrid$o@(templateAktivitasGrid.RowIndex)_TanggalDiperbarui" id="fTemplateAktivitasgrid$o@(templateAktivitasGrid.RowIndex)_TanggalDiperbarui" value="@Html.Raw(HtmlEncode(templateAktivitasGrid.TanggalDiperbarui.OldValue))">
+    }
+    @* TanggalDiperbarui (end) *@
+} @* View (end) *@
+</td>
+    } @* templateAktivitasGrid.TanggalDiperbarui.Visible (end) *@
+    @if (templateAktivitasGrid.TipeAktivitas.Visible) { // templateAktivitasGrid.TipeAktivitas.Visible (begin)
+        <td data-name="TipeAktivitas" @Html.Raw(templateAktivitasGrid.TipeAktivitas.CellAttributes)>
+@if (templateAktivitasGrid.RowType == RowType.Add) { // Add (begin)
+    @* TipeAktivitas (begin) *@
+    <span id="el@(templateAktivitasGrid.RowIndex == "$rowindex$" ? "$rowindex$" : templateAktivitasGrid.RowCount)_TemplateAktivitas_TipeAktivitas" class="el_TemplateAktivitas_TipeAktivitas">
+        <select
+            id="x@(templateAktivitasGrid.RowIndex)_TipeAktivitas"
+            name="x@(templateAktivitasGrid.RowIndex)_TipeAktivitas"
+            class="form-select ew-select@(templateAktivitasGrid.TipeAktivitas.IsInvalidClass)"
+            data-select2-id="fTemplateAktivitasgrid_x@(templateAktivitasGrid.RowIndex)_TipeAktivitas"
+            data-table="TemplateAktivitas"
+            data-field="x_TipeAktivitas"
+            data-value-separator="@(templateAktivitasGrid.TipeAktivitas.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(templateAktivitasGrid.TipeAktivitas.PlaceHolder))"
+            @Html.Raw(templateAktivitasGrid.TipeAktivitas.EditAttributes)>
+            @(templateAktivitasGrid.TipeAktivitas.SelectOptionListHtml("x" + templateAktivitasGrid.RowIndex + "_TipeAktivitas"))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(templateAktivitasGrid.TipeAktivitas.GetErrorMessage())</div>
+    <script>
+    loadjs.ready("fTemplateAktivitasgrid", function() {
+        var options = { name: "x@(templateAktivitasGrid.RowIndex)_TipeAktivitas", selectId: "fTemplateAktivitasgrid_x@(templateAktivitasGrid.RowIndex)_TipeAktivitas" },
+            el = document.querySelector("select[data-select2-id='" + options.selectId + "']");
+        if (!el)
+            return;
+        options.closeOnSelect = !options.multiple;
+        options.dropdownParent = el.closest("#ew-modal-dialog, #ew-add-opt-dialog");
+        if (fTemplateAktivitasgrid.lists.TipeAktivitas?.lookupOptions.length) {
+            options.data = { id: "x@(templateAktivitasGrid.RowIndex)_TipeAktivitas", form: "fTemplateAktivitasgrid" };
+        } else {
+            options.ajax = { id: "x@(templateAktivitasGrid.RowIndex)_TipeAktivitas", form: "fTemplateAktivitasgrid", limit: ew.LOOKUP_PAGE_SIZE };
+        }
+        options.minimumResultsForSearch = Infinity;
+        options = Object.assign({}, ew.selectOptions, options, ew.vars.tables.TemplateAktivitas.fields.TipeAktivitas.selectOptions);
+        ew.createSelect(options);
+    });
+    </script>
+    </span>
+    <input type="hidden" data-table="TemplateAktivitas" data-field="x_TipeAktivitas" data-hidden="1" data-old name="o@(templateAktivitasGrid.RowIndex)_TipeAktivitas" id="o@(templateAktivitasGrid.RowIndex)_TipeAktivitas" value="@Html.Raw(HtmlEncode(templateAktivitasGrid.TipeAktivitas.OldValue))">
+    @* TipeAktivitas (end) *@
+} @* Add (end) *@
+@if (templateAktivitasGrid.RowType == RowType.Edit) { // Edit (begin)
+    @* TipeAktivitas (begin) *@
+    <span id="el@(templateAktivitasGrid.RowIndex == "$rowindex$" ? "$rowindex$" : templateAktivitasGrid.RowCount)_TemplateAktivitas_TipeAktivitas" class="el_TemplateAktivitas_TipeAktivitas">
+        <select
+            id="x@(templateAktivitasGrid.RowIndex)_TipeAktivitas"
+            name="x@(templateAktivitasGrid.RowIndex)_TipeAktivitas"
+            class="form-select ew-select@(templateAktivitasGrid.TipeAktivitas.IsInvalidClass)"
+            data-select2-id="fTemplateAktivitasgrid_x@(templateAktivitasGrid.RowIndex)_TipeAktivitas"
+            data-table="TemplateAktivitas"
+            data-field="x_TipeAktivitas"
+            data-value-separator="@(templateAktivitasGrid.TipeAktivitas.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(templateAktivitasGrid.TipeAktivitas.PlaceHolder))"
+            @Html.Raw(templateAktivitasGrid.TipeAktivitas.EditAttributes)>
+            @(templateAktivitasGrid.TipeAktivitas.SelectOptionListHtml("x" + templateAktivitasGrid.RowIndex + "_TipeAktivitas"))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(templateAktivitasGrid.TipeAktivitas.GetErrorMessage())</div>
+    <script>
+    loadjs.ready("fTemplateAktivitasgrid", function() {
+        var options = { name: "x@(templateAktivitasGrid.RowIndex)_TipeAktivitas", selectId: "fTemplateAktivitasgrid_x@(templateAktivitasGrid.RowIndex)_TipeAktivitas" },
+            el = document.querySelector("select[data-select2-id='" + options.selectId + "']");
+        if (!el)
+            return;
+        options.closeOnSelect = !options.multiple;
+        options.dropdownParent = el.closest("#ew-modal-dialog, #ew-add-opt-dialog");
+        if (fTemplateAktivitasgrid.lists.TipeAktivitas?.lookupOptions.length) {
+            options.data = { id: "x@(templateAktivitasGrid.RowIndex)_TipeAktivitas", form: "fTemplateAktivitasgrid" };
+        } else {
+            options.ajax = { id: "x@(templateAktivitasGrid.RowIndex)_TipeAktivitas", form: "fTemplateAktivitasgrid", limit: ew.LOOKUP_PAGE_SIZE };
+        }
+        options.minimumResultsForSearch = Infinity;
+        options = Object.assign({}, ew.selectOptions, options, ew.vars.tables.TemplateAktivitas.fields.TipeAktivitas.selectOptions);
+        ew.createSelect(options);
+    });
+    </script>
+    </span>
+    @* TipeAktivitas (end) *@
+} @* Edit (end) *@
+@if (templateAktivitasGrid.RowType == RowType.View) { // View (begin)
+    @* TipeAktivitas (begin) *@
+    <span id="el@(templateAktivitasGrid.RowIndex == "$rowindex$" ? "$rowindex$" : templateAktivitasGrid.RowCount)_TemplateAktivitas_TipeAktivitas" class="el_TemplateAktivitas_TipeAktivitas">
+    <span @Html.Raw(templateAktivitasGrid.TipeAktivitas.ViewAttributes)>
+    @Html.Raw(templateAktivitasGrid.TipeAktivitas.GetViewValue())</span>
+    </span>
+    if (templateAktivitasGrid.IsConfirm) {
+    <input type="hidden" data-table="TemplateAktivitas" data-field="x_TipeAktivitas" data-hidden="1" name="fTemplateAktivitasgrid$x@(templateAktivitasGrid.RowIndex)_TipeAktivitas" id="fTemplateAktivitasgrid$x@(templateAktivitasGrid.RowIndex)_TipeAktivitas" value="@Html.Raw(HtmlEncode(templateAktivitasGrid.TipeAktivitas.FormValue))">
+    <input type="hidden" data-table="TemplateAktivitas" data-field="x_TipeAktivitas" data-hidden="1" data-old name="fTemplateAktivitasgrid$o@(templateAktivitasGrid.RowIndex)_TipeAktivitas" id="fTemplateAktivitasgrid$o@(templateAktivitasGrid.RowIndex)_TipeAktivitas" value="@Html.Raw(HtmlEncode(templateAktivitasGrid.TipeAktivitas.OldValue))">
+    }
+    @* TipeAktivitas (end) *@
+} @* View (end) *@
+</td>
+    } @* templateAktivitasGrid.TipeAktivitas.Visible (end) *@
+    @if (templateAktivitasGrid._URL.Visible) { // templateAktivitasGrid._URL.Visible (begin)
+        <td data-name="_URL" @Html.Raw(templateAktivitasGrid._URL.CellAttributes)>
+@if (templateAktivitasGrid.RowType == RowType.Add) { // Add (begin)
+    @* _URL (begin) *@
+    <span id="el@(templateAktivitasGrid.RowIndex == "$rowindex$" ? "$rowindex$" : templateAktivitasGrid.RowCount)_TemplateAktivitas__URL" class="el_TemplateAktivitas__URL">
+    <input type="@(templateAktivitasGrid._URL.InputTextType)" name="x@(templateAktivitasGrid.RowIndex)__URL" id="x@(templateAktivitasGrid.RowIndex)__URL" data-table="TemplateAktivitas" data-field="x__URL" value="@Html.Raw(templateAktivitasGrid._URL.EditValue)" size="30" maxlength="255" placeholder="@Html.Raw(HtmlEncode(templateAktivitasGrid._URL.PlaceHolder))" data-format-pattern="@(templateAktivitasGrid._URL.FormatPattern)"@Html.Raw(templateAktivitasGrid._URL.EditAttributes)>
+    <div class="invalid-feedback">@Html.Raw(templateAktivitasGrid._URL.GetErrorMessage())</div>
+    </span>
+    <input type="hidden" data-table="TemplateAktivitas" data-field="x__URL" data-hidden="1" data-old name="o@(templateAktivitasGrid.RowIndex)__URL" id="o@(templateAktivitasGrid.RowIndex)__URL" value="@Html.Raw(HtmlEncode(templateAktivitasGrid._URL.OldValue))">
+    @* _URL (end) *@
+} @* Add (end) *@
+@if (templateAktivitasGrid.RowType == RowType.Edit) { // Edit (begin)
+    @* _URL (begin) *@
+    <span id="el@(templateAktivitasGrid.RowIndex == "$rowindex$" ? "$rowindex$" : templateAktivitasGrid.RowCount)_TemplateAktivitas__URL" class="el_TemplateAktivitas__URL">
+    <input type="@(templateAktivitasGrid._URL.InputTextType)" name="x@(templateAktivitasGrid.RowIndex)__URL" id="x@(templateAktivitasGrid.RowIndex)__URL" data-table="TemplateAktivitas" data-field="x__URL" value="@Html.Raw(templateAktivitasGrid._URL.EditValue)" size="30" maxlength="255" placeholder="@Html.Raw(HtmlEncode(templateAktivitasGrid._URL.PlaceHolder))" data-format-pattern="@(templateAktivitasGrid._URL.FormatPattern)"@Html.Raw(templateAktivitasGrid._URL.EditAttributes)>
+    <div class="invalid-feedback">@Html.Raw(templateAktivitasGrid._URL.GetErrorMessage())</div>
+    </span>
+    @* _URL (end) *@
+} @* Edit (end) *@
+@if (templateAktivitasGrid.RowType == RowType.View) { // View (begin)
+    @* _URL (begin) *@
+    <span id="el@(templateAktivitasGrid.RowIndex == "$rowindex$" ? "$rowindex$" : templateAktivitasGrid.RowCount)_TemplateAktivitas__URL" class="el_TemplateAktivitas__URL">
+    <span @Html.Raw(templateAktivitasGrid._URL.ViewAttributes)>
+    @Html.Raw(templateAktivitasGrid._URL.GetViewValue())</span>
+    </span>
+    if (templateAktivitasGrid.IsConfirm) {
+    <input type="hidden" data-table="TemplateAktivitas" data-field="x__URL" data-hidden="1" name="fTemplateAktivitasgrid$x@(templateAktivitasGrid.RowIndex)__URL" id="fTemplateAktivitasgrid$x@(templateAktivitasGrid.RowIndex)__URL" value="@Html.Raw(HtmlEncode(templateAktivitasGrid._URL.FormValue))">
+    <input type="hidden" data-table="TemplateAktivitas" data-field="x__URL" data-hidden="1" data-old name="fTemplateAktivitasgrid$o@(templateAktivitasGrid.RowIndex)__URL" id="fTemplateAktivitasgrid$o@(templateAktivitasGrid.RowIndex)__URL" value="@Html.Raw(HtmlEncode(templateAktivitasGrid._URL.OldValue))">
+    }
+    @* _URL (end) *@
+} @* View (end) *@
+</td>
+    } @* templateAktivitasGrid._URL.Visible (end) *@
+    @* Render list options (body, right) *@
+    @templateAktivitasGrid.ListOptions.RenderBody("right", templateAktivitasGrid.RowCount)
+    </tr>
+if (templateAktivitasGrid.RowType == RowType.Add || templateAktivitasGrid.RowType == RowType.Edit) {
+<script>
+loadjs.ready(["fTemplateAktivitasgrid","load"], () => fTemplateAktivitasgrid.updateLists(@(templateAktivitasGrid.RowIndex)@(templateAktivitasGrid.IsAdd || templateAktivitasGrid.IsEdit || templateAktivitasGrid.IsCopy || SameString(templateAktivitasGrid.RowIndex, "$rowindex$") ? ", true" : "")));
+</script>
+}
+    } @* End delete row checking *@
+    } @* End if *@
+
+    // Reset for template row
+    if (SameString(templateAktivitasGrid.RowIndex, "$rowindex$"))
+        templateAktivitasGrid.RowIndex = 0;
+
+    // Reset inline add/copy row
+    if ((templateAktivitasGrid.IsCopy || templateAktivitasGrid.IsAdd) && templateAktivitasGrid.RowIndex is int rowIndex2 && rowIndex2 == 0)
+        templateAktivitasGrid.RowIndex = 1;
+} @* End While *@
+</tbody>
+</table><!-- /.ew-table -->
+@if (templateAktivitasGrid.CurrentMode == "add" || templateAktivitasGrid.CurrentMode == "copy") {
+<input type="hidden" name="@(templateAktivitasGrid.FormKeyCountName)" id="@(templateAktivitasGrid.FormKeyCountName)" value="@(templateAktivitasGrid.KeyCount)">
+@Html.Raw(templateAktivitasGrid.MultiSelectKey)
+}
+@if (templateAktivitasGrid.CurrentMode == "edit") {
+<input type="hidden" name="@(templateAktivitasGrid.FormKeyCountName)" id="@(templateAktivitasGrid.FormKeyCountName)" value="@(templateAktivitasGrid.KeyCount)">
+@Html.Raw(templateAktivitasGrid.MultiSelectKey)
+}
+</div><!-- /.ew-grid-middle-panel -->
+@if (Empty(templateAktivitasGrid.CurrentMode)) {
+<input type="hidden" name="action" id="action" value="">
+}
+<input type="hidden" name="detailpage" value="fTemplateAktivitasgrid">
+</div><!-- /.ew-list-form -->
+@{ templateAktivitasGrid.CloseRecordset(); }
+@if (templateAktivitasGrid.ShowOtherOptions) {
+<div class="card-footer ew-grid-lower-panel">
+    @templateAktivitasGrid.OtherOptions.RenderBody("bottom")
+</div>
+}
+</div><!-- /.ew-grid -->
+} else { // Show other options
+<div class="ew-list-other-options">
+@templateAktivitasGrid.OtherOptions.ForEach(opt => opt.ButtonClass = "").RenderBody()
+</div>
+}
+</div>
+<div id="ew-footer-options">
+    @templateAktivitasGrid.FooterOptions.RenderBody()
+</div>
+</main>
+@if (!templateAktivitasGrid.IsExport()) {
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("TemplateAktivitas");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Write your table-specific startup script here
+    // document.write("page loaded");
+});
+</script>
+}
+@{
+    // Close Recordset
+    templateAktivitasGrid.CloseRecordset(); // DN
+    // Clear CurrentGrid
+    CurrentGrid = null;
+}

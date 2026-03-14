@@ -1,0 +1,297 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (templateProsesEdit.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = templateProsesEdit.UseLayout ? "_Layout" : "";
+}
+@templateProsesEdit.ShowPageHeader()
+@templateProsesEdit.ShowMessages()
+<main class="edit">
+<form name="fTemplateProsesedit" id="fTemplateProsesedit" class="@(templateProsesEdit.FormClassName)" action="@AppPath(CurrentPageName())" method="post" novalidate autocomplete="off">
+<script>
+var currentTable = @Html.Raw(ConvertToJson(templateProsesEdit.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { TemplateProses: currentTable } });
+var currentPageID = ew.PAGE_ID = "edit";
+var currentForm;
+var fTemplateProsesedit;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("fTemplateProsesedit")
+        .setPageId("edit")
+
+        // Add fields
+        .setFields([
+
+            ["IdTemplate", [fields.IdTemplate.visible && fields.IdTemplate.required ? ew.Validators.required(fields.IdTemplate.caption) : null], fields.IdTemplate.isInvalid],
+            ["UrutanProses", [fields.UrutanProses.visible && fields.UrutanProses.required ? ew.Validators.required(fields.UrutanProses.caption) : null, ew.Validators.integer], fields.UrutanProses.isInvalid],
+            ["NamaProses", [fields.NamaProses.visible && fields.NamaProses.required ? ew.Validators.required(fields.NamaProses.caption) : null], fields.NamaProses.isInvalid],
+            ["IdPIC", [fields.IdPIC.visible && fields.IdPIC.required ? ew.Validators.required(fields.IdPIC.caption) : null], fields.IdPIC.isInvalid],
+            ["IdTools", [fields.IdTools.visible && fields.IdTools.required ? ew.Validators.required(fields.IdTools.caption) : null], fields.IdTools.isInvalid],
+            ["Keterangan", [fields.Keterangan.visible && fields.Keterangan.required ? ew.Validators.required(fields.Keterangan.caption) : null], fields.Keterangan.isInvalid]
+        ])
+
+        // Form_CustomValidate
+        .setCustomValidate(
+            function(fobj) { // DO NOT CHANGE THIS LINE!
+                    // Your custom validation code here, return false if invalid.
+                    return true;
+                }
+        )
+
+        // Use JavaScript validation or not
+        .setValidateRequired(ew.CLIENT_VALIDATE)
+
+        // Dynamic selection lists
+        .setLists({
+            "IdTemplate": @Html.Raw(templateProsesEdit.IdTemplate.ToClientList(templateProsesEdit)),
+            "IdPIC": @Html.Raw(templateProsesEdit.IdPIC.ToClientList(templateProsesEdit)),
+            "IdTools": @Html.Raw(templateProsesEdit.IdTools.ToClientList(templateProsesEdit)),
+        })
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Client script
+    $('#fTemplateProsesedit').on('submit', function (e) {
+        e.preventDefault();
+        showLoading();
+        setTimeout(() => {
+            hideLoading();
+        }, 3000);
+        this.requestSubmit();
+    });
+});
+</script>
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+<input type="hidden" name="action" id="action" value="update">
+<input type="hidden" name="modal" value="@ConvertToInt(templateProsesEdit.IsModal)">
+@if (IsJsonResponse()) {
+<input type="hidden" name="json" value="1">
+}
+<input type="hidden" name="@(templateProsesEdit.OldKeyName)" value="@Html.Raw(templateProsesEdit.OldKey)">
+@if (templateProsesEdit.CurrentMasterTable == "MasterTemplate") {
+<input type="hidden" name="@Config.TableShowMaster" value="MasterTemplate">
+<input type="hidden" name="fk_IdTemplate" value="@(HtmlEncode(templateProsesEdit.IdTemplate.SessionValue))">
+}
+<div class="ew-edit-div"><!-- page* -->
+@if (templateProsesEdit.IdTemplate.Visible) { // templateProsesEdit.IdTemplate.Visible (begin)
+    <div id="r_IdTemplate" @Html.Raw(templateProsesEdit.IdTemplate.RowAttributes)>
+        <label id="elh_TemplateProses_IdTemplate" for="x_IdTemplate" class="@(templateProsesEdit.LeftColumnClass)">@Html.Raw(templateProsesEdit.IdTemplate.Caption)@Html.Raw(templateProsesEdit.IdTemplate.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(templateProsesEdit.RightColumnClass)"><div @Html.Raw(templateProsesEdit.IdTemplate.CellAttributes)>
+@if (!Empty(templateProsesEdit.IdTemplate.SessionValue)) {
+<span @Html.Raw(templateProsesEdit.IdTemplate.ViewAttributes)>
+<span class="form-control-plaintext">@Html.Raw(templateProsesEdit.IdTemplate.DisplayValue(templateProsesEdit.IdTemplate.ViewValue))</span></span>
+<input type="hidden" id="x_IdTemplate" name="x_IdTemplate" value="@(HtmlEncode(templateProsesEdit.IdTemplate.CurrentValue))" data-hidden="1">
+} else {
+<span id="el_TemplateProses_IdTemplate">
+    <select
+        id="x_IdTemplate"
+        name="x_IdTemplate"
+        class="form-select ew-select@(templateProsesEdit.IdTemplate.IsInvalidClass)"
+        data-select2-id="fTemplateProsesedit_x_IdTemplate"
+        data-table="TemplateProses"
+        data-field="x_IdTemplate"
+        data-value-separator="@(templateProsesEdit.IdTemplate.DisplayValueSeparatorAttribute)"
+        data-placeholder="@(HtmlEncode(templateProsesEdit.IdTemplate.PlaceHolder))"
+        @Html.Raw(templateProsesEdit.IdTemplate.EditAttributes)>
+        @(templateProsesEdit.IdTemplate.SelectOptionListHtml("x_IdTemplate"))
+    </select>
+    @Html.Raw(templateProsesEdit.IdTemplate.GetCustomMessage)
+    <div class="invalid-feedback">@Html.Raw(templateProsesEdit.IdTemplate.GetErrorMessage())</div>
+@Html.Raw(templateProsesEdit.IdTemplate.Lookup.GetParamTag(templateProsesEdit, "p_x_IdTemplate"))
+<script>
+loadjs.ready("fTemplateProsesedit", function() {
+    var options = { name: "x_IdTemplate", selectId: "fTemplateProsesedit_x_IdTemplate" },
+        el = document.querySelector("select[data-select2-id='" + options.selectId + "']");
+    if (!el)
+        return;
+    options.closeOnSelect = !options.multiple;
+    options.dropdownParent = el.closest("#ew-modal-dialog, #ew-add-opt-dialog");
+    if (fTemplateProsesedit.lists.IdTemplate?.lookupOptions.length) {
+        options.data = { id: "x_IdTemplate", form: "fTemplateProsesedit" };
+    } else {
+        options.ajax = { id: "x_IdTemplate", form: "fTemplateProsesedit", limit: ew.LOOKUP_PAGE_SIZE };
+    }
+    options.minimumInputLength = ew.selectMinimumInputLength;
+    options = Object.assign({}, ew.selectOptions, options, ew.vars.tables.TemplateProses.fields.IdTemplate.selectOptions);
+    ew.createSelect(options);
+});
+</script>
+</span>
+}
+</div></div>
+    </div>
+} @* templateProsesEdit.IdTemplate.Visible (end) *@
+@if (templateProsesEdit.UrutanProses.Visible) { // templateProsesEdit.UrutanProses.Visible (begin)
+    <div id="r_UrutanProses" @Html.Raw(templateProsesEdit.UrutanProses.RowAttributes)>
+        <label id="elh_TemplateProses_UrutanProses" for="x_UrutanProses" class="@(templateProsesEdit.LeftColumnClass)">@Html.Raw(templateProsesEdit.UrutanProses.Caption)@Html.Raw(templateProsesEdit.UrutanProses.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(templateProsesEdit.RightColumnClass)"><div @Html.Raw(templateProsesEdit.UrutanProses.CellAttributes)>
+<span id="el_TemplateProses_UrutanProses">
+<input type="@(templateProsesEdit.UrutanProses.InputTextType)" name="x_UrutanProses" id="x_UrutanProses" data-table="TemplateProses" data-field="x_UrutanProses" value="@Html.Raw(templateProsesEdit.UrutanProses.EditValue)" size="30" placeholder="@Html.Raw(HtmlEncode(templateProsesEdit.UrutanProses.PlaceHolder))" data-format-pattern="@(templateProsesEdit.UrutanProses.FormatPattern)"@Html.Raw(templateProsesEdit.UrutanProses.EditAttributes) aria-describedby="x_UrutanProses_help">
+@Html.Raw(templateProsesEdit.UrutanProses.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(templateProsesEdit.UrutanProses.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* templateProsesEdit.UrutanProses.Visible (end) *@
+@if (templateProsesEdit.NamaProses.Visible) { // templateProsesEdit.NamaProses.Visible (begin)
+    <div id="r_NamaProses" @Html.Raw(templateProsesEdit.NamaProses.RowAttributes)>
+        <label id="elh_TemplateProses_NamaProses" for="x_NamaProses" class="@(templateProsesEdit.LeftColumnClass)">@Html.Raw(templateProsesEdit.NamaProses.Caption)@Html.Raw(templateProsesEdit.NamaProses.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(templateProsesEdit.RightColumnClass)"><div @Html.Raw(templateProsesEdit.NamaProses.CellAttributes)>
+<span id="el_TemplateProses_NamaProses">
+<input type="@(templateProsesEdit.NamaProses.InputTextType)" name="x_NamaProses" id="x_NamaProses" data-table="TemplateProses" data-field="x_NamaProses" value="@Html.Raw(templateProsesEdit.NamaProses.EditValue)" size="30" maxlength="100" placeholder="@Html.Raw(HtmlEncode(templateProsesEdit.NamaProses.PlaceHolder))" data-format-pattern="@(templateProsesEdit.NamaProses.FormatPattern)"@Html.Raw(templateProsesEdit.NamaProses.EditAttributes) aria-describedby="x_NamaProses_help">
+@Html.Raw(templateProsesEdit.NamaProses.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(templateProsesEdit.NamaProses.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* templateProsesEdit.NamaProses.Visible (end) *@
+@if (templateProsesEdit.IdPIC.Visible) { // templateProsesEdit.IdPIC.Visible (begin)
+    <div id="r_IdPIC" @Html.Raw(templateProsesEdit.IdPIC.RowAttributes)>
+        <label id="elh_TemplateProses_IdPIC" for="x_IdPIC" class="@(templateProsesEdit.LeftColumnClass)">@Html.Raw(templateProsesEdit.IdPIC.Caption)@Html.Raw(templateProsesEdit.IdPIC.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(templateProsesEdit.RightColumnClass)"><div @Html.Raw(templateProsesEdit.IdPIC.CellAttributes)>
+<span id="el_TemplateProses_IdPIC">
+    <select
+        id="x_IdPIC"
+        name="x_IdPIC"
+        class="form-select ew-select@(templateProsesEdit.IdPIC.IsInvalidClass)"
+        data-select2-id="fTemplateProsesedit_x_IdPIC"
+        data-table="TemplateProses"
+        data-field="x_IdPIC"
+        data-value-separator="@(templateProsesEdit.IdPIC.DisplayValueSeparatorAttribute)"
+        data-placeholder="@(HtmlEncode(templateProsesEdit.IdPIC.PlaceHolder))"
+        @Html.Raw(templateProsesEdit.IdPIC.EditAttributes)>
+        @(templateProsesEdit.IdPIC.SelectOptionListHtml("x_IdPIC"))
+    </select>
+    @Html.Raw(templateProsesEdit.IdPIC.GetCustomMessage)
+    <div class="invalid-feedback">@Html.Raw(templateProsesEdit.IdPIC.GetErrorMessage())</div>
+@Html.Raw(templateProsesEdit.IdPIC.Lookup.GetParamTag(templateProsesEdit, "p_x_IdPIC"))
+<script>
+loadjs.ready("fTemplateProsesedit", function() {
+    var options = { name: "x_IdPIC", selectId: "fTemplateProsesedit_x_IdPIC" },
+        el = document.querySelector("select[data-select2-id='" + options.selectId + "']");
+    if (!el)
+        return;
+    options.closeOnSelect = !options.multiple;
+    options.dropdownParent = el.closest("#ew-modal-dialog, #ew-add-opt-dialog");
+    if (fTemplateProsesedit.lists.IdPIC?.lookupOptions.length) {
+        options.data = { id: "x_IdPIC", form: "fTemplateProsesedit" };
+    } else {
+        options.ajax = { id: "x_IdPIC", form: "fTemplateProsesedit", limit: ew.LOOKUP_PAGE_SIZE };
+    }
+    options.minimumInputLength = ew.selectMinimumInputLength;
+    options = Object.assign({}, ew.selectOptions, options, ew.vars.tables.TemplateProses.fields.IdPIC.selectOptions);
+    ew.createSelect(options);
+});
+</script>
+</span>
+</div></div>
+    </div>
+} @* templateProsesEdit.IdPIC.Visible (end) *@
+@if (templateProsesEdit.IdTools.Visible) { // templateProsesEdit.IdTools.Visible (begin)
+    <div id="r_IdTools" @Html.Raw(templateProsesEdit.IdTools.RowAttributes)>
+        <label id="elh_TemplateProses_IdTools" for="x_IdTools" class="@(templateProsesEdit.LeftColumnClass)">@Html.Raw(templateProsesEdit.IdTools.Caption)@Html.Raw(templateProsesEdit.IdTools.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(templateProsesEdit.RightColumnClass)"><div @Html.Raw(templateProsesEdit.IdTools.CellAttributes)>
+<span id="el_TemplateProses_IdTools">
+    <select
+        id="x_IdTools"
+        name="x_IdTools"
+        class="form-select ew-select@(templateProsesEdit.IdTools.IsInvalidClass)"
+        data-select2-id="fTemplateProsesedit_x_IdTools"
+        data-table="TemplateProses"
+        data-field="x_IdTools"
+        data-value-separator="@(templateProsesEdit.IdTools.DisplayValueSeparatorAttribute)"
+        data-placeholder="@(HtmlEncode(templateProsesEdit.IdTools.PlaceHolder))"
+        @Html.Raw(templateProsesEdit.IdTools.EditAttributes)>
+        @(templateProsesEdit.IdTools.SelectOptionListHtml("x_IdTools"))
+    </select>
+    @Html.Raw(templateProsesEdit.IdTools.GetCustomMessage)
+    <div class="invalid-feedback">@Html.Raw(templateProsesEdit.IdTools.GetErrorMessage())</div>
+@Html.Raw(templateProsesEdit.IdTools.Lookup.GetParamTag(templateProsesEdit, "p_x_IdTools"))
+<script>
+loadjs.ready("fTemplateProsesedit", function() {
+    var options = { name: "x_IdTools", selectId: "fTemplateProsesedit_x_IdTools" },
+        el = document.querySelector("select[data-select2-id='" + options.selectId + "']");
+    if (!el)
+        return;
+    options.closeOnSelect = !options.multiple;
+    options.dropdownParent = el.closest("#ew-modal-dialog, #ew-add-opt-dialog");
+    if (fTemplateProsesedit.lists.IdTools?.lookupOptions.length) {
+        options.data = { id: "x_IdTools", form: "fTemplateProsesedit" };
+    } else {
+        options.ajax = { id: "x_IdTools", form: "fTemplateProsesedit", limit: ew.LOOKUP_PAGE_SIZE };
+    }
+    options.minimumInputLength = ew.selectMinimumInputLength;
+    options = Object.assign({}, ew.selectOptions, options, ew.vars.tables.TemplateProses.fields.IdTools.selectOptions);
+    ew.createSelect(options);
+});
+</script>
+</span>
+</div></div>
+    </div>
+} @* templateProsesEdit.IdTools.Visible (end) *@
+@if (templateProsesEdit.Keterangan.Visible) { // templateProsesEdit.Keterangan.Visible (begin)
+    <div id="r_Keterangan" @Html.Raw(templateProsesEdit.Keterangan.RowAttributes)>
+        <label id="elh_TemplateProses_Keterangan" for="x_Keterangan" class="@(templateProsesEdit.LeftColumnClass)">@Html.Raw(templateProsesEdit.Keterangan.Caption)@Html.Raw(templateProsesEdit.Keterangan.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(templateProsesEdit.RightColumnClass)"><div @Html.Raw(templateProsesEdit.Keterangan.CellAttributes)>
+<span id="el_TemplateProses_Keterangan">
+<textarea data-table="TemplateProses" data-field="x_Keterangan" name="x_Keterangan" id="x_Keterangan" cols="35" rows="4" placeholder="@Html.Raw(HtmlEncode(templateProsesEdit.Keterangan.PlaceHolder))"@Html.Raw(templateProsesEdit.Keterangan.EditAttributes) aria-describedby="x_Keterangan_help">@(templateProsesEdit.Keterangan.EditValue)</textarea>
+@Html.Raw(templateProsesEdit.Keterangan.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(templateProsesEdit.Keterangan.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* templateProsesEdit.Keterangan.Visible (end) *@
+</div><!-- /page* -->
+    <input type="hidden" data-table="TemplateProses" data-field="x_IdTemplateProses" data-hidden="1" name="x_IdTemplateProses" id="x_IdTemplateProses" value="@Html.Raw(HtmlEncode(templateProsesEdit.IdTemplateProses.CurrentValue))">
+@{ templateProsesEdit.CloseRecordset(); }
+@if (templateProsesEdit.CurrentDetailTables.Contains("TemplateAktivitas") && Resolve("TemplateAktivitas").DetailEdit) {
+    if (!Empty(templateProsesEdit.CurrentDetailTable)) {
+<h4 class="ew-detail-caption">@Html.Raw(Language.TablePhrase("TemplateAktivitas", "TblCaption"))</h4>
+    }
+        @await Html.PartialAsync("TemplateAktivitasGrid")
+    View = this;
+}
+@Html.Raw(templateProsesEdit.IsModal ? "<template class=\"ew-modal-buttons\">" : "<div class=\"row ew-buttons\">")<!-- buttons .row -->
+    <div class="@(templateProsesEdit.OffsetColumnClass)"><!-- buttons offset -->
+    <button class="btn btn-primary ew-btn" name="btn-action" id="btn-action" type="submit" form="fTemplateProsesedit">@Html.Raw(Language.Phrase("SaveBtn"))</button>
+@if (IsJsonResponse()) {
+    <button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" data-bs-dismiss="modal">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+} else {
+    <button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" form="fTemplateProsesedit" data-href="@AppPath(templateProsesEdit.ReturnUrl)">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+}
+    </div><!-- /buttons offset -->
+@Html.Raw(templateProsesEdit.IsModal ? "</template>" : "</div>")<!-- /buttons .row -->
+</form>
+</main>
+@templateProsesEdit.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("TemplateProses");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Write your table-specific startup script here
+    // document.write("page loaded");
+});
+</script>

@@ -1,0 +1,1172 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (rencanaPenyaluranList.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = rencanaPenyaluranList.UseLayout ? "_Layout" : "";
+}
+@if (!rencanaPenyaluranList.IsExport()) {
+<script>
+var currentTable = @Html.Raw(ConvertToJson(rencanaPenyaluranList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { RencanaPenyaluran: currentTable } });
+var currentPageID = ew.PAGE_ID = "list";
+var currentForm;
+var @(rencanaPenyaluranList.FormName);
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("@(rencanaPenyaluranList.FormName)")
+        .setPageId("list")
+        .setSubmitWithFetch(@(rencanaPenyaluranList.UseAjaxActions ? "true" : "false"))
+        .setFormKeyCountName("@(rencanaPenyaluranList.FormKeyCountName)")
+
+        // Dynamic selection lists
+        .setLists({
+            "LinkProses": @Html.Raw(rencanaPenyaluranList.LinkProses.ToClientList(rencanaPenyaluranList)),
+            "StatusProses": @Html.Raw(rencanaPenyaluranList.StatusProses.ToClientList(rencanaPenyaluranList)),
+            "PersentaseProgress": @Html.Raw(rencanaPenyaluranList.PersentaseProgress.ToClientList(rencanaPenyaluranList)),
+            "IdPlant": @Html.Raw(rencanaPenyaluranList.IdPlant.ToClientList(rencanaPenyaluranList)),
+            "TipeProdukSTS": @Html.Raw(rencanaPenyaluranList.TipeProdukSTS.ToClientList(rencanaPenyaluranList)),
+            "IdModa": @Html.Raw(rencanaPenyaluranList.IdModa.ToClientList(rencanaPenyaluranList)),
+            "TipePenyaluran": @Html.Raw(rencanaPenyaluranList.TipePenyaluran.ToClientList(rencanaPenyaluranList)),
+            "KategoriPenyaluran": @Html.Raw(rencanaPenyaluranList.KategoriPenyaluran.ToClientList(rencanaPenyaluranList)),
+            "Tujuan": @Html.Raw(rencanaPenyaluranList.Tujuan.ToClientList(rencanaPenyaluranList)),
+            "DibuatOleh": @Html.Raw(rencanaPenyaluranList.DibuatOleh.ToClientList(rencanaPenyaluranList)),
+            "TanggalDibuat": @Html.Raw(rencanaPenyaluranList.TanggalDibuat.ToClientList(rencanaPenyaluranList)),
+            "DiperbaruiOleh": @Html.Raw(rencanaPenyaluranList.DiperbaruiOleh.ToClientList(rencanaPenyaluranList)),
+            "TanggalDiperbarui": @Html.Raw(rencanaPenyaluranList.TanggalDiperbarui.ToClientList(rencanaPenyaluranList)),
+        })
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Write your client script here, no need to add script tags.
+});
+</script>
+}
+@if (!rencanaPenyaluranList.IsExport()) {
+<div class="btn-toolbar ew-toolbar">
+@if (rencanaPenyaluranList.TotalRecords > 0 && rencanaPenyaluranList.ExportOptions.Visible) {
+    rencanaPenyaluranList.ExportOptions.Render("body");
+}
+@if (rencanaPenyaluranList.ImportOptions.Visible) {
+    rencanaPenyaluranList.ImportOptions.Render("body");
+}
+@if (rencanaPenyaluranList.SearchOptions.Visible) {
+    rencanaPenyaluranList.SearchOptions.Render("body");
+}
+@if (rencanaPenyaluranList.FilterOptions.Visible) {
+    rencanaPenyaluranList.FilterOptions.Render("body");
+}
+</div>
+}
+@if (rencanaPenyaluranList.ShowCurrentFilter) {
+    rencanaPenyaluranList.ShowFilterList();
+}
+@if (!rencanaPenyaluranList.IsModal) {
+<form name="fRencanaPenyaluransrch" id="fRencanaPenyaluransrch" class="ew-form ew-ext-search-form" action="@AppPath(CurrentPageName())" novalidate autocomplete="off">
+<div id="fRencanaPenyaluransrch_search_panel" class="mb-2 mb-sm-0 @(rencanaPenyaluranList.SearchPanelClass)"><!-- .ew-search-panel -->
+<script>
+var currentTable = @Html.Raw(ConvertToJson(rencanaPenyaluranList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { RencanaPenyaluran: currentTable } });
+var currentForm;
+var fRencanaPenyaluransrch, currentSearchForm, currentAdvancedSearchForm;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery,
+        fields = currentTable.fields;
+
+    // Form object for search
+    let form = new ew.FormBuilder()
+        .setId("fRencanaPenyaluransrch")
+        .setPageId("list")
+@if (rencanaPenyaluranList.UseAjaxActions) {
+        <text>.setSubmitWithFetch(true)</text>
+}
+
+        // Add fields
+        .setFields([
+        ])
+        // Validate form
+        .setValidate(
+            async function () {
+                if (!this.validateRequired)
+                    return true; // Ignore validation
+                let fobj = this.getForm();
+
+                // Validate fields
+                if (!this.validateFields())
+                    return false;
+
+                // Call Form_CustomValidate event
+                if (!(await this.customValidate?.(fobj) ?? true)) {
+                    this.focus();
+                    return false;
+                }
+                return true;
+            }
+        )
+
+        // Form_CustomValidate
+        .setCustomValidate(
+            function(fobj) { // DO NOT CHANGE THIS LINE!
+                    // Your custom validation code here, return false if invalid.
+                    return true;
+                }
+        )
+
+        // Use JavaScript validation or not
+        .setValidateRequired(ew.CLIENT_VALIDATE)
+
+        // Dynamic selection lists
+        .setLists({
+            "NomorRencanaPenyaluran": @Html.Raw(rencanaPenyaluranList.NomorRencanaPenyaluran.ToClientList(rencanaPenyaluranList)),
+            "LinkProses": @Html.Raw(rencanaPenyaluranList.LinkProses.ToClientList(rencanaPenyaluranList)),
+            "IdPenimbunan": @Html.Raw(rencanaPenyaluranList.IdPenimbunan.ToClientList(rencanaPenyaluranList)),
+            "IdTemplate": @Html.Raw(rencanaPenyaluranList.IdTemplate.ToClientList(rencanaPenyaluranList)),
+            "StatusProses": @Html.Raw(rencanaPenyaluranList.StatusProses.ToClientList(rencanaPenyaluranList)),
+            "PersentaseProgress": @Html.Raw(rencanaPenyaluranList.PersentaseProgress.ToClientList(rencanaPenyaluranList)),
+            "IdPlant": @Html.Raw(rencanaPenyaluranList.IdPlant.ToClientList(rencanaPenyaluranList)),
+            "TipeProdukSTS": @Html.Raw(rencanaPenyaluranList.TipeProdukSTS.ToClientList(rencanaPenyaluranList)),
+            "IdModa": @Html.Raw(rencanaPenyaluranList.IdModa.ToClientList(rencanaPenyaluranList)),
+            "TipePenyaluran": @Html.Raw(rencanaPenyaluranList.TipePenyaluran.ToClientList(rencanaPenyaluranList)),
+            "KategoriPenyaluran": @Html.Raw(rencanaPenyaluranList.KategoriPenyaluran.ToClientList(rencanaPenyaluranList)),
+            "Tujuan": @Html.Raw(rencanaPenyaluranList.Tujuan.ToClientList(rencanaPenyaluranList)),
+            "Catatan": @Html.Raw(rencanaPenyaluranList.Catatan.ToClientList(rencanaPenyaluranList)),
+            "DibuatOleh": @Html.Raw(rencanaPenyaluranList.DibuatOleh.ToClientList(rencanaPenyaluranList)),
+            "TanggalDibuat": @Html.Raw(rencanaPenyaluranList.TanggalDibuat.ToClientList(rencanaPenyaluranList)),
+            "DiperbaruiOleh": @Html.Raw(rencanaPenyaluranList.DiperbaruiOleh.ToClientList(rencanaPenyaluranList)),
+            "TanggalDiperbarui": @Html.Raw(rencanaPenyaluranList.TanggalDiperbarui.ToClientList(rencanaPenyaluranList)),
+        })
+
+        // Filters
+        .setFilterList(@Html.Raw(rencanaPenyaluranList.GetFilterList()))
+        .build();
+    window[form.id] = form;
+    currentSearchForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<input type="hidden" name="cmd" value="search">
+@if (Security.CanSearch) {
+if (!rencanaPenyaluranList.IsExport() && Empty(rencanaPenyaluranList.CurrentAction) && rencanaPenyaluranList.HasSearchFields()) { @* Show search form (begin) *@
+<div class="ew-extended-search container-fluid ps-2">
+<div class="row mb-0@(rencanaPenyaluranList.SearchFieldsPerRow > 0 ? " row-cols-sm-" + rencanaPenyaluranList.SearchFieldsPerRow : "")">
+@{
+    // Render search row
+    rencanaPenyaluranList.RowType = RowType.Search;
+    rencanaPenyaluranList.ResetAttributes();
+    await rencanaPenyaluranList.RenderRow();
+}
+@if (rencanaPenyaluranList.NomorRencanaPenyaluran.Visible) { // rencanaPenyaluranList.NomorRencanaPenyaluran.Visible (begin)
+    if (!rencanaPenyaluranList.NomorRencanaPenyaluran.UseFilter) {
+        rencanaPenyaluranList.SearchColumnCount++;
+    }
+    <div id="xs_NomorRencanaPenyaluran" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(rencanaPenyaluranList.NomorRencanaPenyaluran.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_NomorRencanaPenyaluran"
+            name="x_NomorRencanaPenyaluran[]"
+            class="form-control ew-select@(rencanaPenyaluranList.NomorRencanaPenyaluran.IsInvalidClass)"
+            data-select2-id="fRencanaPenyaluransrch_x_NomorRencanaPenyaluran"
+            data-table="RencanaPenyaluran"
+            data-field="x_NomorRencanaPenyaluran"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(rencanaPenyaluranList.NomorRencanaPenyaluran.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(rencanaPenyaluranList.NomorRencanaPenyaluran.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(rencanaPenyaluranList.NomorRencanaPenyaluran.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(rencanaPenyaluranList.NomorRencanaPenyaluran.EditAttributes)>
+            @(rencanaPenyaluranList.NomorRencanaPenyaluran.SelectOptionListHtml("x_NomorRencanaPenyaluran", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(rencanaPenyaluranList.NomorRencanaPenyaluran.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fRencanaPenyaluransrch", function() {
+            var options = {
+                name: "x_NomorRencanaPenyaluran",
+                selectId: "fRencanaPenyaluransrch_x_NomorRencanaPenyaluran",
+                ajax: { id: "x_NomorRencanaPenyaluran", form: "fRencanaPenyaluransrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.RencanaPenyaluran.fields.NomorRencanaPenyaluran.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* rencanaPenyaluranList.NomorRencanaPenyaluran.Visible (end) *@
+@if (rencanaPenyaluranList.LinkProses.Visible) { // rencanaPenyaluranList.LinkProses.Visible (begin)
+    if (!rencanaPenyaluranList.LinkProses.UseFilter) {
+        rencanaPenyaluranList.SearchColumnCount++;
+    }
+    <div id="xs_LinkProses" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(rencanaPenyaluranList.LinkProses.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_LinkProses"
+            name="x_LinkProses[]"
+            class="form-control ew-select@(rencanaPenyaluranList.LinkProses.IsInvalidClass)"
+            data-select2-id="fRencanaPenyaluransrch_x_LinkProses"
+            data-table="RencanaPenyaluran"
+            data-field="x_LinkProses"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(rencanaPenyaluranList.LinkProses.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(rencanaPenyaluranList.LinkProses.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(rencanaPenyaluranList.LinkProses.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(rencanaPenyaluranList.LinkProses.EditAttributes)>
+            @(rencanaPenyaluranList.LinkProses.SelectOptionListHtml("x_LinkProses", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(rencanaPenyaluranList.LinkProses.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fRencanaPenyaluransrch", function() {
+            var options = {
+                name: "x_LinkProses",
+                selectId: "fRencanaPenyaluransrch_x_LinkProses",
+                ajax: { id: "x_LinkProses", form: "fRencanaPenyaluransrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.RencanaPenyaluran.fields.LinkProses.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* rencanaPenyaluranList.LinkProses.Visible (end) *@
+@if (rencanaPenyaluranList.IdPenimbunan.Visible) { // rencanaPenyaluranList.IdPenimbunan.Visible (begin)
+    if (!rencanaPenyaluranList.IdPenimbunan.UseFilter) {
+        rencanaPenyaluranList.SearchColumnCount++;
+    }
+    <div id="xs_IdPenimbunan" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(rencanaPenyaluranList.IdPenimbunan.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_IdPenimbunan"
+            name="x_IdPenimbunan[]"
+            class="form-control ew-select@(rencanaPenyaluranList.IdPenimbunan.IsInvalidClass)"
+            data-select2-id="fRencanaPenyaluransrch_x_IdPenimbunan"
+            data-table="RencanaPenyaluran"
+            data-field="x_IdPenimbunan"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(rencanaPenyaluranList.IdPenimbunan.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(rencanaPenyaluranList.IdPenimbunan.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(rencanaPenyaluranList.IdPenimbunan.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(rencanaPenyaluranList.IdPenimbunan.EditAttributes)>
+            @(rencanaPenyaluranList.IdPenimbunan.SelectOptionListHtml("x_IdPenimbunan", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(rencanaPenyaluranList.IdPenimbunan.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fRencanaPenyaluransrch", function() {
+            var options = {
+                name: "x_IdPenimbunan",
+                selectId: "fRencanaPenyaluransrch_x_IdPenimbunan",
+                ajax: { id: "x_IdPenimbunan", form: "fRencanaPenyaluransrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.RencanaPenyaluran.fields.IdPenimbunan.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* rencanaPenyaluranList.IdPenimbunan.Visible (end) *@
+@if (rencanaPenyaluranList.IdTemplate.Visible) { // rencanaPenyaluranList.IdTemplate.Visible (begin)
+    if (!rencanaPenyaluranList.IdTemplate.UseFilter) {
+        rencanaPenyaluranList.SearchColumnCount++;
+    }
+    <div id="xs_IdTemplate" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(rencanaPenyaluranList.IdTemplate.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_IdTemplate"
+            name="x_IdTemplate[]"
+            class="form-control ew-select@(rencanaPenyaluranList.IdTemplate.IsInvalidClass)"
+            data-select2-id="fRencanaPenyaluransrch_x_IdTemplate"
+            data-table="RencanaPenyaluran"
+            data-field="x_IdTemplate"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(rencanaPenyaluranList.IdTemplate.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(rencanaPenyaluranList.IdTemplate.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(rencanaPenyaluranList.IdTemplate.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(rencanaPenyaluranList.IdTemplate.EditAttributes)>
+            @(rencanaPenyaluranList.IdTemplate.SelectOptionListHtml("x_IdTemplate", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(rencanaPenyaluranList.IdTemplate.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fRencanaPenyaluransrch", function() {
+            var options = {
+                name: "x_IdTemplate",
+                selectId: "fRencanaPenyaluransrch_x_IdTemplate",
+                ajax: { id: "x_IdTemplate", form: "fRencanaPenyaluransrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.RencanaPenyaluran.fields.IdTemplate.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* rencanaPenyaluranList.IdTemplate.Visible (end) *@
+@if (rencanaPenyaluranList.StatusProses.Visible) { // rencanaPenyaluranList.StatusProses.Visible (begin)
+    if (!rencanaPenyaluranList.StatusProses.UseFilter) {
+        rencanaPenyaluranList.SearchColumnCount++;
+    }
+    <div id="xs_StatusProses" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(rencanaPenyaluranList.StatusProses.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_StatusProses"
+            name="x_StatusProses[]"
+            class="form-control ew-select@(rencanaPenyaluranList.StatusProses.IsInvalidClass)"
+            data-select2-id="fRencanaPenyaluransrch_x_StatusProses"
+            data-table="RencanaPenyaluran"
+            data-field="x_StatusProses"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(rencanaPenyaluranList.StatusProses.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(rencanaPenyaluranList.StatusProses.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(rencanaPenyaluranList.StatusProses.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(rencanaPenyaluranList.StatusProses.EditAttributes)>
+            @(rencanaPenyaluranList.StatusProses.SelectOptionListHtml("x_StatusProses", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(rencanaPenyaluranList.StatusProses.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fRencanaPenyaluransrch", function() {
+            var options = {
+                name: "x_StatusProses",
+                selectId: "fRencanaPenyaluransrch_x_StatusProses",
+                ajax: { id: "x_StatusProses", form: "fRencanaPenyaluransrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.RencanaPenyaluran.fields.StatusProses.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* rencanaPenyaluranList.StatusProses.Visible (end) *@
+@if (rencanaPenyaluranList.PersentaseProgress.Visible) { // rencanaPenyaluranList.PersentaseProgress.Visible (begin)
+    if (!rencanaPenyaluranList.PersentaseProgress.UseFilter) {
+        rencanaPenyaluranList.SearchColumnCount++;
+    }
+    <div id="xs_PersentaseProgress" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(rencanaPenyaluranList.PersentaseProgress.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_PersentaseProgress"
+            name="x_PersentaseProgress[]"
+            class="form-control ew-select@(rencanaPenyaluranList.PersentaseProgress.IsInvalidClass)"
+            data-select2-id="fRencanaPenyaluransrch_x_PersentaseProgress"
+            data-table="RencanaPenyaluran"
+            data-field="x_PersentaseProgress"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(rencanaPenyaluranList.PersentaseProgress.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(rencanaPenyaluranList.PersentaseProgress.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(rencanaPenyaluranList.PersentaseProgress.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(rencanaPenyaluranList.PersentaseProgress.EditAttributes)>
+            @(rencanaPenyaluranList.PersentaseProgress.SelectOptionListHtml("x_PersentaseProgress", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(rencanaPenyaluranList.PersentaseProgress.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fRencanaPenyaluransrch", function() {
+            var options = {
+                name: "x_PersentaseProgress",
+                selectId: "fRencanaPenyaluransrch_x_PersentaseProgress",
+                ajax: { id: "x_PersentaseProgress", form: "fRencanaPenyaluransrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.RencanaPenyaluran.fields.PersentaseProgress.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* rencanaPenyaluranList.PersentaseProgress.Visible (end) *@
+@if (rencanaPenyaluranList.IdPlant.Visible) { // rencanaPenyaluranList.IdPlant.Visible (begin)
+    if (!rencanaPenyaluranList.IdPlant.UseFilter) {
+        rencanaPenyaluranList.SearchColumnCount++;
+    }
+    <div id="xs_IdPlant" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(rencanaPenyaluranList.IdPlant.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_IdPlant"
+            name="x_IdPlant[]"
+            class="form-control ew-select@(rencanaPenyaluranList.IdPlant.IsInvalidClass)"
+            data-select2-id="fRencanaPenyaluransrch_x_IdPlant"
+            data-table="RencanaPenyaluran"
+            data-field="x_IdPlant"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(rencanaPenyaluranList.IdPlant.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(rencanaPenyaluranList.IdPlant.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(rencanaPenyaluranList.IdPlant.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(rencanaPenyaluranList.IdPlant.EditAttributes)>
+            @(rencanaPenyaluranList.IdPlant.SelectOptionListHtml("x_IdPlant", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(rencanaPenyaluranList.IdPlant.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fRencanaPenyaluransrch", function() {
+            var options = {
+                name: "x_IdPlant",
+                selectId: "fRencanaPenyaluransrch_x_IdPlant",
+                ajax: { id: "x_IdPlant", form: "fRencanaPenyaluransrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.RencanaPenyaluran.fields.IdPlant.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* rencanaPenyaluranList.IdPlant.Visible (end) *@
+@if (rencanaPenyaluranList.TipeProdukSTS.Visible) { // rencanaPenyaluranList.TipeProdukSTS.Visible (begin)
+    if (!rencanaPenyaluranList.TipeProdukSTS.UseFilter) {
+        rencanaPenyaluranList.SearchColumnCount++;
+    }
+    <div id="xs_TipeProdukSTS" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(rencanaPenyaluranList.TipeProdukSTS.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_TipeProdukSTS"
+            name="x_TipeProdukSTS[]"
+            class="form-control ew-select@(rencanaPenyaluranList.TipeProdukSTS.IsInvalidClass)"
+            data-select2-id="fRencanaPenyaluransrch_x_TipeProdukSTS"
+            data-table="RencanaPenyaluran"
+            data-field="x_TipeProdukSTS"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(rencanaPenyaluranList.TipeProdukSTS.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(rencanaPenyaluranList.TipeProdukSTS.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(rencanaPenyaluranList.TipeProdukSTS.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(rencanaPenyaluranList.TipeProdukSTS.EditAttributes)>
+            @(rencanaPenyaluranList.TipeProdukSTS.SelectOptionListHtml("x_TipeProdukSTS", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(rencanaPenyaluranList.TipeProdukSTS.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fRencanaPenyaluransrch", function() {
+            var options = {
+                name: "x_TipeProdukSTS",
+                selectId: "fRencanaPenyaluransrch_x_TipeProdukSTS",
+                ajax: { id: "x_TipeProdukSTS", form: "fRencanaPenyaluransrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.RencanaPenyaluran.fields.TipeProdukSTS.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* rencanaPenyaluranList.TipeProdukSTS.Visible (end) *@
+@if (rencanaPenyaluranList.IdModa.Visible) { // rencanaPenyaluranList.IdModa.Visible (begin)
+    if (!rencanaPenyaluranList.IdModa.UseFilter) {
+        rencanaPenyaluranList.SearchColumnCount++;
+    }
+    <div id="xs_IdModa" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(rencanaPenyaluranList.IdModa.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_IdModa"
+            name="x_IdModa[]"
+            class="form-control ew-select@(rencanaPenyaluranList.IdModa.IsInvalidClass)"
+            data-select2-id="fRencanaPenyaluransrch_x_IdModa"
+            data-table="RencanaPenyaluran"
+            data-field="x_IdModa"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(rencanaPenyaluranList.IdModa.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(rencanaPenyaluranList.IdModa.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(rencanaPenyaluranList.IdModa.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(rencanaPenyaluranList.IdModa.EditAttributes)>
+            @(rencanaPenyaluranList.IdModa.SelectOptionListHtml("x_IdModa", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(rencanaPenyaluranList.IdModa.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fRencanaPenyaluransrch", function() {
+            var options = {
+                name: "x_IdModa",
+                selectId: "fRencanaPenyaluransrch_x_IdModa",
+                ajax: { id: "x_IdModa", form: "fRencanaPenyaluransrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.RencanaPenyaluran.fields.IdModa.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* rencanaPenyaluranList.IdModa.Visible (end) *@
+@if (rencanaPenyaluranList.TipePenyaluran.Visible) { // rencanaPenyaluranList.TipePenyaluran.Visible (begin)
+    if (!rencanaPenyaluranList.TipePenyaluran.UseFilter) {
+        rencanaPenyaluranList.SearchColumnCount++;
+    }
+    <div id="xs_TipePenyaluran" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(rencanaPenyaluranList.TipePenyaluran.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_TipePenyaluran"
+            name="x_TipePenyaluran[]"
+            class="form-control ew-select@(rencanaPenyaluranList.TipePenyaluran.IsInvalidClass)"
+            data-select2-id="fRencanaPenyaluransrch_x_TipePenyaluran"
+            data-table="RencanaPenyaluran"
+            data-field="x_TipePenyaluran"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(rencanaPenyaluranList.TipePenyaluran.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(rencanaPenyaluranList.TipePenyaluran.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(rencanaPenyaluranList.TipePenyaluran.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(rencanaPenyaluranList.TipePenyaluran.EditAttributes)>
+            @(rencanaPenyaluranList.TipePenyaluran.SelectOptionListHtml("x_TipePenyaluran", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(rencanaPenyaluranList.TipePenyaluran.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fRencanaPenyaluransrch", function() {
+            var options = {
+                name: "x_TipePenyaluran",
+                selectId: "fRencanaPenyaluransrch_x_TipePenyaluran",
+                ajax: { id: "x_TipePenyaluran", form: "fRencanaPenyaluransrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.RencanaPenyaluran.fields.TipePenyaluran.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* rencanaPenyaluranList.TipePenyaluran.Visible (end) *@
+@if (rencanaPenyaluranList.KategoriPenyaluran.Visible) { // rencanaPenyaluranList.KategoriPenyaluran.Visible (begin)
+    if (!rencanaPenyaluranList.KategoriPenyaluran.UseFilter) {
+        rencanaPenyaluranList.SearchColumnCount++;
+    }
+    <div id="xs_KategoriPenyaluran" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(rencanaPenyaluranList.KategoriPenyaluran.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_KategoriPenyaluran"
+            name="x_KategoriPenyaluran[]"
+            class="form-control ew-select@(rencanaPenyaluranList.KategoriPenyaluran.IsInvalidClass)"
+            data-select2-id="fRencanaPenyaluransrch_x_KategoriPenyaluran"
+            data-table="RencanaPenyaluran"
+            data-field="x_KategoriPenyaluran"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(rencanaPenyaluranList.KategoriPenyaluran.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(rencanaPenyaluranList.KategoriPenyaluran.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(rencanaPenyaluranList.KategoriPenyaluran.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(rencanaPenyaluranList.KategoriPenyaluran.EditAttributes)>
+            @(rencanaPenyaluranList.KategoriPenyaluran.SelectOptionListHtml("x_KategoriPenyaluran", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(rencanaPenyaluranList.KategoriPenyaluran.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fRencanaPenyaluransrch", function() {
+            var options = {
+                name: "x_KategoriPenyaluran",
+                selectId: "fRencanaPenyaluransrch_x_KategoriPenyaluran",
+                ajax: { id: "x_KategoriPenyaluran", form: "fRencanaPenyaluransrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.RencanaPenyaluran.fields.KategoriPenyaluran.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* rencanaPenyaluranList.KategoriPenyaluran.Visible (end) *@
+@if (rencanaPenyaluranList.Tujuan.Visible) { // rencanaPenyaluranList.Tujuan.Visible (begin)
+    if (!rencanaPenyaluranList.Tujuan.UseFilter) {
+        rencanaPenyaluranList.SearchColumnCount++;
+    }
+    <div id="xs_Tujuan" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(rencanaPenyaluranList.Tujuan.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_Tujuan"
+            name="x_Tujuan[]"
+            class="form-control ew-select@(rencanaPenyaluranList.Tujuan.IsInvalidClass)"
+            data-select2-id="fRencanaPenyaluransrch_x_Tujuan"
+            data-table="RencanaPenyaluran"
+            data-field="x_Tujuan"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(rencanaPenyaluranList.Tujuan.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(rencanaPenyaluranList.Tujuan.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(rencanaPenyaluranList.Tujuan.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(rencanaPenyaluranList.Tujuan.EditAttributes)>
+            @(rencanaPenyaluranList.Tujuan.SelectOptionListHtml("x_Tujuan", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(rencanaPenyaluranList.Tujuan.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fRencanaPenyaluransrch", function() {
+            var options = {
+                name: "x_Tujuan",
+                selectId: "fRencanaPenyaluransrch_x_Tujuan",
+                ajax: { id: "x_Tujuan", form: "fRencanaPenyaluransrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.RencanaPenyaluran.fields.Tujuan.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* rencanaPenyaluranList.Tujuan.Visible (end) *@
+@if (rencanaPenyaluranList.Catatan.Visible) { // rencanaPenyaluranList.Catatan.Visible (begin)
+    if (!rencanaPenyaluranList.Catatan.UseFilter) {
+        rencanaPenyaluranList.SearchColumnCount++;
+    }
+    <div id="xs_Catatan" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(rencanaPenyaluranList.Catatan.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_Catatan"
+            name="x_Catatan[]"
+            class="form-control ew-select@(rencanaPenyaluranList.Catatan.IsInvalidClass)"
+            data-select2-id="fRencanaPenyaluransrch_x_Catatan"
+            data-table="RencanaPenyaluran"
+            data-field="x_Catatan"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(rencanaPenyaluranList.Catatan.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(rencanaPenyaluranList.Catatan.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(rencanaPenyaluranList.Catatan.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(rencanaPenyaluranList.Catatan.EditAttributes)>
+            @(rencanaPenyaluranList.Catatan.SelectOptionListHtml("x_Catatan", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(rencanaPenyaluranList.Catatan.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fRencanaPenyaluransrch", function() {
+            var options = {
+                name: "x_Catatan",
+                selectId: "fRencanaPenyaluransrch_x_Catatan",
+                ajax: { id: "x_Catatan", form: "fRencanaPenyaluransrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.RencanaPenyaluran.fields.Catatan.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* rencanaPenyaluranList.Catatan.Visible (end) *@
+@if (rencanaPenyaluranList.DibuatOleh.Visible) { // rencanaPenyaluranList.DibuatOleh.Visible (begin)
+    if (!rencanaPenyaluranList.DibuatOleh.UseFilter) {
+        rencanaPenyaluranList.SearchColumnCount++;
+    }
+    <div id="xs_DibuatOleh" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(rencanaPenyaluranList.DibuatOleh.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_DibuatOleh"
+            name="x_DibuatOleh[]"
+            class="form-control ew-select@(rencanaPenyaluranList.DibuatOleh.IsInvalidClass)"
+            data-select2-id="fRencanaPenyaluransrch_x_DibuatOleh"
+            data-table="RencanaPenyaluran"
+            data-field="x_DibuatOleh"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(rencanaPenyaluranList.DibuatOleh.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(rencanaPenyaluranList.DibuatOleh.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(rencanaPenyaluranList.DibuatOleh.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(rencanaPenyaluranList.DibuatOleh.EditAttributes)>
+            @(rencanaPenyaluranList.DibuatOleh.SelectOptionListHtml("x_DibuatOleh", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(rencanaPenyaluranList.DibuatOleh.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fRencanaPenyaluransrch", function() {
+            var options = {
+                name: "x_DibuatOleh",
+                selectId: "fRencanaPenyaluransrch_x_DibuatOleh",
+                ajax: { id: "x_DibuatOleh", form: "fRencanaPenyaluransrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.RencanaPenyaluran.fields.DibuatOleh.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* rencanaPenyaluranList.DibuatOleh.Visible (end) *@
+@if (rencanaPenyaluranList.TanggalDibuat.Visible) { // rencanaPenyaluranList.TanggalDibuat.Visible (begin)
+    if (!rencanaPenyaluranList.TanggalDibuat.UseFilter) {
+        rencanaPenyaluranList.SearchColumnCount++;
+    }
+    <div id="xs_TanggalDibuat" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(rencanaPenyaluranList.TanggalDibuat.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_TanggalDibuat"
+            name="x_TanggalDibuat[]"
+            class="form-control ew-select@(rencanaPenyaluranList.TanggalDibuat.IsInvalidClass)"
+            data-select2-id="fRencanaPenyaluransrch_x_TanggalDibuat"
+            data-table="RencanaPenyaluran"
+            data-field="x_TanggalDibuat"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(rencanaPenyaluranList.TanggalDibuat.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(rencanaPenyaluranList.TanggalDibuat.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(rencanaPenyaluranList.TanggalDibuat.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(rencanaPenyaluranList.TanggalDibuat.EditAttributes)>
+            @(rencanaPenyaluranList.TanggalDibuat.SelectOptionListHtml("x_TanggalDibuat", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(rencanaPenyaluranList.TanggalDibuat.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fRencanaPenyaluransrch", function() {
+            var options = {
+                name: "x_TanggalDibuat",
+                selectId: "fRencanaPenyaluransrch_x_TanggalDibuat",
+                ajax: { id: "x_TanggalDibuat", form: "fRencanaPenyaluransrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.RencanaPenyaluran.fields.TanggalDibuat.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* rencanaPenyaluranList.TanggalDibuat.Visible (end) *@
+@if (rencanaPenyaluranList.DiperbaruiOleh.Visible) { // rencanaPenyaluranList.DiperbaruiOleh.Visible (begin)
+    if (!rencanaPenyaluranList.DiperbaruiOleh.UseFilter) {
+        rencanaPenyaluranList.SearchColumnCount++;
+    }
+    <div id="xs_DiperbaruiOleh" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(rencanaPenyaluranList.DiperbaruiOleh.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_DiperbaruiOleh"
+            name="x_DiperbaruiOleh[]"
+            class="form-control ew-select@(rencanaPenyaluranList.DiperbaruiOleh.IsInvalidClass)"
+            data-select2-id="fRencanaPenyaluransrch_x_DiperbaruiOleh"
+            data-table="RencanaPenyaluran"
+            data-field="x_DiperbaruiOleh"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(rencanaPenyaluranList.DiperbaruiOleh.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(rencanaPenyaluranList.DiperbaruiOleh.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(rencanaPenyaluranList.DiperbaruiOleh.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(rencanaPenyaluranList.DiperbaruiOleh.EditAttributes)>
+            @(rencanaPenyaluranList.DiperbaruiOleh.SelectOptionListHtml("x_DiperbaruiOleh", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(rencanaPenyaluranList.DiperbaruiOleh.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fRencanaPenyaluransrch", function() {
+            var options = {
+                name: "x_DiperbaruiOleh",
+                selectId: "fRencanaPenyaluransrch_x_DiperbaruiOleh",
+                ajax: { id: "x_DiperbaruiOleh", form: "fRencanaPenyaluransrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.RencanaPenyaluran.fields.DiperbaruiOleh.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* rencanaPenyaluranList.DiperbaruiOleh.Visible (end) *@
+@if (rencanaPenyaluranList.TanggalDiperbarui.Visible) { // rencanaPenyaluranList.TanggalDiperbarui.Visible (begin)
+    if (!rencanaPenyaluranList.TanggalDiperbarui.UseFilter) {
+        rencanaPenyaluranList.SearchColumnCount++;
+    }
+    <div id="xs_TanggalDiperbarui" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(rencanaPenyaluranList.TanggalDiperbarui.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_TanggalDiperbarui"
+            name="x_TanggalDiperbarui[]"
+            class="form-control ew-select@(rencanaPenyaluranList.TanggalDiperbarui.IsInvalidClass)"
+            data-select2-id="fRencanaPenyaluransrch_x_TanggalDiperbarui"
+            data-table="RencanaPenyaluran"
+            data-field="x_TanggalDiperbarui"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(rencanaPenyaluranList.TanggalDiperbarui.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(rencanaPenyaluranList.TanggalDiperbarui.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(rencanaPenyaluranList.TanggalDiperbarui.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(rencanaPenyaluranList.TanggalDiperbarui.EditAttributes)>
+            @(rencanaPenyaluranList.TanggalDiperbarui.SelectOptionListHtml("x_TanggalDiperbarui", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(rencanaPenyaluranList.TanggalDiperbarui.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fRencanaPenyaluransrch", function() {
+            var options = {
+                name: "x_TanggalDiperbarui",
+                selectId: "fRencanaPenyaluransrch_x_TanggalDiperbarui",
+                ajax: { id: "x_TanggalDiperbarui", form: "fRencanaPenyaluransrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.RencanaPenyaluran.fields.TanggalDiperbarui.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* rencanaPenyaluranList.TanggalDiperbarui.Visible (end) *@
+</div><!-- /.row -->
+<div class="row mb-0">
+    <div class="col-sm-auto px-0 pe-sm-2">
+        <div class="ew-basic-search input-group">
+            <input type="search" name="@(Config.TableBasicSearch)" id="@(Config.TableBasicSearch)" class="form-control ew-basic-search-keyword" value="@Html.Raw(HtmlEncode(rencanaPenyaluranList.BasicSearch.SessionKeyword))" placeholder="@(HtmlEncode(Language.Phrase("Search")))" aria-label="@(HtmlEncode(Language.Phrase("Search")))">
+            <input type="hidden" name="@(Config.TableBasicSearchType)" id="@(Config.TableBasicSearchType)" class="ew-basic-search-type" value="@(HtmlEncode(rencanaPenyaluranList.BasicSearch.SessionType))">
+            <button type="button" data-bs-toggle="dropdown" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split" aria-haspopup="true" aria-expanded="false">
+                <span id="searchtype">@Html.Raw(rencanaPenyaluranList.BasicSearch.TypeNameShort)</span>
+            </button>
+            <div class="dropdown-menu dropdown-menu-end">
+                <button type="button" class="dropdown-item@(rencanaPenyaluranList.BasicSearch.SessionType == "" ? " active" : "")" form="fRencanaPenyaluransrch" data-ew-action="search-type">@Html.Raw(Language.Phrase("QuickSearchAuto"))</button>
+                <button type="button" class="dropdown-item@(rencanaPenyaluranList.BasicSearch.SessionType == "=" ? " active" : "")" form="fRencanaPenyaluransrch" data-ew-action="search-type" data-search-type="=">@Html.Raw(Language.Phrase("QuickSearchExact"))</button>
+                <button type="button" class="dropdown-item@(rencanaPenyaluranList.BasicSearch.SessionType == "AND" ? " active" : "")" form="fRencanaPenyaluransrch" data-ew-action="search-type" data-search-type="AND">@Html.Raw(Language.Phrase("QuickSearchAll"))</button>
+                <button type="button" class="dropdown-item@(rencanaPenyaluranList.BasicSearch.SessionType == "OR" ? " active" : "")" form="fRencanaPenyaluransrch" data-ew-action="search-type" data-search-type="OR">@Html.Raw(Language.Phrase("QuickSearchAny"))</button>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-auto mb-3">
+        <button class="btn btn-primary" name="btn-submit" id="btn-submit" type="submit">@Html.Raw(Language.Phrase("SearchBtn"))</button>
+    </div>
+</div>
+</div><!-- /.ew-extended-search -->
+} @* Show search form (end) *@
+}
+</div><!-- /.ew-search-panel -->
+</form>
+}
+@rencanaPenyaluranList.ShowPageHeader()
+@rencanaPenyaluranList.ShowMessages()
+<main class="list @(rencanaPenyaluranList.TotalRecords == 0 && !rencanaPenyaluranList.IsAdd ? " ew-no-record" : "")">
+<div id="ew-header-options">
+    @rencanaPenyaluranList.HeaderOptions.RenderBody()
+</div>
+<div id="ew-list">
+@if (rencanaPenyaluranList.TotalRecords > 0 || !Empty(rencanaPenyaluranList.CurrentAction)) {
+<div class="card ew-card ew-grid@(rencanaPenyaluranList.IsAddOrEdit ? " ew-grid-add-edit" : "") @(rencanaPenyaluranList.TableGridClass)">
+<form name="@(rencanaPenyaluranList.FormName)" id="@(rencanaPenyaluranList.FormName)" class="ew-form ew-list-form" action="@AppPath(rencanaPenyaluranList.PageName)" method="post" novalidate autocomplete="off">
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+@if (rencanaPenyaluranList.IsModal) {
+<input type="hidden" name="modal" value="1">
+}
+<div id="gmp_RencanaPenyaluran" class="card-body ew-grid-middle-panel @(rencanaPenyaluranList.TableContainerClass)" style="@(rencanaPenyaluranList.TableContainerStyle)">
+@if (rencanaPenyaluranList.TotalRecords > 0 || rencanaPenyaluranList.IsGridEdit || rencanaPenyaluranList.IsMultiEdit) {
+<table id="tbl_RencanaPenyaluranlist" class="@(rencanaPenyaluranList.TableClass)"><!-- .ew-table -->
+<thead>
+    <tr class="ew-table-header">
+@{
+    // Header row
+    rencanaPenyaluranList.RowType = RowType.Header;
+
+    // Render list options
+    await rencanaPenyaluranList.RenderListOptions();
+}
+@* Render list options (header, left) *@
+@rencanaPenyaluranList.ListOptions.RenderHeader("left")
+@if (rencanaPenyaluranList.LinkProses.Visible) { // rencanaPenyaluranList.LinkProses.Visible (begin)
+        <th data-name="LinkProses" class="@(rencanaPenyaluranList.LinkProses.HeaderCellClass)"><div id="elh_RencanaPenyaluran_LinkProses" class="RencanaPenyaluran_LinkProses">@Html.Raw(rencanaPenyaluranList.RenderFieldHeader(rencanaPenyaluranList.LinkProses))</div></th>
+} @* rencanaPenyaluranList.LinkProses.Visible (end) *@
+@if (rencanaPenyaluranList.StatusProses.Visible) { // rencanaPenyaluranList.StatusProses.Visible (begin)
+        <th data-name="StatusProses" class="@(rencanaPenyaluranList.StatusProses.HeaderCellClass)"><div id="elh_RencanaPenyaluran_StatusProses" class="RencanaPenyaluran_StatusProses">@Html.Raw(rencanaPenyaluranList.RenderFieldHeader(rencanaPenyaluranList.StatusProses))</div></th>
+} @* rencanaPenyaluranList.StatusProses.Visible (end) *@
+@if (rencanaPenyaluranList.PersentaseProgress.Visible) { // rencanaPenyaluranList.PersentaseProgress.Visible (begin)
+        <th data-name="PersentaseProgress" class="@(rencanaPenyaluranList.PersentaseProgress.HeaderCellClass)"><div id="elh_RencanaPenyaluran_PersentaseProgress" class="RencanaPenyaluran_PersentaseProgress">@Html.Raw(rencanaPenyaluranList.RenderFieldHeader(rencanaPenyaluranList.PersentaseProgress))</div></th>
+} @* rencanaPenyaluranList.PersentaseProgress.Visible (end) *@
+@if (rencanaPenyaluranList.IdPlant.Visible) { // rencanaPenyaluranList.IdPlant.Visible (begin)
+        <th data-name="IdPlant" class="@(rencanaPenyaluranList.IdPlant.HeaderCellClass)"><div id="elh_RencanaPenyaluran_IdPlant" class="RencanaPenyaluran_IdPlant">@Html.Raw(rencanaPenyaluranList.RenderFieldHeader(rencanaPenyaluranList.IdPlant))</div></th>
+} @* rencanaPenyaluranList.IdPlant.Visible (end) *@
+@if (rencanaPenyaluranList.TipeProdukSTS.Visible) { // rencanaPenyaluranList.TipeProdukSTS.Visible (begin)
+        <th data-name="TipeProdukSTS" class="@(rencanaPenyaluranList.TipeProdukSTS.HeaderCellClass)"><div id="elh_RencanaPenyaluran_TipeProdukSTS" class="RencanaPenyaluran_TipeProdukSTS">@Html.Raw(rencanaPenyaluranList.RenderFieldHeader(rencanaPenyaluranList.TipeProdukSTS))</div></th>
+} @* rencanaPenyaluranList.TipeProdukSTS.Visible (end) *@
+@if (rencanaPenyaluranList.IdModa.Visible) { // rencanaPenyaluranList.IdModa.Visible (begin)
+        <th data-name="IdModa" class="@(rencanaPenyaluranList.IdModa.HeaderCellClass)"><div id="elh_RencanaPenyaluran_IdModa" class="RencanaPenyaluran_IdModa">@Html.Raw(rencanaPenyaluranList.RenderFieldHeader(rencanaPenyaluranList.IdModa))</div></th>
+} @* rencanaPenyaluranList.IdModa.Visible (end) *@
+@if (rencanaPenyaluranList.TipePenyaluran.Visible) { // rencanaPenyaluranList.TipePenyaluran.Visible (begin)
+        <th data-name="TipePenyaluran" class="@(rencanaPenyaluranList.TipePenyaluran.HeaderCellClass)"><div id="elh_RencanaPenyaluran_TipePenyaluran" class="RencanaPenyaluran_TipePenyaluran">@Html.Raw(rencanaPenyaluranList.RenderFieldHeader(rencanaPenyaluranList.TipePenyaluran))</div></th>
+} @* rencanaPenyaluranList.TipePenyaluran.Visible (end) *@
+@if (rencanaPenyaluranList.KategoriPenyaluran.Visible) { // rencanaPenyaluranList.KategoriPenyaluran.Visible (begin)
+        <th data-name="KategoriPenyaluran" class="@(rencanaPenyaluranList.KategoriPenyaluran.HeaderCellClass)"><div id="elh_RencanaPenyaluran_KategoriPenyaluran" class="RencanaPenyaluran_KategoriPenyaluran">@Html.Raw(rencanaPenyaluranList.RenderFieldHeader(rencanaPenyaluranList.KategoriPenyaluran))</div></th>
+} @* rencanaPenyaluranList.KategoriPenyaluran.Visible (end) *@
+@if (rencanaPenyaluranList.Tujuan.Visible) { // rencanaPenyaluranList.Tujuan.Visible (begin)
+        <th data-name="Tujuan" class="@(rencanaPenyaluranList.Tujuan.HeaderCellClass)"><div id="elh_RencanaPenyaluran_Tujuan" class="RencanaPenyaluran_Tujuan">@Html.Raw(rencanaPenyaluranList.RenderFieldHeader(rencanaPenyaluranList.Tujuan))</div></th>
+} @* rencanaPenyaluranList.Tujuan.Visible (end) *@
+@if (rencanaPenyaluranList.DibuatOleh.Visible) { // rencanaPenyaluranList.DibuatOleh.Visible (begin)
+        <th data-name="DibuatOleh" class="@(rencanaPenyaluranList.DibuatOleh.HeaderCellClass)"><div id="elh_RencanaPenyaluran_DibuatOleh" class="RencanaPenyaluran_DibuatOleh">@Html.Raw(rencanaPenyaluranList.RenderFieldHeader(rencanaPenyaluranList.DibuatOleh))</div></th>
+} @* rencanaPenyaluranList.DibuatOleh.Visible (end) *@
+@if (rencanaPenyaluranList.TanggalDibuat.Visible) { // rencanaPenyaluranList.TanggalDibuat.Visible (begin)
+        <th data-name="TanggalDibuat" class="@(rencanaPenyaluranList.TanggalDibuat.HeaderCellClass)"><div id="elh_RencanaPenyaluran_TanggalDibuat" class="RencanaPenyaluran_TanggalDibuat">@Html.Raw(rencanaPenyaluranList.RenderFieldHeader(rencanaPenyaluranList.TanggalDibuat))</div></th>
+} @* rencanaPenyaluranList.TanggalDibuat.Visible (end) *@
+@if (rencanaPenyaluranList.DiperbaruiOleh.Visible) { // rencanaPenyaluranList.DiperbaruiOleh.Visible (begin)
+        <th data-name="DiperbaruiOleh" class="@(rencanaPenyaluranList.DiperbaruiOleh.HeaderCellClass)"><div id="elh_RencanaPenyaluran_DiperbaruiOleh" class="RencanaPenyaluran_DiperbaruiOleh">@Html.Raw(rencanaPenyaluranList.RenderFieldHeader(rencanaPenyaluranList.DiperbaruiOleh))</div></th>
+} @* rencanaPenyaluranList.DiperbaruiOleh.Visible (end) *@
+@if (rencanaPenyaluranList.TanggalDiperbarui.Visible) { // rencanaPenyaluranList.TanggalDiperbarui.Visible (begin)
+        <th data-name="TanggalDiperbarui" class="@(rencanaPenyaluranList.TanggalDiperbarui.HeaderCellClass)"><div id="elh_RencanaPenyaluran_TanggalDiperbarui" class="RencanaPenyaluran_TanggalDiperbarui">@Html.Raw(rencanaPenyaluranList.RenderFieldHeader(rencanaPenyaluranList.TanggalDiperbarui))</div></th>
+} @* rencanaPenyaluranList.TanggalDiperbarui.Visible (end) *@
+@* Render list options (header, right) *@
+@rencanaPenyaluranList.ListOptions.RenderHeader("right")
+    </tr>
+</thead>
+<tbody data-page="@(rencanaPenyaluranList.PageNumber)">
+@{
+    await rencanaPenyaluranList.SetupGrid();
+    bool eof = rencanaPenyaluranList.Recordset == null; // DN
+}
+@while (rencanaPenyaluranList.RecordCount < rencanaPenyaluranList.StopRecord || SameString(rencanaPenyaluranList.RowIndex, "$rowindex$")) { // Begin While
+    if (!eof && !SameString(rencanaPenyaluranList.RowIndex, "$rowindex$") &&
+        (!rencanaPenyaluranList.IsGridAdd || rencanaPenyaluranList.CurrentMode == "copy") &&
+        (!((rencanaPenyaluranList.IsCopy || rencanaPenyaluranList.IsAdd) && rencanaPenyaluranList.RowIndex is int rowIndex && rowIndex == 0))) // DN
+        eof = !await rencanaPenyaluranList.Recordset.ReadAsync();
+    rencanaPenyaluranList.RecordCount++;
+    if (rencanaPenyaluranList.RecordCount >= rencanaPenyaluranList.StartRecord) {
+        await rencanaPenyaluranList.SetupRow();
+    <tr @Html.Raw(rencanaPenyaluranList.RowAttributes)>
+    @* Render list options (body, left) *@
+    @rencanaPenyaluranList.ListOptions.RenderBody("left", rencanaPenyaluranList.RowCount)
+    @if (rencanaPenyaluranList.LinkProses.Visible) { // rencanaPenyaluranList.LinkProses.Visible (begin)
+        <td data-name="LinkProses" @Html.Raw(rencanaPenyaluranList.LinkProses.CellAttributes)>
+<span id="el@(rencanaPenyaluranList.RowIndex == "$rowindex$" ? "$rowindex$" : rencanaPenyaluranList.RowCount)_RencanaPenyaluran_LinkProses" class="el_RencanaPenyaluran_LinkProses">
+<span @Html.Raw(rencanaPenyaluranList.LinkProses.ViewAttributes)>
+@Html.Raw(rencanaPenyaluranList.LinkProses.GetViewValue())</span>
+</span>
+</td>
+    } @* rencanaPenyaluranList.LinkProses.Visible (end) *@
+    @if (rencanaPenyaluranList.StatusProses.Visible) { // rencanaPenyaluranList.StatusProses.Visible (begin)
+        <td data-name="StatusProses" @Html.Raw(rencanaPenyaluranList.StatusProses.CellAttributes)>
+<span id="el@(rencanaPenyaluranList.RowIndex == "$rowindex$" ? "$rowindex$" : rencanaPenyaluranList.RowCount)_RencanaPenyaluran_StatusProses" class="el_RencanaPenyaluran_StatusProses">
+<span @Html.Raw(rencanaPenyaluranList.StatusProses.ViewAttributes)>
+@Html.Raw(rencanaPenyaluranList.StatusProses.GetViewValue())</span>
+</span>
+</td>
+    } @* rencanaPenyaluranList.StatusProses.Visible (end) *@
+    @if (rencanaPenyaluranList.PersentaseProgress.Visible) { // rencanaPenyaluranList.PersentaseProgress.Visible (begin)
+        <td data-name="PersentaseProgress" @Html.Raw(rencanaPenyaluranList.PersentaseProgress.CellAttributes)>
+<span id="el@(rencanaPenyaluranList.RowIndex == "$rowindex$" ? "$rowindex$" : rencanaPenyaluranList.RowCount)_RencanaPenyaluran_PersentaseProgress" class="el_RencanaPenyaluran_PersentaseProgress">
+<span @Html.Raw(rencanaPenyaluranList.PersentaseProgress.ViewAttributes)>
+@Html.Raw(rencanaPenyaluranList.PersentaseProgress.GetViewValue())</span>
+</span>
+</td>
+    } @* rencanaPenyaluranList.PersentaseProgress.Visible (end) *@
+    @if (rencanaPenyaluranList.IdPlant.Visible) { // rencanaPenyaluranList.IdPlant.Visible (begin)
+        <td data-name="IdPlant" @Html.Raw(rencanaPenyaluranList.IdPlant.CellAttributes)>
+<span id="el@(rencanaPenyaluranList.RowIndex == "$rowindex$" ? "$rowindex$" : rencanaPenyaluranList.RowCount)_RencanaPenyaluran_IdPlant" class="el_RencanaPenyaluran_IdPlant">
+<span @Html.Raw(rencanaPenyaluranList.IdPlant.ViewAttributes)>
+@Html.Raw(rencanaPenyaluranList.IdPlant.GetViewValue())</span>
+</span>
+</td>
+    } @* rencanaPenyaluranList.IdPlant.Visible (end) *@
+    @if (rencanaPenyaluranList.TipeProdukSTS.Visible) { // rencanaPenyaluranList.TipeProdukSTS.Visible (begin)
+        <td data-name="TipeProdukSTS" @Html.Raw(rencanaPenyaluranList.TipeProdukSTS.CellAttributes)>
+<span id="el@(rencanaPenyaluranList.RowIndex == "$rowindex$" ? "$rowindex$" : rencanaPenyaluranList.RowCount)_RencanaPenyaluran_TipeProdukSTS" class="el_RencanaPenyaluran_TipeProdukSTS">
+<span @Html.Raw(rencanaPenyaluranList.TipeProdukSTS.ViewAttributes)>
+@Html.Raw(rencanaPenyaluranList.TipeProdukSTS.GetViewValue())</span>
+</span>
+</td>
+    } @* rencanaPenyaluranList.TipeProdukSTS.Visible (end) *@
+    @if (rencanaPenyaluranList.IdModa.Visible) { // rencanaPenyaluranList.IdModa.Visible (begin)
+        <td data-name="IdModa" @Html.Raw(rencanaPenyaluranList.IdModa.CellAttributes)>
+<span id="el@(rencanaPenyaluranList.RowIndex == "$rowindex$" ? "$rowindex$" : rencanaPenyaluranList.RowCount)_RencanaPenyaluran_IdModa" class="el_RencanaPenyaluran_IdModa">
+<span @Html.Raw(rencanaPenyaluranList.IdModa.ViewAttributes)>
+@Html.Raw(rencanaPenyaluranList.IdModa.GetViewValue())</span>
+</span>
+</td>
+    } @* rencanaPenyaluranList.IdModa.Visible (end) *@
+    @if (rencanaPenyaluranList.TipePenyaluran.Visible) { // rencanaPenyaluranList.TipePenyaluran.Visible (begin)
+        <td data-name="TipePenyaluran" @Html.Raw(rencanaPenyaluranList.TipePenyaluran.CellAttributes)>
+<span id="el@(rencanaPenyaluranList.RowIndex == "$rowindex$" ? "$rowindex$" : rencanaPenyaluranList.RowCount)_RencanaPenyaluran_TipePenyaluran" class="el_RencanaPenyaluran_TipePenyaluran">
+<span @Html.Raw(rencanaPenyaluranList.TipePenyaluran.ViewAttributes)>
+@Html.Raw(rencanaPenyaluranList.TipePenyaluran.GetViewValue())</span>
+</span>
+</td>
+    } @* rencanaPenyaluranList.TipePenyaluran.Visible (end) *@
+    @if (rencanaPenyaluranList.KategoriPenyaluran.Visible) { // rencanaPenyaluranList.KategoriPenyaluran.Visible (begin)
+        <td data-name="KategoriPenyaluran" @Html.Raw(rencanaPenyaluranList.KategoriPenyaluran.CellAttributes)>
+<span id="el@(rencanaPenyaluranList.RowIndex == "$rowindex$" ? "$rowindex$" : rencanaPenyaluranList.RowCount)_RencanaPenyaluran_KategoriPenyaluran" class="el_RencanaPenyaluran_KategoriPenyaluran">
+<span @Html.Raw(rencanaPenyaluranList.KategoriPenyaluran.ViewAttributes)>
+@Html.Raw(rencanaPenyaluranList.KategoriPenyaluran.GetViewValue())</span>
+</span>
+</td>
+    } @* rencanaPenyaluranList.KategoriPenyaluran.Visible (end) *@
+    @if (rencanaPenyaluranList.Tujuan.Visible) { // rencanaPenyaluranList.Tujuan.Visible (begin)
+        <td data-name="Tujuan" @Html.Raw(rencanaPenyaluranList.Tujuan.CellAttributes)>
+<span id="el@(rencanaPenyaluranList.RowIndex == "$rowindex$" ? "$rowindex$" : rencanaPenyaluranList.RowCount)_RencanaPenyaluran_Tujuan" class="el_RencanaPenyaluran_Tujuan">
+<span @Html.Raw(rencanaPenyaluranList.Tujuan.ViewAttributes)>
+@Html.Raw(rencanaPenyaluranList.Tujuan.GetViewValue())</span>
+</span>
+</td>
+    } @* rencanaPenyaluranList.Tujuan.Visible (end) *@
+    @if (rencanaPenyaluranList.DibuatOleh.Visible) { // rencanaPenyaluranList.DibuatOleh.Visible (begin)
+        <td data-name="DibuatOleh" @Html.Raw(rencanaPenyaluranList.DibuatOleh.CellAttributes)>
+<span id="el@(rencanaPenyaluranList.RowIndex == "$rowindex$" ? "$rowindex$" : rencanaPenyaluranList.RowCount)_RencanaPenyaluran_DibuatOleh" class="el_RencanaPenyaluran_DibuatOleh">
+<span @Html.Raw(rencanaPenyaluranList.DibuatOleh.ViewAttributes)>
+@Html.Raw(rencanaPenyaluranList.DibuatOleh.GetViewValue())</span>
+</span>
+</td>
+    } @* rencanaPenyaluranList.DibuatOleh.Visible (end) *@
+    @if (rencanaPenyaluranList.TanggalDibuat.Visible) { // rencanaPenyaluranList.TanggalDibuat.Visible (begin)
+        <td data-name="TanggalDibuat" @Html.Raw(rencanaPenyaluranList.TanggalDibuat.CellAttributes)>
+<span id="el@(rencanaPenyaluranList.RowIndex == "$rowindex$" ? "$rowindex$" : rencanaPenyaluranList.RowCount)_RencanaPenyaluran_TanggalDibuat" class="el_RencanaPenyaluran_TanggalDibuat">
+<span @Html.Raw(rencanaPenyaluranList.TanggalDibuat.ViewAttributes)>
+@Html.Raw(rencanaPenyaluranList.TanggalDibuat.GetViewValue())</span>
+</span>
+</td>
+    } @* rencanaPenyaluranList.TanggalDibuat.Visible (end) *@
+    @if (rencanaPenyaluranList.DiperbaruiOleh.Visible) { // rencanaPenyaluranList.DiperbaruiOleh.Visible (begin)
+        <td data-name="DiperbaruiOleh" @Html.Raw(rencanaPenyaluranList.DiperbaruiOleh.CellAttributes)>
+<span id="el@(rencanaPenyaluranList.RowIndex == "$rowindex$" ? "$rowindex$" : rencanaPenyaluranList.RowCount)_RencanaPenyaluran_DiperbaruiOleh" class="el_RencanaPenyaluran_DiperbaruiOleh">
+<span @Html.Raw(rencanaPenyaluranList.DiperbaruiOleh.ViewAttributes)>
+@Html.Raw(rencanaPenyaluranList.DiperbaruiOleh.GetViewValue())</span>
+</span>
+</td>
+    } @* rencanaPenyaluranList.DiperbaruiOleh.Visible (end) *@
+    @if (rencanaPenyaluranList.TanggalDiperbarui.Visible) { // rencanaPenyaluranList.TanggalDiperbarui.Visible (begin)
+        <td data-name="TanggalDiperbarui" @Html.Raw(rencanaPenyaluranList.TanggalDiperbarui.CellAttributes)>
+<span id="el@(rencanaPenyaluranList.RowIndex == "$rowindex$" ? "$rowindex$" : rencanaPenyaluranList.RowCount)_RencanaPenyaluran_TanggalDiperbarui" class="el_RencanaPenyaluran_TanggalDiperbarui">
+<span @Html.Raw(rencanaPenyaluranList.TanggalDiperbarui.ViewAttributes)>
+@Html.Raw(rencanaPenyaluranList.TanggalDiperbarui.GetViewValue())</span>
+</span>
+</td>
+    } @* rencanaPenyaluranList.TanggalDiperbarui.Visible (end) *@
+    @* Render list options (body, right) *@
+    @rencanaPenyaluranList.ListOptions.RenderBody("right", rencanaPenyaluranList.RowCount)
+    </tr>
+    } @* End if *@
+
+    // Reset for template row
+    if (SameString(rencanaPenyaluranList.RowIndex, "$rowindex$"))
+        rencanaPenyaluranList.RowIndex = 0;
+
+    // Reset inline add/copy row
+    if ((rencanaPenyaluranList.IsCopy || rencanaPenyaluranList.IsAdd) && rencanaPenyaluranList.RowIndex is int rowIndex2 && rowIndex2 == 0)
+        rencanaPenyaluranList.RowIndex = 1;
+} @* End While *@
+</tbody>
+</table><!-- /.ew-table -->
+} @* End If TotalRecords > 0 *@
+</div><!-- /.ew-grid-middle-panel -->
+@if (Empty(rencanaPenyaluranList.CurrentAction) && !rencanaPenyaluranList.UseAjaxActions) {
+<input type="hidden" name="action" id="action" value="">
+}
+</form><!-- /.ew-list-form -->
+@{ rencanaPenyaluranList.CloseRecordset(); }
+@if (!rencanaPenyaluranList.IsExport()) {
+<div class="card-footer ew-grid-lower-panel">
+@if (!rencanaPenyaluranList.IsGridAdd && !(rencanaPenyaluranList.IsGridEdit && rencanaPenyaluranList.ModalGridEdit) && !rencanaPenyaluranList.IsMultiEdit) {
+@Html.Raw(rencanaPenyaluranList.Pager.Render())
+}
+<div class="ew-list-other-options">
+@rencanaPenyaluranList.OtherOptions.RenderBody("bottom")
+</div>
+</div>
+}
+</div><!-- /.ew-grid -->
+} else { // Show other options
+<div class="ew-list-other-options">
+@rencanaPenyaluranList.OtherOptions.ForEach(opt => opt.ButtonClass = "").RenderBody()
+</div>
+}
+</div>
+<div id="ew-footer-options">
+    @rencanaPenyaluranList.FooterOptions.RenderBody()
+</div>
+</main>
+@rencanaPenyaluranList.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+@if (!rencanaPenyaluranList.IsExport()) {
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("RencanaPenyaluran");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Startup script
+    var parent_url = ew.PATH_BASE;
+    var steps = [
+        { number: 1, label: "Rencana & Realisasi Penyaluran", url: '', icon: "fa-solid fa-clipboard-list" },
+    ];
+    var currentStep = 1;
+    $("<style>")
+        .prop("type", "text/css")
+        .html(`
+            .stepper {
+                display: flex;
+                counter-reset: step;
+            }
+            .step {
+                width: 150px;
+                text-align: center;
+                position: relative;
+            }
+            .step:not(:last-child)::after {
+                content: '';
+                position: absolute;
+                top: 20px;
+                right: -50%;
+                width: 100%;
+                height: 4px;
+                background-color: #ccc;
+                z-index: 0;
+            }
+            .step.completed:not(:last-child)::after {
+                background-color: #3c6dbd;
+            }
+            .step-icon {
+                width: 36px;
+                height: 36px;
+                line-height: 36px;
+                border-radius: 50%;
+                background: #ccc;
+                display: inline-block;
+                z-index: 1;
+                position: relative;
+                color: white;
+                font-weight: bold;
+            }
+            .step.active .step-icon {
+                background: #3c6dbd;
+            }
+            .step-label {
+                margin-top: 8px;
+                font-size: 14px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                gap: 6px;
+                color: #333;
+            }
+            .step-label {
+                color: #3c6dbd !important;
+                text-decoration: none;
+                margin: 0;
+                padding: 0;
+            }
+            .step-label-not-active {
+                color: #CCCCCC !important;
+            }
+        `)
+        .appendTo("head");
+    var $stepperWrapper = $('<div id="bread-crumb-nav" class="d-flex border-bottom border-2 pb-2"><div class="stepper"></div></div>');
+    var $stepper = $stepperWrapper.find(".stepper");
+    steps.forEach(function (step, i) {
+        var isActive = step.number === currentStep;
+        var isCompleted = step.number < currentStep;
+        var stepClass = isActive ? "active" : isCompleted ? "completed" : "";
+        var icon, labelContent, html;
+        if (isActive) {
+            icon = `<div class="step-icon bg-success">${step.number}</div>`;
+            labelContent = `<div class="step-label"><p class="text-success mb-1"><i class="fa-solid ${step.icon} me-1 text-success"></i> ${step.label}</p></div>`;
+            html = `<div class="step ${stepClass} text-success">${icon}${labelContent}</div>`;
+        } else if (isCompleted) {
+            icon = `<div class="step-icon" style="background: #3c6dbd;">${step.number}</div>`;
+            labelContent = `<div><a href="${step.url}" class="step-label"><i class="fa-solid ${step.icon} me-1"></i>${step.label}</a></div>`;
+            html = `<div class="step ${stepClass}">${icon}${labelContent}</div>`;
+        } else {
+            icon = `<div class="step-icon">${step.number}</div>`;
+            labelContent = `<div class="step-label-not-active"><p style="margin: 0;"><i class="fa-solid ${step.icon} me-1"></i>${step.label}</p></div>`;
+            html = `<div class="step ${stepClass} text-secondary">${icon}${labelContent}</div>`;
+        }
+        $stepper.append(html);
+    });
+    if ($('#bread-crumb-nav').length == 0) {
+        $(".content-header .container-fluid .row").append($stepperWrapper);
+    }
+    $(document).ready(function() {
+        const UserLevel = "@CurrentUserLevel()";
+        if (UserLevel == "2" || UserLevel == "-1" || UserLevel == "4" || UserLevel == "6") {
+            // Add tombol "Add New" di Penyaluran
+            var oldButton = $('button.btn-primary[name="btn-submit"]');
+            var addButton = $(`
+                <button class="btn btn-success" id="btn-add-penyaluran">
+                    <i class="fas fa-plus"></i> Add New
+                </button>
+            `);
+            addButton.on('click', function (e) {
+                e.preventDefault();
+                window.location.href = parent_url+'RencanaPenyaluranAdd';
+            });
+            oldButton.parent().append(addButton);
+
+            //remove tombol + di Penyaluran
+        }
+        $(`a.btn.btn-default.ew-add-edit.ew-add[href="${parent_url}RencanaPenyaluranAdd"]`).remove();
+    }); 
+});
+</script>
+}

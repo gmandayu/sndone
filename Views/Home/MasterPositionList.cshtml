@@ -1,0 +1,523 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (masterPositionList.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = masterPositionList.UseLayout ? "_Layout" : "";
+}
+@if (!masterPositionList.IsExport()) {
+<script>
+var currentTable = @Html.Raw(ConvertToJson(masterPositionList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { MasterPosition: currentTable } });
+var currentPageID = ew.PAGE_ID = "list";
+var currentForm;
+var @(masterPositionList.FormName);
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("@(masterPositionList.FormName)")
+        .setPageId("list")
+        .setSubmitWithFetch(@(masterPositionList.UseAjaxActions ? "true" : "false"))
+        .setFormKeyCountName("@(masterPositionList.FormKeyCountName)")
+
+        // Dynamic selection lists
+        .setLists({
+            "IdPosition": @Html.Raw(masterPositionList.IdPosition.ToClientList(masterPositionList)),
+            "NamaPosition": @Html.Raw(masterPositionList.NamaPosition.ToClientList(masterPositionList)),
+            "Location": @Html.Raw(masterPositionList.Location.ToClientList(masterPositionList)),
+            "_UserLevel": @Html.Raw(masterPositionList._UserLevel.ToClientList(masterPositionList)),
+            "Role": @Html.Raw(masterPositionList.Role.ToClientList(masterPositionList)),
+        })
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Write your client script here, no need to add script tags.
+});
+</script>
+}
+@if (!masterPositionList.IsExport()) {
+<div class="btn-toolbar ew-toolbar">
+@if (masterPositionList.TotalRecords > 0 && masterPositionList.ExportOptions.Visible) {
+    masterPositionList.ExportOptions.Render("body");
+}
+@if (masterPositionList.ImportOptions.Visible) {
+    masterPositionList.ImportOptions.Render("body");
+}
+@if (masterPositionList.SearchOptions.Visible) {
+    masterPositionList.SearchOptions.Render("body");
+}
+@if (masterPositionList.FilterOptions.Visible) {
+    masterPositionList.FilterOptions.Render("body");
+}
+</div>
+}
+@if (masterPositionList.ShowCurrentFilter) {
+    masterPositionList.ShowFilterList();
+}
+@if (!masterPositionList.IsModal) {
+<form name="fMasterPositionsrch" id="fMasterPositionsrch" class="ew-form ew-ext-search-form" action="@AppPath(CurrentPageName())" novalidate autocomplete="off">
+<div id="fMasterPositionsrch_search_panel" class="mb-2 mb-sm-0 @(masterPositionList.SearchPanelClass)"><!-- .ew-search-panel -->
+<script>
+var currentTable = @Html.Raw(ConvertToJson(masterPositionList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { MasterPosition: currentTable } });
+var currentForm;
+var fMasterPositionsrch, currentSearchForm, currentAdvancedSearchForm;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery,
+        fields = currentTable.fields;
+
+    // Form object for search
+    let form = new ew.FormBuilder()
+        .setId("fMasterPositionsrch")
+        .setPageId("list")
+@if (masterPositionList.UseAjaxActions) {
+        <text>.setSubmitWithFetch(true)</text>
+}
+
+        // Add fields
+        .setFields([
+        ])
+        // Validate form
+        .setValidate(
+            async function () {
+                if (!this.validateRequired)
+                    return true; // Ignore validation
+                let fobj = this.getForm();
+
+                // Validate fields
+                if (!this.validateFields())
+                    return false;
+
+                // Call Form_CustomValidate event
+                if (!(await this.customValidate?.(fobj) ?? true)) {
+                    this.focus();
+                    return false;
+                }
+                return true;
+            }
+        )
+
+        // Form_CustomValidate
+        .setCustomValidate(
+            function(fobj) { // DO NOT CHANGE THIS LINE!
+                    // Your custom validation code here, return false if invalid.
+                    return true;
+                }
+        )
+
+        // Use JavaScript validation or not
+        .setValidateRequired(ew.CLIENT_VALIDATE)
+
+        // Dynamic selection lists
+        .setLists({
+            "IdPosition": @Html.Raw(masterPositionList.IdPosition.ToClientList(masterPositionList)),
+            "NamaPosition": @Html.Raw(masterPositionList.NamaPosition.ToClientList(masterPositionList)),
+            "Location": @Html.Raw(masterPositionList.Location.ToClientList(masterPositionList)),
+            "_UserLevel": @Html.Raw(masterPositionList._UserLevel.ToClientList(masterPositionList)),
+            "Role": @Html.Raw(masterPositionList.Role.ToClientList(masterPositionList)),
+        })
+
+        // Filters
+        .setFilterList(@Html.Raw(masterPositionList.GetFilterList()))
+        .build();
+    window[form.id] = form;
+    currentSearchForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<input type="hidden" name="cmd" value="search">
+@if (Security.CanSearch) {
+if (!masterPositionList.IsExport() && Empty(masterPositionList.CurrentAction) && masterPositionList.HasSearchFields()) { @* Show search form (begin) *@
+<div class="ew-extended-search container-fluid ps-2">
+<div class="row mb-0@(masterPositionList.SearchFieldsPerRow > 0 ? " row-cols-sm-" + masterPositionList.SearchFieldsPerRow : "")">
+@{
+    // Render search row
+    masterPositionList.RowType = RowType.Search;
+    masterPositionList.ResetAttributes();
+    await masterPositionList.RenderRow();
+}
+@if (masterPositionList.IdPosition.Visible) { // masterPositionList.IdPosition.Visible (begin)
+    if (!masterPositionList.IdPosition.UseFilter) {
+        masterPositionList.SearchColumnCount++;
+    }
+    <div id="xs_IdPosition" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(masterPositionList.IdPosition.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_IdPosition"
+            name="x_IdPosition[]"
+            class="form-control ew-select@(masterPositionList.IdPosition.IsInvalidClass)"
+            data-select2-id="fMasterPositionsrch_x_IdPosition"
+            data-table="MasterPosition"
+            data-field="x_IdPosition"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(masterPositionList.IdPosition.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(masterPositionList.IdPosition.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(masterPositionList.IdPosition.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(masterPositionList.IdPosition.EditAttributes)>
+            @(masterPositionList.IdPosition.SelectOptionListHtml("x_IdPosition", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(masterPositionList.IdPosition.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMasterPositionsrch", function() {
+            var options = {
+                name: "x_IdPosition",
+                selectId: "fMasterPositionsrch_x_IdPosition",
+                ajax: { id: "x_IdPosition", form: "fMasterPositionsrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MasterPosition.fields.IdPosition.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* masterPositionList.IdPosition.Visible (end) *@
+@if (masterPositionList.NamaPosition.Visible) { // masterPositionList.NamaPosition.Visible (begin)
+    if (!masterPositionList.NamaPosition.UseFilter) {
+        masterPositionList.SearchColumnCount++;
+    }
+    <div id="xs_NamaPosition" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(masterPositionList.NamaPosition.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_NamaPosition"
+            name="x_NamaPosition[]"
+            class="form-control ew-select@(masterPositionList.NamaPosition.IsInvalidClass)"
+            data-select2-id="fMasterPositionsrch_x_NamaPosition"
+            data-table="MasterPosition"
+            data-field="x_NamaPosition"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(masterPositionList.NamaPosition.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(masterPositionList.NamaPosition.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(masterPositionList.NamaPosition.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(masterPositionList.NamaPosition.EditAttributes)>
+            @(masterPositionList.NamaPosition.SelectOptionListHtml("x_NamaPosition", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(masterPositionList.NamaPosition.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMasterPositionsrch", function() {
+            var options = {
+                name: "x_NamaPosition",
+                selectId: "fMasterPositionsrch_x_NamaPosition",
+                ajax: { id: "x_NamaPosition", form: "fMasterPositionsrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MasterPosition.fields.NamaPosition.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* masterPositionList.NamaPosition.Visible (end) *@
+@if (masterPositionList.Location.Visible) { // masterPositionList.Location.Visible (begin)
+    if (!masterPositionList.Location.UseFilter) {
+        masterPositionList.SearchColumnCount++;
+    }
+    <div id="xs_Location" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(masterPositionList.Location.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_Location"
+            name="x_Location[]"
+            class="form-control ew-select@(masterPositionList.Location.IsInvalidClass)"
+            data-select2-id="fMasterPositionsrch_x_Location"
+            data-table="MasterPosition"
+            data-field="x_Location"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(masterPositionList.Location.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(masterPositionList.Location.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(masterPositionList.Location.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(masterPositionList.Location.EditAttributes)>
+            @(masterPositionList.Location.SelectOptionListHtml("x_Location", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(masterPositionList.Location.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMasterPositionsrch", function() {
+            var options = {
+                name: "x_Location",
+                selectId: "fMasterPositionsrch_x_Location",
+                ajax: { id: "x_Location", form: "fMasterPositionsrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MasterPosition.fields.Location.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* masterPositionList.Location.Visible (end) *@
+@if (masterPositionList._UserLevel.Visible) { // masterPositionList._UserLevel.Visible (begin)
+    if (!masterPositionList._UserLevel.UseFilter) {
+        masterPositionList.SearchColumnCount++;
+    }
+    <div id="xs__UserLevel" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(masterPositionList._UserLevel.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x__UserLevel"
+            name="x__UserLevel[]"
+            class="form-control ew-select@(masterPositionList._UserLevel.IsInvalidClass)"
+            data-select2-id="fMasterPositionsrch_x__UserLevel"
+            data-table="MasterPosition"
+            data-field="x__UserLevel"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(masterPositionList._UserLevel.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(masterPositionList._UserLevel.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(masterPositionList._UserLevel.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(masterPositionList._UserLevel.EditAttributes)>
+            @(masterPositionList._UserLevel.SelectOptionListHtml("x__UserLevel", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(masterPositionList._UserLevel.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMasterPositionsrch", function() {
+            var options = {
+                name: "x__UserLevel",
+                selectId: "fMasterPositionsrch_x__UserLevel",
+                ajax: { id: "x__UserLevel", form: "fMasterPositionsrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MasterPosition.fields._UserLevel.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* masterPositionList._UserLevel.Visible (end) *@
+@if (masterPositionList.Role.Visible) { // masterPositionList.Role.Visible (begin)
+    if (!masterPositionList.Role.UseFilter) {
+        masterPositionList.SearchColumnCount++;
+    }
+    <div id="xs_Role" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(masterPositionList.Role.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_Role"
+            name="x_Role[]"
+            class="form-control ew-select@(masterPositionList.Role.IsInvalidClass)"
+            data-select2-id="fMasterPositionsrch_x_Role"
+            data-table="MasterPosition"
+            data-field="x_Role"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(masterPositionList.Role.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(masterPositionList.Role.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(masterPositionList.Role.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(masterPositionList.Role.EditAttributes)>
+            @(masterPositionList.Role.SelectOptionListHtml("x_Role", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(masterPositionList.Role.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMasterPositionsrch", function() {
+            var options = {
+                name: "x_Role",
+                selectId: "fMasterPositionsrch_x_Role",
+                ajax: { id: "x_Role", form: "fMasterPositionsrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MasterPosition.fields.Role.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* masterPositionList.Role.Visible (end) *@
+</div><!-- /.row -->
+<div class="row mb-0">
+    <div class="col-sm-auto px-0 pe-sm-2">
+        <div class="ew-basic-search input-group">
+            <input type="search" name="@(Config.TableBasicSearch)" id="@(Config.TableBasicSearch)" class="form-control ew-basic-search-keyword" value="@Html.Raw(HtmlEncode(masterPositionList.BasicSearch.SessionKeyword))" placeholder="@(HtmlEncode(Language.Phrase("Search")))" aria-label="@(HtmlEncode(Language.Phrase("Search")))">
+            <input type="hidden" name="@(Config.TableBasicSearchType)" id="@(Config.TableBasicSearchType)" class="ew-basic-search-type" value="@(HtmlEncode(masterPositionList.BasicSearch.SessionType))">
+            <button type="button" data-bs-toggle="dropdown" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split" aria-haspopup="true" aria-expanded="false">
+                <span id="searchtype">@Html.Raw(masterPositionList.BasicSearch.TypeNameShort)</span>
+            </button>
+            <div class="dropdown-menu dropdown-menu-end">
+                <button type="button" class="dropdown-item@(masterPositionList.BasicSearch.SessionType == "" ? " active" : "")" form="fMasterPositionsrch" data-ew-action="search-type">@Html.Raw(Language.Phrase("QuickSearchAuto"))</button>
+                <button type="button" class="dropdown-item@(masterPositionList.BasicSearch.SessionType == "=" ? " active" : "")" form="fMasterPositionsrch" data-ew-action="search-type" data-search-type="=">@Html.Raw(Language.Phrase("QuickSearchExact"))</button>
+                <button type="button" class="dropdown-item@(masterPositionList.BasicSearch.SessionType == "AND" ? " active" : "")" form="fMasterPositionsrch" data-ew-action="search-type" data-search-type="AND">@Html.Raw(Language.Phrase("QuickSearchAll"))</button>
+                <button type="button" class="dropdown-item@(masterPositionList.BasicSearch.SessionType == "OR" ? " active" : "")" form="fMasterPositionsrch" data-ew-action="search-type" data-search-type="OR">@Html.Raw(Language.Phrase("QuickSearchAny"))</button>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-auto mb-3">
+        <button class="btn btn-primary" name="btn-submit" id="btn-submit" type="submit">@Html.Raw(Language.Phrase("SearchBtn"))</button>
+    </div>
+</div>
+</div><!-- /.ew-extended-search -->
+} @* Show search form (end) *@
+}
+</div><!-- /.ew-search-panel -->
+</form>
+}
+@masterPositionList.ShowPageHeader()
+@masterPositionList.ShowMessages()
+<main class="list @(masterPositionList.TotalRecords == 0 && !masterPositionList.IsAdd ? " ew-no-record" : "")">
+<div id="ew-header-options">
+    @masterPositionList.HeaderOptions.RenderBody()
+</div>
+<div id="ew-list">
+@if (masterPositionList.TotalRecords > 0 || !Empty(masterPositionList.CurrentAction)) {
+<div class="card ew-card ew-grid@(masterPositionList.IsAddOrEdit ? " ew-grid-add-edit" : "") @(masterPositionList.TableGridClass)">
+<form name="@(masterPositionList.FormName)" id="@(masterPositionList.FormName)" class="ew-form ew-list-form" action="@AppPath(masterPositionList.PageName)" method="post" novalidate autocomplete="off">
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+@if (masterPositionList.IsModal) {
+<input type="hidden" name="modal" value="1">
+}
+<div id="gmp_MasterPosition" class="card-body ew-grid-middle-panel @(masterPositionList.TableContainerClass)" style="@(masterPositionList.TableContainerStyle)">
+@if (masterPositionList.TotalRecords > 0 || masterPositionList.IsGridEdit || masterPositionList.IsMultiEdit) {
+<table id="tbl_MasterPositionlist" class="@(masterPositionList.TableClass)"><!-- .ew-table -->
+<thead>
+    <tr class="ew-table-header">
+@{
+    // Header row
+    masterPositionList.RowType = RowType.Header;
+
+    // Render list options
+    await masterPositionList.RenderListOptions();
+}
+@* Render list options (header, left) *@
+@masterPositionList.ListOptions.RenderHeader("left")
+@if (masterPositionList.IdPosition.Visible) { // masterPositionList.IdPosition.Visible (begin)
+        <th data-name="IdPosition" class="@(masterPositionList.IdPosition.HeaderCellClass)"><div id="elh_MasterPosition_IdPosition" class="MasterPosition_IdPosition">@Html.Raw(masterPositionList.RenderFieldHeader(masterPositionList.IdPosition))</div></th>
+} @* masterPositionList.IdPosition.Visible (end) *@
+@if (masterPositionList.NamaPosition.Visible) { // masterPositionList.NamaPosition.Visible (begin)
+        <th data-name="NamaPosition" class="@(masterPositionList.NamaPosition.HeaderCellClass)"><div id="elh_MasterPosition_NamaPosition" class="MasterPosition_NamaPosition">@Html.Raw(masterPositionList.RenderFieldHeader(masterPositionList.NamaPosition))</div></th>
+} @* masterPositionList.NamaPosition.Visible (end) *@
+@if (masterPositionList.Location.Visible) { // masterPositionList.Location.Visible (begin)
+        <th data-name="Location" class="@(masterPositionList.Location.HeaderCellClass)"><div id="elh_MasterPosition_Location" class="MasterPosition_Location">@Html.Raw(masterPositionList.RenderFieldHeader(masterPositionList.Location))</div></th>
+} @* masterPositionList.Location.Visible (end) *@
+@if (masterPositionList._UserLevel.Visible) { // masterPositionList._UserLevel.Visible (begin)
+        <th data-name="_UserLevel" class="@(masterPositionList._UserLevel.HeaderCellClass)"><div id="elh_MasterPosition__UserLevel" class="MasterPosition__UserLevel">@Html.Raw(masterPositionList.RenderFieldHeader(masterPositionList._UserLevel))</div></th>
+} @* masterPositionList._UserLevel.Visible (end) *@
+@if (masterPositionList.Role.Visible) { // masterPositionList.Role.Visible (begin)
+        <th data-name="Role" class="@(masterPositionList.Role.HeaderCellClass)"><div id="elh_MasterPosition_Role" class="MasterPosition_Role">@Html.Raw(masterPositionList.RenderFieldHeader(masterPositionList.Role))</div></th>
+} @* masterPositionList.Role.Visible (end) *@
+@* Render list options (header, right) *@
+@masterPositionList.ListOptions.RenderHeader("right")
+    </tr>
+</thead>
+<tbody data-page="@(masterPositionList.PageNumber)">
+@{
+    await masterPositionList.SetupGrid();
+    bool eof = masterPositionList.Recordset == null; // DN
+}
+@while (masterPositionList.RecordCount < masterPositionList.StopRecord || SameString(masterPositionList.RowIndex, "$rowindex$")) { // Begin While
+    if (!eof && !SameString(masterPositionList.RowIndex, "$rowindex$") &&
+        (!masterPositionList.IsGridAdd || masterPositionList.CurrentMode == "copy") &&
+        (!((masterPositionList.IsCopy || masterPositionList.IsAdd) && masterPositionList.RowIndex is int rowIndex && rowIndex == 0))) // DN
+        eof = !await masterPositionList.Recordset.ReadAsync();
+    masterPositionList.RecordCount++;
+    if (masterPositionList.RecordCount >= masterPositionList.StartRecord) {
+        await masterPositionList.SetupRow();
+    <tr @Html.Raw(masterPositionList.RowAttributes)>
+    @* Render list options (body, left) *@
+    @masterPositionList.ListOptions.RenderBody("left", masterPositionList.RowCount)
+    @if (masterPositionList.IdPosition.Visible) { // masterPositionList.IdPosition.Visible (begin)
+        <td data-name="IdPosition" @Html.Raw(masterPositionList.IdPosition.CellAttributes)>
+<span id="el@(masterPositionList.RowIndex == "$rowindex$" ? "$rowindex$" : masterPositionList.RowCount)_MasterPosition_IdPosition" class="el_MasterPosition_IdPosition">
+<span @Html.Raw(masterPositionList.IdPosition.ViewAttributes)>
+@Html.Raw(masterPositionList.IdPosition.GetViewValue())</span>
+</span>
+</td>
+    } @* masterPositionList.IdPosition.Visible (end) *@
+    @if (masterPositionList.NamaPosition.Visible) { // masterPositionList.NamaPosition.Visible (begin)
+        <td data-name="NamaPosition" @Html.Raw(masterPositionList.NamaPosition.CellAttributes)>
+<span id="el@(masterPositionList.RowIndex == "$rowindex$" ? "$rowindex$" : masterPositionList.RowCount)_MasterPosition_NamaPosition" class="el_MasterPosition_NamaPosition">
+<span @Html.Raw(masterPositionList.NamaPosition.ViewAttributes)>
+@Html.Raw(masterPositionList.NamaPosition.GetViewValue())</span>
+</span>
+</td>
+    } @* masterPositionList.NamaPosition.Visible (end) *@
+    @if (masterPositionList.Location.Visible) { // masterPositionList.Location.Visible (begin)
+        <td data-name="Location" @Html.Raw(masterPositionList.Location.CellAttributes)>
+<span id="el@(masterPositionList.RowIndex == "$rowindex$" ? "$rowindex$" : masterPositionList.RowCount)_MasterPosition_Location" class="el_MasterPosition_Location">
+<span @Html.Raw(masterPositionList.Location.ViewAttributes)>
+@Html.Raw(masterPositionList.Location.GetViewValue())</span>
+</span>
+</td>
+    } @* masterPositionList.Location.Visible (end) *@
+    @if (masterPositionList._UserLevel.Visible) { // masterPositionList._UserLevel.Visible (begin)
+        <td data-name="_UserLevel" @Html.Raw(masterPositionList._UserLevel.CellAttributes)>
+<span id="el@(masterPositionList.RowIndex == "$rowindex$" ? "$rowindex$" : masterPositionList.RowCount)_MasterPosition__UserLevel" class="el_MasterPosition__UserLevel">
+<span @Html.Raw(masterPositionList._UserLevel.ViewAttributes)>
+@Html.Raw(masterPositionList._UserLevel.GetViewValue())</span>
+</span>
+</td>
+    } @* masterPositionList._UserLevel.Visible (end) *@
+    @if (masterPositionList.Role.Visible) { // masterPositionList.Role.Visible (begin)
+        <td data-name="Role" @Html.Raw(masterPositionList.Role.CellAttributes)>
+<span id="el@(masterPositionList.RowIndex == "$rowindex$" ? "$rowindex$" : masterPositionList.RowCount)_MasterPosition_Role" class="el_MasterPosition_Role">
+<span @Html.Raw(masterPositionList.Role.ViewAttributes)>
+@Html.Raw(masterPositionList.Role.GetViewValue())</span>
+</span>
+</td>
+    } @* masterPositionList.Role.Visible (end) *@
+    @* Render list options (body, right) *@
+    @masterPositionList.ListOptions.RenderBody("right", masterPositionList.RowCount)
+    </tr>
+    } @* End if *@
+
+    // Reset for template row
+    if (SameString(masterPositionList.RowIndex, "$rowindex$"))
+        masterPositionList.RowIndex = 0;
+
+    // Reset inline add/copy row
+    if ((masterPositionList.IsCopy || masterPositionList.IsAdd) && masterPositionList.RowIndex is int rowIndex2 && rowIndex2 == 0)
+        masterPositionList.RowIndex = 1;
+} @* End While *@
+</tbody>
+</table><!-- /.ew-table -->
+} @* End If TotalRecords > 0 *@
+</div><!-- /.ew-grid-middle-panel -->
+@if (Empty(masterPositionList.CurrentAction) && !masterPositionList.UseAjaxActions) {
+<input type="hidden" name="action" id="action" value="">
+}
+</form><!-- /.ew-list-form -->
+@{ masterPositionList.CloseRecordset(); }
+@if (!masterPositionList.IsExport()) {
+<div class="card-footer ew-grid-lower-panel">
+@if (!masterPositionList.IsGridAdd && !(masterPositionList.IsGridEdit && masterPositionList.ModalGridEdit) && !masterPositionList.IsMultiEdit) {
+@Html.Raw(masterPositionList.Pager.Render())
+}
+<div class="ew-list-other-options">
+@masterPositionList.OtherOptions.RenderBody("bottom")
+</div>
+</div>
+}
+</div><!-- /.ew-grid -->
+} else { // Show other options
+<div class="ew-list-other-options">
+@masterPositionList.OtherOptions.ForEach(opt => opt.ButtonClass = "").RenderBody()
+</div>
+}
+</div>
+<div id="ew-footer-options">
+    @masterPositionList.FooterOptions.RenderBody()
+</div>
+</main>
+@masterPositionList.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+@if (!masterPositionList.IsExport()) {
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("MasterPosition");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Write your table-specific startup script here
+    // document.write("page loaded");
+});
+</script>
+}

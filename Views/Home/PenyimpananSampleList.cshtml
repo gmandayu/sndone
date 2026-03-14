@@ -1,0 +1,676 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (penyimpananSampleList.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = penyimpananSampleList.UseLayout ? "_Layout" : "";
+}
+@if (!penyimpananSampleList.IsExport()) {
+<script>
+var currentTable = @Html.Raw(ConvertToJson(penyimpananSampleList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { PenyimpananSample: currentTable } });
+var currentPageID = ew.PAGE_ID = "list";
+var currentForm;
+var @(penyimpananSampleList.FormName);
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("@(penyimpananSampleList.FormName)")
+        .setPageId("list")
+        .setSubmitWithFetch(@(penyimpananSampleList.UseAjaxActions ? "true" : "false"))
+        .setFormKeyCountName("@(penyimpananSampleList.FormKeyCountName)")
+
+        // Dynamic selection lists
+        .setLists({
+            "JenisSample": @Html.Raw(penyimpananSampleList.JenisSample.ToClientList(penyimpananSampleList)),
+            "IdPlant": @Html.Raw(penyimpananSampleList.IdPlant.ToClientList(penyimpananSampleList)),
+            "Status": @Html.Raw(penyimpananSampleList.Status.ToClientList(penyimpananSampleList)),
+            "LokasiPemusnahan": @Html.Raw(penyimpananSampleList.LokasiPemusnahan.ToClientList(penyimpananSampleList)),
+        })
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Write your client script here, no need to add script tags.
+});
+</script>
+}
+@if (!penyimpananSampleList.IsExport()) {
+<div class="btn-toolbar ew-toolbar">
+@if (penyimpananSampleList.TotalRecords > 0 && penyimpananSampleList.ExportOptions.Visible) {
+    penyimpananSampleList.ExportOptions.Render("body");
+}
+@if (penyimpananSampleList.ImportOptions.Visible) {
+    penyimpananSampleList.ImportOptions.Render("body");
+}
+@if (penyimpananSampleList.SearchOptions.Visible) {
+    penyimpananSampleList.SearchOptions.Render("body");
+}
+@if (penyimpananSampleList.FilterOptions.Visible) {
+    penyimpananSampleList.FilterOptions.Render("body");
+}
+</div>
+}
+@if (penyimpananSampleList.ShowCurrentFilter) {
+    penyimpananSampleList.ShowFilterList();
+}
+@if (!penyimpananSampleList.IsModal) {
+<form name="fPenyimpananSamplesrch" id="fPenyimpananSamplesrch" class="ew-form ew-ext-search-form" action="@AppPath(CurrentPageName())" novalidate autocomplete="off">
+<div id="fPenyimpananSamplesrch_search_panel" class="mb-2 mb-sm-0 @(penyimpananSampleList.SearchPanelClass)"><!-- .ew-search-panel -->
+<script>
+var currentTable = @Html.Raw(ConvertToJson(penyimpananSampleList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { PenyimpananSample: currentTable } });
+var currentForm;
+var fPenyimpananSamplesrch, currentSearchForm, currentAdvancedSearchForm;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery,
+        fields = currentTable.fields;
+
+    // Form object for search
+    let form = new ew.FormBuilder()
+        .setId("fPenyimpananSamplesrch")
+        .setPageId("list")
+@if (penyimpananSampleList.UseAjaxActions) {
+        <text>.setSubmitWithFetch(true)</text>
+}
+
+        // Add fields
+        .setFields([
+        ])
+        // Validate form
+        .setValidate(
+            async function () {
+                if (!this.validateRequired)
+                    return true; // Ignore validation
+                let fobj = this.getForm();
+
+                // Validate fields
+                if (!this.validateFields())
+                    return false;
+
+                // Call Form_CustomValidate event
+                if (!(await this.customValidate?.(fobj) ?? true)) {
+                    this.focus();
+                    return false;
+                }
+                return true;
+            }
+        )
+
+        // Form_CustomValidate
+        .setCustomValidate(
+            function(fobj) { // DO NOT CHANGE THIS LINE!
+                    // Your custom validation code here, return false if invalid.
+                    return true;
+                }
+        )
+
+        // Use JavaScript validation or not
+        .setValidateRequired(ew.CLIENT_VALIDATE)
+
+        // Dynamic selection lists
+        .setLists({
+            "JenisSample": @Html.Raw(penyimpananSampleList.JenisSample.ToClientList(penyimpananSampleList)),
+            "IdPlant": @Html.Raw(penyimpananSampleList.IdPlant.ToClientList(penyimpananSampleList)),
+            "Status": @Html.Raw(penyimpananSampleList.Status.ToClientList(penyimpananSampleList)),
+            "LokasiPemusnahan": @Html.Raw(penyimpananSampleList.LokasiPemusnahan.ToClientList(penyimpananSampleList)),
+        })
+
+        // Filters
+        .setFilterList(@Html.Raw(penyimpananSampleList.GetFilterList()))
+        .build();
+    window[form.id] = form;
+    currentSearchForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<input type="hidden" name="cmd" value="search">
+@if (Security.CanSearch) {
+if (!penyimpananSampleList.IsExport() && Empty(penyimpananSampleList.CurrentAction) && penyimpananSampleList.HasSearchFields()) { @* Show search form (begin) *@
+<div class="ew-extended-search container-fluid ps-2">
+<div class="row mb-0@(penyimpananSampleList.SearchFieldsPerRow > 0 ? " row-cols-sm-" + penyimpananSampleList.SearchFieldsPerRow : "")">
+@{
+    // Render search row
+    penyimpananSampleList.RowType = RowType.Search;
+    penyimpananSampleList.ResetAttributes();
+    await penyimpananSampleList.RenderRow();
+}
+@if (penyimpananSampleList.JenisSample.Visible) { // penyimpananSampleList.JenisSample.Visible (begin)
+    if (!penyimpananSampleList.JenisSample.UseFilter) {
+        penyimpananSampleList.SearchColumnCount++;
+    }
+    <div id="xs_JenisSample" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(penyimpananSampleList.JenisSample.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_JenisSample"
+            name="x_JenisSample[]"
+            class="form-control ew-select@(penyimpananSampleList.JenisSample.IsInvalidClass)"
+            data-select2-id="fPenyimpananSamplesrch_x_JenisSample"
+            data-table="PenyimpananSample"
+            data-field="x_JenisSample"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(penyimpananSampleList.JenisSample.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(penyimpananSampleList.JenisSample.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(penyimpananSampleList.JenisSample.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(penyimpananSampleList.JenisSample.EditAttributes)>
+            @(penyimpananSampleList.JenisSample.SelectOptionListHtml("x_JenisSample", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(penyimpananSampleList.JenisSample.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fPenyimpananSamplesrch", function() {
+            var options = {
+                name: "x_JenisSample",
+                selectId: "fPenyimpananSamplesrch_x_JenisSample",
+                ajax: { id: "x_JenisSample", form: "fPenyimpananSamplesrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.PenyimpananSample.fields.JenisSample.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* penyimpananSampleList.JenisSample.Visible (end) *@
+@if (penyimpananSampleList.IdPlant.Visible) { // penyimpananSampleList.IdPlant.Visible (begin)
+    if (!penyimpananSampleList.IdPlant.UseFilter) {
+        penyimpananSampleList.SearchColumnCount++;
+    }
+    <div id="xs_IdPlant" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(penyimpananSampleList.IdPlant.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_IdPlant"
+            name="x_IdPlant[]"
+            class="form-control ew-select@(penyimpananSampleList.IdPlant.IsInvalidClass)"
+            data-select2-id="fPenyimpananSamplesrch_x_IdPlant"
+            data-table="PenyimpananSample"
+            data-field="x_IdPlant"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(penyimpananSampleList.IdPlant.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(penyimpananSampleList.IdPlant.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(penyimpananSampleList.IdPlant.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(penyimpananSampleList.IdPlant.EditAttributes)>
+            @(penyimpananSampleList.IdPlant.SelectOptionListHtml("x_IdPlant", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(penyimpananSampleList.IdPlant.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fPenyimpananSamplesrch", function() {
+            var options = {
+                name: "x_IdPlant",
+                selectId: "fPenyimpananSamplesrch_x_IdPlant",
+                ajax: { id: "x_IdPlant", form: "fPenyimpananSamplesrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.PenyimpananSample.fields.IdPlant.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* penyimpananSampleList.IdPlant.Visible (end) *@
+@if (penyimpananSampleList.Status.Visible) { // penyimpananSampleList.Status.Visible (begin)
+    if (!penyimpananSampleList.Status.UseFilter) {
+        penyimpananSampleList.SearchColumnCount++;
+    }
+    <div id="xs_Status" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(penyimpananSampleList.Status.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_Status"
+            name="x_Status[]"
+            class="form-control ew-select@(penyimpananSampleList.Status.IsInvalidClass)"
+            data-select2-id="fPenyimpananSamplesrch_x_Status"
+            data-table="PenyimpananSample"
+            data-field="x_Status"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(penyimpananSampleList.Status.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(penyimpananSampleList.Status.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(penyimpananSampleList.Status.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(penyimpananSampleList.Status.EditAttributes)>
+            @(penyimpananSampleList.Status.SelectOptionListHtml("x_Status", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(penyimpananSampleList.Status.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fPenyimpananSamplesrch", function() {
+            var options = {
+                name: "x_Status",
+                selectId: "fPenyimpananSamplesrch_x_Status",
+                ajax: { id: "x_Status", form: "fPenyimpananSamplesrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.PenyimpananSample.fields.Status.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* penyimpananSampleList.Status.Visible (end) *@
+@if (penyimpananSampleList.LokasiPemusnahan.Visible) { // penyimpananSampleList.LokasiPemusnahan.Visible (begin)
+    if (!penyimpananSampleList.LokasiPemusnahan.UseFilter) {
+        penyimpananSampleList.SearchColumnCount++;
+    }
+    <div id="xs_LokasiPemusnahan" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(penyimpananSampleList.LokasiPemusnahan.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_LokasiPemusnahan"
+            name="x_LokasiPemusnahan[]"
+            class="form-control ew-select@(penyimpananSampleList.LokasiPemusnahan.IsInvalidClass)"
+            data-select2-id="fPenyimpananSamplesrch_x_LokasiPemusnahan"
+            data-table="PenyimpananSample"
+            data-field="x_LokasiPemusnahan"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(penyimpananSampleList.LokasiPemusnahan.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(penyimpananSampleList.LokasiPemusnahan.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(penyimpananSampleList.LokasiPemusnahan.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(penyimpananSampleList.LokasiPemusnahan.EditAttributes)>
+            @(penyimpananSampleList.LokasiPemusnahan.SelectOptionListHtml("x_LokasiPemusnahan", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(penyimpananSampleList.LokasiPemusnahan.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fPenyimpananSamplesrch", function() {
+            var options = {
+                name: "x_LokasiPemusnahan",
+                selectId: "fPenyimpananSamplesrch_x_LokasiPemusnahan",
+                ajax: { id: "x_LokasiPemusnahan", form: "fPenyimpananSamplesrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.PenyimpananSample.fields.LokasiPemusnahan.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* penyimpananSampleList.LokasiPemusnahan.Visible (end) *@
+</div><!-- /.row -->
+<div class="row mb-0">
+    <div class="col-sm-auto px-0 pe-sm-2">
+        <div class="ew-basic-search input-group">
+            <input type="search" name="@(Config.TableBasicSearch)" id="@(Config.TableBasicSearch)" class="form-control ew-basic-search-keyword" value="@Html.Raw(HtmlEncode(penyimpananSampleList.BasicSearch.SessionKeyword))" placeholder="@(HtmlEncode(Language.Phrase("Search")))" aria-label="@(HtmlEncode(Language.Phrase("Search")))">
+            <input type="hidden" name="@(Config.TableBasicSearchType)" id="@(Config.TableBasicSearchType)" class="ew-basic-search-type" value="@(HtmlEncode(penyimpananSampleList.BasicSearch.SessionType))">
+            <button type="button" data-bs-toggle="dropdown" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split" aria-haspopup="true" aria-expanded="false">
+                <span id="searchtype">@Html.Raw(penyimpananSampleList.BasicSearch.TypeNameShort)</span>
+            </button>
+            <div class="dropdown-menu dropdown-menu-end">
+                <button type="button" class="dropdown-item@(penyimpananSampleList.BasicSearch.SessionType == "" ? " active" : "")" form="fPenyimpananSamplesrch" data-ew-action="search-type">@Html.Raw(Language.Phrase("QuickSearchAuto"))</button>
+                <button type="button" class="dropdown-item@(penyimpananSampleList.BasicSearch.SessionType == "=" ? " active" : "")" form="fPenyimpananSamplesrch" data-ew-action="search-type" data-search-type="=">@Html.Raw(Language.Phrase("QuickSearchExact"))</button>
+                <button type="button" class="dropdown-item@(penyimpananSampleList.BasicSearch.SessionType == "AND" ? " active" : "")" form="fPenyimpananSamplesrch" data-ew-action="search-type" data-search-type="AND">@Html.Raw(Language.Phrase("QuickSearchAll"))</button>
+                <button type="button" class="dropdown-item@(penyimpananSampleList.BasicSearch.SessionType == "OR" ? " active" : "")" form="fPenyimpananSamplesrch" data-ew-action="search-type" data-search-type="OR">@Html.Raw(Language.Phrase("QuickSearchAny"))</button>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-auto mb-3">
+        <button class="btn btn-primary" name="btn-submit" id="btn-submit" type="submit">@Html.Raw(Language.Phrase("SearchBtn"))</button>
+    </div>
+</div>
+</div><!-- /.ew-extended-search -->
+} @* Show search form (end) *@
+}
+</div><!-- /.ew-search-panel -->
+</form>
+}
+@penyimpananSampleList.ShowPageHeader()
+@penyimpananSampleList.ShowMessages()
+<main class="list @(penyimpananSampleList.TotalRecords == 0 && !penyimpananSampleList.IsAdd ? " ew-no-record" : "")">
+<div id="ew-header-options">
+    @penyimpananSampleList.HeaderOptions.RenderBody()
+</div>
+<div id="ew-list">
+@if (penyimpananSampleList.TotalRecords > 0 || !Empty(penyimpananSampleList.CurrentAction)) {
+<div class="card ew-card ew-grid@(penyimpananSampleList.IsAddOrEdit ? " ew-grid-add-edit" : "") @(penyimpananSampleList.TableGridClass)">
+<form name="@(penyimpananSampleList.FormName)" id="@(penyimpananSampleList.FormName)" class="ew-form ew-list-form" action="@AppPath(penyimpananSampleList.PageName)" method="post" novalidate autocomplete="off">
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+@if (penyimpananSampleList.IsModal) {
+<input type="hidden" name="modal" value="1">
+}
+<div id="gmp_PenyimpananSample" class="card-body ew-grid-middle-panel @(penyimpananSampleList.TableContainerClass)" style="@(penyimpananSampleList.TableContainerStyle)">
+@if (penyimpananSampleList.TotalRecords > 0 || penyimpananSampleList.IsGridEdit || penyimpananSampleList.IsMultiEdit) {
+<table id="tbl_PenyimpananSamplelist" class="@(penyimpananSampleList.TableClass)"><!-- .ew-table -->
+<thead>
+    <tr class="ew-table-header">
+@{
+    // Header row
+    penyimpananSampleList.RowType = RowType.Header;
+
+    // Render list options
+    await penyimpananSampleList.RenderListOptions();
+}
+@* Render list options (header, left) *@
+@penyimpananSampleList.ListOptions.RenderHeader("left")
+@if (penyimpananSampleList.NomorPenyimpananSample.Visible) { // penyimpananSampleList.NomorPenyimpananSample.Visible (begin)
+        <th data-name="NomorPenyimpananSample" class="@(penyimpananSampleList.NomorPenyimpananSample.HeaderCellClass)"><div id="elh_PenyimpananSample_NomorPenyimpananSample" class="PenyimpananSample_NomorPenyimpananSample">@Html.Raw(penyimpananSampleList.RenderFieldHeader(penyimpananSampleList.NomorPenyimpananSample))</div></th>
+} @* penyimpananSampleList.NomorPenyimpananSample.Visible (end) *@
+@if (penyimpananSampleList.JenisSample.Visible) { // penyimpananSampleList.JenisSample.Visible (begin)
+        <th data-name="JenisSample" class="@(penyimpananSampleList.JenisSample.HeaderCellClass)"><div id="elh_PenyimpananSample_JenisSample" class="PenyimpananSample_JenisSample">@Html.Raw(penyimpananSampleList.RenderFieldHeader(penyimpananSampleList.JenisSample))</div></th>
+} @* penyimpananSampleList.JenisSample.Visible (end) *@
+@if (penyimpananSampleList.IdPlant.Visible) { // penyimpananSampleList.IdPlant.Visible (begin)
+        <th data-name="IdPlant" class="@(penyimpananSampleList.IdPlant.HeaderCellClass)"><div id="elh_PenyimpananSample_IdPlant" class="PenyimpananSample_IdPlant">@Html.Raw(penyimpananSampleList.RenderFieldHeader(penyimpananSampleList.IdPlant))</div></th>
+} @* penyimpananSampleList.IdPlant.Visible (end) *@
+@if (penyimpananSampleList.Tanggal.Visible) { // penyimpananSampleList.Tanggal.Visible (begin)
+        <th data-name="Tanggal" class="@(penyimpananSampleList.Tanggal.HeaderCellClass)"><div id="elh_PenyimpananSample_Tanggal" class="PenyimpananSample_Tanggal">@Html.Raw(penyimpananSampleList.RenderFieldHeader(penyimpananSampleList.Tanggal))</div></th>
+} @* penyimpananSampleList.Tanggal.Visible (end) *@
+@if (penyimpananSampleList.NamaMasterSample.Visible) { // penyimpananSampleList.NamaMasterSample.Visible (begin)
+        <th data-name="NamaMasterSample" class="@(penyimpananSampleList.NamaMasterSample.HeaderCellClass)"><div id="elh_PenyimpananSample_NamaMasterSample" class="PenyimpananSample_NamaMasterSample">@Html.Raw(penyimpananSampleList.RenderFieldHeader(penyimpananSampleList.NamaMasterSample))</div></th>
+} @* penyimpananSampleList.NamaMasterSample.Visible (end) *@
+@if (penyimpananSampleList.NomorSegel.Visible) { // penyimpananSampleList.NomorSegel.Visible (begin)
+        <th data-name="NomorSegel" class="@(penyimpananSampleList.NomorSegel.HeaderCellClass)"><div id="elh_PenyimpananSample_NomorSegel" class="PenyimpananSample_NomorSegel">@Html.Raw(penyimpananSampleList.RenderFieldHeader(penyimpananSampleList.NomorSegel))</div></th>
+} @* penyimpananSampleList.NomorSegel.Visible (end) *@
+@if (penyimpananSampleList.Status.Visible) { // penyimpananSampleList.Status.Visible (begin)
+        <th data-name="Status" class="@(penyimpananSampleList.Status.HeaderCellClass)"><div id="elh_PenyimpananSample_Status" class="PenyimpananSample_Status">@Html.Raw(penyimpananSampleList.RenderFieldHeader(penyimpananSampleList.Status))</div></th>
+} @* penyimpananSampleList.Status.Visible (end) *@
+@if (penyimpananSampleList.DownloadFoto.Visible) { // penyimpananSampleList.DownloadFoto.Visible (begin)
+        <th data-name="DownloadFoto" class="@(penyimpananSampleList.DownloadFoto.HeaderCellClass)" style="white-space: nowrap;"><div id="elh_PenyimpananSample_DownloadFoto" class="PenyimpananSample_DownloadFoto">@Html.Raw(penyimpananSampleList.RenderFieldHeader(penyimpananSampleList.DownloadFoto))</div></th>
+} @* penyimpananSampleList.DownloadFoto.Visible (end) *@
+@if (penyimpananSampleList.ExpiredEst.Visible) { // penyimpananSampleList.ExpiredEst.Visible (begin)
+        <th data-name="ExpiredEst" class="@(penyimpananSampleList.ExpiredEst.HeaderCellClass)"><div id="elh_PenyimpananSample_ExpiredEst" class="PenyimpananSample_ExpiredEst">@Html.Raw(penyimpananSampleList.RenderFieldHeader(penyimpananSampleList.ExpiredEst))</div></th>
+} @* penyimpananSampleList.ExpiredEst.Visible (end) *@
+@if (penyimpananSampleList.TanggalDimusnahkan.Visible) { // penyimpananSampleList.TanggalDimusnahkan.Visible (begin)
+        <th data-name="TanggalDimusnahkan" class="@(penyimpananSampleList.TanggalDimusnahkan.HeaderCellClass)"><div id="elh_PenyimpananSample_TanggalDimusnahkan" class="PenyimpananSample_TanggalDimusnahkan">@Html.Raw(penyimpananSampleList.RenderFieldHeader(penyimpananSampleList.TanggalDimusnahkan))</div></th>
+} @* penyimpananSampleList.TanggalDimusnahkan.Visible (end) *@
+@if (penyimpananSampleList.LokasiPemusnahan.Visible) { // penyimpananSampleList.LokasiPemusnahan.Visible (begin)
+        <th data-name="LokasiPemusnahan" class="@(penyimpananSampleList.LokasiPemusnahan.HeaderCellClass)"><div id="elh_PenyimpananSample_LokasiPemusnahan" class="PenyimpananSample_LokasiPemusnahan">@Html.Raw(penyimpananSampleList.RenderFieldHeader(penyimpananSampleList.LokasiPemusnahan))</div></th>
+} @* penyimpananSampleList.LokasiPemusnahan.Visible (end) *@
+@if (penyimpananSampleList.CreatedBy.Visible) { // penyimpananSampleList.CreatedBy.Visible (begin)
+        <th data-name="CreatedBy" class="@(penyimpananSampleList.CreatedBy.HeaderCellClass)"><div id="elh_PenyimpananSample_CreatedBy" class="PenyimpananSample_CreatedBy">@Html.Raw(penyimpananSampleList.RenderFieldHeader(penyimpananSampleList.CreatedBy))</div></th>
+} @* penyimpananSampleList.CreatedBy.Visible (end) *@
+@if (penyimpananSampleList.etlDate.Visible) { // penyimpananSampleList.etlDate.Visible (begin)
+        <th data-name="etlDate" class="@(penyimpananSampleList.etlDate.HeaderCellClass)"><div id="elh_PenyimpananSample_etlDate" class="PenyimpananSample_etlDate">@Html.Raw(penyimpananSampleList.RenderFieldHeader(penyimpananSampleList.etlDate))</div></th>
+} @* penyimpananSampleList.etlDate.Visible (end) *@
+@if (penyimpananSampleList.LastUpdatedBy.Visible) { // penyimpananSampleList.LastUpdatedBy.Visible (begin)
+        <th data-name="LastUpdatedBy" class="@(penyimpananSampleList.LastUpdatedBy.HeaderCellClass)"><div id="elh_PenyimpananSample_LastUpdatedBy" class="PenyimpananSample_LastUpdatedBy">@Html.Raw(penyimpananSampleList.RenderFieldHeader(penyimpananSampleList.LastUpdatedBy))</div></th>
+} @* penyimpananSampleList.LastUpdatedBy.Visible (end) *@
+@if (penyimpananSampleList.lastUpdatedDate.Visible) { // penyimpananSampleList.lastUpdatedDate.Visible (begin)
+        <th data-name="lastUpdatedDate" class="@(penyimpananSampleList.lastUpdatedDate.HeaderCellClass)"><div id="elh_PenyimpananSample_lastUpdatedDate" class="PenyimpananSample_lastUpdatedDate">@Html.Raw(penyimpananSampleList.RenderFieldHeader(penyimpananSampleList.lastUpdatedDate))</div></th>
+} @* penyimpananSampleList.lastUpdatedDate.Visible (end) *@
+@* Render list options (header, right) *@
+@penyimpananSampleList.ListOptions.RenderHeader("right")
+    </tr>
+</thead>
+<tbody data-page="@(penyimpananSampleList.PageNumber)">
+@{
+    await penyimpananSampleList.SetupGrid();
+    bool eof = penyimpananSampleList.Recordset == null; // DN
+}
+@while (penyimpananSampleList.RecordCount < penyimpananSampleList.StopRecord || SameString(penyimpananSampleList.RowIndex, "$rowindex$")) { // Begin While
+    if (!eof && !SameString(penyimpananSampleList.RowIndex, "$rowindex$") &&
+        (!penyimpananSampleList.IsGridAdd || penyimpananSampleList.CurrentMode == "copy") &&
+        (!((penyimpananSampleList.IsCopy || penyimpananSampleList.IsAdd) && penyimpananSampleList.RowIndex is int rowIndex && rowIndex == 0))) // DN
+        eof = !await penyimpananSampleList.Recordset.ReadAsync();
+    penyimpananSampleList.RecordCount++;
+    if (penyimpananSampleList.RecordCount >= penyimpananSampleList.StartRecord) {
+        await penyimpananSampleList.SetupRow();
+    <tr @Html.Raw(penyimpananSampleList.RowAttributes)>
+    @* Render list options (body, left) *@
+    @penyimpananSampleList.ListOptions.RenderBody("left", penyimpananSampleList.RowCount)
+    @if (penyimpananSampleList.NomorPenyimpananSample.Visible) { // penyimpananSampleList.NomorPenyimpananSample.Visible (begin)
+        <td data-name="NomorPenyimpananSample" @Html.Raw(penyimpananSampleList.NomorPenyimpananSample.CellAttributes)>
+<span id="el@(penyimpananSampleList.RowIndex == "$rowindex$" ? "$rowindex$" : penyimpananSampleList.RowCount)_PenyimpananSample_NomorPenyimpananSample" class="el_PenyimpananSample_NomorPenyimpananSample">
+<span @Html.Raw(penyimpananSampleList.NomorPenyimpananSample.ViewAttributes)>
+@Html.Raw(penyimpananSampleList.NomorPenyimpananSample.GetViewValue())</span>
+</span>
+</td>
+    } @* penyimpananSampleList.NomorPenyimpananSample.Visible (end) *@
+    @if (penyimpananSampleList.JenisSample.Visible) { // penyimpananSampleList.JenisSample.Visible (begin)
+        <td data-name="JenisSample" @Html.Raw(penyimpananSampleList.JenisSample.CellAttributes)>
+<span id="el@(penyimpananSampleList.RowIndex == "$rowindex$" ? "$rowindex$" : penyimpananSampleList.RowCount)_PenyimpananSample_JenisSample" class="el_PenyimpananSample_JenisSample">
+<span @Html.Raw(penyimpananSampleList.JenisSample.ViewAttributes)>
+@Html.Raw(penyimpananSampleList.JenisSample.GetViewValue())</span>
+</span>
+</td>
+    } @* penyimpananSampleList.JenisSample.Visible (end) *@
+    @if (penyimpananSampleList.IdPlant.Visible) { // penyimpananSampleList.IdPlant.Visible (begin)
+        <td data-name="IdPlant" @Html.Raw(penyimpananSampleList.IdPlant.CellAttributes)>
+<span id="el@(penyimpananSampleList.RowIndex == "$rowindex$" ? "$rowindex$" : penyimpananSampleList.RowCount)_PenyimpananSample_IdPlant" class="el_PenyimpananSample_IdPlant">
+<span @Html.Raw(penyimpananSampleList.IdPlant.ViewAttributes)>
+@Html.Raw(penyimpananSampleList.IdPlant.GetViewValue())</span>
+</span>
+</td>
+    } @* penyimpananSampleList.IdPlant.Visible (end) *@
+    @if (penyimpananSampleList.Tanggal.Visible) { // penyimpananSampleList.Tanggal.Visible (begin)
+        <td data-name="Tanggal" @Html.Raw(penyimpananSampleList.Tanggal.CellAttributes)>
+<span id="el@(penyimpananSampleList.RowIndex == "$rowindex$" ? "$rowindex$" : penyimpananSampleList.RowCount)_PenyimpananSample_Tanggal" class="el_PenyimpananSample_Tanggal">
+<span @Html.Raw(penyimpananSampleList.Tanggal.ViewAttributes)>
+@Html.Raw(penyimpananSampleList.Tanggal.GetViewValue())</span>
+</span>
+</td>
+    } @* penyimpananSampleList.Tanggal.Visible (end) *@
+    @if (penyimpananSampleList.NamaMasterSample.Visible) { // penyimpananSampleList.NamaMasterSample.Visible (begin)
+        <td data-name="NamaMasterSample" @Html.Raw(penyimpananSampleList.NamaMasterSample.CellAttributes)>
+<span id="el@(penyimpananSampleList.RowIndex == "$rowindex$" ? "$rowindex$" : penyimpananSampleList.RowCount)_PenyimpananSample_NamaMasterSample" class="el_PenyimpananSample_NamaMasterSample">
+<span @Html.Raw(penyimpananSampleList.NamaMasterSample.ViewAttributes)>
+@Html.Raw(penyimpananSampleList.NamaMasterSample.GetViewValue())</span>
+</span>
+</td>
+    } @* penyimpananSampleList.NamaMasterSample.Visible (end) *@
+    @if (penyimpananSampleList.NomorSegel.Visible) { // penyimpananSampleList.NomorSegel.Visible (begin)
+        <td data-name="NomorSegel" @Html.Raw(penyimpananSampleList.NomorSegel.CellAttributes)>
+<span id="el@(penyimpananSampleList.RowIndex == "$rowindex$" ? "$rowindex$" : penyimpananSampleList.RowCount)_PenyimpananSample_NomorSegel" class="el_PenyimpananSample_NomorSegel">
+<span @Html.Raw(penyimpananSampleList.NomorSegel.ViewAttributes)>
+@Html.Raw(penyimpananSampleList.NomorSegel.GetViewValue())</span>
+</span>
+</td>
+    } @* penyimpananSampleList.NomorSegel.Visible (end) *@
+    @if (penyimpananSampleList.Status.Visible) { // penyimpananSampleList.Status.Visible (begin)
+        <td data-name="Status" @Html.Raw(penyimpananSampleList.Status.CellAttributes)>
+<span id="el@(penyimpananSampleList.RowIndex == "$rowindex$" ? "$rowindex$" : penyimpananSampleList.RowCount)_PenyimpananSample_Status" class="el_PenyimpananSample_Status">
+<span @Html.Raw(penyimpananSampleList.Status.ViewAttributes)>
+@Html.Raw(penyimpananSampleList.Status.GetViewValue())</span>
+</span>
+</td>
+    } @* penyimpananSampleList.Status.Visible (end) *@
+    @if (penyimpananSampleList.DownloadFoto.Visible) { // penyimpananSampleList.DownloadFoto.Visible (begin)
+        <td data-name="DownloadFoto" @Html.Raw(penyimpananSampleList.DownloadFoto.CellAttributes)>
+<span id="el@(penyimpananSampleList.RowIndex == "$rowindex$" ? "$rowindex$" : penyimpananSampleList.RowCount)_PenyimpananSample_DownloadFoto" class="el_PenyimpananSample_DownloadFoto">
+<span @Html.Raw(penyimpananSampleList.DownloadFoto.ViewAttributes)>
+@Html.Raw(penyimpananSampleList.DownloadFoto.GetViewValue())</span>
+</span>
+</td>
+    } @* penyimpananSampleList.DownloadFoto.Visible (end) *@
+    @if (penyimpananSampleList.ExpiredEst.Visible) { // penyimpananSampleList.ExpiredEst.Visible (begin)
+        <td data-name="ExpiredEst" @Html.Raw(penyimpananSampleList.ExpiredEst.CellAttributes)>
+<span id="el@(penyimpananSampleList.RowIndex == "$rowindex$" ? "$rowindex$" : penyimpananSampleList.RowCount)_PenyimpananSample_ExpiredEst" class="el_PenyimpananSample_ExpiredEst">
+<span @Html.Raw(penyimpananSampleList.ExpiredEst.ViewAttributes)>
+@Html.Raw(penyimpananSampleList.ExpiredEst.GetViewValue())</span>
+</span>
+</td>
+    } @* penyimpananSampleList.ExpiredEst.Visible (end) *@
+    @if (penyimpananSampleList.TanggalDimusnahkan.Visible) { // penyimpananSampleList.TanggalDimusnahkan.Visible (begin)
+        <td data-name="TanggalDimusnahkan" @Html.Raw(penyimpananSampleList.TanggalDimusnahkan.CellAttributes)>
+<span id="el@(penyimpananSampleList.RowIndex == "$rowindex$" ? "$rowindex$" : penyimpananSampleList.RowCount)_PenyimpananSample_TanggalDimusnahkan" class="el_PenyimpananSample_TanggalDimusnahkan">
+<span @Html.Raw(penyimpananSampleList.TanggalDimusnahkan.ViewAttributes)>
+@Html.Raw(penyimpananSampleList.TanggalDimusnahkan.GetViewValue())</span>
+</span>
+</td>
+    } @* penyimpananSampleList.TanggalDimusnahkan.Visible (end) *@
+    @if (penyimpananSampleList.LokasiPemusnahan.Visible) { // penyimpananSampleList.LokasiPemusnahan.Visible (begin)
+        <td data-name="LokasiPemusnahan" @Html.Raw(penyimpananSampleList.LokasiPemusnahan.CellAttributes)>
+<span id="el@(penyimpananSampleList.RowIndex == "$rowindex$" ? "$rowindex$" : penyimpananSampleList.RowCount)_PenyimpananSample_LokasiPemusnahan" class="el_PenyimpananSample_LokasiPemusnahan">
+<span @Html.Raw(penyimpananSampleList.LokasiPemusnahan.ViewAttributes)>
+@Html.Raw(penyimpananSampleList.LokasiPemusnahan.GetViewValue())</span>
+</span>
+</td>
+    } @* penyimpananSampleList.LokasiPemusnahan.Visible (end) *@
+    @if (penyimpananSampleList.CreatedBy.Visible) { // penyimpananSampleList.CreatedBy.Visible (begin)
+        <td data-name="CreatedBy" @Html.Raw(penyimpananSampleList.CreatedBy.CellAttributes)>
+<span id="el@(penyimpananSampleList.RowIndex == "$rowindex$" ? "$rowindex$" : penyimpananSampleList.RowCount)_PenyimpananSample_CreatedBy" class="el_PenyimpananSample_CreatedBy">
+<span @Html.Raw(penyimpananSampleList.CreatedBy.ViewAttributes)>
+@Html.Raw(penyimpananSampleList.CreatedBy.GetViewValue())</span>
+</span>
+</td>
+    } @* penyimpananSampleList.CreatedBy.Visible (end) *@
+    @if (penyimpananSampleList.etlDate.Visible) { // penyimpananSampleList.etlDate.Visible (begin)
+        <td data-name="etlDate" @Html.Raw(penyimpananSampleList.etlDate.CellAttributes)>
+<span id="el@(penyimpananSampleList.RowIndex == "$rowindex$" ? "$rowindex$" : penyimpananSampleList.RowCount)_PenyimpananSample_etlDate" class="el_PenyimpananSample_etlDate">
+<span @Html.Raw(penyimpananSampleList.etlDate.ViewAttributes)>
+@Html.Raw(penyimpananSampleList.etlDate.GetViewValue())</span>
+</span>
+</td>
+    } @* penyimpananSampleList.etlDate.Visible (end) *@
+    @if (penyimpananSampleList.LastUpdatedBy.Visible) { // penyimpananSampleList.LastUpdatedBy.Visible (begin)
+        <td data-name="LastUpdatedBy" @Html.Raw(penyimpananSampleList.LastUpdatedBy.CellAttributes)>
+<span id="el@(penyimpananSampleList.RowIndex == "$rowindex$" ? "$rowindex$" : penyimpananSampleList.RowCount)_PenyimpananSample_LastUpdatedBy" class="el_PenyimpananSample_LastUpdatedBy">
+<span @Html.Raw(penyimpananSampleList.LastUpdatedBy.ViewAttributes)>
+@Html.Raw(penyimpananSampleList.LastUpdatedBy.GetViewValue())</span>
+</span>
+</td>
+    } @* penyimpananSampleList.LastUpdatedBy.Visible (end) *@
+    @if (penyimpananSampleList.lastUpdatedDate.Visible) { // penyimpananSampleList.lastUpdatedDate.Visible (begin)
+        <td data-name="lastUpdatedDate" @Html.Raw(penyimpananSampleList.lastUpdatedDate.CellAttributes)>
+<span id="el@(penyimpananSampleList.RowIndex == "$rowindex$" ? "$rowindex$" : penyimpananSampleList.RowCount)_PenyimpananSample_lastUpdatedDate" class="el_PenyimpananSample_lastUpdatedDate">
+<span @Html.Raw(penyimpananSampleList.lastUpdatedDate.ViewAttributes)>
+@Html.Raw(penyimpananSampleList.lastUpdatedDate.GetViewValue())</span>
+</span>
+</td>
+    } @* penyimpananSampleList.lastUpdatedDate.Visible (end) *@
+    @* Render list options (body, right) *@
+    @penyimpananSampleList.ListOptions.RenderBody("right", penyimpananSampleList.RowCount)
+    </tr>
+    } @* End if *@
+
+    // Reset for template row
+    if (SameString(penyimpananSampleList.RowIndex, "$rowindex$"))
+        penyimpananSampleList.RowIndex = 0;
+
+    // Reset inline add/copy row
+    if ((penyimpananSampleList.IsCopy || penyimpananSampleList.IsAdd) && penyimpananSampleList.RowIndex is int rowIndex2 && rowIndex2 == 0)
+        penyimpananSampleList.RowIndex = 1;
+} @* End While *@
+</tbody>
+</table><!-- /.ew-table -->
+} @* End If TotalRecords > 0 *@
+</div><!-- /.ew-grid-middle-panel -->
+@if (Empty(penyimpananSampleList.CurrentAction) && !penyimpananSampleList.UseAjaxActions) {
+<input type="hidden" name="action" id="action" value="">
+}
+</form><!-- /.ew-list-form -->
+@{ penyimpananSampleList.CloseRecordset(); }
+@if (!penyimpananSampleList.IsExport()) {
+<div class="card-footer ew-grid-lower-panel">
+@if (!penyimpananSampleList.IsGridAdd && !(penyimpananSampleList.IsGridEdit && penyimpananSampleList.ModalGridEdit) && !penyimpananSampleList.IsMultiEdit) {
+@Html.Raw(penyimpananSampleList.Pager.Render())
+}
+<div class="ew-list-other-options">
+@penyimpananSampleList.OtherOptions.RenderBody("bottom")
+</div>
+</div>
+}
+</div><!-- /.ew-grid -->
+} else { // Show other options
+<div class="ew-list-other-options">
+@penyimpananSampleList.OtherOptions.ForEach(opt => opt.ButtonClass = "").RenderBody()
+</div>
+}
+</div>
+<div id="ew-footer-options">
+    @penyimpananSampleList.FooterOptions.RenderBody()
+</div>
+</main>
+@penyimpananSampleList.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+@if (!penyimpananSampleList.IsExport()) {
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("PenyimpananSample");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Startup script
+    // Write your table-specific startup script here
+    // document.write("page loaded");
+    const parentURL = ew.PATH_BASE;
+    const showMessage = m => (ew?.alert ? ew.alert(m) : alert(m));
+    const showLoadingSafe = () => (typeof showLoading === 'function' ? showLoading() : null);
+    const hideLoadingSafe = () => (typeof hideLoading === 'function' ? hideLoading() : null);
+    function getFilenamFromDisposition(disposition) {
+        if (!disposition) return 'download_file';
+        const utf8 = disposition.match(/filename\*\s*=\s*UTF-8''([^;]+)/i);
+        if (utf8?.[1]) return decodeURIComponent(utf8[1]);
+        const normal = disposition.match(/filename="?([^";]+)"?/i);
+        if (normal?.[1]) return decodeURIComponent(normal[1]);
+        return 'download_file';
+    }
+    function downloadBlob(blob, fileName) {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName || 'download_file';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+    }
+    async function blobToJson(blob) {
+        const text = await blob.text();
+        try {
+            return JSON.parse(text);
+        } catch {
+            return null;
+        }
+    }
+    $(document).ready(function () {
+        const $oldButton = $('button.btn-primary[name="btn-submit"]');
+        if ($oldButton.length) {
+            const $addButton = $(`
+                <button type="button" class="btn btn-success ms-1" id="btn-add-custom">
+                <i class="fas fa-plus"></i> Add New
+                </button>
+            `);
+            $addButton.on('click', () => {
+                window.location.href = parentURL + 'PengujianSampleLainnyaAdd';
+            });
+            $oldButton.parent().append($addButton);
+        }
+    });
+    $(document).on('click', '.download-document', function (e) {
+        e.preventDefault();
+        const id = $(this).data('id');
+        const type = ($(this).data('type') || 'psm').toString().trim().toLowerCase();
+        if (!id) return showMessage('ID dokumen tidak ditemukan.');
+        if (!type) return showMessage('Type tidak ditemukan.');
+        $.ajax({
+            url: `${parentURL}api/qq/download?id=${encodeURIComponent(id)}&type=${encodeURIComponent(type)}`,
+            method: 'GET',
+            xhrFields: { responseType: 'blob' },
+            beforeSend: showLoadingSafe,
+            success: async (blob, _status, xhr) => {
+                const ct = (xhr.getResponseHeader('Content-Type') || '').toLowerCase();
+                if (ct.includes('application/json')) {
+                    const obj = await blobToJson(blob);
+                    return showMessage(obj.message || 'Gagal download.');
+                }
+                const cd = xhr.getResponseHeader('Content-Disposition');
+                const fileName = getFilenamFromDisposition(cd);
+                downloadBlob(blob, fileName);
+                showMessage('Download berhasil!');
+            },
+            error: async xhr => {
+                try {
+                    const blob = xhr.response;
+                    if (blob instanceof Blob) {
+                        const obj = await blobToJson(blob);
+                        if (obj?.message) return showMessage(obj.message);
+                    }
+                } catch {}
+                console.error(`Gagal mengunduh file. (${xhr.status} ${xhr.statusText})`);
+                return showMessage('Gagal mengunduh file.');
+            },
+            complete: hideLoadingSafe,
+        });
+    });
+});
+</script>
+}

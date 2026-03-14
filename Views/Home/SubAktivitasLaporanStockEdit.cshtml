@@ -1,0 +1,835 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (subAktivitasLaporanStockEdit.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = subAktivitasLaporanStockEdit.UseLayout ? "_Layout" : "";
+}
+@subAktivitasLaporanStockEdit.ShowPageHeader()
+@subAktivitasLaporanStockEdit.ShowMessages()
+<main class="edit">
+<form name="fSubAktivitasLaporanStockedit" id="fSubAktivitasLaporanStockedit" class="@(subAktivitasLaporanStockEdit.FormClassName)" action="@AppPath(CurrentPageName())" method="post" novalidate autocomplete="off">
+<script>
+var currentTable = @Html.Raw(ConvertToJson(subAktivitasLaporanStockEdit.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { SubAktivitasLaporanStock: currentTable } });
+var currentPageID = ew.PAGE_ID = "edit";
+var currentForm;
+var fSubAktivitasLaporanStockedit;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("fSubAktivitasLaporanStockedit")
+        .setPageId("edit")
+
+        // Add fields
+        .setFields([
+
+            ["NoReferensi", [fields.NoReferensi.visible && fields.NoReferensi.required ? ew.Validators.required(fields.NoReferensi.caption) : null], fields.NoReferensi.isInvalid],
+            ["idProses", [fields.idProses.visible && fields.idProses.required ? ew.Validators.required(fields.idProses.caption) : null], fields.idProses.isInvalid],
+            ["idAktifitas", [fields.idAktifitas.visible && fields.idAktifitas.required ? ew.Validators.required(fields.idAktifitas.caption) : null], fields.idAktifitas.isInvalid],
+            ["StatusAktivitas", [fields.StatusAktivitas.visible && fields.StatusAktivitas.required ? ew.Validators.required(fields.StatusAktivitas.caption) : null], fields.StatusAktivitas.isInvalid],
+            ["LastUpdatedBy", [fields.LastUpdatedBy.visible && fields.LastUpdatedBy.required ? ew.Validators.required(fields.LastUpdatedBy.caption) : null], fields.LastUpdatedBy.isInvalid],
+            ["lastUpdatedDate", [fields.lastUpdatedDate.visible && fields.lastUpdatedDate.required ? ew.Validators.required(fields.lastUpdatedDate.caption) : null], fields.lastUpdatedDate.isInvalid],
+            ["StockAwal", [fields.StockAwal.visible && fields.StockAwal.required ? ew.Validators.required(fields.StockAwal.caption) : null], fields.StockAwal.isInvalid],
+            ["Penerimaan2", [fields.Penerimaan2.visible && fields.Penerimaan2.required ? ew.Validators.required(fields.Penerimaan2.caption) : null], fields.Penerimaan2.isInvalid],
+            ["Penyaluran2", [fields.Penyaluran2.visible && fields.Penyaluran2.required ? ew.Validators.required(fields.Penyaluran2.caption) : null], fields.Penyaluran2.isInvalid],
+            ["StockAkhir", [fields.StockAkhir.visible && fields.StockAkhir.required ? ew.Validators.required(fields.StockAkhir.caption) : null], fields.StockAkhir.isInvalid],
+            ["WorkingLoss", [fields.WorkingLoss.visible && fields.WorkingLoss.required ? ew.Validators.required(fields.WorkingLoss.caption) : null], fields.WorkingLoss.isInvalid],
+            ["Presentase", [fields.Presentase.visible && fields.Presentase.required ? ew.Validators.required(fields.Presentase.caption) : null], fields.Presentase.isInvalid]
+        ])
+
+        // Form_CustomValidate
+        .setCustomValidate(
+            function(fobj) { // DO NOT CHANGE THIS LINE!
+                    // Your custom validation code here, return false if invalid.
+                    return true;
+                }
+        )
+
+        // Use JavaScript validation or not
+        .setValidateRequired(ew.CLIENT_VALIDATE)
+
+        // Dynamic selection lists
+        .setLists({
+        })
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Client script
+    var parent_url = ew.PATH_BASE;
+    var IdProses = "@subAktivitasLaporanStock.idProses.CurrentValue";
+    $('#x_StockAwal, #x_Penerimaan2, #x_Penyaluran2, #x_StockAkhir')
+        .attr('inputmode', 'numeric')
+        .on('input', function () {
+            let val = $(this).val();
+            let isNegative = val.startsWith('-');
+            val = val.replace(',', '.');
+            val = val.replace(/[^0-9.]/g, '');
+            const parts = val.split('.');
+            if (parts.length > 2) {
+                val = parts[0] + '.' + parts.slice(1).join('');
+            }
+            if (isNegative) {
+                val = '-' + val;
+            }
+            $(this).val(val);
+        });
+    $('#x_StockAwal, #x_Penerimaan2, #x_Penyaluran2, #x_StockAkhir').on('focus', function () {
+        hideFeedback($(this));
+    });
+    function hideFeedback(el) {
+        let feedback = el.siblings('.invalid-feedback');
+        feedback.hide();
+    }
+    function handleCustomSubmit(status) {
+        var inputMap = {
+            "#x_StockAwal": "Stock Awal (KL)",
+            "#x_Penerimaan2": "Penerimaan (KL)",
+            "#x_Penyaluran2": "Penyaluran (KL)",
+            "#x_StockAkhir": "Stock Akhir (KL)"
+        };
+        let isValid = true;
+        $('.invalid-feedback').hide();
+        for (var id in inputMap) {
+            var el = $(id);
+            var label = inputMap[id];
+            var val = el.val().trim();
+            var feedback = el.siblings('.invalid-feedback');
+            if (val === "") {
+                feedback.text('*' + label + ' tidak boleh kosong.').show();
+                isValid = false;
+                continue;
+            }
+            if (isNaN(val)) {
+                feedback.text('*' + label + ' harus diisi dengan angka desimal yang valid.').show();
+                isValid = false;
+                continue;
+            }
+        }
+        if (!isValid) {
+            ew.alert('Nilai input harus berupa angka desimal yang valid.');
+            return;
+        }
+        let idAktivitas = $("#x_idAktifitas").val();
+        const originalStatus = document.querySelector('#el_SubAktivitasLaporanStock_StatusAktivitas .form-control-plaintext').textContent;
+        $.ajax({
+            url: parent_url + `api/LookUpList/check_valid_status_aktivitas?idAktivitas=${idAktivitas}&originalStatus=${originalStatus}`,
+            type: 'GET',
+            beforeSend: function () {
+                showLoading();
+            },
+            success: function (response) {
+                if (!response.IsValid){
+                    hideLoading();
+                    ew.alert(response.Message ?? "Status aktivitas telah diubah oleh pengguna lain");
+                    return;
+                } else {
+                    let form = $("#fSubAktivitasLaporanStockedit");
+                    $.ajax({
+                        url: form.attr("action"),
+                        type: form.attr("method"),
+                        data: form.serialize(),
+                        success: function (response) {
+                            updateStatus(idAktivitas, status);
+                        },
+                        error: function (xhr, status, error) {
+                            hideLoading();
+                            ew.alert("Gagal menyimpan data.");
+                            console.error("Form submit gagal:", error);
+                        }
+                    });  
+                }
+            },
+            error: function (xhr, status, error) {
+                hideLoading();
+                ew.alert("Gagal menyimpan data.");
+                console.error("Form submit gagal:", error);
+            }
+        }); 
+    }
+    function updateStatus(idAktivitas, status) {
+        $.ajax({
+            url: parent_url + `api/LookUpList/update_status_aktivitas?idAktivitas=${idAktivitas}&statusAktivitas=${status}`,
+            type: 'POST',
+            success: function () {
+                console.log("Status berhasil diperbarui.");
+                if (status == "Completed" || status == "Completed Edit") {
+                    window.location.href = `${parent_url}AktivitasList?cmd=search&x_IdProses%5B%5D=${IdProses}&search=&searchtype=`;
+                } else {
+                    location.reload();
+                }
+            },
+            error: function (xhr, status, error) {
+                ew.alert("Status gagal diperbarui.");
+                console.error("Update status gagal:", error);
+            },
+            complete: function () {
+                hideLoading();
+            }
+        });
+    }
+    function reverseStatus(status, catatan) {
+        showLoading();
+        let idAktivitas = $("#x_idAktifitas").val();
+        $.ajax({
+            url: parent_url + `api/LookUpList/update_status_aktivitas-v2`,
+            type: 'POST',
+            data: JSON.stringify({ IdAktivitas: idAktivitas, StatusAktivitas: status, Catatan: catatan ?? null }),
+            contentType: 'application/json',
+            success: function () {
+                setTimeout(function () {
+                    window.location.href = `${parent_url}AktivitasList?cmd=search&x_IdProses%5B%5D=${IdProses}&search=&searchtype=`;
+                }, 1000);
+            },
+            error: function (xhr, status, error) {
+                ew.alert("Status gagal diperbarui.");
+                console.error("Update status gagal:", error);
+            },
+            complete: function () {
+                hideLoading();
+            }
+        });
+    }
+    $(document).on("submit", "#reverseStatusEditingModalForm", function (e) {
+        e.preventDefault();
+        let catatanText = $("#catatanReverseStatusEditing").val();
+        reverseStatus("Editing", catatanText);
+    });
+    $(document).on("click", "#btn-draft", function () {
+        handleCustomSubmit("Draft");
+    });
+    $(document).on("click", "#btn-completed", function () {
+        handleCustomSubmit("Completed");
+    });
+    $(document).on("click", "#btn-editing", function () {
+        handleCustomSubmit("Editing");
+    });
+    $(document).on("click", "#btn-completedEdit", function () {
+        handleCustomSubmit("Completed Edit");
+    });
+});
+</script>
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+<input type="hidden" name="action" id="action" value="update">
+<input type="hidden" name="modal" value="@ConvertToInt(subAktivitasLaporanStockEdit.IsModal)">
+@if (IsJsonResponse()) {
+<input type="hidden" name="json" value="1">
+}
+<input type="hidden" name="@(subAktivitasLaporanStockEdit.OldKeyName)" value="@Html.Raw(subAktivitasLaporanStockEdit.OldKey)">
+<div class="ew-edit-div"><!-- page* -->
+@if (subAktivitasLaporanStockEdit.NoReferensi.Visible) { // subAktivitasLaporanStockEdit.NoReferensi.Visible (begin)
+    <div id="r_NoReferensi" @Html.Raw(subAktivitasLaporanStockEdit.NoReferensi.RowAttributes)>
+        <label id="elh_SubAktivitasLaporanStock_NoReferensi" for="x_NoReferensi" class="@(subAktivitasLaporanStockEdit.LeftColumnClass)">@Html.Raw(subAktivitasLaporanStockEdit.NoReferensi.Caption)@Html.Raw(subAktivitasLaporanStockEdit.NoReferensi.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(subAktivitasLaporanStockEdit.RightColumnClass)"><div @Html.Raw(subAktivitasLaporanStockEdit.NoReferensi.CellAttributes)>
+<span id="el_SubAktivitasLaporanStock_NoReferensi">
+<span @Html.Raw(subAktivitasLaporanStockEdit.NoReferensi.ViewAttributes)>
+<input type="text" readonly class="form-control-plaintext" value="@Html.Raw(RemoveHtml(ConvertToString(subAktivitasLaporanStockEdit.NoReferensi.EditValue)))"></span>
+<input type="hidden" data-table="SubAktivitasLaporanStock" data-field="x_NoReferensi" data-hidden="1" name="x_NoReferensi" id="x_NoReferensi" value="@Html.Raw(HtmlEncode(subAktivitasLaporanStockEdit.NoReferensi.CurrentValue))">
+</span>
+</div></div>
+    </div>
+} @* subAktivitasLaporanStockEdit.NoReferensi.Visible (end) *@
+@if (subAktivitasLaporanStockEdit.idProses.Visible) { // subAktivitasLaporanStockEdit.idProses.Visible (begin)
+    <div id="r_idProses" @Html.Raw(subAktivitasLaporanStockEdit.idProses.RowAttributes)>
+        <label id="elh_SubAktivitasLaporanStock_idProses" class="@(subAktivitasLaporanStockEdit.LeftColumnClass)">@Html.Raw(subAktivitasLaporanStockEdit.idProses.Caption)@Html.Raw(subAktivitasLaporanStockEdit.idProses.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(subAktivitasLaporanStockEdit.RightColumnClass)"><div @Html.Raw(subAktivitasLaporanStockEdit.idProses.CellAttributes)>
+<span id="el_SubAktivitasLaporanStock_idProses">
+<span @Html.Raw(subAktivitasLaporanStockEdit.idProses.ViewAttributes)>
+<span class="form-control-plaintext">@Html.Raw(subAktivitasLaporanStockEdit.idProses.DisplayValue(subAktivitasLaporanStockEdit.idProses.EditValue))</span></span>
+<input type="hidden" data-table="SubAktivitasLaporanStock" data-field="x_idProses" data-hidden="1" name="x_idProses" id="x_idProses" value="@Html.Raw(HtmlEncode(subAktivitasLaporanStockEdit.idProses.CurrentValue))">
+</span>
+</div></div>
+    </div>
+} @* subAktivitasLaporanStockEdit.idProses.Visible (end) *@
+@if (subAktivitasLaporanStockEdit.idAktifitas.Visible) { // subAktivitasLaporanStockEdit.idAktifitas.Visible (begin)
+    <div id="r_idAktifitas" @Html.Raw(subAktivitasLaporanStockEdit.idAktifitas.RowAttributes)>
+        <label id="elh_SubAktivitasLaporanStock_idAktifitas" class="@(subAktivitasLaporanStockEdit.LeftColumnClass)">@Html.Raw(subAktivitasLaporanStockEdit.idAktifitas.Caption)@Html.Raw(subAktivitasLaporanStockEdit.idAktifitas.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(subAktivitasLaporanStockEdit.RightColumnClass)"><div @Html.Raw(subAktivitasLaporanStockEdit.idAktifitas.CellAttributes)>
+<span id="el_SubAktivitasLaporanStock_idAktifitas">
+<span @Html.Raw(subAktivitasLaporanStockEdit.idAktifitas.ViewAttributes)>
+<span class="form-control-plaintext">@Html.Raw(subAktivitasLaporanStockEdit.idAktifitas.DisplayValue(subAktivitasLaporanStockEdit.idAktifitas.EditValue))</span></span>
+<input type="hidden" data-table="SubAktivitasLaporanStock" data-field="x_idAktifitas" data-hidden="1" name="x_idAktifitas" id="x_idAktifitas" value="@Html.Raw(HtmlEncode(subAktivitasLaporanStockEdit.idAktifitas.CurrentValue))">
+</span>
+</div></div>
+    </div>
+} @* subAktivitasLaporanStockEdit.idAktifitas.Visible (end) *@
+@if (subAktivitasLaporanStockEdit.StatusAktivitas.Visible) { // subAktivitasLaporanStockEdit.StatusAktivitas.Visible (begin)
+    <div id="r_StatusAktivitas" @Html.Raw(subAktivitasLaporanStockEdit.StatusAktivitas.RowAttributes)>
+        <label id="elh_SubAktivitasLaporanStock_StatusAktivitas" class="@(subAktivitasLaporanStockEdit.LeftColumnClass)">@Html.Raw(subAktivitasLaporanStockEdit.StatusAktivitas.Caption)@Html.Raw(subAktivitasLaporanStockEdit.StatusAktivitas.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(subAktivitasLaporanStockEdit.RightColumnClass)"><div @Html.Raw(subAktivitasLaporanStockEdit.StatusAktivitas.CellAttributes)>
+<span id="el_SubAktivitasLaporanStock_StatusAktivitas">
+<span @Html.Raw(subAktivitasLaporanStockEdit.StatusAktivitas.ViewAttributes)>
+<span class="form-control-plaintext">@Html.Raw(subAktivitasLaporanStockEdit.StatusAktivitas.DisplayValue(subAktivitasLaporanStockEdit.StatusAktivitas.EditValue))</span></span>
+<input type="hidden" data-table="SubAktivitasLaporanStock" data-field="x_StatusAktivitas" data-hidden="1" name="x_StatusAktivitas" id="x_StatusAktivitas" value="@Html.Raw(HtmlEncode(subAktivitasLaporanStockEdit.StatusAktivitas.CurrentValue))">
+</span>
+</div></div>
+    </div>
+} @* subAktivitasLaporanStockEdit.StatusAktivitas.Visible (end) *@
+@if (subAktivitasLaporanStockEdit.LastUpdatedBy.Visible) { // subAktivitasLaporanStockEdit.LastUpdatedBy.Visible (begin)
+    <div id="r_LastUpdatedBy" @Html.Raw(subAktivitasLaporanStockEdit.LastUpdatedBy.RowAttributes)>
+        <label id="elh_SubAktivitasLaporanStock_LastUpdatedBy" for="x_LastUpdatedBy" class="@(subAktivitasLaporanStockEdit.LeftColumnClass)">@Html.Raw(subAktivitasLaporanStockEdit.LastUpdatedBy.Caption)@Html.Raw(subAktivitasLaporanStockEdit.LastUpdatedBy.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(subAktivitasLaporanStockEdit.RightColumnClass)"><div @Html.Raw(subAktivitasLaporanStockEdit.LastUpdatedBy.CellAttributes)>
+<span id="el_SubAktivitasLaporanStock_LastUpdatedBy">
+<span @Html.Raw(subAktivitasLaporanStockEdit.LastUpdatedBy.ViewAttributes)>
+<input type="text" readonly class="form-control-plaintext" value="@Html.Raw(RemoveHtml(ConvertToString(subAktivitasLaporanStockEdit.LastUpdatedBy.EditValue)))"></span>
+<input type="hidden" data-table="SubAktivitasLaporanStock" data-field="x_LastUpdatedBy" data-hidden="1" name="x_LastUpdatedBy" id="x_LastUpdatedBy" value="@Html.Raw(HtmlEncode(subAktivitasLaporanStockEdit.LastUpdatedBy.CurrentValue))">
+</span>
+</div></div>
+    </div>
+} @* subAktivitasLaporanStockEdit.LastUpdatedBy.Visible (end) *@
+@if (subAktivitasLaporanStockEdit.lastUpdatedDate.Visible) { // subAktivitasLaporanStockEdit.lastUpdatedDate.Visible (begin)
+    <div id="r_lastUpdatedDate" @Html.Raw(subAktivitasLaporanStockEdit.lastUpdatedDate.RowAttributes)>
+        <label id="elh_SubAktivitasLaporanStock_lastUpdatedDate" for="x_lastUpdatedDate" class="@(subAktivitasLaporanStockEdit.LeftColumnClass)">@Html.Raw(subAktivitasLaporanStockEdit.lastUpdatedDate.Caption)@Html.Raw(subAktivitasLaporanStockEdit.lastUpdatedDate.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(subAktivitasLaporanStockEdit.RightColumnClass)"><div @Html.Raw(subAktivitasLaporanStockEdit.lastUpdatedDate.CellAttributes)>
+<span id="el_SubAktivitasLaporanStock_lastUpdatedDate">
+<span @Html.Raw(subAktivitasLaporanStockEdit.lastUpdatedDate.ViewAttributes)>
+<input type="text" readonly class="form-control-plaintext" value="@Html.Raw(RemoveHtml(ConvertToString(subAktivitasLaporanStockEdit.lastUpdatedDate.EditValue)))"></span>
+<input type="hidden" data-table="SubAktivitasLaporanStock" data-field="x_lastUpdatedDate" data-hidden="1" name="x_lastUpdatedDate" id="x_lastUpdatedDate" value="@Html.Raw(HtmlEncode(subAktivitasLaporanStockEdit.lastUpdatedDate.CurrentValue))">
+</span>
+</div></div>
+    </div>
+} @* subAktivitasLaporanStockEdit.lastUpdatedDate.Visible (end) *@
+@if (subAktivitasLaporanStockEdit.StockAwal.Visible) { // subAktivitasLaporanStockEdit.StockAwal.Visible (begin)
+    <div id="r_StockAwal" @Html.Raw(subAktivitasLaporanStockEdit.StockAwal.RowAttributes)>
+        <label id="elh_SubAktivitasLaporanStock_StockAwal" for="x_StockAwal" class="@(subAktivitasLaporanStockEdit.LeftColumnClass)">@Html.Raw(subAktivitasLaporanStockEdit.StockAwal.Caption)@Html.Raw(subAktivitasLaporanStockEdit.StockAwal.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(subAktivitasLaporanStockEdit.RightColumnClass)"><div @Html.Raw(subAktivitasLaporanStockEdit.StockAwal.CellAttributes)>
+<span id="el_SubAktivitasLaporanStock_StockAwal">
+<input type="@(subAktivitasLaporanStockEdit.StockAwal.InputTextType)" name="x_StockAwal" id="x_StockAwal" data-table="SubAktivitasLaporanStock" data-field="x_StockAwal" value="@Html.Raw(subAktivitasLaporanStockEdit.StockAwal.EditValue)" size="30" maxlength="53" placeholder="@Html.Raw(HtmlEncode(subAktivitasLaporanStockEdit.StockAwal.PlaceHolder))" data-format-pattern="@(subAktivitasLaporanStockEdit.StockAwal.FormatPattern)"@Html.Raw(subAktivitasLaporanStockEdit.StockAwal.EditAttributes) aria-describedby="x_StockAwal_help">
+@Html.Raw(subAktivitasLaporanStockEdit.StockAwal.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(subAktivitasLaporanStockEdit.StockAwal.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* subAktivitasLaporanStockEdit.StockAwal.Visible (end) *@
+@if (subAktivitasLaporanStockEdit.Penerimaan2.Visible) { // subAktivitasLaporanStockEdit.Penerimaan2.Visible (begin)
+    <div id="r_Penerimaan2" @Html.Raw(subAktivitasLaporanStockEdit.Penerimaan2.RowAttributes)>
+        <label id="elh_SubAktivitasLaporanStock_Penerimaan2" for="x_Penerimaan2" class="@(subAktivitasLaporanStockEdit.LeftColumnClass)">@Html.Raw(subAktivitasLaporanStockEdit.Penerimaan2.Caption)@Html.Raw(subAktivitasLaporanStockEdit.Penerimaan2.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(subAktivitasLaporanStockEdit.RightColumnClass)"><div @Html.Raw(subAktivitasLaporanStockEdit.Penerimaan2.CellAttributes)>
+<span id="el_SubAktivitasLaporanStock_Penerimaan2">
+<input type="@(subAktivitasLaporanStockEdit.Penerimaan2.InputTextType)" name="x_Penerimaan2" id="x_Penerimaan2" data-table="SubAktivitasLaporanStock" data-field="x_Penerimaan2" value="@Html.Raw(subAktivitasLaporanStockEdit.Penerimaan2.EditValue)" size="30" maxlength="53" placeholder="@Html.Raw(HtmlEncode(subAktivitasLaporanStockEdit.Penerimaan2.PlaceHolder))" data-format-pattern="@(subAktivitasLaporanStockEdit.Penerimaan2.FormatPattern)"@Html.Raw(subAktivitasLaporanStockEdit.Penerimaan2.EditAttributes) aria-describedby="x_Penerimaan2_help">
+@Html.Raw(subAktivitasLaporanStockEdit.Penerimaan2.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(subAktivitasLaporanStockEdit.Penerimaan2.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* subAktivitasLaporanStockEdit.Penerimaan2.Visible (end) *@
+@if (subAktivitasLaporanStockEdit.Penyaluran2.Visible) { // subAktivitasLaporanStockEdit.Penyaluran2.Visible (begin)
+    <div id="r_Penyaluran2" @Html.Raw(subAktivitasLaporanStockEdit.Penyaluran2.RowAttributes)>
+        <label id="elh_SubAktivitasLaporanStock_Penyaluran2" for="x_Penyaluran2" class="@(subAktivitasLaporanStockEdit.LeftColumnClass)">@Html.Raw(subAktivitasLaporanStockEdit.Penyaluran2.Caption)@Html.Raw(subAktivitasLaporanStockEdit.Penyaluran2.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(subAktivitasLaporanStockEdit.RightColumnClass)"><div @Html.Raw(subAktivitasLaporanStockEdit.Penyaluran2.CellAttributes)>
+<span id="el_SubAktivitasLaporanStock_Penyaluran2">
+<input type="@(subAktivitasLaporanStockEdit.Penyaluran2.InputTextType)" name="x_Penyaluran2" id="x_Penyaluran2" data-table="SubAktivitasLaporanStock" data-field="x_Penyaluran2" value="@Html.Raw(subAktivitasLaporanStockEdit.Penyaluran2.EditValue)" size="30" maxlength="53" placeholder="@Html.Raw(HtmlEncode(subAktivitasLaporanStockEdit.Penyaluran2.PlaceHolder))" data-format-pattern="@(subAktivitasLaporanStockEdit.Penyaluran2.FormatPattern)"@Html.Raw(subAktivitasLaporanStockEdit.Penyaluran2.EditAttributes) aria-describedby="x_Penyaluran2_help">
+@Html.Raw(subAktivitasLaporanStockEdit.Penyaluran2.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(subAktivitasLaporanStockEdit.Penyaluran2.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* subAktivitasLaporanStockEdit.Penyaluran2.Visible (end) *@
+@if (subAktivitasLaporanStockEdit.StockAkhir.Visible) { // subAktivitasLaporanStockEdit.StockAkhir.Visible (begin)
+    <div id="r_StockAkhir" @Html.Raw(subAktivitasLaporanStockEdit.StockAkhir.RowAttributes)>
+        <label id="elh_SubAktivitasLaporanStock_StockAkhir" for="x_StockAkhir" class="@(subAktivitasLaporanStockEdit.LeftColumnClass)">@Html.Raw(subAktivitasLaporanStockEdit.StockAkhir.Caption)@Html.Raw(subAktivitasLaporanStockEdit.StockAkhir.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(subAktivitasLaporanStockEdit.RightColumnClass)"><div @Html.Raw(subAktivitasLaporanStockEdit.StockAkhir.CellAttributes)>
+<span id="el_SubAktivitasLaporanStock_StockAkhir">
+<input type="@(subAktivitasLaporanStockEdit.StockAkhir.InputTextType)" name="x_StockAkhir" id="x_StockAkhir" data-table="SubAktivitasLaporanStock" data-field="x_StockAkhir" value="@Html.Raw(subAktivitasLaporanStockEdit.StockAkhir.EditValue)" size="30" maxlength="53" placeholder="@Html.Raw(HtmlEncode(subAktivitasLaporanStockEdit.StockAkhir.PlaceHolder))" data-format-pattern="@(subAktivitasLaporanStockEdit.StockAkhir.FormatPattern)"@Html.Raw(subAktivitasLaporanStockEdit.StockAkhir.EditAttributes) aria-describedby="x_StockAkhir_help">
+@Html.Raw(subAktivitasLaporanStockEdit.StockAkhir.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(subAktivitasLaporanStockEdit.StockAkhir.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* subAktivitasLaporanStockEdit.StockAkhir.Visible (end) *@
+@if (subAktivitasLaporanStockEdit.WorkingLoss.Visible) { // subAktivitasLaporanStockEdit.WorkingLoss.Visible (begin)
+    <div id="r_WorkingLoss" @Html.Raw(subAktivitasLaporanStockEdit.WorkingLoss.RowAttributes)>
+        <label id="elh_SubAktivitasLaporanStock_WorkingLoss" for="x_WorkingLoss" class="@(subAktivitasLaporanStockEdit.LeftColumnClass)">@Html.Raw(subAktivitasLaporanStockEdit.WorkingLoss.Caption)@Html.Raw(subAktivitasLaporanStockEdit.WorkingLoss.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(subAktivitasLaporanStockEdit.RightColumnClass)"><div @Html.Raw(subAktivitasLaporanStockEdit.WorkingLoss.CellAttributes)>
+<span id="el_SubAktivitasLaporanStock_WorkingLoss">
+<span @Html.Raw(subAktivitasLaporanStockEdit.WorkingLoss.ViewAttributes)>
+<input type="text" readonly class="form-control-plaintext" value="@Html.Raw(RemoveHtml(ConvertToString(subAktivitasLaporanStockEdit.WorkingLoss.EditValue)))"></span>
+<input type="hidden" data-table="SubAktivitasLaporanStock" data-field="x_WorkingLoss" data-hidden="1" name="x_WorkingLoss" id="x_WorkingLoss" value="@Html.Raw(HtmlEncode(subAktivitasLaporanStockEdit.WorkingLoss.CurrentValue))">
+</span>
+</div></div>
+    </div>
+} @* subAktivitasLaporanStockEdit.WorkingLoss.Visible (end) *@
+@if (subAktivitasLaporanStockEdit.Presentase.Visible) { // subAktivitasLaporanStockEdit.Presentase.Visible (begin)
+    <div id="r_Presentase" @Html.Raw(subAktivitasLaporanStockEdit.Presentase.RowAttributes)>
+        <label id="elh_SubAktivitasLaporanStock_Presentase" for="x_Presentase" class="@(subAktivitasLaporanStockEdit.LeftColumnClass)">@Html.Raw(subAktivitasLaporanStockEdit.Presentase.Caption)@Html.Raw(subAktivitasLaporanStockEdit.Presentase.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(subAktivitasLaporanStockEdit.RightColumnClass)"><div @Html.Raw(subAktivitasLaporanStockEdit.Presentase.CellAttributes)>
+<span id="el_SubAktivitasLaporanStock_Presentase">
+<span @Html.Raw(subAktivitasLaporanStockEdit.Presentase.ViewAttributes)>
+<input type="text" readonly class="form-control-plaintext" value="@Html.Raw(RemoveHtml(ConvertToString(subAktivitasLaporanStockEdit.Presentase.EditValue)))"></span>
+<input type="hidden" data-table="SubAktivitasLaporanStock" data-field="x_Presentase" data-hidden="1" name="x_Presentase" id="x_Presentase" value="@Html.Raw(HtmlEncode(subAktivitasLaporanStockEdit.Presentase.CurrentValue))">
+</span>
+</div></div>
+    </div>
+} @* subAktivitasLaporanStockEdit.Presentase.Visible (end) *@
+</div><!-- /page* -->
+    <input type="hidden" data-table="SubAktivitasLaporanStock" data-field="x_id" data-hidden="1" name="x_id" id="x_id" value="@Html.Raw(HtmlEncode(subAktivitasLaporanStockEdit.id.CurrentValue))">
+@{ subAktivitasLaporanStockEdit.CloseRecordset(); }
+@Html.Raw(subAktivitasLaporanStockEdit.IsModal ? "<template class=\"ew-modal-buttons\">" : "<div class=\"row ew-buttons\">")<!-- buttons .row -->
+    <div class="@(subAktivitasLaporanStockEdit.OffsetColumnClass)"><!-- buttons offset -->
+    <button class="btn btn-primary ew-btn" name="btn-action" id="btn-action" type="submit" form="fSubAktivitasLaporanStockedit">@Html.Raw(Language.Phrase("SaveBtn"))</button>
+@if (IsJsonResponse()) {
+    <button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" data-bs-dismiss="modal">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+} else {
+    <button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" form="fSubAktivitasLaporanStockedit" data-href="@AppPath(subAktivitasLaporanStockEdit.ReturnUrl)">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+}
+    </div><!-- /buttons offset -->
+@Html.Raw(subAktivitasLaporanStockEdit.IsModal ? "</template>" : "</div>")<!-- /buttons .row -->
+</form>
+</main>
+@subAktivitasLaporanStockEdit.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("SubAktivitasLaporanStock");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Startup script
+    var IdReferensi = "@subAktivitasLaporanStock.NoReferensi.CurrentValue";
+    var IdProses = "@subAktivitasLaporanStock.idProses.CurrentValue";
+    var idAktivitas = "@subAktivitasLaporanStock.idAktifitas.CurrentValue";
+    var NamaAktivitas = $('#el_SubAktivitasLaporanStock_idAktifitas').text();
+    var parent_url = ew.PATH_BASE;
+    const userLevel = "@CurrentUserLevel()";
+    let currentStatusAktivitas = "";
+    var steps = [
+        { number: 1, label: "Closing Stock", url: `${parent_url}ClosingStockList`, icon: "fa-inbox" },
+        { number: 2, label: "Proses", url: `${parent_url}ProsesList?cmd=search&x_IdReferensi%5B%5D=${IdReferensi}&search=&searchtype=`, icon: "fa-gears" },
+        { number: 3, label: "Aktivitas", url: `${parent_url}AktivitasList?cmd=search&x_IdProses%5B%5D=${IdProses}&search=&searchtype=`, icon: "fa-list-check" },
+        { number: 4, label: NamaAktivitas, url: '', icon: "fa-file-circle-check" }
+    ];
+    var currentStep = 4;
+    $("<style>")
+        .prop("type", "text/css")
+        .html(`
+            .stepper {
+                display: flex;
+                counter-reset: step;
+                flex-wrap: nowrap;        /* jangan pecah ke bawah */
+                overflow-x: auto;         /* scroll horizontal */
+                -webkit-overflow-scrolling: touch; /* smooth scroll di mobile */
+                padding-bottom: 8px;      /* space biar scroll bar gak nempel */
+            }
+            .stepper::-webkit-scrollbar {
+            height: 6px; /* tipis */
+            }
+            .stepper::-webkit-scrollbar-thumb {
+                background-color: #ccc;
+                border-radius: 3px;
+            }
+            .step {
+                width: 150px;
+                text-align: center;
+                position: relative;
+            }
+            .step:not(:last-child)::after {
+                content: '';
+                position: absolute;
+                top: 20px;
+                right: -50%;
+                width: 100%;
+                height: 4px;
+                background-color: #ccc;
+                z-index: 0;
+            }
+            .step.completed:not(:last-child)::after {
+                background-color: #3c6dbd;
+            }
+            .step-icon {
+                width: 36px;
+                height: 36px;
+                line-height: 36px;
+                border-radius: 50%;
+                background: #ccc;
+                display: inline-block;
+                z-index: 1;
+                position: relative;
+                color: white;
+                font-weight: bold;
+            }
+            .step.active .step-icon {
+                background: #3c6dbd;
+            }
+            .step-label {
+                margin-top: 8px;
+                font-size: 14px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                gap: 6px;
+                color: #333;
+            }
+            .step-label {
+                color: #3c6dbd !important;
+                text-decoration: none;
+                margin: 0;
+                padding: 0;
+            }
+            .step-label-not-active {
+                color: #CCCCCC !important;
+            }
+            .ag-theme-quartz .ag-header {
+                background-color: #3c6dbd !important;
+            }
+            .ag-theme-quartz .ag-header-cell-label {
+                color: #ffffff !important;
+            }
+            .ag-theme-quartz .ag-icon-filter {
+                color: #ffffff !important;
+            }
+            .rotate-down {
+                transform: rotate(90deg);
+                transition: transform 0.3s ease;
+            }
+            .rotate-right {
+                transform: rotate(0deg);
+                transition: transform 0.3s ease;
+            }
+        `)
+        .appendTo("head");
+    var $stepperWrapper = $('<div class="d-flex border-bottom border-2 pb-2"><div class="stepper"></div></div>');
+    var $stepper = $stepperWrapper.find(".stepper");
+    steps.forEach(function (step, i) {
+        var isActive = step.number === currentStep;
+        var isCompleted = step.number < currentStep;
+        var stepClass = isActive ? "active" : isCompleted ? "completed" : "";
+        var icon, labelContent, html;
+        if (isActive) {
+            icon = `<div class="step-icon bg-success">${step.number}</div>`;
+            labelContent = `<div class="step-label"><p class="text-success mb-1"><i class="fa-solid ${step.icon} me-1 text-success"></i> ${step.label}</p></div>`;
+            html = `<div class="step ${stepClass} text-success">${icon}${labelContent}</div>`;
+        } else if (isCompleted) {
+            icon = `<div class="step-icon" style="background: #3c6dbd;">${step.number}</div>`;
+            labelContent = `<div class="step-label"><a href="${step.url}" class="text-primary"><i class="fa-solid ${step.icon} me-1"></i>${step.label}</a></div>`;
+            html = `<div class="step ${stepClass}">${icon}${labelContent}</div>`;
+        } else {
+            icon = `<div class="step-icon">${step.number}</div>`;
+            labelContent = `<div class="step-label-not-active"><p style="margin: 0;"><i class="fa-solid ${step.icon} me-1"></i>${step.label}</p></div>`;
+            html = `<div class="step ${stepClass} text-secondary">${icon}${labelContent}</div>`;
+        }
+        $stepper.append(html);
+    });
+    $(".content-header .container-fluid .row").append($stepperWrapper);
+    $("#btn-action").hide();
+    $("#btn-cancel").html('<i class="fa-solid fa-ban"></i></i> Cancel');
+    const $cancelButton = $("#btn-cancel");
+    const idAktifitas = $("#x_idAktifitas").val();
+
+    // --- log aktivitas start ---
+    $('#el_SubAktivitasLaporanStock_LastUpdatedBy').addClass('d-flex gap-3');
+    $('#el_SubAktivitasLaporanStock_LastUpdatedBy').append(`
+        <button type="button" class="btn btn-primary ew-btn ps-2" expand-log="false">
+            <i class="fa-solid fa-caret-right fa-2xl me-2 caret-icon rotate-right"></i>
+            Log History
+            <i class="fa-solid fa-clock-rotate-left ms-1"></i> 
+        </button>
+    `);
+    $('#r_StockAwal').css('max-width', '660px');
+    $('#r_Penerimaan2').css('max-width', '660px');
+    $('#r_Penyaluran2').css('max-width', '660px');
+    $('#r_StockAkhir').css('max-width', '660px');
+    $('#r_WorkingLoss').css('max-width', '660px');
+    $('#r_Presentase').css('max-width', '660px');
+    $(document).on('click', 'button[expand-log]', function () {
+        const $btn = $(this);
+        const isExpanded = $btn.attr('expand-log') === 'true';
+        const $row = $('#log-table-row');
+        const $wrapper = $('#log-table-wrapper');
+        const $caret = $btn.find('.caret-icon');
+        if (!isExpanded) {
+            $btn.attr('expand-log', 'true');
+            $row.removeClass('d-none');
+            setTimeout(() => {
+                $wrapper.css({
+                    maxHeight: '500px'
+                });
+            }, 10);
+            $caret.removeClass('rotate-right').addClass('rotate-down');
+        } else {
+            $btn.attr('expand-log', 'false');
+            $wrapper.css({
+                maxHeight: '0'
+            });
+            setTimeout(() => {
+                $row.addClass('d-none');
+            }, 600);
+            $caret.removeClass('rotate-down').addClass('rotate-right');
+        }
+    });
+    if (idAktivitas && idAktivitas !== "0") {
+        $.ajax({
+            url: parent_url + `api/LookUpList/sub-aktivitas/startup?idAktivitas=${idAktivitas}`,
+            type: 'GET',
+            success: function(response) {
+                // cek status
+                if ($cancelButton.length){
+                    let status = response.StatusAktivitas;
+                    currentStatusAktivitas = status;
+                    let $customButtons = ``;
+                    switch (status) {
+                        case "Waiting":
+                            $customButtons = `
+                                <button type="button" class="btn btn-primary ew-btn ml-2" id="btn-draft">
+                                    <i class="fas fa-save"></i> Save
+                                </button>
+                            `;
+                            break;
+                        case "Draft":
+                            $customButtons = `
+                                <button type="button" class="btn btn-primary ew-btn ml-2" id="btn-draft">
+                                    <i class="fas fa-save"></i> Save
+                                </button>
+                                <button type="button" class="btn btn-success ew-btn ml-2" id="btn-completed">
+                                    <i class="fas fa-paper-plane"></i> Submit
+                                </button>
+                            `
+                            break;
+                        case "Completed":
+                            $customButtons = `
+                                <button type="button" class="btn btn-primary ew-btn ml-2" id="btn-editing">
+                                    <i class="fa-solid fa-pen-to-square"></i> Edit
+                                </button>
+                                <button type="button" class="btn btn-success ew-btn ml-2" id="btn-completedEdit">
+                                    <i class="fas fa-paper-plane"></i> Submit
+                                </button>
+                            `;
+                            break;
+                        case "Editing":
+                            $customButtons = `
+                                <button type="button" class="btn btn-primary ew-btn ml-2" id="btn-editing">
+                                    <i class="fa-solid fa-pen-to-square"></i> Edit
+                                </button>
+                                <button type="button" class="btn btn-success ew-btn ml-2" id="btn-completedEdit">
+                                    <i class="fas fa-paper-plane"></i> Submit
+                                </button>
+                            `;
+                            break;
+                        case "Completed Edit":
+                            if (userLevel === '4'){
+                                $customButtons = `
+                                    <button type="button" class="btn btn-warning ew-btn ml-2" id="btn-reverse-status">
+                                        <i class="fa-solid fa-pen-to-square"></i> Edit 
+                                    </button>
+                                `;
+                            }
+                            break;
+                    }
+                    $cancelButton.before($customButtons);
+                    if (status == "Waiting") {
+                        $.ajax({
+                            url: parent_url + "api/LookUpList/GetLaporanStockValue",
+                            type: "GET",
+                            data: {
+                                NoReferensi: IdReferensi,
+                                IdAktivitas: idAktivitas
+                            },
+                            success: function(rs){
+                                if (rs.success) {
+                                    $('#x_StockAwal').val(rs.StockAwal);
+                                    $('#x_Penerimaan2').val(rs.Penerimaan);
+                                    $('#x_Penyaluran2').val(rs.Penyaluran);
+                                    $('#x_StockAkhir').val(rs.StockAkhir);
+                                    eventLaporanStockHarian();
+                                }
+                            },
+                            error: function (xhr, status, error) {
+                                console.log("Error: " + xhr.responseText);
+                            }
+                        });
+                    }
+                }
+
+                // Cek is editable
+                if(!response.IsEditable || response.StatusAktivitas === "Completed Edit"){
+                    $("#btn-draft").hide();
+                    $("#btn-editing").hide();
+                    $("#btn-completed").hide();
+                    $("#btn-completedEdit").hide();
+                    $('input, select, textarea').prop('disabled', true);
+                    $('#catatanReverseStatusEditing').prop('disabled', false);
+                }
+
+                // Log
+                const mappedData = response.LogAktivitas.map(item => ({
+                    Aktivitas: item.Aktivitas,
+                    Username: item.UserName,
+                    StatusAktivitas: item.StatusAktivitas,
+                    Tanggal: item.Tanggal,
+                    Catatan: item.Catatan
+                }));
+                $.getScript('https://cdn.jsdelivr.net/npm/ag-grid-community/dist/ag-grid-community.min.js', function () {
+                        $('#r_LastUpdatedBy').after(`
+                            <div id="log-table-row" class="d-none row m-0">
+                                <div class="p-0 col-2"></div>
+                                <div class="p-0 col-10">
+                                    <div id="log-table-wrapper" style="overflow: hidden; transition: all 0.6s ease; max-height: 0;">
+                                        <div id="myGrid" class="ag-theme-quartz w-100 my-3" style="height: 300px;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        `);
+                        const gridOptions = {
+                            rowData: mappedData,
+                            columnDefs: [
+                                {
+                                    headerName: 'No.',
+                                    valueGetter: 'node.rowIndex + 1',
+                                    width: 80,
+                                    filter: false
+                                },
+                                {
+                                    headerName: 'Aktivitas',
+                                    field: 'Aktivitas',
+                                    flex: 1
+                                },
+                                {
+                                    headerName: 'Username',
+                                    field: 'Username',
+                                    flex: 1
+                                },
+                                {
+                                    headerName: 'Status Aktivitas',
+                                    field: 'StatusAktivitas',
+                                    flex: 1
+                                },
+                                {
+                                    headerName: 'Tanggal',
+                                    field: 'Tanggal',
+                                    flex: 1
+                                },
+                                {
+                                    headerName: 'Catatan',
+                                    field: 'Catatan',
+                                    flex: 1
+                                }
+                            ],
+                            defaultColDef: {
+                                sortable: false,
+                                suppressMovable: true,
+                                filter: true,
+                                resizable: false
+                            },
+                            rowSelection: 'multiple',
+                            suppressRowClickSelection: true,
+                            pagination: true,
+                            paginationPageSize: 10
+                        };
+                        const myGridElement = document.querySelector('#myGrid');
+                        agGrid.createGrid(myGridElement, gridOptions);
+                    });
+            },
+            error: function(xhr, status, error) {
+                ew.alert(xhr.responseJSON.message ?? "Terjadi kesalahan dalam memuat data");
+            }
+        });
+    } else {
+        console.warn("Skipping startup API: Invalid IdAktivitas");
+        $('button[expand-log]').hide(); 
+        $("#btn-draft, #btn-editing, #btn-completed, #btn-completedEdit").hide();
+        $('input, select, textarea').prop('disabled', true);
+    }
+    // --- log aktivitas end ---
+    function eventLaporanStockHarian() {
+        const stockAwal = parseFloat($('#x_StockAwal').val());
+        const stockAkhir = parseFloat($('#x_StockAkhir').val());
+        const penerimaan = parseFloat($('#x_Penerimaan2').val());
+        const penyaluran = parseFloat($('#x_Penyaluran2').val());
+        if (!isNaN(stockAwal) && !isNaN(stockAkhir) && !isNaN(penerimaan) && !isNaN(penyaluran)) {
+            const expectedStockAkhir = stockAwal + penerimaan - penyaluran;
+            const workingLoss = stockAkhir - expectedStockAkhir;
+            const persentase = workingLoss / (stockAwal + penerimaan) * 100;
+            $('#el_SubAktivitasLaporanStock_WorkingLoss input').val(workingLoss.toFixed(2));
+            $('#el_SubAktivitasLaporanStock_Presentase input').val(persentase.toFixed(2)+"%");
+            $('#x_WorkingLoss').val(workingLoss.toFixed(2));
+            $('#x_Presentase').val(persentase.toFixed(2)+"%");
+        } else {
+            $('#el_SubAktivitasLaporanStock_WorkingLoss').val('');
+            $('#el_SubAktivitasLaporanStock_Presentase').val('');
+            $('#x_WorkingLoss').val('');
+            $('#x_Presentase').val('');
+        }
+    }
+    $(document).on('input', '#x_StockAwal, #x_StockAkhir, #x_Penerimaan2, #x_Penyaluran2', function () {
+        eventLaporanStockHarian();
+    });
+    eventLaporanStockHarian();
+
+    // Cari elemen container dengan id r_lastUpdatedDate
+    var el = document.getElementById("r_lastUpdatedDate");
+    if (el) {
+        // Buat elemen note
+        var note = document.createElement("div");
+        note.innerHTML = `
+            <div class="mt-2">
+              <div class="card border-primary shadow-sm" style="max-width: 650px;">
+                <div class="card-header bg-primary text-white py-2 px-3">
+                  <strong>Petunjuk Pengisian Data</strong>
+                </div>
+                <div class="card-body py-2 px-3 text-dark">
+                  <p class="mb-2">
+                        Gunakan satuan sesuai jenis produk saat mengisi <strong>Stock Awal, Penerimaan, Penyaluran, dan Stock Akhir</strong>:
+                  </p>
+                  <p class="mb-1"><strong>BBM </strong> menggunakan satuan <strong>Kilo Liter (KL)</strong></p>
+                  <p class="mb-1"><strong>LPG </strong> menggunakan satuan <strong>Metric Ton (MT)</strong></p>
+                      <p class="mb-0 fst-italic">Gunakan satuan dengan benar agar data tercatat secara akurat.</p>
+                </div>
+              </div>
+            </div>
+    `;
+        note.style.marginTop = "5px";
+
+        // Sisipkan setelah elemen
+        el.parentNode.insertBefore(note, el.nextSibling);
+    }
+
+    // Reverse Status to Editing
+    let reverseStatusModal = `<div class="modal fade" id="confirmReverseStatusEditingModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary">
+            <h1 class="modal-title fs-5" id="confirmReverseStatusEditingModalTitle">Konfirmasi Kembalikan Status</h1>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="reverseStatusEditingModalForm">
+            <div class="modal-body px-2 py-1">
+                <div class="mb-3">
+                    <label for="message-text" class="col-form-label">Catatan:</label>
+                    <textarea class="form-control" id="catatanReverseStatusEditing" required rows="4"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="btnReverseStatusEditingModalCancel">Batal</button>
+                <button type="submit" class="btn btn-primary" id="btnReverseStatusEditingModalSubmit">Lanjutkan</button>
+            </div>
+            </form>
+        </div>
+        </div>
+    </div>`
+    $("body").append(reverseStatusModal);
+    $("#btnReverseStatusEditingModalCancel").click(function (event) {
+        event.preventDefault();
+        $("#confirmReverseStatusEditingModal").modal("hide");
+    });
+    $(document).on("click", "#btn-reverse-status", function () {
+        $("#confirmReverseStatusEditingModal").modal("show");
+    });
+});
+</script>

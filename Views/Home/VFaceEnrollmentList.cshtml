@@ -1,0 +1,875 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (vFaceEnrollmentList.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = vFaceEnrollmentList.UseLayout ? "_Layout" : "";
+}
+@if (!vFaceEnrollmentList.IsExport()) {
+<script>
+var currentTable = @Html.Raw(ConvertToJson(vFaceEnrollmentList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { VFaceEnrollment: currentTable } });
+var currentPageID = ew.PAGE_ID = "list";
+var currentForm;
+var @(vFaceEnrollmentList.FormName);
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("@(vFaceEnrollmentList.FormName)")
+        .setPageId("list")
+        .setSubmitWithFetch(@(vFaceEnrollmentList.UseAjaxActions ? "true" : "false"))
+        .setFormKeyCountName("@(vFaceEnrollmentList.FormKeyCountName)")
+
+        // Dynamic selection lists
+        .setLists({
+            "LinkRedirect": @Html.Raw(vFaceEnrollmentList.LinkRedirect.ToClientList(vFaceEnrollmentList)),
+            "_Email": @Html.Raw(vFaceEnrollmentList._Email.ToClientList(vFaceEnrollmentList)),
+            "NamaLengkap": @Html.Raw(vFaceEnrollmentList.NamaLengkap.ToClientList(vFaceEnrollmentList)),
+            "IdPosition": @Html.Raw(vFaceEnrollmentList.IdPosition.ToClientList(vFaceEnrollmentList)),
+            "Jabatan": @Html.Raw(vFaceEnrollmentList.Jabatan.ToClientList(vFaceEnrollmentList)),
+            "Face": @Html.Raw(vFaceEnrollmentList.Face.ToClientList(vFaceEnrollmentList)),
+            "TanggalInputFace": @Html.Raw(vFaceEnrollmentList.TanggalInputFace.ToClientList(vFaceEnrollmentList)),
+            "UserInputFace": @Html.Raw(vFaceEnrollmentList.UserInputFace.ToClientList(vFaceEnrollmentList)),
+        })
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Client script
+    const parent_url = ew.PATH_BASE;
+    $(document).on('click', '.download-face', function (e) {
+        e.preventDefault();
+        const url = $(this).data('url');
+        if (!url) {
+            ew.alert("URL dokumen tidak ditemukan.");
+            return;
+        }
+        $.ajax({
+            url: parent_url + 'api/LookUpList/DownloadFaceEnrollment',
+            type: 'GET',
+            data: { FileName: url },
+            xhrFields: {
+                responseType: 'blob'
+            },
+            beforeSend: function () {
+                showLoading();
+            },
+            success: function (response, status, xhr) {
+                const disposition = xhr.getResponseHeader('Content-Disposition');
+                let fileName = "download_file";
+                if (disposition) {
+                    const fileNameMatch = disposition.match(/filename="?([^";]+)"?/);
+                    if (fileNameMatch && fileNameMatch[1]) {
+                        fileName = decodeURIComponent(fileNameMatch[1]);
+                    }
+                    const utf8FileNameMatch = disposition.match(/filename\*\s*=\s*UTF-8''([^;]+)/);
+                    if (utf8FileNameMatch && utf8FileNameMatch[1]) {
+                        fileName = decodeURIComponent(utf8FileNameMatch[1]);
+                    }
+                }
+                const blobUrl = window.URL.createObjectURL(response);
+                const a = document.createElement('a');
+                a.href = blobUrl;
+                a.download = fileName;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(blobUrl);
+                ew.alert("Download berhasil!");
+            },
+            error: function (xhr, status, error) {
+                if (xhr.status === 404) {
+                    ew.alert("File tidak ditemukan di server.");
+                } else if (xhr.status === 500) {
+                    ew.alert("Terjadi kesalahan server. Coba lagi nanti.");
+                } else {
+                    ew.alert("Gagal mendownload file. Error: " + xhr.responseText);
+                }
+            },
+            complete: function () {
+                hideLoading();
+            }
+        });
+    });
+});
+</script>
+}
+@if (!vFaceEnrollmentList.IsExport()) {
+<div class="btn-toolbar ew-toolbar">
+@if (vFaceEnrollmentList.TotalRecords > 0 && vFaceEnrollmentList.ExportOptions.Visible) {
+    vFaceEnrollmentList.ExportOptions.Render("body");
+}
+@if (vFaceEnrollmentList.ImportOptions.Visible) {
+    vFaceEnrollmentList.ImportOptions.Render("body");
+}
+@if (vFaceEnrollmentList.SearchOptions.Visible) {
+    vFaceEnrollmentList.SearchOptions.Render("body");
+}
+@if (vFaceEnrollmentList.FilterOptions.Visible) {
+    vFaceEnrollmentList.FilterOptions.Render("body");
+}
+</div>
+}
+@if (vFaceEnrollmentList.ShowCurrentFilter) {
+    vFaceEnrollmentList.ShowFilterList();
+}
+@if (!vFaceEnrollmentList.IsModal) {
+<form name="fVFaceEnrollmentsrch" id="fVFaceEnrollmentsrch" class="ew-form ew-ext-search-form" action="@AppPath(CurrentPageName())" novalidate autocomplete="off">
+<div id="fVFaceEnrollmentsrch_search_panel" class="mb-2 mb-sm-0 @(vFaceEnrollmentList.SearchPanelClass)"><!-- .ew-search-panel -->
+<script>
+var currentTable = @Html.Raw(ConvertToJson(vFaceEnrollmentList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { VFaceEnrollment: currentTable } });
+var currentForm;
+var fVFaceEnrollmentsrch, currentSearchForm, currentAdvancedSearchForm;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery,
+        fields = currentTable.fields;
+
+    // Form object for search
+    let form = new ew.FormBuilder()
+        .setId("fVFaceEnrollmentsrch")
+        .setPageId("list")
+@if (vFaceEnrollmentList.UseAjaxActions) {
+        <text>.setSubmitWithFetch(true)</text>
+}
+
+        // Add fields
+        .setFields([
+        ])
+        // Validate form
+        .setValidate(
+            async function () {
+                if (!this.validateRequired)
+                    return true; // Ignore validation
+                let fobj = this.getForm();
+
+                // Validate fields
+                if (!this.validateFields())
+                    return false;
+
+                // Call Form_CustomValidate event
+                if (!(await this.customValidate?.(fobj) ?? true)) {
+                    this.focus();
+                    return false;
+                }
+                return true;
+            }
+        )
+
+        // Form_CustomValidate
+        .setCustomValidate(
+            function(fobj) { // DO NOT CHANGE THIS LINE!
+                    // Your custom validation code here, return false if invalid.
+                    return true;
+                }
+        )
+
+        // Use JavaScript validation or not
+        .setValidateRequired(ew.CLIENT_VALIDATE)
+
+        // Dynamic selection lists
+        .setLists({
+            "_Username": @Html.Raw(vFaceEnrollmentList._Username.ToClientList(vFaceEnrollmentList)),
+            "LinkRedirect": @Html.Raw(vFaceEnrollmentList.LinkRedirect.ToClientList(vFaceEnrollmentList)),
+            "_Email": @Html.Raw(vFaceEnrollmentList._Email.ToClientList(vFaceEnrollmentList)),
+            "NamaLengkap": @Html.Raw(vFaceEnrollmentList.NamaLengkap.ToClientList(vFaceEnrollmentList)),
+            "IdPosition": @Html.Raw(vFaceEnrollmentList.IdPosition.ToClientList(vFaceEnrollmentList)),
+            "Jabatan": @Html.Raw(vFaceEnrollmentList.Jabatan.ToClientList(vFaceEnrollmentList)),
+            "Face": @Html.Raw(vFaceEnrollmentList.Face.ToClientList(vFaceEnrollmentList)),
+            "TanggalInputFace": @Html.Raw(vFaceEnrollmentList.TanggalInputFace.ToClientList(vFaceEnrollmentList)),
+            "UserInputFace": @Html.Raw(vFaceEnrollmentList.UserInputFace.ToClientList(vFaceEnrollmentList)),
+        })
+
+        // Filters
+        .setFilterList(@Html.Raw(vFaceEnrollmentList.GetFilterList()))
+        .build();
+    window[form.id] = form;
+    currentSearchForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<input type="hidden" name="cmd" value="search">
+@if (Security.CanSearch) {
+if (!vFaceEnrollmentList.IsExport() && Empty(vFaceEnrollmentList.CurrentAction) && vFaceEnrollmentList.HasSearchFields()) { @* Show search form (begin) *@
+<div class="ew-extended-search container-fluid ps-2">
+<div class="row mb-0@(vFaceEnrollmentList.SearchFieldsPerRow > 0 ? " row-cols-sm-" + vFaceEnrollmentList.SearchFieldsPerRow : "")">
+@{
+    // Render search row
+    vFaceEnrollmentList.RowType = RowType.Search;
+    vFaceEnrollmentList.ResetAttributes();
+    await vFaceEnrollmentList.RenderRow();
+}
+@if (vFaceEnrollmentList._Username.Visible) { // vFaceEnrollmentList._Username.Visible (begin)
+    if (!vFaceEnrollmentList._Username.UseFilter) {
+        vFaceEnrollmentList.SearchColumnCount++;
+    }
+    <div id="xs__Username" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(vFaceEnrollmentList._Username.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x__Username"
+            name="x__Username[]"
+            class="form-control ew-select@(vFaceEnrollmentList._Username.IsInvalidClass)"
+            data-select2-id="fVFaceEnrollmentsrch_x__Username"
+            data-table="VFaceEnrollment"
+            data-field="x__Username"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(vFaceEnrollmentList._Username.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(vFaceEnrollmentList._Username.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(vFaceEnrollmentList._Username.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(vFaceEnrollmentList._Username.EditAttributes)>
+            @(vFaceEnrollmentList._Username.SelectOptionListHtml("x__Username", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(vFaceEnrollmentList._Username.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fVFaceEnrollmentsrch", function() {
+            var options = {
+                name: "x__Username",
+                selectId: "fVFaceEnrollmentsrch_x__Username",
+                ajax: { id: "x__Username", form: "fVFaceEnrollmentsrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.VFaceEnrollment.fields._Username.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* vFaceEnrollmentList._Username.Visible (end) *@
+@if (vFaceEnrollmentList.LinkRedirect.Visible) { // vFaceEnrollmentList.LinkRedirect.Visible (begin)
+    if (!vFaceEnrollmentList.LinkRedirect.UseFilter) {
+        vFaceEnrollmentList.SearchColumnCount++;
+    }
+    <div id="xs_LinkRedirect" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(vFaceEnrollmentList.LinkRedirect.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_LinkRedirect"
+            name="x_LinkRedirect[]"
+            class="form-control ew-select@(vFaceEnrollmentList.LinkRedirect.IsInvalidClass)"
+            data-select2-id="fVFaceEnrollmentsrch_x_LinkRedirect"
+            data-table="VFaceEnrollment"
+            data-field="x_LinkRedirect"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(vFaceEnrollmentList.LinkRedirect.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(vFaceEnrollmentList.LinkRedirect.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(vFaceEnrollmentList.LinkRedirect.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(vFaceEnrollmentList.LinkRedirect.EditAttributes)>
+            @(vFaceEnrollmentList.LinkRedirect.SelectOptionListHtml("x_LinkRedirect", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(vFaceEnrollmentList.LinkRedirect.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fVFaceEnrollmentsrch", function() {
+            var options = {
+                name: "x_LinkRedirect",
+                selectId: "fVFaceEnrollmentsrch_x_LinkRedirect",
+                ajax: { id: "x_LinkRedirect", form: "fVFaceEnrollmentsrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.VFaceEnrollment.fields.LinkRedirect.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* vFaceEnrollmentList.LinkRedirect.Visible (end) *@
+@if (vFaceEnrollmentList._Email.Visible) { // vFaceEnrollmentList._Email.Visible (begin)
+    if (!vFaceEnrollmentList._Email.UseFilter) {
+        vFaceEnrollmentList.SearchColumnCount++;
+    }
+    <div id="xs__Email" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(vFaceEnrollmentList._Email.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x__Email"
+            name="x__Email[]"
+            class="form-control ew-select@(vFaceEnrollmentList._Email.IsInvalidClass)"
+            data-select2-id="fVFaceEnrollmentsrch_x__Email"
+            data-table="VFaceEnrollment"
+            data-field="x__Email"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(vFaceEnrollmentList._Email.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(vFaceEnrollmentList._Email.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(vFaceEnrollmentList._Email.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(vFaceEnrollmentList._Email.EditAttributes)>
+            @(vFaceEnrollmentList._Email.SelectOptionListHtml("x__Email", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(vFaceEnrollmentList._Email.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fVFaceEnrollmentsrch", function() {
+            var options = {
+                name: "x__Email",
+                selectId: "fVFaceEnrollmentsrch_x__Email",
+                ajax: { id: "x__Email", form: "fVFaceEnrollmentsrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.VFaceEnrollment.fields._Email.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* vFaceEnrollmentList._Email.Visible (end) *@
+@if (vFaceEnrollmentList.NamaLengkap.Visible) { // vFaceEnrollmentList.NamaLengkap.Visible (begin)
+    if (!vFaceEnrollmentList.NamaLengkap.UseFilter) {
+        vFaceEnrollmentList.SearchColumnCount++;
+    }
+    <div id="xs_NamaLengkap" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(vFaceEnrollmentList.NamaLengkap.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_NamaLengkap"
+            name="x_NamaLengkap[]"
+            class="form-control ew-select@(vFaceEnrollmentList.NamaLengkap.IsInvalidClass)"
+            data-select2-id="fVFaceEnrollmentsrch_x_NamaLengkap"
+            data-table="VFaceEnrollment"
+            data-field="x_NamaLengkap"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(vFaceEnrollmentList.NamaLengkap.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(vFaceEnrollmentList.NamaLengkap.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(vFaceEnrollmentList.NamaLengkap.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(vFaceEnrollmentList.NamaLengkap.EditAttributes)>
+            @(vFaceEnrollmentList.NamaLengkap.SelectOptionListHtml("x_NamaLengkap", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(vFaceEnrollmentList.NamaLengkap.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fVFaceEnrollmentsrch", function() {
+            var options = {
+                name: "x_NamaLengkap",
+                selectId: "fVFaceEnrollmentsrch_x_NamaLengkap",
+                ajax: { id: "x_NamaLengkap", form: "fVFaceEnrollmentsrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.VFaceEnrollment.fields.NamaLengkap.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* vFaceEnrollmentList.NamaLengkap.Visible (end) *@
+@if (vFaceEnrollmentList.IdPosition.Visible) { // vFaceEnrollmentList.IdPosition.Visible (begin)
+    if (!vFaceEnrollmentList.IdPosition.UseFilter) {
+        vFaceEnrollmentList.SearchColumnCount++;
+    }
+    <div id="xs_IdPosition" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(vFaceEnrollmentList.IdPosition.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_IdPosition"
+            name="x_IdPosition[]"
+            class="form-control ew-select@(vFaceEnrollmentList.IdPosition.IsInvalidClass)"
+            data-select2-id="fVFaceEnrollmentsrch_x_IdPosition"
+            data-table="VFaceEnrollment"
+            data-field="x_IdPosition"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(vFaceEnrollmentList.IdPosition.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(vFaceEnrollmentList.IdPosition.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(vFaceEnrollmentList.IdPosition.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(vFaceEnrollmentList.IdPosition.EditAttributes)>
+            @(vFaceEnrollmentList.IdPosition.SelectOptionListHtml("x_IdPosition", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(vFaceEnrollmentList.IdPosition.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fVFaceEnrollmentsrch", function() {
+            var options = {
+                name: "x_IdPosition",
+                selectId: "fVFaceEnrollmentsrch_x_IdPosition",
+                ajax: { id: "x_IdPosition", form: "fVFaceEnrollmentsrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.VFaceEnrollment.fields.IdPosition.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* vFaceEnrollmentList.IdPosition.Visible (end) *@
+@if (vFaceEnrollmentList.Jabatan.Visible) { // vFaceEnrollmentList.Jabatan.Visible (begin)
+    if (!vFaceEnrollmentList.Jabatan.UseFilter) {
+        vFaceEnrollmentList.SearchColumnCount++;
+    }
+    <div id="xs_Jabatan" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(vFaceEnrollmentList.Jabatan.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_Jabatan"
+            name="x_Jabatan[]"
+            class="form-control ew-select@(vFaceEnrollmentList.Jabatan.IsInvalidClass)"
+            data-select2-id="fVFaceEnrollmentsrch_x_Jabatan"
+            data-table="VFaceEnrollment"
+            data-field="x_Jabatan"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(vFaceEnrollmentList.Jabatan.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(vFaceEnrollmentList.Jabatan.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(vFaceEnrollmentList.Jabatan.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(vFaceEnrollmentList.Jabatan.EditAttributes)>
+            @(vFaceEnrollmentList.Jabatan.SelectOptionListHtml("x_Jabatan", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(vFaceEnrollmentList.Jabatan.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fVFaceEnrollmentsrch", function() {
+            var options = {
+                name: "x_Jabatan",
+                selectId: "fVFaceEnrollmentsrch_x_Jabatan",
+                ajax: { id: "x_Jabatan", form: "fVFaceEnrollmentsrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.VFaceEnrollment.fields.Jabatan.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* vFaceEnrollmentList.Jabatan.Visible (end) *@
+@if (vFaceEnrollmentList.Face.Visible) { // vFaceEnrollmentList.Face.Visible (begin)
+    if (!vFaceEnrollmentList.Face.UseFilter) {
+        vFaceEnrollmentList.SearchColumnCount++;
+    }
+    <div id="xs_Face" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(vFaceEnrollmentList.Face.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_Face"
+            name="x_Face[]"
+            class="form-control ew-select@(vFaceEnrollmentList.Face.IsInvalidClass)"
+            data-select2-id="fVFaceEnrollmentsrch_x_Face"
+            data-table="VFaceEnrollment"
+            data-field="x_Face"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(vFaceEnrollmentList.Face.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(vFaceEnrollmentList.Face.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(vFaceEnrollmentList.Face.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(vFaceEnrollmentList.Face.EditAttributes)>
+            @(vFaceEnrollmentList.Face.SelectOptionListHtml("x_Face", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(vFaceEnrollmentList.Face.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fVFaceEnrollmentsrch", function() {
+            var options = {
+                name: "x_Face",
+                selectId: "fVFaceEnrollmentsrch_x_Face",
+                ajax: { id: "x_Face", form: "fVFaceEnrollmentsrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.VFaceEnrollment.fields.Face.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* vFaceEnrollmentList.Face.Visible (end) *@
+@if (vFaceEnrollmentList.TanggalInputFace.Visible) { // vFaceEnrollmentList.TanggalInputFace.Visible (begin)
+    if (!vFaceEnrollmentList.TanggalInputFace.UseFilter) {
+        vFaceEnrollmentList.SearchColumnCount++;
+    }
+    <div id="xs_TanggalInputFace" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(vFaceEnrollmentList.TanggalInputFace.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_TanggalInputFace"
+            name="x_TanggalInputFace[]"
+            class="form-control ew-select@(vFaceEnrollmentList.TanggalInputFace.IsInvalidClass)"
+            data-select2-id="fVFaceEnrollmentsrch_x_TanggalInputFace"
+            data-table="VFaceEnrollment"
+            data-field="x_TanggalInputFace"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(vFaceEnrollmentList.TanggalInputFace.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(vFaceEnrollmentList.TanggalInputFace.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(vFaceEnrollmentList.TanggalInputFace.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(vFaceEnrollmentList.TanggalInputFace.EditAttributes)>
+            @(vFaceEnrollmentList.TanggalInputFace.SelectOptionListHtml("x_TanggalInputFace", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(vFaceEnrollmentList.TanggalInputFace.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fVFaceEnrollmentsrch", function() {
+            var options = {
+                name: "x_TanggalInputFace",
+                selectId: "fVFaceEnrollmentsrch_x_TanggalInputFace",
+                ajax: { id: "x_TanggalInputFace", form: "fVFaceEnrollmentsrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.VFaceEnrollment.fields.TanggalInputFace.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* vFaceEnrollmentList.TanggalInputFace.Visible (end) *@
+@if (vFaceEnrollmentList.UserInputFace.Visible) { // vFaceEnrollmentList.UserInputFace.Visible (begin)
+    if (!vFaceEnrollmentList.UserInputFace.UseFilter) {
+        vFaceEnrollmentList.SearchColumnCount++;
+    }
+    <div id="xs_UserInputFace" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(vFaceEnrollmentList.UserInputFace.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_UserInputFace"
+            name="x_UserInputFace[]"
+            class="form-control ew-select@(vFaceEnrollmentList.UserInputFace.IsInvalidClass)"
+            data-select2-id="fVFaceEnrollmentsrch_x_UserInputFace"
+            data-table="VFaceEnrollment"
+            data-field="x_UserInputFace"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(vFaceEnrollmentList.UserInputFace.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(vFaceEnrollmentList.UserInputFace.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(vFaceEnrollmentList.UserInputFace.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(vFaceEnrollmentList.UserInputFace.EditAttributes)>
+            @(vFaceEnrollmentList.UserInputFace.SelectOptionListHtml("x_UserInputFace", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(vFaceEnrollmentList.UserInputFace.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fVFaceEnrollmentsrch", function() {
+            var options = {
+                name: "x_UserInputFace",
+                selectId: "fVFaceEnrollmentsrch_x_UserInputFace",
+                ajax: { id: "x_UserInputFace", form: "fVFaceEnrollmentsrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.VFaceEnrollment.fields.UserInputFace.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* vFaceEnrollmentList.UserInputFace.Visible (end) *@
+</div><!-- /.row -->
+<div class="row mb-0">
+    <div class="col-sm-auto px-0 pe-sm-2">
+        <div class="ew-basic-search input-group">
+            <input type="search" name="@(Config.TableBasicSearch)" id="@(Config.TableBasicSearch)" class="form-control ew-basic-search-keyword" value="@Html.Raw(HtmlEncode(vFaceEnrollmentList.BasicSearch.SessionKeyword))" placeholder="@(HtmlEncode(Language.Phrase("Search")))" aria-label="@(HtmlEncode(Language.Phrase("Search")))">
+            <input type="hidden" name="@(Config.TableBasicSearchType)" id="@(Config.TableBasicSearchType)" class="ew-basic-search-type" value="@(HtmlEncode(vFaceEnrollmentList.BasicSearch.SessionType))">
+            <button type="button" data-bs-toggle="dropdown" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split" aria-haspopup="true" aria-expanded="false">
+                <span id="searchtype">@Html.Raw(vFaceEnrollmentList.BasicSearch.TypeNameShort)</span>
+            </button>
+            <div class="dropdown-menu dropdown-menu-end">
+                <button type="button" class="dropdown-item@(vFaceEnrollmentList.BasicSearch.SessionType == "" ? " active" : "")" form="fVFaceEnrollmentsrch" data-ew-action="search-type">@Html.Raw(Language.Phrase("QuickSearchAuto"))</button>
+                <button type="button" class="dropdown-item@(vFaceEnrollmentList.BasicSearch.SessionType == "=" ? " active" : "")" form="fVFaceEnrollmentsrch" data-ew-action="search-type" data-search-type="=">@Html.Raw(Language.Phrase("QuickSearchExact"))</button>
+                <button type="button" class="dropdown-item@(vFaceEnrollmentList.BasicSearch.SessionType == "AND" ? " active" : "")" form="fVFaceEnrollmentsrch" data-ew-action="search-type" data-search-type="AND">@Html.Raw(Language.Phrase("QuickSearchAll"))</button>
+                <button type="button" class="dropdown-item@(vFaceEnrollmentList.BasicSearch.SessionType == "OR" ? " active" : "")" form="fVFaceEnrollmentsrch" data-ew-action="search-type" data-search-type="OR">@Html.Raw(Language.Phrase("QuickSearchAny"))</button>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-auto mb-3">
+        <button class="btn btn-primary" name="btn-submit" id="btn-submit" type="submit">@Html.Raw(Language.Phrase("SearchBtn"))</button>
+    </div>
+</div>
+</div><!-- /.ew-extended-search -->
+} @* Show search form (end) *@
+}
+</div><!-- /.ew-search-panel -->
+</form>
+}
+@vFaceEnrollmentList.ShowPageHeader()
+@vFaceEnrollmentList.ShowMessages()
+<main class="list @(vFaceEnrollmentList.TotalRecords == 0 && !vFaceEnrollmentList.IsAdd ? " ew-no-record" : "")">
+<div id="ew-header-options">
+    @vFaceEnrollmentList.HeaderOptions.RenderBody()
+</div>
+<div id="ew-list">
+@if (vFaceEnrollmentList.TotalRecords > 0 || !Empty(vFaceEnrollmentList.CurrentAction)) {
+<div class="card ew-card ew-grid@(vFaceEnrollmentList.IsAddOrEdit ? " ew-grid-add-edit" : "") @(vFaceEnrollmentList.TableGridClass)">
+<form name="@(vFaceEnrollmentList.FormName)" id="@(vFaceEnrollmentList.FormName)" class="ew-form ew-list-form" action="@AppPath(vFaceEnrollmentList.PageName)" method="post" novalidate autocomplete="off">
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+@if (vFaceEnrollmentList.IsModal) {
+<input type="hidden" name="modal" value="1">
+}
+<div id="gmp_VFaceEnrollment" class="card-body ew-grid-middle-panel @(vFaceEnrollmentList.TableContainerClass)" style="@(vFaceEnrollmentList.TableContainerStyle)">
+@if (vFaceEnrollmentList.TotalRecords > 0 || vFaceEnrollmentList.IsGridEdit || vFaceEnrollmentList.IsMultiEdit) {
+<table id="tbl_VFaceEnrollmentlist" class="@(vFaceEnrollmentList.TableClass)"><!-- .ew-table -->
+<thead>
+    <tr class="ew-table-header">
+@{
+    // Header row
+    vFaceEnrollmentList.RowType = RowType.Header;
+
+    // Render list options
+    await vFaceEnrollmentList.RenderListOptions();
+}
+@* Render list options (header, left) *@
+@vFaceEnrollmentList.ListOptions.RenderHeader("left")
+@if (vFaceEnrollmentList.LinkRedirect.Visible) { // vFaceEnrollmentList.LinkRedirect.Visible (begin)
+        <th data-name="LinkRedirect" class="@(vFaceEnrollmentList.LinkRedirect.HeaderCellClass)"><div id="elh_VFaceEnrollment_LinkRedirect" class="VFaceEnrollment_LinkRedirect">@Html.Raw(vFaceEnrollmentList.RenderFieldHeader(vFaceEnrollmentList.LinkRedirect))</div></th>
+} @* vFaceEnrollmentList.LinkRedirect.Visible (end) *@
+@if (vFaceEnrollmentList._Email.Visible) { // vFaceEnrollmentList._Email.Visible (begin)
+        <th data-name="_Email" class="@(vFaceEnrollmentList._Email.HeaderCellClass)"><div id="elh_VFaceEnrollment__Email" class="VFaceEnrollment__Email">@Html.Raw(vFaceEnrollmentList.RenderFieldHeader(vFaceEnrollmentList._Email))</div></th>
+} @* vFaceEnrollmentList._Email.Visible (end) *@
+@if (vFaceEnrollmentList.NamaLengkap.Visible) { // vFaceEnrollmentList.NamaLengkap.Visible (begin)
+        <th data-name="NamaLengkap" class="@(vFaceEnrollmentList.NamaLengkap.HeaderCellClass)"><div id="elh_VFaceEnrollment_NamaLengkap" class="VFaceEnrollment_NamaLengkap">@Html.Raw(vFaceEnrollmentList.RenderFieldHeader(vFaceEnrollmentList.NamaLengkap))</div></th>
+} @* vFaceEnrollmentList.NamaLengkap.Visible (end) *@
+@if (vFaceEnrollmentList.DownloadFace.Visible) { // vFaceEnrollmentList.DownloadFace.Visible (begin)
+        <th data-name="DownloadFace" class="@(vFaceEnrollmentList.DownloadFace.HeaderCellClass)"><div id="elh_VFaceEnrollment_DownloadFace" class="VFaceEnrollment_DownloadFace">@Html.Raw(vFaceEnrollmentList.RenderFieldHeader(vFaceEnrollmentList.DownloadFace))</div></th>
+} @* vFaceEnrollmentList.DownloadFace.Visible (end) *@
+@if (vFaceEnrollmentList.IdPosition.Visible) { // vFaceEnrollmentList.IdPosition.Visible (begin)
+        <th data-name="IdPosition" class="@(vFaceEnrollmentList.IdPosition.HeaderCellClass)"><div id="elh_VFaceEnrollment_IdPosition" class="VFaceEnrollment_IdPosition">@Html.Raw(vFaceEnrollmentList.RenderFieldHeader(vFaceEnrollmentList.IdPosition))</div></th>
+} @* vFaceEnrollmentList.IdPosition.Visible (end) *@
+@if (vFaceEnrollmentList.Jabatan.Visible) { // vFaceEnrollmentList.Jabatan.Visible (begin)
+        <th data-name="Jabatan" class="@(vFaceEnrollmentList.Jabatan.HeaderCellClass)"><div id="elh_VFaceEnrollment_Jabatan" class="VFaceEnrollment_Jabatan">@Html.Raw(vFaceEnrollmentList.RenderFieldHeader(vFaceEnrollmentList.Jabatan))</div></th>
+} @* vFaceEnrollmentList.Jabatan.Visible (end) *@
+@if (vFaceEnrollmentList.Face.Visible) { // vFaceEnrollmentList.Face.Visible (begin)
+        <th data-name="Face" class="@(vFaceEnrollmentList.Face.HeaderCellClass)"><div id="elh_VFaceEnrollment_Face" class="VFaceEnrollment_Face">@Html.Raw(vFaceEnrollmentList.RenderFieldHeader(vFaceEnrollmentList.Face))</div></th>
+} @* vFaceEnrollmentList.Face.Visible (end) *@
+@if (vFaceEnrollmentList.TanggalInputFace.Visible) { // vFaceEnrollmentList.TanggalInputFace.Visible (begin)
+        <th data-name="TanggalInputFace" class="@(vFaceEnrollmentList.TanggalInputFace.HeaderCellClass)"><div id="elh_VFaceEnrollment_TanggalInputFace" class="VFaceEnrollment_TanggalInputFace">@Html.Raw(vFaceEnrollmentList.RenderFieldHeader(vFaceEnrollmentList.TanggalInputFace))</div></th>
+} @* vFaceEnrollmentList.TanggalInputFace.Visible (end) *@
+@if (vFaceEnrollmentList.UserInputFace.Visible) { // vFaceEnrollmentList.UserInputFace.Visible (begin)
+        <th data-name="UserInputFace" class="@(vFaceEnrollmentList.UserInputFace.HeaderCellClass)"><div id="elh_VFaceEnrollment_UserInputFace" class="VFaceEnrollment_UserInputFace">@Html.Raw(vFaceEnrollmentList.RenderFieldHeader(vFaceEnrollmentList.UserInputFace))</div></th>
+} @* vFaceEnrollmentList.UserInputFace.Visible (end) *@
+@if (vFaceEnrollmentList.AzurePersonId.Visible) { // vFaceEnrollmentList.AzurePersonId.Visible (begin)
+        <th data-name="AzurePersonId" class="@(vFaceEnrollmentList.AzurePersonId.HeaderCellClass)"><div id="elh_VFaceEnrollment_AzurePersonId" class="VFaceEnrollment_AzurePersonId">@Html.Raw(vFaceEnrollmentList.RenderFieldHeader(vFaceEnrollmentList.AzurePersonId))</div></th>
+} @* vFaceEnrollmentList.AzurePersonId.Visible (end) *@
+@* Render list options (header, right) *@
+@vFaceEnrollmentList.ListOptions.RenderHeader("right")
+    </tr>
+</thead>
+<tbody data-page="@(vFaceEnrollmentList.PageNumber)">
+@{
+    await vFaceEnrollmentList.SetupGrid();
+    bool eof = vFaceEnrollmentList.Recordset == null; // DN
+}
+@while (vFaceEnrollmentList.RecordCount < vFaceEnrollmentList.StopRecord || SameString(vFaceEnrollmentList.RowIndex, "$rowindex$")) { // Begin While
+    if (!eof && !SameString(vFaceEnrollmentList.RowIndex, "$rowindex$") &&
+        (!vFaceEnrollmentList.IsGridAdd || vFaceEnrollmentList.CurrentMode == "copy") &&
+        (!((vFaceEnrollmentList.IsCopy || vFaceEnrollmentList.IsAdd) && vFaceEnrollmentList.RowIndex is int rowIndex && rowIndex == 0))) // DN
+        eof = !await vFaceEnrollmentList.Recordset.ReadAsync();
+    vFaceEnrollmentList.RecordCount++;
+    if (vFaceEnrollmentList.RecordCount >= vFaceEnrollmentList.StartRecord) {
+        await vFaceEnrollmentList.SetupRow();
+    <tr @Html.Raw(vFaceEnrollmentList.RowAttributes)>
+    @* Render list options (body, left) *@
+    @vFaceEnrollmentList.ListOptions.RenderBody("left", vFaceEnrollmentList.RowCount)
+    @if (vFaceEnrollmentList.LinkRedirect.Visible) { // vFaceEnrollmentList.LinkRedirect.Visible (begin)
+        <td data-name="LinkRedirect" @Html.Raw(vFaceEnrollmentList.LinkRedirect.CellAttributes)>
+<span id="el@(vFaceEnrollmentList.RowIndex == "$rowindex$" ? "$rowindex$" : vFaceEnrollmentList.RowCount)_VFaceEnrollment_LinkRedirect" class="el_VFaceEnrollment_LinkRedirect">
+<span @Html.Raw(vFaceEnrollmentList.LinkRedirect.ViewAttributes)>
+@Html.Raw(vFaceEnrollmentList.LinkRedirect.GetViewValue())</span>
+</span>
+</td>
+    } @* vFaceEnrollmentList.LinkRedirect.Visible (end) *@
+    @if (vFaceEnrollmentList._Email.Visible) { // vFaceEnrollmentList._Email.Visible (begin)
+        <td data-name="_Email" @Html.Raw(vFaceEnrollmentList._Email.CellAttributes)>
+<span id="el@(vFaceEnrollmentList.RowIndex == "$rowindex$" ? "$rowindex$" : vFaceEnrollmentList.RowCount)_VFaceEnrollment__Email" class="el_VFaceEnrollment__Email">
+<span @Html.Raw(vFaceEnrollmentList._Email.ViewAttributes)>
+@Html.Raw(vFaceEnrollmentList._Email.GetViewValue())</span>
+</span>
+</td>
+    } @* vFaceEnrollmentList._Email.Visible (end) *@
+    @if (vFaceEnrollmentList.NamaLengkap.Visible) { // vFaceEnrollmentList.NamaLengkap.Visible (begin)
+        <td data-name="NamaLengkap" @Html.Raw(vFaceEnrollmentList.NamaLengkap.CellAttributes)>
+<span id="el@(vFaceEnrollmentList.RowIndex == "$rowindex$" ? "$rowindex$" : vFaceEnrollmentList.RowCount)_VFaceEnrollment_NamaLengkap" class="el_VFaceEnrollment_NamaLengkap">
+<span @Html.Raw(vFaceEnrollmentList.NamaLengkap.ViewAttributes)>
+@Html.Raw(vFaceEnrollmentList.NamaLengkap.GetViewValue())</span>
+</span>
+</td>
+    } @* vFaceEnrollmentList.NamaLengkap.Visible (end) *@
+    @if (vFaceEnrollmentList.DownloadFace.Visible) { // vFaceEnrollmentList.DownloadFace.Visible (begin)
+        <td data-name="DownloadFace" @Html.Raw(vFaceEnrollmentList.DownloadFace.CellAttributes)>
+<span id="el@(vFaceEnrollmentList.RowIndex == "$rowindex$" ? "$rowindex$" : vFaceEnrollmentList.RowCount)_VFaceEnrollment_DownloadFace" class="el_VFaceEnrollment_DownloadFace">
+<span @Html.Raw(vFaceEnrollmentList.DownloadFace.ViewAttributes)>
+@Html.Raw(vFaceEnrollmentList.DownloadFace.GetViewValue())</span>
+</span>
+</td>
+    } @* vFaceEnrollmentList.DownloadFace.Visible (end) *@
+    @if (vFaceEnrollmentList.IdPosition.Visible) { // vFaceEnrollmentList.IdPosition.Visible (begin)
+        <td data-name="IdPosition" @Html.Raw(vFaceEnrollmentList.IdPosition.CellAttributes)>
+<span id="el@(vFaceEnrollmentList.RowIndex == "$rowindex$" ? "$rowindex$" : vFaceEnrollmentList.RowCount)_VFaceEnrollment_IdPosition" class="el_VFaceEnrollment_IdPosition">
+<span @Html.Raw(vFaceEnrollmentList.IdPosition.ViewAttributes)>
+@Html.Raw(vFaceEnrollmentList.IdPosition.GetViewValue())</span>
+</span>
+</td>
+    } @* vFaceEnrollmentList.IdPosition.Visible (end) *@
+    @if (vFaceEnrollmentList.Jabatan.Visible) { // vFaceEnrollmentList.Jabatan.Visible (begin)
+        <td data-name="Jabatan" @Html.Raw(vFaceEnrollmentList.Jabatan.CellAttributes)>
+<span id="el@(vFaceEnrollmentList.RowIndex == "$rowindex$" ? "$rowindex$" : vFaceEnrollmentList.RowCount)_VFaceEnrollment_Jabatan" class="el_VFaceEnrollment_Jabatan">
+<span @Html.Raw(vFaceEnrollmentList.Jabatan.ViewAttributes)>
+@Html.Raw(vFaceEnrollmentList.Jabatan.GetViewValue())</span>
+</span>
+</td>
+    } @* vFaceEnrollmentList.Jabatan.Visible (end) *@
+    @if (vFaceEnrollmentList.Face.Visible) { // vFaceEnrollmentList.Face.Visible (begin)
+        <td data-name="Face" @Html.Raw(vFaceEnrollmentList.Face.CellAttributes)>
+<span id="el@(vFaceEnrollmentList.RowIndex == "$rowindex$" ? "$rowindex$" : vFaceEnrollmentList.RowCount)_VFaceEnrollment_Face" class="el_VFaceEnrollment_Face">
+<span @Html.Raw(vFaceEnrollmentList.Face.ViewAttributes)>
+@Html.Raw(vFaceEnrollmentList.Face.GetViewValue())</span>
+</span>
+</td>
+    } @* vFaceEnrollmentList.Face.Visible (end) *@
+    @if (vFaceEnrollmentList.TanggalInputFace.Visible) { // vFaceEnrollmentList.TanggalInputFace.Visible (begin)
+        <td data-name="TanggalInputFace" @Html.Raw(vFaceEnrollmentList.TanggalInputFace.CellAttributes)>
+<span id="el@(vFaceEnrollmentList.RowIndex == "$rowindex$" ? "$rowindex$" : vFaceEnrollmentList.RowCount)_VFaceEnrollment_TanggalInputFace" class="el_VFaceEnrollment_TanggalInputFace">
+<span @Html.Raw(vFaceEnrollmentList.TanggalInputFace.ViewAttributes)>
+@Html.Raw(vFaceEnrollmentList.TanggalInputFace.GetViewValue())</span>
+</span>
+</td>
+    } @* vFaceEnrollmentList.TanggalInputFace.Visible (end) *@
+    @if (vFaceEnrollmentList.UserInputFace.Visible) { // vFaceEnrollmentList.UserInputFace.Visible (begin)
+        <td data-name="UserInputFace" @Html.Raw(vFaceEnrollmentList.UserInputFace.CellAttributes)>
+<span id="el@(vFaceEnrollmentList.RowIndex == "$rowindex$" ? "$rowindex$" : vFaceEnrollmentList.RowCount)_VFaceEnrollment_UserInputFace" class="el_VFaceEnrollment_UserInputFace">
+<span @Html.Raw(vFaceEnrollmentList.UserInputFace.ViewAttributes)>
+@Html.Raw(vFaceEnrollmentList.UserInputFace.GetViewValue())</span>
+</span>
+</td>
+    } @* vFaceEnrollmentList.UserInputFace.Visible (end) *@
+    @if (vFaceEnrollmentList.AzurePersonId.Visible) { // vFaceEnrollmentList.AzurePersonId.Visible (begin)
+        <td data-name="AzurePersonId" @Html.Raw(vFaceEnrollmentList.AzurePersonId.CellAttributes)>
+<span id="el@(vFaceEnrollmentList.RowIndex == "$rowindex$" ? "$rowindex$" : vFaceEnrollmentList.RowCount)_VFaceEnrollment_AzurePersonId" class="el_VFaceEnrollment_AzurePersonId">
+<span @Html.Raw(vFaceEnrollmentList.AzurePersonId.ViewAttributes)>
+@Html.Raw(vFaceEnrollmentList.AzurePersonId.GetViewValue())</span>
+</span>
+</td>
+    } @* vFaceEnrollmentList.AzurePersonId.Visible (end) *@
+    @* Render list options (body, right) *@
+    @vFaceEnrollmentList.ListOptions.RenderBody("right", vFaceEnrollmentList.RowCount)
+    </tr>
+    } @* End if *@
+
+    // Reset for template row
+    if (SameString(vFaceEnrollmentList.RowIndex, "$rowindex$"))
+        vFaceEnrollmentList.RowIndex = 0;
+
+    // Reset inline add/copy row
+    if ((vFaceEnrollmentList.IsCopy || vFaceEnrollmentList.IsAdd) && vFaceEnrollmentList.RowIndex is int rowIndex2 && rowIndex2 == 0)
+        vFaceEnrollmentList.RowIndex = 1;
+} @* End While *@
+</tbody>
+</table><!-- /.ew-table -->
+} @* End If TotalRecords > 0 *@
+</div><!-- /.ew-grid-middle-panel -->
+@if (Empty(vFaceEnrollmentList.CurrentAction) && !vFaceEnrollmentList.UseAjaxActions) {
+<input type="hidden" name="action" id="action" value="">
+}
+</form><!-- /.ew-list-form -->
+@{ vFaceEnrollmentList.CloseRecordset(); }
+@if (!vFaceEnrollmentList.IsExport()) {
+<div class="card-footer ew-grid-lower-panel">
+@if (!vFaceEnrollmentList.IsGridAdd && !(vFaceEnrollmentList.IsGridEdit && vFaceEnrollmentList.ModalGridEdit) && !vFaceEnrollmentList.IsMultiEdit) {
+@Html.Raw(vFaceEnrollmentList.Pager.Render())
+}
+<div class="ew-list-other-options">
+@vFaceEnrollmentList.OtherOptions.RenderBody("bottom")
+</div>
+</div>
+}
+</div><!-- /.ew-grid -->
+} else { // Show other options
+<div class="ew-list-other-options">
+@vFaceEnrollmentList.OtherOptions.ForEach(opt => opt.ButtonClass = "").RenderBody()
+</div>
+}
+</div>
+<div id="ew-footer-options">
+    @vFaceEnrollmentList.FooterOptions.RenderBody()
+</div>
+</main>
+@vFaceEnrollmentList.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+@if (!vFaceEnrollmentList.IsExport()) {
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("VFaceEnrollment");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Startup script
+    $('.btn-toolbar.ew-toolbar').hide();
+    $('[data-name="button"]').hide();
+    $('[data-name="edit"]').hide();
+    var steps = [
+        { number: 1, label: "Face Enrollment", url: '', icon: "fa-face-smile" },
+    ];
+    var currentStep = 1;
+    $("<style>")
+        .prop("type", "text/css")
+        .html(`
+            .stepper {
+                display: flex;
+                counter-reset: step;
+            }
+            .step {
+                width: 150px;
+                text-align: center;
+                position: relative;
+            }
+            .step:not(:last-child)::after {
+                content: '';
+                position: absolute;
+                top: 20px;
+                right: -50%;
+                width: 100%;
+                height: 4px;
+                background-color: #ccc;
+                z-index: 0;
+            }
+            .step.completed:not(:last-child)::after {
+                background-color: #3c6dbd;
+            }
+            .step-icon {
+                width: 36px;
+                height: 36px;
+                line-height: 36px;
+                border-radius: 50%;
+                background: #ccc;
+                display: inline-block;
+                z-index: 1;
+                position: relative;
+                color: white;
+                font-weight: bold;
+            }
+            .step.active .step-icon {
+                background: #3c6dbd;
+            }
+            .step-label {
+                margin-top: 8px;
+                font-size: 14px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                gap: 6px;
+                color: #333;
+            }
+            .step-label {
+                color: #3c6dbd !important;
+                text-decoration: none;
+                margin: 0;
+                padding: 0;
+            }
+            .step-label-not-active {
+                color: #CCCCCC !important;
+            }
+        `)
+        .appendTo("head");
+    var $stepperWrapper = $('<div id="bread-crumb-nav" class="d-flex border-bottom border-2 pb-2"><div class="stepper"></div></div>');
+    var $stepper = $stepperWrapper.find(".stepper");
+    steps.forEach(function (step, i) {
+        var isActive = step.number === currentStep;
+        var isCompleted = step.number < currentStep;
+        var stepClass = isActive ? "active" : isCompleted ? "completed" : "";
+        var icon, labelContent, html;
+        if (isActive) {
+            icon = `<div class="step-icon bg-success">${step.number}</div>`;
+            labelContent = `<div class="step-label"><p class="text-success mb-1"><i class="fa-solid ${step.icon} me-1 text-success"></i> ${step.label}</p></div>`;
+            html = `<div class="step ${stepClass} text-success">${icon}${labelContent}</div>`;
+        } else if (isCompleted) {
+            icon = `<div class="step-icon" style="background: #3c6dbd;">${step.number}</div>`;
+            labelContent = `<div><a href="${step.url}" class="step-label"><i class="fa-solid ${step.icon} me-1"></i>${step.label}</a></div>`;
+            html = `<div class="step ${stepClass}">${icon}${labelContent}</div>`;
+        } else {
+            icon = `<div class="step-icon">${step.number}</div>`;
+            labelContent = `<div class="step-label-not-active"><p style="margin: 0;"><i class="fa-solid ${step.icon} me-1"></i>${step.label}</p></div>`;
+            html = `<div class="step ${stepClass} text-secondary">${icon}${labelContent}</div>`;
+        }
+        $stepper.append(html);
+    });
+    if ($('#bread-crumb-nav').length == 0) {
+        $(".content-header .container-fluid .row").append($stepperWrapper);
+    }
+});
+</script>
+}

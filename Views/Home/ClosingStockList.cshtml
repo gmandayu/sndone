@@ -1,0 +1,982 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (closingStockList.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = closingStockList.UseLayout ? "_Layout" : "";
+}
+@if (!closingStockList.IsExport()) {
+<script>
+var currentTable = @Html.Raw(ConvertToJson(closingStockList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { ClosingStock: currentTable } });
+var currentPageID = ew.PAGE_ID = "list";
+var currentForm;
+var @(closingStockList.FormName);
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("@(closingStockList.FormName)")
+        .setPageId("list")
+        .setSubmitWithFetch(@(closingStockList.UseAjaxActions ? "true" : "false"))
+        .setFormKeyCountName("@(closingStockList.FormKeyCountName)")
+
+        // Dynamic selection lists
+        .setLists({
+            "Proses2": @Html.Raw(closingStockList.Proses2.ToClientList(closingStockList)),
+            "Plant": @Html.Raw(closingStockList.Plant.ToClientList(closingStockList)),
+            "TipeProdukSTS": @Html.Raw(closingStockList.TipeProdukSTS.ToClientList(closingStockList)),
+            "IdTangki": @Html.Raw(closingStockList.IdTangki.ToClientList(closingStockList)),
+            "Produk": @Html.Raw(closingStockList.Produk.ToClientList(closingStockList)),
+            "StatusProses": @Html.Raw(closingStockList.StatusProses.ToClientList(closingStockList)),
+            "PersentaseProgress": @Html.Raw(closingStockList.PersentaseProgress.ToClientList(closingStockList)),
+            "DibuatOleh": @Html.Raw(closingStockList.DibuatOleh.ToClientList(closingStockList)),
+            "TanggalDibuat": @Html.Raw(closingStockList.TanggalDibuat.ToClientList(closingStockList)),
+            "DiperbaruiOleh": @Html.Raw(closingStockList.DiperbaruiOleh.ToClientList(closingStockList)),
+            "TanggalDiperbarui": @Html.Raw(closingStockList.TanggalDiperbarui.ToClientList(closingStockList)),
+        })
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Write your client script here, no need to add script tags.
+});
+</script>
+}
+@if (!closingStockList.IsExport()) {
+<div class="btn-toolbar ew-toolbar">
+@if (closingStockList.TotalRecords > 0 && closingStockList.ExportOptions.Visible) {
+    closingStockList.ExportOptions.Render("body");
+}
+@if (closingStockList.ImportOptions.Visible) {
+    closingStockList.ImportOptions.Render("body");
+}
+@if (closingStockList.SearchOptions.Visible) {
+    closingStockList.SearchOptions.Render("body");
+}
+@if (closingStockList.FilterOptions.Visible) {
+    closingStockList.FilterOptions.Render("body");
+}
+</div>
+}
+@if (closingStockList.ShowCurrentFilter) {
+    closingStockList.ShowFilterList();
+}
+@if (!closingStockList.IsModal) {
+<form name="fClosingStocksrch" id="fClosingStocksrch" class="ew-form ew-ext-search-form" action="@AppPath(CurrentPageName())" novalidate autocomplete="off">
+<div id="fClosingStocksrch_search_panel" class="mb-2 mb-sm-0 @(closingStockList.SearchPanelClass)"><!-- .ew-search-panel -->
+<script>
+var currentTable = @Html.Raw(ConvertToJson(closingStockList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { ClosingStock: currentTable } });
+var currentForm;
+var fClosingStocksrch, currentSearchForm, currentAdvancedSearchForm;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery,
+        fields = currentTable.fields;
+
+    // Form object for search
+    let form = new ew.FormBuilder()
+        .setId("fClosingStocksrch")
+        .setPageId("list")
+@if (closingStockList.UseAjaxActions) {
+        <text>.setSubmitWithFetch(true)</text>
+}
+
+        // Add fields
+        .setFields([
+        ])
+        // Validate form
+        .setValidate(
+            async function () {
+                if (!this.validateRequired)
+                    return true; // Ignore validation
+                let fobj = this.getForm();
+
+                // Validate fields
+                if (!this.validateFields())
+                    return false;
+
+                // Call Form_CustomValidate event
+                if (!(await this.customValidate?.(fobj) ?? true)) {
+                    this.focus();
+                    return false;
+                }
+                return true;
+            }
+        )
+
+        // Form_CustomValidate
+        .setCustomValidate(
+            function(fobj) { // DO NOT CHANGE THIS LINE!
+                    // Your custom validation code here, return false if invalid.
+                    return true;
+                }
+        )
+
+        // Use JavaScript validation or not
+        .setValidateRequired(ew.CLIENT_VALIDATE)
+
+        // Dynamic selection lists
+        .setLists({
+            "NomorClosingStock": @Html.Raw(closingStockList.NomorClosingStock.ToClientList(closingStockList)),
+            "Proses2": @Html.Raw(closingStockList.Proses2.ToClientList(closingStockList)),
+            "Plant": @Html.Raw(closingStockList.Plant.ToClientList(closingStockList)),
+            "TipeProdukSTS": @Html.Raw(closingStockList.TipeProdukSTS.ToClientList(closingStockList)),
+            "IdTangki": @Html.Raw(closingStockList.IdTangki.ToClientList(closingStockList)),
+            "StatusProses": @Html.Raw(closingStockList.StatusProses.ToClientList(closingStockList)),
+            "PersentaseProgress": @Html.Raw(closingStockList.PersentaseProgress.ToClientList(closingStockList)),
+            "Catatan": @Html.Raw(closingStockList.Catatan.ToClientList(closingStockList)),
+            "DibuatOleh": @Html.Raw(closingStockList.DibuatOleh.ToClientList(closingStockList)),
+            "TanggalDibuat": @Html.Raw(closingStockList.TanggalDibuat.ToClientList(closingStockList)),
+            "DiperbaruiOleh": @Html.Raw(closingStockList.DiperbaruiOleh.ToClientList(closingStockList)),
+            "TanggalDiperbarui": @Html.Raw(closingStockList.TanggalDiperbarui.ToClientList(closingStockList)),
+        })
+
+        // Filters
+        .setFilterList(@Html.Raw(closingStockList.GetFilterList()))
+        .build();
+    window[form.id] = form;
+    currentSearchForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<input type="hidden" name="cmd" value="search">
+@if (Security.CanSearch) {
+if (!closingStockList.IsExport() && Empty(closingStockList.CurrentAction) && closingStockList.HasSearchFields()) { @* Show search form (begin) *@
+<div class="ew-extended-search container-fluid ps-2">
+<div class="row mb-0@(closingStockList.SearchFieldsPerRow > 0 ? " row-cols-sm-" + closingStockList.SearchFieldsPerRow : "")">
+@{
+    // Render search row
+    closingStockList.RowType = RowType.Search;
+    closingStockList.ResetAttributes();
+    await closingStockList.RenderRow();
+}
+@if (closingStockList.NomorClosingStock.Visible) { // closingStockList.NomorClosingStock.Visible (begin)
+    if (!closingStockList.NomorClosingStock.UseFilter) {
+        closingStockList.SearchColumnCount++;
+    }
+    <div id="xs_NomorClosingStock" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(closingStockList.NomorClosingStock.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_NomorClosingStock"
+            name="x_NomorClosingStock[]"
+            class="form-control ew-select@(closingStockList.NomorClosingStock.IsInvalidClass)"
+            data-select2-id="fClosingStocksrch_x_NomorClosingStock"
+            data-table="ClosingStock"
+            data-field="x_NomorClosingStock"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(closingStockList.NomorClosingStock.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(closingStockList.NomorClosingStock.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(closingStockList.NomorClosingStock.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(closingStockList.NomorClosingStock.EditAttributes)>
+            @(closingStockList.NomorClosingStock.SelectOptionListHtml("x_NomorClosingStock", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(closingStockList.NomorClosingStock.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fClosingStocksrch", function() {
+            var options = {
+                name: "x_NomorClosingStock",
+                selectId: "fClosingStocksrch_x_NomorClosingStock",
+                ajax: { id: "x_NomorClosingStock", form: "fClosingStocksrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.ClosingStock.fields.NomorClosingStock.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* closingStockList.NomorClosingStock.Visible (end) *@
+@if (closingStockList.Proses2.Visible) { // closingStockList.Proses2.Visible (begin)
+    if (!closingStockList.Proses2.UseFilter) {
+        closingStockList.SearchColumnCount++;
+    }
+    <div id="xs_Proses2" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(closingStockList.Proses2.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_Proses2"
+            name="x_Proses2[]"
+            class="form-control ew-select@(closingStockList.Proses2.IsInvalidClass)"
+            data-select2-id="fClosingStocksrch_x_Proses2"
+            data-table="ClosingStock"
+            data-field="x_Proses2"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(closingStockList.Proses2.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(closingStockList.Proses2.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(closingStockList.Proses2.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(closingStockList.Proses2.EditAttributes)>
+            @(closingStockList.Proses2.SelectOptionListHtml("x_Proses2", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(closingStockList.Proses2.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fClosingStocksrch", function() {
+            var options = {
+                name: "x_Proses2",
+                selectId: "fClosingStocksrch_x_Proses2",
+                ajax: { id: "x_Proses2", form: "fClosingStocksrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.ClosingStock.fields.Proses2.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* closingStockList.Proses2.Visible (end) *@
+@if (closingStockList.Plant.Visible) { // closingStockList.Plant.Visible (begin)
+    if (!closingStockList.Plant.UseFilter) {
+        closingStockList.SearchColumnCount++;
+    }
+    <div id="xs_Plant" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(closingStockList.Plant.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_Plant"
+            name="x_Plant[]"
+            class="form-control ew-select@(closingStockList.Plant.IsInvalidClass)"
+            data-select2-id="fClosingStocksrch_x_Plant"
+            data-table="ClosingStock"
+            data-field="x_Plant"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(closingStockList.Plant.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(closingStockList.Plant.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(closingStockList.Plant.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(closingStockList.Plant.EditAttributes)>
+            @(closingStockList.Plant.SelectOptionListHtml("x_Plant", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(closingStockList.Plant.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fClosingStocksrch", function() {
+            var options = {
+                name: "x_Plant",
+                selectId: "fClosingStocksrch_x_Plant",
+                ajax: { id: "x_Plant", form: "fClosingStocksrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.ClosingStock.fields.Plant.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* closingStockList.Plant.Visible (end) *@
+@if (closingStockList.TipeProdukSTS.Visible) { // closingStockList.TipeProdukSTS.Visible (begin)
+    if (!closingStockList.TipeProdukSTS.UseFilter) {
+        closingStockList.SearchColumnCount++;
+    }
+    <div id="xs_TipeProdukSTS" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(closingStockList.TipeProdukSTS.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_TipeProdukSTS"
+            name="x_TipeProdukSTS[]"
+            class="form-control ew-select@(closingStockList.TipeProdukSTS.IsInvalidClass)"
+            data-select2-id="fClosingStocksrch_x_TipeProdukSTS"
+            data-table="ClosingStock"
+            data-field="x_TipeProdukSTS"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(closingStockList.TipeProdukSTS.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(closingStockList.TipeProdukSTS.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(closingStockList.TipeProdukSTS.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(closingStockList.TipeProdukSTS.EditAttributes)>
+            @(closingStockList.TipeProdukSTS.SelectOptionListHtml("x_TipeProdukSTS", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(closingStockList.TipeProdukSTS.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fClosingStocksrch", function() {
+            var options = {
+                name: "x_TipeProdukSTS",
+                selectId: "fClosingStocksrch_x_TipeProdukSTS",
+                ajax: { id: "x_TipeProdukSTS", form: "fClosingStocksrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.ClosingStock.fields.TipeProdukSTS.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* closingStockList.TipeProdukSTS.Visible (end) *@
+@if (closingStockList.IdTangki.Visible) { // closingStockList.IdTangki.Visible (begin)
+    if (!closingStockList.IdTangki.UseFilter) {
+        closingStockList.SearchColumnCount++;
+    }
+    <div id="xs_IdTangki" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(closingStockList.IdTangki.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_IdTangki"
+            name="x_IdTangki[]"
+            class="form-control ew-select@(closingStockList.IdTangki.IsInvalidClass)"
+            data-select2-id="fClosingStocksrch_x_IdTangki"
+            data-table="ClosingStock"
+            data-field="x_IdTangki"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(closingStockList.IdTangki.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(closingStockList.IdTangki.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(closingStockList.IdTangki.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(closingStockList.IdTangki.EditAttributes)>
+            @(closingStockList.IdTangki.SelectOptionListHtml("x_IdTangki", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(closingStockList.IdTangki.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fClosingStocksrch", function() {
+            var options = {
+                name: "x_IdTangki",
+                selectId: "fClosingStocksrch_x_IdTangki",
+                ajax: { id: "x_IdTangki", form: "fClosingStocksrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.ClosingStock.fields.IdTangki.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* closingStockList.IdTangki.Visible (end) *@
+@if (closingStockList.StatusProses.Visible) { // closingStockList.StatusProses.Visible (begin)
+    if (!closingStockList.StatusProses.UseFilter) {
+        closingStockList.SearchColumnCount++;
+    }
+    <div id="xs_StatusProses" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(closingStockList.StatusProses.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_StatusProses"
+            name="x_StatusProses[]"
+            class="form-control ew-select@(closingStockList.StatusProses.IsInvalidClass)"
+            data-select2-id="fClosingStocksrch_x_StatusProses"
+            data-table="ClosingStock"
+            data-field="x_StatusProses"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(closingStockList.StatusProses.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(closingStockList.StatusProses.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(closingStockList.StatusProses.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(closingStockList.StatusProses.EditAttributes)>
+            @(closingStockList.StatusProses.SelectOptionListHtml("x_StatusProses", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(closingStockList.StatusProses.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fClosingStocksrch", function() {
+            var options = {
+                name: "x_StatusProses",
+                selectId: "fClosingStocksrch_x_StatusProses",
+                ajax: { id: "x_StatusProses", form: "fClosingStocksrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.ClosingStock.fields.StatusProses.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* closingStockList.StatusProses.Visible (end) *@
+@if (closingStockList.PersentaseProgress.Visible) { // closingStockList.PersentaseProgress.Visible (begin)
+    if (!closingStockList.PersentaseProgress.UseFilter) {
+        closingStockList.SearchColumnCount++;
+    }
+    <div id="xs_PersentaseProgress" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(closingStockList.PersentaseProgress.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_PersentaseProgress"
+            name="x_PersentaseProgress[]"
+            class="form-control ew-select@(closingStockList.PersentaseProgress.IsInvalidClass)"
+            data-select2-id="fClosingStocksrch_x_PersentaseProgress"
+            data-table="ClosingStock"
+            data-field="x_PersentaseProgress"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(closingStockList.PersentaseProgress.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(closingStockList.PersentaseProgress.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(closingStockList.PersentaseProgress.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(closingStockList.PersentaseProgress.EditAttributes)>
+            @(closingStockList.PersentaseProgress.SelectOptionListHtml("x_PersentaseProgress", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(closingStockList.PersentaseProgress.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fClosingStocksrch", function() {
+            var options = {
+                name: "x_PersentaseProgress",
+                selectId: "fClosingStocksrch_x_PersentaseProgress",
+                ajax: { id: "x_PersentaseProgress", form: "fClosingStocksrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.ClosingStock.fields.PersentaseProgress.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* closingStockList.PersentaseProgress.Visible (end) *@
+@if (closingStockList.Catatan.Visible) { // closingStockList.Catatan.Visible (begin)
+    if (!closingStockList.Catatan.UseFilter) {
+        closingStockList.SearchColumnCount++;
+    }
+    <div id="xs_Catatan" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(closingStockList.Catatan.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_Catatan"
+            name="x_Catatan[]"
+            class="form-control ew-select@(closingStockList.Catatan.IsInvalidClass)"
+            data-select2-id="fClosingStocksrch_x_Catatan"
+            data-table="ClosingStock"
+            data-field="x_Catatan"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(closingStockList.Catatan.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(closingStockList.Catatan.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(closingStockList.Catatan.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(closingStockList.Catatan.EditAttributes)>
+            @(closingStockList.Catatan.SelectOptionListHtml("x_Catatan", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(closingStockList.Catatan.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fClosingStocksrch", function() {
+            var options = {
+                name: "x_Catatan",
+                selectId: "fClosingStocksrch_x_Catatan",
+                ajax: { id: "x_Catatan", form: "fClosingStocksrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.ClosingStock.fields.Catatan.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* closingStockList.Catatan.Visible (end) *@
+@if (closingStockList.DibuatOleh.Visible) { // closingStockList.DibuatOleh.Visible (begin)
+    if (!closingStockList.DibuatOleh.UseFilter) {
+        closingStockList.SearchColumnCount++;
+    }
+    <div id="xs_DibuatOleh" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(closingStockList.DibuatOleh.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_DibuatOleh"
+            name="x_DibuatOleh[]"
+            class="form-control ew-select@(closingStockList.DibuatOleh.IsInvalidClass)"
+            data-select2-id="fClosingStocksrch_x_DibuatOleh"
+            data-table="ClosingStock"
+            data-field="x_DibuatOleh"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(closingStockList.DibuatOleh.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(closingStockList.DibuatOleh.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(closingStockList.DibuatOleh.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(closingStockList.DibuatOleh.EditAttributes)>
+            @(closingStockList.DibuatOleh.SelectOptionListHtml("x_DibuatOleh", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(closingStockList.DibuatOleh.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fClosingStocksrch", function() {
+            var options = {
+                name: "x_DibuatOleh",
+                selectId: "fClosingStocksrch_x_DibuatOleh",
+                ajax: { id: "x_DibuatOleh", form: "fClosingStocksrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.ClosingStock.fields.DibuatOleh.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* closingStockList.DibuatOleh.Visible (end) *@
+@if (closingStockList.TanggalDibuat.Visible) { // closingStockList.TanggalDibuat.Visible (begin)
+    if (!closingStockList.TanggalDibuat.UseFilter) {
+        closingStockList.SearchColumnCount++;
+    }
+    <div id="xs_TanggalDibuat" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(closingStockList.TanggalDibuat.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_TanggalDibuat"
+            name="x_TanggalDibuat[]"
+            class="form-control ew-select@(closingStockList.TanggalDibuat.IsInvalidClass)"
+            data-select2-id="fClosingStocksrch_x_TanggalDibuat"
+            data-table="ClosingStock"
+            data-field="x_TanggalDibuat"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(closingStockList.TanggalDibuat.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(closingStockList.TanggalDibuat.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(closingStockList.TanggalDibuat.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(closingStockList.TanggalDibuat.EditAttributes)>
+            @(closingStockList.TanggalDibuat.SelectOptionListHtml("x_TanggalDibuat", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(closingStockList.TanggalDibuat.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fClosingStocksrch", function() {
+            var options = {
+                name: "x_TanggalDibuat",
+                selectId: "fClosingStocksrch_x_TanggalDibuat",
+                ajax: { id: "x_TanggalDibuat", form: "fClosingStocksrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.ClosingStock.fields.TanggalDibuat.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* closingStockList.TanggalDibuat.Visible (end) *@
+@if (closingStockList.DiperbaruiOleh.Visible) { // closingStockList.DiperbaruiOleh.Visible (begin)
+    if (!closingStockList.DiperbaruiOleh.UseFilter) {
+        closingStockList.SearchColumnCount++;
+    }
+    <div id="xs_DiperbaruiOleh" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(closingStockList.DiperbaruiOleh.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_DiperbaruiOleh"
+            name="x_DiperbaruiOleh[]"
+            class="form-control ew-select@(closingStockList.DiperbaruiOleh.IsInvalidClass)"
+            data-select2-id="fClosingStocksrch_x_DiperbaruiOleh"
+            data-table="ClosingStock"
+            data-field="x_DiperbaruiOleh"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(closingStockList.DiperbaruiOleh.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(closingStockList.DiperbaruiOleh.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(closingStockList.DiperbaruiOleh.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(closingStockList.DiperbaruiOleh.EditAttributes)>
+            @(closingStockList.DiperbaruiOleh.SelectOptionListHtml("x_DiperbaruiOleh", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(closingStockList.DiperbaruiOleh.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fClosingStocksrch", function() {
+            var options = {
+                name: "x_DiperbaruiOleh",
+                selectId: "fClosingStocksrch_x_DiperbaruiOleh",
+                ajax: { id: "x_DiperbaruiOleh", form: "fClosingStocksrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.ClosingStock.fields.DiperbaruiOleh.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* closingStockList.DiperbaruiOleh.Visible (end) *@
+@if (closingStockList.TanggalDiperbarui.Visible) { // closingStockList.TanggalDiperbarui.Visible (begin)
+    if (!closingStockList.TanggalDiperbarui.UseFilter) {
+        closingStockList.SearchColumnCount++;
+    }
+    <div id="xs_TanggalDiperbarui" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(closingStockList.TanggalDiperbarui.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_TanggalDiperbarui"
+            name="x_TanggalDiperbarui[]"
+            class="form-control ew-select@(closingStockList.TanggalDiperbarui.IsInvalidClass)"
+            data-select2-id="fClosingStocksrch_x_TanggalDiperbarui"
+            data-table="ClosingStock"
+            data-field="x_TanggalDiperbarui"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(closingStockList.TanggalDiperbarui.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(closingStockList.TanggalDiperbarui.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(closingStockList.TanggalDiperbarui.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(closingStockList.TanggalDiperbarui.EditAttributes)>
+            @(closingStockList.TanggalDiperbarui.SelectOptionListHtml("x_TanggalDiperbarui", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(closingStockList.TanggalDiperbarui.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fClosingStocksrch", function() {
+            var options = {
+                name: "x_TanggalDiperbarui",
+                selectId: "fClosingStocksrch_x_TanggalDiperbarui",
+                ajax: { id: "x_TanggalDiperbarui", form: "fClosingStocksrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.ClosingStock.fields.TanggalDiperbarui.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* closingStockList.TanggalDiperbarui.Visible (end) *@
+</div><!-- /.row -->
+<div class="row mb-0">
+    <div class="col-sm-auto px-0 pe-sm-2">
+        <div class="ew-basic-search input-group">
+            <input type="search" name="@(Config.TableBasicSearch)" id="@(Config.TableBasicSearch)" class="form-control ew-basic-search-keyword" value="@Html.Raw(HtmlEncode(closingStockList.BasicSearch.SessionKeyword))" placeholder="@(HtmlEncode(Language.Phrase("Search")))" aria-label="@(HtmlEncode(Language.Phrase("Search")))">
+            <input type="hidden" name="@(Config.TableBasicSearchType)" id="@(Config.TableBasicSearchType)" class="ew-basic-search-type" value="@(HtmlEncode(closingStockList.BasicSearch.SessionType))">
+            <button type="button" data-bs-toggle="dropdown" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split" aria-haspopup="true" aria-expanded="false">
+                <span id="searchtype">@Html.Raw(closingStockList.BasicSearch.TypeNameShort)</span>
+            </button>
+            <div class="dropdown-menu dropdown-menu-end">
+                <button type="button" class="dropdown-item@(closingStockList.BasicSearch.SessionType == "" ? " active" : "")" form="fClosingStocksrch" data-ew-action="search-type">@Html.Raw(Language.Phrase("QuickSearchAuto"))</button>
+                <button type="button" class="dropdown-item@(closingStockList.BasicSearch.SessionType == "=" ? " active" : "")" form="fClosingStocksrch" data-ew-action="search-type" data-search-type="=">@Html.Raw(Language.Phrase("QuickSearchExact"))</button>
+                <button type="button" class="dropdown-item@(closingStockList.BasicSearch.SessionType == "AND" ? " active" : "")" form="fClosingStocksrch" data-ew-action="search-type" data-search-type="AND">@Html.Raw(Language.Phrase("QuickSearchAll"))</button>
+                <button type="button" class="dropdown-item@(closingStockList.BasicSearch.SessionType == "OR" ? " active" : "")" form="fClosingStocksrch" data-ew-action="search-type" data-search-type="OR">@Html.Raw(Language.Phrase("QuickSearchAny"))</button>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-auto mb-3">
+        <button class="btn btn-primary" name="btn-submit" id="btn-submit" type="submit">@Html.Raw(Language.Phrase("SearchBtn"))</button>
+    </div>
+</div>
+</div><!-- /.ew-extended-search -->
+} @* Show search form (end) *@
+}
+</div><!-- /.ew-search-panel -->
+</form>
+}
+@closingStockList.ShowPageHeader()
+@closingStockList.ShowMessages()
+<main class="list @(closingStockList.TotalRecords == 0 && !closingStockList.IsAdd ? " ew-no-record" : "")">
+<div id="ew-header-options">
+    @closingStockList.HeaderOptions.RenderBody()
+</div>
+<div id="ew-list">
+@if (closingStockList.TotalRecords > 0 || !Empty(closingStockList.CurrentAction)) {
+<div class="card ew-card ew-grid@(closingStockList.IsAddOrEdit ? " ew-grid-add-edit" : "") @(closingStockList.TableGridClass)">
+<form name="@(closingStockList.FormName)" id="@(closingStockList.FormName)" class="ew-form ew-list-form" action="@AppPath(closingStockList.PageName)" method="post" novalidate autocomplete="off">
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+@if (closingStockList.IsModal) {
+<input type="hidden" name="modal" value="1">
+}
+<div id="gmp_ClosingStock" class="card-body ew-grid-middle-panel @(closingStockList.TableContainerClass)" style="@(closingStockList.TableContainerStyle)">
+@if (closingStockList.TotalRecords > 0 || closingStockList.IsGridEdit || closingStockList.IsMultiEdit) {
+<table id="tbl_ClosingStocklist" class="@(closingStockList.TableClass)"><!-- .ew-table -->
+<thead>
+    <tr class="ew-table-header">
+@{
+    // Header row
+    closingStockList.RowType = RowType.Header;
+
+    // Render list options
+    await closingStockList.RenderListOptions();
+}
+@* Render list options (header, left) *@
+@closingStockList.ListOptions.RenderHeader("left")
+@if (closingStockList.Proses2.Visible) { // closingStockList.Proses2.Visible (begin)
+        <th data-name="Proses2" class="@(closingStockList.Proses2.HeaderCellClass)"><div id="elh_ClosingStock_Proses2" class="ClosingStock_Proses2">@Html.Raw(closingStockList.RenderFieldHeader(closingStockList.Proses2))</div></th>
+} @* closingStockList.Proses2.Visible (end) *@
+@if (closingStockList.Plant.Visible) { // closingStockList.Plant.Visible (begin)
+        <th data-name="Plant" class="@(closingStockList.Plant.HeaderCellClass)"><div id="elh_ClosingStock_Plant" class="ClosingStock_Plant">@Html.Raw(closingStockList.RenderFieldHeader(closingStockList.Plant))</div></th>
+} @* closingStockList.Plant.Visible (end) *@
+@if (closingStockList.TipeProdukSTS.Visible) { // closingStockList.TipeProdukSTS.Visible (begin)
+        <th data-name="TipeProdukSTS" class="@(closingStockList.TipeProdukSTS.HeaderCellClass)"><div id="elh_ClosingStock_TipeProdukSTS" class="ClosingStock_TipeProdukSTS">@Html.Raw(closingStockList.RenderFieldHeader(closingStockList.TipeProdukSTS))</div></th>
+} @* closingStockList.TipeProdukSTS.Visible (end) *@
+@if (closingStockList.IdTangki.Visible) { // closingStockList.IdTangki.Visible (begin)
+        <th data-name="IdTangki" class="@(closingStockList.IdTangki.HeaderCellClass)"><div id="elh_ClosingStock_IdTangki" class="ClosingStock_IdTangki">@Html.Raw(closingStockList.RenderFieldHeader(closingStockList.IdTangki))</div></th>
+} @* closingStockList.IdTangki.Visible (end) *@
+@if (closingStockList.TanggalClosingStock.Visible) { // closingStockList.TanggalClosingStock.Visible (begin)
+        <th data-name="TanggalClosingStock" class="@(closingStockList.TanggalClosingStock.HeaderCellClass)"><div id="elh_ClosingStock_TanggalClosingStock" class="ClosingStock_TanggalClosingStock">@Html.Raw(closingStockList.RenderFieldHeader(closingStockList.TanggalClosingStock))</div></th>
+} @* closingStockList.TanggalClosingStock.Visible (end) *@
+@if (closingStockList.Produk.Visible) { // closingStockList.Produk.Visible (begin)
+        <th data-name="Produk" class="@(closingStockList.Produk.HeaderCellClass)"><div id="elh_ClosingStock_Produk" class="ClosingStock_Produk">@Html.Raw(closingStockList.RenderFieldHeader(closingStockList.Produk))</div></th>
+} @* closingStockList.Produk.Visible (end) *@
+@if (closingStockList.StatusProses.Visible) { // closingStockList.StatusProses.Visible (begin)
+        <th data-name="StatusProses" class="@(closingStockList.StatusProses.HeaderCellClass)"><div id="elh_ClosingStock_StatusProses" class="ClosingStock_StatusProses">@Html.Raw(closingStockList.RenderFieldHeader(closingStockList.StatusProses))</div></th>
+} @* closingStockList.StatusProses.Visible (end) *@
+@if (closingStockList.PersentaseProgress.Visible) { // closingStockList.PersentaseProgress.Visible (begin)
+        <th data-name="PersentaseProgress" class="@(closingStockList.PersentaseProgress.HeaderCellClass)"><div id="elh_ClosingStock_PersentaseProgress" class="ClosingStock_PersentaseProgress">@Html.Raw(closingStockList.RenderFieldHeader(closingStockList.PersentaseProgress))</div></th>
+} @* closingStockList.PersentaseProgress.Visible (end) *@
+@if (closingStockList.DibuatOleh.Visible) { // closingStockList.DibuatOleh.Visible (begin)
+        <th data-name="DibuatOleh" class="@(closingStockList.DibuatOleh.HeaderCellClass)"><div id="elh_ClosingStock_DibuatOleh" class="ClosingStock_DibuatOleh">@Html.Raw(closingStockList.RenderFieldHeader(closingStockList.DibuatOleh))</div></th>
+} @* closingStockList.DibuatOleh.Visible (end) *@
+@if (closingStockList.TanggalDibuat.Visible) { // closingStockList.TanggalDibuat.Visible (begin)
+        <th data-name="TanggalDibuat" class="@(closingStockList.TanggalDibuat.HeaderCellClass)"><div id="elh_ClosingStock_TanggalDibuat" class="ClosingStock_TanggalDibuat">@Html.Raw(closingStockList.RenderFieldHeader(closingStockList.TanggalDibuat))</div></th>
+} @* closingStockList.TanggalDibuat.Visible (end) *@
+@if (closingStockList.DiperbaruiOleh.Visible) { // closingStockList.DiperbaruiOleh.Visible (begin)
+        <th data-name="DiperbaruiOleh" class="@(closingStockList.DiperbaruiOleh.HeaderCellClass)"><div id="elh_ClosingStock_DiperbaruiOleh" class="ClosingStock_DiperbaruiOleh">@Html.Raw(closingStockList.RenderFieldHeader(closingStockList.DiperbaruiOleh))</div></th>
+} @* closingStockList.DiperbaruiOleh.Visible (end) *@
+@if (closingStockList.TanggalDiperbarui.Visible) { // closingStockList.TanggalDiperbarui.Visible (begin)
+        <th data-name="TanggalDiperbarui" class="@(closingStockList.TanggalDiperbarui.HeaderCellClass)"><div id="elh_ClosingStock_TanggalDiperbarui" class="ClosingStock_TanggalDiperbarui">@Html.Raw(closingStockList.RenderFieldHeader(closingStockList.TanggalDiperbarui))</div></th>
+} @* closingStockList.TanggalDiperbarui.Visible (end) *@
+@* Render list options (header, right) *@
+@closingStockList.ListOptions.RenderHeader("right")
+    </tr>
+</thead>
+<tbody data-page="@(closingStockList.PageNumber)">
+@{
+    await closingStockList.SetupGrid();
+    bool eof = closingStockList.Recordset == null; // DN
+}
+@while (closingStockList.RecordCount < closingStockList.StopRecord || SameString(closingStockList.RowIndex, "$rowindex$")) { // Begin While
+    if (!eof && !SameString(closingStockList.RowIndex, "$rowindex$") &&
+        (!closingStockList.IsGridAdd || closingStockList.CurrentMode == "copy") &&
+        (!((closingStockList.IsCopy || closingStockList.IsAdd) && closingStockList.RowIndex is int rowIndex && rowIndex == 0))) // DN
+        eof = !await closingStockList.Recordset.ReadAsync();
+    closingStockList.RecordCount++;
+    if (closingStockList.RecordCount >= closingStockList.StartRecord) {
+        await closingStockList.SetupRow();
+    <tr @Html.Raw(closingStockList.RowAttributes)>
+    @* Render list options (body, left) *@
+    @closingStockList.ListOptions.RenderBody("left", closingStockList.RowCount)
+    @if (closingStockList.Proses2.Visible) { // closingStockList.Proses2.Visible (begin)
+        <td data-name="Proses2" @Html.Raw(closingStockList.Proses2.CellAttributes)>
+<span id="el@(closingStockList.RowIndex == "$rowindex$" ? "$rowindex$" : closingStockList.RowCount)_ClosingStock_Proses2" class="el_ClosingStock_Proses2">
+<span @Html.Raw(closingStockList.Proses2.ViewAttributes)>
+@Html.Raw(closingStockList.Proses2.GetViewValue())</span>
+</span>
+</td>
+    } @* closingStockList.Proses2.Visible (end) *@
+    @if (closingStockList.Plant.Visible) { // closingStockList.Plant.Visible (begin)
+        <td data-name="Plant" @Html.Raw(closingStockList.Plant.CellAttributes)>
+<span id="el@(closingStockList.RowIndex == "$rowindex$" ? "$rowindex$" : closingStockList.RowCount)_ClosingStock_Plant" class="el_ClosingStock_Plant">
+<span @Html.Raw(closingStockList.Plant.ViewAttributes)>
+@Html.Raw(closingStockList.Plant.GetViewValue())</span>
+</span>
+</td>
+    } @* closingStockList.Plant.Visible (end) *@
+    @if (closingStockList.TipeProdukSTS.Visible) { // closingStockList.TipeProdukSTS.Visible (begin)
+        <td data-name="TipeProdukSTS" @Html.Raw(closingStockList.TipeProdukSTS.CellAttributes)>
+<span id="el@(closingStockList.RowIndex == "$rowindex$" ? "$rowindex$" : closingStockList.RowCount)_ClosingStock_TipeProdukSTS" class="el_ClosingStock_TipeProdukSTS">
+<span @Html.Raw(closingStockList.TipeProdukSTS.ViewAttributes)>
+@Html.Raw(closingStockList.TipeProdukSTS.GetViewValue())</span>
+</span>
+</td>
+    } @* closingStockList.TipeProdukSTS.Visible (end) *@
+    @if (closingStockList.IdTangki.Visible) { // closingStockList.IdTangki.Visible (begin)
+        <td data-name="IdTangki" @Html.Raw(closingStockList.IdTangki.CellAttributes)>
+<span id="el@(closingStockList.RowIndex == "$rowindex$" ? "$rowindex$" : closingStockList.RowCount)_ClosingStock_IdTangki" class="el_ClosingStock_IdTangki">
+<span @Html.Raw(closingStockList.IdTangki.ViewAttributes)>
+@Html.Raw(closingStockList.IdTangki.GetViewValue())</span>
+</span>
+</td>
+    } @* closingStockList.IdTangki.Visible (end) *@
+    @if (closingStockList.TanggalClosingStock.Visible) { // closingStockList.TanggalClosingStock.Visible (begin)
+        <td data-name="TanggalClosingStock" @Html.Raw(closingStockList.TanggalClosingStock.CellAttributes)>
+<span id="el@(closingStockList.RowIndex == "$rowindex$" ? "$rowindex$" : closingStockList.RowCount)_ClosingStock_TanggalClosingStock" class="el_ClosingStock_TanggalClosingStock">
+<span @Html.Raw(closingStockList.TanggalClosingStock.ViewAttributes)>
+@Html.Raw(closingStockList.TanggalClosingStock.GetViewValue())</span>
+</span>
+</td>
+    } @* closingStockList.TanggalClosingStock.Visible (end) *@
+    @if (closingStockList.Produk.Visible) { // closingStockList.Produk.Visible (begin)
+        <td data-name="Produk" @Html.Raw(closingStockList.Produk.CellAttributes)>
+<span id="el@(closingStockList.RowIndex == "$rowindex$" ? "$rowindex$" : closingStockList.RowCount)_ClosingStock_Produk" class="el_ClosingStock_Produk">
+<span @Html.Raw(closingStockList.Produk.ViewAttributes)>
+@Html.Raw(closingStockList.Produk.GetViewValue())</span>
+</span>
+</td>
+    } @* closingStockList.Produk.Visible (end) *@
+    @if (closingStockList.StatusProses.Visible) { // closingStockList.StatusProses.Visible (begin)
+        <td data-name="StatusProses" @Html.Raw(closingStockList.StatusProses.CellAttributes)>
+<span id="el@(closingStockList.RowIndex == "$rowindex$" ? "$rowindex$" : closingStockList.RowCount)_ClosingStock_StatusProses" class="el_ClosingStock_StatusProses">
+<span @Html.Raw(closingStockList.StatusProses.ViewAttributes)>
+@Html.Raw(closingStockList.StatusProses.GetViewValue())</span>
+</span>
+</td>
+    } @* closingStockList.StatusProses.Visible (end) *@
+    @if (closingStockList.PersentaseProgress.Visible) { // closingStockList.PersentaseProgress.Visible (begin)
+        <td data-name="PersentaseProgress" @Html.Raw(closingStockList.PersentaseProgress.CellAttributes)>
+<span id="el@(closingStockList.RowIndex == "$rowindex$" ? "$rowindex$" : closingStockList.RowCount)_ClosingStock_PersentaseProgress" class="el_ClosingStock_PersentaseProgress">
+<span @Html.Raw(closingStockList.PersentaseProgress.ViewAttributes)>
+@Html.Raw(closingStockList.PersentaseProgress.GetViewValue())</span>
+</span>
+</td>
+    } @* closingStockList.PersentaseProgress.Visible (end) *@
+    @if (closingStockList.DibuatOleh.Visible) { // closingStockList.DibuatOleh.Visible (begin)
+        <td data-name="DibuatOleh" @Html.Raw(closingStockList.DibuatOleh.CellAttributes)>
+<span id="el@(closingStockList.RowIndex == "$rowindex$" ? "$rowindex$" : closingStockList.RowCount)_ClosingStock_DibuatOleh" class="el_ClosingStock_DibuatOleh">
+<span @Html.Raw(closingStockList.DibuatOleh.ViewAttributes)>
+@Html.Raw(closingStockList.DibuatOleh.GetViewValue())</span>
+</span>
+</td>
+    } @* closingStockList.DibuatOleh.Visible (end) *@
+    @if (closingStockList.TanggalDibuat.Visible) { // closingStockList.TanggalDibuat.Visible (begin)
+        <td data-name="TanggalDibuat" @Html.Raw(closingStockList.TanggalDibuat.CellAttributes)>
+<span id="el@(closingStockList.RowIndex == "$rowindex$" ? "$rowindex$" : closingStockList.RowCount)_ClosingStock_TanggalDibuat" class="el_ClosingStock_TanggalDibuat">
+<span @Html.Raw(closingStockList.TanggalDibuat.ViewAttributes)>
+@Html.Raw(closingStockList.TanggalDibuat.GetViewValue())</span>
+</span>
+</td>
+    } @* closingStockList.TanggalDibuat.Visible (end) *@
+    @if (closingStockList.DiperbaruiOleh.Visible) { // closingStockList.DiperbaruiOleh.Visible (begin)
+        <td data-name="DiperbaruiOleh" @Html.Raw(closingStockList.DiperbaruiOleh.CellAttributes)>
+<span id="el@(closingStockList.RowIndex == "$rowindex$" ? "$rowindex$" : closingStockList.RowCount)_ClosingStock_DiperbaruiOleh" class="el_ClosingStock_DiperbaruiOleh">
+<span @Html.Raw(closingStockList.DiperbaruiOleh.ViewAttributes)>
+@Html.Raw(closingStockList.DiperbaruiOleh.GetViewValue())</span>
+</span>
+</td>
+    } @* closingStockList.DiperbaruiOleh.Visible (end) *@
+    @if (closingStockList.TanggalDiperbarui.Visible) { // closingStockList.TanggalDiperbarui.Visible (begin)
+        <td data-name="TanggalDiperbarui" @Html.Raw(closingStockList.TanggalDiperbarui.CellAttributes)>
+<span id="el@(closingStockList.RowIndex == "$rowindex$" ? "$rowindex$" : closingStockList.RowCount)_ClosingStock_TanggalDiperbarui" class="el_ClosingStock_TanggalDiperbarui">
+<span @Html.Raw(closingStockList.TanggalDiperbarui.ViewAttributes)>
+@Html.Raw(closingStockList.TanggalDiperbarui.GetViewValue())</span>
+</span>
+</td>
+    } @* closingStockList.TanggalDiperbarui.Visible (end) *@
+    @* Render list options (body, right) *@
+    @closingStockList.ListOptions.RenderBody("right", closingStockList.RowCount)
+    </tr>
+    } @* End if *@
+
+    // Reset for template row
+    if (SameString(closingStockList.RowIndex, "$rowindex$"))
+        closingStockList.RowIndex = 0;
+
+    // Reset inline add/copy row
+    if ((closingStockList.IsCopy || closingStockList.IsAdd) && closingStockList.RowIndex is int rowIndex2 && rowIndex2 == 0)
+        closingStockList.RowIndex = 1;
+} @* End While *@
+</tbody>
+</table><!-- /.ew-table -->
+} @* End If TotalRecords > 0 *@
+</div><!-- /.ew-grid-middle-panel -->
+@if (Empty(closingStockList.CurrentAction) && !closingStockList.UseAjaxActions) {
+<input type="hidden" name="action" id="action" value="">
+}
+</form><!-- /.ew-list-form -->
+@{ closingStockList.CloseRecordset(); }
+@if (!closingStockList.IsExport()) {
+<div class="card-footer ew-grid-lower-panel">
+@if (!closingStockList.IsGridAdd && !(closingStockList.IsGridEdit && closingStockList.ModalGridEdit) && !closingStockList.IsMultiEdit) {
+@Html.Raw(closingStockList.Pager.Render())
+}
+<div class="ew-list-other-options">
+@closingStockList.OtherOptions.RenderBody("bottom")
+</div>
+</div>
+}
+</div><!-- /.ew-grid -->
+} else { // Show other options
+<div class="ew-list-other-options">
+@closingStockList.OtherOptions.ForEach(opt => opt.ButtonClass = "").RenderBody()
+</div>
+}
+</div>
+<div id="ew-footer-options">
+    @closingStockList.FooterOptions.RenderBody()
+</div>
+</main>
+@closingStockList.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+@if (!closingStockList.IsExport()) {
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("ClosingStock");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Startup script
+    var parent_url = ew.PATH_BASE;
+    var steps = [
+        { number: 1, label: "Closing Stock", url: '', icon: "fa-solid fa-inbox" },
+    ];
+    var currentStep = 1;
+    $("<style>")
+        .prop("type", "text/css")
+        .html(`
+            .stepper {
+                display: flex;
+                counter-reset: step;
+            }
+            .step {
+                width: 150px;
+                text-align: center;
+                position: relative;
+            }
+            .step:not(:last-child)::after {
+                content: '';
+                position: absolute;
+                top: 20px;
+                right: -50%;
+                width: 100%;
+                height: 4px;
+                background-color: #ccc;
+                z-index: 0;
+            }
+            .step.completed:not(:last-child)::after {
+                background-color: #3c6dbd;
+            }
+            .step-icon {
+                width: 36px;
+                height: 36px;
+                line-height: 36px;
+                border-radius: 50%;
+                background: #ccc;
+                display: inline-block;
+                z-index: 1;
+                position: relative;
+                color: white;
+                font-weight: bold;
+            }
+            .step.active .step-icon {
+                background: #3c6dbd;
+            }
+            .step-label {
+                margin-top: 8px;
+                font-size: 14px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                gap: 6px;
+                color: #333;
+            }
+            .step-label {
+                color: #3c6dbd !important;
+                text-decoration: none;
+                margin: 0;
+                padding: 0;
+            }
+            .step-label-not-active {
+                color: #CCCCCC !important;
+            }
+        `)
+        .appendTo("head");
+    var $stepperWrapper = $('<div id="bread-crumb-nav" class="d-flex border-bottom border-2 pb-2"><div class="stepper"></div></div>');
+    var $stepper = $stepperWrapper.find(".stepper");
+    steps.forEach(function (step, i) {
+        var isActive = step.number === currentStep;
+        var isCompleted = step.number < currentStep;
+        var stepClass = isActive ? "active" : isCompleted ? "completed" : "";
+        var icon, labelContent, html;
+        if (isActive) {
+            icon = `<div class="step-icon bg-success">${step.number}</div>`;
+            labelContent = `<div class="step-label"><p class="text-success mb-1"><i class="fa-solid ${step.icon} me-1 text-success"></i> ${step.label}</p></div>`;
+            html = `<div class="step ${stepClass} text-success">${icon}${labelContent}</div>`;
+        } else if (isCompleted) {
+            icon = `<div class="step-icon" style="background: #3c6dbd;">${step.number}</div>`;
+            labelContent = `<div><a href="${step.url}" class="step-label"><i class="fa-solid ${step.icon} me-1"></i>${step.label}</a></div>`;
+            html = `<div class="step ${stepClass}">${icon}${labelContent}</div>`;
+        } else {
+            icon = `<div class="step-icon">${step.number}</div>`;
+            labelContent = `<div class="step-label-not-active"><p style="margin: 0;"><i class="fa-solid ${step.icon} me-1"></i>${step.label}</p></div>`;
+            html = `<div class="step ${stepClass} text-secondary">${icon}${labelContent}</div>`;
+        }
+        $stepper.append(html);
+    });
+    if ($('#bread-crumb-nav').length == 0) {
+        $(".content-header .container-fluid .row").append($stepperWrapper);
+    }
+    $(document).ready(function() {
+        const UserLevel = "@CurrentUserLevel()";
+        const idRole = '@CurrentUserInfo("Rule")?.ToString()';
+        var parrentButton = $('button.btn-primary[name="btn-submit"]');
+        var addButton = $(`
+            <button class="btn btn-success ms-2" id="btn-add-ClosingStock">
+                <i class="fas fa-plus"></i> Add New
+            </button>
+        `);
+        $(`a.btn.btn-default.ew-add-edit.ew-add[href="${parent_url}ClosingStockAdd"]`).remove();
+        parrentButton.parent().append(addButton);
+        if (UserLevel == "2" || UserLevel == "-1" || UserLevel == "4" || UserLevel == "5" || UserLevel == "6") {
+            addButton.on('click', function (e) {
+                e.preventDefault();
+                window.location.href = parent_url+'ClosingStockAdd';
+            });
+        } else if (idRole == '1' || idRole == '12' || idRole == '13') {
+            addButton.on('click', function (e) {
+                e.preventDefault();
+                window.location.href = parent_url+'ClosingStockAdd';
+            });
+        } else {
+            addButton.on('click', function (e) {
+                e.preventDefault();
+                ew.alert('Anda tidak memiliki akses untuk menambah data ClosingStock.');
+            });
+        }
+    }); 
+});
+</script>
+}

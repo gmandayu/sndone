@@ -1,0 +1,119 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (masterProdukView.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = masterProdukView.UseLayout ? "_Layout" : "";
+}
+@if (!masterProdukView.IsExport()) {
+<div class="btn-toolbar ew-toolbar">
+    @masterProdukView.ExportOptions.RenderBody()
+    @masterProdukView.OtherOptions.RenderBody()
+</div>
+}
+@masterProdukView.ShowPageHeader()
+@masterProdukView.ShowMessages()
+<main class="view">
+<form name="fMasterProdukview" id="fMasterProdukview" class="ew-form ew-view-form overlay-wrapper" action="@AppPath(CurrentPageName())" method="post" novalidate autocomplete="off">
+@if (!masterProdukView.IsExport()) {
+<script>
+var currentTable = @Html.Raw(ConvertToJson(masterProdukView.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { MasterProduk: currentTable } });
+var currentPageID = ew.PAGE_ID = "view";
+var currentForm;
+var fMasterProdukview;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("fMasterProdukview")
+        .setPageId("view")
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Write your client script here, no need to add script tags.
+});
+</script>
+}
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+<input type="hidden" name="modal" value="@ConvertToInt(masterProdukView.IsModal)">
+<table class="@(masterProdukView.TableClass)">
+@if (masterProdukView.NoProduk.Visible) { // masterProdukView.NoProduk.Visible (begin)
+    <tr id="r_NoProduk" @Html.Raw(masterProdukView.NoProduk.RowAttributes)>
+        <td class="@(masterProdukView.TableLeftColumnClass)"><span id="elh_MasterProduk_NoProduk">@Html.Raw(masterProdukView.NoProduk.Caption)</span></td>
+        <td data-name="NoProduk" @Html.Raw(masterProdukView.NoProduk.CellAttributes)>
+<span id="el_MasterProduk_NoProduk">
+<span @Html.Raw(masterProdukView.NoProduk.ViewAttributes)>
+@Html.Raw(masterProdukView.NoProduk.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* masterProdukView.NoProduk.Visible (end) *@
+@if (masterProdukView.NamaProduk.Visible) { // masterProdukView.NamaProduk.Visible (begin)
+    <tr id="r_NamaProduk" @Html.Raw(masterProdukView.NamaProduk.RowAttributes)>
+        <td class="@(masterProdukView.TableLeftColumnClass)"><span id="elh_MasterProduk_NamaProduk">@Html.Raw(masterProdukView.NamaProduk.Caption)</span></td>
+        <td data-name="NamaProduk" @Html.Raw(masterProdukView.NamaProduk.CellAttributes)>
+<span id="el_MasterProduk_NamaProduk">
+<span @Html.Raw(masterProdukView.NamaProduk.ViewAttributes)>
+@Html.Raw(masterProdukView.NamaProduk.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* masterProdukView.NamaProduk.Visible (end) *@
+@if (masterProdukView.TipeProduk.Visible) { // masterProdukView.TipeProduk.Visible (begin)
+    <tr id="r_TipeProduk" @Html.Raw(masterProdukView.TipeProduk.RowAttributes)>
+        <td class="@(masterProdukView.TableLeftColumnClass)"><span id="elh_MasterProduk_TipeProduk">@Html.Raw(masterProdukView.TipeProduk.Caption)</span></td>
+        <td data-name="TipeProduk" @Html.Raw(masterProdukView.TipeProduk.CellAttributes)>
+<span id="el_MasterProduk_TipeProduk">
+<span @Html.Raw(masterProdukView.TipeProduk.ViewAttributes)>
+@Html.Raw(masterProdukView.TipeProduk.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* masterProdukView.TipeProduk.Visible (end) *@
+@if (masterProdukView.DensityMin.Visible) { // masterProdukView.DensityMin.Visible (begin)
+    <tr id="r_DensityMin" @Html.Raw(masterProdukView.DensityMin.RowAttributes)>
+        <td class="@(masterProdukView.TableLeftColumnClass)"><span id="elh_MasterProduk_DensityMin">@Html.Raw(masterProdukView.DensityMin.Caption)</span></td>
+        <td data-name="DensityMin" @Html.Raw(masterProdukView.DensityMin.CellAttributes)>
+<span id="el_MasterProduk_DensityMin">
+<span @Html.Raw(masterProdukView.DensityMin.ViewAttributes)>
+@Html.Raw(masterProdukView.DensityMin.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* masterProdukView.DensityMin.Visible (end) *@
+@if (masterProdukView.DensityMax.Visible) { // masterProdukView.DensityMax.Visible (begin)
+    <tr id="r_DensityMax" @Html.Raw(masterProdukView.DensityMax.RowAttributes)>
+        <td class="@(masterProdukView.TableLeftColumnClass)"><span id="elh_MasterProduk_DensityMax">@Html.Raw(masterProdukView.DensityMax.Caption)</span></td>
+        <td data-name="DensityMax" @Html.Raw(masterProdukView.DensityMax.CellAttributes)>
+<span id="el_MasterProduk_DensityMax">
+<span @Html.Raw(masterProdukView.DensityMax.ViewAttributes)>
+@Html.Raw(masterProdukView.DensityMax.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* masterProdukView.DensityMax.Visible (end) *@
+</table>
+@{ masterProdukView.CloseRecordset(); }
+</form>
+</main>
+@masterProdukView.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+@if (!masterProdukView.IsExport()) {
+<script>
+loadjs.ready("load", function() {
+    // Write your table-specific startup script here
+    // document.write("page loaded");
+});
+</script>
+}

@@ -1,0 +1,1026 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (masterUserList.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = masterUserList.UseLayout ? "_Layout" : "";
+}
+@if (!masterUserList.IsExport()) {
+<script>
+var currentTable = @Html.Raw(ConvertToJson(masterUserList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { MasterUser: currentTable } });
+var currentPageID = ew.PAGE_ID = "list";
+var currentForm;
+var @(masterUserList.FormName);
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("@(masterUserList.FormName)")
+        .setPageId("list")
+        .setSubmitWithFetch(@(masterUserList.UseAjaxActions ? "true" : "false"))
+        .setFormKeyCountName("@(masterUserList.FormKeyCountName)")
+
+        // Dynamic selection lists
+        .setLists({
+            "_Email": @Html.Raw(masterUserList._Email.ToClientList(masterUserList)),
+            "_Username": @Html.Raw(masterUserList._Username.ToClientList(masterUserList)),
+            "NamaLengkap": @Html.Raw(masterUserList.NamaLengkap.ToClientList(masterUserList)),
+            "_UserLevel": @Html.Raw(masterUserList._UserLevel.ToClientList(masterUserList)),
+            "Rule": @Html.Raw(masterUserList.Rule.ToClientList(masterUserList)),
+            "IdPosition": @Html.Raw(masterUserList.IdPosition.ToClientList(masterUserList)),
+            "Region": @Html.Raw(masterUserList.Region.ToClientList(masterUserList)),
+            "Plant": @Html.Raw(masterUserList.Plant.ToClientList(masterUserList)),
+            "StatusAktif": @Html.Raw(masterUserList.StatusAktif.ToClientList(masterUserList)),
+            "Keterangan": @Html.Raw(masterUserList.Keterangan.ToClientList(masterUserList)),
+            "DibuatOleh": @Html.Raw(masterUserList.DibuatOleh.ToClientList(masterUserList)),
+            "TanggalDibuat": @Html.Raw(masterUserList.TanggalDibuat.ToClientList(masterUserList)),
+            "DiperbaruiOleh": @Html.Raw(masterUserList.DiperbaruiOleh.ToClientList(masterUserList)),
+            "TanggalDiperbarui": @Html.Raw(masterUserList.TanggalDiperbarui.ToClientList(masterUserList)),
+            "exception": @Html.Raw(masterUserList.exception.ToClientList(masterUserList)),
+        })
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Write your client script here, no need to add script tags.
+});
+</script>
+}
+@if (!masterUserList.IsExport()) {
+<div class="btn-toolbar ew-toolbar">
+@if (masterUserList.TotalRecords > 0 && masterUserList.ExportOptions.Visible) {
+    masterUserList.ExportOptions.Render("body");
+}
+@if (masterUserList.ImportOptions.Visible) {
+    masterUserList.ImportOptions.Render("body");
+}
+@if (masterUserList.SearchOptions.Visible) {
+    masterUserList.SearchOptions.Render("body");
+}
+@if (masterUserList.FilterOptions.Visible) {
+    masterUserList.FilterOptions.Render("body");
+}
+</div>
+}
+@if (masterUserList.ShowCurrentFilter) {
+    masterUserList.ShowFilterList();
+}
+@if (!masterUserList.IsModal) {
+<form name="fMasterUsersrch" id="fMasterUsersrch" class="ew-form ew-ext-search-form" action="@AppPath(CurrentPageName())" novalidate autocomplete="off">
+<div id="fMasterUsersrch_search_panel" class="mb-2 mb-sm-0 @(masterUserList.SearchPanelClass)"><!-- .ew-search-panel -->
+<script>
+var currentTable = @Html.Raw(ConvertToJson(masterUserList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { MasterUser: currentTable } });
+var currentForm;
+var fMasterUsersrch, currentSearchForm, currentAdvancedSearchForm;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery,
+        fields = currentTable.fields;
+
+    // Form object for search
+    let form = new ew.FormBuilder()
+        .setId("fMasterUsersrch")
+        .setPageId("list")
+@if (masterUserList.UseAjaxActions) {
+        <text>.setSubmitWithFetch(true)</text>
+}
+
+        // Add fields
+        .setFields([
+        ])
+        // Validate form
+        .setValidate(
+            async function () {
+                if (!this.validateRequired)
+                    return true; // Ignore validation
+                let fobj = this.getForm();
+
+                // Validate fields
+                if (!this.validateFields())
+                    return false;
+
+                // Call Form_CustomValidate event
+                if (!(await this.customValidate?.(fobj) ?? true)) {
+                    this.focus();
+                    return false;
+                }
+                return true;
+            }
+        )
+
+        // Form_CustomValidate
+        .setCustomValidate(
+            function(fobj) { // DO NOT CHANGE THIS LINE!
+                    // Your custom validation code here, return false if invalid.
+                    return true;
+                }
+        )
+
+        // Use JavaScript validation or not
+        .setValidateRequired(ew.CLIENT_VALIDATE)
+
+        // Dynamic selection lists
+        .setLists({
+            "_Email": @Html.Raw(masterUserList._Email.ToClientList(masterUserList)),
+            "_Username": @Html.Raw(masterUserList._Username.ToClientList(masterUserList)),
+            "NamaLengkap": @Html.Raw(masterUserList.NamaLengkap.ToClientList(masterUserList)),
+            "_UserLevel": @Html.Raw(masterUserList._UserLevel.ToClientList(masterUserList)),
+            "Rule": @Html.Raw(masterUserList.Rule.ToClientList(masterUserList)),
+            "IdPosition": @Html.Raw(masterUserList.IdPosition.ToClientList(masterUserList)),
+            "Region": @Html.Raw(masterUserList.Region.ToClientList(masterUserList)),
+            "Plant": @Html.Raw(masterUserList.Plant.ToClientList(masterUserList)),
+            "StatusAktif": @Html.Raw(masterUserList.StatusAktif.ToClientList(masterUserList)),
+            "Keterangan": @Html.Raw(masterUserList.Keterangan.ToClientList(masterUserList)),
+            "DibuatOleh": @Html.Raw(masterUserList.DibuatOleh.ToClientList(masterUserList)),
+            "TanggalDibuat": @Html.Raw(masterUserList.TanggalDibuat.ToClientList(masterUserList)),
+            "DiperbaruiOleh": @Html.Raw(masterUserList.DiperbaruiOleh.ToClientList(masterUserList)),
+            "TanggalDiperbarui": @Html.Raw(masterUserList.TanggalDiperbarui.ToClientList(masterUserList)),
+            "exception": @Html.Raw(masterUserList.exception.ToClientList(masterUserList)),
+        })
+
+        // Filters
+        .setFilterList(@Html.Raw(masterUserList.GetFilterList()))
+        .build();
+    window[form.id] = form;
+    currentSearchForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<input type="hidden" name="cmd" value="search">
+@if (Security.CanSearch) {
+if (!masterUserList.IsExport() && Empty(masterUserList.CurrentAction) && masterUserList.HasSearchFields()) { @* Show search form (begin) *@
+<div class="ew-extended-search container-fluid ps-2">
+<div class="row mb-0@(masterUserList.SearchFieldsPerRow > 0 ? " row-cols-sm-" + masterUserList.SearchFieldsPerRow : "")">
+@{
+    // Render search row
+    masterUserList.RowType = RowType.Search;
+    masterUserList.ResetAttributes();
+    await masterUserList.RenderRow();
+}
+@if (masterUserList._Email.Visible) { // masterUserList._Email.Visible (begin)
+    if (!masterUserList._Email.UseFilter) {
+        masterUserList.SearchColumnCount++;
+    }
+    <div id="xs__Email" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(masterUserList._Email.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x__Email"
+            name="x__Email[]"
+            class="form-control ew-select@(masterUserList._Email.IsInvalidClass)"
+            data-select2-id="fMasterUsersrch_x__Email"
+            data-table="MasterUser"
+            data-field="x__Email"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(masterUserList._Email.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(masterUserList._Email.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(masterUserList._Email.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(masterUserList._Email.EditAttributes)>
+            @(masterUserList._Email.SelectOptionListHtml("x__Email", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(masterUserList._Email.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMasterUsersrch", function() {
+            var options = {
+                name: "x__Email",
+                selectId: "fMasterUsersrch_x__Email",
+                ajax: { id: "x__Email", form: "fMasterUsersrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MasterUser.fields._Email.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* masterUserList._Email.Visible (end) *@
+@if (masterUserList._Username.Visible) { // masterUserList._Username.Visible (begin)
+    if (!masterUserList._Username.UseFilter) {
+        masterUserList.SearchColumnCount++;
+    }
+    <div id="xs__Username" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(masterUserList._Username.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x__Username"
+            name="x__Username[]"
+            class="form-control ew-select@(masterUserList._Username.IsInvalidClass)"
+            data-select2-id="fMasterUsersrch_x__Username"
+            data-table="MasterUser"
+            data-field="x__Username"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(masterUserList._Username.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(masterUserList._Username.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(masterUserList._Username.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(masterUserList._Username.EditAttributes)>
+            @(masterUserList._Username.SelectOptionListHtml("x__Username", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(masterUserList._Username.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMasterUsersrch", function() {
+            var options = {
+                name: "x__Username",
+                selectId: "fMasterUsersrch_x__Username",
+                ajax: { id: "x__Username", form: "fMasterUsersrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MasterUser.fields._Username.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* masterUserList._Username.Visible (end) *@
+@if (masterUserList.NamaLengkap.Visible) { // masterUserList.NamaLengkap.Visible (begin)
+    if (!masterUserList.NamaLengkap.UseFilter) {
+        masterUserList.SearchColumnCount++;
+    }
+    <div id="xs_NamaLengkap" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(masterUserList.NamaLengkap.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_NamaLengkap"
+            name="x_NamaLengkap[]"
+            class="form-control ew-select@(masterUserList.NamaLengkap.IsInvalidClass)"
+            data-select2-id="fMasterUsersrch_x_NamaLengkap"
+            data-table="MasterUser"
+            data-field="x_NamaLengkap"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(masterUserList.NamaLengkap.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(masterUserList.NamaLengkap.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(masterUserList.NamaLengkap.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(masterUserList.NamaLengkap.EditAttributes)>
+            @(masterUserList.NamaLengkap.SelectOptionListHtml("x_NamaLengkap", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(masterUserList.NamaLengkap.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMasterUsersrch", function() {
+            var options = {
+                name: "x_NamaLengkap",
+                selectId: "fMasterUsersrch_x_NamaLengkap",
+                ajax: { id: "x_NamaLengkap", form: "fMasterUsersrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MasterUser.fields.NamaLengkap.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* masterUserList.NamaLengkap.Visible (end) *@
+@if (masterUserList._UserLevel.Visible) { // masterUserList._UserLevel.Visible (begin)
+    if (!masterUserList._UserLevel.UseFilter) {
+        masterUserList.SearchColumnCount++;
+    }
+    <div id="xs__UserLevel" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(masterUserList._UserLevel.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x__UserLevel"
+            name="x__UserLevel[]"
+            class="form-control ew-select@(masterUserList._UserLevel.IsInvalidClass)"
+            data-select2-id="fMasterUsersrch_x__UserLevel"
+            data-table="MasterUser"
+            data-field="x__UserLevel"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(masterUserList._UserLevel.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(masterUserList._UserLevel.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(masterUserList._UserLevel.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(masterUserList._UserLevel.EditAttributes)>
+            @(masterUserList._UserLevel.SelectOptionListHtml("x__UserLevel", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(masterUserList._UserLevel.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMasterUsersrch", function() {
+            var options = {
+                name: "x__UserLevel",
+                selectId: "fMasterUsersrch_x__UserLevel",
+                ajax: { id: "x__UserLevel", form: "fMasterUsersrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MasterUser.fields._UserLevel.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* masterUserList._UserLevel.Visible (end) *@
+@if (masterUserList.Rule.Visible) { // masterUserList.Rule.Visible (begin)
+    if (!masterUserList.Rule.UseFilter) {
+        masterUserList.SearchColumnCount++;
+    }
+    <div id="xs_Rule" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(masterUserList.Rule.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_Rule"
+            name="x_Rule[]"
+            class="form-control ew-select@(masterUserList.Rule.IsInvalidClass)"
+            data-select2-id="fMasterUsersrch_x_Rule"
+            data-table="MasterUser"
+            data-field="x_Rule"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(masterUserList.Rule.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(masterUserList.Rule.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(masterUserList.Rule.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(masterUserList.Rule.EditAttributes)>
+            @(masterUserList.Rule.SelectOptionListHtml("x_Rule", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(masterUserList.Rule.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMasterUsersrch", function() {
+            var options = {
+                name: "x_Rule",
+                selectId: "fMasterUsersrch_x_Rule",
+                ajax: { id: "x_Rule", form: "fMasterUsersrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MasterUser.fields.Rule.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* masterUserList.Rule.Visible (end) *@
+@if (masterUserList.IdPosition.Visible) { // masterUserList.IdPosition.Visible (begin)
+    if (!masterUserList.IdPosition.UseFilter) {
+        masterUserList.SearchColumnCount++;
+    }
+    <div id="xs_IdPosition" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(masterUserList.IdPosition.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_IdPosition"
+            name="x_IdPosition[]"
+            class="form-control ew-select@(masterUserList.IdPosition.IsInvalidClass)"
+            data-select2-id="fMasterUsersrch_x_IdPosition"
+            data-table="MasterUser"
+            data-field="x_IdPosition"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(masterUserList.IdPosition.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(masterUserList.IdPosition.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(masterUserList.IdPosition.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(masterUserList.IdPosition.EditAttributes)>
+            @(masterUserList.IdPosition.SelectOptionListHtml("x_IdPosition", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(masterUserList.IdPosition.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMasterUsersrch", function() {
+            var options = {
+                name: "x_IdPosition",
+                selectId: "fMasterUsersrch_x_IdPosition",
+                ajax: { id: "x_IdPosition", form: "fMasterUsersrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MasterUser.fields.IdPosition.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* masterUserList.IdPosition.Visible (end) *@
+@if (masterUserList.Region.Visible) { // masterUserList.Region.Visible (begin)
+    if (!masterUserList.Region.UseFilter) {
+        masterUserList.SearchColumnCount++;
+    }
+    <div id="xs_Region" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(masterUserList.Region.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_Region"
+            name="x_Region[]"
+            class="form-control ew-select@(masterUserList.Region.IsInvalidClass)"
+            data-select2-id="fMasterUsersrch_x_Region"
+            data-table="MasterUser"
+            data-field="x_Region"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(masterUserList.Region.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(masterUserList.Region.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(masterUserList.Region.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(masterUserList.Region.EditAttributes)>
+            @(masterUserList.Region.SelectOptionListHtml("x_Region", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(masterUserList.Region.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMasterUsersrch", function() {
+            var options = {
+                name: "x_Region",
+                selectId: "fMasterUsersrch_x_Region",
+                ajax: { id: "x_Region", form: "fMasterUsersrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MasterUser.fields.Region.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* masterUserList.Region.Visible (end) *@
+@if (masterUserList.Plant.Visible) { // masterUserList.Plant.Visible (begin)
+    if (!masterUserList.Plant.UseFilter) {
+        masterUserList.SearchColumnCount++;
+    }
+    <div id="xs_Plant" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(masterUserList.Plant.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_Plant"
+            name="x_Plant[]"
+            class="form-control ew-select@(masterUserList.Plant.IsInvalidClass)"
+            data-select2-id="fMasterUsersrch_x_Plant"
+            data-table="MasterUser"
+            data-field="x_Plant"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(masterUserList.Plant.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(masterUserList.Plant.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(masterUserList.Plant.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(masterUserList.Plant.EditAttributes)>
+            @(masterUserList.Plant.SelectOptionListHtml("x_Plant", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(masterUserList.Plant.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMasterUsersrch", function() {
+            var options = {
+                name: "x_Plant",
+                selectId: "fMasterUsersrch_x_Plant",
+                ajax: { id: "x_Plant", form: "fMasterUsersrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MasterUser.fields.Plant.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* masterUserList.Plant.Visible (end) *@
+@if (masterUserList.StatusAktif.Visible) { // masterUserList.StatusAktif.Visible (begin)
+    if (!masterUserList.StatusAktif.UseFilter) {
+        masterUserList.SearchColumnCount++;
+    }
+    <div id="xs_StatusAktif" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(masterUserList.StatusAktif.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_StatusAktif"
+            name="x_StatusAktif[]"
+            class="form-control ew-select@(masterUserList.StatusAktif.IsInvalidClass)"
+            data-select2-id="fMasterUsersrch_x_StatusAktif"
+            data-table="MasterUser"
+            data-field="x_StatusAktif"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(masterUserList.StatusAktif.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(masterUserList.StatusAktif.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(masterUserList.StatusAktif.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(masterUserList.StatusAktif.EditAttributes)>
+            @(masterUserList.StatusAktif.SelectOptionListHtml("x_StatusAktif", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(masterUserList.StatusAktif.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMasterUsersrch", function() {
+            var options = {
+                name: "x_StatusAktif",
+                selectId: "fMasterUsersrch_x_StatusAktif",
+                ajax: { id: "x_StatusAktif", form: "fMasterUsersrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MasterUser.fields.StatusAktif.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* masterUserList.StatusAktif.Visible (end) *@
+@if (masterUserList.Keterangan.Visible) { // masterUserList.Keterangan.Visible (begin)
+    if (!masterUserList.Keterangan.UseFilter) {
+        masterUserList.SearchColumnCount++;
+    }
+    <div id="xs_Keterangan" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(masterUserList.Keterangan.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_Keterangan"
+            name="x_Keterangan[]"
+            class="form-control ew-select@(masterUserList.Keterangan.IsInvalidClass)"
+            data-select2-id="fMasterUsersrch_x_Keterangan"
+            data-table="MasterUser"
+            data-field="x_Keterangan"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(masterUserList.Keterangan.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(masterUserList.Keterangan.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(masterUserList.Keterangan.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(masterUserList.Keterangan.EditAttributes)>
+            @(masterUserList.Keterangan.SelectOptionListHtml("x_Keterangan", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(masterUserList.Keterangan.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMasterUsersrch", function() {
+            var options = {
+                name: "x_Keterangan",
+                selectId: "fMasterUsersrch_x_Keterangan",
+                ajax: { id: "x_Keterangan", form: "fMasterUsersrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MasterUser.fields.Keterangan.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* masterUserList.Keterangan.Visible (end) *@
+@if (masterUserList.DibuatOleh.Visible) { // masterUserList.DibuatOleh.Visible (begin)
+    if (!masterUserList.DibuatOleh.UseFilter) {
+        masterUserList.SearchColumnCount++;
+    }
+    <div id="xs_DibuatOleh" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(masterUserList.DibuatOleh.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_DibuatOleh"
+            name="x_DibuatOleh[]"
+            class="form-control ew-select@(masterUserList.DibuatOleh.IsInvalidClass)"
+            data-select2-id="fMasterUsersrch_x_DibuatOleh"
+            data-table="MasterUser"
+            data-field="x_DibuatOleh"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(masterUserList.DibuatOleh.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(masterUserList.DibuatOleh.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(masterUserList.DibuatOleh.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(masterUserList.DibuatOleh.EditAttributes)>
+            @(masterUserList.DibuatOleh.SelectOptionListHtml("x_DibuatOleh", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(masterUserList.DibuatOleh.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMasterUsersrch", function() {
+            var options = {
+                name: "x_DibuatOleh",
+                selectId: "fMasterUsersrch_x_DibuatOleh",
+                ajax: { id: "x_DibuatOleh", form: "fMasterUsersrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MasterUser.fields.DibuatOleh.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* masterUserList.DibuatOleh.Visible (end) *@
+@if (masterUserList.TanggalDibuat.Visible) { // masterUserList.TanggalDibuat.Visible (begin)
+    if (!masterUserList.TanggalDibuat.UseFilter) {
+        masterUserList.SearchColumnCount++;
+    }
+    <div id="xs_TanggalDibuat" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(masterUserList.TanggalDibuat.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_TanggalDibuat"
+            name="x_TanggalDibuat[]"
+            class="form-control ew-select@(masterUserList.TanggalDibuat.IsInvalidClass)"
+            data-select2-id="fMasterUsersrch_x_TanggalDibuat"
+            data-table="MasterUser"
+            data-field="x_TanggalDibuat"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(masterUserList.TanggalDibuat.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(masterUserList.TanggalDibuat.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(masterUserList.TanggalDibuat.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(masterUserList.TanggalDibuat.EditAttributes)>
+            @(masterUserList.TanggalDibuat.SelectOptionListHtml("x_TanggalDibuat", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(masterUserList.TanggalDibuat.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMasterUsersrch", function() {
+            var options = {
+                name: "x_TanggalDibuat",
+                selectId: "fMasterUsersrch_x_TanggalDibuat",
+                ajax: { id: "x_TanggalDibuat", form: "fMasterUsersrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MasterUser.fields.TanggalDibuat.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* masterUserList.TanggalDibuat.Visible (end) *@
+@if (masterUserList.DiperbaruiOleh.Visible) { // masterUserList.DiperbaruiOleh.Visible (begin)
+    if (!masterUserList.DiperbaruiOleh.UseFilter) {
+        masterUserList.SearchColumnCount++;
+    }
+    <div id="xs_DiperbaruiOleh" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(masterUserList.DiperbaruiOleh.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_DiperbaruiOleh"
+            name="x_DiperbaruiOleh[]"
+            class="form-control ew-select@(masterUserList.DiperbaruiOleh.IsInvalidClass)"
+            data-select2-id="fMasterUsersrch_x_DiperbaruiOleh"
+            data-table="MasterUser"
+            data-field="x_DiperbaruiOleh"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(masterUserList.DiperbaruiOleh.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(masterUserList.DiperbaruiOleh.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(masterUserList.DiperbaruiOleh.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(masterUserList.DiperbaruiOleh.EditAttributes)>
+            @(masterUserList.DiperbaruiOleh.SelectOptionListHtml("x_DiperbaruiOleh", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(masterUserList.DiperbaruiOleh.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMasterUsersrch", function() {
+            var options = {
+                name: "x_DiperbaruiOleh",
+                selectId: "fMasterUsersrch_x_DiperbaruiOleh",
+                ajax: { id: "x_DiperbaruiOleh", form: "fMasterUsersrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MasterUser.fields.DiperbaruiOleh.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* masterUserList.DiperbaruiOleh.Visible (end) *@
+@if (masterUserList.TanggalDiperbarui.Visible) { // masterUserList.TanggalDiperbarui.Visible (begin)
+    if (!masterUserList.TanggalDiperbarui.UseFilter) {
+        masterUserList.SearchColumnCount++;
+    }
+    <div id="xs_TanggalDiperbarui" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(masterUserList.TanggalDiperbarui.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_TanggalDiperbarui"
+            name="x_TanggalDiperbarui[]"
+            class="form-control ew-select@(masterUserList.TanggalDiperbarui.IsInvalidClass)"
+            data-select2-id="fMasterUsersrch_x_TanggalDiperbarui"
+            data-table="MasterUser"
+            data-field="x_TanggalDiperbarui"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(masterUserList.TanggalDiperbarui.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(masterUserList.TanggalDiperbarui.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(masterUserList.TanggalDiperbarui.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(masterUserList.TanggalDiperbarui.EditAttributes)>
+            @(masterUserList.TanggalDiperbarui.SelectOptionListHtml("x_TanggalDiperbarui", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(masterUserList.TanggalDiperbarui.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMasterUsersrch", function() {
+            var options = {
+                name: "x_TanggalDiperbarui",
+                selectId: "fMasterUsersrch_x_TanggalDiperbarui",
+                ajax: { id: "x_TanggalDiperbarui", form: "fMasterUsersrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MasterUser.fields.TanggalDiperbarui.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* masterUserList.TanggalDiperbarui.Visible (end) *@
+@if (masterUserList.exception.Visible) { // masterUserList.exception.Visible (begin)
+    if (!masterUserList.exception.UseFilter) {
+        masterUserList.SearchColumnCount++;
+    }
+    <div id="xs_exception" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(masterUserList.exception.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_exception"
+            name="x_exception[]"
+            class="form-control ew-select@(masterUserList.exception.IsInvalidClass)"
+            data-select2-id="fMasterUsersrch_x_exception"
+            data-table="MasterUser"
+            data-field="x_exception"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(masterUserList.exception.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(masterUserList.exception.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(masterUserList.exception.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(masterUserList.exception.EditAttributes)>
+            @(masterUserList.exception.SelectOptionListHtml("x_exception", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(masterUserList.exception.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMasterUsersrch", function() {
+            var options = {
+                name: "x_exception",
+                selectId: "fMasterUsersrch_x_exception",
+                ajax: { id: "x_exception", form: "fMasterUsersrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MasterUser.fields.exception.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* masterUserList.exception.Visible (end) *@
+</div><!-- /.row -->
+<div class="row mb-0">
+    <div class="col-sm-auto px-0 pe-sm-2">
+        <div class="ew-basic-search input-group">
+            <input type="search" name="@(Config.TableBasicSearch)" id="@(Config.TableBasicSearch)" class="form-control ew-basic-search-keyword" value="@Html.Raw(HtmlEncode(masterUserList.BasicSearch.SessionKeyword))" placeholder="@(HtmlEncode(Language.Phrase("Search")))" aria-label="@(HtmlEncode(Language.Phrase("Search")))">
+            <input type="hidden" name="@(Config.TableBasicSearchType)" id="@(Config.TableBasicSearchType)" class="ew-basic-search-type" value="@(HtmlEncode(masterUserList.BasicSearch.SessionType))">
+            <button type="button" data-bs-toggle="dropdown" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split" aria-haspopup="true" aria-expanded="false">
+                <span id="searchtype">@Html.Raw(masterUserList.BasicSearch.TypeNameShort)</span>
+            </button>
+            <div class="dropdown-menu dropdown-menu-end">
+                <button type="button" class="dropdown-item@(masterUserList.BasicSearch.SessionType == "" ? " active" : "")" form="fMasterUsersrch" data-ew-action="search-type">@Html.Raw(Language.Phrase("QuickSearchAuto"))</button>
+                <button type="button" class="dropdown-item@(masterUserList.BasicSearch.SessionType == "=" ? " active" : "")" form="fMasterUsersrch" data-ew-action="search-type" data-search-type="=">@Html.Raw(Language.Phrase("QuickSearchExact"))</button>
+                <button type="button" class="dropdown-item@(masterUserList.BasicSearch.SessionType == "AND" ? " active" : "")" form="fMasterUsersrch" data-ew-action="search-type" data-search-type="AND">@Html.Raw(Language.Phrase("QuickSearchAll"))</button>
+                <button type="button" class="dropdown-item@(masterUserList.BasicSearch.SessionType == "OR" ? " active" : "")" form="fMasterUsersrch" data-ew-action="search-type" data-search-type="OR">@Html.Raw(Language.Phrase("QuickSearchAny"))</button>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-auto mb-3">
+        <button class="btn btn-primary" name="btn-submit" id="btn-submit" type="submit">@Html.Raw(Language.Phrase("SearchBtn"))</button>
+    </div>
+</div>
+</div><!-- /.ew-extended-search -->
+} @* Show search form (end) *@
+}
+</div><!-- /.ew-search-panel -->
+</form>
+}
+@masterUserList.ShowPageHeader()
+@masterUserList.ShowMessages()
+<main class="list @(masterUserList.TotalRecords == 0 && !masterUserList.IsAdd ? " ew-no-record" : "")">
+<div id="ew-header-options">
+    @masterUserList.HeaderOptions.RenderBody()
+</div>
+<div id="ew-list">
+@if (masterUserList.TotalRecords > 0 || !Empty(masterUserList.CurrentAction)) {
+<div class="card ew-card ew-grid@(masterUserList.IsAddOrEdit ? " ew-grid-add-edit" : "") @(masterUserList.TableGridClass)">
+<form name="@(masterUserList.FormName)" id="@(masterUserList.FormName)" class="ew-form ew-list-form" action="@AppPath(masterUserList.PageName)" method="post" novalidate autocomplete="off">
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+@if (masterUserList.IsModal) {
+<input type="hidden" name="modal" value="1">
+}
+<div id="gmp_MasterUser" class="card-body ew-grid-middle-panel @(masterUserList.TableContainerClass)" style="@(masterUserList.TableContainerStyle)">
+@if (masterUserList.TotalRecords > 0 || masterUserList.IsGridEdit || masterUserList.IsMultiEdit) {
+<table id="tbl_MasterUserlist" class="@(masterUserList.TableClass)"><!-- .ew-table -->
+<thead>
+    <tr class="ew-table-header">
+@{
+    // Header row
+    masterUserList.RowType = RowType.Header;
+
+    // Render list options
+    await masterUserList.RenderListOptions();
+}
+@* Render list options (header, left) *@
+@masterUserList.ListOptions.RenderHeader("left")
+@if (masterUserList._Email.Visible) { // masterUserList._Email.Visible (begin)
+        <th data-name="_Email" class="@(masterUserList._Email.HeaderCellClass)"><div id="elh_MasterUser__Email" class="MasterUser__Email">@Html.Raw(masterUserList.RenderFieldHeader(masterUserList._Email))</div></th>
+} @* masterUserList._Email.Visible (end) *@
+@if (masterUserList._Username.Visible) { // masterUserList._Username.Visible (begin)
+        <th data-name="_Username" class="@(masterUserList._Username.HeaderCellClass)"><div id="elh_MasterUser__Username" class="MasterUser__Username">@Html.Raw(masterUserList.RenderFieldHeader(masterUserList._Username))</div></th>
+} @* masterUserList._Username.Visible (end) *@
+@if (masterUserList.NamaLengkap.Visible) { // masterUserList.NamaLengkap.Visible (begin)
+        <th data-name="NamaLengkap" class="@(masterUserList.NamaLengkap.HeaderCellClass)"><div id="elh_MasterUser_NamaLengkap" class="MasterUser_NamaLengkap">@Html.Raw(masterUserList.RenderFieldHeader(masterUserList.NamaLengkap))</div></th>
+} @* masterUserList.NamaLengkap.Visible (end) *@
+@if (masterUserList._UserLevel.Visible) { // masterUserList._UserLevel.Visible (begin)
+        <th data-name="_UserLevel" class="@(masterUserList._UserLevel.HeaderCellClass)"><div id="elh_MasterUser__UserLevel" class="MasterUser__UserLevel">@Html.Raw(masterUserList.RenderFieldHeader(masterUserList._UserLevel))</div></th>
+} @* masterUserList._UserLevel.Visible (end) *@
+@if (masterUserList.Rule.Visible) { // masterUserList.Rule.Visible (begin)
+        <th data-name="Rule" class="@(masterUserList.Rule.HeaderCellClass)"><div id="elh_MasterUser_Rule" class="MasterUser_Rule">@Html.Raw(masterUserList.RenderFieldHeader(masterUserList.Rule))</div></th>
+} @* masterUserList.Rule.Visible (end) *@
+@if (masterUserList.IdPosition.Visible) { // masterUserList.IdPosition.Visible (begin)
+        <th data-name="IdPosition" class="@(masterUserList.IdPosition.HeaderCellClass)"><div id="elh_MasterUser_IdPosition" class="MasterUser_IdPosition">@Html.Raw(masterUserList.RenderFieldHeader(masterUserList.IdPosition))</div></th>
+} @* masterUserList.IdPosition.Visible (end) *@
+@if (masterUserList.Region.Visible) { // masterUserList.Region.Visible (begin)
+        <th data-name="Region" class="@(masterUserList.Region.HeaderCellClass)"><div id="elh_MasterUser_Region" class="MasterUser_Region">@Html.Raw(masterUserList.RenderFieldHeader(masterUserList.Region))</div></th>
+} @* masterUserList.Region.Visible (end) *@
+@if (masterUserList.Plant.Visible) { // masterUserList.Plant.Visible (begin)
+        <th data-name="Plant" class="@(masterUserList.Plant.HeaderCellClass)"><div id="elh_MasterUser_Plant" class="MasterUser_Plant">@Html.Raw(masterUserList.RenderFieldHeader(masterUserList.Plant))</div></th>
+} @* masterUserList.Plant.Visible (end) *@
+@if (masterUserList.StatusAktif.Visible) { // masterUserList.StatusAktif.Visible (begin)
+        <th data-name="StatusAktif" class="@(masterUserList.StatusAktif.HeaderCellClass)"><div id="elh_MasterUser_StatusAktif" class="MasterUser_StatusAktif">@Html.Raw(masterUserList.RenderFieldHeader(masterUserList.StatusAktif))</div></th>
+} @* masterUserList.StatusAktif.Visible (end) *@
+@if (masterUserList.Keterangan.Visible) { // masterUserList.Keterangan.Visible (begin)
+        <th data-name="Keterangan" class="@(masterUserList.Keterangan.HeaderCellClass)"><div id="elh_MasterUser_Keterangan" class="MasterUser_Keterangan">@Html.Raw(masterUserList.RenderFieldHeader(masterUserList.Keterangan))</div></th>
+} @* masterUserList.Keterangan.Visible (end) *@
+@if (masterUserList.DibuatOleh.Visible) { // masterUserList.DibuatOleh.Visible (begin)
+        <th data-name="DibuatOleh" class="@(masterUserList.DibuatOleh.HeaderCellClass)"><div id="elh_MasterUser_DibuatOleh" class="MasterUser_DibuatOleh">@Html.Raw(masterUserList.RenderFieldHeader(masterUserList.DibuatOleh))</div></th>
+} @* masterUserList.DibuatOleh.Visible (end) *@
+@if (masterUserList.TanggalDibuat.Visible) { // masterUserList.TanggalDibuat.Visible (begin)
+        <th data-name="TanggalDibuat" class="@(masterUserList.TanggalDibuat.HeaderCellClass)"><div id="elh_MasterUser_TanggalDibuat" class="MasterUser_TanggalDibuat">@Html.Raw(masterUserList.RenderFieldHeader(masterUserList.TanggalDibuat))</div></th>
+} @* masterUserList.TanggalDibuat.Visible (end) *@
+@if (masterUserList.DiperbaruiOleh.Visible) { // masterUserList.DiperbaruiOleh.Visible (begin)
+        <th data-name="DiperbaruiOleh" class="@(masterUserList.DiperbaruiOleh.HeaderCellClass)"><div id="elh_MasterUser_DiperbaruiOleh" class="MasterUser_DiperbaruiOleh">@Html.Raw(masterUserList.RenderFieldHeader(masterUserList.DiperbaruiOleh))</div></th>
+} @* masterUserList.DiperbaruiOleh.Visible (end) *@
+@if (masterUserList.TanggalDiperbarui.Visible) { // masterUserList.TanggalDiperbarui.Visible (begin)
+        <th data-name="TanggalDiperbarui" class="@(masterUserList.TanggalDiperbarui.HeaderCellClass)"><div id="elh_MasterUser_TanggalDiperbarui" class="MasterUser_TanggalDiperbarui">@Html.Raw(masterUserList.RenderFieldHeader(masterUserList.TanggalDiperbarui))</div></th>
+} @* masterUserList.TanggalDiperbarui.Visible (end) *@
+@if (masterUserList.IdIdaman.Visible) { // masterUserList.IdIdaman.Visible (begin)
+        <th data-name="IdIdaman" class="@(masterUserList.IdIdaman.HeaderCellClass)"><div id="elh_MasterUser_IdIdaman" class="MasterUser_IdIdaman">@Html.Raw(masterUserList.RenderFieldHeader(masterUserList.IdIdaman))</div></th>
+} @* masterUserList.IdIdaman.Visible (end) *@
+@if (masterUserList.exception.Visible) { // masterUserList.exception.Visible (begin)
+        <th data-name="exception" class="@(masterUserList.exception.HeaderCellClass)"><div id="elh_MasterUser_exception" class="MasterUser_exception">@Html.Raw(masterUserList.RenderFieldHeader(masterUserList.exception))</div></th>
+} @* masterUserList.exception.Visible (end) *@
+@* Render list options (header, right) *@
+@masterUserList.ListOptions.RenderHeader("right")
+    </tr>
+</thead>
+<tbody data-page="@(masterUserList.PageNumber)">
+@{
+    await masterUserList.SetupGrid();
+    bool eof = masterUserList.Recordset == null; // DN
+}
+@while (masterUserList.RecordCount < masterUserList.StopRecord || SameString(masterUserList.RowIndex, "$rowindex$")) { // Begin While
+    if (!eof && !SameString(masterUserList.RowIndex, "$rowindex$") &&
+        (!masterUserList.IsGridAdd || masterUserList.CurrentMode == "copy") &&
+        (!((masterUserList.IsCopy || masterUserList.IsAdd) && masterUserList.RowIndex is int rowIndex && rowIndex == 0))) // DN
+        eof = !await masterUserList.Recordset.ReadAsync();
+    masterUserList.RecordCount++;
+    if (masterUserList.RecordCount >= masterUserList.StartRecord) {
+        await masterUserList.SetupRow();
+    <tr @Html.Raw(masterUserList.RowAttributes)>
+    @* Render list options (body, left) *@
+    @masterUserList.ListOptions.RenderBody("left", masterUserList.RowCount)
+    @if (masterUserList._Email.Visible) { // masterUserList._Email.Visible (begin)
+        <td data-name="_Email" @Html.Raw(masterUserList._Email.CellAttributes)>
+<span id="el@(masterUserList.RowIndex == "$rowindex$" ? "$rowindex$" : masterUserList.RowCount)_MasterUser__Email" class="el_MasterUser__Email">
+<span @Html.Raw(masterUserList._Email.ViewAttributes)>
+@Html.Raw(masterUserList._Email.GetViewValue())</span>
+</span>
+</td>
+    } @* masterUserList._Email.Visible (end) *@
+    @if (masterUserList._Username.Visible) { // masterUserList._Username.Visible (begin)
+        <td data-name="_Username" @Html.Raw(masterUserList._Username.CellAttributes)>
+<span id="el@(masterUserList.RowIndex == "$rowindex$" ? "$rowindex$" : masterUserList.RowCount)_MasterUser__Username" class="el_MasterUser__Username">
+<span @Html.Raw(masterUserList._Username.ViewAttributes)>
+@Html.Raw(masterUserList._Username.GetViewValue())</span>
+</span>
+</td>
+    } @* masterUserList._Username.Visible (end) *@
+    @if (masterUserList.NamaLengkap.Visible) { // masterUserList.NamaLengkap.Visible (begin)
+        <td data-name="NamaLengkap" @Html.Raw(masterUserList.NamaLengkap.CellAttributes)>
+<span id="el@(masterUserList.RowIndex == "$rowindex$" ? "$rowindex$" : masterUserList.RowCount)_MasterUser_NamaLengkap" class="el_MasterUser_NamaLengkap">
+<span @Html.Raw(masterUserList.NamaLengkap.ViewAttributes)>
+@Html.Raw(masterUserList.NamaLengkap.GetViewValue())</span>
+</span>
+</td>
+    } @* masterUserList.NamaLengkap.Visible (end) *@
+    @if (masterUserList._UserLevel.Visible) { // masterUserList._UserLevel.Visible (begin)
+        <td data-name="_UserLevel" @Html.Raw(masterUserList._UserLevel.CellAttributes)>
+<span id="el@(masterUserList.RowIndex == "$rowindex$" ? "$rowindex$" : masterUserList.RowCount)_MasterUser__UserLevel" class="el_MasterUser__UserLevel">
+<span @Html.Raw(masterUserList._UserLevel.ViewAttributes)>
+@Html.Raw(masterUserList._UserLevel.GetViewValue())</span>
+</span>
+</td>
+    } @* masterUserList._UserLevel.Visible (end) *@
+    @if (masterUserList.Rule.Visible) { // masterUserList.Rule.Visible (begin)
+        <td data-name="Rule" @Html.Raw(masterUserList.Rule.CellAttributes)>
+<span id="el@(masterUserList.RowIndex == "$rowindex$" ? "$rowindex$" : masterUserList.RowCount)_MasterUser_Rule" class="el_MasterUser_Rule">
+<span @Html.Raw(masterUserList.Rule.ViewAttributes)>
+@Html.Raw(masterUserList.Rule.GetViewValue())</span>
+</span>
+</td>
+    } @* masterUserList.Rule.Visible (end) *@
+    @if (masterUserList.IdPosition.Visible) { // masterUserList.IdPosition.Visible (begin)
+        <td data-name="IdPosition" @Html.Raw(masterUserList.IdPosition.CellAttributes)>
+<span id="el@(masterUserList.RowIndex == "$rowindex$" ? "$rowindex$" : masterUserList.RowCount)_MasterUser_IdPosition" class="el_MasterUser_IdPosition">
+<span @Html.Raw(masterUserList.IdPosition.ViewAttributes)>
+@Html.Raw(masterUserList.IdPosition.GetViewValue())</span>
+</span>
+</td>
+    } @* masterUserList.IdPosition.Visible (end) *@
+    @if (masterUserList.Region.Visible) { // masterUserList.Region.Visible (begin)
+        <td data-name="Region" @Html.Raw(masterUserList.Region.CellAttributes)>
+<span id="el@(masterUserList.RowIndex == "$rowindex$" ? "$rowindex$" : masterUserList.RowCount)_MasterUser_Region" class="el_MasterUser_Region">
+<span @Html.Raw(masterUserList.Region.ViewAttributes)>
+@Html.Raw(masterUserList.Region.GetViewValue())</span>
+</span>
+</td>
+    } @* masterUserList.Region.Visible (end) *@
+    @if (masterUserList.Plant.Visible) { // masterUserList.Plant.Visible (begin)
+        <td data-name="Plant" @Html.Raw(masterUserList.Plant.CellAttributes)>
+<span id="el@(masterUserList.RowIndex == "$rowindex$" ? "$rowindex$" : masterUserList.RowCount)_MasterUser_Plant" class="el_MasterUser_Plant">
+<span @Html.Raw(masterUserList.Plant.ViewAttributes)>
+@Html.Raw(masterUserList.Plant.GetViewValue())</span>
+</span>
+</td>
+    } @* masterUserList.Plant.Visible (end) *@
+    @if (masterUserList.StatusAktif.Visible) { // masterUserList.StatusAktif.Visible (begin)
+        <td data-name="StatusAktif" @Html.Raw(masterUserList.StatusAktif.CellAttributes)>
+<span id="el@(masterUserList.RowIndex == "$rowindex$" ? "$rowindex$" : masterUserList.RowCount)_MasterUser_StatusAktif" class="el_MasterUser_StatusAktif">
+<span @Html.Raw(masterUserList.StatusAktif.ViewAttributes)>
+<i class="fa-regular @(ConvertToBool(masterUserList.StatusAktif.CurrentValue) ? "fa-square-check" : "fa-square") ew-icon ew-boolean"></i>
+</span>
+</span>
+</td>
+    } @* masterUserList.StatusAktif.Visible (end) *@
+    @if (masterUserList.Keterangan.Visible) { // masterUserList.Keterangan.Visible (begin)
+        <td data-name="Keterangan" @Html.Raw(masterUserList.Keterangan.CellAttributes)>
+<span id="el@(masterUserList.RowIndex == "$rowindex$" ? "$rowindex$" : masterUserList.RowCount)_MasterUser_Keterangan" class="el_MasterUser_Keterangan">
+<span @Html.Raw(masterUserList.Keterangan.ViewAttributes)>
+@Html.Raw(masterUserList.Keterangan.GetViewValue())</span>
+</span>
+</td>
+    } @* masterUserList.Keterangan.Visible (end) *@
+    @if (masterUserList.DibuatOleh.Visible) { // masterUserList.DibuatOleh.Visible (begin)
+        <td data-name="DibuatOleh" @Html.Raw(masterUserList.DibuatOleh.CellAttributes)>
+<span id="el@(masterUserList.RowIndex == "$rowindex$" ? "$rowindex$" : masterUserList.RowCount)_MasterUser_DibuatOleh" class="el_MasterUser_DibuatOleh">
+<span @Html.Raw(masterUserList.DibuatOleh.ViewAttributes)>
+@Html.Raw(masterUserList.DibuatOleh.GetViewValue())</span>
+</span>
+</td>
+    } @* masterUserList.DibuatOleh.Visible (end) *@
+    @if (masterUserList.TanggalDibuat.Visible) { // masterUserList.TanggalDibuat.Visible (begin)
+        <td data-name="TanggalDibuat" @Html.Raw(masterUserList.TanggalDibuat.CellAttributes)>
+<span id="el@(masterUserList.RowIndex == "$rowindex$" ? "$rowindex$" : masterUserList.RowCount)_MasterUser_TanggalDibuat" class="el_MasterUser_TanggalDibuat">
+<span @Html.Raw(masterUserList.TanggalDibuat.ViewAttributes)>
+@Html.Raw(masterUserList.TanggalDibuat.GetViewValue())</span>
+</span>
+</td>
+    } @* masterUserList.TanggalDibuat.Visible (end) *@
+    @if (masterUserList.DiperbaruiOleh.Visible) { // masterUserList.DiperbaruiOleh.Visible (begin)
+        <td data-name="DiperbaruiOleh" @Html.Raw(masterUserList.DiperbaruiOleh.CellAttributes)>
+<span id="el@(masterUserList.RowIndex == "$rowindex$" ? "$rowindex$" : masterUserList.RowCount)_MasterUser_DiperbaruiOleh" class="el_MasterUser_DiperbaruiOleh">
+<span @Html.Raw(masterUserList.DiperbaruiOleh.ViewAttributes)>
+@Html.Raw(masterUserList.DiperbaruiOleh.GetViewValue())</span>
+</span>
+</td>
+    } @* masterUserList.DiperbaruiOleh.Visible (end) *@
+    @if (masterUserList.TanggalDiperbarui.Visible) { // masterUserList.TanggalDiperbarui.Visible (begin)
+        <td data-name="TanggalDiperbarui" @Html.Raw(masterUserList.TanggalDiperbarui.CellAttributes)>
+<span id="el@(masterUserList.RowIndex == "$rowindex$" ? "$rowindex$" : masterUserList.RowCount)_MasterUser_TanggalDiperbarui" class="el_MasterUser_TanggalDiperbarui">
+<span @Html.Raw(masterUserList.TanggalDiperbarui.ViewAttributes)>
+@Html.Raw(masterUserList.TanggalDiperbarui.GetViewValue())</span>
+</span>
+</td>
+    } @* masterUserList.TanggalDiperbarui.Visible (end) *@
+    @if (masterUserList.IdIdaman.Visible) { // masterUserList.IdIdaman.Visible (begin)
+        <td data-name="IdIdaman" @Html.Raw(masterUserList.IdIdaman.CellAttributes)>
+<span id="el@(masterUserList.RowIndex == "$rowindex$" ? "$rowindex$" : masterUserList.RowCount)_MasterUser_IdIdaman" class="el_MasterUser_IdIdaman">
+<span @Html.Raw(masterUserList.IdIdaman.ViewAttributes)>
+@Html.Raw(masterUserList.IdIdaman.GetViewValue())</span>
+</span>
+</td>
+    } @* masterUserList.IdIdaman.Visible (end) *@
+    @if (masterUserList.exception.Visible) { // masterUserList.exception.Visible (begin)
+        <td data-name="exception" @Html.Raw(masterUserList.exception.CellAttributes)>
+<span id="el@(masterUserList.RowIndex == "$rowindex$" ? "$rowindex$" : masterUserList.RowCount)_MasterUser_exception" class="el_MasterUser_exception">
+<span @Html.Raw(masterUserList.exception.ViewAttributes)>
+<i class="fa-regular @(ConvertToBool(masterUserList.exception.CurrentValue) ? "fa-square-check" : "fa-square") ew-icon ew-boolean"></i>
+</span>
+</span>
+</td>
+    } @* masterUserList.exception.Visible (end) *@
+    @* Render list options (body, right) *@
+    @masterUserList.ListOptions.RenderBody("right", masterUserList.RowCount)
+    </tr>
+    } @* End if *@
+
+    // Reset for template row
+    if (SameString(masterUserList.RowIndex, "$rowindex$"))
+        masterUserList.RowIndex = 0;
+
+    // Reset inline add/copy row
+    if ((masterUserList.IsCopy || masterUserList.IsAdd) && masterUserList.RowIndex is int rowIndex2 && rowIndex2 == 0)
+        masterUserList.RowIndex = 1;
+} @* End While *@
+</tbody>
+</table><!-- /.ew-table -->
+} @* End If TotalRecords > 0 *@
+</div><!-- /.ew-grid-middle-panel -->
+@if (Empty(masterUserList.CurrentAction) && !masterUserList.UseAjaxActions) {
+<input type="hidden" name="action" id="action" value="">
+}
+</form><!-- /.ew-list-form -->
+@{ masterUserList.CloseRecordset(); }
+@if (!masterUserList.IsExport()) {
+<div class="card-footer ew-grid-lower-panel">
+@if (!masterUserList.IsGridAdd && !(masterUserList.IsGridEdit && masterUserList.ModalGridEdit) && !masterUserList.IsMultiEdit) {
+@Html.Raw(masterUserList.Pager.Render())
+}
+<div class="ew-list-other-options">
+@masterUserList.OtherOptions.RenderBody("bottom")
+</div>
+</div>
+}
+</div><!-- /.ew-grid -->
+} else { // Show other options
+<div class="ew-list-other-options">
+@masterUserList.OtherOptions.ForEach(opt => opt.ButtonClass = "").RenderBody()
+</div>
+}
+</div>
+<div id="ew-footer-options">
+    @masterUserList.FooterOptions.RenderBody()
+</div>
+</main>
+@masterUserList.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+@if (!masterUserList.IsExport()) {
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("MasterUser");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Write your table-specific startup script here
+    // document.write("page loaded");
+});
+</script>
+}

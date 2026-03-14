@@ -1,0 +1,139 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (masterRegionEdit.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = masterRegionEdit.UseLayout ? "_Layout" : "";
+}
+@masterRegionEdit.ShowPageHeader()
+@masterRegionEdit.ShowMessages()
+<main class="edit">
+<form name="fMasterRegionedit" id="fMasterRegionedit" class="@(masterRegionEdit.FormClassName)" action="@AppPath(CurrentPageName())" method="post" novalidate autocomplete="off">
+<script>
+var currentTable = @Html.Raw(ConvertToJson(masterRegionEdit.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { MasterRegion: currentTable } });
+var currentPageID = ew.PAGE_ID = "edit";
+var currentForm;
+var fMasterRegionedit;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("fMasterRegionedit")
+        .setPageId("edit")
+
+        // Add fields
+        .setFields([
+
+            ["IdRegion", [fields.IdRegion.visible && fields.IdRegion.required ? ew.Validators.required(fields.IdRegion.caption) : null], fields.IdRegion.isInvalid],
+            ["Region", [fields.Region.visible && fields.Region.required ? ew.Validators.required(fields.Region.caption) : null], fields.Region.isInvalid],
+            ["RegionCode", [fields.RegionCode.visible && fields.RegionCode.required ? ew.Validators.required(fields.RegionCode.caption) : null], fields.RegionCode.isInvalid]
+        ])
+
+        // Form_CustomValidate
+        .setCustomValidate(
+            function(fobj) { // DO NOT CHANGE THIS LINE!
+                    // Your custom validation code here, return false if invalid.
+                    return true;
+                }
+        )
+
+        // Use JavaScript validation or not
+        .setValidateRequired(ew.CLIENT_VALIDATE)
+
+        // Dynamic selection lists
+        .setLists({
+        })
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Write your client script here, no need to add script tags.
+});
+</script>
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+<input type="hidden" name="action" id="action" value="update">
+<input type="hidden" name="modal" value="@ConvertToInt(masterRegionEdit.IsModal)">
+@if (IsJsonResponse()) {
+<input type="hidden" name="json" value="1">
+}
+<input type="hidden" name="@(masterRegionEdit.OldKeyName)" value="@Html.Raw(masterRegionEdit.OldKey)">
+<div class="ew-edit-div"><!-- page* -->
+@if (masterRegionEdit.IdRegion.Visible) { // masterRegionEdit.IdRegion.Visible (begin)
+    <div id="r_IdRegion" @Html.Raw(masterRegionEdit.IdRegion.RowAttributes)>
+        <label id="elh_MasterRegion_IdRegion" class="@(masterRegionEdit.LeftColumnClass)">@Html.Raw(masterRegionEdit.IdRegion.Caption)@Html.Raw(masterRegionEdit.IdRegion.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(masterRegionEdit.RightColumnClass)"><div @Html.Raw(masterRegionEdit.IdRegion.CellAttributes)>
+<span id="el_MasterRegion_IdRegion">
+<span @Html.Raw(masterRegionEdit.IdRegion.ViewAttributes)>
+<input type="text" readonly class="form-control-plaintext" value="@Html.Raw(RemoveHtml(ConvertToString(masterRegionEdit.IdRegion.EditValue)))"></span>
+<input type="hidden" data-table="MasterRegion" data-field="x_IdRegion" data-hidden="1" name="x_IdRegion" id="x_IdRegion" value="@Html.Raw(HtmlEncode(masterRegionEdit.IdRegion.CurrentValue))">
+</span>
+</div></div>
+    </div>
+} @* masterRegionEdit.IdRegion.Visible (end) *@
+@if (masterRegionEdit.Region.Visible) { // masterRegionEdit.Region.Visible (begin)
+    <div id="r_Region" @Html.Raw(masterRegionEdit.Region.RowAttributes)>
+        <label id="elh_MasterRegion_Region" for="x_Region" class="@(masterRegionEdit.LeftColumnClass)">@Html.Raw(masterRegionEdit.Region.Caption)@Html.Raw(masterRegionEdit.Region.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(masterRegionEdit.RightColumnClass)"><div @Html.Raw(masterRegionEdit.Region.CellAttributes)>
+<span id="el_MasterRegion_Region">
+<input type="@(masterRegionEdit.Region.InputTextType)" name="x_Region" id="x_Region" data-table="MasterRegion" data-field="x_Region" value="@Html.Raw(masterRegionEdit.Region.EditValue)" size="30" maxlength="100" placeholder="@Html.Raw(HtmlEncode(masterRegionEdit.Region.PlaceHolder))" data-format-pattern="@(masterRegionEdit.Region.FormatPattern)"@Html.Raw(masterRegionEdit.Region.EditAttributes) aria-describedby="x_Region_help">
+@Html.Raw(masterRegionEdit.Region.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(masterRegionEdit.Region.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* masterRegionEdit.Region.Visible (end) *@
+@if (masterRegionEdit.RegionCode.Visible) { // masterRegionEdit.RegionCode.Visible (begin)
+    <div id="r_RegionCode" @Html.Raw(masterRegionEdit.RegionCode.RowAttributes)>
+        <label id="elh_MasterRegion_RegionCode" for="x_RegionCode" class="@(masterRegionEdit.LeftColumnClass)">@Html.Raw(masterRegionEdit.RegionCode.Caption)@Html.Raw(masterRegionEdit.RegionCode.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(masterRegionEdit.RightColumnClass)"><div @Html.Raw(masterRegionEdit.RegionCode.CellAttributes)>
+<span id="el_MasterRegion_RegionCode">
+<input type="@(masterRegionEdit.RegionCode.InputTextType)" name="x_RegionCode" id="x_RegionCode" data-table="MasterRegion" data-field="x_RegionCode" value="@Html.Raw(masterRegionEdit.RegionCode.EditValue)" size="30" maxlength="20" placeholder="@Html.Raw(HtmlEncode(masterRegionEdit.RegionCode.PlaceHolder))" data-format-pattern="@(masterRegionEdit.RegionCode.FormatPattern)"@Html.Raw(masterRegionEdit.RegionCode.EditAttributes) aria-describedby="x_RegionCode_help">
+@Html.Raw(masterRegionEdit.RegionCode.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(masterRegionEdit.RegionCode.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* masterRegionEdit.RegionCode.Visible (end) *@
+</div><!-- /page* -->
+@{ masterRegionEdit.CloseRecordset(); }
+@Html.Raw(masterRegionEdit.IsModal ? "<template class=\"ew-modal-buttons\">" : "<div class=\"row ew-buttons\">")<!-- buttons .row -->
+    <div class="@(masterRegionEdit.OffsetColumnClass)"><!-- buttons offset -->
+    <button class="btn btn-primary ew-btn" name="btn-action" id="btn-action" type="submit" form="fMasterRegionedit">@Html.Raw(Language.Phrase("SaveBtn"))</button>
+@if (IsJsonResponse()) {
+    <button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" data-bs-dismiss="modal">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+} else {
+    <button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" form="fMasterRegionedit" data-href="@AppPath(masterRegionEdit.ReturnUrl)">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+}
+    </div><!-- /buttons offset -->
+@Html.Raw(masterRegionEdit.IsModal ? "</template>" : "</div>")<!-- /buttons .row -->
+</form>
+</main>
+@masterRegionEdit.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("MasterRegion");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Write your table-specific startup script here
+    // document.write("page loaded");
+});
+</script>

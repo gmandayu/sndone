@@ -1,0 +1,204 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (masterProdukEdit.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = masterProdukEdit.UseLayout ? "_Layout" : "";
+}
+@masterProdukEdit.ShowPageHeader()
+@masterProdukEdit.ShowMessages()
+<main class="edit">
+<form name="fMasterProdukedit" id="fMasterProdukedit" class="@(masterProdukEdit.FormClassName)" action="@AppPath(CurrentPageName())" method="post" novalidate autocomplete="off">
+<script>
+var currentTable = @Html.Raw(ConvertToJson(masterProdukEdit.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { MasterProduk: currentTable } });
+var currentPageID = ew.PAGE_ID = "edit";
+var currentForm;
+var fMasterProdukedit;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("fMasterProdukedit")
+        .setPageId("edit")
+
+        // Add fields
+        .setFields([
+
+            ["NoProduk", [fields.NoProduk.visible && fields.NoProduk.required ? ew.Validators.required(fields.NoProduk.caption) : null], fields.NoProduk.isInvalid],
+            ["NamaProduk", [fields.NamaProduk.visible && fields.NamaProduk.required ? ew.Validators.required(fields.NamaProduk.caption) : null], fields.NamaProduk.isInvalid],
+            ["TipeProduk", [fields.TipeProduk.visible && fields.TipeProduk.required ? ew.Validators.required(fields.TipeProduk.caption) : null], fields.TipeProduk.isInvalid],
+            ["DensityMin", [fields.DensityMin.visible && fields.DensityMin.required ? ew.Validators.required(fields.DensityMin.caption) : null, ew.Validators.float], fields.DensityMin.isInvalid],
+            ["DensityMax", [fields.DensityMax.visible && fields.DensityMax.required ? ew.Validators.required(fields.DensityMax.caption) : null, ew.Validators.float], fields.DensityMax.isInvalid]
+        ])
+
+        // Form_CustomValidate
+        .setCustomValidate(
+            function(fobj) { // DO NOT CHANGE THIS LINE!
+                    // Your custom validation code here, return false if invalid.
+                    return true;
+                }
+        )
+
+        // Use JavaScript validation or not
+        .setValidateRequired(ew.CLIENT_VALIDATE)
+
+        // Dynamic selection lists
+        .setLists({
+            "TipeProduk": @Html.Raw(masterProdukEdit.TipeProduk.ToClientList(masterProdukEdit)),
+        })
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Client script
+    $('#fMasterProdukedit').on('submit', function (e) {
+        e.preventDefault();
+        showLoading();
+        setTimeout(() => {
+            hideLoading();
+        }, 3000);
+        this.requestSubmit();
+    });
+});
+</script>
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+<input type="hidden" name="action" id="action" value="update">
+<input type="hidden" name="modal" value="@ConvertToInt(masterProdukEdit.IsModal)">
+@if (IsJsonResponse()) {
+<input type="hidden" name="json" value="1">
+}
+<input type="hidden" name="@(masterProdukEdit.OldKeyName)" value="@Html.Raw(masterProdukEdit.OldKey)">
+<div class="ew-edit-div"><!-- page* -->
+@if (masterProdukEdit.NoProduk.Visible) { // masterProdukEdit.NoProduk.Visible (begin)
+    <div id="r_NoProduk" @Html.Raw(masterProdukEdit.NoProduk.RowAttributes)>
+        <label id="elh_MasterProduk_NoProduk" for="x_NoProduk" class="@(masterProdukEdit.LeftColumnClass)">@Html.Raw(masterProdukEdit.NoProduk.Caption)@Html.Raw(masterProdukEdit.NoProduk.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(masterProdukEdit.RightColumnClass)"><div @Html.Raw(masterProdukEdit.NoProduk.CellAttributes)>
+<span id="el_MasterProduk_NoProduk">
+<input type="@(masterProdukEdit.NoProduk.InputTextType)" name="x_NoProduk" id="x_NoProduk" data-table="MasterProduk" data-field="x_NoProduk" value="@Html.Raw(masterProdukEdit.NoProduk.EditValue)" size="30" maxlength="10" placeholder="@Html.Raw(HtmlEncode(masterProdukEdit.NoProduk.PlaceHolder))" data-format-pattern="@(masterProdukEdit.NoProduk.FormatPattern)"@Html.Raw(masterProdukEdit.NoProduk.EditAttributes) aria-describedby="x_NoProduk_help">
+@Html.Raw(masterProdukEdit.NoProduk.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(masterProdukEdit.NoProduk.GetErrorMessage())</div>
+<input type="hidden" data-table="MasterProduk" data-field="x_NoProduk" data-hidden="1" data-old name="o_NoProduk" id="o_NoProduk" value="@Html.Raw(HtmlEncode(masterProdukEdit.NoProduk.OldValue ?? masterProdukEdit.NoProduk.CurrentValue))">
+</span>
+</div></div>
+    </div>
+} @* masterProdukEdit.NoProduk.Visible (end) *@
+@if (masterProdukEdit.NamaProduk.Visible) { // masterProdukEdit.NamaProduk.Visible (begin)
+    <div id="r_NamaProduk" @Html.Raw(masterProdukEdit.NamaProduk.RowAttributes)>
+        <label id="elh_MasterProduk_NamaProduk" for="x_NamaProduk" class="@(masterProdukEdit.LeftColumnClass)">@Html.Raw(masterProdukEdit.NamaProduk.Caption)@Html.Raw(masterProdukEdit.NamaProduk.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(masterProdukEdit.RightColumnClass)"><div @Html.Raw(masterProdukEdit.NamaProduk.CellAttributes)>
+<span id="el_MasterProduk_NamaProduk">
+<input type="@(masterProdukEdit.NamaProduk.InputTextType)" name="x_NamaProduk" id="x_NamaProduk" data-table="MasterProduk" data-field="x_NamaProduk" value="@Html.Raw(masterProdukEdit.NamaProduk.EditValue)" size="30" maxlength="255" placeholder="@Html.Raw(HtmlEncode(masterProdukEdit.NamaProduk.PlaceHolder))" data-format-pattern="@(masterProdukEdit.NamaProduk.FormatPattern)"@Html.Raw(masterProdukEdit.NamaProduk.EditAttributes) aria-describedby="x_NamaProduk_help">
+@Html.Raw(masterProdukEdit.NamaProduk.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(masterProdukEdit.NamaProduk.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* masterProdukEdit.NamaProduk.Visible (end) *@
+@if (masterProdukEdit.TipeProduk.Visible) { // masterProdukEdit.TipeProduk.Visible (begin)
+    <div id="r_TipeProduk" @Html.Raw(masterProdukEdit.TipeProduk.RowAttributes)>
+        <label id="elh_MasterProduk_TipeProduk" for="x_TipeProduk" class="@(masterProdukEdit.LeftColumnClass)">@Html.Raw(masterProdukEdit.TipeProduk.Caption)@Html.Raw(masterProdukEdit.TipeProduk.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(masterProdukEdit.RightColumnClass)"><div @Html.Raw(masterProdukEdit.TipeProduk.CellAttributes)>
+<span id="el_MasterProduk_TipeProduk">
+    <select
+        id="x_TipeProduk"
+        name="x_TipeProduk"
+        class="form-select ew-select@(masterProdukEdit.TipeProduk.IsInvalidClass)"
+        data-select2-id="fMasterProdukedit_x_TipeProduk"
+        data-table="MasterProduk"
+        data-field="x_TipeProduk"
+        data-value-separator="@(masterProdukEdit.TipeProduk.DisplayValueSeparatorAttribute)"
+        data-placeholder="@(HtmlEncode(masterProdukEdit.TipeProduk.PlaceHolder))"
+        @Html.Raw(masterProdukEdit.TipeProduk.EditAttributes)>
+        @(masterProdukEdit.TipeProduk.SelectOptionListHtml("x_TipeProduk"))
+    </select>
+    @Html.Raw(masterProdukEdit.TipeProduk.GetCustomMessage)
+    <div class="invalid-feedback">@Html.Raw(masterProdukEdit.TipeProduk.GetErrorMessage())</div>
+<script>
+loadjs.ready("fMasterProdukedit", function() {
+    var options = { name: "x_TipeProduk", selectId: "fMasterProdukedit_x_TipeProduk" },
+        el = document.querySelector("select[data-select2-id='" + options.selectId + "']");
+    if (!el)
+        return;
+    options.closeOnSelect = !options.multiple;
+    options.dropdownParent = el.closest("#ew-modal-dialog, #ew-add-opt-dialog");
+    if (fMasterProdukedit.lists.TipeProduk?.lookupOptions.length) {
+        options.data = { id: "x_TipeProduk", form: "fMasterProdukedit" };
+    } else {
+        options.ajax = { id: "x_TipeProduk", form: "fMasterProdukedit", limit: ew.LOOKUP_PAGE_SIZE };
+    }
+    options.minimumResultsForSearch = Infinity;
+    options = Object.assign({}, ew.selectOptions, options, ew.vars.tables.MasterProduk.fields.TipeProduk.selectOptions);
+    ew.createSelect(options);
+});
+</script>
+</span>
+</div></div>
+    </div>
+} @* masterProdukEdit.TipeProduk.Visible (end) *@
+@if (masterProdukEdit.DensityMin.Visible) { // masterProdukEdit.DensityMin.Visible (begin)
+    <div id="r_DensityMin" @Html.Raw(masterProdukEdit.DensityMin.RowAttributes)>
+        <label id="elh_MasterProduk_DensityMin" for="x_DensityMin" class="@(masterProdukEdit.LeftColumnClass)">@Html.Raw(masterProdukEdit.DensityMin.Caption)@Html.Raw(masterProdukEdit.DensityMin.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(masterProdukEdit.RightColumnClass)"><div @Html.Raw(masterProdukEdit.DensityMin.CellAttributes)>
+<span id="el_MasterProduk_DensityMin">
+<input type="@(masterProdukEdit.DensityMin.InputTextType)" name="x_DensityMin" id="x_DensityMin" data-table="MasterProduk" data-field="x_DensityMin" value="@Html.Raw(masterProdukEdit.DensityMin.EditValue)" size="30" maxlength="100" placeholder="@Html.Raw(HtmlEncode(masterProdukEdit.DensityMin.PlaceHolder))" data-format-pattern="@(masterProdukEdit.DensityMin.FormatPattern)"@Html.Raw(masterProdukEdit.DensityMin.EditAttributes) aria-describedby="x_DensityMin_help">
+@Html.Raw(masterProdukEdit.DensityMin.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(masterProdukEdit.DensityMin.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* masterProdukEdit.DensityMin.Visible (end) *@
+@if (masterProdukEdit.DensityMax.Visible) { // masterProdukEdit.DensityMax.Visible (begin)
+    <div id="r_DensityMax" @Html.Raw(masterProdukEdit.DensityMax.RowAttributes)>
+        <label id="elh_MasterProduk_DensityMax" for="x_DensityMax" class="@(masterProdukEdit.LeftColumnClass)">@Html.Raw(masterProdukEdit.DensityMax.Caption)@Html.Raw(masterProdukEdit.DensityMax.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(masterProdukEdit.RightColumnClass)"><div @Html.Raw(masterProdukEdit.DensityMax.CellAttributes)>
+<span id="el_MasterProduk_DensityMax">
+<input type="@(masterProdukEdit.DensityMax.InputTextType)" name="x_DensityMax" id="x_DensityMax" data-table="MasterProduk" data-field="x_DensityMax" value="@Html.Raw(masterProdukEdit.DensityMax.EditValue)" size="30" maxlength="100" placeholder="@Html.Raw(HtmlEncode(masterProdukEdit.DensityMax.PlaceHolder))" data-format-pattern="@(masterProdukEdit.DensityMax.FormatPattern)"@Html.Raw(masterProdukEdit.DensityMax.EditAttributes) aria-describedby="x_DensityMax_help">
+@Html.Raw(masterProdukEdit.DensityMax.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(masterProdukEdit.DensityMax.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* masterProdukEdit.DensityMax.Visible (end) *@
+</div><!-- /page* -->
+@{ masterProdukEdit.CloseRecordset(); }
+@Html.Raw(masterProdukEdit.IsModal ? "<template class=\"ew-modal-buttons\">" : "<div class=\"row ew-buttons\">")<!-- buttons .row -->
+    <div class="@(masterProdukEdit.OffsetColumnClass)"><!-- buttons offset -->
+    <button class="btn btn-primary ew-btn" name="btn-action" id="btn-action" type="submit" form="fMasterProdukedit">@Html.Raw(Language.Phrase("SaveBtn"))</button>
+@if (IsJsonResponse()) {
+    <button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" data-bs-dismiss="modal">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+} else {
+    <button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" form="fMasterProdukedit" data-href="@AppPath(masterProdukEdit.ReturnUrl)">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+}
+    </div><!-- /buttons offset -->
+@Html.Raw(masterProdukEdit.IsModal ? "</template>" : "</div>")<!-- /buttons .row -->
+</form>
+</main>
+@masterProdukEdit.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("MasterProduk");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Write your table-specific startup script here
+    // document.write("page loaded");
+});
+</script>

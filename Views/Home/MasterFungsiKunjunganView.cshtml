@@ -1,0 +1,89 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (masterFungsiKunjunganView.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = masterFungsiKunjunganView.UseLayout ? "_Layout" : "";
+}
+@if (!masterFungsiKunjunganView.IsExport()) {
+<div class="btn-toolbar ew-toolbar">
+    @masterFungsiKunjunganView.ExportOptions.RenderBody()
+    @masterFungsiKunjunganView.OtherOptions.RenderBody()
+</div>
+}
+@masterFungsiKunjunganView.ShowPageHeader()
+@masterFungsiKunjunganView.ShowMessages()
+<main class="view">
+<form name="fMasterFungsiKunjunganview" id="fMasterFungsiKunjunganview" class="ew-form ew-view-form overlay-wrapper" action="@AppPath(CurrentPageName())" method="post" novalidate autocomplete="off">
+@if (!masterFungsiKunjunganView.IsExport()) {
+<script>
+var currentTable = @Html.Raw(ConvertToJson(masterFungsiKunjunganView.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { MasterFungsiKunjungan: currentTable } });
+var currentPageID = ew.PAGE_ID = "view";
+var currentForm;
+var fMasterFungsiKunjunganview;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("fMasterFungsiKunjunganview")
+        .setPageId("view")
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Write your client script here, no need to add script tags.
+});
+</script>
+}
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+<input type="hidden" name="modal" value="@ConvertToInt(masterFungsiKunjunganView.IsModal)">
+<table class="@(masterFungsiKunjunganView.TableClass)">
+@if (masterFungsiKunjunganView.ID.Visible) { // masterFungsiKunjunganView.ID.Visible (begin)
+    <tr id="r_ID" @Html.Raw(masterFungsiKunjunganView.ID.RowAttributes)>
+        <td class="@(masterFungsiKunjunganView.TableLeftColumnClass)"><span id="elh_MasterFungsiKunjungan_ID">@Html.Raw(masterFungsiKunjunganView.ID.Caption)</span></td>
+        <td data-name="ID" @Html.Raw(masterFungsiKunjunganView.ID.CellAttributes)>
+<span id="el_MasterFungsiKunjungan_ID">
+<span @Html.Raw(masterFungsiKunjunganView.ID.ViewAttributes)>
+@Html.Raw(masterFungsiKunjunganView.ID.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* masterFungsiKunjunganView.ID.Visible (end) *@
+@if (masterFungsiKunjunganView.FungsiKunjungan.Visible) { // masterFungsiKunjunganView.FungsiKunjungan.Visible (begin)
+    <tr id="r_FungsiKunjungan" @Html.Raw(masterFungsiKunjunganView.FungsiKunjungan.RowAttributes)>
+        <td class="@(masterFungsiKunjunganView.TableLeftColumnClass)"><span id="elh_MasterFungsiKunjungan_FungsiKunjungan">@Html.Raw(masterFungsiKunjunganView.FungsiKunjungan.Caption)</span></td>
+        <td data-name="FungsiKunjungan" @Html.Raw(masterFungsiKunjunganView.FungsiKunjungan.CellAttributes)>
+<span id="el_MasterFungsiKunjungan_FungsiKunjungan">
+<span @Html.Raw(masterFungsiKunjunganView.FungsiKunjungan.ViewAttributes)>
+@Html.Raw(masterFungsiKunjunganView.FungsiKunjungan.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* masterFungsiKunjunganView.FungsiKunjungan.Visible (end) *@
+</table>
+@{ masterFungsiKunjunganView.CloseRecordset(); }
+</form>
+</main>
+@masterFungsiKunjunganView.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+@if (!masterFungsiKunjunganView.IsExport()) {
+<script>
+loadjs.ready("load", function() {
+    // Write your table-specific startup script here
+    // document.write("page loaded");
+});
+</script>
+}

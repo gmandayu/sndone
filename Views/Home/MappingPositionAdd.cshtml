@@ -1,0 +1,230 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (mappingPositionAdd.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = mappingPositionAdd.UseLayout ? "_Layout" : "";
+}
+<script>
+var currentTable = @Html.Raw(ConvertToJson(mappingPositionAdd.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { MappingPosition: currentTable } });
+var currentPageID = ew.PAGE_ID = "add";
+var currentForm;
+var fMappingPositionadd;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("fMappingPositionadd")
+        .setPageId("add")
+
+        // Add fields
+        .setFields([
+
+            ["IdPosition", [fields.IdPosition.visible && fields.IdPosition.required ? ew.Validators.required(fields.IdPosition.caption) : null], fields.IdPosition.isInvalid],
+            ["IdRegion", [fields.IdRegion.visible && fields.IdRegion.required ? ew.Validators.required(fields.IdRegion.caption) : null], fields.IdRegion.isInvalid],
+            ["IdPlant", [fields.IdPlant.visible && fields.IdPlant.required ? ew.Validators.required(fields.IdPlant.caption) : null], fields.IdPlant.isInvalid]
+        ])
+
+        // Form_CustomValidate
+        .setCustomValidate(
+            function(fobj) { // DO NOT CHANGE THIS LINE!
+                    // Your custom validation code here, return false if invalid.
+                    return true;
+                }
+        )
+
+        // Use JavaScript validation or not
+        .setValidateRequired(ew.CLIENT_VALIDATE)
+
+        // Dynamic selection lists
+        .setLists({
+            "IdPosition": @Html.Raw(mappingPositionAdd.IdPosition.ToClientList(mappingPositionAdd)),
+            "IdRegion": @Html.Raw(mappingPositionAdd.IdRegion.ToClientList(mappingPositionAdd)),
+            "IdPlant": @Html.Raw(mappingPositionAdd.IdPlant.ToClientList(mappingPositionAdd)),
+        })
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Write your client script here, no need to add script tags.
+});
+</script>
+@mappingPositionAdd.ShowPageHeader()
+@mappingPositionAdd.ShowMessages()
+<form name="fMappingPositionadd" id="fMappingPositionadd" class="@(mappingPositionAdd.FormClassName)" action="@AppPath(CurrentPageName())" method="post" novalidate autocomplete="off">
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+<input type="hidden" name="action" id="action" value="insert">
+<input type="hidden" name="modal" value="@ConvertToInt(mappingPositionAdd.IsModal)">
+@if (IsJsonResponse()) {
+<input type="hidden" name="json" value="1">
+}
+<input type="hidden" name="@(mappingPositionAdd.OldKeyName)" value="@Html.Raw(mappingPositionAdd.OldKey)">
+<div class="ew-add-div"><!-- page* -->
+@if (mappingPositionAdd.IdPosition.Visible) { // mappingPositionAdd.IdPosition.Visible (begin)
+    <div id="r_IdPosition" @Html.Raw(mappingPositionAdd.IdPosition.RowAttributes)>
+        <label id="elh_MappingPosition_IdPosition" for="x_IdPosition" class="@(mappingPositionAdd.LeftColumnClass)">@Html.Raw(mappingPositionAdd.IdPosition.Caption)@Html.Raw(mappingPositionAdd.IdPosition.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(mappingPositionAdd.RightColumnClass)"><div @Html.Raw(mappingPositionAdd.IdPosition.CellAttributes)>
+<span id="el_MappingPosition_IdPosition">
+    <select
+        id="x_IdPosition"
+        name="x_IdPosition"
+        class="form-select ew-select@(mappingPositionAdd.IdPosition.IsInvalidClass)"
+        data-select2-id="fMappingPositionadd_x_IdPosition"
+        data-table="MappingPosition"
+        data-field="x_IdPosition"
+        data-value-separator="@(mappingPositionAdd.IdPosition.DisplayValueSeparatorAttribute)"
+        data-placeholder="@(HtmlEncode(mappingPositionAdd.IdPosition.PlaceHolder))"
+        @Html.Raw(mappingPositionAdd.IdPosition.EditAttributes)>
+        @(mappingPositionAdd.IdPosition.SelectOptionListHtml("x_IdPosition"))
+    </select>
+    @Html.Raw(mappingPositionAdd.IdPosition.GetCustomMessage)
+    <div class="invalid-feedback">@Html.Raw(mappingPositionAdd.IdPosition.GetErrorMessage())</div>
+@Html.Raw(mappingPositionAdd.IdPosition.Lookup.GetParamTag(mappingPositionAdd, "p_x_IdPosition"))
+<script>
+loadjs.ready("fMappingPositionadd", function() {
+    var options = { name: "x_IdPosition", selectId: "fMappingPositionadd_x_IdPosition" },
+        el = document.querySelector("select[data-select2-id='" + options.selectId + "']");
+    if (!el)
+        return;
+    options.closeOnSelect = !options.multiple;
+    options.dropdownParent = el.closest("#ew-modal-dialog, #ew-add-opt-dialog");
+    if (fMappingPositionadd.lists.IdPosition?.lookupOptions.length) {
+        options.data = { id: "x_IdPosition", form: "fMappingPositionadd" };
+    } else {
+        options.ajax = { id: "x_IdPosition", form: "fMappingPositionadd", limit: ew.LOOKUP_PAGE_SIZE };
+    }
+    options.minimumInputLength = ew.selectMinimumInputLength;
+    options = Object.assign({}, ew.selectOptions, options, ew.vars.tables.MappingPosition.fields.IdPosition.selectOptions);
+    ew.createSelect(options);
+});
+</script>
+</span>
+</div></div>
+    </div>
+} @* mappingPositionAdd.IdPosition.Visible (end) *@
+@if (mappingPositionAdd.IdRegion.Visible) { // mappingPositionAdd.IdRegion.Visible (begin)
+    <div id="r_IdRegion" @Html.Raw(mappingPositionAdd.IdRegion.RowAttributes)>
+        <label id="elh_MappingPosition_IdRegion" for="x_IdRegion" class="@(mappingPositionAdd.LeftColumnClass)">@Html.Raw(mappingPositionAdd.IdRegion.Caption)@Html.Raw(mappingPositionAdd.IdRegion.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(mappingPositionAdd.RightColumnClass)"><div @Html.Raw(mappingPositionAdd.IdRegion.CellAttributes)>
+<span id="el_MappingPosition_IdRegion">
+    <select
+        id="x_IdRegion"
+        name="x_IdRegion"
+        class="form-select ew-select@(mappingPositionAdd.IdRegion.IsInvalidClass)"
+        data-select2-id="fMappingPositionadd_x_IdRegion"
+        data-table="MappingPosition"
+        data-field="x_IdRegion"
+        data-value-separator="@(mappingPositionAdd.IdRegion.DisplayValueSeparatorAttribute)"
+        data-placeholder="@(HtmlEncode(mappingPositionAdd.IdRegion.PlaceHolder))"
+        @Html.Raw(mappingPositionAdd.IdRegion.EditAttributes)>
+        @(mappingPositionAdd.IdRegion.SelectOptionListHtml("x_IdRegion"))
+    </select>
+    @Html.Raw(mappingPositionAdd.IdRegion.GetCustomMessage)
+    <div class="invalid-feedback">@Html.Raw(mappingPositionAdd.IdRegion.GetErrorMessage())</div>
+@Html.Raw(mappingPositionAdd.IdRegion.Lookup.GetParamTag(mappingPositionAdd, "p_x_IdRegion"))
+<script>
+loadjs.ready("fMappingPositionadd", function() {
+    var options = { name: "x_IdRegion", selectId: "fMappingPositionadd_x_IdRegion" },
+        el = document.querySelector("select[data-select2-id='" + options.selectId + "']");
+    if (!el)
+        return;
+    options.closeOnSelect = !options.multiple;
+    options.dropdownParent = el.closest("#ew-modal-dialog, #ew-add-opt-dialog");
+    if (fMappingPositionadd.lists.IdRegion?.lookupOptions.length) {
+        options.data = { id: "x_IdRegion", form: "fMappingPositionadd" };
+    } else {
+        options.ajax = { id: "x_IdRegion", form: "fMappingPositionadd", limit: ew.LOOKUP_PAGE_SIZE };
+    }
+    options.minimumInputLength = ew.selectMinimumInputLength;
+    options = Object.assign({}, ew.selectOptions, options, ew.vars.tables.MappingPosition.fields.IdRegion.selectOptions);
+    ew.createSelect(options);
+});
+</script>
+</span>
+</div></div>
+    </div>
+} @* mappingPositionAdd.IdRegion.Visible (end) *@
+@if (mappingPositionAdd.IdPlant.Visible) { // mappingPositionAdd.IdPlant.Visible (begin)
+    <div id="r_IdPlant" @Html.Raw(mappingPositionAdd.IdPlant.RowAttributes)>
+        <label id="elh_MappingPosition_IdPlant" for="x_IdPlant" class="@(mappingPositionAdd.LeftColumnClass)">@Html.Raw(mappingPositionAdd.IdPlant.Caption)@Html.Raw(mappingPositionAdd.IdPlant.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(mappingPositionAdd.RightColumnClass)"><div @Html.Raw(mappingPositionAdd.IdPlant.CellAttributes)>
+<span id="el_MappingPosition_IdPlant">
+    <select
+        id="x_IdPlant"
+        name="x_IdPlant"
+        class="form-select ew-select@(mappingPositionAdd.IdPlant.IsInvalidClass)"
+        data-select2-id="fMappingPositionadd_x_IdPlant"
+        data-table="MappingPosition"
+        data-field="x_IdPlant"
+        data-value-separator="@(mappingPositionAdd.IdPlant.DisplayValueSeparatorAttribute)"
+        data-placeholder="@(HtmlEncode(mappingPositionAdd.IdPlant.PlaceHolder))"
+        @Html.Raw(mappingPositionAdd.IdPlant.EditAttributes)>
+        @(mappingPositionAdd.IdPlant.SelectOptionListHtml("x_IdPlant"))
+    </select>
+    @Html.Raw(mappingPositionAdd.IdPlant.GetCustomMessage)
+    <div class="invalid-feedback">@Html.Raw(mappingPositionAdd.IdPlant.GetErrorMessage())</div>
+@Html.Raw(mappingPositionAdd.IdPlant.Lookup.GetParamTag(mappingPositionAdd, "p_x_IdPlant"))
+<script>
+loadjs.ready("fMappingPositionadd", function() {
+    var options = { name: "x_IdPlant", selectId: "fMappingPositionadd_x_IdPlant" },
+        el = document.querySelector("select[data-select2-id='" + options.selectId + "']");
+    if (!el)
+        return;
+    options.closeOnSelect = !options.multiple;
+    options.dropdownParent = el.closest("#ew-modal-dialog, #ew-add-opt-dialog");
+    if (fMappingPositionadd.lists.IdPlant?.lookupOptions.length) {
+        options.data = { id: "x_IdPlant", form: "fMappingPositionadd" };
+    } else {
+        options.ajax = { id: "x_IdPlant", form: "fMappingPositionadd", limit: ew.LOOKUP_PAGE_SIZE };
+    }
+    options.minimumInputLength = ew.selectMinimumInputLength;
+    options = Object.assign({}, ew.selectOptions, options, ew.vars.tables.MappingPosition.fields.IdPlant.selectOptions);
+    ew.createSelect(options);
+});
+</script>
+</span>
+</div></div>
+    </div>
+} @* mappingPositionAdd.IdPlant.Visible (end) *@
+</div><!-- /page* -->
+@{ mappingPositionAdd.CloseRecordset(); }
+@Html.Raw(mappingPositionAdd.IsModal ? "<template class=\"ew-modal-buttons\">" : "<div class=\"row ew-buttons\">")<!-- buttons .row -->
+    <div class="@(mappingPositionAdd.OffsetColumnClass)"><!-- buttons offset -->
+    <button class="btn btn-primary ew-btn" name="btn-action" id="btn-action" type="submit" form="fMappingPositionadd">@Html.Raw(Language.Phrase("AddBtn"))</button>
+@if (IsJsonResponse()) {
+    <button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" data-bs-dismiss="modal">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+} else {
+    <button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" form="fMappingPositionadd" data-href="@AppPath(mappingPositionAdd.ReturnUrl)">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+}
+    </div><!-- /buttons offset -->
+@Html.Raw(mappingPositionAdd.IsModal ? "</template>" : "</div>")<!-- /buttons .row -->
+</form>
+@mappingPositionAdd.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("MappingPosition");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Write your table-specific startup script here
+    // document.write("page loaded");
+});
+</script>

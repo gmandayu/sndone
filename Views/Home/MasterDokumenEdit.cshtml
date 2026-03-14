@@ -1,0 +1,134 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (masterDokumenEdit.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = masterDokumenEdit.UseLayout ? "_Layout" : "";
+}
+@masterDokumenEdit.ShowPageHeader()
+@masterDokumenEdit.ShowMessages()
+<main class="edit">
+<form name="fMasterDokumenedit" id="fMasterDokumenedit" class="@(masterDokumenEdit.FormClassName)" action="@AppPath(CurrentPageName())" method="post" novalidate autocomplete="off">
+<script>
+var currentTable = @Html.Raw(ConvertToJson(masterDokumenEdit.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { MasterDokumen: currentTable } });
+var currentPageID = ew.PAGE_ID = "edit";
+var currentForm;
+var fMasterDokumenedit;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("fMasterDokumenedit")
+        .setPageId("edit")
+
+        // Add fields
+        .setFields([
+
+            ["IdDokumen", [fields.IdDokumen.visible && fields.IdDokumen.required ? ew.Validators.required(fields.IdDokumen.caption) : null], fields.IdDokumen.isInvalid],
+            ["NamaDokumen", [fields.NamaDokumen.visible && fields.NamaDokumen.required ? ew.Validators.required(fields.NamaDokumen.caption) : null], fields.NamaDokumen.isInvalid]
+        ])
+
+        // Form_CustomValidate
+        .setCustomValidate(
+            function(fobj) { // DO NOT CHANGE THIS LINE!
+                    // Your custom validation code here, return false if invalid.
+                    return true;
+                }
+        )
+
+        // Use JavaScript validation or not
+        .setValidateRequired(ew.CLIENT_VALIDATE)
+
+        // Dynamic selection lists
+        .setLists({
+        })
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Client script
+    $('#fMasterDokumenedit').on('submit', function (e) {
+        e.preventDefault();
+        showLoading();
+        setTimeout(() => {
+            hideLoading();
+        }, 3000);
+        this.requestSubmit();
+    });
+});
+</script>
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+<input type="hidden" name="action" id="action" value="update">
+<input type="hidden" name="modal" value="@ConvertToInt(masterDokumenEdit.IsModal)">
+@if (IsJsonResponse()) {
+<input type="hidden" name="json" value="1">
+}
+<input type="hidden" name="@(masterDokumenEdit.OldKeyName)" value="@Html.Raw(masterDokumenEdit.OldKey)">
+<div class="ew-edit-div"><!-- page* -->
+@if (masterDokumenEdit.IdDokumen.Visible) { // masterDokumenEdit.IdDokumen.Visible (begin)
+    <div id="r_IdDokumen" @Html.Raw(masterDokumenEdit.IdDokumen.RowAttributes)>
+        <label id="elh_MasterDokumen_IdDokumen" class="@(masterDokumenEdit.LeftColumnClass)">@Html.Raw(masterDokumenEdit.IdDokumen.Caption)@Html.Raw(masterDokumenEdit.IdDokumen.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(masterDokumenEdit.RightColumnClass)"><div @Html.Raw(masterDokumenEdit.IdDokumen.CellAttributes)>
+<span id="el_MasterDokumen_IdDokumen">
+<span @Html.Raw(masterDokumenEdit.IdDokumen.ViewAttributes)>
+<input type="text" readonly class="form-control-plaintext" value="@Html.Raw(RemoveHtml(ConvertToString(masterDokumenEdit.IdDokumen.EditValue)))"></span>
+<input type="hidden" data-table="MasterDokumen" data-field="x_IdDokumen" data-hidden="1" name="x_IdDokumen" id="x_IdDokumen" value="@Html.Raw(HtmlEncode(masterDokumenEdit.IdDokumen.CurrentValue))">
+</span>
+</div></div>
+    </div>
+} @* masterDokumenEdit.IdDokumen.Visible (end) *@
+@if (masterDokumenEdit.NamaDokumen.Visible) { // masterDokumenEdit.NamaDokumen.Visible (begin)
+    <div id="r_NamaDokumen" @Html.Raw(masterDokumenEdit.NamaDokumen.RowAttributes)>
+        <label id="elh_MasterDokumen_NamaDokumen" for="x_NamaDokumen" class="@(masterDokumenEdit.LeftColumnClass)">@Html.Raw(masterDokumenEdit.NamaDokumen.Caption)@Html.Raw(masterDokumenEdit.NamaDokumen.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(masterDokumenEdit.RightColumnClass)"><div @Html.Raw(masterDokumenEdit.NamaDokumen.CellAttributes)>
+<span id="el_MasterDokumen_NamaDokumen">
+<input type="@(masterDokumenEdit.NamaDokumen.InputTextType)" name="x_NamaDokumen" id="x_NamaDokumen" data-table="MasterDokumen" data-field="x_NamaDokumen" value="@Html.Raw(masterDokumenEdit.NamaDokumen.EditValue)" size="30" maxlength="100" placeholder="@Html.Raw(HtmlEncode(masterDokumenEdit.NamaDokumen.PlaceHolder))" data-format-pattern="@(masterDokumenEdit.NamaDokumen.FormatPattern)"@Html.Raw(masterDokumenEdit.NamaDokumen.EditAttributes) aria-describedby="x_NamaDokumen_help">
+@Html.Raw(masterDokumenEdit.NamaDokumen.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(masterDokumenEdit.NamaDokumen.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* masterDokumenEdit.NamaDokumen.Visible (end) *@
+</div><!-- /page* -->
+@{ masterDokumenEdit.CloseRecordset(); }
+@Html.Raw(masterDokumenEdit.IsModal ? "<template class=\"ew-modal-buttons\">" : "<div class=\"row ew-buttons\">")<!-- buttons .row -->
+    <div class="@(masterDokumenEdit.OffsetColumnClass)"><!-- buttons offset -->
+    <button class="btn btn-primary ew-btn" name="btn-action" id="btn-action" type="submit" form="fMasterDokumenedit">@Html.Raw(Language.Phrase("SaveBtn"))</button>
+@if (IsJsonResponse()) {
+    <button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" data-bs-dismiss="modal">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+} else {
+    <button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" form="fMasterDokumenedit" data-href="@AppPath(masterDokumenEdit.ReturnUrl)">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+}
+    </div><!-- /buttons offset -->
+@Html.Raw(masterDokumenEdit.IsModal ? "</template>" : "</div>")<!-- /buttons .row -->
+</form>
+</main>
+@masterDokumenEdit.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("MasterDokumen");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Write your table-specific startup script here
+    // document.write("page loaded");
+});
+</script>

@@ -1,0 +1,244 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (detailMasterPipaEdit.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = detailMasterPipaEdit.UseLayout ? "_Layout" : "";
+}
+@detailMasterPipaEdit.ShowPageHeader()
+@detailMasterPipaEdit.ShowMessages()
+<main class="edit">
+<form name="fDetailMasterPipaedit" id="fDetailMasterPipaedit" class="@(detailMasterPipaEdit.FormClassName)" action="@AppPath(CurrentPageName())" method="post" novalidate autocomplete="off">
+<script>
+var currentTable = @Html.Raw(ConvertToJson(detailMasterPipaEdit.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { DetailMasterPipa: currentTable } });
+var currentPageID = ew.PAGE_ID = "edit";
+var currentForm;
+var fDetailMasterPipaedit;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("fDetailMasterPipaedit")
+        .setPageId("edit")
+
+        // Add fields
+        .setFields([
+
+            ["idPipa", [fields.idPipa.visible && fields.idPipa.required ? ew.Validators.required(fields.idPipa.caption) : null], fields.idPipa.isInvalid],
+            ["idPlantTujuan", [fields.idPlantTujuan.visible && fields.idPlantTujuan.required ? ew.Validators.required(fields.idPlantTujuan.caption) : null], fields.idPlantTujuan.isInvalid],
+            ["Panjang", [fields.Panjang.visible && fields.Panjang.required ? ew.Validators.required(fields.Panjang.caption) : null], fields.Panjang.isInvalid],
+            ["Diameter", [fields.Diameter.visible && fields.Diameter.required ? ew.Validators.required(fields.Diameter.caption) : null], fields.Diameter.isInvalid],
+            ["Volume", [fields.Volume.visible && fields.Volume.required ? ew.Validators.required(fields.Volume.caption) : null], fields.Volume.isInvalid]
+        ])
+
+        // Form_CustomValidate
+        .setCustomValidate(
+            function(fobj) { // DO NOT CHANGE THIS LINE!
+                    // Your custom validation code here, return false if invalid.
+                    return true;
+                }
+        )
+
+        // Use JavaScript validation or not
+        .setValidateRequired(ew.CLIENT_VALIDATE)
+
+        // Dynamic selection lists
+        .setLists({
+            "idPipa": @Html.Raw(detailMasterPipaEdit.idPipa.ToClientList(detailMasterPipaEdit)),
+            "idPlantTujuan": @Html.Raw(detailMasterPipaEdit.idPlantTujuan.ToClientList(detailMasterPipaEdit)),
+        })
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Client script
+    $("#x_Panjang, #x_Diameter, #x_Volume")
+        .attr('inputmode', 'numeric')
+        .on('input', function () {
+            let val = $(this).val();
+            let isNegative = val.startsWith('-');
+            val = val.replace(',', '.');
+            val = val.replace(/[^0-9.]/g, '');
+            const parts = val.split('.');
+            if (parts.length > 2) {
+                val = parts[0] + '.' + parts.slice(1).join('');
+            }
+            if (isNegative) {
+                val = '-' + val;
+            }
+            $(this).val(val);
+        });
+});
+</script>
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+<input type="hidden" name="action" id="action" value="update">
+<input type="hidden" name="modal" value="@ConvertToInt(detailMasterPipaEdit.IsModal)">
+@if (IsJsonResponse()) {
+<input type="hidden" name="json" value="1">
+}
+<input type="hidden" name="@(detailMasterPipaEdit.OldKeyName)" value="@Html.Raw(detailMasterPipaEdit.OldKey)">
+<div class="ew-edit-div"><!-- page* -->
+@if (detailMasterPipaEdit.idPipa.Visible) { // detailMasterPipaEdit.idPipa.Visible (begin)
+    <div id="r_idPipa" @Html.Raw(detailMasterPipaEdit.idPipa.RowAttributes)>
+        <label id="elh_DetailMasterPipa_idPipa" for="x_idPipa" class="@(detailMasterPipaEdit.LeftColumnClass)">@Html.Raw(detailMasterPipaEdit.idPipa.Caption)@Html.Raw(detailMasterPipaEdit.idPipa.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(detailMasterPipaEdit.RightColumnClass)"><div @Html.Raw(detailMasterPipaEdit.idPipa.CellAttributes)>
+<span id="el_DetailMasterPipa_idPipa">
+    <select
+        id="x_idPipa"
+        name="x_idPipa"
+        class="form-select ew-select@(detailMasterPipaEdit.idPipa.IsInvalidClass)"
+        data-select2-id="fDetailMasterPipaedit_x_idPipa"
+        data-table="DetailMasterPipa"
+        data-field="x_idPipa"
+        data-value-separator="@(detailMasterPipaEdit.idPipa.DisplayValueSeparatorAttribute)"
+        data-placeholder="@(HtmlEncode(detailMasterPipaEdit.idPipa.PlaceHolder))"
+        @Html.Raw(detailMasterPipaEdit.idPipa.EditAttributes)>
+        @(detailMasterPipaEdit.idPipa.SelectOptionListHtml("x_idPipa"))
+    </select>
+    @Html.Raw(detailMasterPipaEdit.idPipa.GetCustomMessage)
+    <div class="invalid-feedback">@Html.Raw(detailMasterPipaEdit.idPipa.GetErrorMessage())</div>
+@Html.Raw(detailMasterPipaEdit.idPipa.Lookup.GetParamTag(detailMasterPipaEdit, "p_x_idPipa"))
+<script>
+loadjs.ready("fDetailMasterPipaedit", function() {
+    var options = { name: "x_idPipa", selectId: "fDetailMasterPipaedit_x_idPipa" },
+        el = document.querySelector("select[data-select2-id='" + options.selectId + "']");
+    if (!el)
+        return;
+    options.closeOnSelect = !options.multiple;
+    options.dropdownParent = el.closest("#ew-modal-dialog, #ew-add-opt-dialog");
+    if (fDetailMasterPipaedit.lists.idPipa?.lookupOptions.length) {
+        options.data = { id: "x_idPipa", form: "fDetailMasterPipaedit" };
+    } else {
+        options.ajax = { id: "x_idPipa", form: "fDetailMasterPipaedit", limit: ew.LOOKUP_PAGE_SIZE };
+    }
+    options.minimumInputLength = ew.selectMinimumInputLength;
+    options = Object.assign({}, ew.selectOptions, options, ew.vars.tables.DetailMasterPipa.fields.idPipa.selectOptions);
+    ew.createSelect(options);
+});
+</script>
+</span>
+</div></div>
+    </div>
+} @* detailMasterPipaEdit.idPipa.Visible (end) *@
+@if (detailMasterPipaEdit.idPlantTujuan.Visible) { // detailMasterPipaEdit.idPlantTujuan.Visible (begin)
+    <div id="r_idPlantTujuan" @Html.Raw(detailMasterPipaEdit.idPlantTujuan.RowAttributes)>
+        <label id="elh_DetailMasterPipa_idPlantTujuan" for="x_idPlantTujuan" class="@(detailMasterPipaEdit.LeftColumnClass)">@Html.Raw(detailMasterPipaEdit.idPlantTujuan.Caption)@Html.Raw(detailMasterPipaEdit.idPlantTujuan.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(detailMasterPipaEdit.RightColumnClass)"><div @Html.Raw(detailMasterPipaEdit.idPlantTujuan.CellAttributes)>
+<span id="el_DetailMasterPipa_idPlantTujuan">
+    <select
+        id="x_idPlantTujuan"
+        name="x_idPlantTujuan"
+        class="form-select ew-select@(detailMasterPipaEdit.idPlantTujuan.IsInvalidClass)"
+        data-select2-id="fDetailMasterPipaedit_x_idPlantTujuan"
+        data-table="DetailMasterPipa"
+        data-field="x_idPlantTujuan"
+        data-value-separator="@(detailMasterPipaEdit.idPlantTujuan.DisplayValueSeparatorAttribute)"
+        data-placeholder="@(HtmlEncode(detailMasterPipaEdit.idPlantTujuan.PlaceHolder))"
+        @Html.Raw(detailMasterPipaEdit.idPlantTujuan.EditAttributes)>
+        @(detailMasterPipaEdit.idPlantTujuan.SelectOptionListHtml("x_idPlantTujuan"))
+    </select>
+    @Html.Raw(detailMasterPipaEdit.idPlantTujuan.GetCustomMessage)
+    <div class="invalid-feedback">@Html.Raw(detailMasterPipaEdit.idPlantTujuan.GetErrorMessage())</div>
+@Html.Raw(detailMasterPipaEdit.idPlantTujuan.Lookup.GetParamTag(detailMasterPipaEdit, "p_x_idPlantTujuan"))
+<script>
+loadjs.ready("fDetailMasterPipaedit", function() {
+    var options = { name: "x_idPlantTujuan", selectId: "fDetailMasterPipaedit_x_idPlantTujuan" },
+        el = document.querySelector("select[data-select2-id='" + options.selectId + "']");
+    if (!el)
+        return;
+    options.closeOnSelect = !options.multiple;
+    options.dropdownParent = el.closest("#ew-modal-dialog, #ew-add-opt-dialog");
+    if (fDetailMasterPipaedit.lists.idPlantTujuan?.lookupOptions.length) {
+        options.data = { id: "x_idPlantTujuan", form: "fDetailMasterPipaedit" };
+    } else {
+        options.ajax = { id: "x_idPlantTujuan", form: "fDetailMasterPipaedit", limit: ew.LOOKUP_PAGE_SIZE };
+    }
+    options.minimumInputLength = ew.selectMinimumInputLength;
+    options = Object.assign({}, ew.selectOptions, options, ew.vars.tables.DetailMasterPipa.fields.idPlantTujuan.selectOptions);
+    ew.createSelect(options);
+});
+</script>
+</span>
+</div></div>
+    </div>
+} @* detailMasterPipaEdit.idPlantTujuan.Visible (end) *@
+@if (detailMasterPipaEdit.Panjang.Visible) { // detailMasterPipaEdit.Panjang.Visible (begin)
+    <div id="r_Panjang" @Html.Raw(detailMasterPipaEdit.Panjang.RowAttributes)>
+        <label id="elh_DetailMasterPipa_Panjang" for="x_Panjang" class="@(detailMasterPipaEdit.LeftColumnClass)">@Html.Raw(detailMasterPipaEdit.Panjang.Caption)@Html.Raw(detailMasterPipaEdit.Panjang.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(detailMasterPipaEdit.RightColumnClass)"><div @Html.Raw(detailMasterPipaEdit.Panjang.CellAttributes)>
+<span id="el_DetailMasterPipa_Panjang">
+<input type="@(detailMasterPipaEdit.Panjang.InputTextType)" name="x_Panjang" id="x_Panjang" data-table="DetailMasterPipa" data-field="x_Panjang" value="@Html.Raw(detailMasterPipaEdit.Panjang.EditValue)" size="30" maxlength="100" placeholder="@Html.Raw(HtmlEncode(detailMasterPipaEdit.Panjang.PlaceHolder))" data-format-pattern="@(detailMasterPipaEdit.Panjang.FormatPattern)"@Html.Raw(detailMasterPipaEdit.Panjang.EditAttributes) aria-describedby="x_Panjang_help">
+@Html.Raw(detailMasterPipaEdit.Panjang.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(detailMasterPipaEdit.Panjang.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* detailMasterPipaEdit.Panjang.Visible (end) *@
+@if (detailMasterPipaEdit.Diameter.Visible) { // detailMasterPipaEdit.Diameter.Visible (begin)
+    <div id="r_Diameter" @Html.Raw(detailMasterPipaEdit.Diameter.RowAttributes)>
+        <label id="elh_DetailMasterPipa_Diameter" for="x_Diameter" class="@(detailMasterPipaEdit.LeftColumnClass)">@Html.Raw(detailMasterPipaEdit.Diameter.Caption)@Html.Raw(detailMasterPipaEdit.Diameter.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(detailMasterPipaEdit.RightColumnClass)"><div @Html.Raw(detailMasterPipaEdit.Diameter.CellAttributes)>
+<span id="el_DetailMasterPipa_Diameter">
+<input type="@(detailMasterPipaEdit.Diameter.InputTextType)" name="x_Diameter" id="x_Diameter" data-table="DetailMasterPipa" data-field="x_Diameter" value="@Html.Raw(detailMasterPipaEdit.Diameter.EditValue)" size="30" maxlength="100" placeholder="@Html.Raw(HtmlEncode(detailMasterPipaEdit.Diameter.PlaceHolder))" data-format-pattern="@(detailMasterPipaEdit.Diameter.FormatPattern)"@Html.Raw(detailMasterPipaEdit.Diameter.EditAttributes) aria-describedby="x_Diameter_help">
+@Html.Raw(detailMasterPipaEdit.Diameter.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(detailMasterPipaEdit.Diameter.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* detailMasterPipaEdit.Diameter.Visible (end) *@
+@if (detailMasterPipaEdit.Volume.Visible) { // detailMasterPipaEdit.Volume.Visible (begin)
+    <div id="r_Volume" @Html.Raw(detailMasterPipaEdit.Volume.RowAttributes)>
+        <label id="elh_DetailMasterPipa_Volume" for="x_Volume" class="@(detailMasterPipaEdit.LeftColumnClass)">@Html.Raw(detailMasterPipaEdit.Volume.Caption)@Html.Raw(detailMasterPipaEdit.Volume.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(detailMasterPipaEdit.RightColumnClass)"><div @Html.Raw(detailMasterPipaEdit.Volume.CellAttributes)>
+<span id="el_DetailMasterPipa_Volume">
+<input type="@(detailMasterPipaEdit.Volume.InputTextType)" name="x_Volume" id="x_Volume" data-table="DetailMasterPipa" data-field="x_Volume" value="@Html.Raw(detailMasterPipaEdit.Volume.EditValue)" size="30" maxlength="100" placeholder="@Html.Raw(HtmlEncode(detailMasterPipaEdit.Volume.PlaceHolder))" data-format-pattern="@(detailMasterPipaEdit.Volume.FormatPattern)"@Html.Raw(detailMasterPipaEdit.Volume.EditAttributes) aria-describedby="x_Volume_help">
+@Html.Raw(detailMasterPipaEdit.Volume.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(detailMasterPipaEdit.Volume.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* detailMasterPipaEdit.Volume.Visible (end) *@
+</div><!-- /page* -->
+    <input type="hidden" data-table="DetailMasterPipa" data-field="x_id" data-hidden="1" name="x_id" id="x_id" value="@Html.Raw(HtmlEncode(detailMasterPipaEdit.id.CurrentValue))">
+@{ detailMasterPipaEdit.CloseRecordset(); }
+@Html.Raw(detailMasterPipaEdit.IsModal ? "<template class=\"ew-modal-buttons\">" : "<div class=\"row ew-buttons\">")<!-- buttons .row -->
+    <div class="@(detailMasterPipaEdit.OffsetColumnClass)"><!-- buttons offset -->
+    <button class="btn btn-primary ew-btn" name="btn-action" id="btn-action" type="submit" form="fDetailMasterPipaedit">@Html.Raw(Language.Phrase("SaveBtn"))</button>
+@if (IsJsonResponse()) {
+    <button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" data-bs-dismiss="modal">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+} else {
+    <button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" form="fDetailMasterPipaedit" data-href="@AppPath(detailMasterPipaEdit.ReturnUrl)">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+}
+    </div><!-- /buttons offset -->
+@Html.Raw(detailMasterPipaEdit.IsModal ? "</template>" : "</div>")<!-- /buttons .row -->
+</form>
+</main>
+@detailMasterPipaEdit.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("DetailMasterPipa");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Write your table-specific startup script here
+    // document.write("page loaded");
+});
+</script>

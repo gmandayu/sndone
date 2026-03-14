@@ -1,0 +1,134 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (masterToolsEdit.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = masterToolsEdit.UseLayout ? "_Layout" : "";
+}
+@masterToolsEdit.ShowPageHeader()
+@masterToolsEdit.ShowMessages()
+<main class="edit">
+<form name="fMasterToolsedit" id="fMasterToolsedit" class="@(masterToolsEdit.FormClassName)" action="@AppPath(CurrentPageName())" method="post" novalidate autocomplete="off">
+<script>
+var currentTable = @Html.Raw(ConvertToJson(masterToolsEdit.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { MasterTools: currentTable } });
+var currentPageID = ew.PAGE_ID = "edit";
+var currentForm;
+var fMasterToolsedit;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("fMasterToolsedit")
+        .setPageId("edit")
+
+        // Add fields
+        .setFields([
+
+            ["IdTools", [fields.IdTools.visible && fields.IdTools.required ? ew.Validators.required(fields.IdTools.caption) : null], fields.IdTools.isInvalid],
+            ["NamaTools", [fields.NamaTools.visible && fields.NamaTools.required ? ew.Validators.required(fields.NamaTools.caption) : null], fields.NamaTools.isInvalid]
+        ])
+
+        // Form_CustomValidate
+        .setCustomValidate(
+            function(fobj) { // DO NOT CHANGE THIS LINE!
+                    // Your custom validation code here, return false if invalid.
+                    return true;
+                }
+        )
+
+        // Use JavaScript validation or not
+        .setValidateRequired(ew.CLIENT_VALIDATE)
+
+        // Dynamic selection lists
+        .setLists({
+        })
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Client script
+    $('#fMasterToolsedit').on('submit', function (e) {
+        e.preventDefault();
+        showLoading();
+        setTimeout(() => {
+            hideLoading();
+        }, 3000);
+        this.requestSubmit();
+    });
+});
+</script>
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+<input type="hidden" name="action" id="action" value="update">
+<input type="hidden" name="modal" value="@ConvertToInt(masterToolsEdit.IsModal)">
+@if (IsJsonResponse()) {
+<input type="hidden" name="json" value="1">
+}
+<input type="hidden" name="@(masterToolsEdit.OldKeyName)" value="@Html.Raw(masterToolsEdit.OldKey)">
+<div class="ew-edit-div"><!-- page* -->
+@if (masterToolsEdit.IdTools.Visible) { // masterToolsEdit.IdTools.Visible (begin)
+    <div id="r_IdTools" @Html.Raw(masterToolsEdit.IdTools.RowAttributes)>
+        <label id="elh_MasterTools_IdTools" class="@(masterToolsEdit.LeftColumnClass)">@Html.Raw(masterToolsEdit.IdTools.Caption)@Html.Raw(masterToolsEdit.IdTools.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(masterToolsEdit.RightColumnClass)"><div @Html.Raw(masterToolsEdit.IdTools.CellAttributes)>
+<span id="el_MasterTools_IdTools">
+<span @Html.Raw(masterToolsEdit.IdTools.ViewAttributes)>
+<input type="text" readonly class="form-control-plaintext" value="@Html.Raw(RemoveHtml(ConvertToString(masterToolsEdit.IdTools.EditValue)))"></span>
+<input type="hidden" data-table="MasterTools" data-field="x_IdTools" data-hidden="1" name="x_IdTools" id="x_IdTools" value="@Html.Raw(HtmlEncode(masterToolsEdit.IdTools.CurrentValue))">
+</span>
+</div></div>
+    </div>
+} @* masterToolsEdit.IdTools.Visible (end) *@
+@if (masterToolsEdit.NamaTools.Visible) { // masterToolsEdit.NamaTools.Visible (begin)
+    <div id="r_NamaTools" @Html.Raw(masterToolsEdit.NamaTools.RowAttributes)>
+        <label id="elh_MasterTools_NamaTools" for="x_NamaTools" class="@(masterToolsEdit.LeftColumnClass)">@Html.Raw(masterToolsEdit.NamaTools.Caption)@Html.Raw(masterToolsEdit.NamaTools.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(masterToolsEdit.RightColumnClass)"><div @Html.Raw(masterToolsEdit.NamaTools.CellAttributes)>
+<span id="el_MasterTools_NamaTools">
+<input type="@(masterToolsEdit.NamaTools.InputTextType)" name="x_NamaTools" id="x_NamaTools" data-table="MasterTools" data-field="x_NamaTools" value="@Html.Raw(masterToolsEdit.NamaTools.EditValue)" size="30" maxlength="100" placeholder="@Html.Raw(HtmlEncode(masterToolsEdit.NamaTools.PlaceHolder))" data-format-pattern="@(masterToolsEdit.NamaTools.FormatPattern)"@Html.Raw(masterToolsEdit.NamaTools.EditAttributes) aria-describedby="x_NamaTools_help">
+@Html.Raw(masterToolsEdit.NamaTools.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(masterToolsEdit.NamaTools.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* masterToolsEdit.NamaTools.Visible (end) *@
+</div><!-- /page* -->
+@{ masterToolsEdit.CloseRecordset(); }
+@Html.Raw(masterToolsEdit.IsModal ? "<template class=\"ew-modal-buttons\">" : "<div class=\"row ew-buttons\">")<!-- buttons .row -->
+    <div class="@(masterToolsEdit.OffsetColumnClass)"><!-- buttons offset -->
+    <button class="btn btn-primary ew-btn" name="btn-action" id="btn-action" type="submit" form="fMasterToolsedit">@Html.Raw(Language.Phrase("SaveBtn"))</button>
+@if (IsJsonResponse()) {
+    <button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" data-bs-dismiss="modal">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+} else {
+    <button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" form="fMasterToolsedit" data-href="@AppPath(masterToolsEdit.ReturnUrl)">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+}
+    </div><!-- /buttons offset -->
+@Html.Raw(masterToolsEdit.IsModal ? "</template>" : "</div>")<!-- /buttons .row -->
+</form>
+</main>
+@masterToolsEdit.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("MasterTools");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Write your table-specific startup script here
+    // document.write("page loaded");
+});
+</script>

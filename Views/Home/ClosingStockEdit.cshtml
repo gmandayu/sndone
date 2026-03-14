@@ -1,0 +1,255 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (closingStockEdit.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = closingStockEdit.UseLayout ? "_Layout" : "";
+}
+@closingStockEdit.ShowPageHeader()
+@closingStockEdit.ShowMessages()
+<main class="edit">
+<form name="fClosingStockedit" id="fClosingStockedit" class="@(closingStockEdit.FormClassName)" action="@AppPath(CurrentPageName())" method="post" novalidate autocomplete="off">
+<script>
+var currentTable = @Html.Raw(ConvertToJson(closingStockEdit.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { ClosingStock: currentTable } });
+var currentPageID = ew.PAGE_ID = "edit";
+var currentForm;
+var fClosingStockedit;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("fClosingStockedit")
+        .setPageId("edit")
+
+        // Add fields
+        .setFields([
+
+            ["NomorClosingStock", [fields.NomorClosingStock.visible && fields.NomorClosingStock.required ? ew.Validators.required(fields.NomorClosingStock.caption) : null], fields.NomorClosingStock.isInvalid],
+            ["Plant", [fields.Plant.visible && fields.Plant.required ? ew.Validators.required(fields.Plant.caption) : null], fields.Plant.isInvalid],
+            ["TipeProdukSTS", [fields.TipeProdukSTS.visible && fields.TipeProdukSTS.required ? ew.Validators.required(fields.TipeProdukSTS.caption) : null], fields.TipeProdukSTS.isInvalid],
+            ["IdTangki", [fields.IdTangki.visible && fields.IdTangki.required ? ew.Validators.required(fields.IdTangki.caption) : null], fields.IdTangki.isInvalid],
+            ["TanggalClosingStock", [fields.TanggalClosingStock.visible && fields.TanggalClosingStock.required ? ew.Validators.required(fields.TanggalClosingStock.caption) : null], fields.TanggalClosingStock.isInvalid],
+            ["Produk", [fields.Produk.visible && fields.Produk.required ? ew.Validators.required(fields.Produk.caption) : null], fields.Produk.isInvalid],
+            ["StatusProses", [fields.StatusProses.visible && fields.StatusProses.required ? ew.Validators.required(fields.StatusProses.caption) : null], fields.StatusProses.isInvalid],
+            ["PersentaseProgress", [fields.PersentaseProgress.visible && fields.PersentaseProgress.required ? ew.Validators.required(fields.PersentaseProgress.caption) : null], fields.PersentaseProgress.isInvalid],
+            ["Catatan", [fields.Catatan.visible && fields.Catatan.required ? ew.Validators.required(fields.Catatan.caption) : null], fields.Catatan.isInvalid],
+            ["DiperbaruiOleh", [fields.DiperbaruiOleh.visible && fields.DiperbaruiOleh.required ? ew.Validators.required(fields.DiperbaruiOleh.caption) : null], fields.DiperbaruiOleh.isInvalid],
+            ["TanggalDiperbarui", [fields.TanggalDiperbarui.visible && fields.TanggalDiperbarui.required ? ew.Validators.required(fields.TanggalDiperbarui.caption) : null], fields.TanggalDiperbarui.isInvalid],
+            ["PlantForLookup", [fields.PlantForLookup.visible && fields.PlantForLookup.required ? ew.Validators.required(fields.PlantForLookup.caption) : null], fields.PlantForLookup.isInvalid],
+            ["LookupJenisPlant", [fields.LookupJenisPlant.visible && fields.LookupJenisPlant.required ? ew.Validators.required(fields.LookupJenisPlant.caption) : null], fields.LookupJenisPlant.isInvalid]
+        ])
+
+        // Form_CustomValidate
+        .setCustomValidate(
+            function(fobj) { // DO NOT CHANGE THIS LINE!
+                    // Your custom validation code here, return false if invalid.
+                    return true;
+                }
+        )
+
+        // Use JavaScript validation or not
+        .setValidateRequired(ew.CLIENT_VALIDATE)
+
+        // Dynamic selection lists
+        .setLists({
+            "Produk": @Html.Raw(closingStockEdit.Produk.ToClientList(closingStockEdit)),
+        })
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Client script
+    $('#fClosingStockedit').on('submit', function (e) {
+        e.preventDefault();
+        showLoading();
+        setTimeout(() => {
+            hideLoading();
+        }, 3000);
+        this.requestSubmit();
+    });
+});
+</script>
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+<input type="hidden" name="action" id="action" value="update">
+<input type="hidden" name="modal" value="@ConvertToInt(closingStockEdit.IsModal)">
+@if (IsJsonResponse()) {
+<input type="hidden" name="json" value="1">
+}
+<input type="hidden" name="@(closingStockEdit.OldKeyName)" value="@Html.Raw(closingStockEdit.OldKey)">
+<div class="ew-edit-div"><!-- page* -->
+@if (closingStockEdit.NomorClosingStock.Visible) { // closingStockEdit.NomorClosingStock.Visible (begin)
+    <div id="r_NomorClosingStock" @Html.Raw(closingStockEdit.NomorClosingStock.RowAttributes)>
+        <label id="elh_ClosingStock_NomorClosingStock" for="x_NomorClosingStock" class="@(closingStockEdit.LeftColumnClass)">@Html.Raw(closingStockEdit.NomorClosingStock.Caption)@Html.Raw(closingStockEdit.NomorClosingStock.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(closingStockEdit.RightColumnClass)"><div @Html.Raw(closingStockEdit.NomorClosingStock.CellAttributes)>
+<span id="el_ClosingStock_NomorClosingStock">
+<span @Html.Raw(closingStockEdit.NomorClosingStock.ViewAttributes)>
+<input type="text" readonly class="form-control-plaintext" value="@Html.Raw(RemoveHtml(ConvertToString(closingStockEdit.NomorClosingStock.EditValue)))"></span>
+<input type="hidden" data-table="ClosingStock" data-field="x_NomorClosingStock" data-hidden="1" name="x_NomorClosingStock" id="x_NomorClosingStock" value="@Html.Raw(HtmlEncode(closingStockEdit.NomorClosingStock.CurrentValue))">
+</span>
+</div></div>
+    </div>
+} @* closingStockEdit.NomorClosingStock.Visible (end) *@
+@if (closingStockEdit.Plant.Visible) { // closingStockEdit.Plant.Visible (begin)
+    <div id="r_Plant" @Html.Raw(closingStockEdit.Plant.RowAttributes)>
+        <label id="elh_ClosingStock_Plant" class="@(closingStockEdit.LeftColumnClass)">@Html.Raw(closingStockEdit.Plant.Caption)@Html.Raw(closingStockEdit.Plant.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(closingStockEdit.RightColumnClass)"><div @Html.Raw(closingStockEdit.Plant.CellAttributes)>
+<span id="el_ClosingStock_Plant">
+<span @Html.Raw(closingStockEdit.Plant.ViewAttributes)>
+<span class="form-control-plaintext">@Html.Raw(closingStockEdit.Plant.DisplayValue(closingStockEdit.Plant.EditValue))</span></span>
+<input type="hidden" data-table="ClosingStock" data-field="x_Plant" data-hidden="1" name="x_Plant" id="x_Plant" value="@Html.Raw(HtmlEncode(closingStockEdit.Plant.CurrentValue))">
+</span>
+</div></div>
+    </div>
+} @* closingStockEdit.Plant.Visible (end) *@
+@if (closingStockEdit.TipeProdukSTS.Visible) { // closingStockEdit.TipeProdukSTS.Visible (begin)
+    <div id="r_TipeProdukSTS" @Html.Raw(closingStockEdit.TipeProdukSTS.RowAttributes)>
+        <label id="elh_ClosingStock_TipeProdukSTS" for="x_TipeProdukSTS" class="@(closingStockEdit.LeftColumnClass)">@Html.Raw(closingStockEdit.TipeProdukSTS.Caption)@Html.Raw(closingStockEdit.TipeProdukSTS.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(closingStockEdit.RightColumnClass)"><div @Html.Raw(closingStockEdit.TipeProdukSTS.CellAttributes)>
+<span id="el_ClosingStock_TipeProdukSTS">
+<span @Html.Raw(closingStockEdit.TipeProdukSTS.ViewAttributes)>
+<span class="form-control-plaintext">@Html.Raw(closingStockEdit.TipeProdukSTS.DisplayValue(closingStockEdit.TipeProdukSTS.EditValue))</span></span>
+<input type="hidden" data-table="ClosingStock" data-field="x_TipeProdukSTS" data-hidden="1" name="x_TipeProdukSTS" id="x_TipeProdukSTS" value="@Html.Raw(HtmlEncode(closingStockEdit.TipeProdukSTS.CurrentValue))">
+</span>
+</div></div>
+    </div>
+} @* closingStockEdit.TipeProdukSTS.Visible (end) *@
+@if (closingStockEdit.IdTangki.Visible) { // closingStockEdit.IdTangki.Visible (begin)
+    <div id="r_IdTangki" @Html.Raw(closingStockEdit.IdTangki.RowAttributes)>
+        <label id="elh_ClosingStock_IdTangki" for="x_IdTangki" class="@(closingStockEdit.LeftColumnClass)">@Html.Raw(closingStockEdit.IdTangki.Caption)@Html.Raw(closingStockEdit.IdTangki.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(closingStockEdit.RightColumnClass)"><div @Html.Raw(closingStockEdit.IdTangki.CellAttributes)>
+<span id="el_ClosingStock_IdTangki">
+<span @Html.Raw(closingStockEdit.IdTangki.ViewAttributes)>
+<span class="form-control-plaintext">@Html.Raw(closingStockEdit.IdTangki.DisplayValue(closingStockEdit.IdTangki.EditValue))</span></span>
+<input type="hidden" data-table="ClosingStock" data-field="x_IdTangki" data-hidden="1" name="x_IdTangki" id="x_IdTangki" value="@Html.Raw(HtmlEncode(closingStockEdit.IdTangki.CurrentValue))">
+</span>
+</div></div>
+    </div>
+} @* closingStockEdit.IdTangki.Visible (end) *@
+@if (closingStockEdit.TanggalClosingStock.Visible) { // closingStockEdit.TanggalClosingStock.Visible (begin)
+    <div id="r_TanggalClosingStock" @Html.Raw(closingStockEdit.TanggalClosingStock.RowAttributes)>
+        <label id="elh_ClosingStock_TanggalClosingStock" for="x_TanggalClosingStock" class="@(closingStockEdit.LeftColumnClass)">@Html.Raw(closingStockEdit.TanggalClosingStock.Caption)@Html.Raw(closingStockEdit.TanggalClosingStock.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(closingStockEdit.RightColumnClass)"><div @Html.Raw(closingStockEdit.TanggalClosingStock.CellAttributes)>
+<span id="el_ClosingStock_TanggalClosingStock">
+<span @Html.Raw(closingStockEdit.TanggalClosingStock.ViewAttributes)>
+<input type="text" readonly class="form-control-plaintext" value="@Html.Raw(RemoveHtml(ConvertToString(closingStockEdit.TanggalClosingStock.EditValue)))"></span>
+<input type="hidden" data-table="ClosingStock" data-field="x_TanggalClosingStock" data-hidden="1" name="x_TanggalClosingStock" id="x_TanggalClosingStock" value="@Html.Raw(HtmlEncode(closingStockEdit.TanggalClosingStock.CurrentValue))">
+</span>
+</div></div>
+    </div>
+} @* closingStockEdit.TanggalClosingStock.Visible (end) *@
+@if (closingStockEdit.Produk.Visible) { // closingStockEdit.Produk.Visible (begin)
+    <div id="r_Produk" @Html.Raw(closingStockEdit.Produk.RowAttributes)>
+        <label id="elh_ClosingStock_Produk" for="x_Produk" class="@(closingStockEdit.LeftColumnClass)">@Html.Raw(closingStockEdit.Produk.Caption)@Html.Raw(closingStockEdit.Produk.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(closingStockEdit.RightColumnClass)"><div @Html.Raw(closingStockEdit.Produk.CellAttributes)>
+<span id="el_ClosingStock_Produk">
+    <select
+        id="x_Produk"
+        name="x_Produk"
+        class="form-select ew-select@(closingStockEdit.Produk.IsInvalidClass)"
+        data-select2-id="fClosingStockedit_x_Produk"
+        data-table="ClosingStock"
+        data-field="x_Produk"
+        data-value-separator="@(closingStockEdit.Produk.DisplayValueSeparatorAttribute)"
+        data-placeholder="@(HtmlEncode(closingStockEdit.Produk.PlaceHolder))"
+        @Html.Raw(closingStockEdit.Produk.EditAttributes)>
+        @(closingStockEdit.Produk.SelectOptionListHtml("x_Produk"))
+    </select>
+    @Html.Raw(closingStockEdit.Produk.GetCustomMessage)
+    <div class="invalid-feedback">@Html.Raw(closingStockEdit.Produk.GetErrorMessage())</div>
+<script>
+loadjs.ready("fClosingStockedit", function() {
+    var options = { name: "x_Produk", selectId: "fClosingStockedit_x_Produk" },
+        el = document.querySelector("select[data-select2-id='" + options.selectId + "']");
+    if (!el)
+        return;
+    options.closeOnSelect = !options.multiple;
+    options.dropdownParent = el.closest("#ew-modal-dialog, #ew-add-opt-dialog");
+    if (fClosingStockedit.lists.Produk?.lookupOptions.length) {
+        options.data = { id: "x_Produk", form: "fClosingStockedit" };
+    } else {
+        options.ajax = { id: "x_Produk", form: "fClosingStockedit", limit: ew.LOOKUP_PAGE_SIZE };
+    }
+    options.minimumInputLength = ew.selectMinimumInputLength;
+    options = Object.assign({}, ew.selectOptions, options, ew.vars.tables.ClosingStock.fields.Produk.selectOptions);
+    ew.createSelect(options);
+});
+</script>
+</span>
+</div></div>
+    </div>
+} @* closingStockEdit.Produk.Visible (end) *@
+@if (closingStockEdit.Catatan.Visible) { // closingStockEdit.Catatan.Visible (begin)
+    <div id="r_Catatan" @Html.Raw(closingStockEdit.Catatan.RowAttributes)>
+        <label id="elh_ClosingStock_Catatan" for="x_Catatan" class="@(closingStockEdit.LeftColumnClass)">@Html.Raw(closingStockEdit.Catatan.Caption)@Html.Raw(closingStockEdit.Catatan.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(closingStockEdit.RightColumnClass)"><div @Html.Raw(closingStockEdit.Catatan.CellAttributes)>
+<span id="el_ClosingStock_Catatan">
+<textarea data-table="ClosingStock" data-field="x_Catatan" name="x_Catatan" id="x_Catatan" cols="35" rows="4" placeholder="@Html.Raw(HtmlEncode(closingStockEdit.Catatan.PlaceHolder))"@Html.Raw(closingStockEdit.Catatan.EditAttributes) aria-describedby="x_Catatan_help">@(closingStockEdit.Catatan.EditValue)</textarea>
+@Html.Raw(closingStockEdit.Catatan.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(closingStockEdit.Catatan.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* closingStockEdit.Catatan.Visible (end) *@
+</div><!-- /page* -->
+<span id="el_ClosingStock_StatusProses">
+<input type="hidden" data-table="ClosingStock" data-field="x_StatusProses" data-hidden="1" name="x_StatusProses" id="x_StatusProses" value="@Html.Raw(HtmlEncode(closingStockEdit.StatusProses.CurrentValue))">
+</span>
+<span id="el_ClosingStock_PersentaseProgress">
+<input type="hidden" data-table="ClosingStock" data-field="x_PersentaseProgress" data-hidden="1" name="x_PersentaseProgress" id="x_PersentaseProgress" value="@Html.Raw(HtmlEncode(closingStockEdit.PersentaseProgress.CurrentValue))">
+</span>
+<span id="el_ClosingStock_PlantForLookup">
+<input type="hidden" data-table="ClosingStock" data-field="x_PlantForLookup" data-hidden="1" name="x_PlantForLookup" id="x_PlantForLookup" value="@Html.Raw(HtmlEncode(closingStockEdit.PlantForLookup.CurrentValue))">
+</span>
+<span id="el_ClosingStock_LookupJenisPlant">
+<input type="hidden" data-table="ClosingStock" data-field="x_LookupJenisPlant" data-hidden="1" name="x_LookupJenisPlant" id="x_LookupJenisPlant" value="@Html.Raw(HtmlEncode(closingStockEdit.LookupJenisPlant.CurrentValue))">
+</span>
+    <input type="hidden" data-table="ClosingStock" data-field="x_IdClosingStock" data-hidden="1" name="x_IdClosingStock" id="x_IdClosingStock" value="@Html.Raw(HtmlEncode(closingStockEdit.IdClosingStock.CurrentValue))">
+@{ closingStockEdit.CloseRecordset(); }
+@Html.Raw(closingStockEdit.IsModal ? "<template class=\"ew-modal-buttons\">" : "<div class=\"row ew-buttons\">")<!-- buttons .row -->
+    <div class="@(closingStockEdit.OffsetColumnClass)"><!-- buttons offset -->
+    <button class="btn btn-primary ew-btn" name="btn-action" id="btn-action" type="submit" form="fClosingStockedit">@Html.Raw(Language.Phrase("SaveBtn"))</button>
+@if (IsJsonResponse()) {
+    <button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" data-bs-dismiss="modal">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+} else {
+    <button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" form="fClosingStockedit" data-href="@AppPath(closingStockEdit.ReturnUrl)">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+}
+    </div><!-- /buttons offset -->
+@Html.Raw(closingStockEdit.IsModal ? "</template>" : "</div>")<!-- /buttons .row -->
+</form>
+</main>
+@closingStockEdit.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("ClosingStock");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Startup script
+    $('#r_PlantForLookup').hide();
+    $('#r_NomorClosingStock').hide();
+    $('#r_LookupJenisPlant').hide();
+    if ($('#x_TipeProdukSTS') != '') {
+        $('#r_TipeProdukSTS').show();
+    } else {
+        $('#r_TipeProdukSTS').hide();
+    }
+});
+</script>

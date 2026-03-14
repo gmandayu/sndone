@@ -1,0 +1,459 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (bukuTamuView.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = bukuTamuView.UseLayout ? "_Layout" : "";
+}
+@if (!bukuTamuView.IsExport()) {
+<div class="btn-toolbar ew-toolbar">
+    @bukuTamuView.ExportOptions.RenderBody()
+    @bukuTamuView.OtherOptions.RenderBody()
+</div>
+}
+@bukuTamuView.ShowPageHeader()
+@bukuTamuView.ShowMessages()
+<main class="view">
+<form name="fBukuTamuview" id="fBukuTamuview" class="ew-form ew-view-form overlay-wrapper" action="@AppPath(CurrentPageName())" method="post" novalidate autocomplete="off">
+@if (!bukuTamuView.IsExport()) {
+<script>
+var currentTable = @Html.Raw(ConvertToJson(bukuTamuView.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { BukuTamu: currentTable } });
+var currentPageID = ew.PAGE_ID = "view";
+var currentForm;
+var fBukuTamuview;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("fBukuTamuview")
+        .setPageId("view")
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Write your client script here, no need to add script tags.
+});
+</script>
+}
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+<input type="hidden" name="modal" value="@ConvertToInt(bukuTamuView.IsModal)">
+<table class="@(bukuTamuView.TableClass)">
+@if (bukuTamuView.NomorBukuTamu.Visible) { // bukuTamuView.NomorBukuTamu.Visible (begin)
+    <tr id="r_NomorBukuTamu" @Html.Raw(bukuTamuView.NomorBukuTamu.RowAttributes)>
+        <td class="@(bukuTamuView.TableLeftColumnClass)"><span id="elh_BukuTamu_NomorBukuTamu">@Html.Raw(bukuTamuView.NomorBukuTamu.Caption)</span></td>
+        <td data-name="NomorBukuTamu" @Html.Raw(bukuTamuView.NomorBukuTamu.CellAttributes)>
+<span id="el_BukuTamu_NomorBukuTamu">
+<span @Html.Raw(bukuTamuView.NomorBukuTamu.ViewAttributes)>
+@Html.Raw(bukuTamuView.NomorBukuTamu.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* bukuTamuView.NomorBukuTamu.Visible (end) *@
+@if (bukuTamuView.LookupPlant.Visible) { // bukuTamuView.LookupPlant.Visible (begin)
+    <tr id="r_LookupPlant" @Html.Raw(bukuTamuView.LookupPlant.RowAttributes)>
+        <td class="@(bukuTamuView.TableLeftColumnClass)"><span id="elh_BukuTamu_LookupPlant">@Html.Raw(bukuTamuView.LookupPlant.Caption)</span></td>
+        <td data-name="LookupPlant" @Html.Raw(bukuTamuView.LookupPlant.CellAttributes)>
+<span id="el_BukuTamu_LookupPlant">
+<span @Html.Raw(bukuTamuView.LookupPlant.ViewAttributes)>
+@Html.Raw(bukuTamuView.LookupPlant.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* bukuTamuView.LookupPlant.Visible (end) *@
+@if (bukuTamuView.Plant.Visible) { // bukuTamuView.Plant.Visible (begin)
+    <tr id="r_Plant" @Html.Raw(bukuTamuView.Plant.RowAttributes)>
+        <td class="@(bukuTamuView.TableLeftColumnClass)"><span id="elh_BukuTamu_Plant">@Html.Raw(bukuTamuView.Plant.Caption)</span></td>
+        <td data-name="Plant" @Html.Raw(bukuTamuView.Plant.CellAttributes)>
+<span id="el_BukuTamu_Plant">
+<span @Html.Raw(bukuTamuView.Plant.ViewAttributes)>
+@Html.Raw(bukuTamuView.Plant.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* bukuTamuView.Plant.Visible (end) *@
+@if (bukuTamuView.Tanggal.Visible) { // bukuTamuView.Tanggal.Visible (begin)
+    <tr id="r_Tanggal" @Html.Raw(bukuTamuView.Tanggal.RowAttributes)>
+        <td class="@(bukuTamuView.TableLeftColumnClass)"><span id="elh_BukuTamu_Tanggal">@Html.Raw(bukuTamuView.Tanggal.Caption)</span></td>
+        <td data-name="Tanggal" @Html.Raw(bukuTamuView.Tanggal.CellAttributes)>
+<span id="el_BukuTamu_Tanggal">
+<span @Html.Raw(bukuTamuView.Tanggal.ViewAttributes)>
+@Html.Raw(bukuTamuView.Tanggal.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* bukuTamuView.Tanggal.Visible (end) *@
+@if (bukuTamuView.StatusZona.Visible) { // bukuTamuView.StatusZona.Visible (begin)
+    <tr id="r_StatusZona" @Html.Raw(bukuTamuView.StatusZona.RowAttributes)>
+        <td class="@(bukuTamuView.TableLeftColumnClass)"><span id="elh_BukuTamu_StatusZona">@Html.Raw(bukuTamuView.StatusZona.Caption)</span></td>
+        <td data-name="StatusZona" @Html.Raw(bukuTamuView.StatusZona.CellAttributes)>
+<span id="el_BukuTamu_StatusZona">
+<span @Html.Raw(bukuTamuView.StatusZona.ViewAttributes)>
+@Html.Raw(bukuTamuView.StatusZona.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* bukuTamuView.StatusZona.Visible (end) *@
+@if (bukuTamuView.Nama.Visible) { // bukuTamuView.Nama.Visible (begin)
+    <tr id="r_Nama" @Html.Raw(bukuTamuView.Nama.RowAttributes)>
+        <td class="@(bukuTamuView.TableLeftColumnClass)"><span id="elh_BukuTamu_Nama">@Html.Raw(bukuTamuView.Nama.Caption)</span></td>
+        <td data-name="Nama" @Html.Raw(bukuTamuView.Nama.CellAttributes)>
+<span id="el_BukuTamu_Nama">
+<span @Html.Raw(bukuTamuView.Nama.ViewAttributes)>
+@Html.Raw(bukuTamuView.Nama.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* bukuTamuView.Nama.Visible (end) *@
+@if (bukuTamuView.AsalPerusahaan.Visible) { // bukuTamuView.AsalPerusahaan.Visible (begin)
+    <tr id="r_AsalPerusahaan" @Html.Raw(bukuTamuView.AsalPerusahaan.RowAttributes)>
+        <td class="@(bukuTamuView.TableLeftColumnClass)"><span id="elh_BukuTamu_AsalPerusahaan">@Html.Raw(bukuTamuView.AsalPerusahaan.Caption)</span></td>
+        <td data-name="AsalPerusahaan" @Html.Raw(bukuTamuView.AsalPerusahaan.CellAttributes)>
+<span id="el_BukuTamu_AsalPerusahaan">
+<span @Html.Raw(bukuTamuView.AsalPerusahaan.ViewAttributes)>
+@Html.Raw(bukuTamuView.AsalPerusahaan.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* bukuTamuView.AsalPerusahaan.Visible (end) *@
+@if (bukuTamuView.Jabatan.Visible) { // bukuTamuView.Jabatan.Visible (begin)
+    <tr id="r_Jabatan" @Html.Raw(bukuTamuView.Jabatan.RowAttributes)>
+        <td class="@(bukuTamuView.TableLeftColumnClass)"><span id="elh_BukuTamu_Jabatan">@Html.Raw(bukuTamuView.Jabatan.Caption)</span></td>
+        <td data-name="Jabatan" @Html.Raw(bukuTamuView.Jabatan.CellAttributes)>
+<span id="el_BukuTamu_Jabatan">
+<span @Html.Raw(bukuTamuView.Jabatan.ViewAttributes)>
+@Html.Raw(bukuTamuView.Jabatan.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* bukuTamuView.Jabatan.Visible (end) *@
+@if (bukuTamuView.FungsiygDikunjungi.Visible) { // bukuTamuView.FungsiygDikunjungi.Visible (begin)
+    <tr id="r_FungsiygDikunjungi" @Html.Raw(bukuTamuView.FungsiygDikunjungi.RowAttributes)>
+        <td class="@(bukuTamuView.TableLeftColumnClass)"><span id="elh_BukuTamu_FungsiygDikunjungi">@Html.Raw(bukuTamuView.FungsiygDikunjungi.Caption)</span></td>
+        <td data-name="FungsiygDikunjungi" @Html.Raw(bukuTamuView.FungsiygDikunjungi.CellAttributes)>
+<span id="el_BukuTamu_FungsiygDikunjungi">
+<span @Html.Raw(bukuTamuView.FungsiygDikunjungi.ViewAttributes)>
+@Html.Raw(bukuTamuView.FungsiygDikunjungi.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* bukuTamuView.FungsiygDikunjungi.Visible (end) *@
+@if (bukuTamuView.MaksudKunjungan.Visible) { // bukuTamuView.MaksudKunjungan.Visible (begin)
+    <tr id="r_MaksudKunjungan" @Html.Raw(bukuTamuView.MaksudKunjungan.RowAttributes)>
+        <td class="@(bukuTamuView.TableLeftColumnClass)"><span id="elh_BukuTamu_MaksudKunjungan">@Html.Raw(bukuTamuView.MaksudKunjungan.Caption)</span></td>
+        <td data-name="MaksudKunjungan" @Html.Raw(bukuTamuView.MaksudKunjungan.CellAttributes)>
+<span id="el_BukuTamu_MaksudKunjungan">
+<span @Html.Raw(bukuTamuView.MaksudKunjungan.ViewAttributes)>
+@Html.Raw(bukuTamuView.MaksudKunjungan.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* bukuTamuView.MaksudKunjungan.Visible (end) *@
+@if (bukuTamuView.TandaPengenal.Visible) { // bukuTamuView.TandaPengenal.Visible (begin)
+    <tr id="r_TandaPengenal" @Html.Raw(bukuTamuView.TandaPengenal.RowAttributes)>
+        <td class="@(bukuTamuView.TableLeftColumnClass)"><span id="elh_BukuTamu_TandaPengenal">@Html.Raw(bukuTamuView.TandaPengenal.Caption)</span></td>
+        <td data-name="TandaPengenal" @Html.Raw(bukuTamuView.TandaPengenal.CellAttributes)>
+<span id="el_BukuTamu_TandaPengenal">
+<span @Html.Raw(bukuTamuView.TandaPengenal.ViewAttributes)>
+@Html.Raw(bukuTamuView.TandaPengenal.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* bukuTamuView.TandaPengenal.Visible (end) *@
+@if (bukuTamuView.TandaTanganDownload.Visible) { // bukuTamuView.TandaTanganDownload.Visible (begin)
+    <tr id="r_TandaTanganDownload" @Html.Raw(bukuTamuView.TandaTanganDownload.RowAttributes)>
+        <td class="@(bukuTamuView.TableLeftColumnClass)"><span id="elh_BukuTamu_TandaTanganDownload">@Html.Raw(bukuTamuView.TandaTanganDownload.Caption)</span></td>
+        <td data-name="TandaTanganDownload" @Html.Raw(bukuTamuView.TandaTanganDownload.CellAttributes)>
+<span id="el_BukuTamu_TandaTanganDownload">
+<span @Html.Raw(bukuTamuView.TandaTanganDownload.ViewAttributes)>
+@Html.Raw(bukuTamuView.TandaTanganDownload.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* bukuTamuView.TandaTanganDownload.Visible (end) *@
+@if (bukuTamuView.Keterangan.Visible) { // bukuTamuView.Keterangan.Visible (begin)
+    <tr id="r_Keterangan" @Html.Raw(bukuTamuView.Keterangan.RowAttributes)>
+        <td class="@(bukuTamuView.TableLeftColumnClass)"><span id="elh_BukuTamu_Keterangan">@Html.Raw(bukuTamuView.Keterangan.Caption)</span></td>
+        <td data-name="Keterangan" @Html.Raw(bukuTamuView.Keterangan.CellAttributes)>
+<span id="el_BukuTamu_Keterangan">
+<span @Html.Raw(bukuTamuView.Keterangan.ViewAttributes)>
+@Html.Raw(bukuTamuView.Keterangan.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* bukuTamuView.Keterangan.Visible (end) *@
+@if (bukuTamuView.PintuUtamaId.Visible) { // bukuTamuView.PintuUtamaId.Visible (begin)
+    <tr id="r_PintuUtamaId" @Html.Raw(bukuTamuView.PintuUtamaId.RowAttributes)>
+        <td class="@(bukuTamuView.TableLeftColumnClass)"><span id="elh_BukuTamu_PintuUtamaId">@Html.Raw(bukuTamuView.PintuUtamaId.Caption)</span></td>
+        <td data-name="PintuUtamaId" @Html.Raw(bukuTamuView.PintuUtamaId.CellAttributes)>
+<span id="el_BukuTamu_PintuUtamaId">
+<span @Html.Raw(bukuTamuView.PintuUtamaId.ViewAttributes)>
+@Html.Raw(bukuTamuView.PintuUtamaId.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* bukuTamuView.PintuUtamaId.Visible (end) *@
+@if (bukuTamuView.PintuUtamaInTanggal.Visible) { // bukuTamuView.PintuUtamaInTanggal.Visible (begin)
+    <tr id="r_PintuUtamaInTanggal" @Html.Raw(bukuTamuView.PintuUtamaInTanggal.RowAttributes)>
+        <td class="@(bukuTamuView.TableLeftColumnClass)"><span id="elh_BukuTamu_PintuUtamaInTanggal">@Html.Raw(bukuTamuView.PintuUtamaInTanggal.Caption)</span></td>
+        <td data-name="PintuUtamaInTanggal" @Html.Raw(bukuTamuView.PintuUtamaInTanggal.CellAttributes)>
+<span id="el_BukuTamu_PintuUtamaInTanggal">
+<span @Html.Raw(bukuTamuView.PintuUtamaInTanggal.ViewAttributes)>
+@Html.Raw(bukuTamuView.PintuUtamaInTanggal.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* bukuTamuView.PintuUtamaInTanggal.Visible (end) *@
+@if (bukuTamuView.PintuUtamaInFotoDownload.Visible) { // bukuTamuView.PintuUtamaInFotoDownload.Visible (begin)
+    <tr id="r_PintuUtamaInFotoDownload" @Html.Raw(bukuTamuView.PintuUtamaInFotoDownload.RowAttributes)>
+        <td class="@(bukuTamuView.TableLeftColumnClass)"><span id="elh_BukuTamu_PintuUtamaInFotoDownload">@Html.Raw(bukuTamuView.PintuUtamaInFotoDownload.Caption)</span></td>
+        <td data-name="PintuUtamaInFotoDownload" @Html.Raw(bukuTamuView.PintuUtamaInFotoDownload.CellAttributes)>
+<span id="el_BukuTamu_PintuUtamaInFotoDownload">
+<span @Html.Raw(bukuTamuView.PintuUtamaInFotoDownload.ViewAttributes)>
+@Html.Raw(bukuTamuView.PintuUtamaInFotoDownload.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* bukuTamuView.PintuUtamaInFotoDownload.Visible (end) *@
+@if (bukuTamuView.PintuUtamaInUser.Visible) { // bukuTamuView.PintuUtamaInUser.Visible (begin)
+    <tr id="r_PintuUtamaInUser" @Html.Raw(bukuTamuView.PintuUtamaInUser.RowAttributes)>
+        <td class="@(bukuTamuView.TableLeftColumnClass)"><span id="elh_BukuTamu_PintuUtamaInUser">@Html.Raw(bukuTamuView.PintuUtamaInUser.Caption)</span></td>
+        <td data-name="PintuUtamaInUser" @Html.Raw(bukuTamuView.PintuUtamaInUser.CellAttributes)>
+<span id="el_BukuTamu_PintuUtamaInUser">
+<span @Html.Raw(bukuTamuView.PintuUtamaInUser.ViewAttributes)>
+@Html.Raw(bukuTamuView.PintuUtamaInUser.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* bukuTamuView.PintuUtamaInUser.Visible (end) *@
+@if (bukuTamuView.CustomPilihPintu.Visible) { // bukuTamuView.CustomPilihPintu.Visible (begin)
+    <tr id="r_CustomPilihPintu" @Html.Raw(bukuTamuView.CustomPilihPintu.RowAttributes)>
+        <td class="@(bukuTamuView.TableLeftColumnClass)"><span id="elh_BukuTamu_CustomPilihPintu">@Html.Raw(bukuTamuView.CustomPilihPintu.Caption)</span></td>
+        <td data-name="CustomPilihPintu" @Html.Raw(bukuTamuView.CustomPilihPintu.CellAttributes)>
+<span id="el_BukuTamu_CustomPilihPintu">
+<span @Html.Raw(bukuTamuView.CustomPilihPintu.ViewAttributes)>
+@Html.Raw(bukuTamuView.CustomPilihPintu.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* bukuTamuView.CustomPilihPintu.Visible (end) *@
+@if (bukuTamuView.PintuUtamaOutTanggal.Visible) { // bukuTamuView.PintuUtamaOutTanggal.Visible (begin)
+    <tr id="r_PintuUtamaOutTanggal" @Html.Raw(bukuTamuView.PintuUtamaOutTanggal.RowAttributes)>
+        <td class="@(bukuTamuView.TableLeftColumnClass)"><span id="elh_BukuTamu_PintuUtamaOutTanggal">@Html.Raw(bukuTamuView.PintuUtamaOutTanggal.Caption)</span></td>
+        <td data-name="PintuUtamaOutTanggal" @Html.Raw(bukuTamuView.PintuUtamaOutTanggal.CellAttributes)>
+<span id="el_BukuTamu_PintuUtamaOutTanggal">
+<span @Html.Raw(bukuTamuView.PintuUtamaOutTanggal.ViewAttributes)>
+@Html.Raw(bukuTamuView.PintuUtamaOutTanggal.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* bukuTamuView.PintuUtamaOutTanggal.Visible (end) *@
+@if (bukuTamuView.PintuUtamaOutFotoDownload.Visible) { // bukuTamuView.PintuUtamaOutFotoDownload.Visible (begin)
+    <tr id="r_PintuUtamaOutFotoDownload" @Html.Raw(bukuTamuView.PintuUtamaOutFotoDownload.RowAttributes)>
+        <td class="@(bukuTamuView.TableLeftColumnClass)"><span id="elh_BukuTamu_PintuUtamaOutFotoDownload">@Html.Raw(bukuTamuView.PintuUtamaOutFotoDownload.Caption)</span></td>
+        <td data-name="PintuUtamaOutFotoDownload" @Html.Raw(bukuTamuView.PintuUtamaOutFotoDownload.CellAttributes)>
+<span id="el_BukuTamu_PintuUtamaOutFotoDownload">
+<span @Html.Raw(bukuTamuView.PintuUtamaOutFotoDownload.ViewAttributes)>
+@Html.Raw(bukuTamuView.PintuUtamaOutFotoDownload.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* bukuTamuView.PintuUtamaOutFotoDownload.Visible (end) *@
+@if (bukuTamuView.PintuUtamaOutUser.Visible) { // bukuTamuView.PintuUtamaOutUser.Visible (begin)
+    <tr id="r_PintuUtamaOutUser" @Html.Raw(bukuTamuView.PintuUtamaOutUser.RowAttributes)>
+        <td class="@(bukuTamuView.TableLeftColumnClass)"><span id="elh_BukuTamu_PintuUtamaOutUser">@Html.Raw(bukuTamuView.PintuUtamaOutUser.Caption)</span></td>
+        <td data-name="PintuUtamaOutUser" @Html.Raw(bukuTamuView.PintuUtamaOutUser.CellAttributes)>
+<span id="el_BukuTamu_PintuUtamaOutUser">
+<span @Html.Raw(bukuTamuView.PintuUtamaOutUser.ViewAttributes)>
+@Html.Raw(bukuTamuView.PintuUtamaOutUser.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* bukuTamuView.PintuUtamaOutUser.Visible (end) *@
+@if (bukuTamuView.LobbyUtamaId.Visible) { // bukuTamuView.LobbyUtamaId.Visible (begin)
+    <tr id="r_LobbyUtamaId" @Html.Raw(bukuTamuView.LobbyUtamaId.RowAttributes)>
+        <td class="@(bukuTamuView.TableLeftColumnClass)"><span id="elh_BukuTamu_LobbyUtamaId">@Html.Raw(bukuTamuView.LobbyUtamaId.Caption)</span></td>
+        <td data-name="LobbyUtamaId" @Html.Raw(bukuTamuView.LobbyUtamaId.CellAttributes)>
+<span id="el_BukuTamu_LobbyUtamaId">
+<span @Html.Raw(bukuTamuView.LobbyUtamaId.ViewAttributes)>
+@Html.Raw(bukuTamuView.LobbyUtamaId.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* bukuTamuView.LobbyUtamaId.Visible (end) *@
+@if (bukuTamuView.LobbyUtamaInTanggal.Visible) { // bukuTamuView.LobbyUtamaInTanggal.Visible (begin)
+    <tr id="r_LobbyUtamaInTanggal" @Html.Raw(bukuTamuView.LobbyUtamaInTanggal.RowAttributes)>
+        <td class="@(bukuTamuView.TableLeftColumnClass)"><span id="elh_BukuTamu_LobbyUtamaInTanggal">@Html.Raw(bukuTamuView.LobbyUtamaInTanggal.Caption)</span></td>
+        <td data-name="LobbyUtamaInTanggal" @Html.Raw(bukuTamuView.LobbyUtamaInTanggal.CellAttributes)>
+<span id="el_BukuTamu_LobbyUtamaInTanggal">
+<span @Html.Raw(bukuTamuView.LobbyUtamaInTanggal.ViewAttributes)>
+@Html.Raw(bukuTamuView.LobbyUtamaInTanggal.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* bukuTamuView.LobbyUtamaInTanggal.Visible (end) *@
+@if (bukuTamuView.LobbyUtamaInFotoDownload.Visible) { // bukuTamuView.LobbyUtamaInFotoDownload.Visible (begin)
+    <tr id="r_LobbyUtamaInFotoDownload" @Html.Raw(bukuTamuView.LobbyUtamaInFotoDownload.RowAttributes)>
+        <td class="@(bukuTamuView.TableLeftColumnClass)"><span id="elh_BukuTamu_LobbyUtamaInFotoDownload">@Html.Raw(bukuTamuView.LobbyUtamaInFotoDownload.Caption)</span></td>
+        <td data-name="LobbyUtamaInFotoDownload" @Html.Raw(bukuTamuView.LobbyUtamaInFotoDownload.CellAttributes)>
+<span id="el_BukuTamu_LobbyUtamaInFotoDownload">
+<span @Html.Raw(bukuTamuView.LobbyUtamaInFotoDownload.ViewAttributes)>
+@Html.Raw(bukuTamuView.LobbyUtamaInFotoDownload.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* bukuTamuView.LobbyUtamaInFotoDownload.Visible (end) *@
+@if (bukuTamuView.LobbyUtamaInUser.Visible) { // bukuTamuView.LobbyUtamaInUser.Visible (begin)
+    <tr id="r_LobbyUtamaInUser" @Html.Raw(bukuTamuView.LobbyUtamaInUser.RowAttributes)>
+        <td class="@(bukuTamuView.TableLeftColumnClass)"><span id="elh_BukuTamu_LobbyUtamaInUser">@Html.Raw(bukuTamuView.LobbyUtamaInUser.Caption)</span></td>
+        <td data-name="LobbyUtamaInUser" @Html.Raw(bukuTamuView.LobbyUtamaInUser.CellAttributes)>
+<span id="el_BukuTamu_LobbyUtamaInUser">
+<span @Html.Raw(bukuTamuView.LobbyUtamaInUser.ViewAttributes)>
+@Html.Raw(bukuTamuView.LobbyUtamaInUser.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* bukuTamuView.LobbyUtamaInUser.Visible (end) *@
+@if (bukuTamuView.LobbyUtamaOutTanggal.Visible) { // bukuTamuView.LobbyUtamaOutTanggal.Visible (begin)
+    <tr id="r_LobbyUtamaOutTanggal" @Html.Raw(bukuTamuView.LobbyUtamaOutTanggal.RowAttributes)>
+        <td class="@(bukuTamuView.TableLeftColumnClass)"><span id="elh_BukuTamu_LobbyUtamaOutTanggal">@Html.Raw(bukuTamuView.LobbyUtamaOutTanggal.Caption)</span></td>
+        <td data-name="LobbyUtamaOutTanggal" @Html.Raw(bukuTamuView.LobbyUtamaOutTanggal.CellAttributes)>
+<span id="el_BukuTamu_LobbyUtamaOutTanggal">
+<span @Html.Raw(bukuTamuView.LobbyUtamaOutTanggal.ViewAttributes)>
+@Html.Raw(bukuTamuView.LobbyUtamaOutTanggal.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* bukuTamuView.LobbyUtamaOutTanggal.Visible (end) *@
+@if (bukuTamuView.LobbyUtamaOutFotoDownload.Visible) { // bukuTamuView.LobbyUtamaOutFotoDownload.Visible (begin)
+    <tr id="r_LobbyUtamaOutFotoDownload" @Html.Raw(bukuTamuView.LobbyUtamaOutFotoDownload.RowAttributes)>
+        <td class="@(bukuTamuView.TableLeftColumnClass)"><span id="elh_BukuTamu_LobbyUtamaOutFotoDownload">@Html.Raw(bukuTamuView.LobbyUtamaOutFotoDownload.Caption)</span></td>
+        <td data-name="LobbyUtamaOutFotoDownload" @Html.Raw(bukuTamuView.LobbyUtamaOutFotoDownload.CellAttributes)>
+<span id="el_BukuTamu_LobbyUtamaOutFotoDownload">
+<span @Html.Raw(bukuTamuView.LobbyUtamaOutFotoDownload.ViewAttributes)>
+@Html.Raw(bukuTamuView.LobbyUtamaOutFotoDownload.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* bukuTamuView.LobbyUtamaOutFotoDownload.Visible (end) *@
+@if (bukuTamuView.LobbyUtamaOutUser.Visible) { // bukuTamuView.LobbyUtamaOutUser.Visible (begin)
+    <tr id="r_LobbyUtamaOutUser" @Html.Raw(bukuTamuView.LobbyUtamaOutUser.RowAttributes)>
+        <td class="@(bukuTamuView.TableLeftColumnClass)"><span id="elh_BukuTamu_LobbyUtamaOutUser">@Html.Raw(bukuTamuView.LobbyUtamaOutUser.Caption)</span></td>
+        <td data-name="LobbyUtamaOutUser" @Html.Raw(bukuTamuView.LobbyUtamaOutUser.CellAttributes)>
+<span id="el_BukuTamu_LobbyUtamaOutUser">
+<span @Html.Raw(bukuTamuView.LobbyUtamaOutUser.ViewAttributes)>
+@Html.Raw(bukuTamuView.LobbyUtamaOutUser.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* bukuTamuView.LobbyUtamaOutUser.Visible (end) *@
+@if (bukuTamuView.AreaTerlarangId.Visible) { // bukuTamuView.AreaTerlarangId.Visible (begin)
+    <tr id="r_AreaTerlarangId" @Html.Raw(bukuTamuView.AreaTerlarangId.RowAttributes)>
+        <td class="@(bukuTamuView.TableLeftColumnClass)"><span id="elh_BukuTamu_AreaTerlarangId">@Html.Raw(bukuTamuView.AreaTerlarangId.Caption)</span></td>
+        <td data-name="AreaTerlarangId" @Html.Raw(bukuTamuView.AreaTerlarangId.CellAttributes)>
+<span id="el_BukuTamu_AreaTerlarangId">
+<span @Html.Raw(bukuTamuView.AreaTerlarangId.ViewAttributes)>
+@Html.Raw(bukuTamuView.AreaTerlarangId.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* bukuTamuView.AreaTerlarangId.Visible (end) *@
+@if (bukuTamuView.AreaTerlarangInTanggal.Visible) { // bukuTamuView.AreaTerlarangInTanggal.Visible (begin)
+    <tr id="r_AreaTerlarangInTanggal" @Html.Raw(bukuTamuView.AreaTerlarangInTanggal.RowAttributes)>
+        <td class="@(bukuTamuView.TableLeftColumnClass)"><span id="elh_BukuTamu_AreaTerlarangInTanggal">@Html.Raw(bukuTamuView.AreaTerlarangInTanggal.Caption)</span></td>
+        <td data-name="AreaTerlarangInTanggal" @Html.Raw(bukuTamuView.AreaTerlarangInTanggal.CellAttributes)>
+<span id="el_BukuTamu_AreaTerlarangInTanggal">
+<span @Html.Raw(bukuTamuView.AreaTerlarangInTanggal.ViewAttributes)>
+@Html.Raw(bukuTamuView.AreaTerlarangInTanggal.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* bukuTamuView.AreaTerlarangInTanggal.Visible (end) *@
+@if (bukuTamuView.AreaTerlarangInFotoDownload.Visible) { // bukuTamuView.AreaTerlarangInFotoDownload.Visible (begin)
+    <tr id="r_AreaTerlarangInFotoDownload" @Html.Raw(bukuTamuView.AreaTerlarangInFotoDownload.RowAttributes)>
+        <td class="@(bukuTamuView.TableLeftColumnClass)"><span id="elh_BukuTamu_AreaTerlarangInFotoDownload">@Html.Raw(bukuTamuView.AreaTerlarangInFotoDownload.Caption)</span></td>
+        <td data-name="AreaTerlarangInFotoDownload" @Html.Raw(bukuTamuView.AreaTerlarangInFotoDownload.CellAttributes)>
+<span id="el_BukuTamu_AreaTerlarangInFotoDownload">
+<span @Html.Raw(bukuTamuView.AreaTerlarangInFotoDownload.ViewAttributes)>
+@Html.Raw(bukuTamuView.AreaTerlarangInFotoDownload.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* bukuTamuView.AreaTerlarangInFotoDownload.Visible (end) *@
+@if (bukuTamuView.AreaTerlarangInUser.Visible) { // bukuTamuView.AreaTerlarangInUser.Visible (begin)
+    <tr id="r_AreaTerlarangInUser" @Html.Raw(bukuTamuView.AreaTerlarangInUser.RowAttributes)>
+        <td class="@(bukuTamuView.TableLeftColumnClass)"><span id="elh_BukuTamu_AreaTerlarangInUser">@Html.Raw(bukuTamuView.AreaTerlarangInUser.Caption)</span></td>
+        <td data-name="AreaTerlarangInUser" @Html.Raw(bukuTamuView.AreaTerlarangInUser.CellAttributes)>
+<span id="el_BukuTamu_AreaTerlarangInUser">
+<span @Html.Raw(bukuTamuView.AreaTerlarangInUser.ViewAttributes)>
+@Html.Raw(bukuTamuView.AreaTerlarangInUser.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* bukuTamuView.AreaTerlarangInUser.Visible (end) *@
+@if (bukuTamuView.AreaTerlarangOutTanggal.Visible) { // bukuTamuView.AreaTerlarangOutTanggal.Visible (begin)
+    <tr id="r_AreaTerlarangOutTanggal" @Html.Raw(bukuTamuView.AreaTerlarangOutTanggal.RowAttributes)>
+        <td class="@(bukuTamuView.TableLeftColumnClass)"><span id="elh_BukuTamu_AreaTerlarangOutTanggal">@Html.Raw(bukuTamuView.AreaTerlarangOutTanggal.Caption)</span></td>
+        <td data-name="AreaTerlarangOutTanggal" @Html.Raw(bukuTamuView.AreaTerlarangOutTanggal.CellAttributes)>
+<span id="el_BukuTamu_AreaTerlarangOutTanggal">
+<span @Html.Raw(bukuTamuView.AreaTerlarangOutTanggal.ViewAttributes)>
+@Html.Raw(bukuTamuView.AreaTerlarangOutTanggal.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* bukuTamuView.AreaTerlarangOutTanggal.Visible (end) *@
+@if (bukuTamuView.AreaTerlarangOutFotoDownload.Visible) { // bukuTamuView.AreaTerlarangOutFotoDownload.Visible (begin)
+    <tr id="r_AreaTerlarangOutFotoDownload" @Html.Raw(bukuTamuView.AreaTerlarangOutFotoDownload.RowAttributes)>
+        <td class="@(bukuTamuView.TableLeftColumnClass)"><span id="elh_BukuTamu_AreaTerlarangOutFotoDownload">@Html.Raw(bukuTamuView.AreaTerlarangOutFotoDownload.Caption)</span></td>
+        <td data-name="AreaTerlarangOutFotoDownload" @Html.Raw(bukuTamuView.AreaTerlarangOutFotoDownload.CellAttributes)>
+<span id="el_BukuTamu_AreaTerlarangOutFotoDownload">
+<span @Html.Raw(bukuTamuView.AreaTerlarangOutFotoDownload.ViewAttributes)>
+@Html.Raw(bukuTamuView.AreaTerlarangOutFotoDownload.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* bukuTamuView.AreaTerlarangOutFotoDownload.Visible (end) *@
+@if (bukuTamuView.AreaTerlarangOutUser.Visible) { // bukuTamuView.AreaTerlarangOutUser.Visible (begin)
+    <tr id="r_AreaTerlarangOutUser" @Html.Raw(bukuTamuView.AreaTerlarangOutUser.RowAttributes)>
+        <td class="@(bukuTamuView.TableLeftColumnClass)"><span id="elh_BukuTamu_AreaTerlarangOutUser">@Html.Raw(bukuTamuView.AreaTerlarangOutUser.Caption)</span></td>
+        <td data-name="AreaTerlarangOutUser" @Html.Raw(bukuTamuView.AreaTerlarangOutUser.CellAttributes)>
+<span id="el_BukuTamu_AreaTerlarangOutUser">
+<span @Html.Raw(bukuTamuView.AreaTerlarangOutUser.ViewAttributes)>
+@Html.Raw(bukuTamuView.AreaTerlarangOutUser.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* bukuTamuView.AreaTerlarangOutUser.Visible (end) *@
+@if (bukuTamuView.etlDate.Visible) { // bukuTamuView.etlDate.Visible (begin)
+    <tr id="r_etlDate" @Html.Raw(bukuTamuView.etlDate.RowAttributes)>
+        <td class="@(bukuTamuView.TableLeftColumnClass)"><span id="elh_BukuTamu_etlDate">@Html.Raw(bukuTamuView.etlDate.Caption)</span></td>
+        <td data-name="etlDate" @Html.Raw(bukuTamuView.etlDate.CellAttributes)>
+<span id="el_BukuTamu_etlDate">
+<span @Html.Raw(bukuTamuView.etlDate.ViewAttributes)>
+@Html.Raw(bukuTamuView.etlDate.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* bukuTamuView.etlDate.Visible (end) *@
+@if (bukuTamuView.LastUpdatedBy.Visible) { // bukuTamuView.LastUpdatedBy.Visible (begin)
+    <tr id="r_LastUpdatedBy" @Html.Raw(bukuTamuView.LastUpdatedBy.RowAttributes)>
+        <td class="@(bukuTamuView.TableLeftColumnClass)"><span id="elh_BukuTamu_LastUpdatedBy">@Html.Raw(bukuTamuView.LastUpdatedBy.Caption)</span></td>
+        <td data-name="LastUpdatedBy" @Html.Raw(bukuTamuView.LastUpdatedBy.CellAttributes)>
+<span id="el_BukuTamu_LastUpdatedBy">
+<span @Html.Raw(bukuTamuView.LastUpdatedBy.ViewAttributes)>
+@Html.Raw(bukuTamuView.LastUpdatedBy.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* bukuTamuView.LastUpdatedBy.Visible (end) *@
+@if (bukuTamuView.lastUpdatedDate.Visible) { // bukuTamuView.lastUpdatedDate.Visible (begin)
+    <tr id="r_lastUpdatedDate" @Html.Raw(bukuTamuView.lastUpdatedDate.RowAttributes)>
+        <td class="@(bukuTamuView.TableLeftColumnClass)"><span id="elh_BukuTamu_lastUpdatedDate">@Html.Raw(bukuTamuView.lastUpdatedDate.Caption)</span></td>
+        <td data-name="lastUpdatedDate" @Html.Raw(bukuTamuView.lastUpdatedDate.CellAttributes)>
+<span id="el_BukuTamu_lastUpdatedDate">
+<span @Html.Raw(bukuTamuView.lastUpdatedDate.ViewAttributes)>
+@Html.Raw(bukuTamuView.lastUpdatedDate.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* bukuTamuView.lastUpdatedDate.Visible (end) *@
+@if (bukuTamuView.StatusZonaPrev.Visible) { // bukuTamuView.StatusZonaPrev.Visible (begin)
+    <tr id="r_StatusZonaPrev" @Html.Raw(bukuTamuView.StatusZonaPrev.RowAttributes)>
+        <td class="@(bukuTamuView.TableLeftColumnClass)"><span id="elh_BukuTamu_StatusZonaPrev">@Html.Raw(bukuTamuView.StatusZonaPrev.Caption)</span></td>
+        <td data-name="StatusZonaPrev" @Html.Raw(bukuTamuView.StatusZonaPrev.CellAttributes)>
+<span id="el_BukuTamu_StatusZonaPrev">
+<span @Html.Raw(bukuTamuView.StatusZonaPrev.ViewAttributes)>
+@Html.Raw(bukuTamuView.StatusZonaPrev.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* bukuTamuView.StatusZonaPrev.Visible (end) *@
+</table>
+@{ bukuTamuView.CloseRecordset(); }
+</form>
+</main>
+@bukuTamuView.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+@if (!bukuTamuView.IsExport()) {
+<script>
+loadjs.ready("load", function() {
+    // Write your table-specific startup script here
+    // document.write("page loaded");
+});
+</script>
+}

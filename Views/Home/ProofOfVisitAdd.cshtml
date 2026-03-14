@@ -1,0 +1,240 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (proofOfVisitAdd.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = proofOfVisitAdd.UseLayout ? "_Layout" : "";
+}
+<script>
+var currentTable = @Html.Raw(ConvertToJson(proofOfVisitAdd.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { ProofOfVisit: currentTable } });
+var currentPageID = ew.PAGE_ID = "add";
+var currentForm;
+var fProofOfVisitadd;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("fProofOfVisitadd")
+        .setPageId("add")
+
+        // Add fields
+        .setFields([
+
+            ["NomorProofOfVisit", [fields.NomorProofOfVisit.visible && fields.NomorProofOfVisit.required ? ew.Validators.required(fields.NomorProofOfVisit.caption) : null], fields.NomorProofOfVisit.isInvalid],
+            ["LookupPlant", [fields.LookupPlant.visible && fields.LookupPlant.required ? ew.Validators.required(fields.LookupPlant.caption) : null], fields.LookupPlant.isInvalid],
+            ["Plant", [fields.Plant.visible && fields.Plant.required ? ew.Validators.required(fields.Plant.caption) : null], fields.Plant.isInvalid],
+            ["Catatan", [fields.Catatan.visible && fields.Catatan.required ? ew.Validators.required(fields.Catatan.caption) : null], fields.Catatan.isInvalid]
+        ])
+
+        // Form_CustomValidate
+        .setCustomValidate(
+            function(fobj) { // DO NOT CHANGE THIS LINE!
+                    // Your custom validation code here, return false if invalid.
+                    return true;
+                }
+        )
+
+        // Use JavaScript validation or not
+        .setValidateRequired(ew.CLIENT_VALIDATE)
+
+        // Dynamic selection lists
+        .setLists({
+            "LookupPlant": @Html.Raw(proofOfVisitAdd.LookupPlant.ToClientList(proofOfVisitAdd)),
+            "Plant": @Html.Raw(proofOfVisitAdd.Plant.ToClientList(proofOfVisitAdd)),
+        })
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Client script
+    // // Write your client script here, no need to add script tags.
+    // $('#x_LookupPlant').on("change", function () {
+    //     $('#x_Plant').val(selectedValue).trigger('change');
+    // });
+});
+</script>
+@proofOfVisitAdd.ShowPageHeader()
+@proofOfVisitAdd.ShowMessages()
+<form name="fProofOfVisitadd" id="fProofOfVisitadd" class="@(proofOfVisitAdd.FormClassName)" action="@AppPath(CurrentPageName())" method="post" novalidate autocomplete="off">
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+<input type="hidden" name="action" id="action" value="insert">
+<input type="hidden" name="modal" value="@ConvertToInt(proofOfVisitAdd.IsModal)">
+@if (IsJsonResponse()) {
+<input type="hidden" name="json" value="1">
+}
+<input type="hidden" name="@(proofOfVisitAdd.OldKeyName)" value="@Html.Raw(proofOfVisitAdd.OldKey)">
+<div class="ew-add-div"><!-- page* -->
+@if (proofOfVisitAdd.NomorProofOfVisit.Visible) { // proofOfVisitAdd.NomorProofOfVisit.Visible (begin)
+    <div id="r_NomorProofOfVisit" @Html.Raw(proofOfVisitAdd.NomorProofOfVisit.RowAttributes)>
+        <label id="elh_ProofOfVisit_NomorProofOfVisit" for="x_NomorProofOfVisit" class="@(proofOfVisitAdd.LeftColumnClass)">@Html.Raw(proofOfVisitAdd.NomorProofOfVisit.Caption)@Html.Raw(proofOfVisitAdd.NomorProofOfVisit.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(proofOfVisitAdd.RightColumnClass)"><div @Html.Raw(proofOfVisitAdd.NomorProofOfVisit.CellAttributes)>
+<span id="el_ProofOfVisit_NomorProofOfVisit">
+<input type="@(proofOfVisitAdd.NomorProofOfVisit.InputTextType)" name="x_NomorProofOfVisit" id="x_NomorProofOfVisit" data-table="ProofOfVisit" data-field="x_NomorProofOfVisit" value="@Html.Raw(proofOfVisitAdd.NomorProofOfVisit.EditValue)" size="30" maxlength="50" placeholder="@Html.Raw(HtmlEncode(proofOfVisitAdd.NomorProofOfVisit.PlaceHolder))" data-format-pattern="@(proofOfVisitAdd.NomorProofOfVisit.FormatPattern)"@Html.Raw(proofOfVisitAdd.NomorProofOfVisit.EditAttributes) aria-describedby="x_NomorProofOfVisit_help">
+@Html.Raw(proofOfVisitAdd.NomorProofOfVisit.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(proofOfVisitAdd.NomorProofOfVisit.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* proofOfVisitAdd.NomorProofOfVisit.Visible (end) *@
+@if (proofOfVisitAdd.LookupPlant.Visible) { // proofOfVisitAdd.LookupPlant.Visible (begin)
+    <div id="r_LookupPlant" @Html.Raw(proofOfVisitAdd.LookupPlant.RowAttributes)>
+        <label id="elh_ProofOfVisit_LookupPlant" for="x_LookupPlant" class="@(proofOfVisitAdd.LeftColumnClass)">@Html.Raw(proofOfVisitAdd.LookupPlant.Caption)@Html.Raw(proofOfVisitAdd.LookupPlant.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(proofOfVisitAdd.RightColumnClass)"><div @Html.Raw(proofOfVisitAdd.LookupPlant.CellAttributes)>
+<span id="el_ProofOfVisit_LookupPlant">
+    <select
+        id="x_LookupPlant"
+        name="x_LookupPlant"
+        class="form-select ew-select@(proofOfVisitAdd.LookupPlant.IsInvalidClass)"
+        data-select2-id="fProofOfVisitadd_x_LookupPlant"
+        data-table="ProofOfVisit"
+        data-field="x_LookupPlant"
+        data-value-separator="@(proofOfVisitAdd.LookupPlant.DisplayValueSeparatorAttribute)"
+        data-placeholder="@(HtmlEncode(proofOfVisitAdd.LookupPlant.PlaceHolder))"
+        @Html.Raw(proofOfVisitAdd.LookupPlant.EditAttributes)>
+        @(proofOfVisitAdd.LookupPlant.SelectOptionListHtml("x_LookupPlant"))
+    </select>
+    @Html.Raw(proofOfVisitAdd.LookupPlant.GetCustomMessage)
+    <div class="invalid-feedback">@Html.Raw(proofOfVisitAdd.LookupPlant.GetErrorMessage())</div>
+<script>
+loadjs.ready("fProofOfVisitadd", function() {
+    var options = { name: "x_LookupPlant", selectId: "fProofOfVisitadd_x_LookupPlant" },
+        el = document.querySelector("select[data-select2-id='" + options.selectId + "']");
+    if (!el)
+        return;
+    options.closeOnSelect = !options.multiple;
+    options.dropdownParent = el.closest("#ew-modal-dialog, #ew-add-opt-dialog");
+    if (fProofOfVisitadd.lists.LookupPlant?.lookupOptions.length) {
+        options.data = { id: "x_LookupPlant", form: "fProofOfVisitadd" };
+    } else {
+        options.ajax = { id: "x_LookupPlant", form: "fProofOfVisitadd", limit: ew.LOOKUP_PAGE_SIZE };
+    }
+    options.minimumInputLength = ew.selectMinimumInputLength;
+    options = Object.assign({}, ew.selectOptions, options, ew.vars.tables.ProofOfVisit.fields.LookupPlant.selectOptions);
+    ew.createSelect(options);
+});
+</script>
+</span>
+</div></div>
+    </div>
+} @* proofOfVisitAdd.LookupPlant.Visible (end) *@
+@if (proofOfVisitAdd.Plant.Visible) { // proofOfVisitAdd.Plant.Visible (begin)
+    <div id="r_Plant" @Html.Raw(proofOfVisitAdd.Plant.RowAttributes)>
+        <label id="elh_ProofOfVisit_Plant" class="@(proofOfVisitAdd.LeftColumnClass)">@Html.Raw(proofOfVisitAdd.Plant.Caption)@Html.Raw(proofOfVisitAdd.Plant.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(proofOfVisitAdd.RightColumnClass)"><div @Html.Raw(proofOfVisitAdd.Plant.CellAttributes)>
+<span id="el_ProofOfVisit_Plant">
+<span>@{
+    if (IsRTL) {
+        proofOfVisitAdd.Plant.EditAttrs["dir"] = "rtl";
+    }
+}</span>
+<span id="as_x_Plant" class="ew-auto-suggest">
+    <input type="text" class="form-control" name="sv_x_Plant" id="sv_x_Plant" value="@(RemoveHtml(ConvertToString(proofOfVisitAdd.Plant.EditValue)))" autocomplete="off" size="30" placeholder="@Html.Raw(HtmlEncode(proofOfVisitAdd.Plant.PlaceHolder))" data-placeholder="@Html.Raw(HtmlEncode(proofOfVisitAdd.Plant.PlaceHolder))" data-format-pattern="@(proofOfVisitAdd.Plant.FormatPattern)" @Html.Raw(proofOfVisitAdd.Plant.EditAttributes) aria-describedby="x_Plant_help">
+</span>
+<selection-list hidden class="form-control" data-table="ProofOfVisit" data-field="x_Plant" data-input="sv_x_Plant" data-value-separator="@(proofOfVisitAdd.Plant.DisplayValueSeparatorAttribute)" name="x_Plant" id="x_Plant" value="@(HtmlEncode(proofOfVisitAdd.Plant.CurrentValue))"></selection-list>
+@Html.Raw(proofOfVisitAdd.Plant.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(proofOfVisitAdd.Plant.GetErrorMessage())</div>
+<script>
+loadjs.ready(["fProofOfVisitadd"], function() {
+    fProofOfVisitadd.createAutoSuggest(Object.assign({"id":"x_Plant","forceSelect":true}, { lookupAllDisplayFields: @(proofOfVisitAdd.Plant.Lookup.LookupAllDisplayFields ? "true" : "false") }, ew.vars.tables.ProofOfVisit.fields.Plant.autoSuggestOptions));
+});
+</script>
+@Html.Raw(proofOfVisitAdd.Plant.Lookup.GetParamTag(proofOfVisitAdd, "p_x_Plant"))
+</span>
+</div></div>
+    </div>
+} @* proofOfVisitAdd.Plant.Visible (end) *@
+@if (proofOfVisitAdd.Catatan.Visible) { // proofOfVisitAdd.Catatan.Visible (begin)
+    <div id="r_Catatan" @Html.Raw(proofOfVisitAdd.Catatan.RowAttributes)>
+        <label id="elh_ProofOfVisit_Catatan" for="x_Catatan" class="@(proofOfVisitAdd.LeftColumnClass)">@Html.Raw(proofOfVisitAdd.Catatan.Caption)@Html.Raw(proofOfVisitAdd.Catatan.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(proofOfVisitAdd.RightColumnClass)"><div @Html.Raw(proofOfVisitAdd.Catatan.CellAttributes)>
+<span id="el_ProofOfVisit_Catatan">
+<textarea data-table="ProofOfVisit" data-field="x_Catatan" name="x_Catatan" id="x_Catatan" cols="35" rows="4" placeholder="@Html.Raw(HtmlEncode(proofOfVisitAdd.Catatan.PlaceHolder))"@Html.Raw(proofOfVisitAdd.Catatan.EditAttributes) aria-describedby="x_Catatan_help">@(proofOfVisitAdd.Catatan.EditValue)</textarea>
+@Html.Raw(proofOfVisitAdd.Catatan.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(proofOfVisitAdd.Catatan.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* proofOfVisitAdd.Catatan.Visible (end) *@
+</div><!-- /page* -->
+@{ proofOfVisitAdd.CloseRecordset(); }
+@Html.Raw(proofOfVisitAdd.IsModal ? "<template class=\"ew-modal-buttons\">" : "<div class=\"row ew-buttons\">")<!-- buttons .row -->
+    <div class="@(proofOfVisitAdd.OffsetColumnClass)"><!-- buttons offset -->
+    <button class="btn btn-primary ew-btn" name="btn-action" id="btn-action" type="submit" form="fProofOfVisitadd">@Html.Raw(Language.Phrase("AddBtn"))</button>
+@if (IsJsonResponse()) {
+    <button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" data-bs-dismiss="modal">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+} else {
+    <button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" form="fProofOfVisitadd" data-href="@AppPath(proofOfVisitAdd.ReturnUrl)">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+}
+    </div><!-- /buttons offset -->
+@Html.Raw(proofOfVisitAdd.IsModal ? "</template>" : "</div>")<!-- /buttons .row -->
+</form>
+@proofOfVisitAdd.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("ProofOfVisit");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Startup script
+    // Write your table-specific startup script here
+    // document.write("page loaded");
+    const parentURL = ew.PATH_BASE;
+    $('#r_NomorProofOfVisit, #r_Plant').hide();
+    const ddl = $('#x_LookupPlant');
+    const hiddenPlant = $('#x_Plant');
+    ddl.empty().append('<option value="">Loading...</option>');
+    $.ajax({
+        url: `${parentURL}api/pov/dropdown/plant`,
+        method: 'GET',
+        dataType: 'json',
+        success: function (res) {
+            ddl.empty();
+            if (!res.success) {
+                ddl.append('<option value="">Gagal load plant</option>');
+                return ew.alert(res.message);
+            }
+            ddl.append('<option value="">-- Pilih Plant --</option>');
+            (res.data || []).forEach((p) => {
+                ddl.append(
+                    `<option value="${p.Value}">
+                        ${p.Label}
+                    </option>`,
+                );
+            });
+            if (res.data?.length) {
+                const first = res.data[0].Value;
+                ddl.val(first).trigger('change');
+            }
+        },
+        error: function (_, __, err) {
+            console.error('Gagal ambil data dropdown:', err);
+            ddl.empty().append('<option value="">Error load data</option>');
+        },
+    });
+    ddl.on('change', function () {
+        const selectedValue = $(this).val();
+        hiddenPlant.val(selectedValue).trigger('change');
+        if (typeof ew_AutoFill === 'function') {
+            ew_AutoFill('x_Plant', selectedValue);
+        }
+    });
+});
+</script>

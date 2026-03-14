@@ -1,0 +1,933 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (formInputProofOfVisitList.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = formInputProofOfVisitList.UseLayout ? "_Layout" : "";
+}
+@if (!formInputProofOfVisitList.IsExport()) {
+<script>
+var currentTable = @Html.Raw(ConvertToJson(formInputProofOfVisitList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { FormInputProofOfVisit: currentTable } });
+var currentPageID = ew.PAGE_ID = "list";
+var currentForm;
+var @(formInputProofOfVisitList.FormName);
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("@(formInputProofOfVisitList.FormName)")
+        .setPageId("list")
+        .setSubmitWithFetch(@(formInputProofOfVisitList.UseAjaxActions ? "true" : "false"))
+        .setFormKeyCountName("@(formInputProofOfVisitList.FormKeyCountName)")
+
+        // Dynamic selection lists
+        .setLists({
+            "NoReferensi": @Html.Raw(formInputProofOfVisitList.NoReferensi.ToClientList(formInputProofOfVisitList)),
+            "Tanggal": @Html.Raw(formInputProofOfVisitList.Tanggal.ToClientList(formInputProofOfVisitList)),
+            "Lokasi": @Html.Raw(formInputProofOfVisitList.Lokasi.ToClientList(formInputProofOfVisitList)),
+            "Ketidaksesuaiaan": @Html.Raw(formInputProofOfVisitList.Ketidaksesuaiaan.ToClientList(formInputProofOfVisitList)),
+            "Keterangan": @Html.Raw(formInputProofOfVisitList.Keterangan.ToClientList(formInputProofOfVisitList)),
+            "userInput": @Html.Raw(formInputProofOfVisitList.userInput.ToClientList(formInputProofOfVisitList)),
+            "etlDate": @Html.Raw(formInputProofOfVisitList.etlDate.ToClientList(formInputProofOfVisitList)),
+            "lastUpdatedBy": @Html.Raw(formInputProofOfVisitList.lastUpdatedBy.ToClientList(formInputProofOfVisitList)),
+            "lastUpdatedDate": @Html.Raw(formInputProofOfVisitList.lastUpdatedDate.ToClientList(formInputProofOfVisitList)),
+        })
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Client script
+    const parent_url = ew.PATH_BASE;
+    $(document).on('click', '.download-document', function (e) {
+        e.preventDefault();
+        const idPOV = $(this).data('id');
+        if (!idPOV) {
+            ew.alert("ID dokumen tidak ditemukan.");
+            return;
+        }
+        $.ajax({
+            url: parent_url + 'api/LookUpList/DownloadDocumentZip',
+            type: 'GET',
+            data: { 
+                idRef: idPOV,
+                table: 'DetailUploadPOV',
+                colRef: 'idPOV',
+                path: 'POVDocument'
+            },
+            xhrFields: {
+                responseType: 'blob'
+            },
+            beforeSend: function () {
+                showLoading();
+            },
+            success: function (response, status, xhr) {
+                const disposition = xhr.getResponseHeader('Content-Disposition');
+                let fileName = "download_file";
+                if (disposition) {
+                    const fileNameMatch = disposition.match(/filename="?([^";]+)"?/);
+                    if (fileNameMatch && fileNameMatch[1]) {
+                        fileName = decodeURIComponent(fileNameMatch[1]);
+                    }
+                    const utf8FileNameMatch = disposition.match(/filename\*\s*=\s*UTF-8''([^;]+)/);
+                    if (utf8FileNameMatch && utf8FileNameMatch[1]) {
+                        fileName = decodeURIComponent(utf8FileNameMatch[1]);
+                    }
+                }
+                const blobUrl = window.URL.createObjectURL(response);
+                const a = document.createElement('a');
+                a.href = blobUrl;
+                a.download = fileName;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(blobUrl);
+                ew.alert("Download berhasil!");
+            },
+            error: function (xhr, status, error) {
+                if (xhr.status === 404) {
+                    ew.alert("File tidak ditemukan di server.");
+                } else if (xhr.status === 500) {
+                    ew.alert("Terjadi kesalahan server. Coba lagi nanti.");
+                } else {
+                    ew.alert("Gagal mendownload file. Error: " + xhr.responseText);
+                }
+            },
+            complete: function () {
+                hideLoading();
+            }
+        });
+    });
+});
+</script>
+}
+@if (!formInputProofOfVisitList.IsExport()) {
+<div class="btn-toolbar ew-toolbar">
+@if (formInputProofOfVisitList.TotalRecords > 0 && formInputProofOfVisitList.ExportOptions.Visible) {
+    formInputProofOfVisitList.ExportOptions.Render("body");
+}
+@if (formInputProofOfVisitList.ImportOptions.Visible) {
+    formInputProofOfVisitList.ImportOptions.Render("body");
+}
+@if (formInputProofOfVisitList.SearchOptions.Visible) {
+    formInputProofOfVisitList.SearchOptions.Render("body");
+}
+@if (formInputProofOfVisitList.FilterOptions.Visible) {
+    formInputProofOfVisitList.FilterOptions.Render("body");
+}
+</div>
+}
+@if (formInputProofOfVisitList.ShowCurrentFilter) {
+    formInputProofOfVisitList.ShowFilterList();
+}
+@if (!formInputProofOfVisitList.IsModal) {
+<form name="fFormInputProofOfVisitsrch" id="fFormInputProofOfVisitsrch" class="ew-form ew-ext-search-form" action="@AppPath(CurrentPageName())" novalidate autocomplete="off">
+<div id="fFormInputProofOfVisitsrch_search_panel" class="mb-2 mb-sm-0 @(formInputProofOfVisitList.SearchPanelClass)"><!-- .ew-search-panel -->
+<script>
+var currentTable = @Html.Raw(ConvertToJson(formInputProofOfVisitList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { FormInputProofOfVisit: currentTable } });
+var currentForm;
+var fFormInputProofOfVisitsrch, currentSearchForm, currentAdvancedSearchForm;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery,
+        fields = currentTable.fields;
+
+    // Form object for search
+    let form = new ew.FormBuilder()
+        .setId("fFormInputProofOfVisitsrch")
+        .setPageId("list")
+@if (formInputProofOfVisitList.UseAjaxActions) {
+        <text>.setSubmitWithFetch(true)</text>
+}
+
+        // Add fields
+        .setFields([
+        ])
+        // Validate form
+        .setValidate(
+            async function () {
+                if (!this.validateRequired)
+                    return true; // Ignore validation
+                let fobj = this.getForm();
+
+                // Validate fields
+                if (!this.validateFields())
+                    return false;
+
+                // Call Form_CustomValidate event
+                if (!(await this.customValidate?.(fobj) ?? true)) {
+                    this.focus();
+                    return false;
+                }
+                return true;
+            }
+        )
+
+        // Form_CustomValidate
+        .setCustomValidate(
+            function(fobj) { // DO NOT CHANGE THIS LINE!
+                    // Your custom validation code here, return false if invalid.
+                    return true;
+                }
+        )
+
+        // Use JavaScript validation or not
+        .setValidateRequired(ew.CLIENT_VALIDATE)
+
+        // Dynamic selection lists
+        .setLists({
+            "NoReferensi": @Html.Raw(formInputProofOfVisitList.NoReferensi.ToClientList(formInputProofOfVisitList)),
+            "Tanggal": @Html.Raw(formInputProofOfVisitList.Tanggal.ToClientList(formInputProofOfVisitList)),
+            "Lokasi": @Html.Raw(formInputProofOfVisitList.Lokasi.ToClientList(formInputProofOfVisitList)),
+            "Keterangan": @Html.Raw(formInputProofOfVisitList.Keterangan.ToClientList(formInputProofOfVisitList)),
+            "userInput": @Html.Raw(formInputProofOfVisitList.userInput.ToClientList(formInputProofOfVisitList)),
+            "etlDate": @Html.Raw(formInputProofOfVisitList.etlDate.ToClientList(formInputProofOfVisitList)),
+            "lastUpdatedBy": @Html.Raw(formInputProofOfVisitList.lastUpdatedBy.ToClientList(formInputProofOfVisitList)),
+            "lastUpdatedDate": @Html.Raw(formInputProofOfVisitList.lastUpdatedDate.ToClientList(formInputProofOfVisitList)),
+        })
+
+        // Filters
+        .setFilterList(@Html.Raw(formInputProofOfVisitList.GetFilterList()))
+        .build();
+    window[form.id] = form;
+    currentSearchForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<input type="hidden" name="cmd" value="search">
+@if (Security.CanSearch) {
+if (!formInputProofOfVisitList.IsExport() && Empty(formInputProofOfVisitList.CurrentAction) && formInputProofOfVisitList.HasSearchFields()) { @* Show search form (begin) *@
+<div class="ew-extended-search container-fluid ps-2">
+<div class="row mb-0@(formInputProofOfVisitList.SearchFieldsPerRow > 0 ? " row-cols-sm-" + formInputProofOfVisitList.SearchFieldsPerRow : "")">
+@{
+    // Render search row
+    formInputProofOfVisitList.RowType = RowType.Search;
+    formInputProofOfVisitList.ResetAttributes();
+    await formInputProofOfVisitList.RenderRow();
+}
+@if (formInputProofOfVisitList.NoReferensi.Visible) { // formInputProofOfVisitList.NoReferensi.Visible (begin)
+    if (!formInputProofOfVisitList.NoReferensi.UseFilter) {
+        formInputProofOfVisitList.SearchColumnCount++;
+    }
+    <div id="xs_NoReferensi" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(formInputProofOfVisitList.NoReferensi.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_NoReferensi"
+            name="x_NoReferensi[]"
+            class="form-control ew-select@(formInputProofOfVisitList.NoReferensi.IsInvalidClass)"
+            data-select2-id="fFormInputProofOfVisitsrch_x_NoReferensi"
+            data-table="FormInputProofOfVisit"
+            data-field="x_NoReferensi"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(formInputProofOfVisitList.NoReferensi.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(formInputProofOfVisitList.NoReferensi.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(formInputProofOfVisitList.NoReferensi.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(formInputProofOfVisitList.NoReferensi.EditAttributes)>
+            @(formInputProofOfVisitList.NoReferensi.SelectOptionListHtml("x_NoReferensi", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(formInputProofOfVisitList.NoReferensi.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fFormInputProofOfVisitsrch", function() {
+            var options = {
+                name: "x_NoReferensi",
+                selectId: "fFormInputProofOfVisitsrch_x_NoReferensi",
+                ajax: { id: "x_NoReferensi", form: "fFormInputProofOfVisitsrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.FormInputProofOfVisit.fields.NoReferensi.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* formInputProofOfVisitList.NoReferensi.Visible (end) *@
+@if (formInputProofOfVisitList.Tanggal.Visible) { // formInputProofOfVisitList.Tanggal.Visible (begin)
+    if (!formInputProofOfVisitList.Tanggal.UseFilter) {
+        formInputProofOfVisitList.SearchColumnCount++;
+    }
+    <div id="xs_Tanggal" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(formInputProofOfVisitList.Tanggal.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_Tanggal"
+            name="x_Tanggal[]"
+            class="form-control ew-select@(formInputProofOfVisitList.Tanggal.IsInvalidClass)"
+            data-select2-id="fFormInputProofOfVisitsrch_x_Tanggal"
+            data-table="FormInputProofOfVisit"
+            data-field="x_Tanggal"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(formInputProofOfVisitList.Tanggal.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(formInputProofOfVisitList.Tanggal.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(formInputProofOfVisitList.Tanggal.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(formInputProofOfVisitList.Tanggal.EditAttributes)>
+            @(formInputProofOfVisitList.Tanggal.SelectOptionListHtml("x_Tanggal", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(formInputProofOfVisitList.Tanggal.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fFormInputProofOfVisitsrch", function() {
+            var options = {
+                name: "x_Tanggal",
+                selectId: "fFormInputProofOfVisitsrch_x_Tanggal",
+                ajax: { id: "x_Tanggal", form: "fFormInputProofOfVisitsrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.FormInputProofOfVisit.fields.Tanggal.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* formInputProofOfVisitList.Tanggal.Visible (end) *@
+@if (formInputProofOfVisitList.Lokasi.Visible) { // formInputProofOfVisitList.Lokasi.Visible (begin)
+    if (!formInputProofOfVisitList.Lokasi.UseFilter) {
+        formInputProofOfVisitList.SearchColumnCount++;
+    }
+    <div id="xs_Lokasi" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(formInputProofOfVisitList.Lokasi.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_Lokasi"
+            name="x_Lokasi[]"
+            class="form-control ew-select@(formInputProofOfVisitList.Lokasi.IsInvalidClass)"
+            data-select2-id="fFormInputProofOfVisitsrch_x_Lokasi"
+            data-table="FormInputProofOfVisit"
+            data-field="x_Lokasi"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(formInputProofOfVisitList.Lokasi.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(formInputProofOfVisitList.Lokasi.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(formInputProofOfVisitList.Lokasi.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(formInputProofOfVisitList.Lokasi.EditAttributes)>
+            @(formInputProofOfVisitList.Lokasi.SelectOptionListHtml("x_Lokasi", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(formInputProofOfVisitList.Lokasi.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fFormInputProofOfVisitsrch", function() {
+            var options = {
+                name: "x_Lokasi",
+                selectId: "fFormInputProofOfVisitsrch_x_Lokasi",
+                ajax: { id: "x_Lokasi", form: "fFormInputProofOfVisitsrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.FormInputProofOfVisit.fields.Lokasi.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* formInputProofOfVisitList.Lokasi.Visible (end) *@
+@if (formInputProofOfVisitList.Keterangan.Visible) { // formInputProofOfVisitList.Keterangan.Visible (begin)
+    if (!formInputProofOfVisitList.Keterangan.UseFilter) {
+        formInputProofOfVisitList.SearchColumnCount++;
+    }
+    <div id="xs_Keterangan" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(formInputProofOfVisitList.Keterangan.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_Keterangan"
+            name="x_Keterangan[]"
+            class="form-control ew-select@(formInputProofOfVisitList.Keterangan.IsInvalidClass)"
+            data-select2-id="fFormInputProofOfVisitsrch_x_Keterangan"
+            data-table="FormInputProofOfVisit"
+            data-field="x_Keterangan"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(formInputProofOfVisitList.Keterangan.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(formInputProofOfVisitList.Keterangan.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(formInputProofOfVisitList.Keterangan.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(formInputProofOfVisitList.Keterangan.EditAttributes)>
+            @(formInputProofOfVisitList.Keterangan.SelectOptionListHtml("x_Keterangan", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(formInputProofOfVisitList.Keterangan.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fFormInputProofOfVisitsrch", function() {
+            var options = {
+                name: "x_Keterangan",
+                selectId: "fFormInputProofOfVisitsrch_x_Keterangan",
+                ajax: { id: "x_Keterangan", form: "fFormInputProofOfVisitsrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.FormInputProofOfVisit.fields.Keterangan.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* formInputProofOfVisitList.Keterangan.Visible (end) *@
+@if (formInputProofOfVisitList.userInput.Visible) { // formInputProofOfVisitList.userInput.Visible (begin)
+    if (!formInputProofOfVisitList.userInput.UseFilter) {
+        formInputProofOfVisitList.SearchColumnCount++;
+    }
+    <div id="xs_userInput" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(formInputProofOfVisitList.userInput.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_userInput"
+            name="x_userInput[]"
+            class="form-control ew-select@(formInputProofOfVisitList.userInput.IsInvalidClass)"
+            data-select2-id="fFormInputProofOfVisitsrch_x_userInput"
+            data-table="FormInputProofOfVisit"
+            data-field="x_userInput"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(formInputProofOfVisitList.userInput.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(formInputProofOfVisitList.userInput.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(formInputProofOfVisitList.userInput.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(formInputProofOfVisitList.userInput.EditAttributes)>
+            @(formInputProofOfVisitList.userInput.SelectOptionListHtml("x_userInput", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(formInputProofOfVisitList.userInput.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fFormInputProofOfVisitsrch", function() {
+            var options = {
+                name: "x_userInput",
+                selectId: "fFormInputProofOfVisitsrch_x_userInput",
+                ajax: { id: "x_userInput", form: "fFormInputProofOfVisitsrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.FormInputProofOfVisit.fields.userInput.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* formInputProofOfVisitList.userInput.Visible (end) *@
+@if (formInputProofOfVisitList.etlDate.Visible) { // formInputProofOfVisitList.etlDate.Visible (begin)
+    if (!formInputProofOfVisitList.etlDate.UseFilter) {
+        formInputProofOfVisitList.SearchColumnCount++;
+    }
+    <div id="xs_etlDate" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(formInputProofOfVisitList.etlDate.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_etlDate"
+            name="x_etlDate[]"
+            class="form-control ew-select@(formInputProofOfVisitList.etlDate.IsInvalidClass)"
+            data-select2-id="fFormInputProofOfVisitsrch_x_etlDate"
+            data-table="FormInputProofOfVisit"
+            data-field="x_etlDate"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(formInputProofOfVisitList.etlDate.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(formInputProofOfVisitList.etlDate.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(formInputProofOfVisitList.etlDate.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(formInputProofOfVisitList.etlDate.EditAttributes)>
+            @(formInputProofOfVisitList.etlDate.SelectOptionListHtml("x_etlDate", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(formInputProofOfVisitList.etlDate.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fFormInputProofOfVisitsrch", function() {
+            var options = {
+                name: "x_etlDate",
+                selectId: "fFormInputProofOfVisitsrch_x_etlDate",
+                ajax: { id: "x_etlDate", form: "fFormInputProofOfVisitsrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.FormInputProofOfVisit.fields.etlDate.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* formInputProofOfVisitList.etlDate.Visible (end) *@
+@if (formInputProofOfVisitList.lastUpdatedBy.Visible) { // formInputProofOfVisitList.lastUpdatedBy.Visible (begin)
+    if (!formInputProofOfVisitList.lastUpdatedBy.UseFilter) {
+        formInputProofOfVisitList.SearchColumnCount++;
+    }
+    <div id="xs_lastUpdatedBy" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(formInputProofOfVisitList.lastUpdatedBy.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_lastUpdatedBy"
+            name="x_lastUpdatedBy[]"
+            class="form-control ew-select@(formInputProofOfVisitList.lastUpdatedBy.IsInvalidClass)"
+            data-select2-id="fFormInputProofOfVisitsrch_x_lastUpdatedBy"
+            data-table="FormInputProofOfVisit"
+            data-field="x_lastUpdatedBy"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(formInputProofOfVisitList.lastUpdatedBy.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(formInputProofOfVisitList.lastUpdatedBy.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(formInputProofOfVisitList.lastUpdatedBy.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(formInputProofOfVisitList.lastUpdatedBy.EditAttributes)>
+            @(formInputProofOfVisitList.lastUpdatedBy.SelectOptionListHtml("x_lastUpdatedBy", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(formInputProofOfVisitList.lastUpdatedBy.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fFormInputProofOfVisitsrch", function() {
+            var options = {
+                name: "x_lastUpdatedBy",
+                selectId: "fFormInputProofOfVisitsrch_x_lastUpdatedBy",
+                ajax: { id: "x_lastUpdatedBy", form: "fFormInputProofOfVisitsrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.FormInputProofOfVisit.fields.lastUpdatedBy.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* formInputProofOfVisitList.lastUpdatedBy.Visible (end) *@
+@if (formInputProofOfVisitList.lastUpdatedDate.Visible) { // formInputProofOfVisitList.lastUpdatedDate.Visible (begin)
+    if (!formInputProofOfVisitList.lastUpdatedDate.UseFilter) {
+        formInputProofOfVisitList.SearchColumnCount++;
+    }
+    <div id="xs_lastUpdatedDate" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(formInputProofOfVisitList.lastUpdatedDate.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_lastUpdatedDate"
+            name="x_lastUpdatedDate[]"
+            class="form-control ew-select@(formInputProofOfVisitList.lastUpdatedDate.IsInvalidClass)"
+            data-select2-id="fFormInputProofOfVisitsrch_x_lastUpdatedDate"
+            data-table="FormInputProofOfVisit"
+            data-field="x_lastUpdatedDate"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(formInputProofOfVisitList.lastUpdatedDate.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(formInputProofOfVisitList.lastUpdatedDate.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(formInputProofOfVisitList.lastUpdatedDate.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(formInputProofOfVisitList.lastUpdatedDate.EditAttributes)>
+            @(formInputProofOfVisitList.lastUpdatedDate.SelectOptionListHtml("x_lastUpdatedDate", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(formInputProofOfVisitList.lastUpdatedDate.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fFormInputProofOfVisitsrch", function() {
+            var options = {
+                name: "x_lastUpdatedDate",
+                selectId: "fFormInputProofOfVisitsrch_x_lastUpdatedDate",
+                ajax: { id: "x_lastUpdatedDate", form: "fFormInputProofOfVisitsrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.FormInputProofOfVisit.fields.lastUpdatedDate.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* formInputProofOfVisitList.lastUpdatedDate.Visible (end) *@
+</div><!-- /.row -->
+<div class="row mb-0">
+    <div class="col-sm-auto px-0 pe-sm-2">
+        <div class="ew-basic-search input-group">
+            <input type="search" name="@(Config.TableBasicSearch)" id="@(Config.TableBasicSearch)" class="form-control ew-basic-search-keyword" value="@Html.Raw(HtmlEncode(formInputProofOfVisitList.BasicSearch.SessionKeyword))" placeholder="@(HtmlEncode(Language.Phrase("Search")))" aria-label="@(HtmlEncode(Language.Phrase("Search")))">
+            <input type="hidden" name="@(Config.TableBasicSearchType)" id="@(Config.TableBasicSearchType)" class="ew-basic-search-type" value="@(HtmlEncode(formInputProofOfVisitList.BasicSearch.SessionType))">
+            <button type="button" data-bs-toggle="dropdown" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split" aria-haspopup="true" aria-expanded="false">
+                <span id="searchtype">@Html.Raw(formInputProofOfVisitList.BasicSearch.TypeNameShort)</span>
+            </button>
+            <div class="dropdown-menu dropdown-menu-end">
+                <button type="button" class="dropdown-item@(formInputProofOfVisitList.BasicSearch.SessionType == "" ? " active" : "")" form="fFormInputProofOfVisitsrch" data-ew-action="search-type">@Html.Raw(Language.Phrase("QuickSearchAuto"))</button>
+                <button type="button" class="dropdown-item@(formInputProofOfVisitList.BasicSearch.SessionType == "=" ? " active" : "")" form="fFormInputProofOfVisitsrch" data-ew-action="search-type" data-search-type="=">@Html.Raw(Language.Phrase("QuickSearchExact"))</button>
+                <button type="button" class="dropdown-item@(formInputProofOfVisitList.BasicSearch.SessionType == "AND" ? " active" : "")" form="fFormInputProofOfVisitsrch" data-ew-action="search-type" data-search-type="AND">@Html.Raw(Language.Phrase("QuickSearchAll"))</button>
+                <button type="button" class="dropdown-item@(formInputProofOfVisitList.BasicSearch.SessionType == "OR" ? " active" : "")" form="fFormInputProofOfVisitsrch" data-ew-action="search-type" data-search-type="OR">@Html.Raw(Language.Phrase("QuickSearchAny"))</button>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-auto mb-3">
+        <button class="btn btn-primary" name="btn-submit" id="btn-submit" type="submit">@Html.Raw(Language.Phrase("SearchBtn"))</button>
+    </div>
+</div>
+</div><!-- /.ew-extended-search -->
+} @* Show search form (end) *@
+}
+</div><!-- /.ew-search-panel -->
+</form>
+}
+@formInputProofOfVisitList.ShowPageHeader()
+@formInputProofOfVisitList.ShowMessages()
+<main class="list @(formInputProofOfVisitList.TotalRecords == 0 && !formInputProofOfVisitList.IsAdd ? " ew-no-record" : "")">
+<div id="ew-header-options">
+    @formInputProofOfVisitList.HeaderOptions.RenderBody()
+</div>
+<div id="ew-list">
+@if (formInputProofOfVisitList.TotalRecords > 0 || !Empty(formInputProofOfVisitList.CurrentAction)) {
+<div class="card ew-card ew-grid@(formInputProofOfVisitList.IsAddOrEdit ? " ew-grid-add-edit" : "") @(formInputProofOfVisitList.TableGridClass)">
+<form name="@(formInputProofOfVisitList.FormName)" id="@(formInputProofOfVisitList.FormName)" class="ew-form ew-list-form" action="@AppPath(formInputProofOfVisitList.PageName)" method="post" novalidate autocomplete="off">
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+@if (formInputProofOfVisitList.IsModal) {
+<input type="hidden" name="modal" value="1">
+}
+<div id="gmp_FormInputProofOfVisit" class="card-body ew-grid-middle-panel @(formInputProofOfVisitList.TableContainerClass)" style="@(formInputProofOfVisitList.TableContainerStyle)">
+@if (formInputProofOfVisitList.TotalRecords > 0 || formInputProofOfVisitList.IsGridEdit || formInputProofOfVisitList.IsMultiEdit) {
+<table id="tbl_FormInputProofOfVisitlist" class="@(formInputProofOfVisitList.TableClass)"><!-- .ew-table -->
+<thead>
+    <tr class="ew-table-header">
+@{
+    // Header row
+    formInputProofOfVisitList.RowType = RowType.Header;
+
+    // Render list options
+    await formInputProofOfVisitList.RenderListOptions();
+}
+@* Render list options (header, left) *@
+@formInputProofOfVisitList.ListOptions.RenderHeader("left")
+@if (formInputProofOfVisitList.NoReferensi.Visible) { // formInputProofOfVisitList.NoReferensi.Visible (begin)
+        <th data-name="NoReferensi" class="@(formInputProofOfVisitList.NoReferensi.HeaderCellClass)"><div id="elh_FormInputProofOfVisit_NoReferensi" class="FormInputProofOfVisit_NoReferensi">@Html.Raw(formInputProofOfVisitList.RenderFieldHeader(formInputProofOfVisitList.NoReferensi))</div></th>
+} @* formInputProofOfVisitList.NoReferensi.Visible (end) *@
+@if (formInputProofOfVisitList.Tanggal.Visible) { // formInputProofOfVisitList.Tanggal.Visible (begin)
+        <th data-name="Tanggal" class="@(formInputProofOfVisitList.Tanggal.HeaderCellClass)"><div id="elh_FormInputProofOfVisit_Tanggal" class="FormInputProofOfVisit_Tanggal">@Html.Raw(formInputProofOfVisitList.RenderFieldHeader(formInputProofOfVisitList.Tanggal))</div></th>
+} @* formInputProofOfVisitList.Tanggal.Visible (end) *@
+@if (formInputProofOfVisitList.Lokasi.Visible) { // formInputProofOfVisitList.Lokasi.Visible (begin)
+        <th data-name="Lokasi" class="@(formInputProofOfVisitList.Lokasi.HeaderCellClass)"><div id="elh_FormInputProofOfVisit_Lokasi" class="FormInputProofOfVisit_Lokasi">@Html.Raw(formInputProofOfVisitList.RenderFieldHeader(formInputProofOfVisitList.Lokasi))</div></th>
+} @* formInputProofOfVisitList.Lokasi.Visible (end) *@
+@if (formInputProofOfVisitList.DownloadDokumen.Visible) { // formInputProofOfVisitList.DownloadDokumen.Visible (begin)
+        <th data-name="DownloadDokumen" class="@(formInputProofOfVisitList.DownloadDokumen.HeaderCellClass)" style="white-space: nowrap;"><div id="elh_FormInputProofOfVisit_DownloadDokumen" class="FormInputProofOfVisit_DownloadDokumen">@Html.Raw(formInputProofOfVisitList.RenderFieldHeader(formInputProofOfVisitList.DownloadDokumen))</div></th>
+} @* formInputProofOfVisitList.DownloadDokumen.Visible (end) *@
+@if (formInputProofOfVisitList.Ketidaksesuaiaan.Visible) { // formInputProofOfVisitList.Ketidaksesuaiaan.Visible (begin)
+        <th data-name="Ketidaksesuaiaan" class="@(formInputProofOfVisitList.Ketidaksesuaiaan.HeaderCellClass)"><div id="elh_FormInputProofOfVisit_Ketidaksesuaiaan" class="FormInputProofOfVisit_Ketidaksesuaiaan">@Html.Raw(formInputProofOfVisitList.RenderFieldHeader(formInputProofOfVisitList.Ketidaksesuaiaan))</div></th>
+} @* formInputProofOfVisitList.Ketidaksesuaiaan.Visible (end) *@
+@if (formInputProofOfVisitList.Keterangan.Visible) { // formInputProofOfVisitList.Keterangan.Visible (begin)
+        <th data-name="Keterangan" class="@(formInputProofOfVisitList.Keterangan.HeaderCellClass)"><div id="elh_FormInputProofOfVisit_Keterangan" class="FormInputProofOfVisit_Keterangan">@Html.Raw(formInputProofOfVisitList.RenderFieldHeader(formInputProofOfVisitList.Keterangan))</div></th>
+} @* formInputProofOfVisitList.Keterangan.Visible (end) *@
+@if (formInputProofOfVisitList.IdPosition.Visible) { // formInputProofOfVisitList.IdPosition.Visible (begin)
+        <th data-name="IdPosition" class="@(formInputProofOfVisitList.IdPosition.HeaderCellClass)"><div id="elh_FormInputProofOfVisit_IdPosition" class="FormInputProofOfVisit_IdPosition">@Html.Raw(formInputProofOfVisitList.RenderFieldHeader(formInputProofOfVisitList.IdPosition))</div></th>
+} @* formInputProofOfVisitList.IdPosition.Visible (end) *@
+@if (formInputProofOfVisitList.userInput.Visible) { // formInputProofOfVisitList.userInput.Visible (begin)
+        <th data-name="userInput" class="@(formInputProofOfVisitList.userInput.HeaderCellClass)"><div id="elh_FormInputProofOfVisit_userInput" class="FormInputProofOfVisit_userInput">@Html.Raw(formInputProofOfVisitList.RenderFieldHeader(formInputProofOfVisitList.userInput))</div></th>
+} @* formInputProofOfVisitList.userInput.Visible (end) *@
+@if (formInputProofOfVisitList.etlDate.Visible) { // formInputProofOfVisitList.etlDate.Visible (begin)
+        <th data-name="etlDate" class="@(formInputProofOfVisitList.etlDate.HeaderCellClass)"><div id="elh_FormInputProofOfVisit_etlDate" class="FormInputProofOfVisit_etlDate">@Html.Raw(formInputProofOfVisitList.RenderFieldHeader(formInputProofOfVisitList.etlDate))</div></th>
+} @* formInputProofOfVisitList.etlDate.Visible (end) *@
+@if (formInputProofOfVisitList.lastUpdatedBy.Visible) { // formInputProofOfVisitList.lastUpdatedBy.Visible (begin)
+        <th data-name="lastUpdatedBy" class="@(formInputProofOfVisitList.lastUpdatedBy.HeaderCellClass)"><div id="elh_FormInputProofOfVisit_lastUpdatedBy" class="FormInputProofOfVisit_lastUpdatedBy">@Html.Raw(formInputProofOfVisitList.RenderFieldHeader(formInputProofOfVisitList.lastUpdatedBy))</div></th>
+} @* formInputProofOfVisitList.lastUpdatedBy.Visible (end) *@
+@if (formInputProofOfVisitList.lastUpdatedDate.Visible) { // formInputProofOfVisitList.lastUpdatedDate.Visible (begin)
+        <th data-name="lastUpdatedDate" class="@(formInputProofOfVisitList.lastUpdatedDate.HeaderCellClass)"><div id="elh_FormInputProofOfVisit_lastUpdatedDate" class="FormInputProofOfVisit_lastUpdatedDate">@Html.Raw(formInputProofOfVisitList.RenderFieldHeader(formInputProofOfVisitList.lastUpdatedDate))</div></th>
+} @* formInputProofOfVisitList.lastUpdatedDate.Visible (end) *@
+@* Render list options (header, right) *@
+@formInputProofOfVisitList.ListOptions.RenderHeader("right")
+    </tr>
+</thead>
+<tbody data-page="@(formInputProofOfVisitList.PageNumber)">
+@{
+    await formInputProofOfVisitList.SetupGrid();
+    bool eof = formInputProofOfVisitList.Recordset == null; // DN
+}
+@while (formInputProofOfVisitList.RecordCount < formInputProofOfVisitList.StopRecord || SameString(formInputProofOfVisitList.RowIndex, "$rowindex$")) { // Begin While
+    if (!eof && !SameString(formInputProofOfVisitList.RowIndex, "$rowindex$") &&
+        (!formInputProofOfVisitList.IsGridAdd || formInputProofOfVisitList.CurrentMode == "copy") &&
+        (!((formInputProofOfVisitList.IsCopy || formInputProofOfVisitList.IsAdd) && formInputProofOfVisitList.RowIndex is int rowIndex && rowIndex == 0))) // DN
+        eof = !await formInputProofOfVisitList.Recordset.ReadAsync();
+    formInputProofOfVisitList.RecordCount++;
+    if (formInputProofOfVisitList.RecordCount >= formInputProofOfVisitList.StartRecord) {
+        await formInputProofOfVisitList.SetupRow();
+    <tr @Html.Raw(formInputProofOfVisitList.RowAttributes)>
+    @* Render list options (body, left) *@
+    @formInputProofOfVisitList.ListOptions.RenderBody("left", formInputProofOfVisitList.RowCount)
+    @if (formInputProofOfVisitList.NoReferensi.Visible) { // formInputProofOfVisitList.NoReferensi.Visible (begin)
+        <td data-name="NoReferensi" @Html.Raw(formInputProofOfVisitList.NoReferensi.CellAttributes)>
+<span id="el@(formInputProofOfVisitList.RowIndex == "$rowindex$" ? "$rowindex$" : formInputProofOfVisitList.RowCount)_FormInputProofOfVisit_NoReferensi" class="el_FormInputProofOfVisit_NoReferensi">
+<span @Html.Raw(formInputProofOfVisitList.NoReferensi.ViewAttributes)>
+@Html.Raw(formInputProofOfVisitList.NoReferensi.GetViewValue())</span>
+</span>
+</td>
+    } @* formInputProofOfVisitList.NoReferensi.Visible (end) *@
+    @if (formInputProofOfVisitList.Tanggal.Visible) { // formInputProofOfVisitList.Tanggal.Visible (begin)
+        <td data-name="Tanggal" @Html.Raw(formInputProofOfVisitList.Tanggal.CellAttributes)>
+<span id="el@(formInputProofOfVisitList.RowIndex == "$rowindex$" ? "$rowindex$" : formInputProofOfVisitList.RowCount)_FormInputProofOfVisit_Tanggal" class="el_FormInputProofOfVisit_Tanggal">
+<span @Html.Raw(formInputProofOfVisitList.Tanggal.ViewAttributes)>
+@Html.Raw(formInputProofOfVisitList.Tanggal.GetViewValue())</span>
+</span>
+</td>
+    } @* formInputProofOfVisitList.Tanggal.Visible (end) *@
+    @if (formInputProofOfVisitList.Lokasi.Visible) { // formInputProofOfVisitList.Lokasi.Visible (begin)
+        <td data-name="Lokasi" @Html.Raw(formInputProofOfVisitList.Lokasi.CellAttributes)>
+<span id="el@(formInputProofOfVisitList.RowIndex == "$rowindex$" ? "$rowindex$" : formInputProofOfVisitList.RowCount)_FormInputProofOfVisit_Lokasi" class="el_FormInputProofOfVisit_Lokasi">
+<span @Html.Raw(formInputProofOfVisitList.Lokasi.ViewAttributes)>
+@Html.Raw(formInputProofOfVisitList.Lokasi.GetViewValue())</span>
+</span>
+</td>
+    } @* formInputProofOfVisitList.Lokasi.Visible (end) *@
+    @if (formInputProofOfVisitList.DownloadDokumen.Visible) { // formInputProofOfVisitList.DownloadDokumen.Visible (begin)
+        <td data-name="DownloadDokumen" @Html.Raw(formInputProofOfVisitList.DownloadDokumen.CellAttributes)>
+<span id="el@(formInputProofOfVisitList.RowIndex == "$rowindex$" ? "$rowindex$" : formInputProofOfVisitList.RowCount)_FormInputProofOfVisit_DownloadDokumen" class="el_FormInputProofOfVisit_DownloadDokumen">
+<span @Html.Raw(formInputProofOfVisitList.DownloadDokumen.ViewAttributes)>
+@Html.Raw(formInputProofOfVisitList.DownloadDokumen.GetViewValue())</span>
+</span>
+</td>
+    } @* formInputProofOfVisitList.DownloadDokumen.Visible (end) *@
+    @if (formInputProofOfVisitList.Ketidaksesuaiaan.Visible) { // formInputProofOfVisitList.Ketidaksesuaiaan.Visible (begin)
+        <td data-name="Ketidaksesuaiaan" @Html.Raw(formInputProofOfVisitList.Ketidaksesuaiaan.CellAttributes)>
+<span id="el@(formInputProofOfVisitList.RowIndex == "$rowindex$" ? "$rowindex$" : formInputProofOfVisitList.RowCount)_FormInputProofOfVisit_Ketidaksesuaiaan" class="el_FormInputProofOfVisit_Ketidaksesuaiaan">
+<span @Html.Raw(formInputProofOfVisitList.Ketidaksesuaiaan.ViewAttributes)>
+@Html.Raw(formInputProofOfVisitList.Ketidaksesuaiaan.GetViewValue())</span>
+</span>
+</td>
+    } @* formInputProofOfVisitList.Ketidaksesuaiaan.Visible (end) *@
+    @if (formInputProofOfVisitList.Keterangan.Visible) { // formInputProofOfVisitList.Keterangan.Visible (begin)
+        <td data-name="Keterangan" @Html.Raw(formInputProofOfVisitList.Keterangan.CellAttributes)>
+<span id="el@(formInputProofOfVisitList.RowIndex == "$rowindex$" ? "$rowindex$" : formInputProofOfVisitList.RowCount)_FormInputProofOfVisit_Keterangan" class="el_FormInputProofOfVisit_Keterangan">
+<span @Html.Raw(formInputProofOfVisitList.Keterangan.ViewAttributes)>
+@Html.Raw(formInputProofOfVisitList.Keterangan.GetViewValue())</span>
+</span>
+</td>
+    } @* formInputProofOfVisitList.Keterangan.Visible (end) *@
+    @if (formInputProofOfVisitList.IdPosition.Visible) { // formInputProofOfVisitList.IdPosition.Visible (begin)
+        <td data-name="IdPosition" @Html.Raw(formInputProofOfVisitList.IdPosition.CellAttributes)>
+<span id="el@(formInputProofOfVisitList.RowIndex == "$rowindex$" ? "$rowindex$" : formInputProofOfVisitList.RowCount)_FormInputProofOfVisit_IdPosition" class="el_FormInputProofOfVisit_IdPosition">
+<span @Html.Raw(formInputProofOfVisitList.IdPosition.ViewAttributes)>
+@Html.Raw(formInputProofOfVisitList.IdPosition.GetViewValue())</span>
+</span>
+</td>
+    } @* formInputProofOfVisitList.IdPosition.Visible (end) *@
+    @if (formInputProofOfVisitList.userInput.Visible) { // formInputProofOfVisitList.userInput.Visible (begin)
+        <td data-name="userInput" @Html.Raw(formInputProofOfVisitList.userInput.CellAttributes)>
+<span id="el@(formInputProofOfVisitList.RowIndex == "$rowindex$" ? "$rowindex$" : formInputProofOfVisitList.RowCount)_FormInputProofOfVisit_userInput" class="el_FormInputProofOfVisit_userInput">
+<span @Html.Raw(formInputProofOfVisitList.userInput.ViewAttributes)>
+@Html.Raw(formInputProofOfVisitList.userInput.GetViewValue())</span>
+</span>
+</td>
+    } @* formInputProofOfVisitList.userInput.Visible (end) *@
+    @if (formInputProofOfVisitList.etlDate.Visible) { // formInputProofOfVisitList.etlDate.Visible (begin)
+        <td data-name="etlDate" @Html.Raw(formInputProofOfVisitList.etlDate.CellAttributes)>
+<span id="el@(formInputProofOfVisitList.RowIndex == "$rowindex$" ? "$rowindex$" : formInputProofOfVisitList.RowCount)_FormInputProofOfVisit_etlDate" class="el_FormInputProofOfVisit_etlDate">
+<span @Html.Raw(formInputProofOfVisitList.etlDate.ViewAttributes)>
+@Html.Raw(formInputProofOfVisitList.etlDate.GetViewValue())</span>
+</span>
+</td>
+    } @* formInputProofOfVisitList.etlDate.Visible (end) *@
+    @if (formInputProofOfVisitList.lastUpdatedBy.Visible) { // formInputProofOfVisitList.lastUpdatedBy.Visible (begin)
+        <td data-name="lastUpdatedBy" @Html.Raw(formInputProofOfVisitList.lastUpdatedBy.CellAttributes)>
+<span id="el@(formInputProofOfVisitList.RowIndex == "$rowindex$" ? "$rowindex$" : formInputProofOfVisitList.RowCount)_FormInputProofOfVisit_lastUpdatedBy" class="el_FormInputProofOfVisit_lastUpdatedBy">
+<span @Html.Raw(formInputProofOfVisitList.lastUpdatedBy.ViewAttributes)>
+@Html.Raw(formInputProofOfVisitList.lastUpdatedBy.GetViewValue())</span>
+</span>
+</td>
+    } @* formInputProofOfVisitList.lastUpdatedBy.Visible (end) *@
+    @if (formInputProofOfVisitList.lastUpdatedDate.Visible) { // formInputProofOfVisitList.lastUpdatedDate.Visible (begin)
+        <td data-name="lastUpdatedDate" @Html.Raw(formInputProofOfVisitList.lastUpdatedDate.CellAttributes)>
+<span id="el@(formInputProofOfVisitList.RowIndex == "$rowindex$" ? "$rowindex$" : formInputProofOfVisitList.RowCount)_FormInputProofOfVisit_lastUpdatedDate" class="el_FormInputProofOfVisit_lastUpdatedDate">
+<span @Html.Raw(formInputProofOfVisitList.lastUpdatedDate.ViewAttributes)>
+@Html.Raw(formInputProofOfVisitList.lastUpdatedDate.GetViewValue())</span>
+</span>
+</td>
+    } @* formInputProofOfVisitList.lastUpdatedDate.Visible (end) *@
+    @* Render list options (body, right) *@
+    @formInputProofOfVisitList.ListOptions.RenderBody("right", formInputProofOfVisitList.RowCount)
+    </tr>
+    } @* End if *@
+
+    // Reset for template row
+    if (SameString(formInputProofOfVisitList.RowIndex, "$rowindex$"))
+        formInputProofOfVisitList.RowIndex = 0;
+
+    // Reset inline add/copy row
+    if ((formInputProofOfVisitList.IsCopy || formInputProofOfVisitList.IsAdd) && formInputProofOfVisitList.RowIndex is int rowIndex2 && rowIndex2 == 0)
+        formInputProofOfVisitList.RowIndex = 1;
+} @* End While *@
+</tbody>
+</table><!-- /.ew-table -->
+} @* End If TotalRecords > 0 *@
+</div><!-- /.ew-grid-middle-panel -->
+@if (Empty(formInputProofOfVisitList.CurrentAction) && !formInputProofOfVisitList.UseAjaxActions) {
+<input type="hidden" name="action" id="action" value="">
+}
+</form><!-- /.ew-list-form -->
+@{ formInputProofOfVisitList.CloseRecordset(); }
+@if (!formInputProofOfVisitList.IsExport()) {
+<div class="card-footer ew-grid-lower-panel">
+@if (!formInputProofOfVisitList.IsGridAdd && !(formInputProofOfVisitList.IsGridEdit && formInputProofOfVisitList.ModalGridEdit) && !formInputProofOfVisitList.IsMultiEdit) {
+@Html.Raw(formInputProofOfVisitList.Pager.Render())
+}
+<div class="ew-list-other-options">
+@formInputProofOfVisitList.OtherOptions.RenderBody("bottom")
+</div>
+</div>
+}
+</div><!-- /.ew-grid -->
+} else { // Show other options
+<div class="ew-list-other-options">
+@formInputProofOfVisitList.OtherOptions.ForEach(opt => opt.ButtonClass = "").RenderBody()
+</div>
+}
+</div>
+<div id="ew-footer-options">
+    @formInputProofOfVisitList.FooterOptions.RenderBody()
+</div>
+</main>
+@formInputProofOfVisitList.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+@if (!formInputProofOfVisitList.IsExport()) {
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("FormInputProofOfVisit");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Startup script
+    const parent_url = ew.PATH_BASE;
+
+    /* ==== Ambil NoReferensi dari URL / form (tanpa bergantung data list) ==== */
+    function resolveNoRef() {
+        const qs = new URLSearchParams(location.search);
+        let v = (qs.getAll("x_NoReferensi[]")[0] || "").trim();
+        if (!v) v = (qs.get("x_NoReferensi") || "").trim();
+        if (!v) v = (qs.get("NoReferensi") || "").trim();
+        if (!v) {
+            v = ($('input[name="x_NoReferensi[]"]').val() || $('input[name="x_NoReferensi"]').val() || "").trim();
+        }
+        return v;
+    }
+    const NoReferensi = resolveNoRef();
+
+    /* ==== Stepper ==== */
+    (function () {
+        const steps = [
+            { number: 1, label: "Proof of Visit", url: parent_url + 'ProofOfVisitList', icon: "fa-clipboard-list" },
+            { number: 2, label: "Input Data", url: "", icon: "fa-pen-to-square" }
+        ];
+        const currentStep = 2;
+        if (!document.querySelector("style[data-hsse-stepper]")) {
+            $("<style data-hsse-stepper>")
+                .prop("type", "text/css")
+                .html(`
+                .stepper{display:flex;counter-reset:step}
+                .step{width:150px;text-align:center;position:relative}
+                .step:not(:last-child)::after{content:'';position:absolute;top:20px;right:-50%;width:100%;height:4px;background-color:#ccc;z-index:0}
+                .step.completed:not(:last-child)::after{background-color:#3c6dbd}
+                .step-icon{width:36px;height:36px;line-height:36px;border-radius:50%;background:#ccc;display:inline-block;z-index:1;position:relative;color:#fff;font-weight:bold}
+                .step.active .step-icon{background:#28a745}
+                .step-label{margin-top:8px;font-size:14px;display:flex;justify-content:center;align-items:center;gap:6px;color:#3c6dbd;text-decoration:none}
+                .step-label-not-active{color:#CCC!important}
+            `).appendTo("head");
+        }
+        const $wrapper = $('<div class="d-flex border-bottom border-2 pb-2"><div class="stepper"></div></div>');
+        const $stepper = $wrapper.find(".stepper");
+        steps.forEach(step => {
+            const isActive = step.number === currentStep;
+            const isCompleted = step.number < currentStep;
+            let icon, label, html;
+            if (isActive) {
+                icon = `<div class="step-icon bg-success">${step.number}</div>`;
+                label = `<div class="step-label text-success"><i class="fa-solid ${step.icon} me-1 text-success"></i>${step.label}</div>`;
+                html = `<div class="step active text-success">${icon}${label}</div>`;
+            } else if (isCompleted) {
+                icon = `<div class="step-icon" style="background:#3c6dbd">${step.number}</div>`;
+                label = `<div class="step-label"><a href="${step.url}" class="text-primary"><i class="fa-solid ${step.icon} me-1"></i>${step.label}</a></div>`;
+                html = `<div class="step completed text-primary">${icon}${label}</div>`;
+            } else {
+                icon = `<div class="step-icon">${step.number}</div>`;
+                label = `<div class="step-label-not-active"><i class="fa-solid ${step.icon} me-1"></i>${step.label}</div>`;
+                html = `<div class="step text-secondary">${icon}${label}</div>`;
+            }
+            $stepper.append(html);
+        });
+        $(".content-header .container-fluid .row").append($wrapper);
+    })();
+
+    /* ==== Judul kecil di samping Filter (pakai NoReferensi dari URL) ==== */
+    (function () {
+        const id = "title-pov-plant-date";
+        $("#" + id).remove();
+        const noRef = NoReferensi;
+        if (!noRef) return;
+        $.get(ew.PATH_BASE + "api/LookUpList/get_pov_header", { nomorReferensi: noRef })
+            .done(res => {
+                const plant = (res && res.success && (res.plantDisplay || res.plant)) || "-";
+                const tgl = (res && res.success && res.tanggal) || "-";
+                const html =
+                    `<span id="${id}" class="ms-3 fw-bold fst-italic d-inline-block align-middle">
+                Nomor Referensi: <span style="color:red">${noRef}</span>,
+                Plant: <span style="color:red">${plant}</span>,
+                Tanggal: <span style="color:red">${tgl}</span>
+                </span>`;
+                const $filter = $(".ew-toolbar .ew-filter-option").first();
+                if ($filter.length) $filter.after(html);
+                else $(".ew-toolbar").first().append(html);
+            });
+    })();
+
+    /* ==== Tombol Add kustom (selalu pakai NoReferensi dari URL) ==== */
+    (function () {
+        const $originalButton = $(`a.btn.btn-default.ew-add-edit.ew-add[href="${parent_url}FormInputProofOfVisitAdd"]`);
+        if ($originalButton.length) {
+            $originalButton.remove(); // Remove the default button
+            const nref = resolveNoRef();
+            if (!nref) {
+                return;
+            }
+            $.ajax({
+                url: parent_url + "api/LookUpList/GetTanggalDibuatPOV",
+                type: 'GET',
+                data: { noReferensi: nref },
+                success: function(response) {
+                    if (response && response.success) {
+                        const tanggalDibuat = new Date(response.tanggalDibuat);
+                        const now = new Date();
+                        const offsetWIB = 7 * 60; // 7 hours in minutes
+                        const todayWIB = new Date(now.getTime() + (offsetWIB + now.getTimezoneOffset()) * 60000);
+                        const isSameDate =
+                                tanggalDibuat.getFullYear() === todayWIB.getFullYear() &&
+                                tanggalDibuat.getMonth() === todayWIB.getMonth() &&
+                                tanggalDibuat.getDate() === todayWIB.getDate();
+                        if (isSameDate) {
+                            const $buttonContainer = $('button.btn-primary[name="btn-submit"]').first().parent();
+                            const $addButton = $(`
+                                <button class="btn btn-success ms-2" id="btn-add-pov">
+                                    <i class="fas fa-plus"></i> Add New
+                                </button>
+                            `);
+                            $addButton.on('click', function (e) {
+                                e.preventDefault();
+                                window.location.href = `${parent_url}FormInputProofOfVisitAdd?NoReferensi=${encodeURIComponent(nref)}`;
+                            });
+                            ($buttonContainer.length ? $buttonContainer : $(".ew-toolbar").first()).append($addButton);
+                        }
+                    }
+                },
+                error: function() {
+                    console.error("Failed to verify POV creation date.");
+                }
+            });
+        }
+    })();
+
+    /* ==== Gate akses List: Admin/OH bebas; lainnya harus MOD (API GetMODForPOV) ==== */
+    (function () {
+        const role = parseInt('@CurrentUserInfo("Rule")') || 0; // 0 = Superadmin, 10 = OH
+        if (role == 0 || role === 10) return;
+        const noRef = NoReferensi;
+        if (!noRef) return; // jika NoReferensi tidak ada, biarkan UI default
+        const hideRestrictedUI = () => {
+            // Add (default & custom)
+            $('.ew-toolbar a.ew-add, .ew-grid-lower-panel a').filter(function () {
+                const href = (this.href || "").toLowerCase();
+                return href.includes("forminputproofofvisitadd");
+            }).closest('.btn, a, .ew-list-other-options').hide();
+            $('#btn-add-pov').closest('.btn, button').hide();
+
+            // Multi-delete
+            $('.ew-toolbar .ew-multi-delete, .ew-grid-lower-panel .ew-multi-delete')
+                .closest('.btn, button, a, .ew-list-other-options').hide();
+
+            // Per-row Edit/Delete/Copy
+            $('a.ew-row-link.ew-edit, a.ew-row-link.ew-delete, a.ew-row-link.ew-copy, button.ew-row-link.ew-delete')
+                .closest('.ew-list-options, .ew-list-option-body, a, button, li').hide();
+
+            // Checkbox seleksi
+            $('input[type="checkbox"][name="key_m[]"], input#key, input#toggle-all')
+                .closest('th, td, .form-check, label').hide();
+
+            // Info kecil
+            const $filter = $(".ew-toolbar .ew-filter-option").first();
+            if ($filter.length) {
+                $filter.after('<span class="ms-3 text-warning fw-bold">Akses dibatasi: hanya User MOD / OH / Admin.</span>');
+            }
+        };
+        $.get(ew.PATH_BASE + "api/LookUpList/GetMODForPOV", { noRef: noRef })
+            .done(function (res) {
+                if (!res || res.success !== true || res.isCurrentUserMOD !== true) {
+                    hideRestrictedUI();
+                    if (parseInt('@CurrentUserInfo("UserLevel")') == 4) $('a.ew-row-link.ew-edit').show();
+                }
+            })
+            .fail(function () {
+                hideRestrictedUI();
+            });
+    })();
+});
+</script>
+}

@@ -1,0 +1,134 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (masterPicEdit.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = masterPicEdit.UseLayout ? "_Layout" : "";
+}
+@masterPicEdit.ShowPageHeader()
+@masterPicEdit.ShowMessages()
+<main class="edit">
+<form name="fMasterPICedit" id="fMasterPICedit" class="@(masterPicEdit.FormClassName)" action="@AppPath(CurrentPageName())" method="post" novalidate autocomplete="off">
+<script>
+var currentTable = @Html.Raw(ConvertToJson(masterPicEdit.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { MasterPIC: currentTable } });
+var currentPageID = ew.PAGE_ID = "edit";
+var currentForm;
+var fMasterPICedit;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("fMasterPICedit")
+        .setPageId("edit")
+
+        // Add fields
+        .setFields([
+
+            ["IdPIC", [fields.IdPIC.visible && fields.IdPIC.required ? ew.Validators.required(fields.IdPIC.caption) : null], fields.IdPIC.isInvalid],
+            ["NamaPIC", [fields.NamaPIC.visible && fields.NamaPIC.required ? ew.Validators.required(fields.NamaPIC.caption) : null], fields.NamaPIC.isInvalid]
+        ])
+
+        // Form_CustomValidate
+        .setCustomValidate(
+            function(fobj) { // DO NOT CHANGE THIS LINE!
+                    // Your custom validation code here, return false if invalid.
+                    return true;
+                }
+        )
+
+        // Use JavaScript validation or not
+        .setValidateRequired(ew.CLIENT_VALIDATE)
+
+        // Dynamic selection lists
+        .setLists({
+        })
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Client script
+    $('#fMasterPICedit').on('submit', function (e) {
+        e.preventDefault();
+        showLoading();
+        setTimeout(() => {
+            hideLoading();
+        }, 3000);
+        this.requestSubmit();
+    });
+});
+</script>
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+<input type="hidden" name="action" id="action" value="update">
+<input type="hidden" name="modal" value="@ConvertToInt(masterPicEdit.IsModal)">
+@if (IsJsonResponse()) {
+<input type="hidden" name="json" value="1">
+}
+<input type="hidden" name="@(masterPicEdit.OldKeyName)" value="@Html.Raw(masterPicEdit.OldKey)">
+<div class="ew-edit-div"><!-- page* -->
+@if (masterPicEdit.IdPIC.Visible) { // masterPicEdit.IdPIC.Visible (begin)
+    <div id="r_IdPIC" @Html.Raw(masterPicEdit.IdPIC.RowAttributes)>
+        <label id="elh_MasterPIC_IdPIC" class="@(masterPicEdit.LeftColumnClass)">@Html.Raw(masterPicEdit.IdPIC.Caption)@Html.Raw(masterPicEdit.IdPIC.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(masterPicEdit.RightColumnClass)"><div @Html.Raw(masterPicEdit.IdPIC.CellAttributes)>
+<span id="el_MasterPIC_IdPIC">
+<span @Html.Raw(masterPicEdit.IdPIC.ViewAttributes)>
+<input type="text" readonly class="form-control-plaintext" value="@Html.Raw(RemoveHtml(ConvertToString(masterPicEdit.IdPIC.EditValue)))"></span>
+<input type="hidden" data-table="MasterPIC" data-field="x_IdPIC" data-hidden="1" name="x_IdPIC" id="x_IdPIC" value="@Html.Raw(HtmlEncode(masterPicEdit.IdPIC.CurrentValue))">
+</span>
+</div></div>
+    </div>
+} @* masterPicEdit.IdPIC.Visible (end) *@
+@if (masterPicEdit.NamaPIC.Visible) { // masterPicEdit.NamaPIC.Visible (begin)
+    <div id="r_NamaPIC" @Html.Raw(masterPicEdit.NamaPIC.RowAttributes)>
+        <label id="elh_MasterPIC_NamaPIC" for="x_NamaPIC" class="@(masterPicEdit.LeftColumnClass)">@Html.Raw(masterPicEdit.NamaPIC.Caption)@Html.Raw(masterPicEdit.NamaPIC.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(masterPicEdit.RightColumnClass)"><div @Html.Raw(masterPicEdit.NamaPIC.CellAttributes)>
+<span id="el_MasterPIC_NamaPIC">
+<input type="@(masterPicEdit.NamaPIC.InputTextType)" name="x_NamaPIC" id="x_NamaPIC" data-table="MasterPIC" data-field="x_NamaPIC" value="@Html.Raw(masterPicEdit.NamaPIC.EditValue)" size="30" maxlength="100" placeholder="@Html.Raw(HtmlEncode(masterPicEdit.NamaPIC.PlaceHolder))" data-format-pattern="@(masterPicEdit.NamaPIC.FormatPattern)"@Html.Raw(masterPicEdit.NamaPIC.EditAttributes) aria-describedby="x_NamaPIC_help">
+@Html.Raw(masterPicEdit.NamaPIC.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(masterPicEdit.NamaPIC.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* masterPicEdit.NamaPIC.Visible (end) *@
+</div><!-- /page* -->
+@{ masterPicEdit.CloseRecordset(); }
+@Html.Raw(masterPicEdit.IsModal ? "<template class=\"ew-modal-buttons\">" : "<div class=\"row ew-buttons\">")<!-- buttons .row -->
+    <div class="@(masterPicEdit.OffsetColumnClass)"><!-- buttons offset -->
+    <button class="btn btn-primary ew-btn" name="btn-action" id="btn-action" type="submit" form="fMasterPICedit">@Html.Raw(Language.Phrase("SaveBtn"))</button>
+@if (IsJsonResponse()) {
+    <button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" data-bs-dismiss="modal">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+} else {
+    <button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" form="fMasterPICedit" data-href="@AppPath(masterPicEdit.ReturnUrl)">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+}
+    </div><!-- /buttons offset -->
+@Html.Raw(masterPicEdit.IsModal ? "</template>" : "</div>")<!-- /buttons .row -->
+</form>
+</main>
+@masterPicEdit.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("MasterPIC");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Write your table-specific startup script here
+    // document.write("page loaded");
+});
+</script>

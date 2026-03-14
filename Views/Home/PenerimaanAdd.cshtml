@@ -1,0 +1,893 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (penerimaanAdd.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = penerimaanAdd.UseLayout ? "_Layout" : "";
+}
+<script>
+var currentTable = @Html.Raw(ConvertToJson(penerimaanAdd.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { Penerimaan: currentTable } });
+var currentPageID = ew.PAGE_ID = "add";
+var currentForm;
+var fPenerimaanadd;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("fPenerimaanadd")
+        .setPageId("add")
+
+        // Add fields
+        .setFields([
+
+            ["NomorVoyage", [fields.NomorVoyage.visible && fields.NomorVoyage.required ? ew.Validators.required(fields.NomorVoyage.caption) : null], fields.NomorVoyage.isInvalid],
+            ["NomorPengiriman", [fields.NomorPengiriman.visible && fields.NomorPengiriman.required ? ew.Validators.required(fields.NomorPengiriman.caption) : null], fields.NomorPengiriman.isInvalid],
+            ["LookupPlant", [fields.LookupPlant.visible && fields.LookupPlant.required ? ew.Validators.required(fields.LookupPlant.caption) : null], fields.LookupPlant.isInvalid],
+            ["IdPlant", [fields.IdPlant.visible && fields.IdPlant.required ? ew.Validators.required(fields.IdPlant.caption) : null, ew.Validators.integer], fields.IdPlant.isInvalid],
+            ["TipeProdukSTS", [fields.TipeProdukSTS.visible && fields.TipeProdukSTS.required ? ew.Validators.required(fields.TipeProdukSTS.caption) : null], fields.TipeProdukSTS.isInvalid],
+            ["KodeProduk", [fields.KodeProduk.visible && fields.KodeProduk.required ? ew.Validators.required(fields.KodeProduk.caption) : null], fields.KodeProduk.isInvalid],
+            ["ModaTransportasi", [fields.ModaTransportasi.visible && fields.ModaTransportasi.required ? ew.Validators.required(fields.ModaTransportasi.caption) : null], fields.ModaTransportasi.isInvalid],
+            ["NamaKapal", [fields.NamaKapal.visible && fields.NamaKapal.required ? ew.Validators.required(fields.NamaKapal.caption) : null], fields.NamaKapal.isInvalid],
+            ["Refinery", [fields.Refinery.visible && fields.Refinery.required ? ew.Validators.required(fields.Refinery.caption) : null], fields.Refinery.isInvalid],
+            ["IdPenyaluran", [fields.IdPenyaluran.visible && fields.IdPenyaluran.required ? ew.Validators.required(fields.IdPenyaluran.caption) : null], fields.IdPenyaluran.isInvalid],
+            ["TanggalSandar", [fields.TanggalSandar.visible && fields.TanggalSandar.required ? ew.Validators.required(fields.TanggalSandar.caption) : null, ew.Validators.datetime(fields.TanggalSandar.clientFormatPattern)], fields.TanggalSandar.isInvalid],
+            ["IdDermaga", [fields.IdDermaga.visible && fields.IdDermaga.required ? ew.Validators.required(fields.IdDermaga.caption) : null], fields.IdDermaga.isInvalid],
+            ["StatusProses", [fields.StatusProses.visible && fields.StatusProses.required ? ew.Validators.required(fields.StatusProses.caption) : null], fields.StatusProses.isInvalid],
+            ["PersentaseProgress", [fields.PersentaseProgress.visible && fields.PersentaseProgress.required ? ew.Validators.required(fields.PersentaseProgress.caption) : null], fields.PersentaseProgress.isInvalid],
+            ["IdTemplate", [fields.IdTemplate.visible && fields.IdTemplate.required ? ew.Validators.required(fields.IdTemplate.caption) : null], fields.IdTemplate.isInvalid],
+            ["Catatan", [fields.Catatan.visible && fields.Catatan.required ? ew.Validators.required(fields.Catatan.caption) : null], fields.Catatan.isInvalid],
+            ["DibuatOleh", [fields.DibuatOleh.visible && fields.DibuatOleh.required ? ew.Validators.required(fields.DibuatOleh.caption) : null], fields.DibuatOleh.isInvalid],
+            ["TanggalDibuat", [fields.TanggalDibuat.visible && fields.TanggalDibuat.required ? ew.Validators.required(fields.TanggalDibuat.caption) : null], fields.TanggalDibuat.isInvalid],
+            ["DiperbaruiOleh", [fields.DiperbaruiOleh.visible && fields.DiperbaruiOleh.required ? ew.Validators.required(fields.DiperbaruiOleh.caption) : null], fields.DiperbaruiOleh.isInvalid],
+            ["TanggalDiperbarui", [fields.TanggalDiperbarui.visible && fields.TanggalDiperbarui.required ? ew.Validators.required(fields.TanggalDiperbarui.caption) : null], fields.TanggalDiperbarui.isInvalid],
+            ["LookupTipeProduk", [fields.LookupTipeProduk.visible && fields.LookupTipeProduk.required ? ew.Validators.required(fields.LookupTipeProduk.caption) : null], fields.LookupTipeProduk.isInvalid],
+            ["LookupJenisPlant", [fields.LookupJenisPlant.visible && fields.LookupJenisPlant.required ? ew.Validators.required(fields.LookupJenisPlant.caption) : null], fields.LookupJenisPlant.isInvalid]
+        ])
+
+        // Form_CustomValidate
+        .setCustomValidate(
+            function(fobj) { // DO NOT CHANGE THIS LINE!
+                    // Your custom validation code here, return false if invalid.
+                    return true;
+                }
+        )
+
+        // Use JavaScript validation or not
+        .setValidateRequired(ew.CLIENT_VALIDATE)
+
+        // Dynamic selection lists
+        .setLists({
+            "LookupPlant": @Html.Raw(penerimaanAdd.LookupPlant.ToClientList(penerimaanAdd)),
+            "IdPlant": @Html.Raw(penerimaanAdd.IdPlant.ToClientList(penerimaanAdd)),
+            "TipeProdukSTS": @Html.Raw(penerimaanAdd.TipeProdukSTS.ToClientList(penerimaanAdd)),
+            "KodeProduk": @Html.Raw(penerimaanAdd.KodeProduk.ToClientList(penerimaanAdd)),
+            "ModaTransportasi": @Html.Raw(penerimaanAdd.ModaTransportasi.ToClientList(penerimaanAdd)),
+            "Refinery": @Html.Raw(penerimaanAdd.Refinery.ToClientList(penerimaanAdd)),
+            "IdPenyaluran": @Html.Raw(penerimaanAdd.IdPenyaluran.ToClientList(penerimaanAdd)),
+            "IdDermaga": @Html.Raw(penerimaanAdd.IdDermaga.ToClientList(penerimaanAdd)),
+        })
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Client script
+    var parent_url = ew.PATH_BASE;
+    $('#fPenerimaanadd button[type=submit]').on('click', function (e) {
+        e.preventDefault();
+        const parent_url = ew.PATH_BASE;
+        const UserLevel = "@CurrentUserLevel()";
+        const idRole = '@CurrentUserInfo("Rule")?.ToString()';
+        const idModa = $('#x_ModaTransportasi').val();
+        const idPenyaluran = $('#x_IdPenyaluran').val();
+        const lookupPlant = $('#x_LookupPlant').val();
+        const idDermaga = $('#x_IdDermaga').val();
+        $('#x_IdPlant').val(lookupPlant);
+        if ((idModa == '1' || idModa == '2') && !idDermaga) {
+        ew.alert('Dermaga tidak boleh kosong');
+        return false;
+        }
+        if ((idModa == '4') && !idPenyaluran) { // RTW
+            ew.alert('Penyaluran tidak boleh kosong');
+            return false;
+        }
+        if ((idModa == '3') && !idPenyaluran) { // Truck
+                ew.alert('Penyaluran tidak boleh kosong');
+                return false;
+            }
+        if (UserLevel != "2" && UserLevel != "-1" && UserLevel != "4" && UserLevel != "5" && idRole != '1' && idRole != '12' && idRole != '13') {
+            ew.alert('Anda tidak memiliki akses untuk menambah data Penerimaan.');
+            setTimeOut(() => {
+                window.location.href = parent_url+'PenerimaanList';
+            }, 1000);
+            return false;
+        }
+        const data = {
+            IdPlant: $('#x_IdPlant').val(),
+            KodeProduk: $('#x_KodeProduk').val(),
+            ModaTransportasi: $('#x_ModaTransportasi').val(),
+            NamaKapal: $('#x_NamaKapal').val(),
+            TanggalSandar: $('#x_TanggalSandar').val(),
+            IdDermaga: $('#x_IdDermaga').val()
+        };
+        showLoading();
+        $.ajax({
+            url: parent_url + 'api/LookUpList/CheckDuplicateReferensi',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({
+                Referensi: 'Penerimaan',
+                Data: data
+            }),
+            success: function (res) {
+                if (res.success && !res.duplicate) {
+                    $('#fPenerimaanadd').submit();
+                    setTimeout(() => {
+                        hideLoading();
+                    }, 3000);
+                } else if (res.success && res.duplicate) {
+                    hideLoading();
+                    ew.alert({
+                        text: "Telah ditemukan ada data yang sama, apakah anda yakin ingin menambah data ini?",
+                        showCancelButton: true,
+                        confirmButtonText: 'Yes',
+                        cancelButtonText: 'Cancel',
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            showLoading();
+                            setTimeout(function () {
+                                hideLoading();
+                            }, 3000);
+                            $('#fPenerimaanadd').submit();
+                        } else if (result.dismiss === 'cancel') {
+                            return false;
+                        }
+                    });
+                }
+            },
+            error: function (err) {
+                hideLoading();
+                ew.alert('An error occured on the server.');
+                console.error(err);
+                return false;
+            }
+        });
+    });
+    $('#x_LookupJenisPlant').change(function () {
+        if ($(this).val() == 'STS') {
+            $('#r_TipeProdukSTS').show();
+        } else {
+            $('#r_TipeProdukSTS').hide();
+            $('#x_TipeProdukSTS').val('');
+        }
+    });
+    $('#x_LookupPlant').on("change", function () {
+        const selectedValue = $(this).val();
+        $('#x_IdPlant').val(selectedValue).trigger('change');
+        let idModa = $('#x_ModaTransportasi').val();
+        if (idModa && (idModa == 5 || idModa == 6)){
+            fillIdPenyaluranList(selectedValue, idModa)
+        } else if (idModa && (idModa == 4)){ // RTW
+            fillIdPenyaluranList(selectedValue, idModa)
+        } else if (idModa && (idModa == 3)){ // Truck
+            fillIdPenyaluranList(selectedValue, idModa)
+        } else {
+            $('#r_IdPenyaluran').hide();
+        }
+    });
+    $('#x_ModaTransportasi').on("change", function () {
+        const selectedValue = $(this).val();
+        let idPlant = $('#x_LookupPlant').val();
+        if (idPlant && (selectedValue == 5 || selectedValue == 6)){
+            fillIdPenyaluranList(idPlant, selectedValue);
+            $('#r_NamaKapal').hide();
+            $('#r_IdDermaga').hide();
+            $('#r_NomorVoyage').hide();
+            $('#x_NamaKapal').val('');
+            $('#x_IdDermaga').val('');
+            $('#x_NomorVoyage').val('');
+            $('#elh_Penerimaan_TanggalSandar').contents().first()[0].textContent = 'Tanggal';
+            $('#x_TanggalSandar').attr('placeholder', 'Tanggal');
+            $('#r_Refinery').show();
+        } else if (idPlant && (selectedValue == 4)){ // RTW
+            fillIdPenyaluranList(idPlant, selectedValue);
+            $('#r_NamaKapal').hide();
+            $('#r_IdDermaga').hide();
+            $('#r_NomorVoyage').hide();
+            $('#r_Refinery').hide();
+            $('#x_NamaKapal').val('');
+            $('#x_IdDermaga').val('');
+            $('#x_NomorVoyage').val('');
+            $('#x_Refinery').prop("checked", false);
+            $('#elh_Penerimaan_TanggalSandar').contents().first()[0].textContent = 'Tanggal';
+            $('#x_TanggalSandar').attr('placeholder', 'Tanggal');
+        } else if (idPlant && selectedValue == 3){ // Truck
+            fillIdPenyaluranList(idPlant, selectedValue);
+            $('#r_NamaKapal').hide();
+            $('#r_IdDermaga').hide();
+            $('#r_NomorVoyage').hide();
+            $('#r_Refinery').hide();
+            $('#x_NamaKapal').val('');
+            $('#x_IdDermaga').val('');
+            $('#x_NomorVoyage').val('');
+            $('#x_Refinery').prop("checked", false);
+            $('#elh_Penerimaan_TanggalSandar').contents().first()[0].textContent = 'Tanggal';
+            $('#x_TanggalSandar').attr('placeholder', 'Tanggal');
+        } else if (selectedValue == 4) {
+            $('#r_NamaKapal').hide();
+            $('#r_IdDermaga').hide();
+            $('#r_NomorVoyage').hide();
+            $('#r_Refinery').hide();
+            $('#x_NamaKapal').val('');
+            $('#x_IdDermaga').val('');
+            $('#x_NomorVoyage').val('');
+            $('#x_Refinery').prop("checked", false);
+            $('#elh_Penerimaan_TanggalSandar').contents().first()[0].textContent = 'Tanggal';
+            $('#x_TanggalSandar').attr('placeholder', 'Tanggal');
+        } else {
+            $('#elh_Penerimaan_TanggalSandar').contents().first()[0].textContent = 'Tanggal Sandar';
+            $('#x_TanggalSandar').attr('placeholder', 'Tanggal Sandar');
+            $('#r_NamaKapal').show();
+            $('#r_IdDermaga').show();
+            $('#r_NomorVoyage').show();
+            $('#r_IdPenyaluran').hide();
+            $('#r_Refinery').hide();
+            $('#x_IdPenyaluran').val('');
+            $('#x_Refinery').prop("checked", false);
+        }
+    });
+    function fillIdPenyaluranList(idPlant, idModa){
+        const penyaluranSelection = $("#x_IdPenyaluran");
+        penyaluranSelection.empty();
+        penyaluranSelection.append('<option value="">Loading...</option>');
+        $.ajax({
+            url: parent_url + 'api/LookUpList/get-dropdown/penyaluran-to-penerimaan',
+            method: 'GET',
+            dataType: 'json',
+            data: {
+                plantId: idPlant,
+                modaId: idModa
+            },
+            success: function (data) {
+                penyaluranSelection.empty(); 
+                $.each(data, function (index, item) {
+                    penyaluranSelection.append(`<option value="${item.Value}">${item.Label}</option>`);
+                });
+            },
+            error: function (xhr, status, error) {
+                console.error("Gagal ambil data dropdown:", error);
+                penyaluranSelection.empty();
+            },
+            complete: function () {
+                $('#r_IdPenyaluran').show();
+            }     
+        });
+    }
+});
+</script>
+@penerimaanAdd.ShowPageHeader()
+@penerimaanAdd.ShowMessages()
+<form name="fPenerimaanadd" id="fPenerimaanadd" class="@(penerimaanAdd.FormClassName)" action="@AppPath(CurrentPageName())" method="post" novalidate autocomplete="off">
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+<input type="hidden" name="action" id="action" value="insert">
+<input type="hidden" name="modal" value="@ConvertToInt(penerimaanAdd.IsModal)">
+@if (IsJsonResponse()) {
+<input type="hidden" name="json" value="1">
+}
+<input type="hidden" name="@(penerimaanAdd.OldKeyName)" value="@Html.Raw(penerimaanAdd.OldKey)">
+<div class="ew-add-div"><!-- page* -->
+@if (penerimaanAdd.NomorVoyage.Visible) { // penerimaanAdd.NomorVoyage.Visible (begin)
+    <div id="r_NomorVoyage" @Html.Raw(penerimaanAdd.NomorVoyage.RowAttributes)>
+        <label id="elh_Penerimaan_NomorVoyage" for="x_NomorVoyage" class="@(penerimaanAdd.LeftColumnClass)">@Html.Raw(penerimaanAdd.NomorVoyage.Caption)@Html.Raw(penerimaanAdd.NomorVoyage.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(penerimaanAdd.RightColumnClass)"><div @Html.Raw(penerimaanAdd.NomorVoyage.CellAttributes)>
+<span id="el_Penerimaan_NomorVoyage">
+<input type="@(penerimaanAdd.NomorVoyage.InputTextType)" name="x_NomorVoyage" id="x_NomorVoyage" data-table="Penerimaan" data-field="x_NomorVoyage" value="@Html.Raw(penerimaanAdd.NomorVoyage.EditValue)" size="30" maxlength="255" placeholder="@Html.Raw(HtmlEncode(penerimaanAdd.NomorVoyage.PlaceHolder))" data-format-pattern="@(penerimaanAdd.NomorVoyage.FormatPattern)"@Html.Raw(penerimaanAdd.NomorVoyage.EditAttributes) aria-describedby="x_NomorVoyage_help">
+@Html.Raw(penerimaanAdd.NomorVoyage.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(penerimaanAdd.NomorVoyage.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* penerimaanAdd.NomorVoyage.Visible (end) *@
+@if (penerimaanAdd.NomorPengiriman.Visible) { // penerimaanAdd.NomorPengiriman.Visible (begin)
+    <div id="r_NomorPengiriman" @Html.Raw(penerimaanAdd.NomorPengiriman.RowAttributes)>
+        <label id="elh_Penerimaan_NomorPengiriman" for="x_NomorPengiriman" class="@(penerimaanAdd.LeftColumnClass)">@Html.Raw(penerimaanAdd.NomorPengiriman.Caption)@Html.Raw(penerimaanAdd.NomorPengiriman.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(penerimaanAdd.RightColumnClass)"><div @Html.Raw(penerimaanAdd.NomorPengiriman.CellAttributes)>
+<span id="el_Penerimaan_NomorPengiriman">
+<input type="@(penerimaanAdd.NomorPengiriman.InputTextType)" name="x_NomorPengiriman" id="x_NomorPengiriman" data-table="Penerimaan" data-field="x_NomorPengiriman" value="@Html.Raw(penerimaanAdd.NomorPengiriman.EditValue)" size="30" maxlength="50" placeholder="@Html.Raw(HtmlEncode(penerimaanAdd.NomorPengiriman.PlaceHolder))" data-format-pattern="@(penerimaanAdd.NomorPengiriman.FormatPattern)"@Html.Raw(penerimaanAdd.NomorPengiriman.EditAttributes) aria-describedby="x_NomorPengiriman_help">
+@Html.Raw(penerimaanAdd.NomorPengiriman.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(penerimaanAdd.NomorPengiriman.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* penerimaanAdd.NomorPengiriman.Visible (end) *@
+@if (penerimaanAdd.LookupPlant.Visible) { // penerimaanAdd.LookupPlant.Visible (begin)
+    <div id="r_LookupPlant" @Html.Raw(penerimaanAdd.LookupPlant.RowAttributes)>
+        <label id="elh_Penerimaan_LookupPlant" for="x_LookupPlant" class="@(penerimaanAdd.LeftColumnClass)">@Html.Raw(penerimaanAdd.LookupPlant.Caption)@Html.Raw(penerimaanAdd.LookupPlant.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(penerimaanAdd.RightColumnClass)"><div @Html.Raw(penerimaanAdd.LookupPlant.CellAttributes)>
+<span id="el_Penerimaan_LookupPlant">
+    <select
+        id="x_LookupPlant"
+        name="x_LookupPlant"
+        class="form-select ew-select@(penerimaanAdd.LookupPlant.IsInvalidClass)"
+        data-select2-id="fPenerimaanadd_x_LookupPlant"
+        data-table="Penerimaan"
+        data-field="x_LookupPlant"
+        data-value-separator="@(penerimaanAdd.LookupPlant.DisplayValueSeparatorAttribute)"
+        data-placeholder="@(HtmlEncode(penerimaanAdd.LookupPlant.PlaceHolder))"
+        data-ew-action="update-options"
+        @Html.Raw(penerimaanAdd.LookupPlant.EditAttributes)>
+        @(penerimaanAdd.LookupPlant.SelectOptionListHtml("x_LookupPlant"))
+    </select>
+    @Html.Raw(penerimaanAdd.LookupPlant.GetCustomMessage)
+    <div class="invalid-feedback">@Html.Raw(penerimaanAdd.LookupPlant.GetErrorMessage())</div>
+<script>
+loadjs.ready("fPenerimaanadd", function() {
+    var options = { name: "x_LookupPlant", selectId: "fPenerimaanadd_x_LookupPlant" },
+        el = document.querySelector("select[data-select2-id='" + options.selectId + "']");
+    if (!el)
+        return;
+    options.closeOnSelect = !options.multiple;
+    options.dropdownParent = el.closest("#ew-modal-dialog, #ew-add-opt-dialog");
+    if (fPenerimaanadd.lists.LookupPlant?.lookupOptions.length) {
+        options.data = { id: "x_LookupPlant", form: "fPenerimaanadd" };
+    } else {
+        options.ajax = { id: "x_LookupPlant", form: "fPenerimaanadd", limit: ew.LOOKUP_PAGE_SIZE };
+    }
+    options.minimumInputLength = ew.selectMinimumInputLength;
+    options = Object.assign({}, ew.selectOptions, options, ew.vars.tables.Penerimaan.fields.LookupPlant.selectOptions);
+    ew.createSelect(options);
+});
+</script>
+</span>
+</div></div>
+    </div>
+} @* penerimaanAdd.LookupPlant.Visible (end) *@
+@if (penerimaanAdd.IdPlant.Visible) { // penerimaanAdd.IdPlant.Visible (begin)
+    <div id="r_IdPlant" @Html.Raw(penerimaanAdd.IdPlant.RowAttributes)>
+        <label id="elh_Penerimaan_IdPlant" class="@(penerimaanAdd.LeftColumnClass)">@Html.Raw(penerimaanAdd.IdPlant.Caption)@Html.Raw(penerimaanAdd.IdPlant.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(penerimaanAdd.RightColumnClass)"><div @Html.Raw(penerimaanAdd.IdPlant.CellAttributes)>
+<span id="el_Penerimaan_IdPlant">
+<span>@{
+    if (IsRTL) {
+        penerimaanAdd.IdPlant.EditAttrs["dir"] = "rtl";
+    }
+}</span>
+<span id="as_x_IdPlant" class="ew-auto-suggest">
+    <input type="text" class="form-control" name="sv_x_IdPlant" id="sv_x_IdPlant" value="@(RemoveHtml(ConvertToString(penerimaanAdd.IdPlant.EditValue)))" autocomplete="off" size="30" placeholder="@Html.Raw(HtmlEncode(penerimaanAdd.IdPlant.PlaceHolder))" data-placeholder="@Html.Raw(HtmlEncode(penerimaanAdd.IdPlant.PlaceHolder))" data-format-pattern="@(penerimaanAdd.IdPlant.FormatPattern)" @Html.Raw(penerimaanAdd.IdPlant.EditAttributes) aria-describedby="x_IdPlant_help">
+</span>
+<selection-list hidden class="form-control" data-table="Penerimaan" data-field="x_IdPlant" data-input="sv_x_IdPlant" data-value-separator="@(penerimaanAdd.IdPlant.DisplayValueSeparatorAttribute)" name="x_IdPlant" id="x_IdPlant" value="@(HtmlEncode(penerimaanAdd.IdPlant.CurrentValue))" data-ew-action="autofill"></selection-list>
+@Html.Raw(penerimaanAdd.IdPlant.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(penerimaanAdd.IdPlant.GetErrorMessage())</div>
+<script>
+loadjs.ready(["fPenerimaanadd"], function() {
+    fPenerimaanadd.createAutoSuggest(Object.assign({"id":"x_IdPlant","forceSelect":true}, { lookupAllDisplayFields: @(penerimaanAdd.IdPlant.Lookup.LookupAllDisplayFields ? "true" : "false") }, ew.vars.tables.Penerimaan.fields.IdPlant.autoSuggestOptions));
+});
+</script>
+@Html.Raw(penerimaanAdd.IdPlant.Lookup.GetParamTag(penerimaanAdd, "p_x_IdPlant"))
+</span>
+</div></div>
+    </div>
+} @* penerimaanAdd.IdPlant.Visible (end) *@
+@if (penerimaanAdd.TipeProdukSTS.Visible) { // penerimaanAdd.TipeProdukSTS.Visible (begin)
+    <div id="r_TipeProdukSTS" @Html.Raw(penerimaanAdd.TipeProdukSTS.RowAttributes)>
+        <label id="elh_Penerimaan_TipeProdukSTS" for="x_TipeProdukSTS" class="@(penerimaanAdd.LeftColumnClass)">@Html.Raw(penerimaanAdd.TipeProdukSTS.Caption)@Html.Raw(penerimaanAdd.TipeProdukSTS.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(penerimaanAdd.RightColumnClass)"><div @Html.Raw(penerimaanAdd.TipeProdukSTS.CellAttributes)>
+<span id="el_Penerimaan_TipeProdukSTS">
+    <select
+        id="x_TipeProdukSTS"
+        name="x_TipeProdukSTS"
+        class="form-select ew-select@(penerimaanAdd.TipeProdukSTS.IsInvalidClass)"
+        data-select2-id="fPenerimaanadd_x_TipeProdukSTS"
+        data-table="Penerimaan"
+        data-field="x_TipeProdukSTS"
+        data-value-separator="@(penerimaanAdd.TipeProdukSTS.DisplayValueSeparatorAttribute)"
+        data-placeholder="@(HtmlEncode(penerimaanAdd.TipeProdukSTS.PlaceHolder))"
+        data-ew-action="autofill"
+        @Html.Raw(penerimaanAdd.TipeProdukSTS.EditAttributes)>
+        @(penerimaanAdd.TipeProdukSTS.SelectOptionListHtml("x_TipeProdukSTS"))
+    </select>
+    @Html.Raw(penerimaanAdd.TipeProdukSTS.GetCustomMessage)
+    <div class="invalid-feedback">@Html.Raw(penerimaanAdd.TipeProdukSTS.GetErrorMessage())</div>
+@Html.Raw(penerimaanAdd.TipeProdukSTS.Lookup.GetParamTag(penerimaanAdd, "p_x_TipeProdukSTS"))
+<script>
+loadjs.ready("fPenerimaanadd", function() {
+    var options = { name: "x_TipeProdukSTS", selectId: "fPenerimaanadd_x_TipeProdukSTS" },
+        el = document.querySelector("select[data-select2-id='" + options.selectId + "']");
+    if (!el)
+        return;
+    options.closeOnSelect = !options.multiple;
+    options.dropdownParent = el.closest("#ew-modal-dialog, #ew-add-opt-dialog");
+    if (fPenerimaanadd.lists.TipeProdukSTS?.lookupOptions.length) {
+        options.data = { id: "x_TipeProdukSTS", form: "fPenerimaanadd" };
+    } else {
+        options.ajax = { id: "x_TipeProdukSTS", form: "fPenerimaanadd", limit: ew.LOOKUP_PAGE_SIZE };
+    }
+    options.minimumResultsForSearch = Infinity;
+    options = Object.assign({}, ew.selectOptions, options, ew.vars.tables.Penerimaan.fields.TipeProdukSTS.selectOptions);
+    ew.createSelect(options);
+});
+</script>
+</span>
+</div></div>
+    </div>
+} @* penerimaanAdd.TipeProdukSTS.Visible (end) *@
+@if (penerimaanAdd.KodeProduk.Visible) { // penerimaanAdd.KodeProduk.Visible (begin)
+    <div id="r_KodeProduk" @Html.Raw(penerimaanAdd.KodeProduk.RowAttributes)>
+        <label id="elh_Penerimaan_KodeProduk" for="x_KodeProduk" class="@(penerimaanAdd.LeftColumnClass)">@Html.Raw(penerimaanAdd.KodeProduk.Caption)@Html.Raw(penerimaanAdd.KodeProduk.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(penerimaanAdd.RightColumnClass)"><div @Html.Raw(penerimaanAdd.KodeProduk.CellAttributes)>
+<span id="el_Penerimaan_KodeProduk">
+    <select
+        id="x_KodeProduk"
+        name="x_KodeProduk"
+        class="form-select ew-select@(penerimaanAdd.KodeProduk.IsInvalidClass)"
+        data-select2-id="fPenerimaanadd_x_KodeProduk"
+        data-table="Penerimaan"
+        data-field="x_KodeProduk"
+        data-value-separator="@(penerimaanAdd.KodeProduk.DisplayValueSeparatorAttribute)"
+        data-placeholder="@(HtmlEncode(penerimaanAdd.KodeProduk.PlaceHolder))"
+        @Html.Raw(penerimaanAdd.KodeProduk.EditAttributes)>
+        @(penerimaanAdd.KodeProduk.SelectOptionListHtml("x_KodeProduk"))
+    </select>
+    @Html.Raw(penerimaanAdd.KodeProduk.GetCustomMessage)
+    <div class="invalid-feedback">@Html.Raw(penerimaanAdd.KodeProduk.GetErrorMessage())</div>
+@Html.Raw(penerimaanAdd.KodeProduk.Lookup.GetParamTag(penerimaanAdd, "p_x_KodeProduk"))
+<script>
+loadjs.ready("fPenerimaanadd", function() {
+    var options = { name: "x_KodeProduk", selectId: "fPenerimaanadd_x_KodeProduk" },
+        el = document.querySelector("select[data-select2-id='" + options.selectId + "']");
+    if (!el)
+        return;
+    options.closeOnSelect = !options.multiple;
+    options.dropdownParent = el.closest("#ew-modal-dialog, #ew-add-opt-dialog");
+    if (fPenerimaanadd.lists.KodeProduk?.lookupOptions.length) {
+        options.data = { id: "x_KodeProduk", form: "fPenerimaanadd" };
+    } else {
+        options.ajax = { id: "x_KodeProduk", form: "fPenerimaanadd", limit: ew.LOOKUP_PAGE_SIZE };
+    }
+    options.minimumInputLength = ew.selectMinimumInputLength;
+    options = Object.assign({}, ew.selectOptions, options, ew.vars.tables.Penerimaan.fields.KodeProduk.selectOptions);
+    ew.createSelect(options);
+});
+</script>
+</span>
+</div></div>
+    </div>
+} @* penerimaanAdd.KodeProduk.Visible (end) *@
+@if (penerimaanAdd.ModaTransportasi.Visible) { // penerimaanAdd.ModaTransportasi.Visible (begin)
+    <div id="r_ModaTransportasi" @Html.Raw(penerimaanAdd.ModaTransportasi.RowAttributes)>
+        <label id="elh_Penerimaan_ModaTransportasi" for="x_ModaTransportasi" class="@(penerimaanAdd.LeftColumnClass)">@Html.Raw(penerimaanAdd.ModaTransportasi.Caption)@Html.Raw(penerimaanAdd.ModaTransportasi.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(penerimaanAdd.RightColumnClass)"><div @Html.Raw(penerimaanAdd.ModaTransportasi.CellAttributes)>
+<span id="el_Penerimaan_ModaTransportasi">
+    <select
+        id="x_ModaTransportasi"
+        name="x_ModaTransportasi"
+        class="form-select ew-select@(penerimaanAdd.ModaTransportasi.IsInvalidClass)"
+        data-select2-id="fPenerimaanadd_x_ModaTransportasi"
+        data-table="Penerimaan"
+        data-field="x_ModaTransportasi"
+        data-value-separator="@(penerimaanAdd.ModaTransportasi.DisplayValueSeparatorAttribute)"
+        data-placeholder="@(HtmlEncode(penerimaanAdd.ModaTransportasi.PlaceHolder))"
+        @Html.Raw(penerimaanAdd.ModaTransportasi.EditAttributes)>
+        @(penerimaanAdd.ModaTransportasi.SelectOptionListHtml("x_ModaTransportasi"))
+    </select>
+    @Html.Raw(penerimaanAdd.ModaTransportasi.GetCustomMessage)
+    <div class="invalid-feedback">@Html.Raw(penerimaanAdd.ModaTransportasi.GetErrorMessage())</div>
+@Html.Raw(penerimaanAdd.ModaTransportasi.Lookup.GetParamTag(penerimaanAdd, "p_x_ModaTransportasi"))
+<script>
+loadjs.ready("fPenerimaanadd", function() {
+    var options = { name: "x_ModaTransportasi", selectId: "fPenerimaanadd_x_ModaTransportasi" },
+        el = document.querySelector("select[data-select2-id='" + options.selectId + "']");
+    if (!el)
+        return;
+    options.closeOnSelect = !options.multiple;
+    options.dropdownParent = el.closest("#ew-modal-dialog, #ew-add-opt-dialog");
+    if (fPenerimaanadd.lists.ModaTransportasi?.lookupOptions.length) {
+        options.data = { id: "x_ModaTransportasi", form: "fPenerimaanadd" };
+    } else {
+        options.ajax = { id: "x_ModaTransportasi", form: "fPenerimaanadd", limit: ew.LOOKUP_PAGE_SIZE };
+    }
+    options.minimumInputLength = ew.selectMinimumInputLength;
+    options = Object.assign({}, ew.selectOptions, options, ew.vars.tables.Penerimaan.fields.ModaTransportasi.selectOptions);
+    ew.createSelect(options);
+});
+</script>
+</span>
+</div></div>
+    </div>
+} @* penerimaanAdd.ModaTransportasi.Visible (end) *@
+@if (penerimaanAdd.NamaKapal.Visible) { // penerimaanAdd.NamaKapal.Visible (begin)
+    <div id="r_NamaKapal" @Html.Raw(penerimaanAdd.NamaKapal.RowAttributes)>
+        <label id="elh_Penerimaan_NamaKapal" for="x_NamaKapal" class="@(penerimaanAdd.LeftColumnClass)">@Html.Raw(penerimaanAdd.NamaKapal.Caption)@Html.Raw(penerimaanAdd.NamaKapal.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(penerimaanAdd.RightColumnClass)"><div @Html.Raw(penerimaanAdd.NamaKapal.CellAttributes)>
+<span id="el_Penerimaan_NamaKapal">
+<input type="@(penerimaanAdd.NamaKapal.InputTextType)" name="x_NamaKapal" id="x_NamaKapal" data-table="Penerimaan" data-field="x_NamaKapal" value="@Html.Raw(penerimaanAdd.NamaKapal.EditValue)" size="30" maxlength="255" placeholder="@Html.Raw(HtmlEncode(penerimaanAdd.NamaKapal.PlaceHolder))" data-format-pattern="@(penerimaanAdd.NamaKapal.FormatPattern)"@Html.Raw(penerimaanAdd.NamaKapal.EditAttributes) aria-describedby="x_NamaKapal_help">
+@Html.Raw(penerimaanAdd.NamaKapal.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(penerimaanAdd.NamaKapal.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* penerimaanAdd.NamaKapal.Visible (end) *@
+@if (penerimaanAdd.Refinery.Visible) { // penerimaanAdd.Refinery.Visible (begin)
+    <div id="r_Refinery" @Html.Raw(penerimaanAdd.Refinery.RowAttributes)>
+        <label id="elh_Penerimaan_Refinery" class="@(penerimaanAdd.LeftColumnClass)">@Html.Raw(penerimaanAdd.Refinery.Caption)@Html.Raw(penerimaanAdd.Refinery.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(penerimaanAdd.RightColumnClass)"><div @Html.Raw(penerimaanAdd.Refinery.CellAttributes)>
+<span id="el_Penerimaan_Refinery">
+<div class="form-check d-inline-block">
+    <input type="checkbox" class="form-check-input@(penerimaanAdd.Refinery.IsInvalidClass)" data-table="Penerimaan" data-field="x_Refinery" data-boolean name="x_Refinery" id="x_Refinery" value="1" checked="@ConvertToBool(penerimaanAdd.Refinery.CurrentValue)" @Html.Raw(penerimaanAdd.Refinery.EditAttributes) aria-describedby="x_Refinery_help">
+    <div class="invalid-feedback">@Html.Raw(penerimaanAdd.Refinery.GetErrorMessage())</div>
+</div>
+@Html.Raw(penerimaanAdd.Refinery.GetCustomMessage)
+</span>
+</div></div>
+    </div>
+} @* penerimaanAdd.Refinery.Visible (end) *@
+@if (penerimaanAdd.IdPenyaluran.Visible) { // penerimaanAdd.IdPenyaluran.Visible (begin)
+    <div id="r_IdPenyaluran" @Html.Raw(penerimaanAdd.IdPenyaluran.RowAttributes)>
+        <label id="elh_Penerimaan_IdPenyaluran" for="x_IdPenyaluran" class="@(penerimaanAdd.LeftColumnClass)">@Html.Raw(penerimaanAdd.IdPenyaluran.Caption)@Html.Raw(penerimaanAdd.IdPenyaluran.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(penerimaanAdd.RightColumnClass)"><div @Html.Raw(penerimaanAdd.IdPenyaluran.CellAttributes)>
+<span id="el_Penerimaan_IdPenyaluran">
+    <select
+        id="x_IdPenyaluran"
+        name="x_IdPenyaluran"
+        class="form-select ew-select@(penerimaanAdd.IdPenyaluran.IsInvalidClass)"
+        data-select2-id="fPenerimaanadd_x_IdPenyaluran"
+        data-table="Penerimaan"
+        data-field="x_IdPenyaluran"
+        data-value-separator="@(penerimaanAdd.IdPenyaluran.DisplayValueSeparatorAttribute)"
+        data-placeholder="@(HtmlEncode(penerimaanAdd.IdPenyaluran.PlaceHolder))"
+        @Html.Raw(penerimaanAdd.IdPenyaluran.EditAttributes)>
+        @(penerimaanAdd.IdPenyaluran.SelectOptionListHtml("x_IdPenyaluran"))
+    </select>
+    @Html.Raw(penerimaanAdd.IdPenyaluran.GetCustomMessage)
+    <div class="invalid-feedback">@Html.Raw(penerimaanAdd.IdPenyaluran.GetErrorMessage())</div>
+<script>
+loadjs.ready("fPenerimaanadd", function() {
+    var options = { name: "x_IdPenyaluran", selectId: "fPenerimaanadd_x_IdPenyaluran" },
+        el = document.querySelector("select[data-select2-id='" + options.selectId + "']");
+    if (!el)
+        return;
+    options.closeOnSelect = !options.multiple;
+    options.dropdownParent = el.closest("#ew-modal-dialog, #ew-add-opt-dialog");
+    if (fPenerimaanadd.lists.IdPenyaluran?.lookupOptions.length) {
+        options.data = { id: "x_IdPenyaluran", form: "fPenerimaanadd" };
+    } else {
+        options.ajax = { id: "x_IdPenyaluran", form: "fPenerimaanadd", limit: ew.LOOKUP_PAGE_SIZE };
+    }
+    options.minimumInputLength = ew.selectMinimumInputLength;
+    options = Object.assign({}, ew.selectOptions, options, ew.vars.tables.Penerimaan.fields.IdPenyaluran.selectOptions);
+    ew.createSelect(options);
+});
+</script>
+</span>
+</div></div>
+    </div>
+} @* penerimaanAdd.IdPenyaluran.Visible (end) *@
+@if (penerimaanAdd.TanggalSandar.Visible) { // penerimaanAdd.TanggalSandar.Visible (begin)
+    <div id="r_TanggalSandar" @Html.Raw(penerimaanAdd.TanggalSandar.RowAttributes)>
+        <label id="elh_Penerimaan_TanggalSandar" for="x_TanggalSandar" class="@(penerimaanAdd.LeftColumnClass)">@Html.Raw(penerimaanAdd.TanggalSandar.Caption)@Html.Raw(penerimaanAdd.TanggalSandar.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(penerimaanAdd.RightColumnClass)"><div @Html.Raw(penerimaanAdd.TanggalSandar.CellAttributes)>
+<span id="el_Penerimaan_TanggalSandar">
+<input type="@(penerimaanAdd.TanggalSandar.InputTextType)" name="x_TanggalSandar" id="x_TanggalSandar" data-table="Penerimaan" data-field="x_TanggalSandar" value="@Html.Raw(penerimaanAdd.TanggalSandar.EditValue)" placeholder="@Html.Raw(HtmlEncode(penerimaanAdd.TanggalSandar.PlaceHolder))" data-format-pattern="@(penerimaanAdd.TanggalSandar.FormatPattern)"@Html.Raw(penerimaanAdd.TanggalSandar.EditAttributes) aria-describedby="x_TanggalSandar_help">
+@Html.Raw(penerimaanAdd.TanggalSandar.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(penerimaanAdd.TanggalSandar.GetErrorMessage())</div>
+@if (!penerimaanAdd.TanggalSandar.ReadOnly && !penerimaanAdd.TanggalSandar.Disabled && !penerimaanAdd.TanggalSandar.EditAttrs.Is("readonly") && !penerimaanAdd.TanggalSandar.EditAttrs.Is("disabled")) {
+<script>
+loadjs.ready(["fPenerimaanadd", "datetimepicker"], function () {
+    let format = "@Html.Raw(DateFormat(9))", // DN
+        options = {
+                localization: {
+                    locale: ew.LANGUAGE_ID + "-u-nu-" + ew.getNumberingSystem(),
+                    hourCycle: format.match(/H/) ? "h24" : "h12",
+                    format,
+                    ...ew.language.phrase("datetimepicker")
+                },
+                display: {
+                    icons: {
+                        previous: ew.IS_RTL ? "fa-solid fa-chevron-right" : "fa-solid fa-chevron-left",
+                        next: ew.IS_RTL ? "fa-solid fa-chevron-left" : "fa-solid fa-chevron-right"
+                    },
+                    components: {
+                        clock: !!format.match(/h/i) || !!format.match(/m/) || !!format.match(/s/i),
+                        hours: !!format.match(/h/i),
+                        minutes: !!format.match(/m/),
+                        seconds: !!format.match(/s/i)
+                    },
+                theme: ew.getPreferredTheme()
+                }
+            };
+    ew.createDateTimePicker("fPenerimaanadd", "x_TanggalSandar", ew.deepAssign({"useCurrent":false,"display":{"sideBySide":false}}, options));
+});
+</script>
+}
+</span>
+</div></div>
+    </div>
+} @* penerimaanAdd.TanggalSandar.Visible (end) *@
+@if (penerimaanAdd.IdDermaga.Visible) { // penerimaanAdd.IdDermaga.Visible (begin)
+    <div id="r_IdDermaga" @Html.Raw(penerimaanAdd.IdDermaga.RowAttributes)>
+        <label id="elh_Penerimaan_IdDermaga" for="x_IdDermaga" class="@(penerimaanAdd.LeftColumnClass)">@Html.Raw(penerimaanAdd.IdDermaga.Caption)@Html.Raw(penerimaanAdd.IdDermaga.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(penerimaanAdd.RightColumnClass)"><div @Html.Raw(penerimaanAdd.IdDermaga.CellAttributes)>
+<span id="el_Penerimaan_IdDermaga">
+    <select
+        id="x_IdDermaga"
+        name="x_IdDermaga"
+        class="form-select ew-select@(penerimaanAdd.IdDermaga.IsInvalidClass)"
+        data-select2-id="fPenerimaanadd_x_IdDermaga"
+        data-table="Penerimaan"
+        data-field="x_IdDermaga"
+        data-value-separator="@(penerimaanAdd.IdDermaga.DisplayValueSeparatorAttribute)"
+        data-placeholder="@(HtmlEncode(penerimaanAdd.IdDermaga.PlaceHolder))"
+        @Html.Raw(penerimaanAdd.IdDermaga.EditAttributes)>
+        @(penerimaanAdd.IdDermaga.SelectOptionListHtml("x_IdDermaga"))
+    </select>
+    @Html.Raw(penerimaanAdd.IdDermaga.GetCustomMessage)
+    <div class="invalid-feedback">@Html.Raw(penerimaanAdd.IdDermaga.GetErrorMessage())</div>
+@Html.Raw(penerimaanAdd.IdDermaga.Lookup.GetParamTag(penerimaanAdd, "p_x_IdDermaga"))
+<script>
+loadjs.ready("fPenerimaanadd", function() {
+    var options = { name: "x_IdDermaga", selectId: "fPenerimaanadd_x_IdDermaga" },
+        el = document.querySelector("select[data-select2-id='" + options.selectId + "']");
+    if (!el)
+        return;
+    options.closeOnSelect = !options.multiple;
+    options.dropdownParent = el.closest("#ew-modal-dialog, #ew-add-opt-dialog");
+    if (fPenerimaanadd.lists.IdDermaga?.lookupOptions.length) {
+        options.data = { id: "x_IdDermaga", form: "fPenerimaanadd" };
+    } else {
+        options.ajax = { id: "x_IdDermaga", form: "fPenerimaanadd", limit: ew.LOOKUP_PAGE_SIZE };
+    }
+    options.minimumInputLength = ew.selectMinimumInputLength;
+    options = Object.assign({}, ew.selectOptions, options, ew.vars.tables.Penerimaan.fields.IdDermaga.selectOptions);
+    ew.createSelect(options);
+});
+</script>
+</span>
+</div></div>
+    </div>
+} @* penerimaanAdd.IdDermaga.Visible (end) *@
+    <span id="el_Penerimaan_StatusProses">
+    <input type="hidden" data-table="Penerimaan" data-field="x_StatusProses" data-hidden="1" name="x_StatusProses" id="x_StatusProses" value="@Html.Raw(HtmlEncode(penerimaanAdd.StatusProses.CurrentValue))">
+    </span>
+    <span id="el_Penerimaan_PersentaseProgress">
+    <input type="hidden" data-table="Penerimaan" data-field="x_PersentaseProgress" data-hidden="1" name="x_PersentaseProgress" id="x_PersentaseProgress" value="@Html.Raw(HtmlEncode(penerimaanAdd.PersentaseProgress.CurrentValue))">
+    </span>
+    <span id="el_Penerimaan_IdTemplate">
+    <input type="hidden" data-table="Penerimaan" data-field="x_IdTemplate" data-hidden="1" name="x_IdTemplate" id="x_IdTemplate" value="@Html.Raw(HtmlEncode(penerimaanAdd.IdTemplate.CurrentValue))">
+    </span>
+@if (penerimaanAdd.Catatan.Visible) { // penerimaanAdd.Catatan.Visible (begin)
+    <div id="r_Catatan" @Html.Raw(penerimaanAdd.Catatan.RowAttributes)>
+        <label id="elh_Penerimaan_Catatan" for="x_Catatan" class="@(penerimaanAdd.LeftColumnClass)">@Html.Raw(penerimaanAdd.Catatan.Caption)@Html.Raw(penerimaanAdd.Catatan.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(penerimaanAdd.RightColumnClass)"><div @Html.Raw(penerimaanAdd.Catatan.CellAttributes)>
+<span id="el_Penerimaan_Catatan">
+<textarea data-table="Penerimaan" data-field="x_Catatan" name="x_Catatan" id="x_Catatan" cols="35" rows="4" placeholder="@Html.Raw(HtmlEncode(penerimaanAdd.Catatan.PlaceHolder))"@Html.Raw(penerimaanAdd.Catatan.EditAttributes) aria-describedby="x_Catatan_help">@(penerimaanAdd.Catatan.EditValue)</textarea>
+@Html.Raw(penerimaanAdd.Catatan.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(penerimaanAdd.Catatan.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* penerimaanAdd.Catatan.Visible (end) *@
+@if (penerimaanAdd.LookupTipeProduk.Visible) { // penerimaanAdd.LookupTipeProduk.Visible (begin)
+    <div id="r_LookupTipeProduk" @Html.Raw(penerimaanAdd.LookupTipeProduk.RowAttributes)>
+        <label id="elh_Penerimaan_LookupTipeProduk" class="@(penerimaanAdd.LeftColumnClass)">@Html.Raw(penerimaanAdd.LookupTipeProduk.Caption)@Html.Raw(penerimaanAdd.LookupTipeProduk.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(penerimaanAdd.RightColumnClass)"><div @Html.Raw(penerimaanAdd.LookupTipeProduk.CellAttributes)>
+<span id="el_Penerimaan_LookupTipeProduk">
+<input type="@(penerimaanAdd.LookupTipeProduk.InputTextType)" name="x_LookupTipeProduk" id="x_LookupTipeProduk" data-table="Penerimaan" data-field="x_LookupTipeProduk" value="@Html.Raw(penerimaanAdd.LookupTipeProduk.EditValue)" size="30" maxlength="1" placeholder="@Html.Raw(HtmlEncode(penerimaanAdd.LookupTipeProduk.PlaceHolder))" data-format-pattern="@(penerimaanAdd.LookupTipeProduk.FormatPattern)"@Html.Raw(penerimaanAdd.LookupTipeProduk.EditAttributes) aria-describedby="x_LookupTipeProduk_help">
+@Html.Raw(penerimaanAdd.LookupTipeProduk.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(penerimaanAdd.LookupTipeProduk.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* penerimaanAdd.LookupTipeProduk.Visible (end) *@
+@if (penerimaanAdd.LookupJenisPlant.Visible) { // penerimaanAdd.LookupJenisPlant.Visible (begin)
+    <div id="r_LookupJenisPlant" @Html.Raw(penerimaanAdd.LookupJenisPlant.RowAttributes)>
+        <label id="elh_Penerimaan_LookupJenisPlant" class="@(penerimaanAdd.LeftColumnClass)">@Html.Raw(penerimaanAdd.LookupJenisPlant.Caption)@Html.Raw(penerimaanAdd.LookupJenisPlant.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(penerimaanAdd.RightColumnClass)"><div @Html.Raw(penerimaanAdd.LookupJenisPlant.CellAttributes)>
+<span id="el_Penerimaan_LookupJenisPlant">
+<input type="@(penerimaanAdd.LookupJenisPlant.InputTextType)" name="x_LookupJenisPlant" id="x_LookupJenisPlant" data-table="Penerimaan" data-field="x_LookupJenisPlant" value="@Html.Raw(penerimaanAdd.LookupJenisPlant.EditValue)" size="30" maxlength="1" placeholder="@Html.Raw(HtmlEncode(penerimaanAdd.LookupJenisPlant.PlaceHolder))" data-format-pattern="@(penerimaanAdd.LookupJenisPlant.FormatPattern)"@Html.Raw(penerimaanAdd.LookupJenisPlant.EditAttributes) aria-describedby="x_LookupJenisPlant_help">
+@Html.Raw(penerimaanAdd.LookupJenisPlant.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(penerimaanAdd.LookupJenisPlant.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* penerimaanAdd.LookupJenisPlant.Visible (end) *@
+</div><!-- /page* -->
+@{ penerimaanAdd.CloseRecordset(); }
+@Html.Raw(penerimaanAdd.IsModal ? "<template class=\"ew-modal-buttons\">" : "<div class=\"row ew-buttons\">")<!-- buttons .row -->
+    <div class="@(penerimaanAdd.OffsetColumnClass)"><!-- buttons offset -->
+    <button class="btn btn-primary ew-btn" name="btn-action" id="btn-action" type="submit" form="fPenerimaanadd">@Html.Raw(Language.Phrase("AddBtn"))</button>
+@if (IsJsonResponse()) {
+    <button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" data-bs-dismiss="modal">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+} else {
+    <button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" form="fPenerimaanadd" data-href="@AppPath(penerimaanAdd.ReturnUrl)">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+}
+    </div><!-- /buttons offset -->
+@Html.Raw(penerimaanAdd.IsModal ? "</template>" : "</div>")<!-- /buttons .row -->
+</form>
+@penerimaanAdd.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("Penerimaan");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Startup script
+    // Write your table-specific startup script here
+    // document.write("page loaded");
+    var parent_url = ew.PATH_BASE;
+    $("#x_NomorPenerimaan").prop("readonly", true);
+    $("#r_LookupTipeProduk").hide();
+    $("#r_LookupJenisPlant").hide();
+    $("#r_TipeProdukSTS").hide();
+    $("#r_IdPlant").hide();
+    $("#r_IdPenyaluran").hide();
+    $("#r_Refinery").hide();
+    const action = '@HttpContext.Request.Query["action"].ToString()';
+    if (action === "addproduct") {
+    	$("#x_KodeProduk").val("").trigger("change");
+    	let TipeProdukSTS = $("#x_TipeProdukSTS").val();
+    	if (TipeProdukSTS) {
+    		$("#x_TipeProdukSTS").trigger("change");
+    		$("#r_TipeProdukSTS").show();
+    	} else {
+    		$("#x_IdPlant").trigger("change");
+    	}
+    	let plantId = $("#x_IdPlant").val();
+    	let modaId = $("#x_ModaTransportasi").val();
+    	const penyaluranId = $("#x_IdPenyaluran").val();
+    	if (["1", "2"].includes(modaId)) {
+    		// do what?
+    	} else if (modaId === "3") {
+    		fillIdPenyaluranList(plantId, modaId);
+    		$("#r_NamaKapal").hide();
+    		$("#r_IdDermaga").hide();
+    		$("#r_NomorVoyage").hide();
+    		$("#r_Refinery").hide();
+    		$("#x_NamaKapal").val("");
+    		$("#x_IdDermaga").val("");
+    		$("#x_NomorVoyage").val("");
+    		$("#x_Refinery").prop("checked", false);
+    		$("#elh_Penerimaan_TanggalSandar").contents().first()[0].textContent = "Tanggal";
+    		$("#x_TanggalSandar").attr("placeholder", "Tanggal");
+    	} else if (modaId === "4") {
+    		fillIdPenyaluranList(plantId, modaId);
+    		$("#r_NamaKapal").hide();
+    		$("#r_IdDermaga").hide();
+    		$("#r_NomorVoyage").hide();
+    		$("#r_Refinery").hide();
+    		$("#x_NamaKapal").val("");
+    		$("#x_IdDermaga").val("");
+    		$("#x_NomorVoyage").val("");
+    		$("#x_Refinery").prop("checked", false);
+    		$("#elh_Penerimaan_TanggalSandar").contents().first()[0].textContent = "Tanggal";
+    		$("#x_TanggalSandar").attr("placeholder", "Tanggal");
+    	} else if (modaId == "5" || modaId == "6") {
+    		const penyaluranSelection = $("#x_IdPenyaluran");
+    		penyaluranSelection.empty();
+    		penyaluranSelection.append('<option value="">Loading...</option>');
+    		$.ajax({
+    			url: parent_url + "api/LookUpList/get-dropdown/penyaluran-to-penerimaan",
+    			method: "GET",
+    			dataType: "json",
+    			data: {
+    				plantId: plantId,
+    				modaId: modaId,
+    			},
+    			success: function (data) {
+    				penyaluranSelection.empty();
+    				$.each(data, function (index, item) {
+    					let isSelected = penyaluranId == item.Value;
+    					penyaluranSelection.append(`<option value="${item.Value}" selected="${isSelected}">${item.Label}</option>`);
+    				});
+    			},
+    			error: function (xhr, status, error) {
+    				console.error("Gagal ambil data dropdown:", error);
+    				penyaluranSelection.empty();
+    			},
+    		});
+    		$("#r_IdPenyaluran").show();
+    		$("#r_NamaKapal").hide();
+    		$("#r_IdDermaga").hide();
+    		$("#r_NomorVoyage").hide();
+    		$("#elh_Penerimaan_TanggalSandar").contents().first()[0].textContent = "Tanggal";
+    		$("#x_TanggalSandar").attr("placeholder", "Tanggal");
+    		$("#r_Refinery").show();
+    		if ($("#x_Refinery").prop("checked")) {
+    			$("#r_IdPenyaluran").hide();
+    		}
+    	} else {
+    		$("#elh_Penerimaan_TanggalSandar").contents().first()[0].textContent = "Tanggal Sandar";
+    		$("#x_TanggalSandar").attr("placeholder", "Tanggal Sandar");
+    		$("#r_NamaKapal").show();
+    		$("#r_IdDermaga").show();
+    		$("#r_NomorVoyage").show();
+    		$("#r_IdPenyaluran").hide();
+    		$("#r_Refinery").hide();
+    		$("#x_IdPenyaluran").val("");
+    		$("#x_Refinery").prop("checked", false);
+    	}
+    }
+    $(document).ready(function () {
+    	const ddl = $("#x_LookupPlant");
+    	ddl.empty();
+    	ddl.append('<option value="">Loading...</option>');
+    	$.ajax({
+    		url: parent_url + "api/LookUpList/get-dropdown/plant?Menu=Penerimaan",
+    		method: "GET",
+    		dataType: "json",
+    		success: function (data) {
+    			ddl.empty();
+    			var targetPlantId = "@Html.Raw(penerimaanAdd.IdPlant.CurrentValue)";
+    			$.each(data, function (index, item) {
+    				let isSelected = false;
+    				if (targetPlantId && (item.Value == targetPlantId || item.Value.toString() == targetPlantId.toString())) {
+    					isSelected = true;
+    				} else if (!targetPlantId && index === 0) {
+    					isSelected = true;
+    				}
+    				const selectedAttr = isSelected ? "selected" : "";
+    				ddl.append(`<option value="${item.Value}" ${selectedAttr}>${item.Label}</option>`);
+    				if (isSelected) {
+    					$("#x_IdPlant").val(item.Value).trigger("change");
+    				}
+    			});
+    		},
+    		error: function (xhr, status, error) {
+    			console.error("Gagal ambil data dropdown:", error);
+    			ddl.empty();
+    		},
+    	});
+    	const UserLevel = "@CurrentUserLevel()";
+    	const idRole = '@CurrentUserInfo("Rule")?.ToString()';
+    	if (UserLevel != "2" && UserLevel != "-1" && UserLevel != "4" && UserLevel != "5" && idRole != "1" && idRole != "12" && idRole != "13") {
+    		ew.alert("Anda tidak memiliki akses untuk menambah data Penerimaan.");
+    		setTimeout(() => {
+    			window.location.href = parent_url + "PenerimaanList";
+    		}, 1000);
+    	}
+    });
+    function fillIdPenyaluranList(idPlant, idModa) {
+    	const penyaluranSelection = $("#x_IdPenyaluran");
+    	penyaluranSelection.empty();
+    	penyaluranSelection.append('<option value="">Loading...</option>');
+    	$.ajax({
+    		url: parent_url + "api/LookUpList/get-dropdown/penyaluran-to-penerimaan",
+    		method: "GET",
+    		dataType: "json",
+    		data: {
+    			plantId: idPlant,
+    			modaId: idModa,
+    		},
+    		success: function (data) {
+    			penyaluranSelection.empty();
+    			$.each(data, function (index, item) {
+    				penyaluranSelection.append(`<option value="${item.Value}">${item.Label}</option>`);
+    			});
+    		},
+    		error: function (xhr, status, error) {
+    			console.error("Gagal ambil data dropdown:", error);
+    			penyaluranSelection.empty();
+    		},
+    		complete: function () {
+    			$("#r_IdPenyaluran").show();
+    		},
+    	});
+    }
+});
+</script>

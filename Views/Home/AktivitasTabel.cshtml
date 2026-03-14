@@ -1,0 +1,3651 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (aktivitasTabel.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = aktivitasTabel.UseLayout ? "_Layout" : "";
+}
+@aktivitasTabel.ShowMessages()
+@{
+    string IdAktivitas = HttpContext.Request.Query["IdAktivitas"].ToString();
+
+    string DibuatOleh = "", TanggalDibuat = "", IdTemplateAktivitas = "", TableAnak = "", NamaAktivitas = "", produkView = "", IdProses = "", NamaProduk = "", NamaProses = "", NoReferensi = "", DiperbaruiOleh = "", TanggalDiperbarui = "", StatusAktivitas = "", Produk = "", TipeProses = "", NamaKapal = "", NomorPolisi = "", Sloc = "", NamaTerminal = "", LabelProduk = "", TipeProduk = "", colPlant = "", totalTerima = "", ETCval = "", ETAval = "", ETAval2 = "", ETAval3 = "", noUrut = "", NomorGerbongKertel = "";
+    bool isEditable = true;
+    int countRole = 0;
+    DateTime startDate = DateTime.Now;
+    Dictionary<string, object> generalList = new Dictionary<string, object>();
+    List<Dictionary<string, object>> resultList = new List<Dictionary<string, object>>();
+    List<Dictionary<string, object>> plantList = new List<Dictionary<string, object>>();
+    List<Dictionary<string, object>> produkList = new List<Dictionary<string, object>>();
+    List<Dictionary<string, object>> tangkiList = new List<Dictionary<string, object>>();
+    List<Dictionary<string, object>> dataLog = new List<Dictionary<string, object>>();
+    List<Dictionary<string, object>> etaList = new List<Dictionary<string, object>>();
+    List<Dictionary<string, object>> gerbongKetelList = new List<Dictionary<string, object>>();
+    List<List<string>> formList = new List<List<string>>();
+    List<string> currentGuideFields = new List<string>();
+
+    bool IsCustomLogbookPenyaluranContext() =>
+        !string.IsNullOrEmpty(TableAnak) &&
+        (TableAnak.Equals("SubAktivitasLogbookPenerimaanPenyaluran", StringComparison.OrdinalIgnoreCase) ||
+         TableAnak.Equals("SubAktivitasLogbookPenerimaanPenyaluranLPG", StringComparison.OrdinalIgnoreCase));
+
+    string GetCustomVolumeUnit(string tipeProdukContext)
+    {
+        if (!IsCustomLogbookPenyaluranContext())
+            return "";
+
+        return tipeProdukContext == "LPG" ? "Kg" : "L / DaL";
+    }
+
+    string GetFieldUnit(string fieldName, string tipeProdukContext)
+    {
+        string normalizedField = fieldName.ToLower().Replace("_", "");
+        string customVolumeUnit = GetCustomVolumeUnit(tipeProdukContext);
+
+        switch (normalizedField)
+        {
+            case "pressure":
+                return "Kg/cm²";
+
+            case "density":
+                return "g/cm³";
+
+            case "temperature":
+            case "temperatur":
+                return "°C";
+
+            case "level":
+            case "leveltangki":
+                return "mm";
+
+            case "volume":
+            case "volumeklobs":
+            case "volumedischarge":
+            case "volumekl":
+                if (!string.IsNullOrEmpty(customVolumeUnit))
+                    return customVolumeUnit;
+                return tipeProdukContext == "LPG" ? "MT" : "KL";
+
+            case "quantity":
+            case "quantityawal":
+            case "quantityakhir":
+                if (!string.IsNullOrEmpty(customVolumeUnit))
+                    return customVolumeUnit;
+                return tipeProdukContext == "LPG" ? "MT" : (tipeProdukContext == "RTW") ? "L" : "KL";
+
+            case "flowrate":
+                return tipeProdukContext == "LPG" ? "MT/jam" : "KL/jam";
+
+            case "timbanganawal":
+            case "timbanganakhir":
+            case "netwight":
+                return "Kg";
+
+            case "meterawal":
+            case "meterakhir":
+                return "L";
+            default:
+                return "";
+        }
+    }
+
+    string GetFieldLabel(string fieldName)
+    {
+        if (fieldName.Contains("Volume") || fieldName.Contains("volume"))
+        {
+            fieldName = fieldName.Replace("Volume", "Quantity")
+                            .Replace("volume", "Quantity")
+                            .Replace("VOLUME", "Quantity");
+        }
+
+        var labelMap = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) {
+            { "Density", "Density" },
+            { "Temperature", "Temperature" },
+            { "Temperatur", "Temperature" },
+            { "Pressure", "Pressure" },
+            { "Level", "Level Tangki" },
+            { "Level_Tangki", "Level Tangki" },
+            { "Volume", "Quantity" },
+            { "Volume_KLObs", "Quantity" },
+            { "VolumeDischarge", "Quantity" },
+            { "Volume_KL", "Quantity" },
+            { "Quantity", "Quantity" },
+            { "QuantityDischarge", "Quantity" },
+            { "Quantity_KLObs", "Quantity" },
+            { "Quantity_KL", "Quantity" },
+            { "Flowrate", "Flowrate" },
+            { "QuantityAwal", "Quantity" },
+            { "QuantityAkhir", "Quantity" },
+            { "TimbanganAwal", "Timbangan Awal" },
+            { "TimbanganAkhir", "Timbangan Akhir" },
+            { "NetWight", "Net Weight" },
+            { "MeterAwal", "Meter Awal" },
+            { "MeterAkhir", "Meter Akhir" }
+        };
+
+        return labelMap.ContainsKey(fieldName) ? labelMap[fieldName] : fieldName;
+    }
+
+    Dictionary<string, List<string>> fieldGuides = new Dictionary<string, List<string>> {
+        { "SubAktivitasLogbookPenerimaan", new List<string> { "Level", "Volume", "Flowrate" } },
+        { "SubAktivitasLogbookMonitoringStock", new List<string> { "Level_Tangki", "Volume_KLObs" } },
+        { "SubAktivitasLogbookPenerimaanPenyaluran", new List<string> { "Volume" } },
+        { "SubAktivitasHasilPemeriksaanPenyaluran", new List<string> { "Density", "Temperature", "Pressure" } },
+        { "SubAktivitasInputLogbookPenerimaanPenKon", new List<string> { "Density", "Temperatur" } },
+        { "SubAktivitasHasilPemeriksaanLPG", new List<string> { "Density", "Temperature", "Pressure" } },
+        { "SubAktivitasLogbookPenerimaanLPG", new List<string> { "Density", "Temperatur", "Level", "Volume", "Flowrate" } },
+        { "SubAktivitasInputLogbookPenerimaanPenKonLPG", new List<string> { "Density", "Temperatur" } },
+        { "SubAktivitasInputLogbookPenerimaanPipa", new List<string> { "Density", "Temperature" } },
+        { "SubAktivitasHasilPemeriksaanPenyaluranLPG", new List<string> { "Density", "Temperature" } },
+        { "SubAktivitasLogbookPenerimaanPenyaluranLPG", new List<string> { "Quantity" } },
+        { "SubaktivitasInputLogbookPenyaluranPipa", new List<string> { "Quantity" } },
+        { "SubaktivitasHasilPemeriksaanSTSPnrBBM", new List<string> { "Density", "Temperature", "Pressure" } },
+        { "SubAktivitasLogbookPenerimaanSTSPymBBM", new List<string> { "Density", "Temperatur", "Level", "Volume", "Flowrate" } },
+        { "SubAktivitasFormInputMonitoringStockSTSPymSBBM", new List<string> { "Flowrate", "QuantityAwal", "QuantityAkhir" } },
+        { "SubAktivitasFormInputLogbookPenerimaanSTSPymBBM", new List<string> { "Density", "Temperatur" } },
+        { "SubAktivitasHasilPemeriksaanPenyaluranSTSPyrBBM", new List<string> { "Density", "Temperature", "Pressure" } },
+        { "SubAktivitasLogbookPenerimaanSTSPymLPG", new List<string> { "Density", "Temperatur", "Level", "Volume", "Flowrate" } },
+        { "SubAktivitasFormInputMonitoringStockSTSPymSLPG", new List<string> { "QuantityAwal", "QuantityAkhir", "Flowrate" } },
+        { "SubAktivitasHasilPemeriksaanSTSLPG", new List<string> { "Density", "Temperature", "Pressure" } },
+        { "SubAktivitasFormInputLogbookPenerimaanSTSPymLPG", new List<string> { "Density", "Temperatur" } },
+        { "SubAktivitasHasilPemeriksaanPenyaluranSTSPyrLPG", new List<string> { "Density", "Temperature", "Pressure" } },
+        { "SubAktivitasFormInputHasilPemeriksaanPipa", new List<string> { "Density", "Temperature", "Pressure" } },
+        { "SubAktivitasHasilPemeriksaanPipa", new List<string> { "Density", "Temperatur", "Pressure", "VolumeDischarge", "Flowrate" } },
+        { "SubAktivitasFormInputLogbookPenerimaanPipa", new List<string> { "Level", "Volume", "Flowrate" } },
+        { "SubAktivitasLogbookMonitoringStockPipa", new List<string> { "Level_Tangki", "Volume_KL", "Flowrate" } },
+        { "SubaktivitasHasilPemeriksaan", new List<string> { "Density", "Temperature", "Pressure" } },
+        { "SubAktivitasFormInputHslPemeriksaan", new List<string> { "Density", "Temperature", "Pressure" } },
+        { "SubAktivitasFormInputHslPemeriksaanRTW", new List<string> { "Density", "Temperature", "Pressure" } },
+        { "SubaktivitasInputHasilPemeriksaanPipa", new List<string> { "Density", "Temperature", "Pressure", "Flowrate", "Quantity" } },
+        { "SubAktivitasLogbookJembatanTimbangLPG", new List<string> { "TimbanganAwal", "TimbanganAkhir", "NetWight" } },
+        { "SubAktivitasFormInputLogbookPenerimaanRTW", new List<string> { "Level", "Quantity", "Flowrate" } },
+        { "SubAktivitasInputDataRTW", new List<string> { "Quantity", "MeterAwal", "MeterAkhir" } },
+        { "SubAktivitasFormInputLogbMonitoringStockRTW", new List<string> { "Quantity", "Flowrate" } },
+        { "SubAktivitasLogbookPenerimaanRTW", new List<string> { "Density", "Temperatur" } },
+        { "SubAktivitasFormInputLogbookPenerimaanTruck", new List<string> { "Level", "Volume", "Flowrate" } }
+    };
+
+    using (SqlConnection sqlConnection = GetConnection("Db").OpenConnection())
+    {
+        string sqlQuery = $@"SELECT
+                A.TipeProses,
+                A.TableAnak,
+                A.No_Referensi,
+                A.NamaAktivitas,
+                A.StatusAktivitas,
+                A.DiperbaruiOleh,
+                A.TanggalDiperbarui,
+                A.DibuatOleh,
+                A.TanggalDibuat,
+                A.Produk,
+                A.IdProses,
+                A.IdTemplateAktivitas,
+                P.NamaProses,
+                MP.TipeProduk,
+                MP.NoProduk + ' - ' + MP.NamaProduk AS produkView
+            FROM Aktivitas A JOIN Proses P ON A.IdProses = P.IdProses
+            LEFT JOIN MasterProduk MP ON A.Produk = MP.NoProduk
+            WHERE A.IdAktivitas = @IdAktivitas;";
+
+        using (SqlCommand command = new SqlCommand(sqlQuery, sqlConnection))
+        {
+            command.Parameters.AddWithValue("@IdAktivitas", IdAktivitas);
+            using (SqlDataReader rs = command.ExecuteReader())
+            {
+                if (rs.Read())
+                {
+                    TipeProses = rs["TipeProses"] != null ? rs["TipeProses"].ToString() : "";
+                    TableAnak = rs["TableAnak"] != null ? rs["TableAnak"].ToString() : "";
+                    if (fieldGuides.ContainsKey(TableAnak))
+                    {
+                        currentGuideFields = fieldGuides[TableAnak];
+                    }
+                    NoReferensi = rs["No_Referensi"] != null ? rs["No_Referensi"].ToString() : "";
+                    NamaAktivitas = rs["NamaAktivitas"] != null ? rs["NamaAktivitas"].ToString() : "";
+                    StatusAktivitas = rs["StatusAktivitas"] != null ? rs["StatusAktivitas"].ToString() : "";
+                    NamaProses = rs["NamaProses"] != null ? rs["NamaProses"].ToString() : "";
+                    DiperbaruiOleh = rs["DiperbaruiOleh"] != null ? rs["DiperbaruiOleh"].ToString() : "";
+                    DibuatOleh = rs["DibuatOleh"] != null ? rs["DibuatOleh"].ToString() : "";
+                    Produk = rs["Produk"] != null ? rs["Produk"].ToString() : "";
+                    TipeProduk = rs["TipeProduk"] != null ? rs["TipeProduk"].ToString() : "";
+                    IdProses = rs["IdProses"] != null ? rs["IdProses"].ToString() : "";
+                    IdTemplateAktivitas = rs["IdTemplateAktivitas"] != null ? rs["IdTemplateAktivitas"].ToString() : "";
+                    produkView = rs["produkView"] != null ? rs["produkView"].ToString() : "";
+                    if (rs["TanggalDiperbarui"] != null && DateTime.TryParse(rs["TanggalDiperbarui"].ToString(), out DateTime parsedTanggal))
+                    {
+                        TanggalDiperbarui = parsedTanggal.ToString("yyyy/MM/dd HH:mm:ss");
+                    }
+                    if (rs["TanggalDibuat"] != null && DateTime.TryParse(rs["TanggalDibuat"].ToString(), out DateTime parsedTanggal2))
+                    {
+                        TanggalDibuat = parsedTanggal2.ToString("yyyy/MM/dd HH:mm:ss");
+                    }
+                }
+            }
+        }
+
+        switch (TipeProses)
+        {
+            case "PenyaluranTruck" or "PenyaluranLPGTASNGS" or "PenyaluranKonsinyasiSTSBBM" or "PenyaluranKonsinyasiRTW" or
+                 "PenyaluranKonsinyasiSTSLPG" or "PenyaluranPipa" or "Penyaluran" or "PenyaluranSalesPipa" or "PenyaluranPipaLPG" or 
+                 "PenyaluranKonsinyasiTruck" or "PenyaluranPipaJarakDekat":
+                TipeProses = "Penyaluran";
+                colPlant = "IdPlant";
+                break;
+            case "PenerimaanSTSBBM" or "PenerimaanSTSLPG" or "Penerimaan" or "PenerimaanRTW" or "PenerimaanTruck" or "PenerimaanPipaRefinery":
+                TipeProses = "Penerimaan";
+                colPlant = "IdPlant";
+                break;
+            case "PenyimpananPenerimaanLPG" or "PenyimpananPenerimaanSTSBBM" or "PenyimpananPenerimaanLPGSTS" or
+                 "Penimbunan" or "PenyimpananPenerimaanPipa" or "PenyimpananPenerimaanPipaLPG" or "PenyimpananPenerimaanRTW" or
+                 "PenyimpananPenerimaanTruck":
+                TipeProses = "Penimbunan";
+                colPlant = "Plant";
+                break;
+            case "PenimbunanPenyaluran" or "PenimbunanPenyaluranLPG" or "PenyimpananPenyaluranSalesSTSBBM" or
+                 "PenyimpananPenyaluranKonsinyasiSTSBBM" or "PenyimpananPenyaluranSalesSTSLPG" or
+                 "PenyimpananPenyaluranKonsinyasiSTSLPG" or "PenyimpananPenyaluranSalesPipa" or
+                 "PenyimpananPenyaluranKonsinyasiPipa" or "PenyimpananPenyaluranSalesRTW" or "PenyimpananPenyaluranKonsinyasiRTW" or "PenyimpananPenyaluranKonsinyasi":
+                TipeProses = "PenimbunanPenyaluran";
+                colPlant = "Plant";
+                break;
+            case "RencanaPenyaluran" or "RencanaPenyaluranLPG" or "RencanaPenyaluranPipa":
+                TipeProses = "RencanaPenyaluran";
+                colPlant = "IdPlant";
+                break;
+            case "SamplingLabTest":
+                colPlant = "IdPlant";
+                break;
+            case "ClosingStock":
+                colPlant = "Plant";
+                break;
+        }
+
+        sqlQuery = $"SELECT p.*,mp.TipeProduk FROM {TipeProses} p JOIN MasterPlant mp ON p.{colPlant} = mp.IdPlant WHERE Nomor{TipeProses} = @NoReferensi;";
+        using (SqlCommand command = new SqlCommand(sqlQuery, sqlConnection))
+        {
+            command.Parameters.AddWithValue("@NoReferensi", NoReferensi);
+            using (SqlDataReader rs = command.ExecuteReader())
+            {
+                while (rs.Read())
+                {
+                    for (int i = 0; i < rs.FieldCount; i++)
+                    {
+                        generalList[rs.GetName(i)] = rs[i] != null ? rs[i] : "";
+                    }
+                }
+            }
+        }
+
+        if (TipeProses.Contains("LPG") || TipeProduk == "LPG" || generalList["TipeProduk"].ToString() == "LPG" || generalList["TipeProdukSTS"].ToString() == "LPG")
+        {
+            sqlQuery = "SELECT * FROM MasterProduk WHERE TipeProduk = 'LPG';";
+        }
+        else
+        {
+            sqlQuery = "SELECT * FROM MasterProduk WHERE TipeProduk = 'BBM';";
+        }
+
+        using (SqlCommand command = new SqlCommand(sqlQuery, sqlConnection))
+        {
+            using (SqlDataReader rs = command.ExecuteReader())
+            {
+                while (rs.Read())
+                {
+                    Dictionary<string, object> row = new Dictionary<string, object>();
+                    for (int i = 0; i < rs.FieldCount; i++)
+                    {
+                        row[rs.GetName(i)] = rs[i] != null ? rs[i] : "";
+                    }
+                    produkList.Add(row);
+                }
+            }
+        }
+
+        sqlQuery = $"SELECT * FROM {TableAnak} A LEFT JOIN MasterProduk M ON A.Produk = M.NoProduk WHERE A.idAktifitas = @IdAktivitas;";
+        using (SqlCommand command = new SqlCommand(sqlQuery, sqlConnection))
+        {
+            command.Parameters.AddWithValue("@IdAktivitas", IdAktivitas);
+            using (SqlDataReader rs = command.ExecuteReader())
+            {
+                while (rs.Read())
+                {
+                    Dictionary<string, object> row = new Dictionary<string, object>();
+                    for (int i = 0; i < rs.FieldCount; i++)
+                    {
+                        row[rs.GetName(i)] = rs[i] != null ? rs[i] : "";
+                    }
+                    resultList.Add(row);
+                }
+            }
+        }
+
+        sqlQuery = "SELECT IdPlant, Nama_Terminal, Plant FROM MasterPlant;";
+        using (SqlCommand command = new SqlCommand(sqlQuery, sqlConnection))
+        {
+            using (SqlDataReader rs = command.ExecuteReader())
+            {
+                while (rs.Read())
+                {
+                    Dictionary<string, object> row = new Dictionary<string, object>();
+                    for (int i = 0; i < rs.FieldCount; i++)
+                    {
+                        row[rs.GetName(i)] = rs[i] != null ? rs[i] : "";
+                    }
+                    plantList.Add(row);
+                }
+            }
+        }
+
+        sqlQuery = "SELECT NoKetel, Quantity FROM MasterGerbongRTW Where Plant = @plant;";
+        using (SqlCommand command = new SqlCommand(sqlQuery, sqlConnection))
+        {
+            command.Parameters.AddWithValue(
+                "@plant",
+                generalList.TryGetValue("IdPlant", out var plantValue)
+                    ? plantValue?.ToString() ?? ""
+                    : ""
+            );
+            using (SqlDataReader rs = command.ExecuteReader())
+            {
+                while (rs.Read())
+                {
+                    Dictionary<string, object> row = new Dictionary<string, object>();
+                    for (int i = 0; i < rs.FieldCount; i++)
+                    {
+                        row[rs.GetName(i)] = rs[i] != null ? rs[i] : "";
+                    }
+                    gerbongKetelList.Add(row);
+                }
+            }
+        }
+
+        if (IdTemplateAktivitas == "402")
+        {
+            gerbongKetelList.Clear();
+            sqlQuery = "SELECT NoKetel, Quantity FROM MasterGerbongRTW WHERE " +
+                $"Plant = (SELECT IdPlant FROM Penyaluran WHERE IdPenyaluran = (SELECT IdPenyaluran FROM Penerimaan WHERE NomorPenerimaan = '{NoReferensi}')) AND " +
+                $"NoKetel NOT IN (SELECT NomorGerbongKertel FROM SubAktivitasNilaiBDperGerbong Where idAktifitas = @IdAktivitas);";
+            using (SqlCommand command = new SqlCommand(sqlQuery, sqlConnection))
+            {
+                command.Parameters.AddWithValue(
+                    "@IdAktivitas",
+                    IdAktivitas
+                );
+                using (SqlDataReader rs = command.ExecuteReader())
+                {
+                    while (rs.Read())
+                    {
+                        Dictionary<string, object> row = new Dictionary<string, object>();
+                        for (int i = 0; i < rs.FieldCount; i++)
+                        {
+                            row[rs.GetName(i)] = rs[i] != null ? rs[i] : "";
+                        }
+                        gerbongKetelList.Add(row);
+                    }
+                }
+            }
+        }
+
+        sqlQuery = @"SELECT
+                        MT.id,
+                        MT.NamaTerminal,
+                        MT.Plant,
+                        MT.Sloc,
+                        MT.MatNo,
+                        MP.NamaProduk
+                    FROM MasterTangki MT
+                    LEFT JOIN MasterProduk MP ON MT.MatNo = MP.NoProduk
+                    WHERE MT.Status = 'OPERASI';
+                    ";
+        using (SqlCommand command = new SqlCommand(sqlQuery, sqlConnection))
+        {
+            using (SqlDataReader rs = command.ExecuteReader())
+            {
+                while (rs.Read())
+                {
+                    Dictionary<string, object> row = new Dictionary<string, object>();
+                    for (int i = 0; i < rs.FieldCount; i++)
+                    {
+                        row[rs.GetName(i)] = rs[i] != null ? rs[i] : "";
+                    }
+                    tangkiList.Add(row);
+                }
+            }
+        }
+
+        if (generalList.ContainsKey("NamaKapal"))
+        {
+            NamaKapal = generalList["NamaKapal"].ToString() ?? "";
+        }
+
+        if (IdTemplateAktivitas == "13" || IdTemplateAktivitas == "140" || IdTemplateAktivitas == "199" || IdTemplateAktivitas == "273")
+        {
+            string tableStart = "SubaktivitasStartBongkar";
+            if (IdTemplateAktivitas == "140")
+            {
+                tableStart = "SubAktivitasStartBongkarLPG";
+            }
+            else if (IdTemplateAktivitas == "199")
+            {
+                tableStart = "SubaktivitasStartBongkarSTSPnrBBM";
+            }
+            else if (IdTemplateAktivitas == "273")
+            {
+                tableStart = "SubAktivitasStartBongkarSTSLPG";
+            }
+
+            sqlQuery = $@"SELECT tglStartBongkar FROM {tableStart} WHERE NoReferensi = @NoReferensi;";
+            using (SqlCommand command = new SqlCommand(sqlQuery, sqlConnection))
+            {
+                command.Parameters.AddWithValue("@NoReferensi", NoReferensi);
+                using (SqlDataReader rs = command.ExecuteReader())
+                {
+                    if (rs.Read())
+                    {
+                        if (rs["tglStartBongkar"] != null && DateTime.TryParse(rs["tglStartBongkar"].ToString(), out DateTime startDateParsed))
+                        {
+                            startDate = startDateParsed;
+                        }
+                    }
+                }
+            }
+
+            formList = new List<List<string>> {
+                new List<string> { "Nama Kegiatan", "text", "NamaKegiatan", $"Monitoring Pembongkaran {NamaKapal}, Produk {produkView}" },
+                new List<string> { "Tanggal & Jam SOP", "hiddenform", "TanggalJamSOP" },
+                new List<string> { "Tanggal & Jam Aktual", "hiddenform", "TanggalJam" },
+                new List<string> { "Selisih Waktu (Menit)", "hiddenform", "SelisihWaktu" },
+                new List<string> { "Quality", "select", "IsQualityActive" },
+                new List<string> { "Density", "number", "Density" },
+                new List<string> { "Temperature", "number", "Temperature" },
+                new List<string> { "Pressure", "number", "Pressure" },
+                new List<string> { "Keterangan", "textarea", "Keterangan" },
+                new List<string> { NamaKapal, "hidden", "NamaKapal" },
+                new List<string> { Produk, "hidden", "Produk" }
+            };
+        }
+        else if (IdTemplateAktivitas == "378")
+        {
+            sqlQuery = $@"SELECT Tanggal FROM SubAktivitasDataStartPembongkaranRTW WHERE NoReferensi = @NoReferensi;";
+            using (SqlCommand command = new SqlCommand(sqlQuery, sqlConnection))
+            {
+                command.Parameters.AddWithValue("@NoReferensi", NoReferensi);
+                using (SqlDataReader rs = command.ExecuteReader())
+                {
+                    if (rs.Read())
+                    {
+                        if (rs["Tanggal"] != null && DateTime.TryParse(rs["Tanggal"].ToString(), out DateTime startDateParsed))
+                        {
+                            startDate = startDateParsed;
+                        }
+                    }
+                }
+            }
+
+            formList = new List<List<string>> {
+                new List<string> { "Nama Kegiatan", "text", "NamaKegiatan", $"Monitoring Pembongkaran Produk {produkView}" },
+                new List<string> { "Tanggal & Jam SOP", "hiddenform", "TanggalJamSOP" },
+                new List<string> { "Tanggal & Jam Aktual", "hiddenform", "TanggalJam" },
+                new List<string> { "Selisih Waktu (Menit)", "hiddenform", "SelisihWaktu" },
+                new List<string> { "Quality", "select", "IsQualityActive" },
+                new List<string> { "Density", "number", "Density" },
+                new List<string> { "Temperature", "number", "Temperature" },
+                new List<string> { "Pressure", "number", "Pressure" },
+                new List<string> { "Keterangan", "textarea", "Keterangan" },
+                new List<string> { Produk, "hidden", "Produk" }
+            };
+        }
+        else if (IdTemplateAktivitas == "426")
+        {
+            sqlQuery = $@"SELECT Tanggal FROM SubAktivitasFormInputDataStartPembongkaran WHERE NoReferensi = @NoReferensi;";
+            using (SqlCommand command = new SqlCommand(sqlQuery, sqlConnection))
+            {
+                command.Parameters.AddWithValue("@NoReferensi", NoReferensi);
+                using (SqlDataReader rs = command.ExecuteReader())
+                {
+                    if (rs.Read())
+                    {
+                        if (rs["Tanggal"] != null && DateTime.TryParse(rs["Tanggal"].ToString(), out DateTime startDateParsed))
+                        {
+                            startDate = startDateParsed;
+                        }
+                    }
+                }
+            }
+
+            formList = new List<List<string>> {
+                new List<string> { "Nama Kegiatan", "text", "NamaKegiatan", $"Monitoring Pembongkaran Produk {produkView}" },
+                new List<string> { "Tanggal & Jam SOP", "hiddenform", "TanggalJamSOP" },
+                new List<string> { "Tanggal & Jam Aktual", "hiddenform", "Tanggal" },
+                new List<string> { "Selisih Waktu (Menit)", "hiddenform", "SelisihWaktu" },
+                new List<string> { "Quality", "select", "IsQualityActive" },
+                new List<string> { "Density", "number", "Density" },
+                new List<string> { "Temperature", "number", "Temperature" },
+                new List<string> { "Pressure", "number", "Pressure" },
+                new List<string> { "Keterangan", "textarea", "Keterangan" },
+                new List<string> { Produk, "hidden", "Produk" }
+            };
+        }
+        else if (IdTemplateAktivitas == "312" || IdTemplateAktivitas == "465")
+        {
+            sqlQuery = $@"SELECT tglStartBongkar FROM SubAktivitasDataStartPembongkaranPipa WHERE NoReferensi = @NoReferensi;";
+            using (SqlCommand command = new SqlCommand(sqlQuery, sqlConnection))
+            {
+                command.Parameters.AddWithValue("@NoReferensi", NoReferensi);
+                using (SqlDataReader rs = command.ExecuteReader())
+                {
+                    if (rs.Read())
+                    {
+                        if (rs["tglStartBongkar"] != null && DateTime.TryParse(rs["tglStartBongkar"].ToString(), out DateTime startDateParsed))
+                        {
+                            startDate = startDateParsed;
+                        }
+                    }
+                }
+            }
+
+            formList = new List<List<string>> {
+                new List<string> { "Nama Batch", "text", "NamaBatch" },
+                new List<string> { "Nama Kegiatan", "text", "NamaKegiatan", $"Monitoring Pembongkaran {NamaKapal}, Produk {produkView}" },
+                new List<string> { "Tanggal & Jam SOP", "hiddenform", "TanggalJamSOP" },
+                new List<string> { "Tanggal & Jam Aktual", "hiddenform", "TanggalJam" },
+                new List<string> { "Selisih Waktu (Menit)", "hiddenform", "SelisihWaktu" },
+                new List<string> { "Quality", "select", "IsQualityActive" },
+                new List<string> { "Density", "number", "Density" },
+                new List<string> { "Temperature", "number", "Temperature" },
+                new List<string> { "Pressure", "number", "Pressure" },
+                new List<string> { "Keterangan", "textarea", "Keterangan" },
+                new List<string> { Produk, "hidden", "Produk" }
+            };
+        }
+        else if (IdTemplateAktivitas == "296")
+        {
+            formList = new List<List<string>> {
+                new List<string> { "Nama Kegiatan", "text", "NamaKegiatan", $"Monitoring Pembongkaran {NamaKapal}, Produk {produkView}" },
+                new List<string> { "Tanggal & Jam", "datetime-local", "Tanggal" },
+                new List<string> { "Density", "number", "Density" },
+                new List<string> { "Temperature", "number", "Temperature" },
+                new List<string> { "Pressure", "number", "Pressure" },
+                new List<string> { "Keterangan", "textarea", "Keterangan" },
+                new List<string> { NamaKapal, "hidden", "NamaKapal" },
+                new List<string> { Produk, "hidden", "Produk" }
+            };
+        }
+        else if (IdTemplateAktivitas == "320" || IdTemplateAktivitas == "356" || IdTemplateAktivitas == "476")
+        {
+            resultList.Clear();
+
+            sqlQuery = $@"
+                SELECT
+                    A.id,
+                    A.NoBatch,
+                    A.Tanggal,
+                    A.Nama_Kegiatan,
+                    A.Produk,
+                    A.Density,
+                    A.Temperature,
+                    A.Pressure,
+                    A.Keterangan,
+                    A.VolumeDischarge,
+                    A.Flowrate,
+                    A.TotalTerima,
+                    MP.NoProduk + ' - ' + MP.NamaProduk AS Produk_disabled,
+                    A.SubAktivitasHasilPemeriksaanId
+                FROM {TableAnak} A
+                LEFT JOIN MasterProduk MP ON A.Produk = MP.NoProduk
+                WHERE A.idAktifitas = @IdAktivitas;";
+
+            using (SqlCommand command = new SqlCommand(sqlQuery, sqlConnection))
+            {
+                command.Parameters.AddWithValue("@IdAktivitas", IdAktivitas);
+                using (SqlDataReader rs = command.ExecuteReader())
+                {
+                    while (rs.Read())
+                    {
+                        Dictionary<string, object> row = new Dictionary<string, object>();
+                        for (int i = 0; i < rs.FieldCount; i++)
+                        {
+                            row[rs.GetName(i)] = rs[i] != null ? rs[i] : "";
+                        }
+                        resultList.Add(row);
+                    }
+                }
+            }
+
+            sqlQuery = @"SELECT
+                        P.JenisProduk,
+                        MP.NoProduk + ' - ' + MP.NamaProduk AS Produk_disabled
+                        FROM Penyaluran P LEFT JOIN MasterProduk MP ON P.JenisProduk = MP.NoProduk
+                        WHERE P.NomorPenyaluran = @NoReferensi;";
+            using (SqlCommand command = new SqlCommand(sqlQuery, sqlConnection))
+            {
+                command.Parameters.AddWithValue("@NoReferensi", NoReferensi);
+                using (SqlDataReader rs = command.ExecuteReader())
+                {
+                    if (rs.Read())
+                    {
+                        Produk = rs["JenisProduk"] != null ? rs["JenisProduk"].ToString() : "";
+                        produkView = rs["Produk_disabled"] != null ? rs["Produk_disabled"].ToString() : "";
+                    }
+                }
+            }
+
+            bool dataFound = false;
+
+            sqlQuery = @"
+                SELECT TOP 1 ETC
+                FROM SubAktivitasHasilPemeriksaanPipa
+                WHERE NoReferensi = @NoReferensi
+                ORDER BY etlDate DESC;
+            ";
+
+            using (SqlCommand command = new SqlCommand(sqlQuery, sqlConnection))
+            {
+                command.Parameters.AddWithValue("@NoReferensi", NoReferensi);
+                using (SqlDataReader rs = command.ExecuteReader())
+                {
+                    if (rs.Read())
+                    {
+                        if (!rs.IsDBNull(0) && DateTime.TryParse(rs["ETC"].ToString(), out DateTime dt)) {
+                            ETCval = dt.ToString("yyyy/MM/dd HH:mm:ss");
+                            dataFound = true;
+                        }
+                    }
+                }
+            }
+
+            if (!dataFound)
+            {
+                sqlQuery = @"
+                    SELECT TOP 1 ETC
+                    FROM SubAktivitasNilaiETCETAPipa
+                    WHERE NoReferensi = @NoReferensi
+                    ORDER BY etlDate DESC;
+                ";
+
+                using (SqlCommand command = new SqlCommand(sqlQuery, sqlConnection))
+                {
+                    command.Parameters.AddWithValue("@NoReferensi", NoReferensi);
+                    using (SqlDataReader rs = command.ExecuteReader())
+                    {
+                        if (rs.Read())
+                        {
+                            if (!rs.IsDBNull(0) && DateTime.TryParse(rs["ETC"].ToString(), out DateTime dt))
+                                ETCval = dt.ToString("yyyy/MM/dd HH:mm:ss");
+                        }
+                    }
+                }
+            }
+
+            if (IdTemplateAktivitas != "476")
+            {
+                sqlQuery = @"
+                    SELECT
+                        SA.ETA,
+                        SA.ETA_Dinamis,
+                        CONCAT(MP.Plant, ' - ', MP.Nama_Terminal) AS Tujuan
+                    FROM SubAktivitasAnakNilaiETCETAPipa SA
+                    LEFT JOIN MasterPlant MP ON SA.idPlantTujuan = MP.IdPlant
+                    WHERE SA.NoReferensi = @NoReferensi
+                    ORDER BY id ASC;
+                ";
+
+                using (SqlCommand command = new SqlCommand(sqlQuery, sqlConnection))
+                {
+                    command.Parameters.AddWithValue("@NoReferensi", NoReferensi);
+                    command.Parameters.AddWithValue("@IdAktivitas", IdAktivitas);
+
+                    using (SqlDataReader rs = command.ExecuteReader())
+                    {
+                        while (rs.Read())
+                        {
+                            string etaStatis = "";
+                            if (!rs.IsDBNull(0) && DateTime.TryParse(rs.GetValue(0).ToString(), out DateTime dtETA))
+                                etaStatis = dtETA.ToString("yyyy/MM/dd HH:mm:ss");
+
+                            string etaDinamis = "";
+                            if (!rs.IsDBNull(1) && DateTime.TryParse(rs.GetValue(1).ToString(), out DateTime dtETAD))
+                                etaDinamis = dtETAD.ToString("yyyy/MM/dd HH:mm:ss");
+
+                            string TujuanPipa = rs.IsDBNull(2) ? "" : rs.GetValue(2).ToString();
+
+                            etaList.Add(new Dictionary<string, object>
+                            {
+                                { "ETA", etaStatis },
+                                { "ETA_Dinamis", etaDinamis },
+                                { "Tujuan", TujuanPipa }
+                            });
+                        }
+                    }
+                }
+            }
+
+            sqlQuery = @"SELECT Tanggal FROM SubAktivitasDataStartPenyaluranPipa WHERE NoReferensi = @NoReferensi;";
+            using (SqlCommand command = new SqlCommand(sqlQuery, sqlConnection))
+            {
+                command.Parameters.AddWithValue("@NoReferensi", NoReferensi);
+                using (SqlDataReader rs = command.ExecuteReader())
+                {
+                    if (rs.Read())
+                    {
+                        if (rs["Tanggal"] != null && DateTime.TryParse(rs["Tanggal"].ToString(), out DateTime startDateParsed))
+                        {
+                            startDate = startDateParsed;
+                        }
+                    }
+                }
+            }
+
+            sqlQuery = @"SELECT NoUrut FROM SubAktivitasInputDataPenyaluranKonsinyasiPipa WHERE NoReferensi = @NoReferensi;";
+            using (SqlCommand command = new SqlCommand(sqlQuery, sqlConnection))
+            {
+                command.Parameters.AddWithValue("@NoReferensi", NoReferensi);
+                using (SqlDataReader rs = command.ExecuteReader())
+                {
+                    if (rs.Read())
+                    {
+                        noUrut = rs["NoUrut"] != null ? rs["NoUrut"].ToString() : "";
+                    }
+                }
+            }
+
+            formList = new List<List<string>> {
+                new List<string> { "Nama Kegiatan", "text", "Nama_Kegiatan", $"Monitoring Penyaluran Produk {produkView}" },
+                new List<string> { "Nomor Batch", "text", "NoBatch", {noUrut} },
+                new List<string> { "Tanggal & Jam", "datetime-local", "Tanggal" },
+                new List<string> { "Density", "number", "Density" },
+                new List<string> { "Temperature", "number", "Temperature" },
+                new List<string> { "Pressure", "number", "Pressure" },
+                new List<string> { "Volume", "number", "VolumeDischarge" },
+                new List<string> { "Flowrate (KL/Jam)", "number", "Flowrate" },
+                new List<string> { "Total Penyaluran", "hiddenform", "TotalTerima" },
+                new List<string> { "Keterangan", "textarea", "Keterangan" },
+                new List<string> { Produk, "hidden", "Produk" }
+            };
+        }
+        else if (IdTemplateAktivitas == "325" || IdTemplateAktivitas == "361")
+        {
+            resultList.Clear();
+
+            string IdPenerimaan = generalList["IdPenerimaan"].ToString() ?? "";
+            string labelProduk = "";
+
+            sqlQuery = $@"
+                SELECT
+                    A.id,
+                    A.NamaBatch,
+                    A.TanggalJam,
+                    A.TanggalJamSOP,
+                    A.SelisihWaktu,
+                    A.IsQualityActive,
+                    A.NamaKegiatan,
+                    A.Produk,
+                    A.Density,
+                    A.Temperature,
+                    A.Level,
+                    A.Keterangan,
+                    A.Volume,
+                    A.Flowrate,
+                    MP.NoProduk + ' - ' + MP.NamaProduk AS Produk_disabled,
+                    A.SubAktivitasHasilPemeriksaanId
+                FROM {TableAnak} A
+                LEFT JOIN MasterProduk MP ON A.Produk = MP.NoProduk
+                WHERE A.idAktifitas = @IdAktivitas;";
+
+            using (SqlCommand command = new SqlCommand(sqlQuery, sqlConnection))
+            {
+                command.Parameters.AddWithValue("@IdAktivitas", IdAktivitas);
+                using (SqlDataReader rs = command.ExecuteReader())
+                {
+                    while (rs.Read())
+                    {
+                        Dictionary<string, object> row = new Dictionary<string, object>();
+                        for (int i = 0; i < rs.FieldCount; i++)
+                        {
+                            row[rs.GetName(i)] = rs[i] != null ? rs[i] : "";
+                        }
+                        resultList.Add(row);
+                    }
+                }
+            }
+
+            if (IdPenerimaan != "")
+            {
+                sqlQuery = @"SELECT
+                        P.KodeProduk,
+                        MP.NoProduk + ' - ' + MP.NamaProduk AS Produk_disabled,
+                        SA.tglStartBongkar
+                        FROM Penerimaan P LEFT JOIN MasterProduk MP ON P.KodeProduk = MP.NoProduk
+                        LEFT JOIN SubAktivitasDataStartPembongkaranPipa SA ON P.NomorPenerimaan = SA.NoReferensi
+                        WHERE P.IdPenerimaan = @IdPenerimaan;";
+                using (SqlCommand command = new SqlCommand(sqlQuery, sqlConnection))
+                {
+                    command.Parameters.AddWithValue("@IdPenerimaan", IdPenerimaan);
+                    using (SqlDataReader rs = command.ExecuteReader())
+                    {
+                        if (rs.Read())
+                        {
+                            Produk = rs["KodeProduk"] != null ? rs["KodeProduk"].ToString() : "";
+
+                            LabelProduk = rs["Produk_disabled"] != null ? rs["Produk_disabled"].ToString() : "";
+                            labelProduk = rs["Produk_disabled"] != null ? rs["Produk_disabled"].ToString() : "";
+
+                            if (rs["tglStartBongkar"] != null && DateTime.TryParse(rs["tglStartBongkar"].ToString(), out DateTime startDateParsed))
+                            {
+                                startDate = startDateParsed;
+                            }
+                        }
+                    }
+                }
+            }
+
+            formList = new List<List<string>> {
+                new List<string> { "Nama Kegiatan", "text", "NamaKegiatan", $"Logbook Penerimaan Produk {produkView}" },
+                new List<string> { "Tanggal & Jam SOP", "hiddenform", "TanggalJamSOP" },
+                new List<string> { "Tanggal & Jam Aktual", "hiddenform", "TanggalJam" },
+                new List<string> { "Selisih Waktu (Menit)", "hiddenform", "SelisihWaktu" },
+                new List<string> { "Quality", "select", "IsQualityActive" },
+                // new List<string> { "Density", "number", "Density" },
+                // new List<string> { "Temperature", "number", "Temperature" },
+                new List<string> { "Level", "number", "Level" },
+                new List<string> { "Volume", "number", "Volume" },
+                new List<string> { "Flowrate", "number", "Flowrate" },
+                new List<string> { "Keterangan", "textarea", "Keterangan" },
+                new List<string> { Produk, "hidden", "Produk" }
+            };
+        }
+        else if (IdTemplateAktivitas == "394")
+        {
+            resultList.Clear();
+
+            string IdPenerimaan = generalList["IdPenerimaan"].ToString() ?? "";
+            string labelProduk = "";
+
+            sqlQuery = $@"
+                SELECT
+                    A.id,
+                    A.Tanggal,
+                    A.TanggalJamSOP,
+                    A.SelisihWaktu,
+                    A.IsQualityActive,
+                    A.NamaKegiatan,
+                    A.Produk,
+                    A.Density,
+                    A.Temperature,
+                    A.Level,
+                    A.Keterangan,
+                    A.Volume,
+                    A.Flowrate,
+                    MP.NoProduk + ' - ' + MP.NamaProduk AS Produk_disabled,
+                    A.SubAktivitasFormInputHslPemeriksaanRTWId
+                FROM {TableAnak} A
+                LEFT JOIN MasterProduk MP ON A.Produk = MP.NoProduk
+                WHERE A.idAktifitas = @IdAktivitas;";
+
+            using (SqlCommand command = new SqlCommand(sqlQuery, sqlConnection))
+            {
+                command.Parameters.AddWithValue("@IdAktivitas", IdAktivitas);
+                using (SqlDataReader rs = command.ExecuteReader())
+                {
+                    while (rs.Read())
+                    {
+                        Dictionary<string, object> row = new Dictionary<string, object>();
+                        for (int i = 0; i < rs.FieldCount; i++)
+                        {
+                            row[rs.GetName(i)] = rs[i] != null ? rs[i] : "";
+                        }
+                        resultList.Add(row);
+                    }
+                }
+            }
+
+            if (IdPenerimaan != "")
+            {
+                sqlQuery = @"SELECT
+                        P.KodeProduk,
+                        MP.NoProduk + ' - ' + MP.NamaProduk AS Produk_disabled,
+                        SA.Tanggal
+                        FROM Penerimaan P LEFT JOIN MasterProduk MP ON P.KodeProduk = MP.NoProduk
+                        LEFT JOIN SubAktivitasDataStartPembongkaranRTW SA ON P.NomorPenerimaan = SA.NoReferensi
+                        WHERE P.IdPenerimaan = @IdPenerimaan;";
+                using (SqlCommand command = new SqlCommand(sqlQuery, sqlConnection))
+                {
+                    command.Parameters.AddWithValue("@IdPenerimaan", IdPenerimaan);
+                    using (SqlDataReader rs = command.ExecuteReader())
+                    {
+                        if (rs.Read())
+                        {
+                            Produk = rs["KodeProduk"] != null ? rs["KodeProduk"].ToString() : "";
+
+                            LabelProduk = rs["Produk_disabled"] != null ? rs["Produk_disabled"].ToString() : "";
+                            labelProduk = rs["Produk_disabled"] != null ? rs["Produk_disabled"].ToString() : "";
+
+                            if (rs["Tanggal"] != null && DateTime.TryParse(rs["Tanggal"].ToString(), out DateTime startDateParsed))
+                            {
+                                startDate = startDateParsed;
+                            }
+                        }
+                    }
+                }
+            }
+
+            formList = new List<List<string>> {
+                new List<string> { "Nama Kegiatan", "text", "NamaKegiatan", $"Logbook Penerimaan Produk {produkView}" },
+                new List<string> { "Tanggal & Jam SOP", "hiddenform", "TanggalJamSOP" },
+                new List<string> { "Tanggal & Jam Aktual", "hiddenform", "Tanggal" },
+                new List<string> { "Selisih Waktu (Menit)", "hiddenform", "SelisihWaktu" },
+                new List<string> { "Quality", "select", "IsQualityActive" },
+                // new List<string> { "Density", "number", "Density" },
+                // new List<string> { "Temperature", "number", "Temperature" },
+                new List<string> { "Level", "number", "Level" },
+                new List<string> { "Volume", "number", "Volume" },
+                new List<string> { "Flowrate", "number", "Flowrate" },
+                new List<string> { "Keterangan", "textarea", "Keterangan" },
+                new List<string> { Produk, "hidden", "Produk" }
+            };
+        }
+        else if (IdTemplateAktivitas == "432")
+        {
+            resultList.Clear();
+
+            string IdPenerimaan = generalList["IdPenerimaan"].ToString() ?? "";
+            string labelProduk = "";
+
+            sqlQuery = $@"
+                SELECT
+                    A.id,
+                    A.Tanggal,
+                    A.TanggalJamSOP,
+                    A.SelisihWaktu,
+                    A.IsQualityActive,
+                    A.NamaKegiatan,
+                    A.Produk,
+                    A.Level,
+                    A.Keterangan,
+                    A.Volume,
+                    A.Flowrate,
+                    MP.NoProduk + ' - ' + MP.NamaProduk AS Produk_disabled
+                FROM {TableAnak} A
+                LEFT JOIN MasterProduk MP ON A.Produk = MP.NoProduk
+                WHERE A.idAktifitas = @IdAktivitas;";
+
+            using (SqlCommand command = new SqlCommand(sqlQuery, sqlConnection))
+            {
+                command.Parameters.AddWithValue("@IdAktivitas", IdAktivitas);
+                using (SqlDataReader rs = command.ExecuteReader())
+                {
+                    while (rs.Read())
+                    {
+                        Dictionary<string, object> row = new Dictionary<string, object>();
+                        for (int i = 0; i < rs.FieldCount; i++)
+                        {
+                            row[rs.GetName(i)] = rs[i] != null ? rs[i] : "";
+                        }
+                        resultList.Add(row);
+                    }
+                }
+            }
+
+            if (IdPenerimaan != "")
+            {
+                sqlQuery = @"SELECT
+                        P.KodeProduk,
+                        MP.NoProduk + ' - ' + MP.NamaProduk AS Produk_disabled,
+                        SA.Tanggal
+                        FROM Penerimaan P LEFT JOIN MasterProduk MP ON P.KodeProduk = MP.NoProduk
+                        LEFT JOIN SubAktivitasFormInputDataStartPembongkaran SA ON P.NomorPenerimaan = SA.NoReferensi
+                        WHERE P.IdPenerimaan = @IdPenerimaan;";
+                using (SqlCommand command = new SqlCommand(sqlQuery, sqlConnection))
+                {
+                    command.Parameters.AddWithValue("@IdPenerimaan", IdPenerimaan);
+                    using (SqlDataReader rs = command.ExecuteReader())
+                    {
+                        if (rs.Read())
+                        {
+                            Produk = rs["KodeProduk"] != null ? rs["KodeProduk"].ToString() : "";
+
+                            LabelProduk = rs["Produk_disabled"] != null ? rs["Produk_disabled"].ToString() : "";
+                            labelProduk = rs["Produk_disabled"] != null ? rs["Produk_disabled"].ToString() : "";
+
+                            if (rs["Tanggal"] != null && DateTime.TryParse(rs["Tanggal"].ToString(), out DateTime startDateParsed))
+                            {
+                                startDate = startDateParsed;
+                            }
+                        }
+                    }
+                }
+            }
+
+            formList = new List<List<string>> {
+                new List<string> { "Nama Kegiatan", "text", "NamaKegiatan", $"Logbook Penerimaan Produk {produkView}" },
+                new List<string> { "Tanggal & Jam SOP", "hiddenform", "TanggalJamSOP" },
+                new List<string> { "Tanggal & Jam Aktual", "hiddenform", "Tanggal" },
+                new List<string> { "Selisih Waktu (Menit)", "hiddenform", "SelisihWaktu" },
+                new List<string> { "Quality", "select", "IsQualityActive" },
+                // new List<string> { "Density", "number", "Density" },
+                // new List<string> { "Temperature", "number", "Temperature" },
+                new List<string> { "Level", "number", "Level" },
+                new List<string> { "Volume", "number", "Volume" },
+                new List<string> { "Flowrate", "number", "Flowrate" },
+                new List<string> { "Keterangan", "textarea", "Keterangan" },
+                new List<string> { Produk, "hidden", "Produk" }
+            };
+        }
+        else if (IdTemplateAktivitas == "34" || IdTemplateAktivitas == "148" || IdTemplateAktivitas == "209" || IdTemplateAktivitas == "250")
+        {
+            resultList.Clear();
+
+            string IdPenerimaan = generalList["IdPenerimaan"].ToString() ?? "";
+            string labelProduk = "";
+
+            sqlQuery = $@"
+                SELECT
+                    A.id,
+                    A.Nama_Kapal,
+                    A.TanggalJam,
+                    A.TanggalJamSOP,
+                    A.SelisihWaktu,
+                    A.IsQualityActive,
+                    A.Nama_Kegiatan,
+                    A.Produk,
+                    A.Density,
+                    A.Temperatur,
+                    A.Keterangan,
+                    A.Level,
+                    A.Volume,
+                    A.Flowrate,
+                    MP.NoProduk + ' - ' + MP.NamaProduk AS Produk_disabled,
+                    A.SubAktivitasHasilPemeriksaanId
+                FROM {TableAnak} A
+                LEFT JOIN MasterProduk MP ON A.Produk = MP.NoProduk
+                WHERE A.idAktifitas = @IdAktivitas;";
+
+            using (SqlCommand command = new SqlCommand(sqlQuery, sqlConnection))
+            {
+                command.Parameters.AddWithValue("@IdAktivitas", IdAktivitas);
+                using (SqlDataReader rs = command.ExecuteReader())
+                {
+                    while (rs.Read())
+                    {
+                        Dictionary<string, object> row = new Dictionary<string, object>();
+                        for (int i = 0; i < rs.FieldCount; i++)
+                        {
+                            row[rs.GetName(i)] = rs[i] != null ? rs[i] : "";
+                        }
+                        resultList.Add(row);
+                    }
+                }
+            }
+
+            string tableStart = "SubaktivitasStartBongkar";
+            if (IdTemplateAktivitas == "148")
+            {
+                tableStart = "SubAktivitasStartBongkarLPG";
+            }
+            else if (IdTemplateAktivitas == "209")
+            {
+                tableStart = "SubaktivitasStartBongkarSTSPnrBBM";
+            }
+            else if (IdTemplateAktivitas == "250")
+            {
+                tableStart = "SubAktivitasStartBongkarSTSLPG";
+            }
+
+            if (IdPenerimaan != "")
+            {
+                sqlQuery = $@"SELECT
+                        P.NamaKapal,
+                        P.KodeProduk,
+                        MP.NoProduk + ' - ' + MP.NamaProduk AS Produk_disabled,
+                        SA.tglStartBongkar
+                        FROM Penerimaan P LEFT JOIN MasterProduk MP ON P.KodeProduk = MP.NoProduk
+                        LEFT JOIN {tableStart} SA ON P.NomorPenerimaan = SA.NoReferensi
+                        WHERE P.IdPenerimaan = @IdPenerimaan;";
+                using (SqlCommand command = new SqlCommand(sqlQuery, sqlConnection))
+                {
+                    command.Parameters.AddWithValue("@IdPenerimaan", IdPenerimaan);
+                    using (SqlDataReader rs = command.ExecuteReader())
+                    {
+                        if (rs.Read())
+                        {
+                            NamaKapal = rs["NamaKapal"] != null ? rs["NamaKapal"].ToString() : "";
+                            Produk = rs["KodeProduk"] != null ? rs["KodeProduk"].ToString() : "";
+
+                            LabelProduk = rs["Produk_disabled"] != null ? rs["Produk_disabled"].ToString() : "";
+                            labelProduk = rs["Produk_disabled"] != null ? rs["Produk_disabled"].ToString() : "";
+
+                            if (rs["tglStartBongkar"] != null && DateTime.TryParse(rs["tglStartBongkar"].ToString(), out DateTime startDateParsed))
+                            {
+                                startDate = startDateParsed;
+                            }
+                        }
+                    }
+                }
+            }
+
+            formList = new List<List<string>> {
+                new List<string> { "Nama Kapal", "readonly", "Nama_Kapal", NamaKapal },
+                new List<string> { "Produk", "readonly disabled", "Produk_disabled", labelProduk },
+                new List<string> { Produk, "hidden", "Produk" },
+                new List<string> { "Nama Kegiatan", "text", "Nama_Kegiatan", $"Logbook Penerimaan {NamaKapal}, Produk {labelProduk}" },
+                new List<string> { "Tanggal & Jam SOP", "hiddenform", "TanggalJamSOP" },
+                new List<string> { "Tanggal & Jam Aktual", "hiddenform", "TanggalJam" },
+                new List<string> { "Selisih Waktu (Menit)", "hiddenform", "SelisihWaktu" },
+                new List<string> { "Quality", "select", "IsQualityActive" },
+                new List<string> { "Level", "number", "Level" },
+                new List<string> { "Volume", "number", "Volume" },
+                new List<string> { "Flowrate", "number", "Flowrate" },
+                new List<string> { "Keterangan", "textarea", "Keterangan" }
+            };
+        }
+        else if (IdTemplateAktivitas == "43")
+        {
+            resultList.Clear();
+
+            sqlQuery = $@"
+                SELECT
+                    A.id,
+                    A.Nomor_Tangki,
+                    A.Produk,
+                    A.Aktivitas,
+                    A.Level_Tangki,
+                    A.Volume_KLObs,
+                    A.IdPlant,
+                    MP.NoProduk,
+                    MP.NoProduk + ' - ' + MP.NamaProduk AS Produk_disabled,
+                    MT.Sloc + ' - ' + MT.NamaTerminal AS Nomor_Tangki_disabled,
+                    MPT.Plant + ' - ' + MPT.Nama_Terminal AS IdPlant_disabled
+                FROM {TableAnak} A
+                LEFT JOIN MasterProduk MP ON A.Produk = MP.NoProduk
+                LEFT JOIN MasterTangki MT ON A.Nomor_Tangki = MT.id
+                LEFT JOIN MasterPlant MPT ON A.IdPlant = MPT.IdPlant
+                WHERE A.idAktifitas = @IdAktivitas;";
+
+            string labelProduk = "", labelTangki = "", labelPlant = "";
+            using (SqlCommand command = new SqlCommand(sqlQuery, sqlConnection))
+            {
+                command.Parameters.AddWithValue("@IdAktivitas", IdAktivitas);
+                using (SqlDataReader rs = command.ExecuteReader())
+                {
+                    while (rs.Read())
+                    {
+                        Dictionary<string, object> row = new Dictionary<string, object>();
+                        for (int i = 0; i < rs.FieldCount; i++)
+                        {
+                            row[rs.GetName(i)] = rs[i] != null ? rs[i] : "";
+
+                            if (rs.GetName(i) == "NoProduk")
+                            {
+                                Produk = rs[i] != null ? rs[i].ToString() : "";
+                            }
+                        }
+                        resultList.Add(row);
+                    }
+                }
+            }
+            sqlQuery = $@"
+                SELECT
+                    MP.NoProduk,
+                    MP.NoProduk + ' - ' + MP.NamaProduk AS Produk_disabled,
+                    MT.Sloc + ' - ' + MT.SeqTangki + ' - ' + MT.NamaTerminal AS Nomor_Tangki_disabled,
+                    MPT.Plant + ' - ' + MPT.Nama_Terminal AS IdPlant_disabled
+                FROM {TipeProses} A
+                LEFT JOIN MasterPlant MPT ON A.Plant = MPT.IdPlant
+                LEFT JOIN MasterTangki MT ON A.IdTangki = MT.id
+                LEFT JOIN MasterProduk MP ON MT.MatNo = MP.NoProduk
+                WHERE A.NomorPenimbunanPenyaluran = @NoReferensi;";
+
+            using (SqlCommand command = new SqlCommand(sqlQuery, sqlConnection))
+            {
+                command.Parameters.AddWithValue("@NoReferensi", NoReferensi);
+                using (SqlDataReader rs = command.ExecuteReader())
+                {
+                    if (rs.Read())
+                    {
+                        for (int i = 0; i < rs.FieldCount; i++)
+                        {
+                            if (rs.GetName(i) == "NoProduk")
+                            {
+                                Produk = rs[i] != null ? rs[i].ToString() : "";
+                            }
+
+                            if (labelProduk == "" && rs.GetName(i) == "Produk_disabled")
+                            {
+                                labelProduk = rs[i] != null ? rs[i].ToString() : "";
+                            }
+                            if (labelTangki == "" && rs.GetName(i) == "Nomor_Tangki_disabled")
+                            {
+                                labelTangki = rs[i] != null ? rs[i].ToString() : "";
+                            }
+                            if (labelPlant == "" && rs.GetName(i) == "IdPlant_disabled")
+                            {
+                                labelPlant = rs[i] != null ? rs[i].ToString() : "";
+                            }
+                        }
+                    }
+                }
+            }
+
+            formList = new List<List<string>> {
+                new List<string> { "Plant", "readonly disabled", "IdPlant_disabled", labelPlant },
+                new List<string> { "Tangki", "readonly disabled", "Nomor_Tangki_disabled", labelTangki },
+                new List<string> { "Produk", "readonly disabled", "Produk_disabled", labelProduk },
+                new List<string> { generalList["Plant"] != null? generalList["Plant"].ToString() : "", "hidden", "IdPlant" },
+                new List<string> { generalList["IdTangki"] != null? generalList["IdTangki"].ToString() : "", "hidden", "Nomor_Tangki" },
+                new List<string> { Produk, "hidden", "Produk" },
+                new List<string> { "Aktivitas", "text", "Aktivitas", $"Logbook Monitoring Stock {labelPlant}, {labelTangki}, {labelProduk}" },
+                new List<string> { "Level Tangki", "number", "Level_Tangki" },
+                new List<string> { "Volume KL Obs (KL)", "number", "Volume_KLObs" }
+            };
+        }
+        else if (IdTemplateAktivitas == "333")
+        {
+            resultList.Clear();
+
+            sqlQuery = $@"
+                SELECT
+                    A.id,
+                    A.Nomor_Tangki,
+                    A.Produk,
+                    A.Aktivitas,
+                    A.Level_Tangki,
+                    A.Volume_KL,
+                    A.IdPlant,
+                    A.Flowrate,
+                    MP.NoProduk,
+                    MP.NoProduk + ' - ' + MP.NamaProduk AS Produk_disabled,
+                    MT.Sloc + ' - ' + MT.SeqTangki + ' - ' + MT.NamaTerminal AS Nomor_Tangki_disabled,
+                    MPT.Plant + ' - ' + MPT.Nama_Terminal AS IdPlant_disabled
+                FROM {TableAnak} A
+                LEFT JOIN MasterProduk MP ON A.Produk = MP.NoProduk
+                LEFT JOIN MasterTangki MT ON A.Nomor_Tangki = MT.id
+                LEFT JOIN MasterPlant MPT ON A.IdPlant = MPT.IdPlant
+                WHERE A.idAktifitas = @IdAktivitas;";
+
+            string labelProduk = "", labelTangki = "", labelPlant = "";
+            using (SqlCommand command = new SqlCommand(sqlQuery, sqlConnection))
+            {
+                command.Parameters.AddWithValue("@IdAktivitas", IdAktivitas);
+                using (SqlDataReader rs = command.ExecuteReader())
+                {
+                    while (rs.Read())
+                    {
+                        Dictionary<string, object> row = new Dictionary<string, object>();
+                        for (int i = 0; i < rs.FieldCount; i++)
+                        {
+                            row[rs.GetName(i)] = rs[i] != null ? rs[i] : "";
+
+                            if (rs.GetName(i) == "NoProduk")
+                            {
+                                Produk = rs[i] != null ? rs[i].ToString() : "";
+                            }
+                        }
+                        resultList.Add(row);
+                    }
+                }
+            }
+            sqlQuery = $@"
+                SELECT
+                    MP.NoProduk,
+                    MP.NoProduk + ' - ' + MP.NamaProduk AS Produk_disabled,
+                    MT.Sloc + ' - ' + MT.SeqTangki + ' - ' + MT.NamaTerminal AS Nomor_Tangki_disabled,
+                    MPT.Plant + ' - ' + MPT.Nama_Terminal AS IdPlant_disabled
+                FROM {TipeProses} A
+                LEFT JOIN MasterPlant MPT ON A.Plant = MPT.IdPlant
+                LEFT JOIN MasterTangki MT ON A.IdTangki = MT.id
+                LEFT JOIN MasterProduk MP ON MT.MatNo = MP.NoProduk
+                WHERE A.NomorPenimbunanPenyaluran = @NoReferensi;";
+
+            using (SqlCommand command = new SqlCommand(sqlQuery, sqlConnection))
+            {
+                command.Parameters.AddWithValue("@NoReferensi", NoReferensi);
+                using (SqlDataReader rs = command.ExecuteReader())
+                {
+                    if (rs.Read())
+                    {
+                        for (int i = 0; i < rs.FieldCount; i++)
+                        {
+                            if (rs.GetName(i) == "NoProduk")
+                            {
+                                Produk = rs[i] != null ? rs[i].ToString() : "";
+                            }
+
+                            if (labelProduk == "" && rs.GetName(i) == "Produk_disabled")
+                            {
+                                labelProduk = rs[i] != null ? rs[i].ToString() : "";
+                            }
+                            if (labelTangki == "" && rs.GetName(i) == "Nomor_Tangki_disabled")
+                            {
+                                labelTangki = rs[i] != null ? rs[i].ToString() : "";
+                            }
+                            if (labelPlant == "" && rs.GetName(i) == "IdPlant_disabled")
+                            {
+                                labelPlant = rs[i] != null ? rs[i].ToString() : "";
+                            }
+                        }
+                    }
+                }
+            }
+
+            formList = new List<List<string>> {
+                new List<string> { "Plant", "readonly disabled", "IdPlant_disabled", labelPlant },
+                new List<string> { "Tangki", "readonly disabled", "Nomor_Tangki_disabled", labelTangki },
+                new List<string> { "Produk", "readonly disabled", "Produk_disabled", labelProduk },
+                new List<string> { generalList["Plant"] != null? generalList["Plant"].ToString() : "", "hidden", "IdPlant" },
+                new List<string> { generalList["IdTangki"] != null? generalList["IdTangki"].ToString() : "", "hidden", "Nomor_Tangki" },
+                new List<string> { Produk, "hidden", "Produk" },
+                new List<string> { "Aktivitas", "text", "Aktivitas", $"Logbook Monitoring Stock {labelPlant}, {labelTangki}, {labelProduk}" },
+                new List<string> { "Level Tangki", "number", "Level_Tangki" },
+                new List<string> { "Volume KL", "number", "Volume_KL" },
+                new List<string> { "Flowrate", "number", "Flowrate" }
+            };
+        }
+        else if (IdTemplateAktivitas == "51" || IdTemplateAktivitas == "247")
+        {
+            formList = new List<List<string>> {
+                new List<string> { "Stock Awal (KL)", "number", "StockAwal" },
+                new List<string> { "Penerimaan (KL)", "number", "Penerimaan" },
+                new List<string> { "Penyaluran (KL)", "number", "Penyaluran" },
+                new List<string> { "Stock Akhir (KL)", "number", "StockAkhir" },
+                new List<string> { "Working Loss/Gain", "readonly", "WorkingLoss" },
+                new List<string> { "Persentase Working Loss/Gain", "readonly", "Presentase" },
+            };
+        }
+        else if (IdTemplateAktivitas == "56")
+        {
+            tangkiList.Clear();
+            resultList.Clear();
+
+            string IdPlant = generalList["IdPlant"] != null ? generalList["IdPlant"].ToString() : "";
+
+            sqlQuery = $@"
+                SELECT
+                    A.id,
+                    A.LO,
+                    A.NomorTangki,
+                    A.NomorTangki2,
+                    A.Produk,
+                    A.MeterAwal,
+                    A.MeterAkhir,
+                    A.Volume,
+                    A.BayNumber,
+                    A.NoMeter,
+                    A.NomorKompartment,
+                    A.InLineBlending,
+                    MT.Sloc,
+                    MT.SeqTangki,
+                    MT.NamaTerminal,
+                    MT2.Sloc AS Sloc2,
+                    MT2.SeqTangki AS SeqTangki2,
+                    MT2.NamaTerminal AS NamaTerminal2,
+                    MP.NoProduk,
+                    MP.NamaProduk,
+                    MP.NoProduk + ' - ' + MP.NamaProduk AS Produk_disabled
+                FROM {TableAnak} A
+                LEFT JOIN MasterProduk MP ON A.Produk = MP.NoProduk
+                LEFT JOIN MasterTangki MT ON A.NomorTangki = MT.id
+                LEFT JOIN MasterTangki MT2 ON A.NomorTangki2 = MT2.id
+                WHERE A.idAktifitas = @IdAktivitas;";
+
+            using (SqlCommand command = new SqlCommand(sqlQuery, sqlConnection))
+            {
+                command.Parameters.AddWithValue("@IdAktivitas", IdAktivitas);
+                using (SqlDataReader rs = command.ExecuteReader())
+                {
+                    while (rs.Read())
+                    {
+                        Dictionary<string, object> row = new Dictionary<string, object>();
+                        for (int i = 0; i < rs.FieldCount; i++)
+                        {
+                            row[rs.GetName(i)] = rs[i] != null ? rs[i] : "";
+                        }
+                        resultList.Add(row);
+                    }
+                }
+            }
+
+            sqlQuery = @"SELECT
+                            MT.id,
+                            MT.NamaTerminal,
+                            MT.Plant,
+                            MT.Sloc,
+                            MT.MatNo,
+                            MT.SeqTangki,
+                            MP.NamaProduk
+                        FROM MasterTangki MT
+                        LEFT JOIN MasterProduk MP ON MT.MatNo = MP.NoProduk
+                        WHERE MT.Status = 'OPERASI' AND MT.Plant = (
+                            SELECT TOP 1 MPL.Plant FROM MasterPlant MPL
+                            WHERE MPL.IdPlant = (
+                                SELECT TOP 1 P.IdPlant FROM Penyaluran P
+                                WHERE P.NomorPenyaluran = @NoReferensi
+                            )
+                        );
+                        ";
+            using (SqlCommand command = new SqlCommand(sqlQuery, sqlConnection))
+            {
+                command.Parameters.AddWithValue("@NoReferensi", NoReferensi);
+                using (SqlDataReader rs = command.ExecuteReader())
+                {
+                    while (rs.Read())
+                    {
+                        Dictionary<string, object> row = new Dictionary<string, object>();
+                        for (int i = 0; i < rs.FieldCount; i++)
+                        {
+                            row[rs.GetName(i)] = rs[i] != null ? rs[i] : "";
+                        }
+                        tangkiList.Add(row);
+                    }
+                }
+            }
+
+            formList = new List<List<string>> {
+                new List<string> { "Tangki", "select", "NomorTangki" },
+                new List<string> { "In Line Blending", "checkbox", "InLineBlending" },
+                new List<string> { "Tangki 2", "select", "NomorTangki2", "", "d-none" },
+                new List<string> { "Produk", "select", "Produk" },
+                new List<string> { "LO", "number", "LO" },
+                new List<string> { "Bay Number", "number", "BayNumber" },
+                new List<string> { "No Meter", "number", "NoMeter" },
+                new List<string> { "Volume (KL)", "number", "Volume" },
+                new List<string> { "Meter Awal", "number", "MeterAwal" },
+                new List<string> { "Meter Akhir", "number", "MeterAkhir" },
+                new List<string> { "Nomor Kompartment", "number", "NomorKompartment" }
+            };
+        }
+        else if (IdTemplateAktivitas == "70" || IdTemplateAktivitas == "71" || IdTemplateAktivitas == "335" || IdTemplateAktivitas == "337")
+        {
+            formList = new List<List<string>> {
+                new List<string> { "Produk", "select", "Produk" },
+                new List<string> { "Shift 1", "number", "Shift1" },
+                new List<string> { "Shift 2", "number", "Shift2" },
+                new List<string> { "Shift 3", "number", "Shift3" },
+                new List<string> { "Shift 4", "number", "Shift4" },
+                new List<string> { "Total", "number", "Total" }
+            };
+        }
+        else if (IdTemplateAktivitas == "89" || IdTemplateAktivitas == "106" || IdTemplateAktivitas == "170" || IdTemplateAktivitas == "236")
+        {
+            switch (IdTemplateAktivitas)
+            {
+                case "89" or "106":
+                    sqlQuery = $@"SELECT TOP 1
+                            SA.NamaKapal,
+                            SA.JenisProduk,
+                            MP.NoProduk + ' - ' + MP.NamaProduk AS produk_view
+                        FROM SubAktivitasInputDataKapal SA
+                        LEFT JOIN MasterProduk MP ON SA.JenisProduk = MP.NoProduk
+                        WHERE NoReferensi = @NoReferensi;";
+                    break;
+                case "170":
+                    sqlQuery = $@"SELECT TOP 1
+                            SA.NamaKapal,
+                            SA.JenisProduk,
+                            MP.NoProduk + ' - ' + MP.NamaProduk AS produk_view
+                        FROM SubAktivitasInputDataKapalLPG SA
+                        LEFT JOIN MasterProduk MP ON SA.JenisProduk = MP.NoProduk
+                        WHERE NoReferensi = @NoReferensi;";
+                    break;
+                case "236":
+                    sqlQuery = $@"SELECT TOP 1
+                            SA.NamaKapal,
+                            SA.JenisProduk,
+                            MP.NoProduk + ' - ' + MP.NamaProduk AS produk_view
+                        FROM SubAktivitasInputDataKapalSTSPyrBBM SA
+                        LEFT JOIN MasterProduk MP ON SA.JenisProduk = MP.NoProduk
+                        WHERE NoReferensi = @NoReferensi;";
+                    break;
+            }
+            using (SqlCommand command = new SqlCommand(sqlQuery, sqlConnection))
+            {
+                command.Parameters.AddWithValue("@NoReferensi", NoReferensi);
+                using (SqlDataReader rs = command.ExecuteReader())
+                {
+                    if (rs.Read())
+                    {
+                        NamaKapal = rs["NamaKapal"] != null ? rs["NamaKapal"].ToString() : "";
+                        Produk = rs["JenisProduk"] != null ? rs["JenisProduk"].ToString() : "";
+                        produkView = rs["produk_view"] != null ? rs["produk_view"].ToString() : "";
+                    }
+                }
+            }
+
+            formList = new List<List<string>> {
+                new List<string> { "Nama Kegiatan", "text", "NamaKegiatan", $"Monitoring Penyaluran {NamaKapal} Produk {produkView}" },
+                new List<string> { "Tanggal", "datetime-local", "Tanggal" },
+                new List<string> { "Density", "number", "Density" },
+                new List<string> { "Temperature", "number", "Temperature" },
+                new List<string> { "Pressure", "number", "Pressure" },
+                new List<string> { "Keterangan", "textarea", "Keterangan" },
+                new List<string> { NamaKapal, "hidden", "NamaKapal" },
+                new List<string> { Produk, "hidden", "Produk" }
+            };
+        }
+        else if (IdTemplateAktivitas == "114" || IdTemplateAktivitas == "155")
+        {
+            resultList.Clear();
+
+            string labelProduk = "";
+
+            sqlQuery = $@"
+                SELECT
+                    A.id,
+                    A.Nama_Kapal,
+                    A.Tanggal,
+                    A.Nama_Kegiatan,
+                    A.Produk,
+                    A.Density,
+                    A.Temperatur,
+                    A.Keterangan,
+                    MP.NoProduk + ' - ' + MP.NamaProduk AS Produk_disabled,
+                    A.SubAktivitasHasilPemeriksaanId
+                FROM {TableAnak} A
+                LEFT JOIN MasterProduk MP ON A.Produk = MP.NoProduk
+                WHERE A.idAktifitas = @IdAktivitas;";
+
+            using (SqlCommand command = new SqlCommand(sqlQuery, sqlConnection))
+            {
+                command.Parameters.AddWithValue("@IdAktivitas", IdAktivitas);
+                using (SqlDataReader rs = command.ExecuteReader())
+                {
+                    while (rs.Read())
+                    {
+                        Dictionary<string, object> row = new Dictionary<string, object>();
+                        for (int i = 0; i < rs.FieldCount; i++)
+                        {
+                            row[rs.GetName(i)] = rs[i] != null ? rs[i] : "";
+                        }
+                        resultList.Add(row);
+                    }
+                }
+            }
+
+            if (IdTemplateAktivitas == "114")
+            {
+                sqlQuery = $@"
+                SELECT
+                    A.NamaKapal,
+                    A.JenisProduk,
+                    MP.NoProduk,
+                    MP.NamaProduk,
+                    MP.NoProduk + ' - ' + MP.NamaProduk AS Produk_disabled
+                FROM SubAktivitasInputDataKapal A
+                LEFT JOIN MasterProduk MP ON A.JenisProduk = MP.NoProduk
+                WHERE A.NoReferensi = (
+                    SELECT TOP 1 NoPenyaluran FROM PenimbunanPenyaluran
+                    WHERE NomorPenimbunanPenyaluran = @NoReferensi
+                );";
+            }
+            else if (IdTemplateAktivitas == "155")
+            {
+                sqlQuery = $@"
+               SELECT
+                    A.NamaKapal,
+                    A.JenisProduk,
+                    MP.NoProduk,
+                    MP.NamaProduk,
+                    MP.NoProduk + ' - ' + MP.NamaProduk AS Produk_disabled
+                FROM SubAktivitasInputDataKapalLPG A
+                LEFT JOIN MasterProduk MP ON A.JenisProduk = MP.NoProduk
+                WHERE A.NoReferensi = (
+                    SELECT TOP 1 NoPenyaluran FROM PenimbunanPenyaluran
+                    WHERE NomorPenimbunanPenyaluran = @NoReferensi
+                );";
+            }
+            else if (IdTemplateAktivitas == "222" || IdTemplateAktivitas == "281")
+            {
+                sqlQuery = $@"
+                    SELECT
+                    A.NamaKapal,
+                    A.JenisProduk,
+                    MP.NoProduk,
+                    MP.NamaProduk,
+                    MP.NoProduk + ' - ' + MP.NamaProduk AS Produk_disabled
+                FROM Penyaluran A
+                LEFT JOIN MasterProduk MP ON A.JenisProduk = MP.NoProduk
+                WHERE A.NomorPenyaluran = (
+                    SELECT TOP 1 NoPenyaluran FROM PenimbunanPenyaluran
+                    WHERE NomorPenimbunanPenyaluran = @NoReferensi
+                );";
+            }
+
+            using (SqlCommand command = new SqlCommand(sqlQuery, sqlConnection))
+            {
+                command.Parameters.AddWithValue("@NoReferensi", NoReferensi);
+                using (SqlDataReader rs = command.ExecuteReader())
+                {
+                    if (rs.Read())
+                    {
+                        Produk = rs["NoProduk"] != null ? rs["NoProduk"].ToString() : "";
+                        labelProduk = rs["NamaProduk"] != null ? rs["NamaProduk"].ToString() : "";
+                        NamaKapal = rs["NamaKapal"] != null ? rs["NamaKapal"].ToString() : "";
+                        produkView = rs["Produk_disabled"] != null ? rs["Produk_disabled"].ToString() : "";
+                    }
+                }
+            }
+
+            formList = new List<List<string>> {
+                new List<string> { "Nama Kegiatan", "text", "Nama_Kegiatan", $"Logbook Penyaluran Kapal {NamaKapal}, Produk {produkView}" },
+                new List<string> { "Nama Kapal", "text", "Nama_Kapal", NamaKapal },
+                new List<string> { "Produk", "readonly disabled", "Produk_disabled", labelProduk },
+                new List<string> { Produk, "hidden", "Produk" },
+                new List<string> { "Tanggal", "datetime-local", "Tanggal" },
+                new List<string> { "Density", "number", "Density" },
+                new List<string> { "Temperature", "number", "Temperatur" },
+                new List<string> { "Keterangan", "textarea", "Keterangan" }
+            };
+        }
+        else if (IdTemplateAktivitas == "340")
+        {
+            resultList.Clear();
+
+            string labelProduk = "";
+
+            sqlQuery = $@"
+                SELECT
+                    A.id,
+                    A.NamaBatch,
+                    A.TanggalJam,
+                    A.NamaKegiatan,
+                    A.Produk,
+                    A.Density,
+                    A.Temperature,
+                    A.Keterangan,
+                    MP.NoProduk + ' - ' + MP.NamaProduk AS Produk_disabled
+                FROM {TableAnak} A
+                LEFT JOIN MasterProduk MP ON A.Produk = MP.NoProduk
+                WHERE A.idAktifitas = @IdAktivitas;";
+
+            using (SqlCommand command = new SqlCommand(sqlQuery, sqlConnection))
+            {
+                command.Parameters.AddWithValue("@IdAktivitas", IdAktivitas);
+                using (SqlDataReader rs = command.ExecuteReader())
+                {
+                    while (rs.Read())
+                    {
+                        Dictionary<string, object> row = new Dictionary<string, object>();
+                        for (int i = 0; i < rs.FieldCount; i++)
+                        {
+                            row[rs.GetName(i)] = rs[i] != null ? rs[i] : "";
+                        }
+                        resultList.Add(row);
+                    }
+                }
+            }
+
+            sqlQuery = $@"
+            SELECT
+                A.JenisProduk,
+                MP.NoProduk,
+                MP.NamaProduk,
+                MP.NoProduk + ' - ' + MP.NamaProduk AS Produk_disabled
+            FROM Penyaluran A
+            LEFT JOIN MasterProduk MP ON A.JenisProduk = MP.NoProduk
+            WHERE A.NomorPenyaluran = (
+                SELECT TOP 1 NoPenyaluran FROM PenimbunanPenyaluran
+                WHERE NomorPenimbunanPenyaluran = @NoReferensi
+            );";
+
+            using (SqlCommand command = new SqlCommand(sqlQuery, sqlConnection))
+            {
+                command.Parameters.AddWithValue("@NoReferensi", NoReferensi);
+                using (SqlDataReader rs = command.ExecuteReader())
+                {
+                    if (rs.Read())
+                    {
+                        Produk = rs["NoProduk"] != null ? rs["NoProduk"].ToString() : "";
+                        labelProduk = rs["NamaProduk"] != null ? rs["NamaProduk"].ToString() : "";
+                        produkView = rs["Produk_disabled"] != null ? rs["Produk_disabled"].ToString() : "";
+                    }
+                }
+            }
+
+            formList = new List<List<string>> {
+                new List<string> { "Nama Kegiatan", "text", "NamaKegiatan", $"Logbook Penyaluran Produk {produkView}" },
+                new List<string> { "Nomor Batch", "text", "NamaBatch" },
+                new List<string> { "Produk", "readonly disabled", "Produk_disabled", produkView },
+                new List<string> { Produk, "hidden", "Produk" },
+                new List<string> { "Tanggal & Jam", "datetime-local", "TanggalJam" },
+                new List<string> { "Density", "number", "Density" },
+                new List<string> { "Temperature", "number", "Temperature" },
+                new List<string> { "Keterangan", "textarea", "Keterangan" }
+            };
+        }
+        else if (IdTemplateAktivitas == "222" || IdTemplateAktivitas == "281")
+        {
+            resultList.Clear();
+
+            // string IdPenerimaan = generalList["IdPenerimaan"].ToString()?? "";
+            string labelProduk = "";
+
+            sqlQuery = $@"
+                SELECT
+                    A.id,
+                    A.Nama_Kapal,
+                    A.Tanggal,
+                    A.Nama_Kegiatan,
+                    A.Produk,
+                    A.Density,
+                    A.Temperatur,
+                    A.Keterangan,
+                    MP.NoProduk + ' - ' + MP.NamaProduk AS Produk_disabled,
+                    A.SubAktivitasHasilPemeriksaanId
+                FROM {TableAnak} A
+                LEFT JOIN MasterProduk MP ON A.Produk = MP.NoProduk
+                WHERE A.idAktifitas = @IdAktivitas;";
+
+            using (SqlCommand command = new SqlCommand(sqlQuery, sqlConnection))
+            {
+                command.Parameters.AddWithValue("@IdAktivitas", IdAktivitas);
+                using (SqlDataReader rs = command.ExecuteReader())
+                {
+                    while (rs.Read())
+                    {
+                        Dictionary<string, object> row = new Dictionary<string, object>();
+                        for (int i = 0; i < rs.FieldCount; i++)
+                        {
+                            row[rs.GetName(i)] = rs[i] != null ? rs[i] : "";
+                        }
+                        resultList.Add(row);
+                    }
+                }
+            }
+
+            sqlQuery = $@"
+                    SELECT
+                    A.NamaKapal,
+                    A.JenisProduk,
+                    MP.NoProduk,
+                    MP.NamaProduk,
+                    MP.NoProduk + ' - ' + MP.NamaProduk AS Produk_disabled
+                FROM Penyaluran A
+                LEFT JOIN MasterProduk MP ON A.JenisProduk = MP.NoProduk
+                WHERE A.NomorPenyaluran = (
+                    SELECT TOP 1 NoPenyaluran FROM PenimbunanPenyaluran
+                    WHERE NomorPenimbunanPenyaluran = @NoReferensi
+                );";
+
+            using (SqlCommand command = new SqlCommand(sqlQuery, sqlConnection))
+            {
+                command.Parameters.AddWithValue("@NoReferensi", NoReferensi);
+                using (SqlDataReader rs = command.ExecuteReader())
+                {
+                    if (rs.Read())
+                    {
+                        Produk = rs["NoProduk"] != null ? rs["NoProduk"].ToString() : "";
+                        labelProduk = rs["NamaProduk"] != null ? rs["NamaProduk"].ToString() : "";
+                        NamaKapal = rs["NamaKapal"] != null ? rs["NamaKapal"].ToString() : "";
+                        produkView = rs["Produk_disabled"] != null ? rs["Produk_disabled"].ToString() : "";
+                    }
+                }
+            }
+
+
+            formList = new List<List<string>> {
+                new List<string> { "Nama Kegiatan", "text", "Nama_Kegiatan", $"Logbook Penyaluran Kapal {NamaKapal}, Produk {produkView}" },
+                new List<string> { "Nama Kapal", "readonly disabled", "Nama_Kapal", NamaKapal },
+                new List<string> { "Produk", "readonly disabled", "Produk_disabled", produkView },
+                new List<string> { Produk, "hidden", "Produk" },
+                new List<string> { "Tanggal", "datetime-local", "Tanggal" },
+                new List<string> { "Density", "number", "Density" },
+                new List<string> { "Temperature", "number", "Temperatur" },
+                new List<string> { "Keterangan", "textarea", "Keterangan" }
+            };
+        }
+        else if (IdTemplateAktivitas == "179")
+        {
+            tangkiList.Clear();
+            resultList.Clear();
+
+            string IdPlant = generalList["IdPlant"] != null ? generalList["IdPlant"].ToString() : "";
+
+            sqlQuery = $@"
+                SELECT
+                    A.id,
+                    A.NomorTangki,
+                    A.Produk,
+                    A.SPA,
+                    A.MeterAwal,
+                    A.MeterAkhir,
+                    A.Quantity,
+                    A.BayNumber,
+                    A.PresentaseLevelRotoGauge,
+                    MT.Sloc,
+                    MT.SeqTangki,
+                    MT.NamaTerminal,
+                    MP.NoProduk + ' - ' + MP.NamaProduk AS Produk_disabled
+                FROM {TableAnak} A
+                LEFT JOIN MasterProduk MP ON A.Produk = MP.NoProduk
+                LEFT JOIN MasterTangki MT ON A.NomorTangki = MT.id
+                WHERE A.idAktifitas = @IdAktivitas;";
+
+            using (SqlCommand command = new SqlCommand(sqlQuery, sqlConnection))
+            {
+                command.Parameters.AddWithValue("@IdAktivitas", IdAktivitas);
+                using (SqlDataReader rs = command.ExecuteReader())
+                {
+                    while (rs.Read())
+                    {
+                        Dictionary<string, object> row = new Dictionary<string, object>();
+                        for (int i = 0; i < rs.FieldCount; i++)
+                        {
+                            row[rs.GetName(i)] = rs[i] != null ? rs[i] : "";
+                        }
+                        resultList.Add(row);
+                    }
+                }
+            }
+
+            sqlQuery = @"SELECT
+                            MT.id,
+                            MT.NamaTerminal,
+                            MT.Plant,
+                            MT.Sloc,
+                            MT.MatNo,
+                            MT.SeqTangki,
+                            MP.NamaProduk
+                        FROM MasterTangki MT
+                        LEFT JOIN MasterProduk MP ON MT.MatNo = MP.NoProduk
+                        WHERE MT.Status = 'OPERASI' AND MT.Plant = (
+                            SELECT TOP 1 MPL.Plant FROM MasterPlant MPL
+                            WHERE MPL.IdPlant = (
+                                SELECT TOP 1 P.IdPlant FROM Penyaluran P
+                                WHERE P.NomorPenyaluran = @NoReferensi
+                            )
+                        );
+                        ";
+            using (SqlCommand command = new SqlCommand(sqlQuery, sqlConnection))
+            {
+                command.Parameters.AddWithValue("@NoReferensi", NoReferensi);
+                using (SqlDataReader rs = command.ExecuteReader())
+                {
+                    while (rs.Read())
+                    {
+                        Dictionary<string, object> row = new Dictionary<string, object>();
+                        for (int i = 0; i < rs.FieldCount; i++)
+                        {
+                            row[rs.GetName(i)] = rs[i] != null ? rs[i] : "";
+                        }
+                        tangkiList.Add(row);
+                    }
+                }
+            }
+
+            formList = new List<List<string>> {
+                new List<string> { "Tangki", "select", "NomorTangki" },
+                new List<string> { "Produk", "readonly", "Produk_disabled" },
+                new List<string> { "Produk", "select", "ProdukAll", "", "d-none" },
+                new List<string> { "SPA/LO", "number", "SPA" },
+                new List<string> { "Bay Number", "number", "BayNumber" },
+                new List<string> { "Quantity", "number", "Quantity" },
+                new List<string> { "Meter Awal", "number", "MeterAwal" },
+                new List<string> { "Meter Akhir", "number", "MeterAkhir" },
+                new List<string> { "% Level / Roto Gauge", "number", "PresentaseLevelRotoGauge" },
+                new List<string> { Produk, "hidden", "Produk" }
+            };
+        }
+        else if (IdTemplateAktivitas == "180")
+        {
+            tangkiList.Clear();
+            resultList.Clear();
+
+            string IdPlant = generalList["IdPlant"] != null ? generalList["IdPlant"].ToString() : "";
+
+            sqlQuery = $@"
+                SELECT
+                    A.id,
+                    A.NomorTangki,
+                    A.Produk,
+                    A.SPA,
+                    A.TimbanganAwal,
+                    A.TimbanganAkhir,
+                    A.NetWight,
+                    A.PresentaseLevelRotoGauge,
+                    MT.Sloc,
+                    MT.SeqTangki,
+                    MT.NamaTerminal,
+                    MP.NoProduk + ' - ' + MP.NamaProduk AS Produk_disabled
+                FROM {TableAnak} A
+                LEFT JOIN MasterProduk MP ON A.Produk = MP.NoProduk
+                LEFT JOIN MasterTangki MT ON A.NomorTangki = MT.id
+                WHERE A.idAktifitas = @IdAktivitas;";
+
+            using (SqlCommand command = new SqlCommand(sqlQuery, sqlConnection))
+            {
+                command.Parameters.AddWithValue("@IdAktivitas", IdAktivitas);
+                using (SqlDataReader rs = command.ExecuteReader())
+                {
+                    while (rs.Read())
+                    {
+                        Dictionary<string, object> row = new Dictionary<string, object>();
+                        for (int i = 0; i < rs.FieldCount; i++)
+                        {
+                            row[rs.GetName(i)] = rs[i] != null ? rs[i] : "";
+                        }
+                        resultList.Add(row);
+                    }
+                }
+            }
+
+            sqlQuery = @"SELECT
+                            MT.id,
+                            MT.NamaTerminal,
+                            MT.Plant,
+                            MT.Sloc,
+                            MT.MatNo,
+                            MT.SeqTangki,
+                            MP.NamaProduk
+                        FROM MasterTangki MT
+                        LEFT JOIN MasterProduk MP ON MT.MatNo = MP.NoProduk
+                        WHERE MT.Status = 'OPERASI' AND MT.Plant = (
+                            SELECT TOP 1 MPL.Plant FROM MasterPlant MPL
+                            WHERE MPL.IdPlant = (
+                                SELECT TOP 1 P.IdPlant FROM Penyaluran P
+                                WHERE P.NomorPenyaluran = @NoReferensi
+                            )
+                        );
+                        ";
+            using (SqlCommand command = new SqlCommand(sqlQuery, sqlConnection))
+            {
+                command.Parameters.AddWithValue("@NoReferensi", NoReferensi);
+                using (SqlDataReader rs = command.ExecuteReader())
+                {
+                    while (rs.Read())
+                    {
+                        Dictionary<string, object> row = new Dictionary<string, object>();
+                        for (int i = 0; i < rs.FieldCount; i++)
+                        {
+                            row[rs.GetName(i)] = rs[i] != null ? rs[i] : "";
+                        }
+                        tangkiList.Add(row);
+                    }
+                }
+            }
+
+            formList = new List<List<string>> {
+                new List<string> { "Tangki", "select", "NomorTangki" },
+                new List<string> { "Produk", "readonly", "Produk_disabled" },
+                new List<string> { "Produk", "select", "ProdukAll", "", "d-none" },
+                new List<string> { "SPA/LO", "number", "SPA" },
+                new List<string> { "Timbangan Awal", "number", "TimbanganAwal" },
+                new List<string> { "Timbangan Akhir", "number", "TimbanganAkhir" },
+                new List<string> { "Net Weight", "number", "NetWight" },
+                new List<string> { "% Level / Roto Gauge", "number", "PresentaseLevelRotoGauge" },
+                new List<string> { Produk, "hidden", "Produk" }
+            };
+        }
+        else if (IdTemplateAktivitas == "218" || IdTemplateAktivitas == "259")
+        {
+            resultList.Clear();
+
+            sqlQuery = $@"
+                SELECT
+                    A.id,
+                    A.NomorTangki,
+                    A.Produk,
+                    A.Aktivitas,
+                    A.QuantityAwal,
+                    A.TanggalQuantityAwal,
+                    A.QuantityAkhir,
+                    A.TanggalQuantityAkhir,
+                    A.Flowrate,
+                    A.Keterangan,
+                    MP.NoProduk,
+                    MP.NoProduk + ' - ' + MP.NamaProduk AS Produk_disabled,
+                    MT.Sloc + ' - ' + MT.NamaTerminal AS Nomor_Tangki_disabled
+                FROM {TableAnak} A
+                LEFT JOIN MasterProduk MP ON A.Produk = MP.NoProduk
+                LEFT JOIN MasterTangki MT ON A.NomorTangki = MT.id
+                WHERE A.idAktifitas = @IdAktivitas;";
+
+            string labelProduk = "", labelTangki = "", labelPlant = "";
+            using (SqlCommand command = new SqlCommand(sqlQuery, sqlConnection))
+            {
+                command.Parameters.AddWithValue("@IdAktivitas", IdAktivitas);
+                using (SqlDataReader rs = command.ExecuteReader())
+                {
+                    while (rs.Read())
+                    {
+                        Dictionary<string, object> row = new Dictionary<string, object>();
+                        for (int i = 0; i < rs.FieldCount; i++)
+                        {
+                            row[rs.GetName(i)] = rs[i] != null ? rs[i] : "";
+
+                            if (rs.GetName(i) == "NoProduk")
+                            {
+                                Produk = rs[i] != null ? rs[i].ToString() : "";
+                            }
+                        }
+                        resultList.Add(row);
+                    }
+                }
+            }
+            sqlQuery = $@"
+                SELECT
+                    MP.NoProduk,
+                    MP.NoProduk + ' - ' + MP.NamaProduk AS Produk_disabled,
+                    MT.Sloc + ' - ' + MT.NamaTerminal AS Nomor_Tangki_disabled
+                FROM {TipeProses} A
+                LEFT JOIN MasterTangki MT ON A.IdTangki = MT.id
+                LEFT JOIN MasterProduk MP ON MT.MatNo = MP.NoProduk
+                WHERE A.NomorPenimbunanPenyaluran = @NoReferensi;";
+
+            using (SqlCommand command = new SqlCommand(sqlQuery, sqlConnection))
+            {
+                command.Parameters.AddWithValue("@NoReferensi", NoReferensi);
+                using (SqlDataReader rs = command.ExecuteReader())
+                {
+                    if (rs.Read())
+                    {
+                        for (int i = 0; i < rs.FieldCount; i++)
+                        {
+                            if (rs.GetName(i) == "NoProduk")
+                            {
+                                Produk = rs[i] != null ? rs[i].ToString() : "";
+                            }
+
+                            if (labelProduk == "" && rs.GetName(i) == "Produk_disabled")
+                            {
+                                labelProduk = rs[i] != null ? rs[i].ToString() : "";
+                            }
+                            if (labelTangki == "" && rs.GetName(i) == "Nomor_Tangki_disabled")
+                            {
+                                labelTangki = rs[i] != null ? rs[i].ToString() : "";
+                            }
+                        }
+                    }
+                }
+            }
+
+            formList = new List<List<string>> {
+                new List<string> { "Tangki", "readonly disabled", "Nomor_Tangki_disabled", labelTangki },
+                new List<string> { "Produk", "select", "Produk" },
+                new List<string> { generalList["IdTangki"] != null? generalList["IdTangki"].ToString() : "", "hidden", "NomorTangki" },
+                new List<string> { "Aktivitas", "text", "Aktivitas", $"Logbook Monitoring Stock {labelTangki}" },
+                new List<string> { "Quantity Awal", "number", "QuantityAwal" },
+                new List<string> { "Tanggal Quantity Awal", "datetime-local", "TanggalQuantityAwal" },
+                new List<string> { "Quantity Akhir", "number", "QuantityAkhir" },
+                new List<string> { "Tanggal Quantity Akhir", "datetime-local", "TanggalQuantityAkhir" },
+                new List<string> { "Flowrate", "number", "Flowrate" },
+                new List<string> { "Keterangan", "textarea", "Keterangan" }
+            };
+        }
+        else if (IdTemplateAktivitas == "345")
+        {
+            resultList.Clear();
+
+            string IdPlant = generalList["IdPlant"] != null ? generalList["IdPlant"].ToString() : "";
+
+            sqlQuery = $@"
+                SELECT
+                    A.id,
+                    A.TanggalJam,
+                    A.RencanaPenyaluran,
+                    MP.NoProduk,
+                    MP.NamaProduk,
+                    MP.NoProduk + ' - ' + MP.NamaProduk AS Produk_disabled
+                FROM {TableAnak} A
+                LEFT JOIN MasterProduk MP ON A.Produk = MP.NoProduk
+                WHERE A.idAktifitas = @IdAktivitas;";
+
+            using (SqlCommand command = new SqlCommand(sqlQuery, sqlConnection))
+            {
+                command.Parameters.AddWithValue("@IdAktivitas", IdAktivitas);
+                using (SqlDataReader rs = command.ExecuteReader())
+                {
+                    while (rs.Read())
+                    {
+                        Dictionary<string, object> row = new Dictionary<string, object>();
+                        for (int i = 0; i < rs.FieldCount; i++)
+                        {
+                            row[rs.GetName(i)] = rs[i] != null ? rs[i] : "";
+                        }
+                        resultList.Add(row);
+                    }
+                }
+            }
+
+            formList = new List<List<string>> {
+                new List<string> { "Produk", "select", "Produk" },
+                new List<string> { "Tanggal & Jam", "datetime-local", "TanggalJam" },
+                new List<string> { "Rencana Penyaluran", "text", "RencanaPenyaluran" }
+            };
+        }
+        else if (IdTemplateAktivitas == "347")
+        {
+            tangkiList.Clear();
+            resultList.Clear();
+
+            string IdPlant = generalList["IdPlant"] != null ? generalList["IdPlant"].ToString() : "";
+
+            sqlQuery = $@"
+                SELECT
+                    A.id,
+                    A.NomorTangki,
+                    A.Produk,
+                    A.Tanggal,
+                    A.LO,
+                    A.MeterAwal,
+                    A.Quantity,
+                    MT.Sloc,
+                    MT.SeqTangki,
+                    MT.NamaTerminal,
+                    MP.NoProduk,
+                    MP.NamaProduk,
+                    MP.NoProduk + ' - ' + MP.NamaProduk AS Produk_disabled
+                FROM {TableAnak} A
+                LEFT JOIN MasterProduk MP ON A.Produk = MP.NoProduk
+                LEFT JOIN MasterTangki MT ON A.NomorTangki = MT.id
+                WHERE A.idAktifitas = @IdAktivitas;";
+
+            using (SqlCommand command = new SqlCommand(sqlQuery, sqlConnection))
+            {
+                command.Parameters.AddWithValue("@IdAktivitas", IdAktivitas);
+                using (SqlDataReader rs = command.ExecuteReader())
+                {
+                    while (rs.Read())
+                    {
+                        Dictionary<string, object> row = new Dictionary<string, object>();
+                        for (int i = 0; i < rs.FieldCount; i++)
+                        {
+                            row[rs.GetName(i)] = rs[i] != null ? rs[i] : "";
+                        }
+                        resultList.Add(row);
+                    }
+                }
+            }
+
+            sqlQuery = @"SELECT
+                            MT.id,
+                            MT.NamaTerminal,
+                            MT.Plant,
+                            MT.Sloc,
+                            MT.MatNo,
+                            MT.SeqTangki,
+                            MP.NamaProduk
+                        FROM MasterTangki MT
+                        LEFT JOIN MasterProduk MP ON MT.MatNo = MP.NoProduk
+                        WHERE MT.Status = 'OPERASI' AND MT.Plant = (
+                            SELECT TOP 1 MPL.Plant FROM MasterPlant MPL
+                            WHERE MPL.IdPlant = (
+                                SELECT TOP 1 P.IdPlant FROM Penyaluran P
+                                WHERE P.NomorPenyaluran = @NoReferensi
+                            )
+                        );
+                        ";
+            using (SqlCommand command = new SqlCommand(sqlQuery, sqlConnection))
+            {
+                command.Parameters.AddWithValue("@NoReferensi", NoReferensi);
+                using (SqlDataReader rs = command.ExecuteReader())
+                {
+                    while (rs.Read())
+                    {
+                        Dictionary<string, object> row = new Dictionary<string, object>();
+                        for (int i = 0; i < rs.FieldCount; i++)
+                        {
+                            row[rs.GetName(i)] = rs[i] != null ? rs[i] : "";
+                        }
+                        tangkiList.Add(row);
+                    }
+                }
+            }
+
+            formList = new List<List<string>> {
+                new List<string> { "Tangki", "select", "NomorTangki" },
+                new List<string> { "Produk", "select", "Produk" },
+                new List<string> { "Tanggal", "datetime-local", "Tanggal" },
+                new List<string> { "LO", "number", "LO" },
+                new List<string> { "Quantity", "number", "Quantity" },
+                new List<string> { "Meter Awal", "number", "MeterAwal" }
+            };
+        }
+        else if (IdTemplateAktivitas == "348")
+        {
+            sqlQuery = @"SELECT TOP 1
+                            P.JenisProduk,
+                            MP.NoProduk + ' - ' + MP.NamaProduk AS produk_view
+                        FROM Penyaluran P
+                        LEFT JOIN MasterProduk MP ON P.JenisProduk = MP.NoProduk
+                        WHERE NomorPenyaluran = @NoReferensi;";
+
+            using (SqlCommand command = new SqlCommand(sqlQuery, sqlConnection))
+            {
+                command.Parameters.AddWithValue("@NoReferensi", NoReferensi);
+                using (SqlDataReader rs = command.ExecuteReader())
+                {
+                    if (rs.Read())
+                    {
+                        Produk = rs["JenisProduk"] != null ? rs["JenisProduk"].ToString() : "";
+                        produkView = rs["produk_view"] != null ? rs["produk_view"].ToString() : "";
+                    }
+                }
+            }
+
+            formList = new List<List<string>> {
+                new List<string> { "Nama Kegiatan", "text", "NamaKegiatan", $"Monitoring Penyaluran Produk {produkView}" },
+                new List<string> { "Tanggal", "datetime-local", "TanggalJam" },
+                new List<string> { "Quantity Discharge", "number", "QuantityDischarge" },
+                new List<string> { "Density", "number", "Density" },
+                new List<string> { "Temperature", "number", "Temperature" },
+                new List<string> { "Pressure", "number", "Pressure" },
+                new List<string> { "Flowrate", "number", "Flowrate" },
+                new List<string> { "Keterangan", "textarea", "Keterangan" },
+                new List<string> { Produk, "hidden", "Produk" }
+            };
+        }
+        else if (IdTemplateAktivitas == "388")
+        {
+            sqlQuery = @"SELECT TOP 1
+                            P.JenisProduk,
+                            MP.NoProduk + ' - ' + MP.NamaProduk AS produk_view
+                        FROM Penyaluran P
+                        LEFT JOIN MasterProduk MP ON P.JenisProduk = MP.NoProduk
+                        WHERE NomorPenyaluran = @NoReferensi;";
+
+            using (SqlCommand command = new SqlCommand(sqlQuery, sqlConnection))
+            {
+                command.Parameters.AddWithValue("@NoReferensi", NoReferensi);
+                using (SqlDataReader rs = command.ExecuteReader())
+                {
+                    if (rs.Read())
+                    {
+                        Produk = rs["JenisProduk"] != null ? rs["JenisProduk"].ToString() : "";
+                        produkView = rs["produk_view"] != null ? rs["produk_view"].ToString() : "";
+                    }
+                }
+            }
+
+            formList = new List<List<string>> {
+                new List<string> { "Produk", "readonly", "Produk", produkView },
+                new List<string> { "Nama PIC Pengisian", "text", "PICPengisian" },
+                new List<string> { "No Meter", "number", "NoMeter" },
+                new List<string> { "Nomor Gerbong Ketel 1", "select", "NomorGerbongKertel" },
+                new List<string> { "Quantity 1", "number", "Quantity" },
+                new List<string> { "Selisih Pengukuran T2 (cm) 1", "number", "HasilPengukuranT2" },
+                new List<string> { "Nomor Gerbong Ketel 2", "select", "NomorGerbongKertel2" },
+                new List<string> { "Quantity 2", "number", "Quantity2" },
+                new List<string> { "Selisih Pengukuran T2 (cm) 2", "number", "HasilPengukuranT2_2" },
+                new List<string> { "Nomor Gerbong Ketel 3", "select", "NomorGerbongKertel3" },
+                new List<string> { "Quantity 3", "number", "Quantity3" },
+                new List<string> { "Selisih Pengukuran T2 (cm) 3", "number", "HasilPengukuranT2_3" },
+                new List<string> { "Meter Awal", "number", "MeterAwal" },
+                new List<string> { "Meter Akhir", "number", "MeterAkhir" },
+                new List<string> { "Total GK", "readonly", "TotalGK" },
+                new List<string> { "Total Meter", "readonly", "Total" },
+                new List<string> { "Selisih", "readonly", "Selisih" },
+                new List<string> { Produk, "hidden", "Produk" }
+            };
+        }
+        else if (IdTemplateAktivitas == "402")
+        {
+            sqlQuery = @"SELECT TOP 1
+                            NomorGerbongKertel
+                        FROM SubAktivitasNilaiBDPerGerbong
+                        WHERE NoReferensi = @NoReferensi;";
+
+            using (SqlCommand command = new SqlCommand(sqlQuery, sqlConnection))
+            {
+                command.Parameters.AddWithValue("@NoReferensi", NoReferensi);
+                using (SqlDataReader rs = command.ExecuteReader())
+                {
+                    if (rs.Read())
+                    {
+                        NomorGerbongKertel = rs["NomorGerbongKertel"] != null ? rs["NomorGerbongKertel"].ToString() : "";
+                    }
+                }
+            }
+
+            formList = new List<List<string>> {
+                new List<string> { "Nomor Gerbong Ketel", "select", "NomorGerbongKertel" },
+                new List<string> { "Nomor Gerbong Ketel", "text", "NomorGerbongKertelForUpdate" },
+                new List<string> { "KL Obs", "number", "KL_Obs" },
+                new List<string> { "Kl 15", "number", "KL_15" },
+                new List<string> { "Barrels", "number", "Barrels" },
+                new List<string> { "Long Ton", "number", "LT" },
+                new List<string> { "Metric Ton", "number", "MT" }
+            };
+        }
+        else if (IdTemplateAktivitas == "404")
+        {
+            // resultList.Clear();
+            sqlQuery = $@"SELECT TOP 1
+                    P.JenisProduk,
+                    CONCAT (MP.NoProduk, CONCAT (' - ', MP.NamaProduk)) AS produk_view
+                FROM
+                    PenimbunanPenyaluran PP
+                    LEFT JOIN Penyaluran P ON PP.NoPenyaluran = P.NomorPenyaluran
+                    LEFT JOIN MasterProduk MP ON P.JenisProduk = MP.NoProduk
+                WHERE
+                    PP.NomorPenimbunanPenyaluran = @NoReferensi;";
+            // Console.WriteLine("[INFO]: " + sqlQuery);
+            // Console.WriteLine("[INFO]: " + NoReferensi);
+            using (SqlCommand cmd = new SqlCommand(sqlQuery, sqlConnection))
+            {
+                cmd.Parameters.AddWithValue("@NoReferensi", NoReferensi);
+                using (SqlDataReader rs = cmd.ExecuteReader())
+                {
+                    if (rs.Read())
+                    {
+                        Produk = rs["JenisProduk"] != null ? rs["JenisProduk"].ToString() : "";
+                        produkView = rs["produk_view"] != null ? rs["produk_view"].ToString() : "";
+                    }
+                }
+            }
+            formList = new List<List<string>> {
+                new List<string> { "Nama Kegiatan", "text", "NamaKegiatan", $"Logbook Penerimaan ({produkView})" },
+                new List<string> { "Produk", "select", "Produk" },
+                new List<string> { "Tanggal", "datetime-local", "Tanggal" },
+                new List<string> { "Density", "number", "Density" },
+                new List<string> { "Temperature", "number", "Temperatur" },
+                new List<string> { "Keterangan", "textarea", "Keterangan" },
+                new List<string> { Produk, "hidden", "Produk" }
+            };
+        }
+        else if (IdTemplateAktivitas == "444")
+        {
+            // resultList.Clear();
+            sqlQuery = $@"SELECT TOP 1
+                P.JenisProduk,
+                CONCAT (MP.NoProduk, CONCAT (' - ', MP.NamaProduk)) AS produk_view
+            FROM PenimbunanPenyaluran PP
+                LEFT JOIN Penyaluran P ON PP.NoPenyaluran = P.NomorPenyaluran
+                LEFT JOIN MasterProduk MP ON P.JenisProduk = MP.NoProduk
+            WHERE
+                PP.NomorPenimbunanPenyaluran = @NoReferensi;";
+            Console.WriteLine("[INFO]: " + sqlQuery);
+            Console.WriteLine("[INFO]: " + NoReferensi);
+            using (SqlCommand cmd = new SqlCommand(sqlQuery, sqlConnection))
+            {
+                cmd.Parameters.AddWithValue("@NoReferensi", NoReferensi);
+                using (SqlDataReader rs = cmd.ExecuteReader())
+                {
+                    if (rs.Read())
+                    {
+                        Produk = rs["JenisProduk"] != null ? rs["JenisProduk"].ToString() : "";
+                        produkView = rs["produk_view"] != null ? rs["produk_view"].ToString() : "";
+                    }
+                }
+            }
+            formList = new List<List<string>> {
+                new List<string> { "Nama Kegiatan", "text", "NamaKegiatan", $"Logbook Penerimaan ({produkView})" },
+                new List<string> { "Produk", "select", "Produk" },
+                new List<string> { "Tanggal", "datetime-local", "Tanggal" },
+                new List<string> { "Density", "number", "Density" },
+                new List<string> { "Temperature", "number", "Temperatur" },
+                new List<string> { "Level", "number", "Level" },
+                new List<string> { "Volume", "number", "Volume" },
+                new List<string> { "Flowrate", "number", "Flowrate" },
+                new List<string> { "Keterangan", "textarea", "Keterangan" },
+                new List<string> { Produk, "hidden", "Produk" }
+            };
+        }
+        else if (IdTemplateAktivitas == "447")
+        {
+            tangkiList.Clear();
+            resultList.Clear();
+
+            string IdPlant = generalList["IdPlant"] != null ? generalList["IdPlant"].ToString() : "";
+
+            sqlQuery = $@"
+            SELECT
+                A.id,
+                A.LO,
+                A.NomorTangki,
+                A.NomorTangki2,
+                A.Produk,
+                A.MeterAwal,
+                A.MeterAkhir,
+                A.Volume,
+                A.BayNumber,
+                A.NoMeter,
+                A.NomorKompartment,
+                A.InLineBlending,
+                MT.Sloc,
+                MT.SeqTangki,
+                MT.NamaTerminal,
+                MT2.Sloc AS Sloc2,
+                MT2.SeqTangki AS SeqTangki2,
+                MT2.NamaTerminal AS NamaTerminal2,
+                MP.NoProduk,
+                MP.NamaProduk,
+                MP.NoProduk + ' - ' + MP.NamaProduk AS Produk_disabled
+            FROM {TableAnak} A
+            LEFT JOIN MasterProduk MP ON A.Produk = MP.NoProduk
+            LEFT JOIN MasterTangki MT ON A.NomorTangki = MT.id
+            LEFT JOIN MasterTangki MT2 ON A.NomorTangki2 = MT2.id
+            WHERE A.idAktifitas = @IdAktivitas;";
+
+            using (SqlCommand command = new SqlCommand(sqlQuery, sqlConnection))
+            {
+                command.Parameters.AddWithValue("@IdAktivitas", IdAktivitas);
+                using (SqlDataReader rs = command.ExecuteReader())
+                {
+                    while (rs.Read())
+                    {
+                        Dictionary<string, object> row = new Dictionary<string, object>();
+                        for (int i = 0; i < rs.FieldCount; i++)
+                        {
+                            row[rs.GetName(i)] = rs[i] != null ? rs[i] : "";
+                        }
+                        resultList.Add(row);
+                    }
+                }
+            }
+
+            sqlQuery = @"SELECT
+                MT.id,
+                MT.NamaTerminal,
+                MT.Plant,
+                MT.Sloc,
+                MT.MatNo,
+                MT.SeqTangki,
+                MP.NamaProduk
+            FROM MasterTangki MT
+            LEFT JOIN MasterProduk MP ON MT.MatNo = MP.NoProduk
+            WHERE MT.Status = 'OPERASI' AND MT.Plant = (
+                SELECT TOP 1 MPL.Plant FROM MasterPlant MPL
+                WHERE MPL.IdPlant = (
+                    SELECT TOP 1 P.IdPlant FROM Penyaluran P
+                    WHERE P.NomorPenyaluran = @NoReferensi
+                )
+            );";
+            using (SqlCommand command = new SqlCommand(sqlQuery, sqlConnection))
+            {
+                command.Parameters.AddWithValue("@NoReferensi", NoReferensi);
+                using (SqlDataReader rs = command.ExecuteReader())
+                {
+                    while (rs.Read())
+                    {
+                        Dictionary<string, object> row = new Dictionary<string, object>();
+                        for (int i = 0; i < rs.FieldCount; i++)
+                        {
+                            row[rs.GetName(i)] = rs[i] != null ? rs[i] : "";
+                        }
+                        tangkiList.Add(row);
+                    }
+                }
+            }
+            formList = new List<List<string>> {
+                new List<string> { "Tangki", "select", "NomorTangki" },
+                new List<string> { "In Line Blending", "checkbox", "InLineBlending" },
+                new List<string> { "Tangki 2", "select", "NomorTangki2", "", "d-none" },
+                new List<string> { "Produk", "select", "Produk" },
+                new List<string> { "LO", "number", "LO" },
+                new List<string> { "Volume (KL)", "number", "Volume" },
+                new List<string> { "Bay Number", "number", "BayNumber" },
+                new List<string> { "No Meter", "number", "NoMeter" },
+                new List<string> { "Meter Awal", "number", "MeterAwal" },
+                new List<string> { "Meter Akhir", "number", "MeterAkhir" },
+                new List<string> { "Nomor Kompartment", "number", "NomorKompartment" },
+                new List<string> { Produk, "hidden", "Produk" }
+            };
+        }
+        else if (IdTemplateAktivitas == "412")
+        {
+            resultList.Clear();
+
+            sqlQuery = $@"
+                SELECT
+                    A.id,
+                    A.NoTangki,
+                    A.Produk,
+                    A.Volume,
+                    A.Aktivitas,
+                    A.LevelTangki,
+                    A.Flowrate,
+                    MT.Sloc,
+                    MT.SeqTangki,
+                    MT.NamaTerminal,
+                    MP.NoProduk,
+                    MP.NamaProduk,
+                    MP.NoProduk + ' - ' + MP.NamaProduk AS Produk_disabled
+                FROM {TableAnak} A
+                LEFT JOIN MasterProduk MP ON A.Produk = MP.NoProduk
+                LEFT JOIN MasterTangki MT ON A.NoTangki = MT.id
+                WHERE A.idAktifitas = @IdAktivitas;";
+
+            using (SqlCommand command = new SqlCommand(sqlQuery, sqlConnection))
+            {
+                command.Parameters.AddWithValue("@IdAktivitas", IdAktivitas);
+                using (SqlDataReader rs = command.ExecuteReader())
+                {
+                    while (rs.Read())
+                    {
+                        Dictionary<string, object> row = new Dictionary<string, object>();
+                        for (int i = 0; i < rs.FieldCount; i++)
+                        {
+                            row[rs.GetName(i)] = rs[i] != null ? rs[i] : "";
+                        }
+                        resultList.Add(row);
+                    }
+                }
+            }
+
+            string labelProduk = "", labelTangki = "";
+            sqlQuery = $@"
+                SELECT
+                    MP.NoProduk,
+                    MP.NoProduk + ' - ' + MP.NamaProduk AS Produk_disabled,
+                    MT.Sloc + ' - ' + MT.SeqTangki + ' - ' + MT.NamaTerminal AS Nomor_Tangki_disabled,
+                    MPT.Plant + ' - ' + MPT.Nama_Terminal AS IdPlant_disabled
+                FROM {TipeProses} A
+                LEFT JOIN MasterPlant MPT ON A.Plant = MPT.IdPlant
+                LEFT JOIN MasterTangki MT ON A.IdTangki = MT.id
+                LEFT JOIN MasterProduk MP ON MT.MatNo = MP.NoProduk
+                WHERE A.NomorPenimbunanPenyaluran = @NoReferensi;";
+
+            using (SqlCommand command = new SqlCommand(sqlQuery, sqlConnection))
+            {
+                command.Parameters.AddWithValue("@NoReferensi", NoReferensi);
+                using (SqlDataReader rs = command.ExecuteReader())
+                {
+                    if (rs.Read())
+                    {
+                        for (int i = 0; i < rs.FieldCount; i++)
+                        {
+                            if (rs.GetName(i) == "NoProduk")
+                            {
+                                Produk = rs[i] != null ? rs[i].ToString() : "";
+                            }
+
+                            if (labelProduk == "" && rs.GetName(i) == "Produk_disabled")
+                            {
+                                labelProduk = rs[i] != null ? rs[i].ToString() : "";
+                            }
+                            if (labelTangki == "" && rs.GetName(i) == "Nomor_Tangki_disabled")
+                            {
+                                labelTangki = rs[i] != null ? rs[i].ToString() : "";
+                            }
+                        }
+                    }
+                }
+            }
+
+            formList = new List<List<string>> {
+                new List<string> { "Kegiatan", "text", "Aktivitas", $"Logbook Monitoring Stock Tangki {labelTangki}, Produk {labelProduk}" },
+                new List<string> { "Tangki", "readonly disabled", "Nomor_Tangki_disabled", labelTangki },
+                new List<string> { "Produk", "readonly disabled", "Produk_disabled", labelProduk },
+                new List<string> { generalList["IdTangki"] != null? generalList["IdTangki"].ToString() : "", "hidden", "NoTangki" },
+                new List<string> { Produk, "hidden", "Produk" },
+                new List<string> { "Level Tangki", "number", "LevelTangki" },
+                new List<string> { "Volume (KL)", "number", "Volume" },
+                new List<string> { "Flowrate", "number", "Flowrate" }
+            };
+        }
+
+        sqlQuery = "SELECT a.NamaAktivitas as Aktivitas, log.username as Username, log.status_aktivitas as StatusAktivitas, log.etl_date as Tanggal, log.Catatan FROM log_aktivitas log INNER JOIN Aktivitas a ON log.id_aktivitas = a.IdAktivitas WHERE log.id_aktivitas = @IdAktivitas ORDER BY Tanggal DESC;";
+        using (SqlCommand sqlCommand = new SqlCommand(sqlQuery, sqlConnection))
+        {
+            sqlCommand.Parameters.AddWithValue("@IdAktivitas", IdAktivitas);
+            using (SqlDataReader reader = sqlCommand.ExecuteReader())
+            {
+                if (reader.HasRows)
+                {
+                    while (reader.Read())
+                    {
+                        dataLog.Add(new Dictionary<string, object> {
+                            { "Aktivitas", reader["Aktivitas"]?.ToString() ?? "" },
+                            { "Username", reader["Username"]?.ToString() ?? "" },
+                            { "StatusAktivitas", reader["StatusAktivitas"]?.ToString() ?? "" },
+                            { "Tanggal", reader["Tanggal"]?.ToString() ?? "" },
+                            { "Catatan", reader["Catatan"]?.ToString() ?? "" }
+                        });
+                    }
+                }
+            }
+        }
+
+        string currentUser = CurrentUserLevel().ToString();
+
+        sqlQuery = @"EXEC CheckIsEditableAktivitasForm_ByAktivitasId @IdAktivitas";
+
+        using (SqlCommand sqlCommand = new SqlCommand(sqlQuery, sqlConnection))
+        {
+            sqlCommand.Parameters.AddWithValue("@IdAktivitas", IdAktivitas);
+
+            using (SqlDataReader reader = sqlCommand.ExecuteReader())
+            {
+                if (reader.Read())
+                {
+                    isEditable = reader["IsEditable"] != DBNull.Value && Convert.ToBoolean(reader["IsEditable"]);
+                }
+            }
+        }
+
+        if (currentUser != "-1")
+        {
+            string idPic = CurrentUserInfo("Rule")?.ToString();
+
+            if (!string.IsNullOrEmpty(idPic))
+            {
+                string sqlCekRole = $@"WITH SplitValues AS (
+                    SELECT
+                        A.IdTemplateAktivitas,
+                        TRIM(value) AS IdPIC,
+                        A.IdAktivitas
+                    FROM Aktivitas A
+                    JOIN TemplateAktivitas TA ON A.IdTemplateAktivitas = TA.IdTemplateAktivitas
+                    CROSS APPLY STRING_SPLIT(TA.IdPIC, ',')
+                )
+                SELECT COUNT(DISTINCT IdTemplateAktivitas) AS JumlahAktivitas
+                FROM SplitValues
+                WHERE IdPIC = @IdPIc and IdAktivitas = @IdAktivitas";
+
+                using (SqlCommand sqlCommandRole = new SqlCommand(sqlCekRole, sqlConnection))
+                {
+                    sqlCommandRole.Parameters.AddWithValue("@IdAktivitas", IdAktivitas);
+                    sqlCommandRole.Parameters.AddWithValue("@IdPic", idPic);
+
+                    using (SqlDataReader readerRole = sqlCommandRole.ExecuteReader())
+                    {
+                        if (readerRole.Read())
+                        {
+                            countRole = readerRole["JumlahAktivitas"] != DBNull.Value ? Convert.ToInt32(readerRole["JumlahAktivitas"]) : 0;
+                        }
+                    }
+                }
+
+                if (countRole < 1)
+                {
+                    isEditable = false;
+                }
+            }
+            else
+            {
+                isEditable = false;
+            }
+        }
+
+        if (currentUser == "3")
+        {
+            isEditable = false;
+        }
+        else if (currentUser == "6")
+        {
+            isEditable = true;
+            string idPos = CurrentUserInfo("IdPosition")?.ToString();
+            if (!string.IsNullOrEmpty(idPos))
+            {
+                string sqlData = $@"SELECT COUNT(*) AS JumlahSesuai
+                                    FROM Aktivitas a
+                                    JOIN {TipeProses} p ON a.No_Referensi = p.Nomor{TipeProses}
+                                    JOIN MasterPlant mp ON p.{colPlant} = mp.IdPlant
+                                    WHERE a.IdAktivitas = @IdAktivitas
+                                    AND mp.JenisPlant = 'STS'
+                                    AND p.{colPlant} IN (
+                                        SELECT IdPlant
+                                        FROM MappingPosition
+                                        WHERE IdPosition = @IdPosition
+                                    );
+                                    ";
+                int plantCount = 0;
+                using (SqlCommand sqlCommand = new SqlCommand(sqlData, sqlConnection))
+                {
+                    sqlCommand.Parameters.AddWithValue("@IdAktivitas", IdAktivitas);
+                    sqlCommand.Parameters.AddWithValue("@IdPosition", idPos);
+                    using (SqlDataReader reader = sqlCommand.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            plantCount = reader["JumlahSesuai"] != DBNull.Value ? Convert.ToInt32(reader["JumlahSesuai"]) : 0;
+                        }
+                    }
+                }
+
+                if (plantCount <= 0)
+                {
+                    var idTemplateProses = 0;
+                    var acceptProcessListUser6 = new List<int> { 23, 49, 77, 80, 21, 26, 160, 161 };
+
+                    sqlData = @"SELECT P.IdTemplateProses
+                        from Aktivitas A
+                    JOIN dbo.Proses P on A.IdProses = P.IdProses
+                    WHERE A.IdAktivitas = @IdAktivitas";
+                    using (SqlCommand sqlCommandUser6 = new SqlCommand(sqlData, sqlConnection))
+                    {
+                        sqlCommandUser6.Parameters.AddWithValue("@IdAktivitas", IdAktivitas);
+                        using (SqlDataReader readerUser6 = sqlCommandUser6.ExecuteReader())
+                        {
+                            if (readerUser6.Read())
+                            {
+                                idTemplateProses = readerUser6["IdTemplateProses"] != DBNull.Value ? Convert.ToInt32(readerUser6["IdTemplateProses"]) : 0;
+                            }
+                        }
+                    }
+
+                    if (!acceptProcessListUser6.Contains(idTemplateProses))
+                    {
+                        isEditable = false;
+                    }
+                }
+            }
+            else
+            {
+                isEditable = false;
+            }
+        }
+        if (string.IsNullOrEmpty(TipeProduk))
+        {
+            if (generalList.ContainsKey("TipeProduk") && !string.IsNullOrEmpty(generalList["TipeProduk"].ToString()))
+            {
+                TipeProduk = generalList["TipeProduk"].ToString();
+            }
+            else if (TipeProses.Contains("LPG"))
+            {
+                TipeProduk = "LPG";
+            }
+            else if (TableAnak.Contains("LPG"))
+            {
+                TipeProduk = "LPG";
+            }
+            else
+            {
+                TipeProduk = "BBM";
+            }
+        }
+    }
+
+    var jsonData = JsonConvert.SerializeObject(resultList);
+    var jsonLog = JsonConvert.SerializeObject(dataLog);
+    var jsonForm = JsonConvert.SerializeObject(formList);
+    var jsonTangki = JsonConvert.SerializeObject(tangkiList);
+    var jsonProduk = JsonConvert.SerializeObject(produkList);
+}
+
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+    <meta charset='UTF-8'>
+    <title>@(NamaAktivitas)</title>
+    <script src="https://cdn.jsdelivr.net/npm/ag-grid-community/dist/ag-grid-community.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <!-- <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script> -->
+    <style>
+        .stepper {
+            display: flex;
+            counter-reset: step;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding-bottom: 8px;
+        }
+
+            .stepper::-webkit-scrollbar {
+                height: 6px; /* tipis */
+            }
+
+            .stepper::-webkit-scrollbar-thumb {
+                background-color: #ccc;
+                border-radius: 3px;
+            }
+
+        .step {
+            width: 150px;
+            text-align: center;
+            position: relative;
+        }
+
+            .step:not(:last-child)::after {
+                content: '';
+                position: absolute;
+                top: 20px;
+                right: -50%;
+                width: 100%;
+                height: 4px;
+                background-color: #ccc;
+                z-index: 0;
+            }
+
+            .step.completed:not(:last-child)::after {
+                background-color: #3c6dbd;
+            }
+
+        .step-icon {
+            width: 36px;
+            height: 36px;
+            line-height: 36px;
+            border-radius: 50%;
+            background: #ccc;
+            display: inline-block;
+            z-index: 1;
+            position: relative;
+            color: white;
+            font-weight: bold;
+        }
+
+        .step.active .step-icon {
+            background: #3c6dbd;
+        }
+
+        .step-label {
+            margin-top: 8px;
+            font-size: 14px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
+            color: #333;
+        }
+
+        .step-label {
+            color: #3c6dbd !important;
+            text-decoration: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .step-label-not-active {
+            color: #CCCCCC !important;
+        }
+
+        .ag-theme-quartz .ag-header {
+            background-color: #3c6dbd !important;
+        }
+
+        .ag-theme-quartz .ag-header-cell-label {
+            color: #ffffff !important;
+        }
+
+        .ag-theme-quartz .ag-icon-filter {
+            color: #ffffff !important;
+        }
+
+        .rotate-down {
+            transform: rotate(90deg);
+            transition: transform 0.3s ease;
+        }
+
+        .rotate-right {
+            transform: rotate(0deg);
+            transition: transform 0.3s ease;
+        }
+
+        .ag-header-cell-text {
+            font-size: 12.5px;
+        }
+
+        .ag-row.stripe {
+            background-color: #E0F0FB;
+        }
+
+        .select2-container--default .select2-selection--single {
+            height: calc(2.275rem);
+            padding: 0.175rem 0.75rem 0.375rem 0;
+            border: 1px solid #ced4da;
+            border-radius: 0.375rem;
+            background-color: #fff;
+        }
+
+            .select2-container--default .select2-selection--single .select2-selection__rendered {
+                line-height: 2.375rem;
+            }
+
+        .select2-container--default .select2-results__option--highlighted[aria-selected],
+        .select2-container--default .select2-results__option--highlighted:hover {
+            background-color: #3c6dbd !important;
+            color: white;
+        }
+
+            .select2-container--default .select2-results__option--highlighted[aria-selected]:hover {
+                background-color: #3c6dbd !important;
+                color: white;
+            }
+
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: calc(2.375rem);
+            right: 0.5rem;
+        }
+
+        .select2-container--default .select2-selection__clear {
+            padding-top: 0.475rem !important;
+        }
+
+        .mark-yellow {
+            background: #ffff00;
+        }
+
+        .caption-tujuan {
+            margin: 0;
+            padding: 0;
+        }
+
+        #modal-popup .modal-body {
+            max-height: 70dvh;
+            overflow-y: auto;
+        }
+
+        @@media(max-width: 576px) {
+            #modal-popup .modal-dialog {
+                margin: .5rem;
+            }
+
+            #modal-popup .modal-body {
+                max-height: 70dvh;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="row pb-3 border-bottom">
+        <div class="col-2 fw-bold d-flex align-items-center" id="nomor-tipe-proses">
+            Nomor @(TipeProses)
+        </div>
+        <div class="col-10 d-flex gap-3">
+            @(generalList[$"Nomor{TipeProses}"])
+        </div>
+    </div>
+
+    <div class="row py-3 border-bottom">
+        <div class="col-2 fw-bold d-flex align-items-center">
+            Proses
+        </div>
+        <div class="col-10 d-flex gap-3">
+            @(NamaProses)
+        </div>
+    </div>
+
+    <div class="row py-3 border-bottom">
+        <div class="col-2 fw-bold d-flex align-items-center">
+            Aktivitas
+        </div>
+        <div class="col-10 d-flex gap-3">
+            @(NamaAktivitas)
+        </div>
+    </div>
+
+    <div class="row border-bottom">
+        <div class="col-2 fw-bold d-flex align-items-center">
+            Status Aktivitas
+        </div>
+        <div class="col-10 py-3">
+            <span class="px-2 py-1 fw-bold">@(StatusAktivitas)</span>
+        </div>
+    </div>
+
+    <div class="row py-3 border-bottom">
+        <div class="col-2 fw-bold d-flex align-items-center">
+            Diperbarui Oleh
+        </div>
+        <div class="col-10 d-flex gap-3 align-items-center">
+            @(DiperbaruiOleh)
+            <button type="button" class="btn btn-primary ew-btn ps-2" expand-log="false">
+                <i class="fa-solid fa-caret-right fa-2xl me-2 caret-icon rotate-right"></i>
+                Log History
+                <i class="fa-solid fa-clock-rotate-left ms-1"></i>
+            </button>
+        </div>
+    </div>
+
+    <div id="log-table-row" class="d-none row m-0">
+        <div class="col-2">
+        </div>
+        <div class="p-0 col-10">
+            <div id="log-table-wrapper" style="overflow: hidden; transition: all 0.6s ease; max-height: 0;">
+                <div id="logGrid" class="ag-theme-quartz w-100 my-3" style="height: 300px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row py-3 border-bottom">
+        <div class="col-2 fw-bold d-flex align-items-center">
+            Tanggal Diperbarui
+        </div>
+        <div class="col-10">
+            @(TanggalDiperbarui)
+        </div>
+    </div>
+
+    @if (generalList.ContainsKey("NamaKapal") && !string.IsNullOrEmpty(generalList["NamaKapal"].ToString()))
+    {
+        <div class="row py-3 border-bottom">
+            <div class="col-2 fw-bold d-flex align-items-center">
+                Nama Kapal
+            </div>
+            <div class="col-10 d-flex gap-3">
+                @(generalList["NamaKapal"])
+            </div>
+        </div>
+    }
+    else if (generalList.ContainsKey("NomorPolisi") && !string.IsNullOrEmpty(generalList["NomorPolisi"].ToString()))
+    {
+        <div class="row py-3 border-bottom">
+            <div class="col-2 fw-bold d-flex align-items-center">
+                Nomor Polisi
+            </div>
+            <div class="col-10 d-flex gap-3">
+                @(generalList["NomorPolisi"])
+            </div>
+        </div>
+    }
+
+    @if (IdTemplateAktivitas == "13" || IdTemplateAktivitas == "89" || IdTemplateAktivitas == "140" ||
+        IdTemplateAktivitas == "170" || IdTemplateAktivitas == "199" || IdTemplateAktivitas == "236" ||
+        IdTemplateAktivitas == "273" || IdTemplateAktivitas == "320" || IdTemplateAktivitas == "325" ||
+        IdTemplateAktivitas == "348" || IdTemplateAktivitas == "356" || IdTemplateAktivitas == "378" ||
+        IdTemplateAktivitas == "361" || IdTemplateAktivitas == "394" || IdTemplateAktivitas == "426" ||
+        IdTemplateAktivitas == "476")
+    {
+        <div class="row py-3 border-bottom">
+            <div class="col-2 fw-bold d-flex align-items-center">
+                Produk
+            </div>
+            <div class="col-10 d-flex gap-3">
+                @(produkView)
+            </div>
+        </div>
+    }
+
+    @if (IdTemplateAktivitas == "320" || IdTemplateAktivitas == "356" || IdTemplateAktivitas == "479")
+    {
+        <div class="row py-3 border-bottom">
+            <div class="col-2 fw-bold d-flex align-items-center">
+                ETC
+            </div>
+            <div class="col-10 d-flex gap-3">
+                @(ETCval)
+            </div>
+        </div>
+
+        @for (int i = 0; i < etaList.Count; i++)
+        {
+            var idx = i + 1;
+            var row = etaList[i];
+
+            var etaStatis = row.ContainsKey("ETA") ? row["ETA"]?.ToString() : "";
+            var etaDinamis = row.ContainsKey("ETA_Dinamis") ? row["ETA_Dinamis"]?.ToString() : "";
+            var tujuanPipa = row.ContainsKey("Tujuan") ? row["Tujuan"]?.ToString() : "";
+
+            var etaShow = !string.IsNullOrWhiteSpace(etaDinamis) ? etaDinamis : etaStatis;
+
+            <div class="row py-3 border-bottom align-items-center">
+                <div class="col-2 fw-bold">
+                    <p class="caption-tujuan">
+                        ETA @idx
+                    </p>
+                    <p class="caption-tujuan">
+                        @tujuanPipa
+                    </p>
+                </div>
+                <div class="col-10 d-flex gap-3">
+                    @(etaShow)
+                </div>
+            </div>
+        }
+    }
+
+    <div class="row pt-3 pb-1 border-bottom">
+        <div class="col-2">
+        </div>
+        <div class="col-10">
+            @if (StatusAktivitas != "Completed Edit")
+            {
+                <div class="mb-2">
+                    <div class="d-flex align-items-center gap-3 flex-wrap">
+                        <button id="btn-add-modal" class="btn btn-success ew-btn px-3 py-2">
+                            <i class="fas fa-plus me-1"></i> Add New
+                        </button>
+
+                        @if (IdTemplateAktivitas == "56" || IdTemplateAktivitas == "179" /* || IdTemplateAktivitas == "447" */)
+                        {
+                            <button class="btn btn-primary ew-btn px-3 py-2" type="button"
+                                    data-bs-toggle="collapse"
+                                    data-bs-target="#quantityGuide"
+                                    aria-expanded="false"
+                                    aria-controls="quantityGuide">
+                                <i class="fas fa-info-circle me-1"></i> Petunjuk Pengisian Quantity
+                            </button>
+                        }
+                        else if (IdTemplateAktivitas == "218" || IdTemplateAktivitas == "259" || IdTemplateAktivitas == "347")
+                        {
+                            <button class="btn btn-primary ew-btn px-3 py-2" type="button"
+                                    data-bs-toggle="collapse"
+                                    data-bs-target="#SatuanGuide"
+                                    aria-expanded="false"
+                                    aria-controls="SatuanGuide">
+                                <i class="fas fa-info-circle me-1"></i> Informasi Satuan Pengisian
+                            </button>
+                        }
+
+                        <button id="btn-export" class="btn btn-default ew-btn px-3 py-2">
+                            <i class="fas fa-file-export me-1"></i> Export Data
+                        </button>
+                    </div>
+
+                    @if (IdTemplateAktivitas == "56" || IdTemplateAktivitas == "179" /* || IdTemplateAktivitas == "447" */)
+                    {
+                        <div class="collapse mt-2" id="quantityGuide">
+                            <div class="card border-primary shadow-sm" style="max-width: 420px;">
+                                <div class="card-header bg-primary text-white py-2 px-3">
+                                    <strong>Petunjuk Pengisian Quantity</strong>
+                                </div>
+                                <div class="card-body py-2 px-3 text-dark">
+                                    <p class="mb-1">Produk <strong>BBM</strong> menggunakan satuan <strong>Liter (L) / Dekaliter (DaL)</strong> sesuai dengan ketentuan di masing-masing lokasi</p>
+                                    <p class="mb-0">Produk <strong>LPG</strong> menggunakan satuan <strong>Kilogram (Kg)</strong></p>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    else if (IdTemplateAktivitas == "218" || IdTemplateAktivitas == "259" || IdTemplateAktivitas == "347")
+                    {
+                        <div class="collapse mt-2" id="SatuanGuide">
+                            <div class="card border-primary shadow-sm" style="max-width: 420px;">
+                                <div class="card-header bg-primary text-white py-2 px-3">
+                                    <strong>Informasi Satuan Pengisian</strong>
+                                </div>
+                                <div class="card-body py-2 px-3 text-dark">
+                                    <p class="mb-1">Produk <strong>BBM</strong> menggunakan satuan <strong>KL (Kiloliter)</strong></p>
+                                    <p class="mb-0">Produk <strong>LPG</strong> menggunakan satuan <strong>MT (Metric Ton)</strong></p>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="mb-2">
+                    <div class="d-flex align-items-center gap-3 flex-wrap">
+                        <button id="btn-export" class="btn btn-default ew-btn px-3 py-2">
+                            <i class="fas fa-file-export me-1"></i> Export Data
+                        </button>
+                    </div>
+                </div>
+            }
+            <div id="dataGrid" class="ag-theme-quartz w-100 mb-3" style="height: 300px; overflow-x: auto;"></div>
+            <div class="d-flex gap-2 pt-1 pb-3">
+                @if (StatusAktivitas == "Waiting")
+                {
+                    <button id="btn-save" data-nextstatus="Draft" class="btn btn-primary ew-btn">
+                        <i class="fa-solid fa-floppy-disk me-1"></i> Save
+                    </button>
+                }
+                else if (StatusAktivitas == "Draft")
+                {
+                    <button id="btn-save" data-nextstatus="Draft" class="btn btn-primary ew-btn">
+                        <i class="fa-solid fa-floppy-disk me-1"></i> Save
+                    </button>
+                    <button id="btn-submit" data-nextstatus="Completed" class="btn btn-success ew-btn">
+                        <i class="fa-solid fa-paper-plane me-1"></i> Submit
+                    </button>
+                }
+                else if (StatusAktivitas == "Completed" || StatusAktivitas == "Editing")
+                {
+                    <button id="btn-edit" data-nextstatus="Editing" class="btn btn-primary ew-btn">
+                        <i class="fa-solid fa-pen-to-square me-1"></i> Edit
+                    </button>
+                    <button id="btn-submit" data-nextstatus="Completed Edit" class="btn btn-success ew-btn">
+                        <i class="fa-solid fa-paper-plane me-1"></i> Submit
+                    </button>
+                }
+                else if (StatusAktivitas == "Completed Edit")
+                {
+                    if (CurrentUserLevel() == "4")
+                    {
+                        <button type="button" class="btn btn-warning ew-btn ml-2" id="btn-reverse-status">
+                            <i class="fa-solid fa-pen-to-square me-1"></i> Edit
+                        </button>
+                    }
+                }
+                <button id="btn-cancel" class="btn btn-default ew-btn">
+                    <i class="fa-solid fa-ban me-1"></i> Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modal-popup" tabindex="-1" aria-labelledby="modal-popupLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable modal-centered">
+            <div class="modal-content">
+                <form id="form-input-modal" autocomplete="off" novalidate>
+                    <div class="modal-header text-white" style="background: #3c6dbd;">
+                        <h5 class="modal-title fw-bold" id="modal-popupLabel"></h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        @if (currentGuideFields != null && currentGuideFields.Count > 0)
+                        {
+                            var renderedGuideLabels = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                            <div class="card border-primary shadow-sm mb-3">
+                                <div class="card-header bg-primary text-white py-2 px-3">
+                                    <strong>Petunjuk Pengisian Data</strong>
+                                </div>
+                                <div class="card-body py-2 px-3 text-dark">
+                                    <p class="mb-2">
+                                        Harap perhatikan satuan dan ketelitian saat mengisi parameter berikut:
+                                    </p>
+                                    <ul class="mb-2 ps-3" style="padding-left: 0;">
+                                        @foreach (var field in currentGuideFields)
+                                        {
+
+                                            Console.WriteLine("Field: " + field);
+                                            var fieldLabel = GetFieldLabel(field);
+                                            var fieldUnit = GetFieldUnit(field, (IdTemplateAktivitas == "388" ? "RTW" : TipeProduk));
+                                            if (!renderedGuideLabels.Add(fieldLabel))
+                                            {
+                                                continue;
+                                            }
+                                            <li class="mb-1">
+                                                <strong>@fieldLabel</strong>
+                                                @if (!string.IsNullOrEmpty(fieldUnit))
+                                                {
+                                                    <span class="text-muted fw-normal"> — @fieldUnit</span>
+                                                }
+                                            </li>
+                                        }
+                                    </ul>
+                                    <div class="mt-3 border-top border-light">
+                                        <p class="mb-0 fst-italic small text-danger">
+                                            <i class="fas fa-exclamation-triangle me-1"></i>
+                                            Gunakan tanda titik (.) sebagai pemisah desimal.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                        @{
+                            // helper ambil value default dari formList (kalau ada)
+                            string GetFormValue(string fieldName)
+                            {
+                                var it = formList?.FirstOrDefault(x => x.Count > 2 && string.Equals(x[2], fieldName, StringComparison.OrdinalIgnoreCase));
+                                return (it != null && it.Count > 3) ? (it[3] ?? "") : "";
+                            }
+
+                            // helper ambil label
+                            string GetFormLabel(string fieldName)
+                            {
+                                var it = formList?.FirstOrDefault(x => x.Count > 2 && string.Equals(x[2], fieldName, StringComparison.OrdinalIgnoreCase));
+                                return (it != null && it.Count > 0) ? (it[0] ?? fieldName) : fieldName;
+                            }
+                        }
+                        @if (IdTemplateAktivitas == "388")
+                        {
+                            <div id="row_Produk" class="row mb-3">
+                                <div class="col-2 fw-bold d-flex align-items-center">@GetFormLabel("Produk")</div>
+                                <div class="col-10">
+                                    <input type="text" class="form-control-plaintext" id="Produk" name="Produk" readonly
+                                           value="@(string.IsNullOrEmpty(GetFormValue("Produk")) ? Produk : GetFormValue("Produk"))">
+                                </div>
+                            </div>
+                            <div id="row_PICPengisian" class="row mb-3">
+                                <div class="col-2 fw-bold d-flex align-items-center">@GetFormLabel("PICPengisian")</div>
+                                <div class="col-10">
+                                    <input type="text" class="form-control" id="PICPengisian" name="PICPengisian" required
+                                           value="@(GetFormValue("PICPengisian"))">
+                                </div>
+                            </div>
+                            <div id="row_NoMeter" class="row mb-3">
+                                <div class="col-2 fw-bold d-flex align-items-center">@GetFormLabel("NoMeter")</div>
+                                <div class="col-10">
+                                    <input type="text" class="form-control" id="NoMeter" name="NoMeter" required
+                                           value="@(GetFormValue("NoMeter"))">
+                                </div>
+                            </div>
+                            <div id="bulk-388" class="mb-3" style="display:none;">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <div class="fw-bold">Input Gerbong Ketel</div>
+                                    <button type="button" class="btn btn-outline-primary btn-sm" id="btn-add-row-388">
+                                        <i class="fas fa-plus me-1"></i> Tambah GK
+                                    </button>
+                                </div>
+
+                                <div class="table-responsive">
+                                    <table class="table table-bordered align-middle" id="tbl-388">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th style="min-width:140px;">Nomor Gerbong Ketel</th>
+                                                <th style="min-width:140px;">Quantity</th>
+                                                <th style="min-width:140px;">Selisih Pengukuran T2 (cm)</th>
+                                                <th style="width:60px;"></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                    </table>
+                                </div>
+
+                                <small class="text-muted">
+                                    * Maksimal 3 gerbong ketel.
+                                </small>
+
+                                <template id="row388Template">
+                                    <tr>
+                                        <td>
+                                            <select class="ew-select form-select select2 NomorGerbongKertel" required>
+                                                <option value="" disabled selected hidden>
+                                                    Pilih Nomor Gerbong Ketel
+                                                </option>
+                                                @foreach (var gerbong in gerbongKetelList)
+                                                {
+                                                    <option value='@gerbong["NoKetel"]'>@gerbong["NoKetel"]</option>
+                                                }
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <input class="form-control text-rasa-number Quantity" inputmode="numeric" required readonly disabled />
+                                        </td>
+                                        <td>
+                                            <input class="form-control text-rasa-number HasilPengukuranT2" inputmode="numeric" />
+                                        </td>
+                                        <td class="text-center">
+                                            <button type="button" class="btn btn-outline-danger btn-sm btn-del-row-388">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </div>
+                            <!-- <script>
+                                document.addEventListener("DOMContentLoaded", function() {
+                                    const fieldId = 'x_388_NomorGerbongKertel';
+                                    let selectOptions = {
+                                        name: fieldId,
+                                        selectId: '388_NomorGerbongKertel'
+                                    };
+                                    selectOptions.closeOnSelect = !selectOptions.multiple;
+                                    selectOptions.dropdownParent = document.querySelector('#modal-popup') || document.body;
+                                    selectOptions.minimumInputLength = ew.selectMinimumInputLength;
+                                    selectOptions.allowClear = false;
+                                    const extra = (ew.selectOptionList && ew.selectOptionList[fieldId]) ? ew.selectOptionList[fieldId] : {};
+                                    selectOptions = Object.assign(selectOptions, extra);
+
+                                    const el = document.querySelector('select[data-select2-id="' + selectOptions.selectId + '"]');
+                                    if(el) ew.createSelect(selectOptions);
+                                });
+                            </script> -->
+                        }
+                        @{
+                            var skipFields388 = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+                                                {
+                                                "Produk", "PICPengisian", "NoMeter",
+                                                "NomorGerbongKertel", "Quantity", "HasilPengukuranT2",
+                                                "NomorGerbongKertel2", "Quantity2", "HasilPengukuranT2_2",
+                                                "NomorGerbongKertel3", "Quantity3", "HasilPengukuranT2_3"
+                                                };
+                        }
+                        @foreach (var item in formList)
+                        {
+                            @if (IdTemplateAktivitas == "388" && (
+                                                    item[2].Equals("Produk", StringComparison.OrdinalIgnoreCase) ||
+                                                    item[2].Equals("PICPengisian", StringComparison.OrdinalIgnoreCase) ||
+                                                    item[2].Equals("NoMeter", StringComparison.OrdinalIgnoreCase)
+                                                    ))
+                            {
+                                continue;
+                            }
+                            if (IdTemplateAktivitas == "388" && skipFields388.Contains(item[2]))
+                            {
+                                continue;
+                            }
+                            @if (item[1] == "text" || item[1] == "datetime-local")
+                            {
+                                <div id='@("row_" + item[2])' class="row mb-3">
+                                    <div class="col-2 fw-bold d-flex align-items-center">
+                                        @(item[0])
+                                    </div>
+                                    <div class="col-10">
+                                        <input type="@(item[1])" class="form-control" id="@(item[2])" name="@(item[2])" required value="@(item.Count > 3 && !string.IsNullOrEmpty(item[3]) ? item[3] : "")">
+                                    </div>
+                                </div>
+                            }
+                            else if (item[1] == "number")
+                            {
+                                <div id='@("row_" + item[2])' class="row mb-3">
+                                    <div class="col-2 fw-bold d-flex align-items-center">
+                                        @(item[0])
+                                    </div>
+                                    <div class="col-10">
+                                        @{
+                                            var req = (IdTemplateAktivitas == "388" && item[2] == "HasilPengukuranT2") ? "" : "required";
+                                        }
+                                        <input type="text" inputmode="numeric" class="form-control text-rasa-number" id="@(item[2])" name="@(item[2])" @req value="@(item.Count > 3 && !string.IsNullOrEmpty(item[3]) ? item[3] : "")">
+                                    </div>
+                                </div>
+                            }
+                            else if (item[1] == "select")
+                            {
+                                <div id='@("row_" + item[2])' class="row mb-3 @(item.Count > 4 && !string.IsNullOrEmpty(item[4]) ? item[4] : "")">
+                                    <div class="col-2 fw-bold d-flex align-items-center">
+                                        @(item[0])
+                                    </div>
+                                    <div class="col-10">
+                                        <select id="@(item[2])" name="@(item[2])" class="form-select" required>
+                                            <option></option>
+                                            @if (item[2] == "Produk" || item[2] == "ProdukAll")
+                                            {
+                                                @foreach (var produk in produkList)
+                                                {
+                                                    if (produk["NoProduk"].ToString() == Produk)
+                                                    {
+                                                        <option value='@produk["NoProduk"]' selected>@produk["NoProduk"] - @produk["NamaProduk"]</option>
+                                                    }
+                                                    else
+                                                    {
+                                                        <option value='@produk["NoProduk"]'>@produk["NoProduk"] - @produk["NamaProduk"]</option>
+                                                    }
+                                                }
+                                            }
+                                            else if (item[2].Contains("Tangki"))
+                                            {
+                                                @foreach (var tangki in tangkiList)
+                                                {
+                                                    <option value='@tangki["id"]'>@tangki["Sloc"] - @(!string.IsNullOrEmpty(tangki["SeqTangki"].ToString()) ? tangki["SeqTangki"].ToString() + " - " : "") @tangki["NamaTerminal"]</option>
+                                                }
+                                            }
+                                            else if (item[2] == "IdPlant")
+                                            {
+                                                @foreach (var plant in plantList)
+                                                {
+                                                    <option value='@plant["IdPlant"]'>@plant["Plant"] - @plant["Nama_Terminal"]</option>
+                                                }
+                                            }
+                                            else if (item[2] == "IsQualityActive")
+                                            {
+                                                <option value='0' selected>Off</option>
+                                                <option value='1'>On</option>
+                                            }
+                                            else if (item[2] == "NomorGerbongKertel")
+                                            {
+                                                @foreach (var gerbong in gerbongKetelList)
+                                                {
+                                                    Console.WriteLine(gerbong);
+                                                    if (gerbong["NoKetel"].ToString() == NomorGerbongKertel)
+                                                    {
+                                                        <option value='@gerbong["NoKetel"]' selected>@gerbong["NoKetel"]</option>
+                                                    }
+                                                    else
+                                                    {
+                                                        <option value='@gerbong["NoKetel"]'>@gerbong["NoKetel"]</option>
+                                                    }
+                                                }
+                                            }
+                                        </select>
+                                        @if (item[2] == "IsQualityActive")
+                                        {
+                                            <p class="small m-0 pt-1">
+                                                Koordinasikan dengan QQ apabila ada indikasi Quality OFF.
+                                            </p>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                            else if (item[1] == "textarea")
+                            {
+                                <div id='@("row_" + item[2])' class="row mb-3">
+                                    <div class="col-2 fw-bold d-flex">
+                                        @(item[0])
+                                    </div>
+                                    <div class="col-10">
+                                        <textarea class="form-control" id="@(item[2])" name="@(item[2])" rows="3"></textarea>
+                                    </div>
+                                </div>
+                            }
+                            else if (item[1].Contains("readonly"))
+                            {
+                                <div id='@("row_" + item[2])' class="row mb-3">
+                                    <div class="col-2 fw-bold d-flex align-items-center">
+                                        @(item[0])
+                                    </div>
+                                    <div class="col-10">
+                                        <input type="text" class="form-control-plaintext" id="@(item[2])" name="@(item[2])" readonly value="@(item.Count > 3 && !string.IsNullOrEmpty(item[3]) ? item[3] : "")">
+                                    </div>
+                                </div>
+                            }
+                            else if (item[1] == "hidden")
+                            {
+                                <div id='@("row_" + item[2])' class="row mb-3 d-none">
+                                    <input type="hidden" class="form-control" id="@(item[2])" name="@(item[2])" value="@(item[0])" required>
+                                </div>
+                            }
+                            else if (item[1] == "checkbox")
+                            {
+                                <div id='@("row_" + item[2])' class="row mb-3">
+                                    <div class="col-2 fw-bold d-flex align-items-center">
+                                        @(item[0])
+                                    </div>
+                                    <div class="col-10">
+                                        <input class="form-check-input" type="checkbox" value="" id="@(item[2])" name="@(item[2])">
+                                    </div>
+                                </div>
+                            }
+                        }
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-success ew-btn"><i class="fas fa-plus me-1"></i> Add</button>
+                        <button type="button" class="btn btn-default ew-btn" data-bs-dismiss="modal"><i class="fas fa-ban me-1"></i> Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmLabel" aria-hidden="true">
+        <div class="modal-dialog modal-md modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header text-white" style="background: #3c6dbd;">
+                    <h5 class="modal-title fw-bold" id="modal-confirm-title"></h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="confirm-body">
+                    Yakin ingin menghapus data?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" id="confirmBtn" class="btn btn-danger ew-btn"><i class="fas fa-trash me-1"></i>Delete</button>
+                    <button type="button" class="btn btn-default ew-btn" data-bs-dismiss="modal"><i class="fas fa-ban me-1"></i>Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modal-warning-message" tabindex="-1" aria-labelledby="message-modal" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header text-white" style="background:#3c6dbd;">
+                    <h5 class="modal-title fw-bold" id="message-modal-title">Konfirmasi</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="message-modal-body"></div>
+                <div class="modal-footer justify-content-end gap-2">
+                    <button type="button" class="btn btn-primary" id="message-modal-confirm">
+                        <i class="fas fa-plus me-1"></i> Tambah
+                    </button>
+                    <button type="button" class="btn btn-light border" data-bs-dismiss="modal" id="message-modal-cancel">
+                        <i class="fas fa-ban me-1"></i> Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Logbook  -->
+    <div class="modal fade" id="logbookPenerimaanConfirmation" tabindex="-1" aria-labelledby="logbookPenerimaanConfirmationLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="staticBackdropLabel">Konfirmasi Penambahan data</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="logbook-add-confirm-body">
+                    Apakah anda ingin mengambil data dari penerimaan atau menambahkan data secara manual ?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" id="logbookFromPenerimaan" class="btn btn-success" data-bs-dismiss="modal">Ambil data</button>
+                    <button type="button" id="logbookAddManually" class="btn btn-primary">Tambah Manual</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reverse Status Modal -->
+    <div class="modal fade" id="confirmReverseStatusEditingModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-primary">
+                    <h1 class="modal-title fs-5" id="confirmReverseStatusEditingModalTitle">Konfirmasi Kembalikan Status</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="reverseStatusEditingModalForm">
+                    <div class="modal-body px-2 py-1">
+                        <div class="mb-3">
+                            <label for="message-text" class="col-form-label">Catatan:</label>
+                            <textarea class="form-control" id="catatanReverseStatusEditing" required rows="4"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="btnReverseStatusEditingModalCancel">Batal</button>
+                        <button type="submit" class="btn btn-primary" id="btnReverseStatusEditingModalSubmit">Lanjutkan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="loading-spinner" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 9999; justify-content: center; align-items: center;">
+        <div class="spinner-border text-primary" role="status"></div>
+    </div>
+
+</body>
+</html>
+
+<script>
+    ew.ready(["jquery", "dom", "popper"], "https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js", "select2");
+</script>
+
+<script>
+    window._aktivitasTabelConfig = {
+        NoReferensi: @Html.Raw(Json.Serialize(NoReferensi)),
+        IdProses: @Html.Raw(Json.Serialize(IdProses)),
+        Produk: @Html.Raw(Json.Serialize(Produk)),
+        IdAktivitas: @Html.Raw(Json.Serialize(IdAktivitas)),
+        NamaAktivitas: @Html.Raw(Json.Serialize(NamaAktivitas)),
+        NamaKapal: @Html.Raw(Json.Serialize(NamaKapal)),
+        NamaProduk: @Html.Raw(Json.Serialize(NamaProduk)),
+        NamaProses: @Html.Raw(Json.Serialize(NamaProses)),
+        LabelProduk: @Html.Raw(Json.Serialize(LabelProduk)),
+        IdTemplateAktivitas: @Html.Raw(Json.Serialize(IdTemplateAktivitas)),
+        StatusAktivitas: @Html.Raw(Json.Serialize(StatusAktivitas)),
+        TableAnak: @Html.Raw(Json.Serialize(TableAnak)),
+        isEditable: @Html.Raw(Json.Serialize(isEditable.ToString())),
+        TipeProses: @Html.Raw(Json.Serialize(TipeProses)),
+        userLevel: @Html.Raw(Json.Serialize(CurrentUserLevel())),
+        startDate: @Html.Raw(Json.Serialize(startDate.ToString("yyyy-MM-ddTHH:mm:ss"))),
+        DibuatOleh: @Html.Raw(Json.Serialize(DibuatOleh)),
+        TanggalDibuat: @Html.Raw(Json.Serialize(TanggalDibuat)),
+        DiperbaruiOleh: @Html.Raw(Json.Serialize(DiperbaruiOleh)),
+        TanggalDiperbarui: @Html.Raw(Json.Serialize(TanggalDiperbarui)),
+        NomorPolisi: @Html.Raw(Json.Serialize(generalList.ContainsKey("NomorPolisi") ? generalList["NomorPolisi"] : "")),
+        produkView: @Html.Raw(Json.Serialize(produkView)),
+        tangkiList: @Html.Raw(jsonTangki),
+        produkList: @Html.Raw(jsonProduk),
+        jsonData: @Html.Raw(jsonData),
+        formList: @Html.Raw(jsonForm),
+        jsonLog: @Html.Raw(jsonLog),
+        gerbongKetelList: @Html.Raw(Json.Serialize(gerbongKetelList))
+    };
+</script>
+<script src="~/js/AktivitasTabel.js"></script>
+@Html.Raw(GetDebugMessage())
+
+@Html.Raw(GetDebugMessage())

@@ -1,0 +1,570 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (closingStockAdd.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = closingStockAdd.UseLayout ? "_Layout" : "";
+}
+<script>
+var currentTable = @Html.Raw(ConvertToJson(closingStockAdd.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { ClosingStock: currentTable } });
+var currentPageID = ew.PAGE_ID = "add";
+var currentForm;
+var fClosingStockadd;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("fClosingStockadd")
+        .setPageId("add")
+
+        // Add fields
+        .setFields([
+
+            ["IdTemplate", [fields.IdTemplate.visible && fields.IdTemplate.required ? ew.Validators.required(fields.IdTemplate.caption) : null], fields.IdTemplate.isInvalid],
+            ["NomorClosingStock", [fields.NomorClosingStock.visible && fields.NomorClosingStock.required ? ew.Validators.required(fields.NomorClosingStock.caption) : null], fields.NomorClosingStock.isInvalid],
+            ["LookupPlant", [fields.LookupPlant.visible && fields.LookupPlant.required ? ew.Validators.required(fields.LookupPlant.caption) : null], fields.LookupPlant.isInvalid],
+            ["Plant", [fields.Plant.visible && fields.Plant.required ? ew.Validators.required(fields.Plant.caption) : null], fields.Plant.isInvalid],
+            ["TipeProdukSTS", [fields.TipeProdukSTS.visible && fields.TipeProdukSTS.required ? ew.Validators.required(fields.TipeProdukSTS.caption) : null], fields.TipeProdukSTS.isInvalid],
+            ["IdTangki", [fields.IdTangki.visible && fields.IdTangki.required ? ew.Validators.required(fields.IdTangki.caption) : null], fields.IdTangki.isInvalid],
+            ["TanggalClosingStock", [fields.TanggalClosingStock.visible && fields.TanggalClosingStock.required ? ew.Validators.required(fields.TanggalClosingStock.caption) : null, ew.Validators.datetime(fields.TanggalClosingStock.clientFormatPattern)], fields.TanggalClosingStock.isInvalid],
+            ["Produk", [fields.Produk.visible && fields.Produk.required ? ew.Validators.required(fields.Produk.caption) : null], fields.Produk.isInvalid],
+            ["StatusProses", [fields.StatusProses.visible && fields.StatusProses.required ? ew.Validators.required(fields.StatusProses.caption) : null], fields.StatusProses.isInvalid],
+            ["PersentaseProgress", [fields.PersentaseProgress.visible && fields.PersentaseProgress.required ? ew.Validators.required(fields.PersentaseProgress.caption) : null], fields.PersentaseProgress.isInvalid],
+            ["Catatan", [fields.Catatan.visible && fields.Catatan.required ? ew.Validators.required(fields.Catatan.caption) : null], fields.Catatan.isInvalid],
+            ["DibuatOleh", [fields.DibuatOleh.visible && fields.DibuatOleh.required ? ew.Validators.required(fields.DibuatOleh.caption) : null], fields.DibuatOleh.isInvalid],
+            ["TanggalDibuat", [fields.TanggalDibuat.visible && fields.TanggalDibuat.required ? ew.Validators.required(fields.TanggalDibuat.caption) : null], fields.TanggalDibuat.isInvalid],
+            ["PlantForLookup", [fields.PlantForLookup.visible && fields.PlantForLookup.required ? ew.Validators.required(fields.PlantForLookup.caption) : null], fields.PlantForLookup.isInvalid],
+            ["LookupJenisPlant", [fields.LookupJenisPlant.visible && fields.LookupJenisPlant.required ? ew.Validators.required(fields.LookupJenisPlant.caption) : null], fields.LookupJenisPlant.isInvalid]
+        ])
+
+        // Form_CustomValidate
+        .setCustomValidate(
+            function(fobj) { // DO NOT CHANGE THIS LINE!
+                    // Your custom validation code here, return false if invalid.
+                    return true;
+                }
+        )
+
+        // Use JavaScript validation or not
+        .setValidateRequired(ew.CLIENT_VALIDATE)
+
+        // Dynamic selection lists
+        .setLists({
+            "LookupPlant": @Html.Raw(closingStockAdd.LookupPlant.ToClientList(closingStockAdd)),
+            "Plant": @Html.Raw(closingStockAdd.Plant.ToClientList(closingStockAdd)),
+            "TipeProdukSTS": @Html.Raw(closingStockAdd.TipeProdukSTS.ToClientList(closingStockAdd)),
+            "IdTangki": @Html.Raw(closingStockAdd.IdTangki.ToClientList(closingStockAdd)),
+            "Produk": @Html.Raw(closingStockAdd.Produk.ToClientList(closingStockAdd)),
+        })
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Client script
+    var parent_url = ew.PATH_BASE;
+    $('#btn-action').on('click', function(e) {
+        e.preventDefault();
+        const UserLevel = "@CurrentUserLevel()";
+        const idRole = '@CurrentUserInfo("Rule")?.ToString()';
+        if (UserLevel != "2" && UserLevel != "-1" && UserLevel != "4" && UserLevel != "5" && UserLevel != "6" && idRole != '1' && idRole != '12' && idRole != '13') {
+            ew.alert('Anda tidak memiliki akses untuk menambah data Closing Stock.');
+            setTimeOut(() => {
+                window.location.href = parent_url+'ClosingStockList';
+            }, 1000);
+            return false;
+        }
+        const idTangki = $('#x_IdTangki').val();
+        const idProduk = $('#x_Produk').val();
+        const plantValue = $('#sv_x_Plant').val(); // yg pilih user
+        const idPlant = $('#x_Plant').val(); // yg dikirim (dihide) 
+        if (!plantValue){
+            ew.alert("Plant tidak boleh kosong.");
+            return;
+        }
+        if (plantValue && !idPlant) {
+            $('#x_Plant').val($('#x_LookupPlant').val());
+        }
+        if (!idTangki) {
+            ew.alert("Tangki tidak boleh kosong.");
+            return;
+        }
+        const selectedTangkiLabel = $('#x_IdTangki').find('option:selected').text();
+        if (selectedTangkiLabel && selectedTangkiLabel.toLowerCase().includes("pipe")) {
+                if (!idProduk) {
+                    ew.alert("Produk tidak boleh kosong untuk Tangki Pipa.");
+                    return;
+                }
+        }
+        $.ajax({
+            url: parent_url + `api/LookUpList/GetTotalTangki`,
+            type: 'GET',
+            beforeSend: function () {
+                showLoading();
+            },
+            data: {
+                idTangki: idTangki,
+                idProduk: idProduk,
+                idPlant: idPlant
+            },
+            success: function (res) {
+                if (res.totalTangki > 0) {
+                    hideLoading();
+                    if (idProduk) {
+                        ew.alert("Closing Stock untuk Tangki (Pipa) dengan Produk ini sudah dilakukan hari ini.");
+                    } else {
+                        ew.alert("Tangki ini sudah melakukan closing stock hari ini. Silahkan cek kembali.");
+                    }
+                    // stop di sini, jangan biarkan submit
+                } else {
+                    hideLoading();
+                    $('#fClosingStockadd').submit();
+                }
+            },
+            error: function () {
+                ew.alert("Gagal melakukan pengecekan data tangki.");
+                hideLoading();
+            }
+        });
+    });
+    function checkTangkiTypeAndToggleProduk() {
+        const selectedLabel = $('#x_IdTangki').find('option:selected').text();
+        const $produkRow = $('#r_Produk');
+        if (selectedLabel && selectedLabel.toLowerCase().includes("pipe")) {
+            $produkRow.show();
+        } else {
+            $produkRow.hide();
+            $('#x_Produk').val(null).trigger('change'); 
+        }
+    }
+    $('#x_IdTangki').on('change', function() {
+        $('#x_Produk').val(null).trigger('change'); 
+        checkTangkiTypeAndToggleProduk();
+    });
+    $(document).ready(function() {
+            checkTangkiTypeAndToggleProduk();
+    });
+    $('#x_LookupJenisPlant').change(function () {
+        if ($(this).val() == 'STS') {
+            $('#r_TipeProdukSTS').show();
+        } else {
+            $('#r_TipeProdukSTS').hide();
+            $('#x_TipeProdukSTS').val('');
+        }
+    });
+    $('#x_LookupPlant').on("change", function () {
+        const selectedValue = $(this).val();
+        const selectedLabel = $(this).find('option:selected').text();
+        $('#sv_x_Plant').val(selectedLabel);
+        $('#x_Plant').val(selectedValue).trigger('change');
+        $('#x_IdTangki').val(null).trigger('change');
+        $('#x_Produk').val(null).trigger('change');
+        const $produkSelect = $('#x_Produk');
+        $produkSelect.empty().append('<option value="">Loading...</option>');
+        if (selectedValue) {
+            $.ajax({
+                url: parent_url + 'api/LookUpList/get-dropdown/produk-by-plant',
+                type: 'GET',
+                data: { plantId: selectedValue },
+                success: function(data) {
+                    $produkSelect.empty();
+                    $produkSelect.append('<option value="">Please Select</option>');
+                    if (data && data.length > 0) {
+                        $.each(data, function(i, item) {
+                            var newOption = new Option(item.Label, item.Value, false, false);
+                            $produkSelect.append(newOption);
+                        });
+                    } else {
+                        console.warn("No products found for this plant type.");
+                    }
+                    $produkSelect.trigger('change'); 
+                },
+            });
+        } else {
+            $produkSelect.empty().append('<option value="">Please Select</option>');
+        }
+    });
+});
+</script>
+@closingStockAdd.ShowPageHeader()
+@closingStockAdd.ShowMessages()
+<form name="fClosingStockadd" id="fClosingStockadd" class="@(closingStockAdd.FormClassName)" action="@AppPath(CurrentPageName())" method="post" novalidate autocomplete="off">
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+<input type="hidden" name="action" id="action" value="insert">
+<input type="hidden" name="modal" value="@ConvertToInt(closingStockAdd.IsModal)">
+@if (IsJsonResponse()) {
+<input type="hidden" name="json" value="1">
+}
+<input type="hidden" name="@(closingStockAdd.OldKeyName)" value="@Html.Raw(closingStockAdd.OldKey)">
+<div class="ew-add-div"><!-- page* -->
+    <span id="el_ClosingStock_IdTemplate">
+    <input type="hidden" data-table="ClosingStock" data-field="x_IdTemplate" data-hidden="1" name="x_IdTemplate" id="x_IdTemplate" value="@Html.Raw(HtmlEncode(closingStockAdd.IdTemplate.CurrentValue))">
+    </span>
+@if (closingStockAdd.NomorClosingStock.Visible) { // closingStockAdd.NomorClosingStock.Visible (begin)
+    <div id="r_NomorClosingStock" @Html.Raw(closingStockAdd.NomorClosingStock.RowAttributes)>
+        <label id="elh_ClosingStock_NomorClosingStock" for="x_NomorClosingStock" class="@(closingStockAdd.LeftColumnClass)">@Html.Raw(closingStockAdd.NomorClosingStock.Caption)@Html.Raw(closingStockAdd.NomorClosingStock.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(closingStockAdd.RightColumnClass)"><div @Html.Raw(closingStockAdd.NomorClosingStock.CellAttributes)>
+<span id="el_ClosingStock_NomorClosingStock">
+<input type="@(closingStockAdd.NomorClosingStock.InputTextType)" name="x_NomorClosingStock" id="x_NomorClosingStock" data-table="ClosingStock" data-field="x_NomorClosingStock" value="@Html.Raw(closingStockAdd.NomorClosingStock.EditValue)" size="30" maxlength="50" placeholder="@Html.Raw(HtmlEncode(closingStockAdd.NomorClosingStock.PlaceHolder))" data-format-pattern="@(closingStockAdd.NomorClosingStock.FormatPattern)"@Html.Raw(closingStockAdd.NomorClosingStock.EditAttributes) aria-describedby="x_NomorClosingStock_help">
+@Html.Raw(closingStockAdd.NomorClosingStock.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(closingStockAdd.NomorClosingStock.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* closingStockAdd.NomorClosingStock.Visible (end) *@
+@if (closingStockAdd.LookupPlant.Visible) { // closingStockAdd.LookupPlant.Visible (begin)
+    <div id="r_LookupPlant" @Html.Raw(closingStockAdd.LookupPlant.RowAttributes)>
+        <label id="elh_ClosingStock_LookupPlant" for="x_LookupPlant" class="@(closingStockAdd.LeftColumnClass)">@Html.Raw(closingStockAdd.LookupPlant.Caption)@Html.Raw(closingStockAdd.LookupPlant.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(closingStockAdd.RightColumnClass)"><div @Html.Raw(closingStockAdd.LookupPlant.CellAttributes)>
+<span id="el_ClosingStock_LookupPlant">
+    <select
+        id="x_LookupPlant"
+        name="x_LookupPlant"
+        class="form-select ew-select@(closingStockAdd.LookupPlant.IsInvalidClass)"
+        data-select2-id="fClosingStockadd_x_LookupPlant"
+        data-table="ClosingStock"
+        data-field="x_LookupPlant"
+        data-value-separator="@(closingStockAdd.LookupPlant.DisplayValueSeparatorAttribute)"
+        data-placeholder="@(HtmlEncode(closingStockAdd.LookupPlant.PlaceHolder))"
+        @Html.Raw(closingStockAdd.LookupPlant.EditAttributes)>
+        @(closingStockAdd.LookupPlant.SelectOptionListHtml("x_LookupPlant"))
+    </select>
+    @Html.Raw(closingStockAdd.LookupPlant.GetCustomMessage)
+    <div class="invalid-feedback">@Html.Raw(closingStockAdd.LookupPlant.GetErrorMessage())</div>
+<script>
+loadjs.ready("fClosingStockadd", function() {
+    var options = { name: "x_LookupPlant", selectId: "fClosingStockadd_x_LookupPlant" },
+        el = document.querySelector("select[data-select2-id='" + options.selectId + "']");
+    if (!el)
+        return;
+    options.closeOnSelect = !options.multiple;
+    options.dropdownParent = el.closest("#ew-modal-dialog, #ew-add-opt-dialog");
+    if (fClosingStockadd.lists.LookupPlant?.lookupOptions.length) {
+        options.data = { id: "x_LookupPlant", form: "fClosingStockadd" };
+    } else {
+        options.ajax = { id: "x_LookupPlant", form: "fClosingStockadd", limit: ew.LOOKUP_PAGE_SIZE };
+    }
+    options.minimumInputLength = ew.selectMinimumInputLength;
+    options = Object.assign({}, ew.selectOptions, options, ew.vars.tables.ClosingStock.fields.LookupPlant.selectOptions);
+    ew.createSelect(options);
+});
+</script>
+</span>
+</div></div>
+    </div>
+} @* closingStockAdd.LookupPlant.Visible (end) *@
+@if (closingStockAdd.Plant.Visible) { // closingStockAdd.Plant.Visible (begin)
+    <div id="r_Plant" @Html.Raw(closingStockAdd.Plant.RowAttributes)>
+        <label id="elh_ClosingStock_Plant" class="@(closingStockAdd.LeftColumnClass)">@Html.Raw(closingStockAdd.Plant.Caption)@Html.Raw(closingStockAdd.Plant.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(closingStockAdd.RightColumnClass)"><div @Html.Raw(closingStockAdd.Plant.CellAttributes)>
+<span id="el_ClosingStock_Plant">
+<span>@{
+    if (IsRTL) {
+        closingStockAdd.Plant.EditAttrs["dir"] = "rtl";
+    }
+}</span>
+<span id="as_x_Plant" class="ew-auto-suggest">
+    <input type="text" class="form-control" name="sv_x_Plant" id="sv_x_Plant" value="@(RemoveHtml(ConvertToString(closingStockAdd.Plant.EditValue)))" autocomplete="off" size="30" maxlength="10" placeholder="@Html.Raw(HtmlEncode(closingStockAdd.Plant.PlaceHolder))" data-placeholder="@Html.Raw(HtmlEncode(closingStockAdd.Plant.PlaceHolder))" data-format-pattern="@(closingStockAdd.Plant.FormatPattern)" @Html.Raw(closingStockAdd.Plant.EditAttributes) aria-describedby="x_Plant_help">
+</span>
+<selection-list hidden class="form-control" data-table="ClosingStock" data-field="x_Plant" data-input="sv_x_Plant" data-value-separator="@(closingStockAdd.Plant.DisplayValueSeparatorAttribute)" name="x_Plant" id="x_Plant" value="@(HtmlEncode(closingStockAdd.Plant.CurrentValue))" data-ew-action="autofill"></selection-list>
+@Html.Raw(closingStockAdd.Plant.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(closingStockAdd.Plant.GetErrorMessage())</div>
+<script>
+loadjs.ready(["fClosingStockadd"], function() {
+    fClosingStockadd.createAutoSuggest(Object.assign({"id":"x_Plant","forceSelect":true}, { lookupAllDisplayFields: @(closingStockAdd.Plant.Lookup.LookupAllDisplayFields ? "true" : "false") }, ew.vars.tables.ClosingStock.fields.Plant.autoSuggestOptions));
+});
+</script>
+@Html.Raw(closingStockAdd.Plant.Lookup.GetParamTag(closingStockAdd, "p_x_Plant"))
+</span>
+</div></div>
+    </div>
+} @* closingStockAdd.Plant.Visible (end) *@
+@if (closingStockAdd.TipeProdukSTS.Visible) { // closingStockAdd.TipeProdukSTS.Visible (begin)
+    <div id="r_TipeProdukSTS" @Html.Raw(closingStockAdd.TipeProdukSTS.RowAttributes)>
+        <label id="elh_ClosingStock_TipeProdukSTS" for="x_TipeProdukSTS" class="@(closingStockAdd.LeftColumnClass)">@Html.Raw(closingStockAdd.TipeProdukSTS.Caption)@Html.Raw(closingStockAdd.TipeProdukSTS.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(closingStockAdd.RightColumnClass)"><div @Html.Raw(closingStockAdd.TipeProdukSTS.CellAttributes)>
+<span id="el_ClosingStock_TipeProdukSTS">
+    <select
+        id="x_TipeProdukSTS"
+        name="x_TipeProdukSTS"
+        class="form-select ew-select@(closingStockAdd.TipeProdukSTS.IsInvalidClass)"
+        data-select2-id="fClosingStockadd_x_TipeProdukSTS"
+        data-table="ClosingStock"
+        data-field="x_TipeProdukSTS"
+        data-value-separator="@(closingStockAdd.TipeProdukSTS.DisplayValueSeparatorAttribute)"
+        data-placeholder="@(HtmlEncode(closingStockAdd.TipeProdukSTS.PlaceHolder))"
+        @Html.Raw(closingStockAdd.TipeProdukSTS.EditAttributes)>
+        @(closingStockAdd.TipeProdukSTS.SelectOptionListHtml("x_TipeProdukSTS"))
+    </select>
+    @Html.Raw(closingStockAdd.TipeProdukSTS.GetCustomMessage)
+    <div class="invalid-feedback">@Html.Raw(closingStockAdd.TipeProdukSTS.GetErrorMessage())</div>
+@Html.Raw(closingStockAdd.TipeProdukSTS.Lookup.GetParamTag(closingStockAdd, "p_x_TipeProdukSTS"))
+<script>
+loadjs.ready("fClosingStockadd", function() {
+    var options = { name: "x_TipeProdukSTS", selectId: "fClosingStockadd_x_TipeProdukSTS" },
+        el = document.querySelector("select[data-select2-id='" + options.selectId + "']");
+    if (!el)
+        return;
+    options.closeOnSelect = !options.multiple;
+    options.dropdownParent = el.closest("#ew-modal-dialog, #ew-add-opt-dialog");
+    if (fClosingStockadd.lists.TipeProdukSTS?.lookupOptions.length) {
+        options.data = { id: "x_TipeProdukSTS", form: "fClosingStockadd" };
+    } else {
+        options.ajax = { id: "x_TipeProdukSTS", form: "fClosingStockadd", limit: ew.LOOKUP_PAGE_SIZE };
+    }
+    options.minimumResultsForSearch = Infinity;
+    options = Object.assign({}, ew.selectOptions, options, ew.vars.tables.ClosingStock.fields.TipeProdukSTS.selectOptions);
+    ew.createSelect(options);
+});
+</script>
+</span>
+</div></div>
+    </div>
+} @* closingStockAdd.TipeProdukSTS.Visible (end) *@
+@if (closingStockAdd.IdTangki.Visible) { // closingStockAdd.IdTangki.Visible (begin)
+    <div id="r_IdTangki" @Html.Raw(closingStockAdd.IdTangki.RowAttributes)>
+        <label id="elh_ClosingStock_IdTangki" for="x_IdTangki" class="@(closingStockAdd.LeftColumnClass)">@Html.Raw(closingStockAdd.IdTangki.Caption)@Html.Raw(closingStockAdd.IdTangki.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(closingStockAdd.RightColumnClass)"><div @Html.Raw(closingStockAdd.IdTangki.CellAttributes)>
+<span id="el_ClosingStock_IdTangki">
+    <select
+        id="x_IdTangki"
+        name="x_IdTangki"
+        class="form-select ew-select@(closingStockAdd.IdTangki.IsInvalidClass)"
+        data-select2-id="fClosingStockadd_x_IdTangki"
+        data-table="ClosingStock"
+        data-field="x_IdTangki"
+        data-value-separator="@(closingStockAdd.IdTangki.DisplayValueSeparatorAttribute)"
+        data-placeholder="@(HtmlEncode(closingStockAdd.IdTangki.PlaceHolder))"
+        @Html.Raw(closingStockAdd.IdTangki.EditAttributes)>
+        @(closingStockAdd.IdTangki.SelectOptionListHtml("x_IdTangki"))
+    </select>
+    @Html.Raw(closingStockAdd.IdTangki.GetCustomMessage)
+    <div class="invalid-feedback">@Html.Raw(closingStockAdd.IdTangki.GetErrorMessage())</div>
+@Html.Raw(closingStockAdd.IdTangki.Lookup.GetParamTag(closingStockAdd, "p_x_IdTangki"))
+<script>
+loadjs.ready("fClosingStockadd", function() {
+    var options = { name: "x_IdTangki", selectId: "fClosingStockadd_x_IdTangki" },
+        el = document.querySelector("select[data-select2-id='" + options.selectId + "']");
+    if (!el)
+        return;
+    options.closeOnSelect = !options.multiple;
+    options.dropdownParent = el.closest("#ew-modal-dialog, #ew-add-opt-dialog");
+    if (fClosingStockadd.lists.IdTangki?.lookupOptions.length) {
+        options.data = { id: "x_IdTangki", form: "fClosingStockadd" };
+    } else {
+        options.ajax = { id: "x_IdTangki", form: "fClosingStockadd", limit: ew.LOOKUP_PAGE_SIZE };
+    }
+    options.minimumInputLength = ew.selectMinimumInputLength;
+    options = Object.assign({}, ew.selectOptions, options, ew.vars.tables.ClosingStock.fields.IdTangki.selectOptions);
+    ew.createSelect(options);
+});
+</script>
+</span>
+</div></div>
+    </div>
+} @* closingStockAdd.IdTangki.Visible (end) *@
+@if (closingStockAdd.TanggalClosingStock.Visible) { // closingStockAdd.TanggalClosingStock.Visible (begin)
+    <div id="r_TanggalClosingStock" @Html.Raw(closingStockAdd.TanggalClosingStock.RowAttributes)>
+        <label id="elh_ClosingStock_TanggalClosingStock" for="x_TanggalClosingStock" class="@(closingStockAdd.LeftColumnClass)">@Html.Raw(closingStockAdd.TanggalClosingStock.Caption)@Html.Raw(closingStockAdd.TanggalClosingStock.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(closingStockAdd.RightColumnClass)"><div @Html.Raw(closingStockAdd.TanggalClosingStock.CellAttributes)>
+<span id="el_ClosingStock_TanggalClosingStock">
+<input type="@(closingStockAdd.TanggalClosingStock.InputTextType)" name="x_TanggalClosingStock" id="x_TanggalClosingStock" data-table="ClosingStock" data-field="x_TanggalClosingStock" value="@Html.Raw(closingStockAdd.TanggalClosingStock.EditValue)" placeholder="@Html.Raw(HtmlEncode(closingStockAdd.TanggalClosingStock.PlaceHolder))" data-format-pattern="@(closingStockAdd.TanggalClosingStock.FormatPattern)"@Html.Raw(closingStockAdd.TanggalClosingStock.EditAttributes) aria-describedby="x_TanggalClosingStock_help">
+@Html.Raw(closingStockAdd.TanggalClosingStock.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(closingStockAdd.TanggalClosingStock.GetErrorMessage())</div>
+@if (!closingStockAdd.TanggalClosingStock.ReadOnly && !closingStockAdd.TanggalClosingStock.Disabled && !closingStockAdd.TanggalClosingStock.EditAttrs.Is("readonly") && !closingStockAdd.TanggalClosingStock.EditAttrs.Is("disabled")) {
+<script>
+loadjs.ready(["fClosingStockadd", "datetimepicker"], function () {
+    let format = "@Html.Raw(DateFormat(9))", // DN
+        options = {
+                localization: {
+                    locale: ew.LANGUAGE_ID + "-u-nu-" + ew.getNumberingSystem(),
+                    hourCycle: format.match(/H/) ? "h24" : "h12",
+                    format,
+                    ...ew.language.phrase("datetimepicker")
+                },
+                display: {
+                    icons: {
+                        previous: ew.IS_RTL ? "fa-solid fa-chevron-right" : "fa-solid fa-chevron-left",
+                        next: ew.IS_RTL ? "fa-solid fa-chevron-left" : "fa-solid fa-chevron-right"
+                    },
+                    components: {
+                        clock: !!format.match(/h/i) || !!format.match(/m/) || !!format.match(/s/i),
+                        hours: !!format.match(/h/i),
+                        minutes: !!format.match(/m/),
+                        seconds: !!format.match(/s/i)
+                    },
+                theme: ew.getPreferredTheme()
+                }
+            };
+    ew.createDateTimePicker("fClosingStockadd", "x_TanggalClosingStock", ew.deepAssign({"useCurrent":false,"display":{"sideBySide":false}}, options));
+});
+</script>
+}
+</span>
+</div></div>
+    </div>
+} @* closingStockAdd.TanggalClosingStock.Visible (end) *@
+@if (closingStockAdd.Produk.Visible) { // closingStockAdd.Produk.Visible (begin)
+    <div id="r_Produk" @Html.Raw(closingStockAdd.Produk.RowAttributes)>
+        <label id="elh_ClosingStock_Produk" for="x_Produk" class="@(closingStockAdd.LeftColumnClass)">@Html.Raw(closingStockAdd.Produk.Caption)@Html.Raw(closingStockAdd.Produk.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(closingStockAdd.RightColumnClass)"><div @Html.Raw(closingStockAdd.Produk.CellAttributes)>
+<span id="el_ClosingStock_Produk">
+    <select
+        id="x_Produk"
+        name="x_Produk"
+        class="form-select ew-select@(closingStockAdd.Produk.IsInvalidClass)"
+        data-select2-id="fClosingStockadd_x_Produk"
+        data-table="ClosingStock"
+        data-field="x_Produk"
+        data-value-separator="@(closingStockAdd.Produk.DisplayValueSeparatorAttribute)"
+        data-placeholder="@(HtmlEncode(closingStockAdd.Produk.PlaceHolder))"
+        @Html.Raw(closingStockAdd.Produk.EditAttributes)>
+        @(closingStockAdd.Produk.SelectOptionListHtml("x_Produk"))
+    </select>
+    @Html.Raw(closingStockAdd.Produk.GetCustomMessage)
+    <div class="invalid-feedback">@Html.Raw(closingStockAdd.Produk.GetErrorMessage())</div>
+<script>
+loadjs.ready("fClosingStockadd", function() {
+    var options = { name: "x_Produk", selectId: "fClosingStockadd_x_Produk" },
+        el = document.querySelector("select[data-select2-id='" + options.selectId + "']");
+    if (!el)
+        return;
+    options.closeOnSelect = !options.multiple;
+    options.dropdownParent = el.closest("#ew-modal-dialog, #ew-add-opt-dialog");
+    if (fClosingStockadd.lists.Produk?.lookupOptions.length) {
+        options.data = { id: "x_Produk", form: "fClosingStockadd" };
+    } else {
+        options.ajax = { id: "x_Produk", form: "fClosingStockadd", limit: ew.LOOKUP_PAGE_SIZE };
+    }
+    options.minimumInputLength = ew.selectMinimumInputLength;
+    options = Object.assign({}, ew.selectOptions, options, ew.vars.tables.ClosingStock.fields.Produk.selectOptions);
+    ew.createSelect(options);
+});
+</script>
+</span>
+</div></div>
+    </div>
+} @* closingStockAdd.Produk.Visible (end) *@
+    <span id="el_ClosingStock_StatusProses">
+    <input type="hidden" data-table="ClosingStock" data-field="x_StatusProses" data-hidden="1" name="x_StatusProses" id="x_StatusProses" value="@Html.Raw(HtmlEncode(closingStockAdd.StatusProses.CurrentValue))">
+    </span>
+    <span id="el_ClosingStock_PersentaseProgress">
+    <input type="hidden" data-table="ClosingStock" data-field="x_PersentaseProgress" data-hidden="1" name="x_PersentaseProgress" id="x_PersentaseProgress" value="@Html.Raw(HtmlEncode(closingStockAdd.PersentaseProgress.CurrentValue))">
+    </span>
+@if (closingStockAdd.Catatan.Visible) { // closingStockAdd.Catatan.Visible (begin)
+    <div id="r_Catatan" @Html.Raw(closingStockAdd.Catatan.RowAttributes)>
+        <label id="elh_ClosingStock_Catatan" for="x_Catatan" class="@(closingStockAdd.LeftColumnClass)">@Html.Raw(closingStockAdd.Catatan.Caption)@Html.Raw(closingStockAdd.Catatan.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(closingStockAdd.RightColumnClass)"><div @Html.Raw(closingStockAdd.Catatan.CellAttributes)>
+<span id="el_ClosingStock_Catatan">
+<textarea data-table="ClosingStock" data-field="x_Catatan" name="x_Catatan" id="x_Catatan" cols="35" rows="4" placeholder="@Html.Raw(HtmlEncode(closingStockAdd.Catatan.PlaceHolder))"@Html.Raw(closingStockAdd.Catatan.EditAttributes) aria-describedby="x_Catatan_help">@(closingStockAdd.Catatan.EditValue)</textarea>
+@Html.Raw(closingStockAdd.Catatan.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(closingStockAdd.Catatan.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* closingStockAdd.Catatan.Visible (end) *@
+@if (closingStockAdd.PlantForLookup.Visible) { // closingStockAdd.PlantForLookup.Visible (begin)
+    <div id="r_PlantForLookup" @Html.Raw(closingStockAdd.PlantForLookup.RowAttributes)>
+        <label id="elh_ClosingStock_PlantForLookup" class="@(closingStockAdd.LeftColumnClass)">@Html.Raw(closingStockAdd.PlantForLookup.Caption)@Html.Raw(closingStockAdd.PlantForLookup.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(closingStockAdd.RightColumnClass)"><div @Html.Raw(closingStockAdd.PlantForLookup.CellAttributes)>
+<span id="el_ClosingStock_PlantForLookup">
+<input type="@(closingStockAdd.PlantForLookup.InputTextType)" name="x_PlantForLookup" id="x_PlantForLookup" data-table="ClosingStock" data-field="x_PlantForLookup" value="@Html.Raw(closingStockAdd.PlantForLookup.EditValue)" size="30" maxlength="1" placeholder="@Html.Raw(HtmlEncode(closingStockAdd.PlantForLookup.PlaceHolder))" data-format-pattern="@(closingStockAdd.PlantForLookup.FormatPattern)"@Html.Raw(closingStockAdd.PlantForLookup.EditAttributes) aria-describedby="x_PlantForLookup_help">
+@Html.Raw(closingStockAdd.PlantForLookup.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(closingStockAdd.PlantForLookup.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* closingStockAdd.PlantForLookup.Visible (end) *@
+@if (closingStockAdd.LookupJenisPlant.Visible) { // closingStockAdd.LookupJenisPlant.Visible (begin)
+    <div id="r_LookupJenisPlant" @Html.Raw(closingStockAdd.LookupJenisPlant.RowAttributes)>
+        <label id="elh_ClosingStock_LookupJenisPlant" class="@(closingStockAdd.LeftColumnClass)">@Html.Raw(closingStockAdd.LookupJenisPlant.Caption)@Html.Raw(closingStockAdd.LookupJenisPlant.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(closingStockAdd.RightColumnClass)"><div @Html.Raw(closingStockAdd.LookupJenisPlant.CellAttributes)>
+<span id="el_ClosingStock_LookupJenisPlant">
+<input type="@(closingStockAdd.LookupJenisPlant.InputTextType)" name="x_LookupJenisPlant" id="x_LookupJenisPlant" data-table="ClosingStock" data-field="x_LookupJenisPlant" value="@Html.Raw(closingStockAdd.LookupJenisPlant.EditValue)" size="30" maxlength="1" placeholder="@Html.Raw(HtmlEncode(closingStockAdd.LookupJenisPlant.PlaceHolder))" data-format-pattern="@(closingStockAdd.LookupJenisPlant.FormatPattern)"@Html.Raw(closingStockAdd.LookupJenisPlant.EditAttributes) aria-describedby="x_LookupJenisPlant_help">
+@Html.Raw(closingStockAdd.LookupJenisPlant.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(closingStockAdd.LookupJenisPlant.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* closingStockAdd.LookupJenisPlant.Visible (end) *@
+</div><!-- /page* -->
+@{ closingStockAdd.CloseRecordset(); }
+@Html.Raw(closingStockAdd.IsModal ? "<template class=\"ew-modal-buttons\">" : "<div class=\"row ew-buttons\">")<!-- buttons .row -->
+    <div class="@(closingStockAdd.OffsetColumnClass)"><!-- buttons offset -->
+    <button class="btn btn-primary ew-btn" name="btn-action" id="btn-action" type="submit" form="fClosingStockadd">@Html.Raw(Language.Phrase("AddBtn"))</button>
+@if (IsJsonResponse()) {
+    <button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" data-bs-dismiss="modal">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+} else {
+    <button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" form="fClosingStockadd" data-href="@AppPath(closingStockAdd.ReturnUrl)">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+}
+    </div><!-- /buttons offset -->
+@Html.Raw(closingStockAdd.IsModal ? "</template>" : "</div>")<!-- /buttons .row -->
+</form>
+@closingStockAdd.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("ClosingStock");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Startup script
+    var parent_url = ew.PATH_BASE;$('#r_PlantForLookup').hide();
+    $('#r_NomorClosingStock').hide();
+    $('#r_LookupJenisPlant').hide();
+    $('#r_TipeProdukSTS').hide();
+    $('#r_Plant').hide();
+    $(document).ready(function () {
+        const ddl = $("#x_LookupPlant");
+        ddl.empty();
+        ddl.append('<option value="">Loading...</option>');
+        $.ajax({
+            url: parent_url + 'api/LookUpList/get-dropdown/plant?Menu=ClosingStock',
+            method: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                ddl.empty(); 
+                $.each(data, function (index, item) {
+                    const selected = index === 0 ? 'selected' : '';
+                    ddl.append(`<option value="${item.Value}" ${selected}>${item.Label}</option>`);
+                    if (selected){
+                        $('#sv_x_Plant').val(item.Label);
+                        $('#x_Plant').val(item.Value).trigger('change');
+                        setTimeout(function() {
+                            $("#x_LookupPlant").val(item.Value).trigger('change');
+                        }, 100);
+                    }
+                });
+            },
+            error: function (xhr, status, error) {
+                console.error("Gagal ambil data dropdown:", error);
+                ddl.empty();
+            }
+        });
+        const UserLevel = "@CurrentUserLevel()";
+        const idRole = '@CurrentUserInfo("Rule")?.ToString()';
+        if (UserLevel != "2" && UserLevel != "-1" && UserLevel != "4" && UserLevel != "5" && UserLevel != "6" && idRole != '1' && idRole != '12' && idRole != '13') {
+            ew.alert('Anda tidak memiliki akses untuk menambah data Closing Stock.');
+            setTimeout(() => {
+                window.location.href = parent_url+'ClosingStockList';
+            }, 1000);
+        }
+    });
+});
+</script>

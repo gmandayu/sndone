@@ -1,0 +1,764 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (welcomePage.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = welcomePage.UseLayout ? "_Layout" : "";
+}
+@welcomePage.ShowMessages()
+@{
+    var userLevel = CurrentUserLevel();
+    var userIdPosition = CurrentUserInfo("IdPosition") ?? "0";
+    var plantId = "";
+    var whereFilter = "";
+    var whereFilterPlant = "";
+    var whereFilterPoV = ""; 
+    var whereFilterPlantGHK = ""; 
+    var whereFilterPlantBukuTamu = ""; 
+    List<string> plantFilters = new();
+    var result = new List<object>();
+    var penyaluranProcessSalesList = new List<object>();
+    var penyaluranProcessKonsinyasiList = new List<object>();
+    var startDate = Request.Query.TryGetValue("startDate", out var sd) && !string.IsNullOrEmpty(sd) ? sd.ToString() : DateTime.Now.ToString("yyyy-MM-dd");
+    var endDate = Request.Query.TryGetValue("endDate", out var ed) && !string.IsNullOrEmpty(ed) ? ed.ToString() : DateTime.Now.ToString("yyyy-MM-dd");
+    var regionIdParam = Request.Query.TryGetValue("region", out var rp) && !string.IsNullOrEmpty(rp) ? rp.ToString() : "";
+    var plantIdParam = Request.Query.TryGetValue("plant", out var pp) && !string.IsNullOrEmpty(pp) ? pp.ToString() : "";
+    var regions = new List<object>();
+    var plants = new List<object>();
+    
+    var filterBetweenDate = $"WHERE CAST(TanggalDibuat AS date) BETWEEN '{startDate}' AND '{endDate}'";
+
+    if (userLevel != "-1" && userLevel != "3" && userLevel != "4")
+    {
+        plantId = CurrentUserInfo("Plant")?.ToString();
+    }
+
+    if (userLevel == "4")
+    {
+        var regionsTask = DatabaseQueryHelper.ExecuteSelectListQueryAsync<object>(
+            "SELECT DISTINCT MR.IdRegion, MR.Region FROM MappingPosition MP JOIN MasterRegion MR ON MP.IdRegion = MR.IdRegion WHERE MP.IdRegion IN (SELECT IdRegion FROM MappingPosition WHERE IdPosition = @IdPosition)",
+            reader => new
+            {
+                IdRegion = reader.GetInt32("IdRegion").ToString(),
+                Region = reader.IsDBNull("Region") ? null : reader.GetString("Region")
+            },
+            new Dictionary<string, object> {{"@IdPosition", userIdPosition}});
+        
+        var plantsTask = DatabaseQueryHelper.ExecuteSelectListQueryAsync<object>(
+            "SELECT DISTINCT IdPlant, NamaPlant as Terminal, IdRegion as Region FROM MappingPosition WHERE IdRegion IN (SELECT IdRegion FROM MappingPosition WHERE IdPosition = @IdPosition)",
+            reader => new
+            {
+                IdPlant = reader.GetInt32("IdPlant").ToString(),
+                Terminal = reader.IsDBNull("Terminal") ? null : reader.GetString("Terminal"),
+                Region = reader.GetInt32("Region").ToString()
+            },
+            new Dictionary<string, object> {{"@IdPosition", userIdPosition}});
+        
+        await Task.WhenAll(regionsTask, plantsTask);
+        regions = regionsTask.Result;
+        plants = plantsTask.Result;
+        
+        if (!string.IsNullOrEmpty(plantIdParam) && plantIdParam != "All")
+        {
+            plantFilters.Add(plantIdParam);
+        }
+        else if (!string.IsNullOrEmpty(regionIdParam) && regionIdParam != "All")
+        {   
+            plantFilters = await DatabaseQueryHelper.ExecuteSelectListQueryAsync<string>(
+                "SELECT IdPlant FROM MasterPlant WHERE Region = @Region",
+                reader => reader.GetInt32("IdPlant").ToString(), 
+                new Dictionary<string, object>{{ "@Region", regionIdParam }});
+        }
+        else 
+        {
+            plantFilters = await DatabaseQueryHelper.ExecuteSelectListQueryAsync<string>(
+                "SELECT IdPlant FROM MasterPlant WHERE Region IN (SELECT IdRegion FROM MappingPosition WHERE IdPosition = @userIdPosition)",
+                reader => reader.GetInt32("IdPlant").ToString(),
+                new Dictionary<string, object>{{ "@userIdPosition", userIdPosition }});
+        }
+    } else if (userLevel == "-1" || userLevel == "3")
+    {
+        var regionsTask = DatabaseQueryHelper.ExecuteSelectListQueryAsync<object>(
+            "SELECT IdRegion, Region FROM MasterRegion",
+            reader => new
+            {
+                IdRegion = reader.GetInt32("IdRegion").ToString(),
+                Region = reader.IsDBNull("Region") ? null : reader.GetString("Region")
+            });
+        
+        var plantsTask = DatabaseQueryHelper.ExecuteSelectListQueryAsync<object>(
+            "SELECT IdPlant, Nama_Terminal as Terminal, Region FROM MasterPlant",
+            reader => new
+            {
+                IdPlant = reader.GetInt32("IdPlant").ToString(),
+                Terminal = reader.IsDBNull("Terminal") ? null : reader.GetString("Terminal"),
+                Region = reader.IsDBNull("Region") ? null : reader.GetString("Region")
+            });
+        
+        await Task.WhenAll(regionsTask, plantsTask);
+        regions = regionsTask.Result;
+        plants = plantsTask.Result;
+        
+        if (!string.IsNullOrEmpty(plantIdParam) && plantIdParam != "All")
+        {
+            plantFilters.Add(plantIdParam);
+        }
+        else if (!string.IsNullOrEmpty(regionIdParam) && regionIdParam != "All")
+        {
+            plantFilters = await DatabaseQueryHelper.ExecuteSelectListQueryAsync<string>(
+                "SELECT IdPlant FROM MasterPlant WHERE Region = @Region",
+                reader => reader.GetInt32("IdPlant").ToString(), 
+                new Dictionary<string, object>{{ "@Region", regionIdParam }});
+        }
+        else 
+        {
+            plantFilters = await DatabaseQueryHelper.ExecuteSelectListQueryAsync<string>(
+                "SELECT IdPlant FROM MasterPlant",
+                reader => reader.GetInt32("IdPlant").ToString());
+        }
+    } else 
+    {
+        var regionsTask = DatabaseQueryHelper.ExecuteSelectListQueryAsync<object>(
+            "SELECT IdRegion, Region FROM MasterRegion WHERE IdRegion in (SELECT MR.IdRegion as Region FROM MappingPosition MP JOIN MasterRegion MR ON MR.IdRegion = MP.IdRegion WHERE IdPosition = @IdPosition)",
+            reader => new
+            {
+                IdRegion = reader.GetInt32("IdRegion").ToString(),
+                Region = reader.IsDBNull("Region") ? null : reader.GetString("Region")
+            }, 
+            new Dictionary<string, object>{{ "@IdPosition", userIdPosition }});
+
+        var plantsTask = DatabaseQueryHelper.ExecuteSelectListQueryAsync<object>(
+            "SELECT MP.IdPlant, MP.NamaPlant as Terminal, MR.IdRegion as Region FROM MappingPosition MP JOIN MasterRegion MR ON MR.IdRegion = MP.IdRegion WHERE IdPosition = @IdPosition",
+            reader => new
+            {
+                IdPlant = reader.GetInt32("IdPlant").ToString(),
+                Terminal = reader.IsDBNull("Terminal") ? null : reader.GetString("Terminal"),
+                Region = reader.GetInt32("Region").ToString()
+            }, 
+            new Dictionary<string, object>{{ "@IdPosition", userIdPosition }});
+        
+        await Task.WhenAll(regionsTask, plantsTask);
+        regions = regionsTask.Result;
+        plants = plantsTask.Result;
+
+        if (!string.IsNullOrEmpty(plantIdParam) && plantIdParam != "All")
+        {
+            plantFilters.Add(plantIdParam);
+        }
+        else 
+        {
+            plantFilters = await DatabaseQueryHelper.ExecuteSelectListQueryAsync<string>(
+                "SELECT DISTINCT IdPlant FROM MappingPosition WHERE IdPosition = @userIdPosition",
+                reader => reader.GetInt32("IdPlant").ToString(),
+                new Dictionary<string, object>{{"@userIdPosition", userIdPosition}});
+        }
+    }
+        
+    if (plantFilters.Count > 0)
+    {
+        var filterCondition = string.Join(" OR ", plantFilters.Select(p => $"IdPlant = {p}"));
+        whereFilter = $" AND ({filterCondition})";
+        whereFilterPlant = $" AND ({string.Join(" OR ", plantFilters.Select(p => $"Plant = {p}"))})";
+        whereFilterPlantGHK = $" AND ({string.Join(" OR ", plantFilters.Select(p => $"GHK.Plant = {p}"))})";
+        whereFilterPlantBukuTamu = $" AND ({string.Join(" OR ", plantFilters.Select(p => $"BT.Plant = {p}"))})";
+        whereFilterPoV = $" AND ({string.Join(" OR ", plantFilters.Select(p => $"p.LookupPlant = {p}"))})";
+    }
+    else if (userLevel != "-1" && userLevel != "3")
+    {
+        whereFilter = " AND IdPlant = 0";
+        whereFilterPlant = " AND Plant = 0";
+        whereFilterPlantGHK = " AND GHK.Plant = 0";
+        whereFilterPlantBukuTamu = " AND BT.Plant = 0";
+        whereFilterPoV = " AND p.LookupPlant = 0";
+    }
+    
+    string query = $@"
+        SELECT 
+            'Penerimaan'                                                  AS PlanName,
+            COUNT(*)                                                      AS Total,
+            ISNULL(SUM(IIF(StatusProses = 'Waiting', 1, 0)), 0)           AS Waiting,
+            ISNULL(SUM(IIF(StatusProses = 'In Progress', 1, 0)), 0)       AS InProgress,
+            ISNULL(SUM(IIF(StatusProses = 'Complete', 1, 0)), 0)          AS Complete
+        FROM Penerimaan {filterBetweenDate} {whereFilter}
+
+        UNION ALL
+
+        SELECT
+            'Penerimaan Penyimpanan'                                      AS PlanName,
+            COUNT(*)                                                      AS Total,
+            ISNULL(SUM(IIF(StatusProses = 'Waiting', 1, 0)), 0)           AS Waiting,
+            ISNULL(SUM(IIF(StatusProses = 'In Progress', 1, 0)), 0)       AS InProgress,
+            ISNULL(SUM(IIF(StatusProses = 'Complete', 1, 0)), 0)          AS Complete
+        FROM Penimbunan {filterBetweenDate} {whereFilterPlant}
+
+        UNION ALL
+
+        SELECT
+            'Penyaluran Penyimpanan'                                      AS PlanName,
+            COUNT(*)                                                      AS Total,
+            ISNULL(SUM(IIF(StatusProses = 'Waiting', 1, 0)), 0)           AS Waiting,
+            ISNULL(SUM(IIF(StatusProses = 'In Progress', 1, 0)), 0)       AS InProgress,
+            ISNULL(SUM(IIF(StatusProses = 'Complete', 1, 0)), 0)          AS Complete
+        FROM PenimbunanPenyaluran {filterBetweenDate} {whereFilterPlant}
+
+        UNION ALL
+
+        SELECT
+            'Closing Stock Penyimpanan'                                   AS PlanName,
+            COUNT(*)                                                      AS Total,
+            ISNULL(SUM(IIF(StatusProses = 'Waiting', 1, 0)), 0)           AS Waiting,
+            ISNULL(SUM(IIF(StatusProses = 'In Progress', 1, 0)), 0)       AS InProgress,
+            ISNULL(SUM(IIF(StatusProses = 'Complete', 1, 0)), 0)          AS Complete
+        FROM ClosingStock {filterBetweenDate} {whereFilterPlant}
+
+        UNION ALL
+
+        SELECT
+            'Rencana & Realisasi Penyaluran'                              AS PlanName,
+            COUNT(*)                                                      AS Total,
+            ISNULL(SUM(IIF(StatusProses = 'Waiting', 1, 0)), 0)           AS Waiting,
+            ISNULL(SUM(IIF(StatusProses = 'In Progress', 1, 0)), 0)       AS InProgress,
+            ISNULL(SUM(IIF(StatusProses = 'Complete', 1, 0)), 0)          AS Complete
+        FROM RencanaPenyaluran {filterBetweenDate} {whereFilter}
+
+        UNION ALL
+
+        SELECT
+            'Proses Penyaluran'                                           AS PlanName,
+            COUNT(*)                                                      AS Total,
+            ISNULL(SUM(IIF(StatusProses = 'Waiting', 1, 0)), 0)           AS Waiting,
+            ISNULL(SUM(IIF(StatusProses = 'In Progress', 1, 0)), 0)       AS InProgress,
+            ISNULL(SUM(IIF(StatusProses = 'Complete', 1, 0)), 0)          AS Complete
+        FROM Penyaluran {filterBetweenDate} {whereFilter}
+
+        UNION ALL
+
+        SELECT
+            'Sampling Lab Test Penyaluran'                                AS PlanName,
+            COUNT(*)                                                      AS Total,
+            ISNULL(SUM(IIF(StatusProses = 'Waiting', 1, 0)), 0)           AS Waiting,
+            ISNULL(SUM(IIF(StatusProses = 'In Progress', 1, 0)), 0)       AS InProgress,
+            ISNULL(SUM(IIF(StatusProses = 'Complete', 1, 0)), 0)          AS Complete
+        FROM SamplingLabTest {filterBetweenDate} {whereFilter}
+
+        UNION ALL
+        SELECT
+            'Proof of Visit' AS PlanName,
+            COUNT(*) AS Total,          
+            COUNT(*) AS Waiting,        
+            ISNULL(SUM(CASE WHEN UPPER(LTRIM(RTRIM(ISNULL(f.Ketidaksesuaiaan,'')))) = 'YA' THEN 1 ELSE 0 END),0) AS Complete, -- Baris 2: Tidak Sesuai
+            ISNULL(SUM(CASE WHEN UPPER(LTRIM(RTRIM(ISNULL(f.Ketidaksesuaiaan,'')))) = 'TIDAK'    THEN 1 ELSE 0 END),0) AS InProgress   -- Baris 3: Sesuai
+        FROM FormInputProofOfVisit f
+        LEFT JOIN ProofOfVisit p
+            ON p.NomorProofOfVisit = f.NoReferensi
+        LEFT JOIN MasterPlant mp         
+            ON mp.IdPlant = p.LookupPlant
+        WHERE
+            CAST(f.Tanggal AS date) BETWEEN '{startDate}' AND '{endDate}'
+            {whereFilterPoV}
+
+        UNION ALL
+        SELECT
+            'Buku Tamu' AS PlanName,
+            (SELECT COUNT(*) FROM BukuTamu WHERE CAST(Tanggal AS date) BETWEEN '{startDate}' AND '{endDate}' {whereFilterPlant}) AS Total,
+            ISNULL(SUM(IIF(BTD.Area = 'Pintu Utama In', 1, 0)), 0) AS Waiting,
+            ISNULL(SUM(IIF(BTD.Area = 'Lobby Utama In', 1, 0)), 0) AS InProgress,
+            ISNULL(SUM(IIF(BTD.Area = 'Area Terlarang In', 1, 0)), 0) AS Complete
+        FROM BukuTamu BT
+        JOIN BukuTamuDetail BTD ON BT.NomorBukuTamu = BTD.NoReferensi
+        WHERE 
+            CAST(BT.Tanggal AS date) BETWEEN '{startDate}' AND '{endDate}'
+            {whereFilterPlantBukuTamu}
+        
+        UNION ALL
+        SELECT
+            'MWT Online'                                      AS PlanName,
+            COUNT(*)                                          AS Total,
+            ISNULL(SUM(IIF(Status = 'On Progress', 1, 0)), 0) AS Waiting,
+            ISNULL(SUM(IIF(Status = 'Back Log', 1, 0)), 0)    AS InProgress,
+            ISNULL(SUM(IIF(Status = 'Completed', 1, 0)), 0)   AS Complete
+        FROM MWTOnline 
+        WHERE CAST(CreatedDate AS date) BETWEEN '{startDate}' AND '{endDate}'
+            {whereFilter}
+
+        UNION ALL
+        SELECT
+            'Good House Keeping'             AS PlanName,
+            COUNT(GHK.NomorGoodHouseKeeping) AS Total,
+            COUNT(FGHK.NoReferensi)          AS Waiting,
+            0                                AS InProgress,
+            0                                AS Complete
+        FROM 
+            GoodHouseKeeping GHK LEFT JOIN FormInputGoodHouseKeeping FGHK
+            ON GHK.NomorGoodHouseKeeping = FGHK.NoReferensi
+        WHERE
+            CAST(GHK.TanggalDibuat AS date) BETWEEN '{startDate}' AND '{endDate}'
+            {whereFilterPlantGHK}
+        ";
+
+    var dashboardQueryTask = DatabaseQueryHelper.ExecuteSelectListQueryAsync<object>(
+        query,
+        rider => new
+        {
+            PlanName = rider.GetString("PlanName"),
+            Total = rider.GetInt32("Total"),
+            Waiting = rider.GetInt32("Waiting"),
+            InProgress = rider.GetInt32("InProgress"),
+            Complete = rider.GetInt32("Complete")
+        });
+        
+    string prosesPenyaluranSalesQuery = $@"
+            SELECT
+                MP.NamaProduk AS ProductName,
+                SUM(TRY_CAST(SP.Volume as decimal(18,2))) AS TotalVolume,
+                'Sales' AS TipePenyaluran
+            from Penyaluran P
+            JOIN SubAktivitasLogbookPenerimaanPenyaluran SP ON P.NomorPenyaluran = SP.NoReferensi
+            JOIN MasterProduk MP ON SP.Produk = MP.NoProduk
+            {filterBetweenDate} {whereFilter} AND TipePenyaluran = 'Sales'
+            group by
+                SP.Produk,
+                MP.NamaProduk
+
+                UNION ALL
+
+            SELECT
+                MP.NamaProduk AS ProductName,
+                SUM(TRY_CAST(SB.BL_KLObs AS decimal(18,2))) AS TotalVolume,
+                'Konsinyasi' AS TipePenyaluran
+            FROM Penyaluran P
+            JOIN SubAktivitasInputDataKapal SK
+                ON P.NomorPenyaluran = SK.NoReferensi
+            JOIN SubAktivitasNilaiBLSFALPenyaluran SB
+                ON P.NomorPenyaluran = SB.NoReferensi
+            JOIN MasterProduk MP
+                ON SK.JenisProduk = MP.NoProduk
+            {filterBetweenDate} {whereFilter} AND TipePenyaluran = 'Konsinyasi'
+            GROUP BY
+                SK.JenisProduk,
+                MP.NamaProduk
+            HAVING
+                SUM(TRY_CAST(SB.BL_KLObs AS decimal(18,2))) IS NOT NULL
+        ";
+
+    var penyaluranQueryTask = DatabaseQueryHelper.ExecuteSelectListQueryAsync<object>(
+        prosesPenyaluranSalesQuery,
+        rider => new
+        {
+            ProductName = rider.GetString("ProductName"),
+            TotalVolume = rider.GetDecimal("TotalVolume"),
+            TipePenyaluran = rider.GetString("TipePenyaluran")
+        });
+
+    await Task.WhenAll(dashboardQueryTask, penyaluranQueryTask);
+    
+    result = dashboardQueryTask.Result;
+    var prosesPenyaluranSalesResult = penyaluranQueryTask.Result;
+
+    penyaluranProcessKonsinyasiList = prosesPenyaluranSalesResult
+        .Where(x => ((dynamic)x).TipePenyaluran == "Konsinyasi")
+        .Select(x => new { Name = ((dynamic)x).ProductName, Value = ((dynamic)x).TotalVolume })
+        .ToList<object>();
+
+    penyaluranProcessSalesList = prosesPenyaluranSalesResult
+        .Where(x => ((dynamic)x).TipePenyaluran == "Sales")
+        .Select(x => new { Name = ((dynamic)x).ProductName, Value = ((dynamic)x).TotalVolume })
+        .ToList<object>();
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    @* <meta name="viewport" content="width=device-width, initial-scale=1.0"> *@
+    <title>SND Dashboard</title>
+    <!-- Google Fonts - Poppins -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <!-- Tom Select CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.bootstrap5.css" rel="stylesheet">
+    <style>
+        /* Custom Styles */
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f4f7f9;
+            color: #4a5568;
+        }
+        .filter-section {
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            box-shadow: 0 0 16px 0 rgba(0, 0, 0, 0.10);
+            margin: 2rem 0;
+        }
+        .filter-section .form-label {
+            font-weight: 500;
+            color: #4a5568;
+            margin-bottom: 0.5rem;
+        }
+        .filter-section .form-control, .filter-section .form-select {
+            border-radius: 0.5rem;
+        }
+        .filter-section .btn-primary {
+            border-radius: 0.5rem;
+            font-weight: 600;
+            padding: 0.55rem 1.5rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            transition: opacity 0.2s;
+        }
+        .filter-section .btn-primary:hover {
+            opacity: 0.9;
+        }
+
+        .filter-section .btn-primary-hehe {
+            border-radius: 0.5rem;
+            font-weight: 600;
+            padding: 0.55rem 1.5rem;
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            border: none;
+            color: white;
+            transition: opacity 0.2s;
+        }
+
+        .filter-section .btn-primary-hehe:hover {
+            opacity: 0.9;
+        }
+        .filter-section .btn-outline-secondary {
+            border-radius: 0.5rem;
+            font-weight: 600;
+            padding: 0.55rem 1.5rem;
+        }
+        .status-card {
+            background-color: #ffffff;
+            border: none;
+            border-radius: 1rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.07), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            overflow: hidden;
+        }
+        .status-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        .card-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: 600;
+            font-size: 1rem;
+            padding: 1rem 2rem;
+            border-bottom: 0;
+            text-align: center;
+            height: 4rem; 
+            overflow: hidden; 
+            display: flex; 
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+        }
+        .card-body {
+            padding: 1.5rem;
+        }
+        .card-date {
+            font-size: 0.8rem;
+            font-weight: 500;
+            background-color: rgba(255, 255, 255, 0.2);
+            padding: 0.3rem 0.75rem;
+            border-radius: 50rem;
+            display: inline-flex;
+            align-items: center;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+        }
+        .card-date i {
+            margin-right: 0.4rem;
+        }
+        .total-section {
+            text-align: center;
+            margin-bottom: 1.6rem;
+        }
+        .total-label {
+            font-size: 1rem;
+            color: #a0aec0;
+            margin-bottom: 0.25rem;
+        }
+        .total-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            line-height: 1;
+        }
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.85rem 0.5rem;
+            border-top: 1px solid #edf2f7;
+        }
+        .status-item:first-child {
+            border-top: none;
+        }
+        .status-label {
+            display: flex;
+            align-items: center;
+            font-weight: 500;
+        }
+        .status-label i {
+            margin-right: 0.75rem;
+            font-size: 1.4rem;
+        }
+        .badge {
+            font-size: 0.8rem;
+            font-weight: 600;
+            padding: 0.5em 1em;
+        }
+        .badge-waiting { background-color: #f6ad55; color: white; }
+        .badge-processing { background-color: #4299e1; color: white; }
+        .badge-complete { background-color: #48bb78; color: white; }
+        .badge-PintuUtama { background-color: #3c6dbd; color: white; }
+        .badge-LobbyUtama { background-color: #ffcc00; color: white; }
+        .badge-AreaTerlarang { background-color: #ba313b; color: white; }
+
+        .icon-waiting { color: #f6ad55; }
+        .icon-processing { color: #4299e1; }
+        .icon-complete { color: #48bb78; }
+        .icon-PintuUtama { color: #3c6dbd; }
+        .icon-LobbyUtama { color: #ffcc00; }
+        .icon-AreaTerlarang { color: #ba313b; }
+
+        /* Special Card Styles */
+        .special-card {
+            background-color: #ffffff;
+            border-radius: 1rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.07), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            margin-top: 1.5rem;
+            overflow: hidden;
+        }
+        .special-card-header {
+            padding: 1rem 1.5rem;
+            font-size: 1.25rem;
+            font-weight: 600;
+            text-align: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .data-column {
+            flex: 1;
+            padding: 1.5rem;
+        }
+        .data-column:first-child {
+            border-right: 1px solid #e2e8f0;
+        }
+        .column-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            text-align: center;
+            color: #2d3748;
+        }
+        .product-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.75rem 0;
+            font-size: 1rem;
+        }
+        .product-name {
+            color: #4a5568;
+        }
+        .product-value {
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        /* Flatpickr Custom Theme */
+        
+        .flatpickr-calendar {
+            background: #ffffff;
+            border-radius: 0.5rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e2e8f0;
+            font-family: 'Poppins', sans-serif;
+        }
+        .flatpickr-months .flatpickr-month {
+            color: #2d3748;
+            fill: #2263d3;
+        }
+        .flatpickr-months .arrowUp:hover, .flatpickr-months .arrowDown:hover {
+            background: #e2e8f0;
+        }
+        .flatpickr-day {
+            color: #565d6a;
+        }
+        .flatpickr-day:hover, .flatpickr-day:focus {
+            background: #edf2f7;
+            color: #2d3748;
+        }
+        .flatpickr-day.today {
+            border-color: #764ba2;
+        }
+        .flatpickr-day.today:hover {
+            background: #764ba2;
+            color: white;
+        }
+        .flatpickr-day.selected, .flatpickr-day.startRange, .flatpickr-day.endRange {
+            background: #667eea;
+            border-color: #667eea;
+            color: white;
+        }
+        .flatpickr-day.inRange {
+            background: rgba(102, 126, 234, 0.1);
+            border-color: transparent;
+            box-shadow: -5px 0 0 rgba(102, 126, 234, 0.1), 5px 0 0 rgba(102, 126, 234, 0.1);
+        }
+        .numInputWrapper:hover {
+            background: #e2e8f0;
+        }
+
+        /* Tom Select Theme */
+        :root {
+            --ts-border-radius: 0.5rem;
+            --ts-border-color: #d1d5db;
+            --ts-control-min-height: calc(1.5em + 0.75rem + 2px);
+            --ts-dropdown-border-color: #e2e8f0;
+            --ts-dropdown-box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .ts-control {
+            font-weight: 500;
+        }
+        .ts-dropdown {
+            font-weight: 500;
+        }
+        .ts-dropdown .active {
+            background-color: #667eea;
+            color: white;
+        }
+        .ts-wrapper .ts-control .remove {
+            border-left-color: #4a5568;
+        }
+        
+        .icon-total { color: #4299e1; } 
+        .icon-notok { color: #ef4444; }
+
+        .badge-total { background-color: #4299e1; color: #fff; } 
+        .badge-notok { background-color: #ef4444; color: #fff; }  
+        
+    </style>
+</head>
+<body>
+
+    <div class="py-2">
+    <div class="text-center mb-4">
+            <h1><b>Welcome to S&amp;D One</b></h1>
+            <!-- Date Filter Section -->
+            <div class="filter-section d-flex flex-column mb-4 gap-3">
+                <div class="row g-3 align-items-end">
+                    <div class="col-md">
+                        <label for="regionFilter" class="form-label">Region</label>
+                        <select id="regionFilter" placeholder="Pilih region..."></select>
+                    </div>
+                    <div class="col-md">
+                        <label for="plantFilter" class="form-label">Plant</label>
+                        <select id="plantFilter" placeholder="Pilih plant..."></select>
+                    </div>
+                    <div class="col-md">
+                        <label for="startDate" class="form-label">Start Date</label>
+                        <input type="text" class="form-control" id="startDate" placeholder="Select start date...">
+                    </div>
+                    <div class="col-md">
+                        <label for="endDate" class="form-label">End Date</label>
+                        <input type="text" class="form-control" id="endDate" placeholder="Select end date...">
+                    </div>
+                    
+                </div>
+                <div class="row g-3 align-items-end justify-content-end">
+                    <div class="col-md-auto d-grid">
+                        <button class="btn btn-primary" id="filterBtn"><i class="bi bi-funnel-fill"></i> Filter</button>
+                    </div>
+                    <div class="col-md-auto d-grid">
+                        <button class="btn btn-primary-hehe" id="exportBtn"><i class="bi bi-file-earmark-excel-fill"></i> Export</button>
+                    </div>
+                    <div class="col-md-auto d-grid">
+                        <button class="btn btn-outline-secondary" id="resetBtn"><i class="bi bi-arrow-counterclockwise"></i> Reset</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row g-4">
+            <!-- Card Template -->
+            <script id="card-template" type="text/template">
+                <div class="col-lg-4 col-md-6">
+                    <div class="card status-card">
+                        <div class="card-header">
+                            {{name}}
+                        </div>
+                        <div class="card-body">
+                            <div class="total-section">
+                                <div class="total-label">Total</div>
+                                <div class="total-value">{{total}}</div>
+                            </div>
+                            <div class="status-list">
+                                <div class="status-item">
+                                    <span class="status-label"><i class="bi bi-hourglass-split icon-waiting"></i> Waiting</span>
+                                    <span class="badge rounded-pill badge-waiting">{{waiting}}</span>
+                                </div>
+                                <div class="status-item">
+                                    <span class="status-label"><i class="bi bi-gear-fill icon-processing"></i> In Progress</span>
+                                    <span class="badge rounded-pill badge-processing">{{processing}}</span>
+                                </div>
+                                <div class="status-item">
+                                    <span class="status-label"><i class="bi bi-check-circle-fill icon-complete"></i> Complete</span>
+                                    <span class="badge rounded-pill badge-complete">{{complete}}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </script>
+        </div>
+        <div id="special-card-container" class="row">
+            <!-- Special Card Template -->
+            <script id="special-card-template" type="text/template">
+                <div class="col-12">
+                    <div class="special-card">
+                        <div class="special-card-header">{{title}}</div>
+                        <div class="row row-cols-1">
+                            <div class="col data-column" id="sales-column">
+                                <div class="column-title">Sales</div>
+                            </div>
+                            <div class="col data-column" id="konsinyasi-column">
+                                <div class="column-title">Konsinyasi</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </script>
+        </div>
+    </div>
+</div>
+</body>
+</html>
+
+    <!-- Bootstrap 5 JS Bundle with Popper -->
+    <!-- Flatpickr JS -->
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <!-- Tom Select JS -->
+    <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
+    <script>
+    window._welcomePageConfig = {
+        dashboardData: @Html.Raw(Json.Serialize(result ?? new List<object>())),
+        penyaluranProcessSales: @Html.Raw(Json.Serialize(penyaluranProcessSalesList ?? new List<object>())),
+        penyaluranProcessKonsinyasi: @Html.Raw(Json.Serialize(penyaluranProcessKonsinyasiList ?? new List<object>())),
+        regionListRaw: @Html.Raw(Json.Serialize(regions ?? new List<object>())),
+        plantListRaw: @Html.Raw(Json.Serialize(plants ?? new List<object>())),
+        currentUserLevel: @Html.Raw(Json.Serialize(userLevel))
+    };
+    </script>
+    <script src="~/js/WelcomePage.js"></script>
+
+@Html.Raw(GetDebugMessage())

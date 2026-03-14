@@ -1,0 +1,1322 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (samplingLabTestList.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = samplingLabTestList.UseLayout ? "_Layout" : "";
+}
+@if (!samplingLabTestList.IsExport()) {
+<script>
+var currentTable = @Html.Raw(ConvertToJson(samplingLabTestList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { SamplingLabTest: currentTable } });
+var currentPageID = ew.PAGE_ID = "list";
+var currentForm;
+var @(samplingLabTestList.FormName);
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("@(samplingLabTestList.FormName)")
+        .setPageId("list")
+        .setSubmitWithFetch(@(samplingLabTestList.UseAjaxActions ? "true" : "false"))
+        .setFormKeyCountName("@(samplingLabTestList.FormKeyCountName)")
+
+        // Dynamic selection lists
+        .setLists({
+            "LinkProses": @Html.Raw(samplingLabTestList.LinkProses.ToClientList(samplingLabTestList)),
+            "IdPlant": @Html.Raw(samplingLabTestList.IdPlant.ToClientList(samplingLabTestList)),
+            "IdReferensi": @Html.Raw(samplingLabTestList.IdReferensi.ToClientList(samplingLabTestList)),
+            "StatusProses": @Html.Raw(samplingLabTestList.StatusProses.ToClientList(samplingLabTestList)),
+            "PersentaseProgress": @Html.Raw(samplingLabTestList.PersentaseProgress.ToClientList(samplingLabTestList)),
+            "IdModa": @Html.Raw(samplingLabTestList.IdModa.ToClientList(samplingLabTestList)),
+            "TipePenyaluran": @Html.Raw(samplingLabTestList.TipePenyaluran.ToClientList(samplingLabTestList)),
+            "KategoriPenyaluran": @Html.Raw(samplingLabTestList.KategoriPenyaluran.ToClientList(samplingLabTestList)),
+            "NomorPolisi": @Html.Raw(samplingLabTestList.NomorPolisi.ToClientList(samplingLabTestList)),
+            "TipeProdukSTS": @Html.Raw(samplingLabTestList.TipeProdukSTS.ToClientList(samplingLabTestList)),
+            "KodeProduk": @Html.Raw(samplingLabTestList.KodeProduk.ToClientList(samplingLabTestList)),
+            "Tujuan": @Html.Raw(samplingLabTestList.Tujuan.ToClientList(samplingLabTestList)),
+            "DibuatOleh": @Html.Raw(samplingLabTestList.DibuatOleh.ToClientList(samplingLabTestList)),
+            "TanggalDibuat": @Html.Raw(samplingLabTestList.TanggalDibuat.ToClientList(samplingLabTestList)),
+            "DiperbaruiOleh": @Html.Raw(samplingLabTestList.DiperbaruiOleh.ToClientList(samplingLabTestList)),
+            "TanggalDiperbarui": @Html.Raw(samplingLabTestList.TanggalDiperbarui.ToClientList(samplingLabTestList)),
+        })
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Write your client script here, no need to add script tags.
+});
+</script>
+}
+@if (!samplingLabTestList.IsExport()) {
+<div class="btn-toolbar ew-toolbar">
+@if (samplingLabTestList.TotalRecords > 0 && samplingLabTestList.ExportOptions.Visible) {
+    samplingLabTestList.ExportOptions.Render("body");
+}
+@if (samplingLabTestList.ImportOptions.Visible) {
+    samplingLabTestList.ImportOptions.Render("body");
+}
+@if (samplingLabTestList.SearchOptions.Visible) {
+    samplingLabTestList.SearchOptions.Render("body");
+}
+@if (samplingLabTestList.FilterOptions.Visible) {
+    samplingLabTestList.FilterOptions.Render("body");
+}
+</div>
+}
+@if (samplingLabTestList.ShowCurrentFilter) {
+    samplingLabTestList.ShowFilterList();
+}
+@if (!samplingLabTestList.IsModal) {
+<form name="fSamplingLabTestsrch" id="fSamplingLabTestsrch" class="ew-form ew-ext-search-form" action="@AppPath(CurrentPageName())" novalidate autocomplete="off">
+<div id="fSamplingLabTestsrch_search_panel" class="mb-2 mb-sm-0 @(samplingLabTestList.SearchPanelClass)"><!-- .ew-search-panel -->
+<script>
+var currentTable = @Html.Raw(ConvertToJson(samplingLabTestList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { SamplingLabTest: currentTable } });
+var currentForm;
+var fSamplingLabTestsrch, currentSearchForm, currentAdvancedSearchForm;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery,
+        fields = currentTable.fields;
+
+    // Form object for search
+    let form = new ew.FormBuilder()
+        .setId("fSamplingLabTestsrch")
+        .setPageId("list")
+@if (samplingLabTestList.UseAjaxActions) {
+        <text>.setSubmitWithFetch(true)</text>
+}
+
+        // Add fields
+        .setFields([
+        ])
+        // Validate form
+        .setValidate(
+            async function () {
+                if (!this.validateRequired)
+                    return true; // Ignore validation
+                let fobj = this.getForm();
+
+                // Validate fields
+                if (!this.validateFields())
+                    return false;
+
+                // Call Form_CustomValidate event
+                if (!(await this.customValidate?.(fobj) ?? true)) {
+                    this.focus();
+                    return false;
+                }
+                return true;
+            }
+        )
+
+        // Form_CustomValidate
+        .setCustomValidate(
+            function(fobj) { // DO NOT CHANGE THIS LINE!
+                    // Your custom validation code here, return false if invalid.
+                    return true;
+                }
+        )
+
+        // Use JavaScript validation or not
+        .setValidateRequired(ew.CLIENT_VALIDATE)
+
+        // Dynamic selection lists
+        .setLists({
+            "NomorSamplingLabTest": @Html.Raw(samplingLabTestList.NomorSamplingLabTest.ToClientList(samplingLabTestList)),
+            "LinkProses": @Html.Raw(samplingLabTestList.LinkProses.ToClientList(samplingLabTestList)),
+            "IdPlant": @Html.Raw(samplingLabTestList.IdPlant.ToClientList(samplingLabTestList)),
+            "IdReferensi": @Html.Raw(samplingLabTestList.IdReferensi.ToClientList(samplingLabTestList)),
+            "IdPenimbunan": @Html.Raw(samplingLabTestList.IdPenimbunan.ToClientList(samplingLabTestList)),
+            "IdTemplate": @Html.Raw(samplingLabTestList.IdTemplate.ToClientList(samplingLabTestList)),
+            "StatusProses": @Html.Raw(samplingLabTestList.StatusProses.ToClientList(samplingLabTestList)),
+            "PersentaseProgress": @Html.Raw(samplingLabTestList.PersentaseProgress.ToClientList(samplingLabTestList)),
+            "IdModa": @Html.Raw(samplingLabTestList.IdModa.ToClientList(samplingLabTestList)),
+            "TipePenyaluran": @Html.Raw(samplingLabTestList.TipePenyaluran.ToClientList(samplingLabTestList)),
+            "KategoriPenyaluran": @Html.Raw(samplingLabTestList.KategoriPenyaluran.ToClientList(samplingLabTestList)),
+            "NomorPolisi": @Html.Raw(samplingLabTestList.NomorPolisi.ToClientList(samplingLabTestList)),
+            "TipeProdukSTS": @Html.Raw(samplingLabTestList.TipeProdukSTS.ToClientList(samplingLabTestList)),
+            "KodeProduk": @Html.Raw(samplingLabTestList.KodeProduk.ToClientList(samplingLabTestList)),
+            "Tujuan": @Html.Raw(samplingLabTestList.Tujuan.ToClientList(samplingLabTestList)),
+            "Catatan": @Html.Raw(samplingLabTestList.Catatan.ToClientList(samplingLabTestList)),
+            "DibuatOleh": @Html.Raw(samplingLabTestList.DibuatOleh.ToClientList(samplingLabTestList)),
+            "TanggalDibuat": @Html.Raw(samplingLabTestList.TanggalDibuat.ToClientList(samplingLabTestList)),
+            "DiperbaruiOleh": @Html.Raw(samplingLabTestList.DiperbaruiOleh.ToClientList(samplingLabTestList)),
+            "TanggalDiperbarui": @Html.Raw(samplingLabTestList.TanggalDiperbarui.ToClientList(samplingLabTestList)),
+        })
+
+        // Filters
+        .setFilterList(@Html.Raw(samplingLabTestList.GetFilterList()))
+        .build();
+    window[form.id] = form;
+    currentSearchForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<input type="hidden" name="cmd" value="search">
+@if (Security.CanSearch) {
+if (!samplingLabTestList.IsExport() && Empty(samplingLabTestList.CurrentAction) && samplingLabTestList.HasSearchFields()) { @* Show search form (begin) *@
+<div class="ew-extended-search container-fluid ps-2">
+<div class="row mb-0@(samplingLabTestList.SearchFieldsPerRow > 0 ? " row-cols-sm-" + samplingLabTestList.SearchFieldsPerRow : "")">
+@{
+    // Render search row
+    samplingLabTestList.RowType = RowType.Search;
+    samplingLabTestList.ResetAttributes();
+    await samplingLabTestList.RenderRow();
+}
+@if (samplingLabTestList.NomorSamplingLabTest.Visible) { // samplingLabTestList.NomorSamplingLabTest.Visible (begin)
+    if (!samplingLabTestList.NomorSamplingLabTest.UseFilter) {
+        samplingLabTestList.SearchColumnCount++;
+    }
+    <div id="xs_NomorSamplingLabTest" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(samplingLabTestList.NomorSamplingLabTest.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_NomorSamplingLabTest"
+            name="x_NomorSamplingLabTest[]"
+            class="form-control ew-select@(samplingLabTestList.NomorSamplingLabTest.IsInvalidClass)"
+            data-select2-id="fSamplingLabTestsrch_x_NomorSamplingLabTest"
+            data-table="SamplingLabTest"
+            data-field="x_NomorSamplingLabTest"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(samplingLabTestList.NomorSamplingLabTest.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(samplingLabTestList.NomorSamplingLabTest.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(samplingLabTestList.NomorSamplingLabTest.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(samplingLabTestList.NomorSamplingLabTest.EditAttributes)>
+            @(samplingLabTestList.NomorSamplingLabTest.SelectOptionListHtml("x_NomorSamplingLabTest", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(samplingLabTestList.NomorSamplingLabTest.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fSamplingLabTestsrch", function() {
+            var options = {
+                name: "x_NomorSamplingLabTest",
+                selectId: "fSamplingLabTestsrch_x_NomorSamplingLabTest",
+                ajax: { id: "x_NomorSamplingLabTest", form: "fSamplingLabTestsrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.SamplingLabTest.fields.NomorSamplingLabTest.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* samplingLabTestList.NomorSamplingLabTest.Visible (end) *@
+@if (samplingLabTestList.LinkProses.Visible) { // samplingLabTestList.LinkProses.Visible (begin)
+    if (!samplingLabTestList.LinkProses.UseFilter) {
+        samplingLabTestList.SearchColumnCount++;
+    }
+    <div id="xs_LinkProses" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(samplingLabTestList.LinkProses.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_LinkProses"
+            name="x_LinkProses[]"
+            class="form-control ew-select@(samplingLabTestList.LinkProses.IsInvalidClass)"
+            data-select2-id="fSamplingLabTestsrch_x_LinkProses"
+            data-table="SamplingLabTest"
+            data-field="x_LinkProses"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(samplingLabTestList.LinkProses.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(samplingLabTestList.LinkProses.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(samplingLabTestList.LinkProses.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(samplingLabTestList.LinkProses.EditAttributes)>
+            @(samplingLabTestList.LinkProses.SelectOptionListHtml("x_LinkProses", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(samplingLabTestList.LinkProses.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fSamplingLabTestsrch", function() {
+            var options = {
+                name: "x_LinkProses",
+                selectId: "fSamplingLabTestsrch_x_LinkProses",
+                ajax: { id: "x_LinkProses", form: "fSamplingLabTestsrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.SamplingLabTest.fields.LinkProses.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* samplingLabTestList.LinkProses.Visible (end) *@
+@if (samplingLabTestList.IdPlant.Visible) { // samplingLabTestList.IdPlant.Visible (begin)
+    if (!samplingLabTestList.IdPlant.UseFilter) {
+        samplingLabTestList.SearchColumnCount++;
+    }
+    <div id="xs_IdPlant" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(samplingLabTestList.IdPlant.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_IdPlant"
+            name="x_IdPlant[]"
+            class="form-control ew-select@(samplingLabTestList.IdPlant.IsInvalidClass)"
+            data-select2-id="fSamplingLabTestsrch_x_IdPlant"
+            data-table="SamplingLabTest"
+            data-field="x_IdPlant"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(samplingLabTestList.IdPlant.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(samplingLabTestList.IdPlant.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(samplingLabTestList.IdPlant.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(samplingLabTestList.IdPlant.EditAttributes)>
+            @(samplingLabTestList.IdPlant.SelectOptionListHtml("x_IdPlant", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(samplingLabTestList.IdPlant.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fSamplingLabTestsrch", function() {
+            var options = {
+                name: "x_IdPlant",
+                selectId: "fSamplingLabTestsrch_x_IdPlant",
+                ajax: { id: "x_IdPlant", form: "fSamplingLabTestsrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.SamplingLabTest.fields.IdPlant.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* samplingLabTestList.IdPlant.Visible (end) *@
+@if (samplingLabTestList.IdReferensi.Visible) { // samplingLabTestList.IdReferensi.Visible (begin)
+    if (!samplingLabTestList.IdReferensi.UseFilter) {
+        samplingLabTestList.SearchColumnCount++;
+    }
+    <div id="xs_IdReferensi" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(samplingLabTestList.IdReferensi.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_IdReferensi"
+            name="x_IdReferensi[]"
+            class="form-control ew-select@(samplingLabTestList.IdReferensi.IsInvalidClass)"
+            data-select2-id="fSamplingLabTestsrch_x_IdReferensi"
+            data-table="SamplingLabTest"
+            data-field="x_IdReferensi"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(samplingLabTestList.IdReferensi.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(samplingLabTestList.IdReferensi.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(samplingLabTestList.IdReferensi.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(samplingLabTestList.IdReferensi.EditAttributes)>
+            @(samplingLabTestList.IdReferensi.SelectOptionListHtml("x_IdReferensi", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(samplingLabTestList.IdReferensi.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fSamplingLabTestsrch", function() {
+            var options = {
+                name: "x_IdReferensi",
+                selectId: "fSamplingLabTestsrch_x_IdReferensi",
+                ajax: { id: "x_IdReferensi", form: "fSamplingLabTestsrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.SamplingLabTest.fields.IdReferensi.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* samplingLabTestList.IdReferensi.Visible (end) *@
+@if (samplingLabTestList.IdPenimbunan.Visible) { // samplingLabTestList.IdPenimbunan.Visible (begin)
+    if (!samplingLabTestList.IdPenimbunan.UseFilter) {
+        samplingLabTestList.SearchColumnCount++;
+    }
+    <div id="xs_IdPenimbunan" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(samplingLabTestList.IdPenimbunan.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_IdPenimbunan"
+            name="x_IdPenimbunan[]"
+            class="form-control ew-select@(samplingLabTestList.IdPenimbunan.IsInvalidClass)"
+            data-select2-id="fSamplingLabTestsrch_x_IdPenimbunan"
+            data-table="SamplingLabTest"
+            data-field="x_IdPenimbunan"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(samplingLabTestList.IdPenimbunan.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(samplingLabTestList.IdPenimbunan.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(samplingLabTestList.IdPenimbunan.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(samplingLabTestList.IdPenimbunan.EditAttributes)>
+            @(samplingLabTestList.IdPenimbunan.SelectOptionListHtml("x_IdPenimbunan", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(samplingLabTestList.IdPenimbunan.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fSamplingLabTestsrch", function() {
+            var options = {
+                name: "x_IdPenimbunan",
+                selectId: "fSamplingLabTestsrch_x_IdPenimbunan",
+                ajax: { id: "x_IdPenimbunan", form: "fSamplingLabTestsrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.SamplingLabTest.fields.IdPenimbunan.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* samplingLabTestList.IdPenimbunan.Visible (end) *@
+@if (samplingLabTestList.IdTemplate.Visible) { // samplingLabTestList.IdTemplate.Visible (begin)
+    if (!samplingLabTestList.IdTemplate.UseFilter) {
+        samplingLabTestList.SearchColumnCount++;
+    }
+    <div id="xs_IdTemplate" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(samplingLabTestList.IdTemplate.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_IdTemplate"
+            name="x_IdTemplate[]"
+            class="form-control ew-select@(samplingLabTestList.IdTemplate.IsInvalidClass)"
+            data-select2-id="fSamplingLabTestsrch_x_IdTemplate"
+            data-table="SamplingLabTest"
+            data-field="x_IdTemplate"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(samplingLabTestList.IdTemplate.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(samplingLabTestList.IdTemplate.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(samplingLabTestList.IdTemplate.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(samplingLabTestList.IdTemplate.EditAttributes)>
+            @(samplingLabTestList.IdTemplate.SelectOptionListHtml("x_IdTemplate", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(samplingLabTestList.IdTemplate.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fSamplingLabTestsrch", function() {
+            var options = {
+                name: "x_IdTemplate",
+                selectId: "fSamplingLabTestsrch_x_IdTemplate",
+                ajax: { id: "x_IdTemplate", form: "fSamplingLabTestsrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.SamplingLabTest.fields.IdTemplate.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* samplingLabTestList.IdTemplate.Visible (end) *@
+@if (samplingLabTestList.StatusProses.Visible) { // samplingLabTestList.StatusProses.Visible (begin)
+    if (!samplingLabTestList.StatusProses.UseFilter) {
+        samplingLabTestList.SearchColumnCount++;
+    }
+    <div id="xs_StatusProses" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(samplingLabTestList.StatusProses.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_StatusProses"
+            name="x_StatusProses[]"
+            class="form-control ew-select@(samplingLabTestList.StatusProses.IsInvalidClass)"
+            data-select2-id="fSamplingLabTestsrch_x_StatusProses"
+            data-table="SamplingLabTest"
+            data-field="x_StatusProses"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(samplingLabTestList.StatusProses.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(samplingLabTestList.StatusProses.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(samplingLabTestList.StatusProses.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(samplingLabTestList.StatusProses.EditAttributes)>
+            @(samplingLabTestList.StatusProses.SelectOptionListHtml("x_StatusProses", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(samplingLabTestList.StatusProses.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fSamplingLabTestsrch", function() {
+            var options = {
+                name: "x_StatusProses",
+                selectId: "fSamplingLabTestsrch_x_StatusProses",
+                ajax: { id: "x_StatusProses", form: "fSamplingLabTestsrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.SamplingLabTest.fields.StatusProses.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* samplingLabTestList.StatusProses.Visible (end) *@
+@if (samplingLabTestList.PersentaseProgress.Visible) { // samplingLabTestList.PersentaseProgress.Visible (begin)
+    if (!samplingLabTestList.PersentaseProgress.UseFilter) {
+        samplingLabTestList.SearchColumnCount++;
+    }
+    <div id="xs_PersentaseProgress" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(samplingLabTestList.PersentaseProgress.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_PersentaseProgress"
+            name="x_PersentaseProgress[]"
+            class="form-control ew-select@(samplingLabTestList.PersentaseProgress.IsInvalidClass)"
+            data-select2-id="fSamplingLabTestsrch_x_PersentaseProgress"
+            data-table="SamplingLabTest"
+            data-field="x_PersentaseProgress"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(samplingLabTestList.PersentaseProgress.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(samplingLabTestList.PersentaseProgress.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(samplingLabTestList.PersentaseProgress.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(samplingLabTestList.PersentaseProgress.EditAttributes)>
+            @(samplingLabTestList.PersentaseProgress.SelectOptionListHtml("x_PersentaseProgress", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(samplingLabTestList.PersentaseProgress.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fSamplingLabTestsrch", function() {
+            var options = {
+                name: "x_PersentaseProgress",
+                selectId: "fSamplingLabTestsrch_x_PersentaseProgress",
+                ajax: { id: "x_PersentaseProgress", form: "fSamplingLabTestsrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.SamplingLabTest.fields.PersentaseProgress.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* samplingLabTestList.PersentaseProgress.Visible (end) *@
+@if (samplingLabTestList.IdModa.Visible) { // samplingLabTestList.IdModa.Visible (begin)
+    if (!samplingLabTestList.IdModa.UseFilter) {
+        samplingLabTestList.SearchColumnCount++;
+    }
+    <div id="xs_IdModa" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(samplingLabTestList.IdModa.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_IdModa"
+            name="x_IdModa[]"
+            class="form-control ew-select@(samplingLabTestList.IdModa.IsInvalidClass)"
+            data-select2-id="fSamplingLabTestsrch_x_IdModa"
+            data-table="SamplingLabTest"
+            data-field="x_IdModa"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(samplingLabTestList.IdModa.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(samplingLabTestList.IdModa.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(samplingLabTestList.IdModa.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(samplingLabTestList.IdModa.EditAttributes)>
+            @(samplingLabTestList.IdModa.SelectOptionListHtml("x_IdModa", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(samplingLabTestList.IdModa.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fSamplingLabTestsrch", function() {
+            var options = {
+                name: "x_IdModa",
+                selectId: "fSamplingLabTestsrch_x_IdModa",
+                ajax: { id: "x_IdModa", form: "fSamplingLabTestsrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.SamplingLabTest.fields.IdModa.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* samplingLabTestList.IdModa.Visible (end) *@
+@if (samplingLabTestList.TipePenyaluran.Visible) { // samplingLabTestList.TipePenyaluran.Visible (begin)
+    if (!samplingLabTestList.TipePenyaluran.UseFilter) {
+        samplingLabTestList.SearchColumnCount++;
+    }
+    <div id="xs_TipePenyaluran" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(samplingLabTestList.TipePenyaluran.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_TipePenyaluran"
+            name="x_TipePenyaluran[]"
+            class="form-control ew-select@(samplingLabTestList.TipePenyaluran.IsInvalidClass)"
+            data-select2-id="fSamplingLabTestsrch_x_TipePenyaluran"
+            data-table="SamplingLabTest"
+            data-field="x_TipePenyaluran"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(samplingLabTestList.TipePenyaluran.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(samplingLabTestList.TipePenyaluran.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(samplingLabTestList.TipePenyaluran.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(samplingLabTestList.TipePenyaluran.EditAttributes)>
+            @(samplingLabTestList.TipePenyaluran.SelectOptionListHtml("x_TipePenyaluran", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(samplingLabTestList.TipePenyaluran.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fSamplingLabTestsrch", function() {
+            var options = {
+                name: "x_TipePenyaluran",
+                selectId: "fSamplingLabTestsrch_x_TipePenyaluran",
+                ajax: { id: "x_TipePenyaluran", form: "fSamplingLabTestsrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.SamplingLabTest.fields.TipePenyaluran.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* samplingLabTestList.TipePenyaluran.Visible (end) *@
+@if (samplingLabTestList.KategoriPenyaluran.Visible) { // samplingLabTestList.KategoriPenyaluran.Visible (begin)
+    if (!samplingLabTestList.KategoriPenyaluran.UseFilter) {
+        samplingLabTestList.SearchColumnCount++;
+    }
+    <div id="xs_KategoriPenyaluran" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(samplingLabTestList.KategoriPenyaluran.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_KategoriPenyaluran"
+            name="x_KategoriPenyaluran[]"
+            class="form-control ew-select@(samplingLabTestList.KategoriPenyaluran.IsInvalidClass)"
+            data-select2-id="fSamplingLabTestsrch_x_KategoriPenyaluran"
+            data-table="SamplingLabTest"
+            data-field="x_KategoriPenyaluran"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(samplingLabTestList.KategoriPenyaluran.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(samplingLabTestList.KategoriPenyaluran.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(samplingLabTestList.KategoriPenyaluran.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(samplingLabTestList.KategoriPenyaluran.EditAttributes)>
+            @(samplingLabTestList.KategoriPenyaluran.SelectOptionListHtml("x_KategoriPenyaluran", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(samplingLabTestList.KategoriPenyaluran.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fSamplingLabTestsrch", function() {
+            var options = {
+                name: "x_KategoriPenyaluran",
+                selectId: "fSamplingLabTestsrch_x_KategoriPenyaluran",
+                ajax: { id: "x_KategoriPenyaluran", form: "fSamplingLabTestsrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.SamplingLabTest.fields.KategoriPenyaluran.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* samplingLabTestList.KategoriPenyaluran.Visible (end) *@
+@if (samplingLabTestList.NomorPolisi.Visible) { // samplingLabTestList.NomorPolisi.Visible (begin)
+    if (!samplingLabTestList.NomorPolisi.UseFilter) {
+        samplingLabTestList.SearchColumnCount++;
+    }
+    <div id="xs_NomorPolisi" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(samplingLabTestList.NomorPolisi.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_NomorPolisi"
+            name="x_NomorPolisi[]"
+            class="form-control ew-select@(samplingLabTestList.NomorPolisi.IsInvalidClass)"
+            data-select2-id="fSamplingLabTestsrch_x_NomorPolisi"
+            data-table="SamplingLabTest"
+            data-field="x_NomorPolisi"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(samplingLabTestList.NomorPolisi.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(samplingLabTestList.NomorPolisi.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(samplingLabTestList.NomorPolisi.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(samplingLabTestList.NomorPolisi.EditAttributes)>
+            @(samplingLabTestList.NomorPolisi.SelectOptionListHtml("x_NomorPolisi", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(samplingLabTestList.NomorPolisi.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fSamplingLabTestsrch", function() {
+            var options = {
+                name: "x_NomorPolisi",
+                selectId: "fSamplingLabTestsrch_x_NomorPolisi",
+                ajax: { id: "x_NomorPolisi", form: "fSamplingLabTestsrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.SamplingLabTest.fields.NomorPolisi.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* samplingLabTestList.NomorPolisi.Visible (end) *@
+@if (samplingLabTestList.TipeProdukSTS.Visible) { // samplingLabTestList.TipeProdukSTS.Visible (begin)
+    if (!samplingLabTestList.TipeProdukSTS.UseFilter) {
+        samplingLabTestList.SearchColumnCount++;
+    }
+    <div id="xs_TipeProdukSTS" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(samplingLabTestList.TipeProdukSTS.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_TipeProdukSTS"
+            name="x_TipeProdukSTS[]"
+            class="form-control ew-select@(samplingLabTestList.TipeProdukSTS.IsInvalidClass)"
+            data-select2-id="fSamplingLabTestsrch_x_TipeProdukSTS"
+            data-table="SamplingLabTest"
+            data-field="x_TipeProdukSTS"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(samplingLabTestList.TipeProdukSTS.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(samplingLabTestList.TipeProdukSTS.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(samplingLabTestList.TipeProdukSTS.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(samplingLabTestList.TipeProdukSTS.EditAttributes)>
+            @(samplingLabTestList.TipeProdukSTS.SelectOptionListHtml("x_TipeProdukSTS", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(samplingLabTestList.TipeProdukSTS.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fSamplingLabTestsrch", function() {
+            var options = {
+                name: "x_TipeProdukSTS",
+                selectId: "fSamplingLabTestsrch_x_TipeProdukSTS",
+                ajax: { id: "x_TipeProdukSTS", form: "fSamplingLabTestsrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.SamplingLabTest.fields.TipeProdukSTS.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* samplingLabTestList.TipeProdukSTS.Visible (end) *@
+@if (samplingLabTestList.KodeProduk.Visible) { // samplingLabTestList.KodeProduk.Visible (begin)
+    if (!samplingLabTestList.KodeProduk.UseFilter) {
+        samplingLabTestList.SearchColumnCount++;
+    }
+    <div id="xs_KodeProduk" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(samplingLabTestList.KodeProduk.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_KodeProduk"
+            name="x_KodeProduk[]"
+            class="form-control ew-select@(samplingLabTestList.KodeProduk.IsInvalidClass)"
+            data-select2-id="fSamplingLabTestsrch_x_KodeProduk"
+            data-table="SamplingLabTest"
+            data-field="x_KodeProduk"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(samplingLabTestList.KodeProduk.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(samplingLabTestList.KodeProduk.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(samplingLabTestList.KodeProduk.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(samplingLabTestList.KodeProduk.EditAttributes)>
+            @(samplingLabTestList.KodeProduk.SelectOptionListHtml("x_KodeProduk", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(samplingLabTestList.KodeProduk.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fSamplingLabTestsrch", function() {
+            var options = {
+                name: "x_KodeProduk",
+                selectId: "fSamplingLabTestsrch_x_KodeProduk",
+                ajax: { id: "x_KodeProduk", form: "fSamplingLabTestsrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.SamplingLabTest.fields.KodeProduk.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* samplingLabTestList.KodeProduk.Visible (end) *@
+@if (samplingLabTestList.Tujuan.Visible) { // samplingLabTestList.Tujuan.Visible (begin)
+    if (!samplingLabTestList.Tujuan.UseFilter) {
+        samplingLabTestList.SearchColumnCount++;
+    }
+    <div id="xs_Tujuan" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(samplingLabTestList.Tujuan.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_Tujuan"
+            name="x_Tujuan[]"
+            class="form-control ew-select@(samplingLabTestList.Tujuan.IsInvalidClass)"
+            data-select2-id="fSamplingLabTestsrch_x_Tujuan"
+            data-table="SamplingLabTest"
+            data-field="x_Tujuan"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(samplingLabTestList.Tujuan.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(samplingLabTestList.Tujuan.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(samplingLabTestList.Tujuan.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(samplingLabTestList.Tujuan.EditAttributes)>
+            @(samplingLabTestList.Tujuan.SelectOptionListHtml("x_Tujuan", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(samplingLabTestList.Tujuan.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fSamplingLabTestsrch", function() {
+            var options = {
+                name: "x_Tujuan",
+                selectId: "fSamplingLabTestsrch_x_Tujuan",
+                ajax: { id: "x_Tujuan", form: "fSamplingLabTestsrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.SamplingLabTest.fields.Tujuan.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* samplingLabTestList.Tujuan.Visible (end) *@
+@if (samplingLabTestList.Catatan.Visible) { // samplingLabTestList.Catatan.Visible (begin)
+    if (!samplingLabTestList.Catatan.UseFilter) {
+        samplingLabTestList.SearchColumnCount++;
+    }
+    <div id="xs_Catatan" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(samplingLabTestList.Catatan.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_Catatan"
+            name="x_Catatan[]"
+            class="form-control ew-select@(samplingLabTestList.Catatan.IsInvalidClass)"
+            data-select2-id="fSamplingLabTestsrch_x_Catatan"
+            data-table="SamplingLabTest"
+            data-field="x_Catatan"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(samplingLabTestList.Catatan.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(samplingLabTestList.Catatan.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(samplingLabTestList.Catatan.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(samplingLabTestList.Catatan.EditAttributes)>
+            @(samplingLabTestList.Catatan.SelectOptionListHtml("x_Catatan", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(samplingLabTestList.Catatan.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fSamplingLabTestsrch", function() {
+            var options = {
+                name: "x_Catatan",
+                selectId: "fSamplingLabTestsrch_x_Catatan",
+                ajax: { id: "x_Catatan", form: "fSamplingLabTestsrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.SamplingLabTest.fields.Catatan.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* samplingLabTestList.Catatan.Visible (end) *@
+@if (samplingLabTestList.DibuatOleh.Visible) { // samplingLabTestList.DibuatOleh.Visible (begin)
+    if (!samplingLabTestList.DibuatOleh.UseFilter) {
+        samplingLabTestList.SearchColumnCount++;
+    }
+    <div id="xs_DibuatOleh" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(samplingLabTestList.DibuatOleh.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_DibuatOleh"
+            name="x_DibuatOleh[]"
+            class="form-control ew-select@(samplingLabTestList.DibuatOleh.IsInvalidClass)"
+            data-select2-id="fSamplingLabTestsrch_x_DibuatOleh"
+            data-table="SamplingLabTest"
+            data-field="x_DibuatOleh"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(samplingLabTestList.DibuatOleh.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(samplingLabTestList.DibuatOleh.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(samplingLabTestList.DibuatOleh.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(samplingLabTestList.DibuatOleh.EditAttributes)>
+            @(samplingLabTestList.DibuatOleh.SelectOptionListHtml("x_DibuatOleh", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(samplingLabTestList.DibuatOleh.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fSamplingLabTestsrch", function() {
+            var options = {
+                name: "x_DibuatOleh",
+                selectId: "fSamplingLabTestsrch_x_DibuatOleh",
+                ajax: { id: "x_DibuatOleh", form: "fSamplingLabTestsrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.SamplingLabTest.fields.DibuatOleh.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* samplingLabTestList.DibuatOleh.Visible (end) *@
+@if (samplingLabTestList.TanggalDibuat.Visible) { // samplingLabTestList.TanggalDibuat.Visible (begin)
+    if (!samplingLabTestList.TanggalDibuat.UseFilter) {
+        samplingLabTestList.SearchColumnCount++;
+    }
+    <div id="xs_TanggalDibuat" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(samplingLabTestList.TanggalDibuat.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_TanggalDibuat"
+            name="x_TanggalDibuat[]"
+            class="form-control ew-select@(samplingLabTestList.TanggalDibuat.IsInvalidClass)"
+            data-select2-id="fSamplingLabTestsrch_x_TanggalDibuat"
+            data-table="SamplingLabTest"
+            data-field="x_TanggalDibuat"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(samplingLabTestList.TanggalDibuat.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(samplingLabTestList.TanggalDibuat.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(samplingLabTestList.TanggalDibuat.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(samplingLabTestList.TanggalDibuat.EditAttributes)>
+            @(samplingLabTestList.TanggalDibuat.SelectOptionListHtml("x_TanggalDibuat", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(samplingLabTestList.TanggalDibuat.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fSamplingLabTestsrch", function() {
+            var options = {
+                name: "x_TanggalDibuat",
+                selectId: "fSamplingLabTestsrch_x_TanggalDibuat",
+                ajax: { id: "x_TanggalDibuat", form: "fSamplingLabTestsrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.SamplingLabTest.fields.TanggalDibuat.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* samplingLabTestList.TanggalDibuat.Visible (end) *@
+@if (samplingLabTestList.DiperbaruiOleh.Visible) { // samplingLabTestList.DiperbaruiOleh.Visible (begin)
+    if (!samplingLabTestList.DiperbaruiOleh.UseFilter) {
+        samplingLabTestList.SearchColumnCount++;
+    }
+    <div id="xs_DiperbaruiOleh" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(samplingLabTestList.DiperbaruiOleh.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_DiperbaruiOleh"
+            name="x_DiperbaruiOleh[]"
+            class="form-control ew-select@(samplingLabTestList.DiperbaruiOleh.IsInvalidClass)"
+            data-select2-id="fSamplingLabTestsrch_x_DiperbaruiOleh"
+            data-table="SamplingLabTest"
+            data-field="x_DiperbaruiOleh"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(samplingLabTestList.DiperbaruiOleh.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(samplingLabTestList.DiperbaruiOleh.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(samplingLabTestList.DiperbaruiOleh.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(samplingLabTestList.DiperbaruiOleh.EditAttributes)>
+            @(samplingLabTestList.DiperbaruiOleh.SelectOptionListHtml("x_DiperbaruiOleh", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(samplingLabTestList.DiperbaruiOleh.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fSamplingLabTestsrch", function() {
+            var options = {
+                name: "x_DiperbaruiOleh",
+                selectId: "fSamplingLabTestsrch_x_DiperbaruiOleh",
+                ajax: { id: "x_DiperbaruiOleh", form: "fSamplingLabTestsrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.SamplingLabTest.fields.DiperbaruiOleh.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* samplingLabTestList.DiperbaruiOleh.Visible (end) *@
+@if (samplingLabTestList.TanggalDiperbarui.Visible) { // samplingLabTestList.TanggalDiperbarui.Visible (begin)
+    if (!samplingLabTestList.TanggalDiperbarui.UseFilter) {
+        samplingLabTestList.SearchColumnCount++;
+    }
+    <div id="xs_TanggalDiperbarui" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(samplingLabTestList.TanggalDiperbarui.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_TanggalDiperbarui"
+            name="x_TanggalDiperbarui[]"
+            class="form-control ew-select@(samplingLabTestList.TanggalDiperbarui.IsInvalidClass)"
+            data-select2-id="fSamplingLabTestsrch_x_TanggalDiperbarui"
+            data-table="SamplingLabTest"
+            data-field="x_TanggalDiperbarui"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(samplingLabTestList.TanggalDiperbarui.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(samplingLabTestList.TanggalDiperbarui.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(samplingLabTestList.TanggalDiperbarui.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(samplingLabTestList.TanggalDiperbarui.EditAttributes)>
+            @(samplingLabTestList.TanggalDiperbarui.SelectOptionListHtml("x_TanggalDiperbarui", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(samplingLabTestList.TanggalDiperbarui.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fSamplingLabTestsrch", function() {
+            var options = {
+                name: "x_TanggalDiperbarui",
+                selectId: "fSamplingLabTestsrch_x_TanggalDiperbarui",
+                ajax: { id: "x_TanggalDiperbarui", form: "fSamplingLabTestsrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.SamplingLabTest.fields.TanggalDiperbarui.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* samplingLabTestList.TanggalDiperbarui.Visible (end) *@
+</div><!-- /.row -->
+<div class="row mb-0">
+    <div class="col-sm-auto px-0 pe-sm-2">
+        <div class="ew-basic-search input-group">
+            <input type="search" name="@(Config.TableBasicSearch)" id="@(Config.TableBasicSearch)" class="form-control ew-basic-search-keyword" value="@Html.Raw(HtmlEncode(samplingLabTestList.BasicSearch.SessionKeyword))" placeholder="@(HtmlEncode(Language.Phrase("Search")))" aria-label="@(HtmlEncode(Language.Phrase("Search")))">
+            <input type="hidden" name="@(Config.TableBasicSearchType)" id="@(Config.TableBasicSearchType)" class="ew-basic-search-type" value="@(HtmlEncode(samplingLabTestList.BasicSearch.SessionType))">
+            <button type="button" data-bs-toggle="dropdown" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split" aria-haspopup="true" aria-expanded="false">
+                <span id="searchtype">@Html.Raw(samplingLabTestList.BasicSearch.TypeNameShort)</span>
+            </button>
+            <div class="dropdown-menu dropdown-menu-end">
+                <button type="button" class="dropdown-item@(samplingLabTestList.BasicSearch.SessionType == "" ? " active" : "")" form="fSamplingLabTestsrch" data-ew-action="search-type">@Html.Raw(Language.Phrase("QuickSearchAuto"))</button>
+                <button type="button" class="dropdown-item@(samplingLabTestList.BasicSearch.SessionType == "=" ? " active" : "")" form="fSamplingLabTestsrch" data-ew-action="search-type" data-search-type="=">@Html.Raw(Language.Phrase("QuickSearchExact"))</button>
+                <button type="button" class="dropdown-item@(samplingLabTestList.BasicSearch.SessionType == "AND" ? " active" : "")" form="fSamplingLabTestsrch" data-ew-action="search-type" data-search-type="AND">@Html.Raw(Language.Phrase("QuickSearchAll"))</button>
+                <button type="button" class="dropdown-item@(samplingLabTestList.BasicSearch.SessionType == "OR" ? " active" : "")" form="fSamplingLabTestsrch" data-ew-action="search-type" data-search-type="OR">@Html.Raw(Language.Phrase("QuickSearchAny"))</button>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-auto mb-3">
+        <button class="btn btn-primary" name="btn-submit" id="btn-submit" type="submit">@Html.Raw(Language.Phrase("SearchBtn"))</button>
+    </div>
+</div>
+</div><!-- /.ew-extended-search -->
+} @* Show search form (end) *@
+}
+</div><!-- /.ew-search-panel -->
+</form>
+}
+@samplingLabTestList.ShowPageHeader()
+@samplingLabTestList.ShowMessages()
+<main class="list @(samplingLabTestList.TotalRecords == 0 && !samplingLabTestList.IsAdd ? " ew-no-record" : "")">
+<div id="ew-header-options">
+    @samplingLabTestList.HeaderOptions.RenderBody()
+</div>
+<div id="ew-list">
+@if (samplingLabTestList.TotalRecords > 0 || !Empty(samplingLabTestList.CurrentAction)) {
+<div class="card ew-card ew-grid@(samplingLabTestList.IsAddOrEdit ? " ew-grid-add-edit" : "") @(samplingLabTestList.TableGridClass)">
+<form name="@(samplingLabTestList.FormName)" id="@(samplingLabTestList.FormName)" class="ew-form ew-list-form" action="@AppPath(samplingLabTestList.PageName)" method="post" novalidate autocomplete="off">
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+@if (samplingLabTestList.IsModal) {
+<input type="hidden" name="modal" value="1">
+}
+<div id="gmp_SamplingLabTest" class="card-body ew-grid-middle-panel @(samplingLabTestList.TableContainerClass)" style="@(samplingLabTestList.TableContainerStyle)">
+@if (samplingLabTestList.TotalRecords > 0 || samplingLabTestList.IsGridEdit || samplingLabTestList.IsMultiEdit) {
+<table id="tbl_SamplingLabTestlist" class="@(samplingLabTestList.TableClass)"><!-- .ew-table -->
+<thead>
+    <tr class="ew-table-header">
+@{
+    // Header row
+    samplingLabTestList.RowType = RowType.Header;
+
+    // Render list options
+    await samplingLabTestList.RenderListOptions();
+}
+@* Render list options (header, left) *@
+@samplingLabTestList.ListOptions.RenderHeader("left")
+@if (samplingLabTestList.LinkProses.Visible) { // samplingLabTestList.LinkProses.Visible (begin)
+        <th data-name="LinkProses" class="@(samplingLabTestList.LinkProses.HeaderCellClass)"><div id="elh_SamplingLabTest_LinkProses" class="SamplingLabTest_LinkProses">@Html.Raw(samplingLabTestList.RenderFieldHeader(samplingLabTestList.LinkProses))</div></th>
+} @* samplingLabTestList.LinkProses.Visible (end) *@
+@if (samplingLabTestList.IdPlant.Visible) { // samplingLabTestList.IdPlant.Visible (begin)
+        <th data-name="IdPlant" class="@(samplingLabTestList.IdPlant.HeaderCellClass)"><div id="elh_SamplingLabTest_IdPlant" class="SamplingLabTest_IdPlant">@Html.Raw(samplingLabTestList.RenderFieldHeader(samplingLabTestList.IdPlant))</div></th>
+} @* samplingLabTestList.IdPlant.Visible (end) *@
+@if (samplingLabTestList.IdReferensi.Visible) { // samplingLabTestList.IdReferensi.Visible (begin)
+        <th data-name="IdReferensi" class="@(samplingLabTestList.IdReferensi.HeaderCellClass)"><div id="elh_SamplingLabTest_IdReferensi" class="SamplingLabTest_IdReferensi">@Html.Raw(samplingLabTestList.RenderFieldHeader(samplingLabTestList.IdReferensi))</div></th>
+} @* samplingLabTestList.IdReferensi.Visible (end) *@
+@if (samplingLabTestList.StatusProses.Visible) { // samplingLabTestList.StatusProses.Visible (begin)
+        <th data-name="StatusProses" class="@(samplingLabTestList.StatusProses.HeaderCellClass)"><div id="elh_SamplingLabTest_StatusProses" class="SamplingLabTest_StatusProses">@Html.Raw(samplingLabTestList.RenderFieldHeader(samplingLabTestList.StatusProses))</div></th>
+} @* samplingLabTestList.StatusProses.Visible (end) *@
+@if (samplingLabTestList.PersentaseProgress.Visible) { // samplingLabTestList.PersentaseProgress.Visible (begin)
+        <th data-name="PersentaseProgress" class="@(samplingLabTestList.PersentaseProgress.HeaderCellClass)"><div id="elh_SamplingLabTest_PersentaseProgress" class="SamplingLabTest_PersentaseProgress">@Html.Raw(samplingLabTestList.RenderFieldHeader(samplingLabTestList.PersentaseProgress))</div></th>
+} @* samplingLabTestList.PersentaseProgress.Visible (end) *@
+@if (samplingLabTestList.IdModa.Visible) { // samplingLabTestList.IdModa.Visible (begin)
+        <th data-name="IdModa" class="@(samplingLabTestList.IdModa.HeaderCellClass)"><div id="elh_SamplingLabTest_IdModa" class="SamplingLabTest_IdModa">@Html.Raw(samplingLabTestList.RenderFieldHeader(samplingLabTestList.IdModa))</div></th>
+} @* samplingLabTestList.IdModa.Visible (end) *@
+@if (samplingLabTestList.TipePenyaluran.Visible) { // samplingLabTestList.TipePenyaluran.Visible (begin)
+        <th data-name="TipePenyaluran" class="@(samplingLabTestList.TipePenyaluran.HeaderCellClass)"><div id="elh_SamplingLabTest_TipePenyaluran" class="SamplingLabTest_TipePenyaluran">@Html.Raw(samplingLabTestList.RenderFieldHeader(samplingLabTestList.TipePenyaluran))</div></th>
+} @* samplingLabTestList.TipePenyaluran.Visible (end) *@
+@if (samplingLabTestList.KategoriPenyaluran.Visible) { // samplingLabTestList.KategoriPenyaluran.Visible (begin)
+        <th data-name="KategoriPenyaluran" class="@(samplingLabTestList.KategoriPenyaluran.HeaderCellClass)"><div id="elh_SamplingLabTest_KategoriPenyaluran" class="SamplingLabTest_KategoriPenyaluran">@Html.Raw(samplingLabTestList.RenderFieldHeader(samplingLabTestList.KategoriPenyaluran))</div></th>
+} @* samplingLabTestList.KategoriPenyaluran.Visible (end) *@
+@if (samplingLabTestList.NomorPolisi.Visible) { // samplingLabTestList.NomorPolisi.Visible (begin)
+        <th data-name="NomorPolisi" class="@(samplingLabTestList.NomorPolisi.HeaderCellClass)"><div id="elh_SamplingLabTest_NomorPolisi" class="SamplingLabTest_NomorPolisi">@Html.Raw(samplingLabTestList.RenderFieldHeader(samplingLabTestList.NomorPolisi))</div></th>
+} @* samplingLabTestList.NomorPolisi.Visible (end) *@
+@if (samplingLabTestList.TipeProdukSTS.Visible) { // samplingLabTestList.TipeProdukSTS.Visible (begin)
+        <th data-name="TipeProdukSTS" class="@(samplingLabTestList.TipeProdukSTS.HeaderCellClass)"><div id="elh_SamplingLabTest_TipeProdukSTS" class="SamplingLabTest_TipeProdukSTS">@Html.Raw(samplingLabTestList.RenderFieldHeader(samplingLabTestList.TipeProdukSTS))</div></th>
+} @* samplingLabTestList.TipeProdukSTS.Visible (end) *@
+@if (samplingLabTestList.KodeProduk.Visible) { // samplingLabTestList.KodeProduk.Visible (begin)
+        <th data-name="KodeProduk" class="@(samplingLabTestList.KodeProduk.HeaderCellClass)"><div id="elh_SamplingLabTest_KodeProduk" class="SamplingLabTest_KodeProduk">@Html.Raw(samplingLabTestList.RenderFieldHeader(samplingLabTestList.KodeProduk))</div></th>
+} @* samplingLabTestList.KodeProduk.Visible (end) *@
+@if (samplingLabTestList.Tujuan.Visible) { // samplingLabTestList.Tujuan.Visible (begin)
+        <th data-name="Tujuan" class="@(samplingLabTestList.Tujuan.HeaderCellClass)"><div id="elh_SamplingLabTest_Tujuan" class="SamplingLabTest_Tujuan">@Html.Raw(samplingLabTestList.RenderFieldHeader(samplingLabTestList.Tujuan))</div></th>
+} @* samplingLabTestList.Tujuan.Visible (end) *@
+@if (samplingLabTestList.DibuatOleh.Visible) { // samplingLabTestList.DibuatOleh.Visible (begin)
+        <th data-name="DibuatOleh" class="@(samplingLabTestList.DibuatOleh.HeaderCellClass)"><div id="elh_SamplingLabTest_DibuatOleh" class="SamplingLabTest_DibuatOleh">@Html.Raw(samplingLabTestList.RenderFieldHeader(samplingLabTestList.DibuatOleh))</div></th>
+} @* samplingLabTestList.DibuatOleh.Visible (end) *@
+@if (samplingLabTestList.TanggalDibuat.Visible) { // samplingLabTestList.TanggalDibuat.Visible (begin)
+        <th data-name="TanggalDibuat" class="@(samplingLabTestList.TanggalDibuat.HeaderCellClass)"><div id="elh_SamplingLabTest_TanggalDibuat" class="SamplingLabTest_TanggalDibuat">@Html.Raw(samplingLabTestList.RenderFieldHeader(samplingLabTestList.TanggalDibuat))</div></th>
+} @* samplingLabTestList.TanggalDibuat.Visible (end) *@
+@if (samplingLabTestList.DiperbaruiOleh.Visible) { // samplingLabTestList.DiperbaruiOleh.Visible (begin)
+        <th data-name="DiperbaruiOleh" class="@(samplingLabTestList.DiperbaruiOleh.HeaderCellClass)"><div id="elh_SamplingLabTest_DiperbaruiOleh" class="SamplingLabTest_DiperbaruiOleh">@Html.Raw(samplingLabTestList.RenderFieldHeader(samplingLabTestList.DiperbaruiOleh))</div></th>
+} @* samplingLabTestList.DiperbaruiOleh.Visible (end) *@
+@if (samplingLabTestList.TanggalDiperbarui.Visible) { // samplingLabTestList.TanggalDiperbarui.Visible (begin)
+        <th data-name="TanggalDiperbarui" class="@(samplingLabTestList.TanggalDiperbarui.HeaderCellClass)"><div id="elh_SamplingLabTest_TanggalDiperbarui" class="SamplingLabTest_TanggalDiperbarui">@Html.Raw(samplingLabTestList.RenderFieldHeader(samplingLabTestList.TanggalDiperbarui))</div></th>
+} @* samplingLabTestList.TanggalDiperbarui.Visible (end) *@
+@* Render list options (header, right) *@
+@samplingLabTestList.ListOptions.RenderHeader("right")
+    </tr>
+</thead>
+<tbody data-page="@(samplingLabTestList.PageNumber)">
+@{
+    await samplingLabTestList.SetupGrid();
+    bool eof = samplingLabTestList.Recordset == null; // DN
+}
+@while (samplingLabTestList.RecordCount < samplingLabTestList.StopRecord || SameString(samplingLabTestList.RowIndex, "$rowindex$")) { // Begin While
+    if (!eof && !SameString(samplingLabTestList.RowIndex, "$rowindex$") &&
+        (!samplingLabTestList.IsGridAdd || samplingLabTestList.CurrentMode == "copy") &&
+        (!((samplingLabTestList.IsCopy || samplingLabTestList.IsAdd) && samplingLabTestList.RowIndex is int rowIndex && rowIndex == 0))) // DN
+        eof = !await samplingLabTestList.Recordset.ReadAsync();
+    samplingLabTestList.RecordCount++;
+    if (samplingLabTestList.RecordCount >= samplingLabTestList.StartRecord) {
+        await samplingLabTestList.SetupRow();
+    <tr @Html.Raw(samplingLabTestList.RowAttributes)>
+    @* Render list options (body, left) *@
+    @samplingLabTestList.ListOptions.RenderBody("left", samplingLabTestList.RowCount)
+    @if (samplingLabTestList.LinkProses.Visible) { // samplingLabTestList.LinkProses.Visible (begin)
+        <td data-name="LinkProses" @Html.Raw(samplingLabTestList.LinkProses.CellAttributes)>
+<span id="el@(samplingLabTestList.RowIndex == "$rowindex$" ? "$rowindex$" : samplingLabTestList.RowCount)_SamplingLabTest_LinkProses" class="el_SamplingLabTest_LinkProses">
+<span @Html.Raw(samplingLabTestList.LinkProses.ViewAttributes)>
+@Html.Raw(samplingLabTestList.LinkProses.GetViewValue())</span>
+</span>
+</td>
+    } @* samplingLabTestList.LinkProses.Visible (end) *@
+    @if (samplingLabTestList.IdPlant.Visible) { // samplingLabTestList.IdPlant.Visible (begin)
+        <td data-name="IdPlant" @Html.Raw(samplingLabTestList.IdPlant.CellAttributes)>
+<span id="el@(samplingLabTestList.RowIndex == "$rowindex$" ? "$rowindex$" : samplingLabTestList.RowCount)_SamplingLabTest_IdPlant" class="el_SamplingLabTest_IdPlant">
+<span @Html.Raw(samplingLabTestList.IdPlant.ViewAttributes)>
+@Html.Raw(samplingLabTestList.IdPlant.GetViewValue())</span>
+</span>
+</td>
+    } @* samplingLabTestList.IdPlant.Visible (end) *@
+    @if (samplingLabTestList.IdReferensi.Visible) { // samplingLabTestList.IdReferensi.Visible (begin)
+        <td data-name="IdReferensi" @Html.Raw(samplingLabTestList.IdReferensi.CellAttributes)>
+<span id="el@(samplingLabTestList.RowIndex == "$rowindex$" ? "$rowindex$" : samplingLabTestList.RowCount)_SamplingLabTest_IdReferensi" class="el_SamplingLabTest_IdReferensi">
+<span @Html.Raw(samplingLabTestList.IdReferensi.ViewAttributes)>
+@Html.Raw(samplingLabTestList.IdReferensi.GetViewValue())</span>
+</span>
+</td>
+    } @* samplingLabTestList.IdReferensi.Visible (end) *@
+    @if (samplingLabTestList.StatusProses.Visible) { // samplingLabTestList.StatusProses.Visible (begin)
+        <td data-name="StatusProses" @Html.Raw(samplingLabTestList.StatusProses.CellAttributes)>
+<span id="el@(samplingLabTestList.RowIndex == "$rowindex$" ? "$rowindex$" : samplingLabTestList.RowCount)_SamplingLabTest_StatusProses" class="el_SamplingLabTest_StatusProses">
+<span @Html.Raw(samplingLabTestList.StatusProses.ViewAttributes)>
+@Html.Raw(samplingLabTestList.StatusProses.GetViewValue())</span>
+</span>
+</td>
+    } @* samplingLabTestList.StatusProses.Visible (end) *@
+    @if (samplingLabTestList.PersentaseProgress.Visible) { // samplingLabTestList.PersentaseProgress.Visible (begin)
+        <td data-name="PersentaseProgress" @Html.Raw(samplingLabTestList.PersentaseProgress.CellAttributes)>
+<span id="el@(samplingLabTestList.RowIndex == "$rowindex$" ? "$rowindex$" : samplingLabTestList.RowCount)_SamplingLabTest_PersentaseProgress" class="el_SamplingLabTest_PersentaseProgress">
+<span @Html.Raw(samplingLabTestList.PersentaseProgress.ViewAttributes)>
+@Html.Raw(samplingLabTestList.PersentaseProgress.GetViewValue())</span>
+</span>
+</td>
+    } @* samplingLabTestList.PersentaseProgress.Visible (end) *@
+    @if (samplingLabTestList.IdModa.Visible) { // samplingLabTestList.IdModa.Visible (begin)
+        <td data-name="IdModa" @Html.Raw(samplingLabTestList.IdModa.CellAttributes)>
+<span id="el@(samplingLabTestList.RowIndex == "$rowindex$" ? "$rowindex$" : samplingLabTestList.RowCount)_SamplingLabTest_IdModa" class="el_SamplingLabTest_IdModa">
+<span @Html.Raw(samplingLabTestList.IdModa.ViewAttributes)>
+@Html.Raw(samplingLabTestList.IdModa.GetViewValue())</span>
+</span>
+</td>
+    } @* samplingLabTestList.IdModa.Visible (end) *@
+    @if (samplingLabTestList.TipePenyaluran.Visible) { // samplingLabTestList.TipePenyaluran.Visible (begin)
+        <td data-name="TipePenyaluran" @Html.Raw(samplingLabTestList.TipePenyaluran.CellAttributes)>
+<span id="el@(samplingLabTestList.RowIndex == "$rowindex$" ? "$rowindex$" : samplingLabTestList.RowCount)_SamplingLabTest_TipePenyaluran" class="el_SamplingLabTest_TipePenyaluran">
+<span @Html.Raw(samplingLabTestList.TipePenyaluran.ViewAttributes)>
+@Html.Raw(samplingLabTestList.TipePenyaluran.GetViewValue())</span>
+</span>
+</td>
+    } @* samplingLabTestList.TipePenyaluran.Visible (end) *@
+    @if (samplingLabTestList.KategoriPenyaluran.Visible) { // samplingLabTestList.KategoriPenyaluran.Visible (begin)
+        <td data-name="KategoriPenyaluran" @Html.Raw(samplingLabTestList.KategoriPenyaluran.CellAttributes)>
+<span id="el@(samplingLabTestList.RowIndex == "$rowindex$" ? "$rowindex$" : samplingLabTestList.RowCount)_SamplingLabTest_KategoriPenyaluran" class="el_SamplingLabTest_KategoriPenyaluran">
+<span @Html.Raw(samplingLabTestList.KategoriPenyaluran.ViewAttributes)>
+@Html.Raw(samplingLabTestList.KategoriPenyaluran.GetViewValue())</span>
+</span>
+</td>
+    } @* samplingLabTestList.KategoriPenyaluran.Visible (end) *@
+    @if (samplingLabTestList.NomorPolisi.Visible) { // samplingLabTestList.NomorPolisi.Visible (begin)
+        <td data-name="NomorPolisi" @Html.Raw(samplingLabTestList.NomorPolisi.CellAttributes)>
+<span id="el@(samplingLabTestList.RowIndex == "$rowindex$" ? "$rowindex$" : samplingLabTestList.RowCount)_SamplingLabTest_NomorPolisi" class="el_SamplingLabTest_NomorPolisi">
+<span @Html.Raw(samplingLabTestList.NomorPolisi.ViewAttributes)>
+@Html.Raw(samplingLabTestList.NomorPolisi.GetViewValue())</span>
+</span>
+</td>
+    } @* samplingLabTestList.NomorPolisi.Visible (end) *@
+    @if (samplingLabTestList.TipeProdukSTS.Visible) { // samplingLabTestList.TipeProdukSTS.Visible (begin)
+        <td data-name="TipeProdukSTS" @Html.Raw(samplingLabTestList.TipeProdukSTS.CellAttributes)>
+<span id="el@(samplingLabTestList.RowIndex == "$rowindex$" ? "$rowindex$" : samplingLabTestList.RowCount)_SamplingLabTest_TipeProdukSTS" class="el_SamplingLabTest_TipeProdukSTS">
+<span @Html.Raw(samplingLabTestList.TipeProdukSTS.ViewAttributes)>
+@Html.Raw(samplingLabTestList.TipeProdukSTS.GetViewValue())</span>
+</span>
+</td>
+    } @* samplingLabTestList.TipeProdukSTS.Visible (end) *@
+    @if (samplingLabTestList.KodeProduk.Visible) { // samplingLabTestList.KodeProduk.Visible (begin)
+        <td data-name="KodeProduk" @Html.Raw(samplingLabTestList.KodeProduk.CellAttributes)>
+<span id="el@(samplingLabTestList.RowIndex == "$rowindex$" ? "$rowindex$" : samplingLabTestList.RowCount)_SamplingLabTest_KodeProduk" class="el_SamplingLabTest_KodeProduk">
+<span @Html.Raw(samplingLabTestList.KodeProduk.ViewAttributes)>
+@Html.Raw(samplingLabTestList.KodeProduk.GetViewValue())</span>
+</span>
+</td>
+    } @* samplingLabTestList.KodeProduk.Visible (end) *@
+    @if (samplingLabTestList.Tujuan.Visible) { // samplingLabTestList.Tujuan.Visible (begin)
+        <td data-name="Tujuan" @Html.Raw(samplingLabTestList.Tujuan.CellAttributes)>
+<span id="el@(samplingLabTestList.RowIndex == "$rowindex$" ? "$rowindex$" : samplingLabTestList.RowCount)_SamplingLabTest_Tujuan" class="el_SamplingLabTest_Tujuan">
+<span @Html.Raw(samplingLabTestList.Tujuan.ViewAttributes)>
+@Html.Raw(samplingLabTestList.Tujuan.GetViewValue())</span>
+</span>
+</td>
+    } @* samplingLabTestList.Tujuan.Visible (end) *@
+    @if (samplingLabTestList.DibuatOleh.Visible) { // samplingLabTestList.DibuatOleh.Visible (begin)
+        <td data-name="DibuatOleh" @Html.Raw(samplingLabTestList.DibuatOleh.CellAttributes)>
+<span id="el@(samplingLabTestList.RowIndex == "$rowindex$" ? "$rowindex$" : samplingLabTestList.RowCount)_SamplingLabTest_DibuatOleh" class="el_SamplingLabTest_DibuatOleh">
+<span @Html.Raw(samplingLabTestList.DibuatOleh.ViewAttributes)>
+@Html.Raw(samplingLabTestList.DibuatOleh.GetViewValue())</span>
+</span>
+</td>
+    } @* samplingLabTestList.DibuatOleh.Visible (end) *@
+    @if (samplingLabTestList.TanggalDibuat.Visible) { // samplingLabTestList.TanggalDibuat.Visible (begin)
+        <td data-name="TanggalDibuat" @Html.Raw(samplingLabTestList.TanggalDibuat.CellAttributes)>
+<span id="el@(samplingLabTestList.RowIndex == "$rowindex$" ? "$rowindex$" : samplingLabTestList.RowCount)_SamplingLabTest_TanggalDibuat" class="el_SamplingLabTest_TanggalDibuat">
+<span @Html.Raw(samplingLabTestList.TanggalDibuat.ViewAttributes)>
+@Html.Raw(samplingLabTestList.TanggalDibuat.GetViewValue())</span>
+</span>
+</td>
+    } @* samplingLabTestList.TanggalDibuat.Visible (end) *@
+    @if (samplingLabTestList.DiperbaruiOleh.Visible) { // samplingLabTestList.DiperbaruiOleh.Visible (begin)
+        <td data-name="DiperbaruiOleh" @Html.Raw(samplingLabTestList.DiperbaruiOleh.CellAttributes)>
+<span id="el@(samplingLabTestList.RowIndex == "$rowindex$" ? "$rowindex$" : samplingLabTestList.RowCount)_SamplingLabTest_DiperbaruiOleh" class="el_SamplingLabTest_DiperbaruiOleh">
+<span @Html.Raw(samplingLabTestList.DiperbaruiOleh.ViewAttributes)>
+@Html.Raw(samplingLabTestList.DiperbaruiOleh.GetViewValue())</span>
+</span>
+</td>
+    } @* samplingLabTestList.DiperbaruiOleh.Visible (end) *@
+    @if (samplingLabTestList.TanggalDiperbarui.Visible) { // samplingLabTestList.TanggalDiperbarui.Visible (begin)
+        <td data-name="TanggalDiperbarui" @Html.Raw(samplingLabTestList.TanggalDiperbarui.CellAttributes)>
+<span id="el@(samplingLabTestList.RowIndex == "$rowindex$" ? "$rowindex$" : samplingLabTestList.RowCount)_SamplingLabTest_TanggalDiperbarui" class="el_SamplingLabTest_TanggalDiperbarui">
+<span @Html.Raw(samplingLabTestList.TanggalDiperbarui.ViewAttributes)>
+@Html.Raw(samplingLabTestList.TanggalDiperbarui.GetViewValue())</span>
+</span>
+</td>
+    } @* samplingLabTestList.TanggalDiperbarui.Visible (end) *@
+    @* Render list options (body, right) *@
+    @samplingLabTestList.ListOptions.RenderBody("right", samplingLabTestList.RowCount)
+    </tr>
+    } @* End if *@
+
+    // Reset for template row
+    if (SameString(samplingLabTestList.RowIndex, "$rowindex$"))
+        samplingLabTestList.RowIndex = 0;
+
+    // Reset inline add/copy row
+    if ((samplingLabTestList.IsCopy || samplingLabTestList.IsAdd) && samplingLabTestList.RowIndex is int rowIndex2 && rowIndex2 == 0)
+        samplingLabTestList.RowIndex = 1;
+} @* End While *@
+</tbody>
+</table><!-- /.ew-table -->
+} @* End If TotalRecords > 0 *@
+</div><!-- /.ew-grid-middle-panel -->
+@if (Empty(samplingLabTestList.CurrentAction) && !samplingLabTestList.UseAjaxActions) {
+<input type="hidden" name="action" id="action" value="">
+}
+</form><!-- /.ew-list-form -->
+@{ samplingLabTestList.CloseRecordset(); }
+@if (!samplingLabTestList.IsExport()) {
+<div class="card-footer ew-grid-lower-panel">
+@if (!samplingLabTestList.IsGridAdd && !(samplingLabTestList.IsGridEdit && samplingLabTestList.ModalGridEdit) && !samplingLabTestList.IsMultiEdit) {
+@Html.Raw(samplingLabTestList.Pager.Render())
+}
+<div class="ew-list-other-options">
+@samplingLabTestList.OtherOptions.RenderBody("bottom")
+</div>
+</div>
+}
+</div><!-- /.ew-grid -->
+} else { // Show other options
+<div class="ew-list-other-options">
+@samplingLabTestList.OtherOptions.ForEach(opt => opt.ButtonClass = "").RenderBody()
+</div>
+}
+</div>
+<div id="ew-footer-options">
+    @samplingLabTestList.FooterOptions.RenderBody()
+</div>
+</main>
+@samplingLabTestList.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+@if (!samplingLabTestList.IsExport()) {
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("SamplingLabTest");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Startup script
+    var parent_url = ew.PATH_BASE;
+    var steps = [
+        { number: 1, label: "Sampling Lab Test", url: '', icon: "fa-flask" },
+    ];
+    var currentStep = 1;
+    $("<style>")
+        .prop("type", "text/css")
+        .html(`
+            .stepper {
+                display: flex;
+                counter-reset: step;
+            }
+            .step {
+                width: 150px;
+                text-align: center;
+                position: relative;
+            }
+            .step:not(:last-child)::after {
+                content: '';
+                position: absolute;
+                top: 20px;
+                right: -50%;
+                width: 100%;
+                height: 4px;
+                background-color: #ccc;
+                z-index: 0;
+            }
+            .step.completed:not(:last-child)::after {
+                background-color: #3c6dbd;
+            }
+            .step-icon {
+                width: 36px;
+                height: 36px;
+                line-height: 36px;
+                border-radius: 50%;
+                background: #ccc;
+                display: inline-block;
+                z-index: 1;
+                position: relative;
+                color: white;
+                font-weight: bold;
+            }
+            .step.active .step-icon {
+                background: #3c6dbd;
+            }
+            .step-label {
+                margin-top: 8px;
+                font-size: 14px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                gap: 6px;
+                color: #333;
+            }
+            .step-label {
+                color: #3c6dbd !important;
+                text-decoration: none;
+                margin: 0;
+                padding: 0;
+            }
+            .step-label-not-active {
+                color: #CCCCCC !important;
+            }
+        `)
+        .appendTo("head");
+    var $stepperWrapper = $('<div id="bread-crumb-nav" class="d-flex border-bottom border-2 pb-2"><div class="stepper"></div></div>');
+    var $stepper = $stepperWrapper.find(".stepper");
+    steps.forEach(function (step, i) {
+        var isActive = step.number === currentStep;
+        var isCompleted = step.number < currentStep;
+        var stepClass = isActive ? "active" : isCompleted ? "completed" : "";
+        var icon, labelContent, html;
+        if (isActive) {
+            icon = `<div class="step-icon bg-success">${step.number}</div>`;
+            labelContent = `<div class="step-label"><p class="text-success mb-1"><i class="fa-solid ${step.icon} me-1 text-success"></i> ${step.label}</p></div>`;
+            html = `<div class="step ${stepClass} text-success">${icon}${labelContent}</div>`;
+        } else if (isCompleted) {
+            icon = `<div class="step-icon" style="background: #3c6dbd;">${step.number}</div>`;
+            labelContent = `<div><a href="${step.url}" class="step-label"><i class="fa-solid ${step.icon} me-1"></i>${step.label}</a></div>`;
+            html = `<div class="step ${stepClass}">${icon}${labelContent}</div>`;
+        } else {
+            icon = `<div class="step-icon">${step.number}</div>`;
+            labelContent = `<div class="step-label-not-active"><p style="margin: 0;"><i class="fa-solid ${step.icon} me-1"></i>${step.label}</p></div>`;
+            html = `<div class="step ${stepClass} text-secondary">${icon}${labelContent}</div>`;
+        }
+        $stepper.append(html);
+    });
+    if ($('#bread-crumb-nav').length == 0) {
+        $(".content-header .container-fluid .row").append($stepperWrapper);
+    }
+    $(document).ready(function() {
+        const UserLevel = "@CurrentUserLevel()";
+        const idRole = '@CurrentUserInfo("Rule")?.ToString()';
+        var parrentButton = $('button.btn-primary[name="btn-submit"]');
+        var addButton = $(`
+            <button class="btn btn-success ms-2" id="btn-add-SamplingLabTest">
+                <i class="fas fa-plus"></i> Add New
+            </button>
+        `);
+        $(`a.btn.btn-default.ew-add-edit.ew-add[href="${parent_url}SamplingLabTestAdd"]`).remove();
+        parrentButton.parent().append(addButton);
+        if (UserLevel == "2" || UserLevel == "-1" || UserLevel == "4" || idRole == '3') {
+            addButton.on('click', function (e) {
+                e.preventDefault();
+                window.location.href = parent_url+'SamplingLabTestAdd';
+            });
+        } else {
+            addButton.on('click', function (e) {
+                e.preventDefault();
+                ew.alert('Anda tidak memiliki akses untuk menambah data Sampling Lab Test.');
+            });
+        }
+    }); 
+});
+</script>
+}

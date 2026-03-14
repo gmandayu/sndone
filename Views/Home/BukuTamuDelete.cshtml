@@ -1,0 +1,520 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (bukuTamuDelete.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = bukuTamuDelete.UseLayout ? "_Layout" : "";
+}
+<script>
+var currentTable = @Html.Raw(ConvertToJson(bukuTamuDelete.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { BukuTamu: currentTable } });
+var currentPageID = ew.PAGE_ID = "delete";
+var currentForm;
+var fBukuTamudelete;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("fBukuTamudelete")
+        .setPageId("delete")
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Client script
+    const parent_url = ew.PATH_BASE;
+    $(document).on('click', '.download-document', function (e) {
+        e.preventDefault();
+        const id = $(this).data('id');
+        const column = $(this).data('field');
+        if (!id) {
+            ew.alert("ID dokumen tidak ditemukan.");
+            return;
+        }
+        $.ajax({
+            url: parent_url + 'api/LookUpList/DownloadBukuTamu',
+            type: 'GET',
+            data: { 
+                id: id,
+                column: column
+            },
+            xhrFields: {
+                responseType: 'blob'
+            },
+            beforeSend: function () {
+                showLoading();
+            },
+            success: function (response, status, xhr) {
+                const disposition = xhr.getResponseHeader('Content-Disposition');
+                let fileName = "download_file";
+                if (disposition) {
+                    const fileNameMatch = disposition.match(/filename="?([^";]+)"?/);
+                    if (fileNameMatch && fileNameMatch[1]) {
+                        fileName = decodeURIComponent(fileNameMatch[1]);
+                    }
+                    const utf8FileNameMatch = disposition.match(/filename\*\s*=\s*UTF-8''([^;]+)/);
+                    if (utf8FileNameMatch && utf8FileNameMatch[1]) {
+                        fileName = decodeURIComponent(utf8FileNameMatch[1]);
+                    }
+                }
+                const blobUrl = window.URL.createObjectURL(response);
+                const a = document.createElement('a');
+                a.href = blobUrl;
+                a.download = fileName;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(blobUrl);
+                ew.alert("Download berhasil!");
+            },
+            error: function (xhr, status, error) {
+                if (xhr.status === 404) {
+                    ew.alert("File tidak ditemukan di server.");
+                } else if (xhr.status === 500) {
+                    ew.alert("Terjadi kesalahan server. Coba lagi nanti.");
+                } else {
+                    ew.alert("Gagal mendownload file. Error: " + xhr.responseText);
+                }
+            },
+            complete: function () {
+                hideLoading();
+            }
+        });
+    });
+});
+</script>
+@bukuTamuDelete.ShowPageHeader()
+@bukuTamuDelete.ShowMessages()
+<form name="fBukuTamudelete" id="fBukuTamudelete" class="ew-form ew-delete-form" action="@AppPath(CurrentPageName())" method="post" novalidate autocomplete="off">
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+<input type="hidden" name="action" id="action" value="delete">
+@foreach (string key in bukuTamuDelete.RecordKeys) {
+<input type="hidden" name="key_m[]" value="@key">
+}
+<div class="card ew-card ew-grid @(bukuTamuDelete.TableGridClass)">
+<div class="card-body ew-grid-middle-panel @(bukuTamuDelete.TableContainerClass)" style="@(bukuTamuDelete.TableContainerStyle)">
+<table class="@(bukuTamuDelete.TableClass)">
+    <thead>
+    <tr class="ew-table-header">
+@if (bukuTamuDelete.LinkRedirect.Visible) { // bukuTamuDelete.LinkRedirect.Visible (begin)
+        <th class="@Html.Raw(bukuTamuDelete.LinkRedirect.HeaderCellClass)"><span id="elh_BukuTamu_LinkRedirect" class="BukuTamu_LinkRedirect">@Html.Raw(bukuTamuDelete.LinkRedirect.Caption)</span></th>
+} @* bukuTamuDelete.LinkRedirect.Visible (end) *@
+@if (bukuTamuDelete.Plant.Visible) { // bukuTamuDelete.Plant.Visible (begin)
+        <th class="@Html.Raw(bukuTamuDelete.Plant.HeaderCellClass)"><span id="elh_BukuTamu_Plant" class="BukuTamu_Plant">@Html.Raw(bukuTamuDelete.Plant.Caption)</span></th>
+} @* bukuTamuDelete.Plant.Visible (end) *@
+@if (bukuTamuDelete.Tanggal.Visible) { // bukuTamuDelete.Tanggal.Visible (begin)
+        <th class="@Html.Raw(bukuTamuDelete.Tanggal.HeaderCellClass)"><span id="elh_BukuTamu_Tanggal" class="BukuTamu_Tanggal">@Html.Raw(bukuTamuDelete.Tanggal.Caption)</span></th>
+} @* bukuTamuDelete.Tanggal.Visible (end) *@
+@if (bukuTamuDelete.StatusZona.Visible) { // bukuTamuDelete.StatusZona.Visible (begin)
+        <th class="@Html.Raw(bukuTamuDelete.StatusZona.HeaderCellClass)"><span id="elh_BukuTamu_StatusZona" class="BukuTamu_StatusZona">@Html.Raw(bukuTamuDelete.StatusZona.Caption)</span></th>
+} @* bukuTamuDelete.StatusZona.Visible (end) *@
+@if (bukuTamuDelete.Nama.Visible) { // bukuTamuDelete.Nama.Visible (begin)
+        <th class="@Html.Raw(bukuTamuDelete.Nama.HeaderCellClass)"><span id="elh_BukuTamu_Nama" class="BukuTamu_Nama">@Html.Raw(bukuTamuDelete.Nama.Caption)</span></th>
+} @* bukuTamuDelete.Nama.Visible (end) *@
+@if (bukuTamuDelete.AsalPerusahaan.Visible) { // bukuTamuDelete.AsalPerusahaan.Visible (begin)
+        <th class="@Html.Raw(bukuTamuDelete.AsalPerusahaan.HeaderCellClass)"><span id="elh_BukuTamu_AsalPerusahaan" class="BukuTamu_AsalPerusahaan">@Html.Raw(bukuTamuDelete.AsalPerusahaan.Caption)</span></th>
+} @* bukuTamuDelete.AsalPerusahaan.Visible (end) *@
+@if (bukuTamuDelete.Jabatan.Visible) { // bukuTamuDelete.Jabatan.Visible (begin)
+        <th class="@Html.Raw(bukuTamuDelete.Jabatan.HeaderCellClass)"><span id="elh_BukuTamu_Jabatan" class="BukuTamu_Jabatan">@Html.Raw(bukuTamuDelete.Jabatan.Caption)</span></th>
+} @* bukuTamuDelete.Jabatan.Visible (end) *@
+@if (bukuTamuDelete.FungsiygDikunjungi.Visible) { // bukuTamuDelete.FungsiygDikunjungi.Visible (begin)
+        <th class="@Html.Raw(bukuTamuDelete.FungsiygDikunjungi.HeaderCellClass)"><span id="elh_BukuTamu_FungsiygDikunjungi" class="BukuTamu_FungsiygDikunjungi">@Html.Raw(bukuTamuDelete.FungsiygDikunjungi.Caption)</span></th>
+} @* bukuTamuDelete.FungsiygDikunjungi.Visible (end) *@
+@if (bukuTamuDelete.MaksudKunjungan.Visible) { // bukuTamuDelete.MaksudKunjungan.Visible (begin)
+        <th class="@Html.Raw(bukuTamuDelete.MaksudKunjungan.HeaderCellClass)"><span id="elh_BukuTamu_MaksudKunjungan" class="BukuTamu_MaksudKunjungan">@Html.Raw(bukuTamuDelete.MaksudKunjungan.Caption)</span></th>
+} @* bukuTamuDelete.MaksudKunjungan.Visible (end) *@
+@if (bukuTamuDelete.TandaPengenal.Visible) { // bukuTamuDelete.TandaPengenal.Visible (begin)
+        <th class="@Html.Raw(bukuTamuDelete.TandaPengenal.HeaderCellClass)"><span id="elh_BukuTamu_TandaPengenal" class="BukuTamu_TandaPengenal">@Html.Raw(bukuTamuDelete.TandaPengenal.Caption)</span></th>
+} @* bukuTamuDelete.TandaPengenal.Visible (end) *@
+@if (bukuTamuDelete.TandaTanganDownload.Visible) { // bukuTamuDelete.TandaTanganDownload.Visible (begin)
+        <th class="@Html.Raw(bukuTamuDelete.TandaTanganDownload.HeaderCellClass)"><span id="elh_BukuTamu_TandaTanganDownload" class="BukuTamu_TandaTanganDownload">@Html.Raw(bukuTamuDelete.TandaTanganDownload.Caption)</span></th>
+} @* bukuTamuDelete.TandaTanganDownload.Visible (end) *@
+@if (bukuTamuDelete.Keterangan.Visible) { // bukuTamuDelete.Keterangan.Visible (begin)
+        <th class="@Html.Raw(bukuTamuDelete.Keterangan.HeaderCellClass)"><span id="elh_BukuTamu_Keterangan" class="BukuTamu_Keterangan">@Html.Raw(bukuTamuDelete.Keterangan.Caption)</span></th>
+} @* bukuTamuDelete.Keterangan.Visible (end) *@
+@if (bukuTamuDelete.PintuUtamaId.Visible) { // bukuTamuDelete.PintuUtamaId.Visible (begin)
+        <th class="@Html.Raw(bukuTamuDelete.PintuUtamaId.HeaderCellClass)"><span id="elh_BukuTamu_PintuUtamaId" class="BukuTamu_PintuUtamaId">@Html.Raw(bukuTamuDelete.PintuUtamaId.Caption)</span></th>
+} @* bukuTamuDelete.PintuUtamaId.Visible (end) *@
+@if (bukuTamuDelete.PintuUtamaInTanggal.Visible) { // bukuTamuDelete.PintuUtamaInTanggal.Visible (begin)
+        <th class="@Html.Raw(bukuTamuDelete.PintuUtamaInTanggal.HeaderCellClass)"><span id="elh_BukuTamu_PintuUtamaInTanggal" class="BukuTamu_PintuUtamaInTanggal">@Html.Raw(bukuTamuDelete.PintuUtamaInTanggal.Caption)</span></th>
+} @* bukuTamuDelete.PintuUtamaInTanggal.Visible (end) *@
+@if (bukuTamuDelete.PintuUtamaInFotoDownload.Visible) { // bukuTamuDelete.PintuUtamaInFotoDownload.Visible (begin)
+        <th class="@Html.Raw(bukuTamuDelete.PintuUtamaInFotoDownload.HeaderCellClass)"><span id="elh_BukuTamu_PintuUtamaInFotoDownload" class="BukuTamu_PintuUtamaInFotoDownload">@Html.Raw(bukuTamuDelete.PintuUtamaInFotoDownload.Caption)</span></th>
+} @* bukuTamuDelete.PintuUtamaInFotoDownload.Visible (end) *@
+@if (bukuTamuDelete.PintuUtamaInUser.Visible) { // bukuTamuDelete.PintuUtamaInUser.Visible (begin)
+        <th class="@Html.Raw(bukuTamuDelete.PintuUtamaInUser.HeaderCellClass)"><span id="elh_BukuTamu_PintuUtamaInUser" class="BukuTamu_PintuUtamaInUser">@Html.Raw(bukuTamuDelete.PintuUtamaInUser.Caption)</span></th>
+} @* bukuTamuDelete.PintuUtamaInUser.Visible (end) *@
+@if (bukuTamuDelete.CustomPilihPintu.Visible) { // bukuTamuDelete.CustomPilihPintu.Visible (begin)
+        <th class="@Html.Raw(bukuTamuDelete.CustomPilihPintu.HeaderCellClass)"><span id="elh_BukuTamu_CustomPilihPintu" class="BukuTamu_CustomPilihPintu">@Html.Raw(bukuTamuDelete.CustomPilihPintu.Caption)</span></th>
+} @* bukuTamuDelete.CustomPilihPintu.Visible (end) *@
+@if (bukuTamuDelete.PintuUtamaOutTanggal.Visible) { // bukuTamuDelete.PintuUtamaOutTanggal.Visible (begin)
+        <th class="@Html.Raw(bukuTamuDelete.PintuUtamaOutTanggal.HeaderCellClass)"><span id="elh_BukuTamu_PintuUtamaOutTanggal" class="BukuTamu_PintuUtamaOutTanggal">@Html.Raw(bukuTamuDelete.PintuUtamaOutTanggal.Caption)</span></th>
+} @* bukuTamuDelete.PintuUtamaOutTanggal.Visible (end) *@
+@if (bukuTamuDelete.PintuUtamaOutFotoDownload.Visible) { // bukuTamuDelete.PintuUtamaOutFotoDownload.Visible (begin)
+        <th class="@Html.Raw(bukuTamuDelete.PintuUtamaOutFotoDownload.HeaderCellClass)"><span id="elh_BukuTamu_PintuUtamaOutFotoDownload" class="BukuTamu_PintuUtamaOutFotoDownload">@Html.Raw(bukuTamuDelete.PintuUtamaOutFotoDownload.Caption)</span></th>
+} @* bukuTamuDelete.PintuUtamaOutFotoDownload.Visible (end) *@
+@if (bukuTamuDelete.PintuUtamaOutUser.Visible) { // bukuTamuDelete.PintuUtamaOutUser.Visible (begin)
+        <th class="@Html.Raw(bukuTamuDelete.PintuUtamaOutUser.HeaderCellClass)"><span id="elh_BukuTamu_PintuUtamaOutUser" class="BukuTamu_PintuUtamaOutUser">@Html.Raw(bukuTamuDelete.PintuUtamaOutUser.Caption)</span></th>
+} @* bukuTamuDelete.PintuUtamaOutUser.Visible (end) *@
+@if (bukuTamuDelete.LobbyUtamaId.Visible) { // bukuTamuDelete.LobbyUtamaId.Visible (begin)
+        <th class="@Html.Raw(bukuTamuDelete.LobbyUtamaId.HeaderCellClass)"><span id="elh_BukuTamu_LobbyUtamaId" class="BukuTamu_LobbyUtamaId">@Html.Raw(bukuTamuDelete.LobbyUtamaId.Caption)</span></th>
+} @* bukuTamuDelete.LobbyUtamaId.Visible (end) *@
+@if (bukuTamuDelete.LobbyUtamaInTanggal.Visible) { // bukuTamuDelete.LobbyUtamaInTanggal.Visible (begin)
+        <th class="@Html.Raw(bukuTamuDelete.LobbyUtamaInTanggal.HeaderCellClass)"><span id="elh_BukuTamu_LobbyUtamaInTanggal" class="BukuTamu_LobbyUtamaInTanggal">@Html.Raw(bukuTamuDelete.LobbyUtamaInTanggal.Caption)</span></th>
+} @* bukuTamuDelete.LobbyUtamaInTanggal.Visible (end) *@
+@if (bukuTamuDelete.LobbyUtamaInFotoDownload.Visible) { // bukuTamuDelete.LobbyUtamaInFotoDownload.Visible (begin)
+        <th class="@Html.Raw(bukuTamuDelete.LobbyUtamaInFotoDownload.HeaderCellClass)"><span id="elh_BukuTamu_LobbyUtamaInFotoDownload" class="BukuTamu_LobbyUtamaInFotoDownload">@Html.Raw(bukuTamuDelete.LobbyUtamaInFotoDownload.Caption)</span></th>
+} @* bukuTamuDelete.LobbyUtamaInFotoDownload.Visible (end) *@
+@if (bukuTamuDelete.LobbyUtamaInUser.Visible) { // bukuTamuDelete.LobbyUtamaInUser.Visible (begin)
+        <th class="@Html.Raw(bukuTamuDelete.LobbyUtamaInUser.HeaderCellClass)"><span id="elh_BukuTamu_LobbyUtamaInUser" class="BukuTamu_LobbyUtamaInUser">@Html.Raw(bukuTamuDelete.LobbyUtamaInUser.Caption)</span></th>
+} @* bukuTamuDelete.LobbyUtamaInUser.Visible (end) *@
+@if (bukuTamuDelete.LobbyUtamaOutTanggal.Visible) { // bukuTamuDelete.LobbyUtamaOutTanggal.Visible (begin)
+        <th class="@Html.Raw(bukuTamuDelete.LobbyUtamaOutTanggal.HeaderCellClass)"><span id="elh_BukuTamu_LobbyUtamaOutTanggal" class="BukuTamu_LobbyUtamaOutTanggal">@Html.Raw(bukuTamuDelete.LobbyUtamaOutTanggal.Caption)</span></th>
+} @* bukuTamuDelete.LobbyUtamaOutTanggal.Visible (end) *@
+@if (bukuTamuDelete.LobbyUtamaOutFotoDownload.Visible) { // bukuTamuDelete.LobbyUtamaOutFotoDownload.Visible (begin)
+        <th class="@Html.Raw(bukuTamuDelete.LobbyUtamaOutFotoDownload.HeaderCellClass)"><span id="elh_BukuTamu_LobbyUtamaOutFotoDownload" class="BukuTamu_LobbyUtamaOutFotoDownload">@Html.Raw(bukuTamuDelete.LobbyUtamaOutFotoDownload.Caption)</span></th>
+} @* bukuTamuDelete.LobbyUtamaOutFotoDownload.Visible (end) *@
+@if (bukuTamuDelete.LobbyUtamaOutUser.Visible) { // bukuTamuDelete.LobbyUtamaOutUser.Visible (begin)
+        <th class="@Html.Raw(bukuTamuDelete.LobbyUtamaOutUser.HeaderCellClass)"><span id="elh_BukuTamu_LobbyUtamaOutUser" class="BukuTamu_LobbyUtamaOutUser">@Html.Raw(bukuTamuDelete.LobbyUtamaOutUser.Caption)</span></th>
+} @* bukuTamuDelete.LobbyUtamaOutUser.Visible (end) *@
+@if (bukuTamuDelete.AreaTerlarangId.Visible) { // bukuTamuDelete.AreaTerlarangId.Visible (begin)
+        <th class="@Html.Raw(bukuTamuDelete.AreaTerlarangId.HeaderCellClass)"><span id="elh_BukuTamu_AreaTerlarangId" class="BukuTamu_AreaTerlarangId">@Html.Raw(bukuTamuDelete.AreaTerlarangId.Caption)</span></th>
+} @* bukuTamuDelete.AreaTerlarangId.Visible (end) *@
+@if (bukuTamuDelete.AreaTerlarangInTanggal.Visible) { // bukuTamuDelete.AreaTerlarangInTanggal.Visible (begin)
+        <th class="@Html.Raw(bukuTamuDelete.AreaTerlarangInTanggal.HeaderCellClass)"><span id="elh_BukuTamu_AreaTerlarangInTanggal" class="BukuTamu_AreaTerlarangInTanggal">@Html.Raw(bukuTamuDelete.AreaTerlarangInTanggal.Caption)</span></th>
+} @* bukuTamuDelete.AreaTerlarangInTanggal.Visible (end) *@
+@if (bukuTamuDelete.AreaTerlarangInFotoDownload.Visible) { // bukuTamuDelete.AreaTerlarangInFotoDownload.Visible (begin)
+        <th class="@Html.Raw(bukuTamuDelete.AreaTerlarangInFotoDownload.HeaderCellClass)"><span id="elh_BukuTamu_AreaTerlarangInFotoDownload" class="BukuTamu_AreaTerlarangInFotoDownload">@Html.Raw(bukuTamuDelete.AreaTerlarangInFotoDownload.Caption)</span></th>
+} @* bukuTamuDelete.AreaTerlarangInFotoDownload.Visible (end) *@
+@if (bukuTamuDelete.AreaTerlarangInUser.Visible) { // bukuTamuDelete.AreaTerlarangInUser.Visible (begin)
+        <th class="@Html.Raw(bukuTamuDelete.AreaTerlarangInUser.HeaderCellClass)"><span id="elh_BukuTamu_AreaTerlarangInUser" class="BukuTamu_AreaTerlarangInUser">@Html.Raw(bukuTamuDelete.AreaTerlarangInUser.Caption)</span></th>
+} @* bukuTamuDelete.AreaTerlarangInUser.Visible (end) *@
+@if (bukuTamuDelete.AreaTerlarangOutTanggal.Visible) { // bukuTamuDelete.AreaTerlarangOutTanggal.Visible (begin)
+        <th class="@Html.Raw(bukuTamuDelete.AreaTerlarangOutTanggal.HeaderCellClass)"><span id="elh_BukuTamu_AreaTerlarangOutTanggal" class="BukuTamu_AreaTerlarangOutTanggal">@Html.Raw(bukuTamuDelete.AreaTerlarangOutTanggal.Caption)</span></th>
+} @* bukuTamuDelete.AreaTerlarangOutTanggal.Visible (end) *@
+@if (bukuTamuDelete.AreaTerlarangOutFotoDownload.Visible) { // bukuTamuDelete.AreaTerlarangOutFotoDownload.Visible (begin)
+        <th class="@Html.Raw(bukuTamuDelete.AreaTerlarangOutFotoDownload.HeaderCellClass)"><span id="elh_BukuTamu_AreaTerlarangOutFotoDownload" class="BukuTamu_AreaTerlarangOutFotoDownload">@Html.Raw(bukuTamuDelete.AreaTerlarangOutFotoDownload.Caption)</span></th>
+} @* bukuTamuDelete.AreaTerlarangOutFotoDownload.Visible (end) *@
+@if (bukuTamuDelete.AreaTerlarangOutUser.Visible) { // bukuTamuDelete.AreaTerlarangOutUser.Visible (begin)
+        <th class="@Html.Raw(bukuTamuDelete.AreaTerlarangOutUser.HeaderCellClass)"><span id="elh_BukuTamu_AreaTerlarangOutUser" class="BukuTamu_AreaTerlarangOutUser">@Html.Raw(bukuTamuDelete.AreaTerlarangOutUser.Caption)</span></th>
+} @* bukuTamuDelete.AreaTerlarangOutUser.Visible (end) *@
+@if (bukuTamuDelete.etlDate.Visible) { // bukuTamuDelete.etlDate.Visible (begin)
+        <th class="@Html.Raw(bukuTamuDelete.etlDate.HeaderCellClass)"><span id="elh_BukuTamu_etlDate" class="BukuTamu_etlDate">@Html.Raw(bukuTamuDelete.etlDate.Caption)</span></th>
+} @* bukuTamuDelete.etlDate.Visible (end) *@
+@if (bukuTamuDelete.LastUpdatedBy.Visible) { // bukuTamuDelete.LastUpdatedBy.Visible (begin)
+        <th class="@Html.Raw(bukuTamuDelete.LastUpdatedBy.HeaderCellClass)"><span id="elh_BukuTamu_LastUpdatedBy" class="BukuTamu_LastUpdatedBy">@Html.Raw(bukuTamuDelete.LastUpdatedBy.Caption)</span></th>
+} @* bukuTamuDelete.LastUpdatedBy.Visible (end) *@
+@if (bukuTamuDelete.lastUpdatedDate.Visible) { // bukuTamuDelete.lastUpdatedDate.Visible (begin)
+        <th class="@Html.Raw(bukuTamuDelete.lastUpdatedDate.HeaderCellClass)"><span id="elh_BukuTamu_lastUpdatedDate" class="BukuTamu_lastUpdatedDate">@Html.Raw(bukuTamuDelete.lastUpdatedDate.Caption)</span></th>
+} @* bukuTamuDelete.lastUpdatedDate.Visible (end) *@
+    </tr>
+    </thead>
+    <tbody>
+@{ bukuTamuDelete.RecordCount = 0; }
+@while (bukuTamuDelete.Recordset != null && await bukuTamuDelete.Recordset.ReadAsync()) { // DN
+    bukuTamuDelete.RecordCount++;
+    bukuTamuDelete.RowCount++;
+
+    // Set row properties
+    bukuTamuDelete.ResetAttributes();
+    bukuTamuDelete.RowType = RowType.View; // View
+
+    // Get the field contents
+    await bukuTamuDelete.LoadRowValues(bukuTamuDelete.Recordset);
+
+    // Render row
+    await bukuTamuDelete.RenderRow();
+    <tr @Html.Raw(bukuTamuDelete.RowAttributes)>
+@if (bukuTamuDelete.LinkRedirect.Visible) { // bukuTamuDelete.LinkRedirect.Visible (begin)
+        <td @Html.Raw(bukuTamuDelete.LinkRedirect.CellAttributes)>
+<span id="">
+<span @Html.Raw(bukuTamuDelete.LinkRedirect.ViewAttributes)>
+@Html.Raw(bukuTamuDelete.LinkRedirect.GetViewValue())</span>
+</span></td>
+} @* bukuTamuDelete.LinkRedirect.Visible (end) *@
+@if (bukuTamuDelete.Plant.Visible) { // bukuTamuDelete.Plant.Visible (begin)
+        <td @Html.Raw(bukuTamuDelete.Plant.CellAttributes)>
+<span id="">
+<span @Html.Raw(bukuTamuDelete.Plant.ViewAttributes)>
+@Html.Raw(bukuTamuDelete.Plant.GetViewValue())</span>
+</span></td>
+} @* bukuTamuDelete.Plant.Visible (end) *@
+@if (bukuTamuDelete.Tanggal.Visible) { // bukuTamuDelete.Tanggal.Visible (begin)
+        <td @Html.Raw(bukuTamuDelete.Tanggal.CellAttributes)>
+<span id="">
+<span @Html.Raw(bukuTamuDelete.Tanggal.ViewAttributes)>
+@Html.Raw(bukuTamuDelete.Tanggal.GetViewValue())</span>
+</span></td>
+} @* bukuTamuDelete.Tanggal.Visible (end) *@
+@if (bukuTamuDelete.StatusZona.Visible) { // bukuTamuDelete.StatusZona.Visible (begin)
+        <td @Html.Raw(bukuTamuDelete.StatusZona.CellAttributes)>
+<span id="">
+<span @Html.Raw(bukuTamuDelete.StatusZona.ViewAttributes)>
+@Html.Raw(bukuTamuDelete.StatusZona.GetViewValue())</span>
+</span></td>
+} @* bukuTamuDelete.StatusZona.Visible (end) *@
+@if (bukuTamuDelete.Nama.Visible) { // bukuTamuDelete.Nama.Visible (begin)
+        <td @Html.Raw(bukuTamuDelete.Nama.CellAttributes)>
+<span id="">
+<span @Html.Raw(bukuTamuDelete.Nama.ViewAttributes)>
+@Html.Raw(bukuTamuDelete.Nama.GetViewValue())</span>
+</span></td>
+} @* bukuTamuDelete.Nama.Visible (end) *@
+@if (bukuTamuDelete.AsalPerusahaan.Visible) { // bukuTamuDelete.AsalPerusahaan.Visible (begin)
+        <td @Html.Raw(bukuTamuDelete.AsalPerusahaan.CellAttributes)>
+<span id="">
+<span @Html.Raw(bukuTamuDelete.AsalPerusahaan.ViewAttributes)>
+@Html.Raw(bukuTamuDelete.AsalPerusahaan.GetViewValue())</span>
+</span></td>
+} @* bukuTamuDelete.AsalPerusahaan.Visible (end) *@
+@if (bukuTamuDelete.Jabatan.Visible) { // bukuTamuDelete.Jabatan.Visible (begin)
+        <td @Html.Raw(bukuTamuDelete.Jabatan.CellAttributes)>
+<span id="">
+<span @Html.Raw(bukuTamuDelete.Jabatan.ViewAttributes)>
+@Html.Raw(bukuTamuDelete.Jabatan.GetViewValue())</span>
+</span></td>
+} @* bukuTamuDelete.Jabatan.Visible (end) *@
+@if (bukuTamuDelete.FungsiygDikunjungi.Visible) { // bukuTamuDelete.FungsiygDikunjungi.Visible (begin)
+        <td @Html.Raw(bukuTamuDelete.FungsiygDikunjungi.CellAttributes)>
+<span id="">
+<span @Html.Raw(bukuTamuDelete.FungsiygDikunjungi.ViewAttributes)>
+@Html.Raw(bukuTamuDelete.FungsiygDikunjungi.GetViewValue())</span>
+</span></td>
+} @* bukuTamuDelete.FungsiygDikunjungi.Visible (end) *@
+@if (bukuTamuDelete.MaksudKunjungan.Visible) { // bukuTamuDelete.MaksudKunjungan.Visible (begin)
+        <td @Html.Raw(bukuTamuDelete.MaksudKunjungan.CellAttributes)>
+<span id="">
+<span @Html.Raw(bukuTamuDelete.MaksudKunjungan.ViewAttributes)>
+@Html.Raw(bukuTamuDelete.MaksudKunjungan.GetViewValue())</span>
+</span></td>
+} @* bukuTamuDelete.MaksudKunjungan.Visible (end) *@
+@if (bukuTamuDelete.TandaPengenal.Visible) { // bukuTamuDelete.TandaPengenal.Visible (begin)
+        <td @Html.Raw(bukuTamuDelete.TandaPengenal.CellAttributes)>
+<span id="">
+<span @Html.Raw(bukuTamuDelete.TandaPengenal.ViewAttributes)>
+@Html.Raw(bukuTamuDelete.TandaPengenal.GetViewValue())</span>
+</span></td>
+} @* bukuTamuDelete.TandaPengenal.Visible (end) *@
+@if (bukuTamuDelete.TandaTanganDownload.Visible) { // bukuTamuDelete.TandaTanganDownload.Visible (begin)
+        <td @Html.Raw(bukuTamuDelete.TandaTanganDownload.CellAttributes)>
+<span id="">
+<span @Html.Raw(bukuTamuDelete.TandaTanganDownload.ViewAttributes)>
+@Html.Raw(bukuTamuDelete.TandaTanganDownload.GetViewValue())</span>
+</span></td>
+} @* bukuTamuDelete.TandaTanganDownload.Visible (end) *@
+@if (bukuTamuDelete.Keterangan.Visible) { // bukuTamuDelete.Keterangan.Visible (begin)
+        <td @Html.Raw(bukuTamuDelete.Keterangan.CellAttributes)>
+<span id="">
+<span @Html.Raw(bukuTamuDelete.Keterangan.ViewAttributes)>
+@Html.Raw(bukuTamuDelete.Keterangan.GetViewValue())</span>
+</span></td>
+} @* bukuTamuDelete.Keterangan.Visible (end) *@
+@if (bukuTamuDelete.PintuUtamaId.Visible) { // bukuTamuDelete.PintuUtamaId.Visible (begin)
+        <td @Html.Raw(bukuTamuDelete.PintuUtamaId.CellAttributes)>
+<span id="">
+<span @Html.Raw(bukuTamuDelete.PintuUtamaId.ViewAttributes)>
+@Html.Raw(bukuTamuDelete.PintuUtamaId.GetViewValue())</span>
+</span></td>
+} @* bukuTamuDelete.PintuUtamaId.Visible (end) *@
+@if (bukuTamuDelete.PintuUtamaInTanggal.Visible) { // bukuTamuDelete.PintuUtamaInTanggal.Visible (begin)
+        <td @Html.Raw(bukuTamuDelete.PintuUtamaInTanggal.CellAttributes)>
+<span id="">
+<span @Html.Raw(bukuTamuDelete.PintuUtamaInTanggal.ViewAttributes)>
+@Html.Raw(bukuTamuDelete.PintuUtamaInTanggal.GetViewValue())</span>
+</span></td>
+} @* bukuTamuDelete.PintuUtamaInTanggal.Visible (end) *@
+@if (bukuTamuDelete.PintuUtamaInFotoDownload.Visible) { // bukuTamuDelete.PintuUtamaInFotoDownload.Visible (begin)
+        <td @Html.Raw(bukuTamuDelete.PintuUtamaInFotoDownload.CellAttributes)>
+<span id="">
+<span @Html.Raw(bukuTamuDelete.PintuUtamaInFotoDownload.ViewAttributes)>
+@Html.Raw(bukuTamuDelete.PintuUtamaInFotoDownload.GetViewValue())</span>
+</span></td>
+} @* bukuTamuDelete.PintuUtamaInFotoDownload.Visible (end) *@
+@if (bukuTamuDelete.PintuUtamaInUser.Visible) { // bukuTamuDelete.PintuUtamaInUser.Visible (begin)
+        <td @Html.Raw(bukuTamuDelete.PintuUtamaInUser.CellAttributes)>
+<span id="">
+<span @Html.Raw(bukuTamuDelete.PintuUtamaInUser.ViewAttributes)>
+@Html.Raw(bukuTamuDelete.PintuUtamaInUser.GetViewValue())</span>
+</span></td>
+} @* bukuTamuDelete.PintuUtamaInUser.Visible (end) *@
+@if (bukuTamuDelete.CustomPilihPintu.Visible) { // bukuTamuDelete.CustomPilihPintu.Visible (begin)
+        <td @Html.Raw(bukuTamuDelete.CustomPilihPintu.CellAttributes)>
+<span id="">
+<span @Html.Raw(bukuTamuDelete.CustomPilihPintu.ViewAttributes)>
+@Html.Raw(bukuTamuDelete.CustomPilihPintu.GetViewValue())</span>
+</span></td>
+} @* bukuTamuDelete.CustomPilihPintu.Visible (end) *@
+@if (bukuTamuDelete.PintuUtamaOutTanggal.Visible) { // bukuTamuDelete.PintuUtamaOutTanggal.Visible (begin)
+        <td @Html.Raw(bukuTamuDelete.PintuUtamaOutTanggal.CellAttributes)>
+<span id="">
+<span @Html.Raw(bukuTamuDelete.PintuUtamaOutTanggal.ViewAttributes)>
+@Html.Raw(bukuTamuDelete.PintuUtamaOutTanggal.GetViewValue())</span>
+</span></td>
+} @* bukuTamuDelete.PintuUtamaOutTanggal.Visible (end) *@
+@if (bukuTamuDelete.PintuUtamaOutFotoDownload.Visible) { // bukuTamuDelete.PintuUtamaOutFotoDownload.Visible (begin)
+        <td @Html.Raw(bukuTamuDelete.PintuUtamaOutFotoDownload.CellAttributes)>
+<span id="">
+<span @Html.Raw(bukuTamuDelete.PintuUtamaOutFotoDownload.ViewAttributes)>
+@Html.Raw(bukuTamuDelete.PintuUtamaOutFotoDownload.GetViewValue())</span>
+</span></td>
+} @* bukuTamuDelete.PintuUtamaOutFotoDownload.Visible (end) *@
+@if (bukuTamuDelete.PintuUtamaOutUser.Visible) { // bukuTamuDelete.PintuUtamaOutUser.Visible (begin)
+        <td @Html.Raw(bukuTamuDelete.PintuUtamaOutUser.CellAttributes)>
+<span id="">
+<span @Html.Raw(bukuTamuDelete.PintuUtamaOutUser.ViewAttributes)>
+@Html.Raw(bukuTamuDelete.PintuUtamaOutUser.GetViewValue())</span>
+</span></td>
+} @* bukuTamuDelete.PintuUtamaOutUser.Visible (end) *@
+@if (bukuTamuDelete.LobbyUtamaId.Visible) { // bukuTamuDelete.LobbyUtamaId.Visible (begin)
+        <td @Html.Raw(bukuTamuDelete.LobbyUtamaId.CellAttributes)>
+<span id="">
+<span @Html.Raw(bukuTamuDelete.LobbyUtamaId.ViewAttributes)>
+@Html.Raw(bukuTamuDelete.LobbyUtamaId.GetViewValue())</span>
+</span></td>
+} @* bukuTamuDelete.LobbyUtamaId.Visible (end) *@
+@if (bukuTamuDelete.LobbyUtamaInTanggal.Visible) { // bukuTamuDelete.LobbyUtamaInTanggal.Visible (begin)
+        <td @Html.Raw(bukuTamuDelete.LobbyUtamaInTanggal.CellAttributes)>
+<span id="">
+<span @Html.Raw(bukuTamuDelete.LobbyUtamaInTanggal.ViewAttributes)>
+@Html.Raw(bukuTamuDelete.LobbyUtamaInTanggal.GetViewValue())</span>
+</span></td>
+} @* bukuTamuDelete.LobbyUtamaInTanggal.Visible (end) *@
+@if (bukuTamuDelete.LobbyUtamaInFotoDownload.Visible) { // bukuTamuDelete.LobbyUtamaInFotoDownload.Visible (begin)
+        <td @Html.Raw(bukuTamuDelete.LobbyUtamaInFotoDownload.CellAttributes)>
+<span id="">
+<span @Html.Raw(bukuTamuDelete.LobbyUtamaInFotoDownload.ViewAttributes)>
+@Html.Raw(bukuTamuDelete.LobbyUtamaInFotoDownload.GetViewValue())</span>
+</span></td>
+} @* bukuTamuDelete.LobbyUtamaInFotoDownload.Visible (end) *@
+@if (bukuTamuDelete.LobbyUtamaInUser.Visible) { // bukuTamuDelete.LobbyUtamaInUser.Visible (begin)
+        <td @Html.Raw(bukuTamuDelete.LobbyUtamaInUser.CellAttributes)>
+<span id="">
+<span @Html.Raw(bukuTamuDelete.LobbyUtamaInUser.ViewAttributes)>
+@Html.Raw(bukuTamuDelete.LobbyUtamaInUser.GetViewValue())</span>
+</span></td>
+} @* bukuTamuDelete.LobbyUtamaInUser.Visible (end) *@
+@if (bukuTamuDelete.LobbyUtamaOutTanggal.Visible) { // bukuTamuDelete.LobbyUtamaOutTanggal.Visible (begin)
+        <td @Html.Raw(bukuTamuDelete.LobbyUtamaOutTanggal.CellAttributes)>
+<span id="">
+<span @Html.Raw(bukuTamuDelete.LobbyUtamaOutTanggal.ViewAttributes)>
+@Html.Raw(bukuTamuDelete.LobbyUtamaOutTanggal.GetViewValue())</span>
+</span></td>
+} @* bukuTamuDelete.LobbyUtamaOutTanggal.Visible (end) *@
+@if (bukuTamuDelete.LobbyUtamaOutFotoDownload.Visible) { // bukuTamuDelete.LobbyUtamaOutFotoDownload.Visible (begin)
+        <td @Html.Raw(bukuTamuDelete.LobbyUtamaOutFotoDownload.CellAttributes)>
+<span id="">
+<span @Html.Raw(bukuTamuDelete.LobbyUtamaOutFotoDownload.ViewAttributes)>
+@Html.Raw(bukuTamuDelete.LobbyUtamaOutFotoDownload.GetViewValue())</span>
+</span></td>
+} @* bukuTamuDelete.LobbyUtamaOutFotoDownload.Visible (end) *@
+@if (bukuTamuDelete.LobbyUtamaOutUser.Visible) { // bukuTamuDelete.LobbyUtamaOutUser.Visible (begin)
+        <td @Html.Raw(bukuTamuDelete.LobbyUtamaOutUser.CellAttributes)>
+<span id="">
+<span @Html.Raw(bukuTamuDelete.LobbyUtamaOutUser.ViewAttributes)>
+@Html.Raw(bukuTamuDelete.LobbyUtamaOutUser.GetViewValue())</span>
+</span></td>
+} @* bukuTamuDelete.LobbyUtamaOutUser.Visible (end) *@
+@if (bukuTamuDelete.AreaTerlarangId.Visible) { // bukuTamuDelete.AreaTerlarangId.Visible (begin)
+        <td @Html.Raw(bukuTamuDelete.AreaTerlarangId.CellAttributes)>
+<span id="">
+<span @Html.Raw(bukuTamuDelete.AreaTerlarangId.ViewAttributes)>
+@Html.Raw(bukuTamuDelete.AreaTerlarangId.GetViewValue())</span>
+</span></td>
+} @* bukuTamuDelete.AreaTerlarangId.Visible (end) *@
+@if (bukuTamuDelete.AreaTerlarangInTanggal.Visible) { // bukuTamuDelete.AreaTerlarangInTanggal.Visible (begin)
+        <td @Html.Raw(bukuTamuDelete.AreaTerlarangInTanggal.CellAttributes)>
+<span id="">
+<span @Html.Raw(bukuTamuDelete.AreaTerlarangInTanggal.ViewAttributes)>
+@Html.Raw(bukuTamuDelete.AreaTerlarangInTanggal.GetViewValue())</span>
+</span></td>
+} @* bukuTamuDelete.AreaTerlarangInTanggal.Visible (end) *@
+@if (bukuTamuDelete.AreaTerlarangInFotoDownload.Visible) { // bukuTamuDelete.AreaTerlarangInFotoDownload.Visible (begin)
+        <td @Html.Raw(bukuTamuDelete.AreaTerlarangInFotoDownload.CellAttributes)>
+<span id="">
+<span @Html.Raw(bukuTamuDelete.AreaTerlarangInFotoDownload.ViewAttributes)>
+@Html.Raw(bukuTamuDelete.AreaTerlarangInFotoDownload.GetViewValue())</span>
+</span></td>
+} @* bukuTamuDelete.AreaTerlarangInFotoDownload.Visible (end) *@
+@if (bukuTamuDelete.AreaTerlarangInUser.Visible) { // bukuTamuDelete.AreaTerlarangInUser.Visible (begin)
+        <td @Html.Raw(bukuTamuDelete.AreaTerlarangInUser.CellAttributes)>
+<span id="">
+<span @Html.Raw(bukuTamuDelete.AreaTerlarangInUser.ViewAttributes)>
+@Html.Raw(bukuTamuDelete.AreaTerlarangInUser.GetViewValue())</span>
+</span></td>
+} @* bukuTamuDelete.AreaTerlarangInUser.Visible (end) *@
+@if (bukuTamuDelete.AreaTerlarangOutTanggal.Visible) { // bukuTamuDelete.AreaTerlarangOutTanggal.Visible (begin)
+        <td @Html.Raw(bukuTamuDelete.AreaTerlarangOutTanggal.CellAttributes)>
+<span id="">
+<span @Html.Raw(bukuTamuDelete.AreaTerlarangOutTanggal.ViewAttributes)>
+@Html.Raw(bukuTamuDelete.AreaTerlarangOutTanggal.GetViewValue())</span>
+</span></td>
+} @* bukuTamuDelete.AreaTerlarangOutTanggal.Visible (end) *@
+@if (bukuTamuDelete.AreaTerlarangOutFotoDownload.Visible) { // bukuTamuDelete.AreaTerlarangOutFotoDownload.Visible (begin)
+        <td @Html.Raw(bukuTamuDelete.AreaTerlarangOutFotoDownload.CellAttributes)>
+<span id="">
+<span @Html.Raw(bukuTamuDelete.AreaTerlarangOutFotoDownload.ViewAttributes)>
+@Html.Raw(bukuTamuDelete.AreaTerlarangOutFotoDownload.GetViewValue())</span>
+</span></td>
+} @* bukuTamuDelete.AreaTerlarangOutFotoDownload.Visible (end) *@
+@if (bukuTamuDelete.AreaTerlarangOutUser.Visible) { // bukuTamuDelete.AreaTerlarangOutUser.Visible (begin)
+        <td @Html.Raw(bukuTamuDelete.AreaTerlarangOutUser.CellAttributes)>
+<span id="">
+<span @Html.Raw(bukuTamuDelete.AreaTerlarangOutUser.ViewAttributes)>
+@Html.Raw(bukuTamuDelete.AreaTerlarangOutUser.GetViewValue())</span>
+</span></td>
+} @* bukuTamuDelete.AreaTerlarangOutUser.Visible (end) *@
+@if (bukuTamuDelete.etlDate.Visible) { // bukuTamuDelete.etlDate.Visible (begin)
+        <td @Html.Raw(bukuTamuDelete.etlDate.CellAttributes)>
+<span id="">
+<span @Html.Raw(bukuTamuDelete.etlDate.ViewAttributes)>
+@Html.Raw(bukuTamuDelete.etlDate.GetViewValue())</span>
+</span></td>
+} @* bukuTamuDelete.etlDate.Visible (end) *@
+@if (bukuTamuDelete.LastUpdatedBy.Visible) { // bukuTamuDelete.LastUpdatedBy.Visible (begin)
+        <td @Html.Raw(bukuTamuDelete.LastUpdatedBy.CellAttributes)>
+<span id="">
+<span @Html.Raw(bukuTamuDelete.LastUpdatedBy.ViewAttributes)>
+@Html.Raw(bukuTamuDelete.LastUpdatedBy.GetViewValue())</span>
+</span></td>
+} @* bukuTamuDelete.LastUpdatedBy.Visible (end) *@
+@if (bukuTamuDelete.lastUpdatedDate.Visible) { // bukuTamuDelete.lastUpdatedDate.Visible (begin)
+        <td @Html.Raw(bukuTamuDelete.lastUpdatedDate.CellAttributes)>
+<span id="">
+<span @Html.Raw(bukuTamuDelete.lastUpdatedDate.ViewAttributes)>
+@Html.Raw(bukuTamuDelete.lastUpdatedDate.GetViewValue())</span>
+</span></td>
+} @* bukuTamuDelete.lastUpdatedDate.Visible (end) *@
+    </tr>
+}
+@{ bukuTamuDelete.CloseRecordset(); }
+</tbody>
+</table>
+</div>
+</div>
+<div class="ew-buttons ew-desktop-buttons">
+<button class="btn btn-primary ew-btn" name="btn-action" id="btn-action" type="submit">@Html.Raw(Language.Phrase("DeleteBtn"))</button>
+<button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" data-href="@AppPath(bukuTamuDelete.ReturnUrl)">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+</div>
+</form>
+@bukuTamuDelete.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+<script>
+loadjs.ready("load", function() {
+    // Write your table-specific startup script here
+    // document.write("page loaded");
+});
+</script>

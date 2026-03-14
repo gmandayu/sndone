@@ -1,0 +1,339 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (subAktivitasNilaiSfbdlpgList.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = subAktivitasNilaiSfbdlpgList.UseLayout ? "_Layout" : "";
+}
+@if (!subAktivitasNilaiSfbdlpgList.IsExport()) {
+<script>
+var currentTable = @Html.Raw(ConvertToJson(subAktivitasNilaiSfbdlpgList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { SubAktivitasNilaiSFBDLPG: currentTable } });
+var currentPageID = ew.PAGE_ID = "list";
+var currentForm;
+var @(subAktivitasNilaiSfbdlpgList.FormName);
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("@(subAktivitasNilaiSfbdlpgList.FormName)")
+        .setPageId("list")
+        .setSubmitWithFetch(@(subAktivitasNilaiSfbdlpgList.UseAjaxActions ? "true" : "false"))
+        .setFormKeyCountName("@(subAktivitasNilaiSfbdlpgList.FormKeyCountName)")
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Write your client script here, no need to add script tags.
+});
+</script>
+}
+@if (!subAktivitasNilaiSfbdlpgList.IsExport()) {
+<div class="btn-toolbar ew-toolbar">
+@if (subAktivitasNilaiSfbdlpgList.TotalRecords > 0 && subAktivitasNilaiSfbdlpgList.ExportOptions.Visible) {
+    subAktivitasNilaiSfbdlpgList.ExportOptions.Render("body");
+}
+@if (subAktivitasNilaiSfbdlpgList.ImportOptions.Visible) {
+    subAktivitasNilaiSfbdlpgList.ImportOptions.Render("body");
+}
+@if (subAktivitasNilaiSfbdlpgList.SearchOptions.Visible) {
+    subAktivitasNilaiSfbdlpgList.SearchOptions.Render("body");
+}
+@if (subAktivitasNilaiSfbdlpgList.FilterOptions.Visible) {
+    subAktivitasNilaiSfbdlpgList.FilterOptions.Render("body");
+}
+</div>
+}
+@if (!subAktivitasNilaiSfbdlpgList.IsModal) {
+<form name="fSubAktivitasNilaiSFBDLPGsrch" id="fSubAktivitasNilaiSFBDLPGsrch" class="ew-form ew-ext-search-form" action="@AppPath(CurrentPageName())" novalidate autocomplete="off">
+<div id="fSubAktivitasNilaiSFBDLPGsrch_search_panel" class="mb-2 mb-sm-0 @(subAktivitasNilaiSfbdlpgList.SearchPanelClass)"><!-- .ew-search-panel -->
+<script>
+var currentTable = @Html.Raw(ConvertToJson(subAktivitasNilaiSfbdlpgList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { SubAktivitasNilaiSFBDLPG: currentTable } });
+var currentForm;
+var fSubAktivitasNilaiSFBDLPGsrch, currentSearchForm, currentAdvancedSearchForm;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery,
+        fields = currentTable.fields;
+
+    // Form object for search
+    let form = new ew.FormBuilder()
+        .setId("fSubAktivitasNilaiSFBDLPGsrch")
+        .setPageId("list")
+@if (subAktivitasNilaiSfbdlpgList.UseAjaxActions) {
+        <text>.setSubmitWithFetch(true)</text>
+}
+
+        // Dynamic selection lists
+        .setLists({
+        })
+
+        // Filters
+        .setFilterList(@Html.Raw(subAktivitasNilaiSfbdlpgList.GetFilterList()))
+        .build();
+    window[form.id] = form;
+    currentSearchForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<input type="hidden" name="cmd" value="search">
+@if (Security.CanSearch) {
+if (!subAktivitasNilaiSfbdlpgList.IsExport() && Empty(subAktivitasNilaiSfbdlpgList.CurrentAction) && subAktivitasNilaiSfbdlpgList.HasSearchFields()) { @* Show search form (begin) *@
+<div class="ew-extended-search container-fluid ps-2">
+<div class="row mb-0">
+    <div class="col-sm-auto px-0 pe-sm-2">
+        <div class="ew-basic-search input-group">
+            <input type="search" name="@(Config.TableBasicSearch)" id="@(Config.TableBasicSearch)" class="form-control ew-basic-search-keyword" value="@Html.Raw(HtmlEncode(subAktivitasNilaiSfbdlpgList.BasicSearch.SessionKeyword))" placeholder="@(HtmlEncode(Language.Phrase("Search")))" aria-label="@(HtmlEncode(Language.Phrase("Search")))">
+            <input type="hidden" name="@(Config.TableBasicSearchType)" id="@(Config.TableBasicSearchType)" class="ew-basic-search-type" value="@(HtmlEncode(subAktivitasNilaiSfbdlpgList.BasicSearch.SessionType))">
+            <button type="button" data-bs-toggle="dropdown" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split" aria-haspopup="true" aria-expanded="false">
+                <span id="searchtype">@Html.Raw(subAktivitasNilaiSfbdlpgList.BasicSearch.TypeNameShort)</span>
+            </button>
+            <div class="dropdown-menu dropdown-menu-end">
+                <button type="button" class="dropdown-item@(subAktivitasNilaiSfbdlpgList.BasicSearch.SessionType == "" ? " active" : "")" form="fSubAktivitasNilaiSFBDLPGsrch" data-ew-action="search-type">@Html.Raw(Language.Phrase("QuickSearchAuto"))</button>
+                <button type="button" class="dropdown-item@(subAktivitasNilaiSfbdlpgList.BasicSearch.SessionType == "=" ? " active" : "")" form="fSubAktivitasNilaiSFBDLPGsrch" data-ew-action="search-type" data-search-type="=">@Html.Raw(Language.Phrase("QuickSearchExact"))</button>
+                <button type="button" class="dropdown-item@(subAktivitasNilaiSfbdlpgList.BasicSearch.SessionType == "AND" ? " active" : "")" form="fSubAktivitasNilaiSFBDLPGsrch" data-ew-action="search-type" data-search-type="AND">@Html.Raw(Language.Phrase("QuickSearchAll"))</button>
+                <button type="button" class="dropdown-item@(subAktivitasNilaiSfbdlpgList.BasicSearch.SessionType == "OR" ? " active" : "")" form="fSubAktivitasNilaiSFBDLPGsrch" data-ew-action="search-type" data-search-type="OR">@Html.Raw(Language.Phrase("QuickSearchAny"))</button>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-auto mb-3">
+        <button class="btn btn-primary" name="btn-submit" id="btn-submit" type="submit">@Html.Raw(Language.Phrase("SearchBtn"))</button>
+    </div>
+</div>
+</div><!-- /.ew-extended-search -->
+} @* Show search form (end) *@
+}
+</div><!-- /.ew-search-panel -->
+</form>
+}
+@subAktivitasNilaiSfbdlpgList.ShowPageHeader()
+@subAktivitasNilaiSfbdlpgList.ShowMessages()
+<main class="list @(subAktivitasNilaiSfbdlpgList.TotalRecords == 0 && !subAktivitasNilaiSfbdlpgList.IsAdd ? " ew-no-record" : "")">
+<div id="ew-header-options">
+    @subAktivitasNilaiSfbdlpgList.HeaderOptions.RenderBody()
+</div>
+<div id="ew-list">
+@if (subAktivitasNilaiSfbdlpgList.TotalRecords > 0 || !Empty(subAktivitasNilaiSfbdlpgList.CurrentAction)) {
+<div class="card ew-card ew-grid@(subAktivitasNilaiSfbdlpgList.IsAddOrEdit ? " ew-grid-add-edit" : "") @(subAktivitasNilaiSfbdlpgList.TableGridClass)">
+<form name="@(subAktivitasNilaiSfbdlpgList.FormName)" id="@(subAktivitasNilaiSfbdlpgList.FormName)" class="ew-form ew-list-form" action="@AppPath(subAktivitasNilaiSfbdlpgList.PageName)" method="post" novalidate autocomplete="off">
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+@if (subAktivitasNilaiSfbdlpgList.IsModal) {
+<input type="hidden" name="modal" value="1">
+}
+<div id="gmp_SubAktivitasNilaiSFBDLPG" class="card-body ew-grid-middle-panel @(subAktivitasNilaiSfbdlpgList.TableContainerClass)" style="@(subAktivitasNilaiSfbdlpgList.TableContainerStyle)">
+@if (subAktivitasNilaiSfbdlpgList.TotalRecords > 0 || subAktivitasNilaiSfbdlpgList.IsGridEdit || subAktivitasNilaiSfbdlpgList.IsMultiEdit) {
+<table id="tbl_SubAktivitasNilaiSFBDLPGlist" class="@(subAktivitasNilaiSfbdlpgList.TableClass)"><!-- .ew-table -->
+<thead>
+    <tr class="ew-table-header">
+@{
+    // Header row
+    subAktivitasNilaiSfbdlpgList.RowType = RowType.Header;
+
+    // Render list options
+    await subAktivitasNilaiSfbdlpgList.RenderListOptions();
+}
+@* Render list options (header, left) *@
+@subAktivitasNilaiSfbdlpgList.ListOptions.RenderHeader("left")
+@if (subAktivitasNilaiSfbdlpgList.id.Visible) { // subAktivitasNilaiSfbdlpgList.id.Visible (begin)
+        <th data-name="id" class="@(subAktivitasNilaiSfbdlpgList.id.HeaderCellClass)"><div id="elh_SubAktivitasNilaiSFBDLPG_id" class="SubAktivitasNilaiSFBDLPG_id">@Html.Raw(subAktivitasNilaiSfbdlpgList.RenderFieldHeader(subAktivitasNilaiSfbdlpgList.id))</div></th>
+} @* subAktivitasNilaiSfbdlpgList.id.Visible (end) *@
+@if (subAktivitasNilaiSfbdlpgList.idProses.Visible) { // subAktivitasNilaiSfbdlpgList.idProses.Visible (begin)
+        <th data-name="idProses" class="@(subAktivitasNilaiSfbdlpgList.idProses.HeaderCellClass)"><div id="elh_SubAktivitasNilaiSFBDLPG_idProses" class="SubAktivitasNilaiSFBDLPG_idProses">@Html.Raw(subAktivitasNilaiSfbdlpgList.RenderFieldHeader(subAktivitasNilaiSfbdlpgList.idProses))</div></th>
+} @* subAktivitasNilaiSfbdlpgList.idProses.Visible (end) *@
+@if (subAktivitasNilaiSfbdlpgList.idAktifitas.Visible) { // subAktivitasNilaiSfbdlpgList.idAktifitas.Visible (begin)
+        <th data-name="idAktifitas" class="@(subAktivitasNilaiSfbdlpgList.idAktifitas.HeaderCellClass)"><div id="elh_SubAktivitasNilaiSFBDLPG_idAktifitas" class="SubAktivitasNilaiSFBDLPG_idAktifitas">@Html.Raw(subAktivitasNilaiSfbdlpgList.RenderFieldHeader(subAktivitasNilaiSfbdlpgList.idAktifitas))</div></th>
+} @* subAktivitasNilaiSfbdlpgList.idAktifitas.Visible (end) *@
+@if (subAktivitasNilaiSfbdlpgList.NoReferensi.Visible) { // subAktivitasNilaiSfbdlpgList.NoReferensi.Visible (begin)
+        <th data-name="NoReferensi" class="@(subAktivitasNilaiSfbdlpgList.NoReferensi.HeaderCellClass)"><div id="elh_SubAktivitasNilaiSFBDLPG_NoReferensi" class="SubAktivitasNilaiSFBDLPG_NoReferensi">@Html.Raw(subAktivitasNilaiSfbdlpgList.RenderFieldHeader(subAktivitasNilaiSfbdlpgList.NoReferensi))</div></th>
+} @* subAktivitasNilaiSfbdlpgList.NoReferensi.Visible (end) *@
+@if (subAktivitasNilaiSfbdlpgList.StatusAktivitas.Visible) { // subAktivitasNilaiSfbdlpgList.StatusAktivitas.Visible (begin)
+        <th data-name="StatusAktivitas" class="@(subAktivitasNilaiSfbdlpgList.StatusAktivitas.HeaderCellClass)"><div id="elh_SubAktivitasNilaiSFBDLPG_StatusAktivitas" class="SubAktivitasNilaiSFBDLPG_StatusAktivitas">@Html.Raw(subAktivitasNilaiSfbdlpgList.RenderFieldHeader(subAktivitasNilaiSfbdlpgList.StatusAktivitas))</div></th>
+} @* subAktivitasNilaiSfbdlpgList.StatusAktivitas.Visible (end) *@
+@if (subAktivitasNilaiSfbdlpgList.mt.Visible) { // subAktivitasNilaiSfbdlpgList.mt.Visible (begin)
+        <th data-name="mt" class="@(subAktivitasNilaiSfbdlpgList.mt.HeaderCellClass)"><div id="elh_SubAktivitasNilaiSFBDLPG_mt" class="SubAktivitasNilaiSFBDLPG_mt">@Html.Raw(subAktivitasNilaiSfbdlpgList.RenderFieldHeader(subAktivitasNilaiSfbdlpgList.mt))</div></th>
+} @* subAktivitasNilaiSfbdlpgList.mt.Visible (end) *@
+@if (subAktivitasNilaiSfbdlpgList.LastUpdatedBy.Visible) { // subAktivitasNilaiSfbdlpgList.LastUpdatedBy.Visible (begin)
+        <th data-name="LastUpdatedBy" class="@(subAktivitasNilaiSfbdlpgList.LastUpdatedBy.HeaderCellClass)"><div id="elh_SubAktivitasNilaiSFBDLPG_LastUpdatedBy" class="SubAktivitasNilaiSFBDLPG_LastUpdatedBy">@Html.Raw(subAktivitasNilaiSfbdlpgList.RenderFieldHeader(subAktivitasNilaiSfbdlpgList.LastUpdatedBy))</div></th>
+} @* subAktivitasNilaiSfbdlpgList.LastUpdatedBy.Visible (end) *@
+@if (subAktivitasNilaiSfbdlpgList.lastUpdatedDate.Visible) { // subAktivitasNilaiSfbdlpgList.lastUpdatedDate.Visible (begin)
+        <th data-name="lastUpdatedDate" class="@(subAktivitasNilaiSfbdlpgList.lastUpdatedDate.HeaderCellClass)"><div id="elh_SubAktivitasNilaiSFBDLPG_lastUpdatedDate" class="SubAktivitasNilaiSFBDLPG_lastUpdatedDate">@Html.Raw(subAktivitasNilaiSfbdlpgList.RenderFieldHeader(subAktivitasNilaiSfbdlpgList.lastUpdatedDate))</div></th>
+} @* subAktivitasNilaiSfbdlpgList.lastUpdatedDate.Visible (end) *@
+@if (subAktivitasNilaiSfbdlpgList.etlDate.Visible) { // subAktivitasNilaiSfbdlpgList.etlDate.Visible (begin)
+        <th data-name="etlDate" class="@(subAktivitasNilaiSfbdlpgList.etlDate.HeaderCellClass)"><div id="elh_SubAktivitasNilaiSFBDLPG_etlDate" class="SubAktivitasNilaiSFBDLPG_etlDate">@Html.Raw(subAktivitasNilaiSfbdlpgList.RenderFieldHeader(subAktivitasNilaiSfbdlpgList.etlDate))</div></th>
+} @* subAktivitasNilaiSfbdlpgList.etlDate.Visible (end) *@
+@if (subAktivitasNilaiSfbdlpgList.userInput.Visible) { // subAktivitasNilaiSfbdlpgList.userInput.Visible (begin)
+        <th data-name="userInput" class="@(subAktivitasNilaiSfbdlpgList.userInput.HeaderCellClass)"><div id="elh_SubAktivitasNilaiSFBDLPG_userInput" class="SubAktivitasNilaiSFBDLPG_userInput">@Html.Raw(subAktivitasNilaiSfbdlpgList.RenderFieldHeader(subAktivitasNilaiSfbdlpgList.userInput))</div></th>
+} @* subAktivitasNilaiSfbdlpgList.userInput.Visible (end) *@
+@* Render list options (header, right) *@
+@subAktivitasNilaiSfbdlpgList.ListOptions.RenderHeader("right")
+    </tr>
+</thead>
+<tbody data-page="@(subAktivitasNilaiSfbdlpgList.PageNumber)">
+@{
+    await subAktivitasNilaiSfbdlpgList.SetupGrid();
+    bool eof = subAktivitasNilaiSfbdlpgList.Recordset == null; // DN
+}
+@while (subAktivitasNilaiSfbdlpgList.RecordCount < subAktivitasNilaiSfbdlpgList.StopRecord || SameString(subAktivitasNilaiSfbdlpgList.RowIndex, "$rowindex$")) { // Begin While
+    if (!eof && !SameString(subAktivitasNilaiSfbdlpgList.RowIndex, "$rowindex$") &&
+        (!subAktivitasNilaiSfbdlpgList.IsGridAdd || subAktivitasNilaiSfbdlpgList.CurrentMode == "copy") &&
+        (!((subAktivitasNilaiSfbdlpgList.IsCopy || subAktivitasNilaiSfbdlpgList.IsAdd) && subAktivitasNilaiSfbdlpgList.RowIndex is int rowIndex && rowIndex == 0))) // DN
+        eof = !await subAktivitasNilaiSfbdlpgList.Recordset.ReadAsync();
+    subAktivitasNilaiSfbdlpgList.RecordCount++;
+    if (subAktivitasNilaiSfbdlpgList.RecordCount >= subAktivitasNilaiSfbdlpgList.StartRecord) {
+        await subAktivitasNilaiSfbdlpgList.SetupRow();
+    <tr @Html.Raw(subAktivitasNilaiSfbdlpgList.RowAttributes)>
+    @* Render list options (body, left) *@
+    @subAktivitasNilaiSfbdlpgList.ListOptions.RenderBody("left", subAktivitasNilaiSfbdlpgList.RowCount)
+    @if (subAktivitasNilaiSfbdlpgList.id.Visible) { // subAktivitasNilaiSfbdlpgList.id.Visible (begin)
+        <td data-name="id" @Html.Raw(subAktivitasNilaiSfbdlpgList.id.CellAttributes)>
+<span id="el@(subAktivitasNilaiSfbdlpgList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasNilaiSfbdlpgList.RowCount)_SubAktivitasNilaiSFBDLPG_id" class="el_SubAktivitasNilaiSFBDLPG_id">
+<span @Html.Raw(subAktivitasNilaiSfbdlpgList.id.ViewAttributes)>
+@Html.Raw(subAktivitasNilaiSfbdlpgList.id.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasNilaiSfbdlpgList.id.Visible (end) *@
+    @if (subAktivitasNilaiSfbdlpgList.idProses.Visible) { // subAktivitasNilaiSfbdlpgList.idProses.Visible (begin)
+        <td data-name="idProses" @Html.Raw(subAktivitasNilaiSfbdlpgList.idProses.CellAttributes)>
+<span id="el@(subAktivitasNilaiSfbdlpgList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasNilaiSfbdlpgList.RowCount)_SubAktivitasNilaiSFBDLPG_idProses" class="el_SubAktivitasNilaiSFBDLPG_idProses">
+<span @Html.Raw(subAktivitasNilaiSfbdlpgList.idProses.ViewAttributes)>
+@Html.Raw(subAktivitasNilaiSfbdlpgList.idProses.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasNilaiSfbdlpgList.idProses.Visible (end) *@
+    @if (subAktivitasNilaiSfbdlpgList.idAktifitas.Visible) { // subAktivitasNilaiSfbdlpgList.idAktifitas.Visible (begin)
+        <td data-name="idAktifitas" @Html.Raw(subAktivitasNilaiSfbdlpgList.idAktifitas.CellAttributes)>
+<span id="el@(subAktivitasNilaiSfbdlpgList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasNilaiSfbdlpgList.RowCount)_SubAktivitasNilaiSFBDLPG_idAktifitas" class="el_SubAktivitasNilaiSFBDLPG_idAktifitas">
+<span @Html.Raw(subAktivitasNilaiSfbdlpgList.idAktifitas.ViewAttributes)>
+@Html.Raw(subAktivitasNilaiSfbdlpgList.idAktifitas.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasNilaiSfbdlpgList.idAktifitas.Visible (end) *@
+    @if (subAktivitasNilaiSfbdlpgList.NoReferensi.Visible) { // subAktivitasNilaiSfbdlpgList.NoReferensi.Visible (begin)
+        <td data-name="NoReferensi" @Html.Raw(subAktivitasNilaiSfbdlpgList.NoReferensi.CellAttributes)>
+<span id="el@(subAktivitasNilaiSfbdlpgList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasNilaiSfbdlpgList.RowCount)_SubAktivitasNilaiSFBDLPG_NoReferensi" class="el_SubAktivitasNilaiSFBDLPG_NoReferensi">
+<span @Html.Raw(subAktivitasNilaiSfbdlpgList.NoReferensi.ViewAttributes)>
+@Html.Raw(subAktivitasNilaiSfbdlpgList.NoReferensi.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasNilaiSfbdlpgList.NoReferensi.Visible (end) *@
+    @if (subAktivitasNilaiSfbdlpgList.StatusAktivitas.Visible) { // subAktivitasNilaiSfbdlpgList.StatusAktivitas.Visible (begin)
+        <td data-name="StatusAktivitas" @Html.Raw(subAktivitasNilaiSfbdlpgList.StatusAktivitas.CellAttributes)>
+<span id="el@(subAktivitasNilaiSfbdlpgList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasNilaiSfbdlpgList.RowCount)_SubAktivitasNilaiSFBDLPG_StatusAktivitas" class="el_SubAktivitasNilaiSFBDLPG_StatusAktivitas">
+<span @Html.Raw(subAktivitasNilaiSfbdlpgList.StatusAktivitas.ViewAttributes)>
+@Html.Raw(subAktivitasNilaiSfbdlpgList.StatusAktivitas.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasNilaiSfbdlpgList.StatusAktivitas.Visible (end) *@
+    @if (subAktivitasNilaiSfbdlpgList.mt.Visible) { // subAktivitasNilaiSfbdlpgList.mt.Visible (begin)
+        <td data-name="mt" @Html.Raw(subAktivitasNilaiSfbdlpgList.mt.CellAttributes)>
+<span id="el@(subAktivitasNilaiSfbdlpgList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasNilaiSfbdlpgList.RowCount)_SubAktivitasNilaiSFBDLPG_mt" class="el_SubAktivitasNilaiSFBDLPG_mt">
+<span @Html.Raw(subAktivitasNilaiSfbdlpgList.mt.ViewAttributes)>
+@Html.Raw(subAktivitasNilaiSfbdlpgList.mt.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasNilaiSfbdlpgList.mt.Visible (end) *@
+    @if (subAktivitasNilaiSfbdlpgList.LastUpdatedBy.Visible) { // subAktivitasNilaiSfbdlpgList.LastUpdatedBy.Visible (begin)
+        <td data-name="LastUpdatedBy" @Html.Raw(subAktivitasNilaiSfbdlpgList.LastUpdatedBy.CellAttributes)>
+<span id="el@(subAktivitasNilaiSfbdlpgList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasNilaiSfbdlpgList.RowCount)_SubAktivitasNilaiSFBDLPG_LastUpdatedBy" class="el_SubAktivitasNilaiSFBDLPG_LastUpdatedBy">
+<span @Html.Raw(subAktivitasNilaiSfbdlpgList.LastUpdatedBy.ViewAttributes)>
+@Html.Raw(subAktivitasNilaiSfbdlpgList.LastUpdatedBy.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasNilaiSfbdlpgList.LastUpdatedBy.Visible (end) *@
+    @if (subAktivitasNilaiSfbdlpgList.lastUpdatedDate.Visible) { // subAktivitasNilaiSfbdlpgList.lastUpdatedDate.Visible (begin)
+        <td data-name="lastUpdatedDate" @Html.Raw(subAktivitasNilaiSfbdlpgList.lastUpdatedDate.CellAttributes)>
+<span id="el@(subAktivitasNilaiSfbdlpgList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasNilaiSfbdlpgList.RowCount)_SubAktivitasNilaiSFBDLPG_lastUpdatedDate" class="el_SubAktivitasNilaiSFBDLPG_lastUpdatedDate">
+<span @Html.Raw(subAktivitasNilaiSfbdlpgList.lastUpdatedDate.ViewAttributes)>
+@Html.Raw(subAktivitasNilaiSfbdlpgList.lastUpdatedDate.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasNilaiSfbdlpgList.lastUpdatedDate.Visible (end) *@
+    @if (subAktivitasNilaiSfbdlpgList.etlDate.Visible) { // subAktivitasNilaiSfbdlpgList.etlDate.Visible (begin)
+        <td data-name="etlDate" @Html.Raw(subAktivitasNilaiSfbdlpgList.etlDate.CellAttributes)>
+<span id="el@(subAktivitasNilaiSfbdlpgList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasNilaiSfbdlpgList.RowCount)_SubAktivitasNilaiSFBDLPG_etlDate" class="el_SubAktivitasNilaiSFBDLPG_etlDate">
+<span @Html.Raw(subAktivitasNilaiSfbdlpgList.etlDate.ViewAttributes)>
+@Html.Raw(subAktivitasNilaiSfbdlpgList.etlDate.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasNilaiSfbdlpgList.etlDate.Visible (end) *@
+    @if (subAktivitasNilaiSfbdlpgList.userInput.Visible) { // subAktivitasNilaiSfbdlpgList.userInput.Visible (begin)
+        <td data-name="userInput" @Html.Raw(subAktivitasNilaiSfbdlpgList.userInput.CellAttributes)>
+<span id="el@(subAktivitasNilaiSfbdlpgList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasNilaiSfbdlpgList.RowCount)_SubAktivitasNilaiSFBDLPG_userInput" class="el_SubAktivitasNilaiSFBDLPG_userInput">
+<span @Html.Raw(subAktivitasNilaiSfbdlpgList.userInput.ViewAttributes)>
+@Html.Raw(subAktivitasNilaiSfbdlpgList.userInput.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasNilaiSfbdlpgList.userInput.Visible (end) *@
+    @* Render list options (body, right) *@
+    @subAktivitasNilaiSfbdlpgList.ListOptions.RenderBody("right", subAktivitasNilaiSfbdlpgList.RowCount)
+    </tr>
+    } @* End if *@
+
+    // Reset for template row
+    if (SameString(subAktivitasNilaiSfbdlpgList.RowIndex, "$rowindex$"))
+        subAktivitasNilaiSfbdlpgList.RowIndex = 0;
+
+    // Reset inline add/copy row
+    if ((subAktivitasNilaiSfbdlpgList.IsCopy || subAktivitasNilaiSfbdlpgList.IsAdd) && subAktivitasNilaiSfbdlpgList.RowIndex is int rowIndex2 && rowIndex2 == 0)
+        subAktivitasNilaiSfbdlpgList.RowIndex = 1;
+} @* End While *@
+</tbody>
+</table><!-- /.ew-table -->
+} @* End If TotalRecords > 0 *@
+</div><!-- /.ew-grid-middle-panel -->
+@if (Empty(subAktivitasNilaiSfbdlpgList.CurrentAction) && !subAktivitasNilaiSfbdlpgList.UseAjaxActions) {
+<input type="hidden" name="action" id="action" value="">
+}
+</form><!-- /.ew-list-form -->
+@{ subAktivitasNilaiSfbdlpgList.CloseRecordset(); }
+@if (!subAktivitasNilaiSfbdlpgList.IsExport()) {
+<div class="card-footer ew-grid-lower-panel">
+@if (!subAktivitasNilaiSfbdlpgList.IsGridAdd && !(subAktivitasNilaiSfbdlpgList.IsGridEdit && subAktivitasNilaiSfbdlpgList.ModalGridEdit) && !subAktivitasNilaiSfbdlpgList.IsMultiEdit) {
+@Html.Raw(subAktivitasNilaiSfbdlpgList.Pager.Render())
+}
+<div class="ew-list-other-options">
+@subAktivitasNilaiSfbdlpgList.OtherOptions.RenderBody("bottom")
+</div>
+</div>
+}
+</div><!-- /.ew-grid -->
+} else { // Show other options
+<div class="ew-list-other-options">
+@subAktivitasNilaiSfbdlpgList.OtherOptions.ForEach(opt => opt.ButtonClass = "").RenderBody()
+</div>
+}
+</div>
+<div id="ew-footer-options">
+    @subAktivitasNilaiSfbdlpgList.FooterOptions.RenderBody()
+</div>
+</main>
+@subAktivitasNilaiSfbdlpgList.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+@if (!subAktivitasNilaiSfbdlpgList.IsExport()) {
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("SubAktivitasNilaiSFBDLPG");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Write your table-specific startup script here
+    // document.write("page loaded");
+});
+</script>
+}

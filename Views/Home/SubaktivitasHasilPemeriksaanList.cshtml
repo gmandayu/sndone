@@ -1,0 +1,417 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (subaktivitasHasilPemeriksaanList.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = subaktivitasHasilPemeriksaanList.UseLayout ? "_Layout" : "";
+}
+@if (!subaktivitasHasilPemeriksaanList.IsExport()) {
+<script>
+var currentTable = @Html.Raw(ConvertToJson(subaktivitasHasilPemeriksaanList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { SubaktivitasHasilPemeriksaan: currentTable } });
+var currentPageID = ew.PAGE_ID = "list";
+var currentForm;
+var @(subaktivitasHasilPemeriksaanList.FormName);
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("@(subaktivitasHasilPemeriksaanList.FormName)")
+        .setPageId("list")
+        .setSubmitWithFetch(@(subaktivitasHasilPemeriksaanList.UseAjaxActions ? "true" : "false"))
+        .setFormKeyCountName("@(subaktivitasHasilPemeriksaanList.FormKeyCountName)")
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Write your client script here, no need to add script tags.
+});
+</script>
+}
+@if (!subaktivitasHasilPemeriksaanList.IsExport()) {
+<div class="btn-toolbar ew-toolbar">
+@if (subaktivitasHasilPemeriksaanList.TotalRecords > 0 && subaktivitasHasilPemeriksaanList.ExportOptions.Visible) {
+    subaktivitasHasilPemeriksaanList.ExportOptions.Render("body");
+}
+@if (subaktivitasHasilPemeriksaanList.ImportOptions.Visible) {
+    subaktivitasHasilPemeriksaanList.ImportOptions.Render("body");
+}
+@if (subaktivitasHasilPemeriksaanList.SearchOptions.Visible) {
+    subaktivitasHasilPemeriksaanList.SearchOptions.Render("body");
+}
+@if (subaktivitasHasilPemeriksaanList.FilterOptions.Visible) {
+    subaktivitasHasilPemeriksaanList.FilterOptions.Render("body");
+}
+</div>
+}
+@if (!subaktivitasHasilPemeriksaanList.IsModal) {
+<form name="fSubaktivitasHasilPemeriksaansrch" id="fSubaktivitasHasilPemeriksaansrch" class="ew-form ew-ext-search-form" action="@AppPath(CurrentPageName())" novalidate autocomplete="off">
+<div id="fSubaktivitasHasilPemeriksaansrch_search_panel" class="mb-2 mb-sm-0 @(subaktivitasHasilPemeriksaanList.SearchPanelClass)"><!-- .ew-search-panel -->
+<script>
+var currentTable = @Html.Raw(ConvertToJson(subaktivitasHasilPemeriksaanList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { SubaktivitasHasilPemeriksaan: currentTable } });
+var currentForm;
+var fSubaktivitasHasilPemeriksaansrch, currentSearchForm, currentAdvancedSearchForm;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery,
+        fields = currentTable.fields;
+
+    // Form object for search
+    let form = new ew.FormBuilder()
+        .setId("fSubaktivitasHasilPemeriksaansrch")
+        .setPageId("list")
+@if (subaktivitasHasilPemeriksaanList.UseAjaxActions) {
+        <text>.setSubmitWithFetch(true)</text>
+}
+
+        // Dynamic selection lists
+        .setLists({
+        })
+
+        // Filters
+        .setFilterList(@Html.Raw(subaktivitasHasilPemeriksaanList.GetFilterList()))
+        .build();
+    window[form.id] = form;
+    currentSearchForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<input type="hidden" name="cmd" value="search">
+@if (Security.CanSearch) {
+if (!subaktivitasHasilPemeriksaanList.IsExport() && Empty(subaktivitasHasilPemeriksaanList.CurrentAction) && subaktivitasHasilPemeriksaanList.HasSearchFields()) { @* Show search form (begin) *@
+<div class="ew-extended-search container-fluid ps-2">
+<div class="row mb-0">
+    <div class="col-sm-auto px-0 pe-sm-2">
+        <div class="ew-basic-search input-group">
+            <input type="search" name="@(Config.TableBasicSearch)" id="@(Config.TableBasicSearch)" class="form-control ew-basic-search-keyword" value="@Html.Raw(HtmlEncode(subaktivitasHasilPemeriksaanList.BasicSearch.SessionKeyword))" placeholder="@(HtmlEncode(Language.Phrase("Search")))" aria-label="@(HtmlEncode(Language.Phrase("Search")))">
+            <input type="hidden" name="@(Config.TableBasicSearchType)" id="@(Config.TableBasicSearchType)" class="ew-basic-search-type" value="@(HtmlEncode(subaktivitasHasilPemeriksaanList.BasicSearch.SessionType))">
+            <button type="button" data-bs-toggle="dropdown" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split" aria-haspopup="true" aria-expanded="false">
+                <span id="searchtype">@Html.Raw(subaktivitasHasilPemeriksaanList.BasicSearch.TypeNameShort)</span>
+            </button>
+            <div class="dropdown-menu dropdown-menu-end">
+                <button type="button" class="dropdown-item@(subaktivitasHasilPemeriksaanList.BasicSearch.SessionType == "" ? " active" : "")" form="fSubaktivitasHasilPemeriksaansrch" data-ew-action="search-type">@Html.Raw(Language.Phrase("QuickSearchAuto"))</button>
+                <button type="button" class="dropdown-item@(subaktivitasHasilPemeriksaanList.BasicSearch.SessionType == "=" ? " active" : "")" form="fSubaktivitasHasilPemeriksaansrch" data-ew-action="search-type" data-search-type="=">@Html.Raw(Language.Phrase("QuickSearchExact"))</button>
+                <button type="button" class="dropdown-item@(subaktivitasHasilPemeriksaanList.BasicSearch.SessionType == "AND" ? " active" : "")" form="fSubaktivitasHasilPemeriksaansrch" data-ew-action="search-type" data-search-type="AND">@Html.Raw(Language.Phrase("QuickSearchAll"))</button>
+                <button type="button" class="dropdown-item@(subaktivitasHasilPemeriksaanList.BasicSearch.SessionType == "OR" ? " active" : "")" form="fSubaktivitasHasilPemeriksaansrch" data-ew-action="search-type" data-search-type="OR">@Html.Raw(Language.Phrase("QuickSearchAny"))</button>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-auto mb-3">
+        <button class="btn btn-primary" name="btn-submit" id="btn-submit" type="submit">@Html.Raw(Language.Phrase("SearchBtn"))</button>
+    </div>
+</div>
+</div><!-- /.ew-extended-search -->
+} @* Show search form (end) *@
+}
+</div><!-- /.ew-search-panel -->
+</form>
+}
+@subaktivitasHasilPemeriksaanList.ShowPageHeader()
+@subaktivitasHasilPemeriksaanList.ShowMessages()
+<main class="list @(subaktivitasHasilPemeriksaanList.TotalRecords == 0 && !subaktivitasHasilPemeriksaanList.IsAdd ? " ew-no-record" : "")">
+<div id="ew-header-options">
+    @subaktivitasHasilPemeriksaanList.HeaderOptions.RenderBody()
+</div>
+<div id="ew-list">
+@if (subaktivitasHasilPemeriksaanList.TotalRecords > 0 || !Empty(subaktivitasHasilPemeriksaanList.CurrentAction)) {
+<div class="card ew-card ew-grid@(subaktivitasHasilPemeriksaanList.IsAddOrEdit ? " ew-grid-add-edit" : "") @(subaktivitasHasilPemeriksaanList.TableGridClass)">
+<form name="@(subaktivitasHasilPemeriksaanList.FormName)" id="@(subaktivitasHasilPemeriksaanList.FormName)" class="ew-form ew-list-form" action="@AppPath(subaktivitasHasilPemeriksaanList.PageName)" method="post" novalidate autocomplete="off">
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+@if (subaktivitasHasilPemeriksaanList.IsModal) {
+<input type="hidden" name="modal" value="1">
+}
+<div id="gmp_SubaktivitasHasilPemeriksaan" class="card-body ew-grid-middle-panel @(subaktivitasHasilPemeriksaanList.TableContainerClass)" style="@(subaktivitasHasilPemeriksaanList.TableContainerStyle)">
+@if (subaktivitasHasilPemeriksaanList.TotalRecords > 0 || subaktivitasHasilPemeriksaanList.IsGridEdit || subaktivitasHasilPemeriksaanList.IsMultiEdit) {
+<table id="tbl_SubaktivitasHasilPemeriksaanlist" class="@(subaktivitasHasilPemeriksaanList.TableClass)"><!-- .ew-table -->
+<thead>
+    <tr class="ew-table-header">
+@{
+    // Header row
+    subaktivitasHasilPemeriksaanList.RowType = RowType.Header;
+
+    // Render list options
+    await subaktivitasHasilPemeriksaanList.RenderListOptions();
+}
+@* Render list options (header, left) *@
+@subaktivitasHasilPemeriksaanList.ListOptions.RenderHeader("left")
+@if (subaktivitasHasilPemeriksaanList.idAktifitas.Visible) { // subaktivitasHasilPemeriksaanList.idAktifitas.Visible (begin)
+        <th data-name="idAktifitas" class="@(subaktivitasHasilPemeriksaanList.idAktifitas.HeaderCellClass)"><div id="elh_SubaktivitasHasilPemeriksaan_idAktifitas" class="SubaktivitasHasilPemeriksaan_idAktifitas">@Html.Raw(subaktivitasHasilPemeriksaanList.RenderFieldHeader(subaktivitasHasilPemeriksaanList.idAktifitas))</div></th>
+} @* subaktivitasHasilPemeriksaanList.idAktifitas.Visible (end) *@
+@if (subaktivitasHasilPemeriksaanList.idProses.Visible) { // subaktivitasHasilPemeriksaanList.idProses.Visible (begin)
+        <th data-name="idProses" class="@(subaktivitasHasilPemeriksaanList.idProses.HeaderCellClass)"><div id="elh_SubaktivitasHasilPemeriksaan_idProses" class="SubaktivitasHasilPemeriksaan_idProses">@Html.Raw(subaktivitasHasilPemeriksaanList.RenderFieldHeader(subaktivitasHasilPemeriksaanList.idProses))</div></th>
+} @* subaktivitasHasilPemeriksaanList.idProses.Visible (end) *@
+@if (subaktivitasHasilPemeriksaanList.NoReferensi.Visible) { // subaktivitasHasilPemeriksaanList.NoReferensi.Visible (begin)
+        <th data-name="NoReferensi" class="@(subaktivitasHasilPemeriksaanList.NoReferensi.HeaderCellClass)"><div id="elh_SubaktivitasHasilPemeriksaan_NoReferensi" class="SubaktivitasHasilPemeriksaan_NoReferensi">@Html.Raw(subaktivitasHasilPemeriksaanList.RenderFieldHeader(subaktivitasHasilPemeriksaanList.NoReferensi))</div></th>
+} @* subaktivitasHasilPemeriksaanList.NoReferensi.Visible (end) *@
+@if (subaktivitasHasilPemeriksaanList.StatusAktivitas.Visible) { // subaktivitasHasilPemeriksaanList.StatusAktivitas.Visible (begin)
+        <th data-name="StatusAktivitas" class="@(subaktivitasHasilPemeriksaanList.StatusAktivitas.HeaderCellClass)"><div id="elh_SubaktivitasHasilPemeriksaan_StatusAktivitas" class="SubaktivitasHasilPemeriksaan_StatusAktivitas">@Html.Raw(subaktivitasHasilPemeriksaanList.RenderFieldHeader(subaktivitasHasilPemeriksaanList.StatusAktivitas))</div></th>
+} @* subaktivitasHasilPemeriksaanList.StatusAktivitas.Visible (end) *@
+@if (subaktivitasHasilPemeriksaanList.Produk.Visible) { // subaktivitasHasilPemeriksaanList.Produk.Visible (begin)
+        <th data-name="Produk" class="@(subaktivitasHasilPemeriksaanList.Produk.HeaderCellClass)"><div id="elh_SubaktivitasHasilPemeriksaan_Produk" class="SubaktivitasHasilPemeriksaan_Produk">@Html.Raw(subaktivitasHasilPemeriksaanList.RenderFieldHeader(subaktivitasHasilPemeriksaanList.Produk))</div></th>
+} @* subaktivitasHasilPemeriksaanList.Produk.Visible (end) *@
+@if (subaktivitasHasilPemeriksaanList.LastUpdatedBy.Visible) { // subaktivitasHasilPemeriksaanList.LastUpdatedBy.Visible (begin)
+        <th data-name="LastUpdatedBy" class="@(subaktivitasHasilPemeriksaanList.LastUpdatedBy.HeaderCellClass)"><div id="elh_SubaktivitasHasilPemeriksaan_LastUpdatedBy" class="SubaktivitasHasilPemeriksaan_LastUpdatedBy">@Html.Raw(subaktivitasHasilPemeriksaanList.RenderFieldHeader(subaktivitasHasilPemeriksaanList.LastUpdatedBy))</div></th>
+} @* subaktivitasHasilPemeriksaanList.LastUpdatedBy.Visible (end) *@
+@if (subaktivitasHasilPemeriksaanList.lastUpdatedDate.Visible) { // subaktivitasHasilPemeriksaanList.lastUpdatedDate.Visible (begin)
+        <th data-name="lastUpdatedDate" class="@(subaktivitasHasilPemeriksaanList.lastUpdatedDate.HeaderCellClass)"><div id="elh_SubaktivitasHasilPemeriksaan_lastUpdatedDate" class="SubaktivitasHasilPemeriksaan_lastUpdatedDate">@Html.Raw(subaktivitasHasilPemeriksaanList.RenderFieldHeader(subaktivitasHasilPemeriksaanList.lastUpdatedDate))</div></th>
+} @* subaktivitasHasilPemeriksaanList.lastUpdatedDate.Visible (end) *@
+@if (subaktivitasHasilPemeriksaanList.NamaKapal.Visible) { // subaktivitasHasilPemeriksaanList.NamaKapal.Visible (begin)
+        <th data-name="NamaKapal" class="@(subaktivitasHasilPemeriksaanList.NamaKapal.HeaderCellClass)"><div id="elh_SubaktivitasHasilPemeriksaan_NamaKapal" class="SubaktivitasHasilPemeriksaan_NamaKapal">@Html.Raw(subaktivitasHasilPemeriksaanList.RenderFieldHeader(subaktivitasHasilPemeriksaanList.NamaKapal))</div></th>
+} @* subaktivitasHasilPemeriksaanList.NamaKapal.Visible (end) *@
+@if (subaktivitasHasilPemeriksaanList.TanggalJam.Visible) { // subaktivitasHasilPemeriksaanList.TanggalJam.Visible (begin)
+        <th data-name="TanggalJam" class="@(subaktivitasHasilPemeriksaanList.TanggalJam.HeaderCellClass)"><div id="elh_SubaktivitasHasilPemeriksaan_TanggalJam" class="SubaktivitasHasilPemeriksaan_TanggalJam">@Html.Raw(subaktivitasHasilPemeriksaanList.RenderFieldHeader(subaktivitasHasilPemeriksaanList.TanggalJam))</div></th>
+} @* subaktivitasHasilPemeriksaanList.TanggalJam.Visible (end) *@
+@if (subaktivitasHasilPemeriksaanList.NamaKegiatan.Visible) { // subaktivitasHasilPemeriksaanList.NamaKegiatan.Visible (begin)
+        <th data-name="NamaKegiatan" class="@(subaktivitasHasilPemeriksaanList.NamaKegiatan.HeaderCellClass)"><div id="elh_SubaktivitasHasilPemeriksaan_NamaKegiatan" class="SubaktivitasHasilPemeriksaan_NamaKegiatan">@Html.Raw(subaktivitasHasilPemeriksaanList.RenderFieldHeader(subaktivitasHasilPemeriksaanList.NamaKegiatan))</div></th>
+} @* subaktivitasHasilPemeriksaanList.NamaKegiatan.Visible (end) *@
+@if (subaktivitasHasilPemeriksaanList.Density.Visible) { // subaktivitasHasilPemeriksaanList.Density.Visible (begin)
+        <th data-name="Density" class="@(subaktivitasHasilPemeriksaanList.Density.HeaderCellClass)"><div id="elh_SubaktivitasHasilPemeriksaan_Density" class="SubaktivitasHasilPemeriksaan_Density">@Html.Raw(subaktivitasHasilPemeriksaanList.RenderFieldHeader(subaktivitasHasilPemeriksaanList.Density))</div></th>
+} @* subaktivitasHasilPemeriksaanList.Density.Visible (end) *@
+@if (subaktivitasHasilPemeriksaanList.Temperature.Visible) { // subaktivitasHasilPemeriksaanList.Temperature.Visible (begin)
+        <th data-name="Temperature" class="@(subaktivitasHasilPemeriksaanList.Temperature.HeaderCellClass)"><div id="elh_SubaktivitasHasilPemeriksaan_Temperature" class="SubaktivitasHasilPemeriksaan_Temperature">@Html.Raw(subaktivitasHasilPemeriksaanList.RenderFieldHeader(subaktivitasHasilPemeriksaanList.Temperature))</div></th>
+} @* subaktivitasHasilPemeriksaanList.Temperature.Visible (end) *@
+@if (subaktivitasHasilPemeriksaanList.Pressure.Visible) { // subaktivitasHasilPemeriksaanList.Pressure.Visible (begin)
+        <th data-name="Pressure" class="@(subaktivitasHasilPemeriksaanList.Pressure.HeaderCellClass)"><div id="elh_SubaktivitasHasilPemeriksaan_Pressure" class="SubaktivitasHasilPemeriksaan_Pressure">@Html.Raw(subaktivitasHasilPemeriksaanList.RenderFieldHeader(subaktivitasHasilPemeriksaanList.Pressure))</div></th>
+} @* subaktivitasHasilPemeriksaanList.Pressure.Visible (end) *@
+@if (subaktivitasHasilPemeriksaanList.userInput.Visible) { // subaktivitasHasilPemeriksaanList.userInput.Visible (begin)
+        <th data-name="userInput" class="@(subaktivitasHasilPemeriksaanList.userInput.HeaderCellClass)"><div id="elh_SubaktivitasHasilPemeriksaan_userInput" class="SubaktivitasHasilPemeriksaan_userInput">@Html.Raw(subaktivitasHasilPemeriksaanList.RenderFieldHeader(subaktivitasHasilPemeriksaanList.userInput))</div></th>
+} @* subaktivitasHasilPemeriksaanList.userInput.Visible (end) *@
+@if (subaktivitasHasilPemeriksaanList.TanggalJamSOP.Visible) { // subaktivitasHasilPemeriksaanList.TanggalJamSOP.Visible (begin)
+        <th data-name="TanggalJamSOP" class="@(subaktivitasHasilPemeriksaanList.TanggalJamSOP.HeaderCellClass)"><div id="elh_SubaktivitasHasilPemeriksaan_TanggalJamSOP" class="SubaktivitasHasilPemeriksaan_TanggalJamSOP">@Html.Raw(subaktivitasHasilPemeriksaanList.RenderFieldHeader(subaktivitasHasilPemeriksaanList.TanggalJamSOP))</div></th>
+} @* subaktivitasHasilPemeriksaanList.TanggalJamSOP.Visible (end) *@
+@if (subaktivitasHasilPemeriksaanList.SelisihWaktu.Visible) { // subaktivitasHasilPemeriksaanList.SelisihWaktu.Visible (begin)
+        <th data-name="SelisihWaktu" class="@(subaktivitasHasilPemeriksaanList.SelisihWaktu.HeaderCellClass)"><div id="elh_SubaktivitasHasilPemeriksaan_SelisihWaktu" class="SubaktivitasHasilPemeriksaan_SelisihWaktu">@Html.Raw(subaktivitasHasilPemeriksaanList.RenderFieldHeader(subaktivitasHasilPemeriksaanList.SelisihWaktu))</div></th>
+} @* subaktivitasHasilPemeriksaanList.SelisihWaktu.Visible (end) *@
+@if (subaktivitasHasilPemeriksaanList.IsQualityActive.Visible) { // subaktivitasHasilPemeriksaanList.IsQualityActive.Visible (begin)
+        <th data-name="IsQualityActive" class="@(subaktivitasHasilPemeriksaanList.IsQualityActive.HeaderCellClass)"><div id="elh_SubaktivitasHasilPemeriksaan_IsQualityActive" class="SubaktivitasHasilPemeriksaan_IsQualityActive">@Html.Raw(subaktivitasHasilPemeriksaanList.RenderFieldHeader(subaktivitasHasilPemeriksaanList.IsQualityActive))</div></th>
+} @* subaktivitasHasilPemeriksaanList.IsQualityActive.Visible (end) *@
+@* Render list options (header, right) *@
+@subaktivitasHasilPemeriksaanList.ListOptions.RenderHeader("right")
+    </tr>
+</thead>
+<tbody data-page="@(subaktivitasHasilPemeriksaanList.PageNumber)">
+@{
+    await subaktivitasHasilPemeriksaanList.SetupGrid();
+    bool eof = subaktivitasHasilPemeriksaanList.Recordset == null; // DN
+}
+@while (subaktivitasHasilPemeriksaanList.RecordCount < subaktivitasHasilPemeriksaanList.StopRecord || SameString(subaktivitasHasilPemeriksaanList.RowIndex, "$rowindex$")) { // Begin While
+    if (!eof && !SameString(subaktivitasHasilPemeriksaanList.RowIndex, "$rowindex$") &&
+        (!subaktivitasHasilPemeriksaanList.IsGridAdd || subaktivitasHasilPemeriksaanList.CurrentMode == "copy") &&
+        (!((subaktivitasHasilPemeriksaanList.IsCopy || subaktivitasHasilPemeriksaanList.IsAdd) && subaktivitasHasilPemeriksaanList.RowIndex is int rowIndex && rowIndex == 0))) // DN
+        eof = !await subaktivitasHasilPemeriksaanList.Recordset.ReadAsync();
+    subaktivitasHasilPemeriksaanList.RecordCount++;
+    if (subaktivitasHasilPemeriksaanList.RecordCount >= subaktivitasHasilPemeriksaanList.StartRecord) {
+        await subaktivitasHasilPemeriksaanList.SetupRow();
+    <tr @Html.Raw(subaktivitasHasilPemeriksaanList.RowAttributes)>
+    @* Render list options (body, left) *@
+    @subaktivitasHasilPemeriksaanList.ListOptions.RenderBody("left", subaktivitasHasilPemeriksaanList.RowCount)
+    @if (subaktivitasHasilPemeriksaanList.idAktifitas.Visible) { // subaktivitasHasilPemeriksaanList.idAktifitas.Visible (begin)
+        <td data-name="idAktifitas" @Html.Raw(subaktivitasHasilPemeriksaanList.idAktifitas.CellAttributes)>
+<span id="el@(subaktivitasHasilPemeriksaanList.RowIndex == "$rowindex$" ? "$rowindex$" : subaktivitasHasilPemeriksaanList.RowCount)_SubaktivitasHasilPemeriksaan_idAktifitas" class="el_SubaktivitasHasilPemeriksaan_idAktifitas">
+<span @Html.Raw(subaktivitasHasilPemeriksaanList.idAktifitas.ViewAttributes)>
+@Html.Raw(subaktivitasHasilPemeriksaanList.idAktifitas.GetViewValue())</span>
+</span>
+</td>
+    } @* subaktivitasHasilPemeriksaanList.idAktifitas.Visible (end) *@
+    @if (subaktivitasHasilPemeriksaanList.idProses.Visible) { // subaktivitasHasilPemeriksaanList.idProses.Visible (begin)
+        <td data-name="idProses" @Html.Raw(subaktivitasHasilPemeriksaanList.idProses.CellAttributes)>
+<span id="el@(subaktivitasHasilPemeriksaanList.RowIndex == "$rowindex$" ? "$rowindex$" : subaktivitasHasilPemeriksaanList.RowCount)_SubaktivitasHasilPemeriksaan_idProses" class="el_SubaktivitasHasilPemeriksaan_idProses">
+<span @Html.Raw(subaktivitasHasilPemeriksaanList.idProses.ViewAttributes)>
+@Html.Raw(subaktivitasHasilPemeriksaanList.idProses.GetViewValue())</span>
+</span>
+</td>
+    } @* subaktivitasHasilPemeriksaanList.idProses.Visible (end) *@
+    @if (subaktivitasHasilPemeriksaanList.NoReferensi.Visible) { // subaktivitasHasilPemeriksaanList.NoReferensi.Visible (begin)
+        <td data-name="NoReferensi" @Html.Raw(subaktivitasHasilPemeriksaanList.NoReferensi.CellAttributes)>
+<span id="el@(subaktivitasHasilPemeriksaanList.RowIndex == "$rowindex$" ? "$rowindex$" : subaktivitasHasilPemeriksaanList.RowCount)_SubaktivitasHasilPemeriksaan_NoReferensi" class="el_SubaktivitasHasilPemeriksaan_NoReferensi">
+<span @Html.Raw(subaktivitasHasilPemeriksaanList.NoReferensi.ViewAttributes)>
+@Html.Raw(subaktivitasHasilPemeriksaanList.NoReferensi.GetViewValue())</span>
+</span>
+</td>
+    } @* subaktivitasHasilPemeriksaanList.NoReferensi.Visible (end) *@
+    @if (subaktivitasHasilPemeriksaanList.StatusAktivitas.Visible) { // subaktivitasHasilPemeriksaanList.StatusAktivitas.Visible (begin)
+        <td data-name="StatusAktivitas" @Html.Raw(subaktivitasHasilPemeriksaanList.StatusAktivitas.CellAttributes)>
+<span id="el@(subaktivitasHasilPemeriksaanList.RowIndex == "$rowindex$" ? "$rowindex$" : subaktivitasHasilPemeriksaanList.RowCount)_SubaktivitasHasilPemeriksaan_StatusAktivitas" class="el_SubaktivitasHasilPemeriksaan_StatusAktivitas">
+<span @Html.Raw(subaktivitasHasilPemeriksaanList.StatusAktivitas.ViewAttributes)>
+@Html.Raw(subaktivitasHasilPemeriksaanList.StatusAktivitas.GetViewValue())</span>
+</span>
+</td>
+    } @* subaktivitasHasilPemeriksaanList.StatusAktivitas.Visible (end) *@
+    @if (subaktivitasHasilPemeriksaanList.Produk.Visible) { // subaktivitasHasilPemeriksaanList.Produk.Visible (begin)
+        <td data-name="Produk" @Html.Raw(subaktivitasHasilPemeriksaanList.Produk.CellAttributes)>
+<span id="el@(subaktivitasHasilPemeriksaanList.RowIndex == "$rowindex$" ? "$rowindex$" : subaktivitasHasilPemeriksaanList.RowCount)_SubaktivitasHasilPemeriksaan_Produk" class="el_SubaktivitasHasilPemeriksaan_Produk">
+<span @Html.Raw(subaktivitasHasilPemeriksaanList.Produk.ViewAttributes)>
+@Html.Raw(subaktivitasHasilPemeriksaanList.Produk.GetViewValue())</span>
+</span>
+</td>
+    } @* subaktivitasHasilPemeriksaanList.Produk.Visible (end) *@
+    @if (subaktivitasHasilPemeriksaanList.LastUpdatedBy.Visible) { // subaktivitasHasilPemeriksaanList.LastUpdatedBy.Visible (begin)
+        <td data-name="LastUpdatedBy" @Html.Raw(subaktivitasHasilPemeriksaanList.LastUpdatedBy.CellAttributes)>
+<span id="el@(subaktivitasHasilPemeriksaanList.RowIndex == "$rowindex$" ? "$rowindex$" : subaktivitasHasilPemeriksaanList.RowCount)_SubaktivitasHasilPemeriksaan_LastUpdatedBy" class="el_SubaktivitasHasilPemeriksaan_LastUpdatedBy">
+<span @Html.Raw(subaktivitasHasilPemeriksaanList.LastUpdatedBy.ViewAttributes)>
+@Html.Raw(subaktivitasHasilPemeriksaanList.LastUpdatedBy.GetViewValue())</span>
+</span>
+</td>
+    } @* subaktivitasHasilPemeriksaanList.LastUpdatedBy.Visible (end) *@
+    @if (subaktivitasHasilPemeriksaanList.lastUpdatedDate.Visible) { // subaktivitasHasilPemeriksaanList.lastUpdatedDate.Visible (begin)
+        <td data-name="lastUpdatedDate" @Html.Raw(subaktivitasHasilPemeriksaanList.lastUpdatedDate.CellAttributes)>
+<span id="el@(subaktivitasHasilPemeriksaanList.RowIndex == "$rowindex$" ? "$rowindex$" : subaktivitasHasilPemeriksaanList.RowCount)_SubaktivitasHasilPemeriksaan_lastUpdatedDate" class="el_SubaktivitasHasilPemeriksaan_lastUpdatedDate">
+<span @Html.Raw(subaktivitasHasilPemeriksaanList.lastUpdatedDate.ViewAttributes)>
+@Html.Raw(subaktivitasHasilPemeriksaanList.lastUpdatedDate.GetViewValue())</span>
+</span>
+</td>
+    } @* subaktivitasHasilPemeriksaanList.lastUpdatedDate.Visible (end) *@
+    @if (subaktivitasHasilPemeriksaanList.NamaKapal.Visible) { // subaktivitasHasilPemeriksaanList.NamaKapal.Visible (begin)
+        <td data-name="NamaKapal" @Html.Raw(subaktivitasHasilPemeriksaanList.NamaKapal.CellAttributes)>
+<span id="el@(subaktivitasHasilPemeriksaanList.RowIndex == "$rowindex$" ? "$rowindex$" : subaktivitasHasilPemeriksaanList.RowCount)_SubaktivitasHasilPemeriksaan_NamaKapal" class="el_SubaktivitasHasilPemeriksaan_NamaKapal">
+<span @Html.Raw(subaktivitasHasilPemeriksaanList.NamaKapal.ViewAttributes)>
+@Html.Raw(subaktivitasHasilPemeriksaanList.NamaKapal.GetViewValue())</span>
+</span>
+</td>
+    } @* subaktivitasHasilPemeriksaanList.NamaKapal.Visible (end) *@
+    @if (subaktivitasHasilPemeriksaanList.TanggalJam.Visible) { // subaktivitasHasilPemeriksaanList.TanggalJam.Visible (begin)
+        <td data-name="TanggalJam" @Html.Raw(subaktivitasHasilPemeriksaanList.TanggalJam.CellAttributes)>
+<span id="el@(subaktivitasHasilPemeriksaanList.RowIndex == "$rowindex$" ? "$rowindex$" : subaktivitasHasilPemeriksaanList.RowCount)_SubaktivitasHasilPemeriksaan_TanggalJam" class="el_SubaktivitasHasilPemeriksaan_TanggalJam">
+<span @Html.Raw(subaktivitasHasilPemeriksaanList.TanggalJam.ViewAttributes)>
+@Html.Raw(subaktivitasHasilPemeriksaanList.TanggalJam.GetViewValue())</span>
+</span>
+</td>
+    } @* subaktivitasHasilPemeriksaanList.TanggalJam.Visible (end) *@
+    @if (subaktivitasHasilPemeriksaanList.NamaKegiatan.Visible) { // subaktivitasHasilPemeriksaanList.NamaKegiatan.Visible (begin)
+        <td data-name="NamaKegiatan" @Html.Raw(subaktivitasHasilPemeriksaanList.NamaKegiatan.CellAttributes)>
+<span id="el@(subaktivitasHasilPemeriksaanList.RowIndex == "$rowindex$" ? "$rowindex$" : subaktivitasHasilPemeriksaanList.RowCount)_SubaktivitasHasilPemeriksaan_NamaKegiatan" class="el_SubaktivitasHasilPemeriksaan_NamaKegiatan">
+<span @Html.Raw(subaktivitasHasilPemeriksaanList.NamaKegiatan.ViewAttributes)>
+@Html.Raw(subaktivitasHasilPemeriksaanList.NamaKegiatan.GetViewValue())</span>
+</span>
+</td>
+    } @* subaktivitasHasilPemeriksaanList.NamaKegiatan.Visible (end) *@
+    @if (subaktivitasHasilPemeriksaanList.Density.Visible) { // subaktivitasHasilPemeriksaanList.Density.Visible (begin)
+        <td data-name="Density" @Html.Raw(subaktivitasHasilPemeriksaanList.Density.CellAttributes)>
+<span id="el@(subaktivitasHasilPemeriksaanList.RowIndex == "$rowindex$" ? "$rowindex$" : subaktivitasHasilPemeriksaanList.RowCount)_SubaktivitasHasilPemeriksaan_Density" class="el_SubaktivitasHasilPemeriksaan_Density">
+<span @Html.Raw(subaktivitasHasilPemeriksaanList.Density.ViewAttributes)>
+@Html.Raw(subaktivitasHasilPemeriksaanList.Density.GetViewValue())</span>
+</span>
+</td>
+    } @* subaktivitasHasilPemeriksaanList.Density.Visible (end) *@
+    @if (subaktivitasHasilPemeriksaanList.Temperature.Visible) { // subaktivitasHasilPemeriksaanList.Temperature.Visible (begin)
+        <td data-name="Temperature" @Html.Raw(subaktivitasHasilPemeriksaanList.Temperature.CellAttributes)>
+<span id="el@(subaktivitasHasilPemeriksaanList.RowIndex == "$rowindex$" ? "$rowindex$" : subaktivitasHasilPemeriksaanList.RowCount)_SubaktivitasHasilPemeriksaan_Temperature" class="el_SubaktivitasHasilPemeriksaan_Temperature">
+<span @Html.Raw(subaktivitasHasilPemeriksaanList.Temperature.ViewAttributes)>
+@Html.Raw(subaktivitasHasilPemeriksaanList.Temperature.GetViewValue())</span>
+</span>
+</td>
+    } @* subaktivitasHasilPemeriksaanList.Temperature.Visible (end) *@
+    @if (subaktivitasHasilPemeriksaanList.Pressure.Visible) { // subaktivitasHasilPemeriksaanList.Pressure.Visible (begin)
+        <td data-name="Pressure" @Html.Raw(subaktivitasHasilPemeriksaanList.Pressure.CellAttributes)>
+<span id="el@(subaktivitasHasilPemeriksaanList.RowIndex == "$rowindex$" ? "$rowindex$" : subaktivitasHasilPemeriksaanList.RowCount)_SubaktivitasHasilPemeriksaan_Pressure" class="el_SubaktivitasHasilPemeriksaan_Pressure">
+<span @Html.Raw(subaktivitasHasilPemeriksaanList.Pressure.ViewAttributes)>
+@Html.Raw(subaktivitasHasilPemeriksaanList.Pressure.GetViewValue())</span>
+</span>
+</td>
+    } @* subaktivitasHasilPemeriksaanList.Pressure.Visible (end) *@
+    @if (subaktivitasHasilPemeriksaanList.userInput.Visible) { // subaktivitasHasilPemeriksaanList.userInput.Visible (begin)
+        <td data-name="userInput" @Html.Raw(subaktivitasHasilPemeriksaanList.userInput.CellAttributes)>
+<span id="el@(subaktivitasHasilPemeriksaanList.RowIndex == "$rowindex$" ? "$rowindex$" : subaktivitasHasilPemeriksaanList.RowCount)_SubaktivitasHasilPemeriksaan_userInput" class="el_SubaktivitasHasilPemeriksaan_userInput">
+<span @Html.Raw(subaktivitasHasilPemeriksaanList.userInput.ViewAttributes)>
+@Html.Raw(subaktivitasHasilPemeriksaanList.userInput.GetViewValue())</span>
+</span>
+</td>
+    } @* subaktivitasHasilPemeriksaanList.userInput.Visible (end) *@
+    @if (subaktivitasHasilPemeriksaanList.TanggalJamSOP.Visible) { // subaktivitasHasilPemeriksaanList.TanggalJamSOP.Visible (begin)
+        <td data-name="TanggalJamSOP" @Html.Raw(subaktivitasHasilPemeriksaanList.TanggalJamSOP.CellAttributes)>
+<span id="el@(subaktivitasHasilPemeriksaanList.RowIndex == "$rowindex$" ? "$rowindex$" : subaktivitasHasilPemeriksaanList.RowCount)_SubaktivitasHasilPemeriksaan_TanggalJamSOP" class="el_SubaktivitasHasilPemeriksaan_TanggalJamSOP">
+<span @Html.Raw(subaktivitasHasilPemeriksaanList.TanggalJamSOP.ViewAttributes)>
+@Html.Raw(subaktivitasHasilPemeriksaanList.TanggalJamSOP.GetViewValue())</span>
+</span>
+</td>
+    } @* subaktivitasHasilPemeriksaanList.TanggalJamSOP.Visible (end) *@
+    @if (subaktivitasHasilPemeriksaanList.SelisihWaktu.Visible) { // subaktivitasHasilPemeriksaanList.SelisihWaktu.Visible (begin)
+        <td data-name="SelisihWaktu" @Html.Raw(subaktivitasHasilPemeriksaanList.SelisihWaktu.CellAttributes)>
+<span id="el@(subaktivitasHasilPemeriksaanList.RowIndex == "$rowindex$" ? "$rowindex$" : subaktivitasHasilPemeriksaanList.RowCount)_SubaktivitasHasilPemeriksaan_SelisihWaktu" class="el_SubaktivitasHasilPemeriksaan_SelisihWaktu">
+<span @Html.Raw(subaktivitasHasilPemeriksaanList.SelisihWaktu.ViewAttributes)>
+@Html.Raw(subaktivitasHasilPemeriksaanList.SelisihWaktu.GetViewValue())</span>
+</span>
+</td>
+    } @* subaktivitasHasilPemeriksaanList.SelisihWaktu.Visible (end) *@
+    @if (subaktivitasHasilPemeriksaanList.IsQualityActive.Visible) { // subaktivitasHasilPemeriksaanList.IsQualityActive.Visible (begin)
+        <td data-name="IsQualityActive" @Html.Raw(subaktivitasHasilPemeriksaanList.IsQualityActive.CellAttributes)>
+<span id="el@(subaktivitasHasilPemeriksaanList.RowIndex == "$rowindex$" ? "$rowindex$" : subaktivitasHasilPemeriksaanList.RowCount)_SubaktivitasHasilPemeriksaan_IsQualityActive" class="el_SubaktivitasHasilPemeriksaan_IsQualityActive">
+<span @Html.Raw(subaktivitasHasilPemeriksaanList.IsQualityActive.ViewAttributes)>
+<i class="fa-regular @(ConvertToBool(subaktivitasHasilPemeriksaanList.IsQualityActive.CurrentValue) ? "fa-square-check" : "fa-square") ew-icon ew-boolean"></i>
+</span>
+</span>
+</td>
+    } @* subaktivitasHasilPemeriksaanList.IsQualityActive.Visible (end) *@
+    @* Render list options (body, right) *@
+    @subaktivitasHasilPemeriksaanList.ListOptions.RenderBody("right", subaktivitasHasilPemeriksaanList.RowCount)
+    </tr>
+    } @* End if *@
+
+    // Reset for template row
+    if (SameString(subaktivitasHasilPemeriksaanList.RowIndex, "$rowindex$"))
+        subaktivitasHasilPemeriksaanList.RowIndex = 0;
+
+    // Reset inline add/copy row
+    if ((subaktivitasHasilPemeriksaanList.IsCopy || subaktivitasHasilPemeriksaanList.IsAdd) && subaktivitasHasilPemeriksaanList.RowIndex is int rowIndex2 && rowIndex2 == 0)
+        subaktivitasHasilPemeriksaanList.RowIndex = 1;
+} @* End While *@
+</tbody>
+</table><!-- /.ew-table -->
+} @* End If TotalRecords > 0 *@
+</div><!-- /.ew-grid-middle-panel -->
+@if (Empty(subaktivitasHasilPemeriksaanList.CurrentAction) && !subaktivitasHasilPemeriksaanList.UseAjaxActions) {
+<input type="hidden" name="action" id="action" value="">
+}
+</form><!-- /.ew-list-form -->
+@{ subaktivitasHasilPemeriksaanList.CloseRecordset(); }
+@if (!subaktivitasHasilPemeriksaanList.IsExport()) {
+<div class="card-footer ew-grid-lower-panel">
+@if (!subaktivitasHasilPemeriksaanList.IsGridAdd && !(subaktivitasHasilPemeriksaanList.IsGridEdit && subaktivitasHasilPemeriksaanList.ModalGridEdit) && !subaktivitasHasilPemeriksaanList.IsMultiEdit) {
+@Html.Raw(subaktivitasHasilPemeriksaanList.Pager.Render())
+}
+<div class="ew-list-other-options">
+@subaktivitasHasilPemeriksaanList.OtherOptions.RenderBody("bottom")
+</div>
+</div>
+}
+</div><!-- /.ew-grid -->
+} else { // Show other options
+<div class="ew-list-other-options">
+@subaktivitasHasilPemeriksaanList.OtherOptions.ForEach(opt => opt.ButtonClass = "").RenderBody()
+</div>
+}
+</div>
+<div id="ew-footer-options">
+    @subaktivitasHasilPemeriksaanList.FooterOptions.RenderBody()
+</div>
+</main>
+@subaktivitasHasilPemeriksaanList.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+@if (!subaktivitasHasilPemeriksaanList.IsExport()) {
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("SubaktivitasHasilPemeriksaan");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Write your table-specific startup script here
+    // document.write("page loaded");
+});
+</script>
+}

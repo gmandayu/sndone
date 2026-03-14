@@ -1,0 +1,437 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (vAktifitasSandarEdit.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = vAktifitasSandarEdit.UseLayout ? "_Layout" : "";
+}
+@vAktifitasSandarEdit.ShowPageHeader()
+@vAktifitasSandarEdit.ShowMessages()
+<main class="edit">
+<form name="fv_aktifitas_sandaredit" id="fv_aktifitas_sandaredit" class="@(vAktifitasSandarEdit.FormClassName)" action="@AppPath(CurrentPageName())" method="post" novalidate autocomplete="off">
+<script>
+var currentTable = @Html.Raw(ConvertToJson(vAktifitasSandarEdit.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { v_aktifitas_sandar: currentTable } });
+var currentPageID = ew.PAGE_ID = "edit";
+var currentForm;
+var fv_aktifitas_sandaredit;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("fv_aktifitas_sandaredit")
+        .setPageId("edit")
+
+        // Add fields
+        .setFields([
+
+            ["NamaAktivitas", [fields.NamaAktivitas.visible && fields.NamaAktivitas.required ? ew.Validators.required(fields.NamaAktivitas.caption) : null], fields.NamaAktivitas.isInvalid],
+            ["Nama_Proses", [fields.Nama_Proses.visible && fields.Nama_Proses.required ? ew.Validators.required(fields.Nama_Proses.caption) : null], fields.Nama_Proses.isInvalid],
+            ["No_referensi", [fields.No_referensi.visible && fields.No_referensi.required ? ew.Validators.required(fields.No_referensi.caption) : null], fields.No_referensi.isInvalid],
+            ["Produk", [fields.Produk.visible && fields.Produk.required ? ew.Validators.required(fields.Produk.caption) : null], fields.Produk.isInvalid],
+            ["StatusAktivitas", [fields.StatusAktivitas.visible && fields.StatusAktivitas.required ? ew.Validators.required(fields.StatusAktivitas.caption) : null], fields.StatusAktivitas.isInvalid],
+            ["Shipment", [fields.Shipment.visible && fields.Shipment.required ? ew.Validators.required(fields.Shipment.caption) : null], fields.Shipment.isInvalid],
+            ["sandar_nama_kapal", [fields.sandar_nama_kapal.visible && fields.sandar_nama_kapal.required ? ew.Validators.required(fields.sandar_nama_kapal.caption) : null], fields.sandar_nama_kapal.isInvalid],
+            ["sandar_tgl_tiba", [fields.sandar_tgl_tiba.visible && fields.sandar_tgl_tiba.required ? ew.Validators.required(fields.sandar_tgl_tiba.caption) : null, ew.Validators.datetime(fields.sandar_tgl_tiba.clientFormatPattern)], fields.sandar_tgl_tiba.isInvalid],
+            ["sandar_nominasi", [fields.sandar_nominasi.visible && fields.sandar_nominasi.required ? ew.Validators.required(fields.sandar_nominasi.caption) : null], fields.sandar_nominasi.isInvalid],
+            ["IdProses", [fields.IdProses.visible && fields.IdProses.required ? ew.Validators.required(fields.IdProses.caption) : null], fields.IdProses.isInvalid]
+        ])
+
+        // Form_CustomValidate
+        .setCustomValidate(
+            function(fobj) { // DO NOT CHANGE THIS LINE!
+                    // Your custom validation code here, return false if invalid.
+                    return true;
+                }
+        )
+
+        // Use JavaScript validation or not
+        .setValidateRequired(ew.CLIENT_VALIDATE)
+
+        // Dynamic selection lists
+        .setLists({
+        })
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Client script
+    // Write your client script here, no need to add script tags.
+    function handleCustomSubmit(status) {
+            let idAktivitas = $("#x_IdAktivitas").val();
+            $.ajax({
+                url: parent_url + `api/LookUpList/update_status_aktivitas?idAktivitas=${idAktivitas}&statusAktivitas=${status}`,
+                type: 'POST',
+                success: function(response) {
+                    $("#fv_aktifitas_with_dokumenedit").submit();
+                },
+                error: function(xhr, status, error) {
+                    console.error('API call failed:', status, error);
+                }
+            });
+        }
+        $(document).on("click", "#btn-draft", function () {
+            handleCustomSubmit("Draft");
+        });
+        $(document).on("click", "#btn-completed", function () {
+            handleCustomSubmit("Completed");
+        });
+        $(document).on("click", "#btn-editCompleted", function () {
+            handleCustomSubmit("Waiting for Api");
+        });
+        $(document).on("click", "#btn-submitCompleted", function () {
+            handleCustomSubmit("EditCompleted");
+        });
+});
+</script>
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+<input type="hidden" name="action" id="action" value="update">
+<input type="hidden" name="modal" value="@ConvertToInt(vAktifitasSandarEdit.IsModal)">
+@if (IsJsonResponse()) {
+<input type="hidden" name="json" value="1">
+}
+<input type="hidden" name="@(vAktifitasSandarEdit.OldKeyName)" value="@Html.Raw(vAktifitasSandarEdit.OldKey)">
+<div class="ew-edit-div"><!-- page* -->
+@if (vAktifitasSandarEdit.NamaAktivitas.Visible) { // vAktifitasSandarEdit.NamaAktivitas.Visible (begin)
+    <div id="r_NamaAktivitas" @Html.Raw(vAktifitasSandarEdit.NamaAktivitas.RowAttributes)>
+        <label id="elh_v_aktifitas_sandar_NamaAktivitas" for="x_NamaAktivitas" class="@(vAktifitasSandarEdit.LeftColumnClass)">@Html.Raw(vAktifitasSandarEdit.NamaAktivitas.Caption)@Html.Raw(vAktifitasSandarEdit.NamaAktivitas.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(vAktifitasSandarEdit.RightColumnClass)"><div @Html.Raw(vAktifitasSandarEdit.NamaAktivitas.CellAttributes)>
+<span id="el_v_aktifitas_sandar_NamaAktivitas">
+<span @Html.Raw(vAktifitasSandarEdit.NamaAktivitas.ViewAttributes)>
+<input type="text" readonly class="form-control-plaintext" value="@Html.Raw(RemoveHtml(ConvertToString(vAktifitasSandarEdit.NamaAktivitas.EditValue)))"></span>
+<input type="hidden" data-table="v_aktifitas_sandar" data-field="x_NamaAktivitas" data-hidden="1" name="x_NamaAktivitas" id="x_NamaAktivitas" value="@Html.Raw(HtmlEncode(vAktifitasSandarEdit.NamaAktivitas.CurrentValue))">
+</span>
+</div></div>
+    </div>
+} @* vAktifitasSandarEdit.NamaAktivitas.Visible (end) *@
+@if (vAktifitasSandarEdit.Nama_Proses.Visible) { // vAktifitasSandarEdit.Nama_Proses.Visible (begin)
+    <div id="r_Nama_Proses" @Html.Raw(vAktifitasSandarEdit.Nama_Proses.RowAttributes)>
+        <label id="elh_v_aktifitas_sandar_Nama_Proses" for="x_Nama_Proses" class="@(vAktifitasSandarEdit.LeftColumnClass)">@Html.Raw(vAktifitasSandarEdit.Nama_Proses.Caption)@Html.Raw(vAktifitasSandarEdit.Nama_Proses.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(vAktifitasSandarEdit.RightColumnClass)"><div @Html.Raw(vAktifitasSandarEdit.Nama_Proses.CellAttributes)>
+<span id="el_v_aktifitas_sandar_Nama_Proses">
+<span @Html.Raw(vAktifitasSandarEdit.Nama_Proses.ViewAttributes)>
+<input type="text" readonly class="form-control-plaintext" value="@Html.Raw(RemoveHtml(ConvertToString(vAktifitasSandarEdit.Nama_Proses.EditValue)))"></span>
+<input type="hidden" data-table="v_aktifitas_sandar" data-field="x_Nama_Proses" data-hidden="1" name="x_Nama_Proses" id="x_Nama_Proses" value="@Html.Raw(HtmlEncode(vAktifitasSandarEdit.Nama_Proses.CurrentValue))">
+</span>
+</div></div>
+    </div>
+} @* vAktifitasSandarEdit.Nama_Proses.Visible (end) *@
+@if (vAktifitasSandarEdit.No_referensi.Visible) { // vAktifitasSandarEdit.No_referensi.Visible (begin)
+    <div id="r_No_referensi" @Html.Raw(vAktifitasSandarEdit.No_referensi.RowAttributes)>
+        <label id="elh_v_aktifitas_sandar_No_referensi" for="x_No_referensi" class="@(vAktifitasSandarEdit.LeftColumnClass)">@Html.Raw(vAktifitasSandarEdit.No_referensi.Caption)@Html.Raw(vAktifitasSandarEdit.No_referensi.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(vAktifitasSandarEdit.RightColumnClass)"><div @Html.Raw(vAktifitasSandarEdit.No_referensi.CellAttributes)>
+<span id="el_v_aktifitas_sandar_No_referensi">
+<span @Html.Raw(vAktifitasSandarEdit.No_referensi.ViewAttributes)>
+<input type="text" readonly class="form-control-plaintext" value="@Html.Raw(RemoveHtml(ConvertToString(vAktifitasSandarEdit.No_referensi.EditValue)))"></span>
+<input type="hidden" data-table="v_aktifitas_sandar" data-field="x_No_referensi" data-hidden="1" name="x_No_referensi" id="x_No_referensi" value="@Html.Raw(HtmlEncode(vAktifitasSandarEdit.No_referensi.CurrentValue))">
+</span>
+</div></div>
+    </div>
+} @* vAktifitasSandarEdit.No_referensi.Visible (end) *@
+@if (vAktifitasSandarEdit.Produk.Visible) { // vAktifitasSandarEdit.Produk.Visible (begin)
+    <div id="r_Produk" @Html.Raw(vAktifitasSandarEdit.Produk.RowAttributes)>
+        <label id="elh_v_aktifitas_sandar_Produk" for="x_Produk" class="@(vAktifitasSandarEdit.LeftColumnClass)">@Html.Raw(vAktifitasSandarEdit.Produk.Caption)@Html.Raw(vAktifitasSandarEdit.Produk.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(vAktifitasSandarEdit.RightColumnClass)"><div @Html.Raw(vAktifitasSandarEdit.Produk.CellAttributes)>
+<span id="el_v_aktifitas_sandar_Produk">
+<span @Html.Raw(vAktifitasSandarEdit.Produk.ViewAttributes)>
+<input type="text" readonly class="form-control-plaintext" value="@Html.Raw(RemoveHtml(ConvertToString(vAktifitasSandarEdit.Produk.EditValue)))"></span>
+<input type="hidden" data-table="v_aktifitas_sandar" data-field="x_Produk" data-hidden="1" name="x_Produk" id="x_Produk" value="@Html.Raw(HtmlEncode(vAktifitasSandarEdit.Produk.CurrentValue))">
+</span>
+</div></div>
+    </div>
+} @* vAktifitasSandarEdit.Produk.Visible (end) *@
+@if (vAktifitasSandarEdit.StatusAktivitas.Visible) { // vAktifitasSandarEdit.StatusAktivitas.Visible (begin)
+    <div id="r_StatusAktivitas" @Html.Raw(vAktifitasSandarEdit.StatusAktivitas.RowAttributes)>
+        <label id="elh_v_aktifitas_sandar_StatusAktivitas" for="x_StatusAktivitas" class="@(vAktifitasSandarEdit.LeftColumnClass)">@Html.Raw(vAktifitasSandarEdit.StatusAktivitas.Caption)@Html.Raw(vAktifitasSandarEdit.StatusAktivitas.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(vAktifitasSandarEdit.RightColumnClass)"><div @Html.Raw(vAktifitasSandarEdit.StatusAktivitas.CellAttributes)>
+<span id="el_v_aktifitas_sandar_StatusAktivitas">
+<span @Html.Raw(vAktifitasSandarEdit.StatusAktivitas.ViewAttributes)>
+<input type="text" readonly class="form-control-plaintext" value="@Html.Raw(RemoveHtml(ConvertToString(vAktifitasSandarEdit.StatusAktivitas.EditValue)))"></span>
+<input type="hidden" data-table="v_aktifitas_sandar" data-field="x_StatusAktivitas" data-hidden="1" name="x_StatusAktivitas" id="x_StatusAktivitas" value="@Html.Raw(HtmlEncode(vAktifitasSandarEdit.StatusAktivitas.CurrentValue))">
+</span>
+</div></div>
+    </div>
+} @* vAktifitasSandarEdit.StatusAktivitas.Visible (end) *@
+@if (vAktifitasSandarEdit.Shipment.Visible) { // vAktifitasSandarEdit.Shipment.Visible (begin)
+    <div id="r_Shipment" @Html.Raw(vAktifitasSandarEdit.Shipment.RowAttributes)>
+        <label id="elh_v_aktifitas_sandar_Shipment" for="x_Shipment" class="@(vAktifitasSandarEdit.LeftColumnClass)">@Html.Raw(vAktifitasSandarEdit.Shipment.Caption)@Html.Raw(vAktifitasSandarEdit.Shipment.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(vAktifitasSandarEdit.RightColumnClass)"><div @Html.Raw(vAktifitasSandarEdit.Shipment.CellAttributes)>
+<span id="el_v_aktifitas_sandar_Shipment">
+<span @Html.Raw(vAktifitasSandarEdit.Shipment.ViewAttributes)>
+<input type="text" readonly class="form-control-plaintext" value="@Html.Raw(RemoveHtml(ConvertToString(vAktifitasSandarEdit.Shipment.EditValue)))"></span>
+<input type="hidden" data-table="v_aktifitas_sandar" data-field="x_Shipment" data-hidden="1" name="x_Shipment" id="x_Shipment" value="@Html.Raw(HtmlEncode(vAktifitasSandarEdit.Shipment.CurrentValue))">
+</span>
+</div></div>
+    </div>
+} @* vAktifitasSandarEdit.Shipment.Visible (end) *@
+@if (vAktifitasSandarEdit.sandar_nama_kapal.Visible) { // vAktifitasSandarEdit.sandar_nama_kapal.Visible (begin)
+    <div id="r_sandar_nama_kapal" @Html.Raw(vAktifitasSandarEdit.sandar_nama_kapal.RowAttributes)>
+        <label id="elh_v_aktifitas_sandar_sandar_nama_kapal" for="x_sandar_nama_kapal" class="@(vAktifitasSandarEdit.LeftColumnClass)">@Html.Raw(vAktifitasSandarEdit.sandar_nama_kapal.Caption)@Html.Raw(vAktifitasSandarEdit.sandar_nama_kapal.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(vAktifitasSandarEdit.RightColumnClass)"><div @Html.Raw(vAktifitasSandarEdit.sandar_nama_kapal.CellAttributes)>
+<span id="el_v_aktifitas_sandar_sandar_nama_kapal">
+<input type="@(vAktifitasSandarEdit.sandar_nama_kapal.InputTextType)" name="x_sandar_nama_kapal" id="x_sandar_nama_kapal" data-table="v_aktifitas_sandar" data-field="x_sandar_nama_kapal" value="@Html.Raw(vAktifitasSandarEdit.sandar_nama_kapal.EditValue)" size="30" maxlength="255" placeholder="@Html.Raw(HtmlEncode(vAktifitasSandarEdit.sandar_nama_kapal.PlaceHolder))" data-format-pattern="@(vAktifitasSandarEdit.sandar_nama_kapal.FormatPattern)"@Html.Raw(vAktifitasSandarEdit.sandar_nama_kapal.EditAttributes) aria-describedby="x_sandar_nama_kapal_help">
+@Html.Raw(vAktifitasSandarEdit.sandar_nama_kapal.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(vAktifitasSandarEdit.sandar_nama_kapal.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* vAktifitasSandarEdit.sandar_nama_kapal.Visible (end) *@
+@if (vAktifitasSandarEdit.sandar_tgl_tiba.Visible) { // vAktifitasSandarEdit.sandar_tgl_tiba.Visible (begin)
+    <div id="r_sandar_tgl_tiba" @Html.Raw(vAktifitasSandarEdit.sandar_tgl_tiba.RowAttributes)>
+        <label id="elh_v_aktifitas_sandar_sandar_tgl_tiba" for="x_sandar_tgl_tiba" class="@(vAktifitasSandarEdit.LeftColumnClass)">@Html.Raw(vAktifitasSandarEdit.sandar_tgl_tiba.Caption)@Html.Raw(vAktifitasSandarEdit.sandar_tgl_tiba.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(vAktifitasSandarEdit.RightColumnClass)"><div @Html.Raw(vAktifitasSandarEdit.sandar_tgl_tiba.CellAttributes)>
+<span id="el_v_aktifitas_sandar_sandar_tgl_tiba">
+<input type="@(vAktifitasSandarEdit.sandar_tgl_tiba.InputTextType)" name="x_sandar_tgl_tiba" id="x_sandar_tgl_tiba" data-table="v_aktifitas_sandar" data-field="x_sandar_tgl_tiba" value="@Html.Raw(vAktifitasSandarEdit.sandar_tgl_tiba.EditValue)" placeholder="@Html.Raw(HtmlEncode(vAktifitasSandarEdit.sandar_tgl_tiba.PlaceHolder))" data-format-pattern="@(vAktifitasSandarEdit.sandar_tgl_tiba.FormatPattern)"@Html.Raw(vAktifitasSandarEdit.sandar_tgl_tiba.EditAttributes) aria-describedby="x_sandar_tgl_tiba_help">
+@Html.Raw(vAktifitasSandarEdit.sandar_tgl_tiba.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(vAktifitasSandarEdit.sandar_tgl_tiba.GetErrorMessage())</div>
+@if (!vAktifitasSandarEdit.sandar_tgl_tiba.ReadOnly && !vAktifitasSandarEdit.sandar_tgl_tiba.Disabled && !vAktifitasSandarEdit.sandar_tgl_tiba.EditAttrs.Is("readonly") && !vAktifitasSandarEdit.sandar_tgl_tiba.EditAttrs.Is("disabled")) {
+<script>
+loadjs.ready(["fv_aktifitas_sandaredit", "datetimepicker"], function () {
+    let format = "@Html.Raw(DateFormat(9))", // DN
+        options = {
+                localization: {
+                    locale: ew.LANGUAGE_ID + "-u-nu-" + ew.getNumberingSystem(),
+                    hourCycle: format.match(/H/) ? "h24" : "h12",
+                    format,
+                    ...ew.language.phrase("datetimepicker")
+                },
+                display: {
+                    icons: {
+                        previous: ew.IS_RTL ? "fa-solid fa-chevron-right" : "fa-solid fa-chevron-left",
+                        next: ew.IS_RTL ? "fa-solid fa-chevron-left" : "fa-solid fa-chevron-right"
+                    },
+                    components: {
+                        clock: !!format.match(/h/i) || !!format.match(/m/) || !!format.match(/s/i),
+                        hours: !!format.match(/h/i),
+                        minutes: !!format.match(/m/),
+                        seconds: !!format.match(/s/i)
+                    },
+                theme: ew.getPreferredTheme()
+                }
+            };
+    ew.createDateTimePicker("fv_aktifitas_sandaredit", "x_sandar_tgl_tiba", ew.deepAssign({"useCurrent":false,"display":{"sideBySide":false}}, options));
+});
+</script>
+}
+</span>
+</div></div>
+    </div>
+} @* vAktifitasSandarEdit.sandar_tgl_tiba.Visible (end) *@
+@if (vAktifitasSandarEdit.sandar_nominasi.Visible) { // vAktifitasSandarEdit.sandar_nominasi.Visible (begin)
+    <div id="r_sandar_nominasi" @Html.Raw(vAktifitasSandarEdit.sandar_nominasi.RowAttributes)>
+        <label id="elh_v_aktifitas_sandar_sandar_nominasi" for="x_sandar_nominasi" class="@(vAktifitasSandarEdit.LeftColumnClass)">@Html.Raw(vAktifitasSandarEdit.sandar_nominasi.Caption)@Html.Raw(vAktifitasSandarEdit.sandar_nominasi.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(vAktifitasSandarEdit.RightColumnClass)"><div @Html.Raw(vAktifitasSandarEdit.sandar_nominasi.CellAttributes)>
+<span id="el_v_aktifitas_sandar_sandar_nominasi">
+<input type="@(vAktifitasSandarEdit.sandar_nominasi.InputTextType)" name="x_sandar_nominasi" id="x_sandar_nominasi" data-table="v_aktifitas_sandar" data-field="x_sandar_nominasi" value="@Html.Raw(vAktifitasSandarEdit.sandar_nominasi.EditValue)" size="30" maxlength="255" placeholder="@Html.Raw(HtmlEncode(vAktifitasSandarEdit.sandar_nominasi.PlaceHolder))" data-format-pattern="@(vAktifitasSandarEdit.sandar_nominasi.FormatPattern)"@Html.Raw(vAktifitasSandarEdit.sandar_nominasi.EditAttributes) aria-describedby="x_sandar_nominasi_help">
+@Html.Raw(vAktifitasSandarEdit.sandar_nominasi.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(vAktifitasSandarEdit.sandar_nominasi.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* vAktifitasSandarEdit.sandar_nominasi.Visible (end) *@
+@if (vAktifitasSandarEdit.IdProses.Visible) { // vAktifitasSandarEdit.IdProses.Visible (begin)
+    <div id="r_IdProses" @Html.Raw(vAktifitasSandarEdit.IdProses.RowAttributes)>
+        <label id="elh_v_aktifitas_sandar_IdProses" for="x_IdProses" class="@(vAktifitasSandarEdit.LeftColumnClass)">@Html.Raw(vAktifitasSandarEdit.IdProses.Caption)@Html.Raw(vAktifitasSandarEdit.IdProses.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(vAktifitasSandarEdit.RightColumnClass)"><div @Html.Raw(vAktifitasSandarEdit.IdProses.CellAttributes)>
+<span id="el_v_aktifitas_sandar_IdProses">
+<span @Html.Raw(vAktifitasSandarEdit.IdProses.ViewAttributes)>
+<input type="text" readonly class="form-control-plaintext" value="@Html.Raw(RemoveHtml(ConvertToString(vAktifitasSandarEdit.IdProses.EditValue)))"></span>
+<input type="hidden" data-table="v_aktifitas_sandar" data-field="x_IdProses" data-hidden="1" name="x_IdProses" id="x_IdProses" value="@Html.Raw(HtmlEncode(vAktifitasSandarEdit.IdProses.CurrentValue))">
+</span>
+</div></div>
+    </div>
+} @* vAktifitasSandarEdit.IdProses.Visible (end) *@
+</div><!-- /page* -->
+    <input type="hidden" data-table="v_aktifitas_sandar" data-field="x_IdAktivitas" data-hidden="1" name="x_IdAktivitas" id="x_IdAktivitas" value="@Html.Raw(HtmlEncode(vAktifitasSandarEdit.IdAktivitas.CurrentValue))">
+@{ vAktifitasSandarEdit.CloseRecordset(); }
+@Html.Raw(vAktifitasSandarEdit.IsModal ? "<template class=\"ew-modal-buttons\">" : "<div class=\"row ew-buttons\">")<!-- buttons .row -->
+    <div class="@(vAktifitasSandarEdit.OffsetColumnClass)"><!-- buttons offset -->
+    <button class="btn btn-primary ew-btn" name="btn-action" id="btn-action" type="submit" form="fv_aktifitas_sandaredit">@Html.Raw(Language.Phrase("SaveBtn"))</button>
+@if (IsJsonResponse()) {
+    <button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" data-bs-dismiss="modal">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+} else {
+    <button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" form="fv_aktifitas_sandaredit" data-href="@AppPath(vAktifitasSandarEdit.ReturnUrl)">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+}
+    </div><!-- /buttons offset -->
+@Html.Raw(vAktifitasSandarEdit.IsModal ? "</template>" : "</div>")<!-- /buttons .row -->
+</form>
+</main>
+@vAktifitasSandarEdit.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("v_aktifitas_sandar");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Startup script
+    let status = $("#x_StatusAktivitas").val();
+    let $btn = $("#btn-action");
+    if (status == "Waiting") {
+        $btn
+            .removeClass("btn-success")     // hapus kelas hijau (jika ada)
+            .addClass("btn-primary")        // biru
+            .html('<i class="fas fa-save"></i> Save');
+    } else if (status == "Draft") {
+        $btn
+            .removeClass("btn-primary")     // hapus kelas biru (jika ada)
+            .addClass("btn-success")        // hijau
+            .html('<i class="fas fa-paper-plane"></i> Submit');
+    }
+    var IdReferensi = "@vAktifitasSandarEdit.No_referensi.CurrentValue";
+    var IdAktivitas = "@vAktifitasSandarEdit.IdAktivitas.CurrentValue";
+    var IdProses = "@vAktifitasSandarEdit.IdProses.CurrentValue";
+    var NamaAktivitas = "@vAktifitasSandarEdit.NamaAktivitas.CurrentValue";
+    $('#r_IdProses').hide();
+    var parent_url = ew.PATH_BASE;
+    var steps = [
+        { number: 1, label: "Penerimaan", url: `${parent_url}PenerimaanList`, icon: "fa-box-open" },
+        { number: 2, label: "Proses", url: `${parent_url}ProsesList?cmd=search&x_IdReferensi%5B%5D=${IdReferensi}&search=&searchtype=`, icon: "fa-gears" },
+        { number: 3, label: "Aktivitas", url: `${parent_url}AktivitasList?cmd=search&x_IdProses%5B%5D=${IdProses}&search=&searchtype=`, icon: "fa-list-check" },
+        { number: 4, label: NamaAktivitas, url: `${parent_url}VAktifitasSandarEdit/${IdAktivitas}`, icon: "fa-file-circle-check" }
+    ];
+    var currentStep = 4;
+    $("<style>")
+        .prop("type", "text/css")
+        .html(`
+            .stepper {
+                width: 50%;
+                display: flex;
+                counter-reset: step;
+            }
+            .step {
+                flex: 1;
+                text-align: center;
+                position: relative;
+            }
+            .step:not(:last-child)::after {
+                content: '';
+                position: absolute;
+                top: 20px;
+                right: -50%;
+                width: 100%;
+                height: 4px;
+                background-color: #ccc;
+                z-index: 0;
+            }
+            .step.completed:not(:last-child)::after {
+                background-color: #006BB7;
+            }
+            .step-icon {
+                width: 36px;
+                height: 36px;
+                line-height: 36px;
+                border-radius: 50%;
+                background: #ccc;
+                display: inline-block;
+                z-index: 1;
+                position: relative;
+                color: white;
+                font-weight: bold;
+            }
+            .step.active .step-icon {
+                background: #006BB7;
+            }
+            .step-label {
+                margin-top: 8px;
+                font-size: 14px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                gap: 6px;
+                color: #333;
+            }
+            .step-label {
+                color: #006BB7 !important;
+                text-decoration: none;
+                margin: 0;
+                padding: 0;
+            }
+            .step-label-not-active {
+                color: #CCCCCC !important;
+            }
+        `)
+        .appendTo("head");
+    var $stepperWrapper = $('<div class="d-flex border-bottom border-2 pb-2"><div class="stepper"></div></div>');
+    var $stepper = $stepperWrapper.find(".stepper");
+    steps.forEach(function (step, i) {
+        var isActive = step.number === currentStep;
+        var isCompleted = step.number < currentStep;
+        var stepClass = isActive ? "active" : isCompleted ? "completed" : "";
+        var icon, labelContent, html;
+        if (isActive) {
+            icon = `<div class="step-icon bg-success">${step.number}</div>`;
+            labelContent = `<div class="step-label"><p class="text-success mb-1"><i class="fa-solid ${step.icon} me-1 text-success"></i> ${step.label}</p></div>`;
+            html = `<div class="step ${stepClass} text-success">${icon}${labelContent}</div>`;
+        } else if (isCompleted) {
+            icon = `<div class="step-icon" style="background: #006BB7;">${step.number}</div>`;
+            labelContent = `<div><a href="${step.url}" class="step-label"><i class="fa-solid ${step.icon} me-1"></i>${step.label}</a></div>`;
+            html = `<div class="step ${stepClass}">${icon}${labelContent}</div>`;
+        } else {
+            icon = `<div class="step-icon">${step.number}</div>`;
+            labelContent = `<div class="step-label-not-active"><p style="margin: 0;"><i class="fa-solid ${step.icon} me-1"></i>${step.label}</p></div>`;
+            html = `<div class="step ${stepClass} text-secondary">${icon}${labelContent}</div>`;
+        }
+        $stepper.append(html);
+    });
+    $(".content-header .container-fluid .row").append($stepperWrapper);
+    $("#btn-action").hide();
+    $("#btn-cancel").html('<i class="fa-solid fa-ban"></i></i> Cancel');
+        const $cancelButton = $("#btn-cancel");
+        if ($cancelButton.length) {
+            // Sisipkan tombol custom
+            let $customButtons = ``;
+            let status = $("#x_StatusAktivitas").val();
+            switch (status) {
+            case "Waiting":
+                $customButtons = `
+                    <button type="button" class="btn btn-primary ew-btn ml-2" id="btn-draft">
+                        <i class="fas fa-save"></i> Save
+                    </button>
+                `;
+                break;
+            case "Draft":
+                $customButtons = `
+                    <button type="button" class="btn btn-primary ew-btn ml-2" id="btn-draft">
+                        <i class="fas fa-save"></i> Save
+                    </button>
+                    <button type="button" class="btn btn-success ew-btn ml-2" id="btn-completed">
+                        <i class="fas fa-paper-plane"></i> Submit
+                    </button>
+                `
+                break;
+            case "Completed":
+                $customButtons = `
+                    <button type="button" class="btn btn-warning ew-btn ml-2" id="btn-editCompleted">
+                        <i class="fas fa-edit"></i> Edit Completed
+                    </button>
+                `;
+                break;
+            case "Waiting for Api":
+                $customButtons = `
+                    <button type="button" class="btn btn-success ew-btn ml-2" id="btn-submitCompleted">
+                        <i class="fas fa-paper-plane"></i> Submit Completed
+                    </button>
+                `;
+                break;
+            }
+            $cancelButton.before($customButtons);
+        }
+});
+</script>

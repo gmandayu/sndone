@@ -1,0 +1,1225 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (subAktivitasSfadNewBlstslpgEdit.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = subAktivitasSfadNewBlstslpgEdit.UseLayout ? "_Layout" : "";
+}
+@subAktivitasSfadNewBlstslpgEdit.ShowPageHeader()
+@subAktivitasSfadNewBlstslpgEdit.ShowMessages()
+<main class="edit">
+<form name="fSubAktivitasSFADNewBLSTSLPGedit" id="fSubAktivitasSFADNewBLSTSLPGedit" class="@(subAktivitasSfadNewBlstslpgEdit.FormClassName)" action="@AppPath(CurrentPageName())" method="post" novalidate autocomplete="off">
+<script>
+var currentTable = @Html.Raw(ConvertToJson(subAktivitasSfadNewBlstslpgEdit.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { SubAktivitasSFADNewBLSTSLPG: currentTable } });
+var currentPageID = ew.PAGE_ID = "edit";
+var currentForm;
+var fSubAktivitasSFADNewBLSTSLPGedit;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("fSubAktivitasSFADNewBLSTSLPGedit")
+        .setPageId("edit")
+
+        // Add fields
+        .setFields([
+
+            ["NoReferensi", [fields.NoReferensi.visible && fields.NoReferensi.required ? ew.Validators.required(fields.NoReferensi.caption) : null], fields.NoReferensi.isInvalid],
+            ["idProses", [fields.idProses.visible && fields.idProses.required ? ew.Validators.required(fields.idProses.caption) : null], fields.idProses.isInvalid],
+            ["idAktifitas", [fields.idAktifitas.visible && fields.idAktifitas.required ? ew.Validators.required(fields.idAktifitas.caption) : null], fields.idAktifitas.isInvalid],
+            ["StatusAktivitas", [fields.StatusAktivitas.visible && fields.StatusAktivitas.required ? ew.Validators.required(fields.StatusAktivitas.caption) : null], fields.StatusAktivitas.isInvalid],
+            ["LastUpdatedBy", [fields.LastUpdatedBy.visible && fields.LastUpdatedBy.required ? ew.Validators.required(fields.LastUpdatedBy.caption) : null], fields.LastUpdatedBy.isInvalid],
+            ["lastUpdatedDate", [fields.lastUpdatedDate.visible && fields.lastUpdatedDate.required ? ew.Validators.required(fields.lastUpdatedDate.caption) : null], fields.lastUpdatedDate.isInvalid],
+            ["ApakahTerdapatROB", [fields.ApakahTerdapatROB.visible && fields.ApakahTerdapatROB.required ? ew.Validators.required(fields.ApakahTerdapatROB.caption) : null], fields.ApakahTerdapatROB.isInvalid],
+            ["Import", [fields.Import.visible && fields.Import.required ? ew.Validators.required(fields.Import.caption) : null], fields.Import.isInvalid],
+            ["Tujuan", [fields.Tujuan.visible && fields.Tujuan.required ? ew.Validators.required(fields.Tujuan.caption) : null], fields.Tujuan.isInvalid],
+            ["SFAD_mt", [fields.SFAD_mt.visible && fields.SFAD_mt.required ? ew.Validators.required(fields.SFAD_mt.caption) : null], fields.SFAD_mt.isInvalid],
+            ["NewBl_mt", [fields.NewBl_mt.visible && fields.NewBl_mt.required ? ew.Validators.required(fields.NewBl_mt.caption) : null], fields.NewBl_mt.isInvalid],
+            ["AR45B_mt", [fields.AR45B_mt.visible && fields.AR45B_mt.required ? ew.Validators.required(fields.AR45B_mt.caption) : null], fields.AR45B_mt.isInvalid]
+        ])
+
+        // Form_CustomValidate
+        .setCustomValidate(
+            function(fobj) { // DO NOT CHANGE THIS LINE!
+                    // Your custom validation code here, return false if invalid.
+                    return true;
+                }
+        )
+
+        // Use JavaScript validation or not
+        .setValidateRequired(ew.CLIENT_VALIDATE)
+
+        // Dynamic selection lists
+        .setLists({
+            "ApakahTerdapatROB": @Html.Raw(subAktivitasSfadNewBlstslpgEdit.ApakahTerdapatROB.ToClientList(subAktivitasSfadNewBlstslpgEdit)),
+            "Import": @Html.Raw(subAktivitasSfadNewBlstslpgEdit.Import.ToClientList(subAktivitasSfadNewBlstslpgEdit)),
+            "Tujuan": @Html.Raw(subAktivitasSfadNewBlstslpgEdit.Tujuan.ToClientList(subAktivitasSfadNewBlstslpgEdit)),
+        })
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Client script
+    // Write your client script here, no need to add script tags.
+    var parent_url = ew.PATH_BASE;
+    var IdProses = "@subAktivitasSfadNewBlstslpgEdit.idProses.CurrentValue";
+    var NoReferensi = "@subAktivitasSfadNewBlstslpgEdit.NoReferensi.CurrentValue";
+    let proceedSubmitStatus = null;
+    $('#x_NewBl_mt, #x_SFAD_mt, #x_AR45B_mt').on('focus', function () {
+        hideFeedback($(this));
+    });
+    function hideFeedback(el) {
+        let feedback = el.siblings('.invalid-feedback');
+        feedback.hide();
+    }
+    function validasiRob() {
+        const isROBChecked = $("#x_ApakahTerdapatROB").prop("checked");
+        const robFields = [
+            "#x_Tujuan",
+            "#x_SFAD_mt",
+            "#x_NewBl_mt"
+        ];
+        const inputMap = {
+            "#x_Tujuan": "Tujuan",
+            "#x_SFAD_mt": "SFAD MT", 
+            "#x_NewBl_mt": "NewBl MT"
+        };
+        if (!isROBChecked) {
+            robFields.forEach(field => $(field).val(""));
+            return { isValid: true };
+        }
+        let isValid = true;
+        let zeroOrNegativeFields = [];
+        let fieldNotValid = [];
+        $('.invalid-feedback').hide();
+        for (const id in inputMap) {
+            const el = $(id);
+            const label = inputMap[id];
+            const val = el.val().trim();
+            el.val(val);
+            const feedback = el.siblings('.invalid-feedback');
+            if (val === "") {
+                feedback.text(`*${label} tidak boleh kosong.`).show();
+                isValid = false;
+                fieldNotValid.push(label);
+                continue;
+            }
+            if (id === "#x_Tujuan") continue; // field ini string bebas
+            if (isNaN(val)) {
+                feedback.text(`*${label} harus diisi angka desimal.`).show();
+                isValid = false;
+                fieldNotValid.push(label);
+                continue;
+            }
+            const number = parseFloat(val);
+            if (number <= 0) {
+                zeroOrNegativeFields.push(label);
+            }
+        }
+        if (!isValid) {
+            ew.alert("Field tidak boleh kosong atau salah format: " + fieldNotValid.join(", "));
+            return { isValid: false };
+        }
+        if (zeroOrNegativeFields.length > 0) {
+            return { isValid: false, hasNegative: true, fields: zeroOrNegativeFields };
+        }
+        return { isValid: true };
+    }
+    function validasiImport() {
+        const isImportChecked = $("#x_Import").prop("checked");
+        const importFields = [
+            "x_AR45B_mt"
+        ];
+        const inputImportMap = {
+            "#x_AR45B_mt": "AR45B MT"
+        };
+        if (!isImportChecked) {
+            for (const fieldId of importFields) {
+                $("#" + fieldId).val("");
+            }
+            return { isValid: true };
+        }
+        let isValid = true;
+        $('.invalid-feedback').hide();
+        let zeroOrNegativeFields = [];
+        let fieldNotValid = [];
+        for (var id in inputImportMap) {
+            let el = $(id);
+            let label = inputImportMap[id];
+            let val = el.val().trim();
+            let feedback = el.siblings('.invalid-feedback');
+            if (val === "") {
+                feedback.text('*' + label + ' tidak boleh kosong.').show();
+                isValid = false;
+                fieldNotValid.push(label);
+                continue;
+            }
+            if (isNaN(val)) {
+                feedback.text('*' + label + ' harus diisi dengan angka desimal yang valid.').show();
+                isValid = false;
+                fieldNotValid.push(label);
+                continue;
+            }
+            let number = parseFloat(val);
+            if (number <= 0) {
+                zeroOrNegativeFields.push(label);
+            }
+        }
+        if (!isValid) {
+            ew.alert("Field tidak boleh kosong: " + fieldNotValid.join(", "));
+            return { isValid: false };
+        }
+        if (zeroOrNegativeFields.length > 0) {
+            return { isValid: false, hasNegative: true, fields: zeroOrNegativeFields };
+        }
+        return { isValid: true };
+    }
+    function handleCustomSubmit(status) {
+        let idAktivitas = $("#x_idAktifitas").val();
+        const originalStatus = document.querySelector('#el_SubAktivitasSFADNewBLSTSLPG_StatusAktivitas .form-control-plaintext').textContent;
+        const robResult = validasiRob();
+        const importResult = validasiImport();
+        if (!robResult.isValid && !robResult.hasNegative) return;
+        if (!importResult.isValid && !importResult.hasNegative) return;
+        let allNegativeFields = [];
+        if (robResult.hasNegative) allNegativeFields = allNegativeFields.concat(robResult.fields);
+        if (importResult.hasNegative) allNegativeFields = allNegativeFields.concat(importResult.fields);
+        if (allNegativeFields.length > 0) {
+            let warningText = "Field berikut bernilai 0 atau kurang: " + allNegativeFields.join(", ") + ". Apakah Anda ingin tetap menyimpan?";
+            $("#warningValueText").text(warningText);
+            proceedSubmitStatus = status;
+            $("#warningValueModal").modal("show");
+            return;
+        }
+        submitFinal(status);
+    }
+    function submitFinal(status) {
+        let idAktivitas = $("#x_idAktifitas").val();
+        const originalStatus = document.querySelector('#el_SubAktivitasSFADNewBLSTSLPG_StatusAktivitas .form-control-plaintext').textContent;
+        $.ajax({
+            url: parent_url + `api/LookUpList/check_valid_status_aktivitas?idAktivitas=${idAktivitas}&originalStatus=${originalStatus}`,
+            type: 'GET',
+            beforeSend: function () {
+                showLoading();
+            },
+            success: function (response) {
+                if (!response.IsValid){
+                    hideLoading();
+                    ew.alert(response.Message ?? "Status aktivitas telah diubah oleh pengguna lain");
+                    return;
+                } else {
+                    let form = $("#fSubAktivitasSFADNewBLSTSLPGedit");
+                    $.ajax({
+                        url: form.attr("action"),
+                        type: form.attr("method"),
+                        data: form.serialize(),
+                        success: function (response) {
+                            updateStatus(idAktivitas, status);
+                        },
+                        error: function (xhr, status, error) {
+                            hideLoading();
+                            ew.alert("Gagal menyimpan data.");
+                            console.error("Form submit gagal:", error);
+                        }
+                    });  
+                }
+            },
+            error: function (xhr, status, error) {
+                hideLoading();
+                ew.alert("Gagal menyimpan data.");
+                console.error("Form submit gagal:", error);
+            }
+        }); 
+    }
+    function updateStatus(idAktivitas, status) {
+        $.ajax({
+            url: parent_url + `api/LookUpList/update_status_aktivitas?idAktivitas=${idAktivitas}&statusAktivitas=${status}`,
+            type: 'POST',
+            success: function () {
+                $.ajax({
+                    url: parent_url + 'api/LookUpList/UpdateSFADNewBL',
+                    type: 'POST',
+                    data: JSON.stringify({ NoReferensi: NoReferensi }),
+                    contentType: 'application/json',
+                    success: function (res) {
+                        if (status == "Completed" || status == "Completed Edit") {
+                            $.ajax({
+                                url: parent_url + 'api/LookUpList/update_lop_r3_r4',
+                                type: 'POST',
+                                data: JSON.stringify({
+                                    NoReferensi: NoReferensi,
+                                    IdProses: IdProses,
+                                    IdAktivitas: idAktivitas
+                                }),
+                                contentType: 'application/json',
+                                success: function (res) {
+                                    window.location.href = `${parent_url}AktivitasList?cmd=search&x_IdProses%5B%5D=${IdProses}&search=&searchtype=`;
+                                },
+                                error: function (xhr, status, error) {
+                                    console.error("Update Aktivitas Dokumen gagal:", error);
+                                },
+                                complete: function () {
+                                    hideLoading();
+                                }
+                            });
+                        } else {
+                            hideLoading();
+                            location.reload();
+                        }  
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("Update Aktivitas Dokumen gagal:", error);
+                    },
+                    complete: function () {
+                        hideLoading();
+                    }
+                });
+            },
+            error: function (xhr, status, error) {
+                ew.alert("Status gagal diperbarui.");
+                console.error("Update status gagal:", error);
+            },
+            complete: function () {
+                hideLoading();
+            }
+        });
+    }
+    function reverseStatus(status, catatan) {
+            showLoading();
+            let idAktivitas = $("#x_idAktifitas").val();
+            $.ajax({
+                    url: parent_url + `api/LookUpList/update_status_aktivitas-v2`,
+                    type: 'POST',
+                    data: JSON.stringify({ IdAktivitas: idAktivitas, StatusAktivitas: status, Catatan: catatan ?? null }),
+                    contentType: 'application/json',
+                    success: function () {
+                        setTimeout(function () {
+                            window.location.href = `${parent_url}AktivitasList?cmd=search&x_IdProses%5B%5D=${IdProses}&search=&searchtype=`;
+                        }, 1000);
+                    },
+                    error: function (xhr, status, error) {
+                        ew.alert("Status gagal diperbarui.");
+                        console.error("Update status gagal:", error);
+                    },
+                    complete: function () {
+                        hideLoading();
+                    }
+                });
+    }
+    $(document).on("click", "#btn-draft", function () {
+        handleCustomSubmit("Draft");
+    });
+    $(document).on("click", "#btn-completed", function () {
+        handleCustomSubmit("Completed");
+    });
+    $(document).on("click", "#btn-editing", function () {
+        handleCustomSubmit("Editing");
+    });
+    $(document).on("click", "#btn-completedEdit", function () {
+        handleCustomSubmit("Completed Edit");
+    });
+    $(document).on("click", "#btn-confirm-modal", function () {
+        $("#warningValueModal").modal("hide");
+        submitFinal(proceedSubmitStatus);
+    });
+    $(document).on("submit", "#reverseStatusEditingModalForm", function (e) {
+        e.preventDefault();
+        let catatanText = $("#catatanReverseStatusEditing").val();
+        reverseStatus("Editing", catatanText);
+    });
+});
+</script>
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+<input type="hidden" name="action" id="action" value="update">
+<input type="hidden" name="modal" value="@ConvertToInt(subAktivitasSfadNewBlstslpgEdit.IsModal)">
+@if (IsJsonResponse()) {
+<input type="hidden" name="json" value="1">
+}
+<input type="hidden" name="@(subAktivitasSfadNewBlstslpgEdit.OldKeyName)" value="@Html.Raw(subAktivitasSfadNewBlstslpgEdit.OldKey)">
+<div class="ew-edit-div"><!-- page* -->
+@if (subAktivitasSfadNewBlstslpgEdit.NoReferensi.Visible) { // subAktivitasSfadNewBlstslpgEdit.NoReferensi.Visible (begin)
+    <div id="r_NoReferensi" @Html.Raw(subAktivitasSfadNewBlstslpgEdit.NoReferensi.RowAttributes)>
+        <label id="elh_SubAktivitasSFADNewBLSTSLPG_NoReferensi" for="x_NoReferensi" class="@(subAktivitasSfadNewBlstslpgEdit.LeftColumnClass)">@Html.Raw(subAktivitasSfadNewBlstslpgEdit.NoReferensi.Caption)@Html.Raw(subAktivitasSfadNewBlstslpgEdit.NoReferensi.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(subAktivitasSfadNewBlstslpgEdit.RightColumnClass)"><div @Html.Raw(subAktivitasSfadNewBlstslpgEdit.NoReferensi.CellAttributes)>
+<span id="el_SubAktivitasSFADNewBLSTSLPG_NoReferensi">
+<span @Html.Raw(subAktivitasSfadNewBlstslpgEdit.NoReferensi.ViewAttributes)>
+<input type="text" readonly class="form-control-plaintext" value="@Html.Raw(RemoveHtml(ConvertToString(subAktivitasSfadNewBlstslpgEdit.NoReferensi.EditValue)))"></span>
+<input type="hidden" data-table="SubAktivitasSFADNewBLSTSLPG" data-field="x_NoReferensi" data-hidden="1" name="x_NoReferensi" id="x_NoReferensi" value="@Html.Raw(HtmlEncode(subAktivitasSfadNewBlstslpgEdit.NoReferensi.CurrentValue))">
+</span>
+</div></div>
+    </div>
+} @* subAktivitasSfadNewBlstslpgEdit.NoReferensi.Visible (end) *@
+@if (subAktivitasSfadNewBlstslpgEdit.idProses.Visible) { // subAktivitasSfadNewBlstslpgEdit.idProses.Visible (begin)
+    <div id="r_idProses" @Html.Raw(subAktivitasSfadNewBlstslpgEdit.idProses.RowAttributes)>
+        <label id="elh_SubAktivitasSFADNewBLSTSLPG_idProses" class="@(subAktivitasSfadNewBlstslpgEdit.LeftColumnClass)">@Html.Raw(subAktivitasSfadNewBlstslpgEdit.idProses.Caption)@Html.Raw(subAktivitasSfadNewBlstslpgEdit.idProses.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(subAktivitasSfadNewBlstslpgEdit.RightColumnClass)"><div @Html.Raw(subAktivitasSfadNewBlstslpgEdit.idProses.CellAttributes)>
+<span id="el_SubAktivitasSFADNewBLSTSLPG_idProses">
+<span @Html.Raw(subAktivitasSfadNewBlstslpgEdit.idProses.ViewAttributes)>
+<span class="form-control-plaintext">@Html.Raw(subAktivitasSfadNewBlstslpgEdit.idProses.DisplayValue(subAktivitasSfadNewBlstslpgEdit.idProses.EditValue))</span></span>
+<input type="hidden" data-table="SubAktivitasSFADNewBLSTSLPG" data-field="x_idProses" data-hidden="1" name="x_idProses" id="x_idProses" value="@Html.Raw(HtmlEncode(subAktivitasSfadNewBlstslpgEdit.idProses.CurrentValue))">
+</span>
+</div></div>
+    </div>
+} @* subAktivitasSfadNewBlstslpgEdit.idProses.Visible (end) *@
+@if (subAktivitasSfadNewBlstslpgEdit.idAktifitas.Visible) { // subAktivitasSfadNewBlstslpgEdit.idAktifitas.Visible (begin)
+    <div id="r_idAktifitas" @Html.Raw(subAktivitasSfadNewBlstslpgEdit.idAktifitas.RowAttributes)>
+        <label id="elh_SubAktivitasSFADNewBLSTSLPG_idAktifitas" class="@(subAktivitasSfadNewBlstslpgEdit.LeftColumnClass)">@Html.Raw(subAktivitasSfadNewBlstslpgEdit.idAktifitas.Caption)@Html.Raw(subAktivitasSfadNewBlstslpgEdit.idAktifitas.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(subAktivitasSfadNewBlstslpgEdit.RightColumnClass)"><div @Html.Raw(subAktivitasSfadNewBlstslpgEdit.idAktifitas.CellAttributes)>
+<span id="el_SubAktivitasSFADNewBLSTSLPG_idAktifitas">
+<span @Html.Raw(subAktivitasSfadNewBlstslpgEdit.idAktifitas.ViewAttributes)>
+<span class="form-control-plaintext">@Html.Raw(subAktivitasSfadNewBlstslpgEdit.idAktifitas.DisplayValue(subAktivitasSfadNewBlstslpgEdit.idAktifitas.EditValue))</span></span>
+<input type="hidden" data-table="SubAktivitasSFADNewBLSTSLPG" data-field="x_idAktifitas" data-hidden="1" name="x_idAktifitas" id="x_idAktifitas" value="@Html.Raw(HtmlEncode(subAktivitasSfadNewBlstslpgEdit.idAktifitas.CurrentValue))">
+</span>
+</div></div>
+    </div>
+} @* subAktivitasSfadNewBlstslpgEdit.idAktifitas.Visible (end) *@
+@if (subAktivitasSfadNewBlstslpgEdit.StatusAktivitas.Visible) { // subAktivitasSfadNewBlstslpgEdit.StatusAktivitas.Visible (begin)
+    <div id="r_StatusAktivitas" @Html.Raw(subAktivitasSfadNewBlstslpgEdit.StatusAktivitas.RowAttributes)>
+        <label id="elh_SubAktivitasSFADNewBLSTSLPG_StatusAktivitas" class="@(subAktivitasSfadNewBlstslpgEdit.LeftColumnClass)">@Html.Raw(subAktivitasSfadNewBlstslpgEdit.StatusAktivitas.Caption)@Html.Raw(subAktivitasSfadNewBlstslpgEdit.StatusAktivitas.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(subAktivitasSfadNewBlstslpgEdit.RightColumnClass)"><div @Html.Raw(subAktivitasSfadNewBlstslpgEdit.StatusAktivitas.CellAttributes)>
+<span id="el_SubAktivitasSFADNewBLSTSLPG_StatusAktivitas">
+<span @Html.Raw(subAktivitasSfadNewBlstslpgEdit.StatusAktivitas.ViewAttributes)>
+<span class="form-control-plaintext">@Html.Raw(subAktivitasSfadNewBlstslpgEdit.StatusAktivitas.DisplayValue(subAktivitasSfadNewBlstslpgEdit.StatusAktivitas.EditValue))</span></span>
+<input type="hidden" data-table="SubAktivitasSFADNewBLSTSLPG" data-field="x_StatusAktivitas" data-hidden="1" name="x_StatusAktivitas" id="x_StatusAktivitas" value="@Html.Raw(HtmlEncode(subAktivitasSfadNewBlstslpgEdit.StatusAktivitas.CurrentValue))">
+</span>
+</div></div>
+    </div>
+} @* subAktivitasSfadNewBlstslpgEdit.StatusAktivitas.Visible (end) *@
+@if (subAktivitasSfadNewBlstslpgEdit.LastUpdatedBy.Visible) { // subAktivitasSfadNewBlstslpgEdit.LastUpdatedBy.Visible (begin)
+    <div id="r_LastUpdatedBy" @Html.Raw(subAktivitasSfadNewBlstslpgEdit.LastUpdatedBy.RowAttributes)>
+        <label id="elh_SubAktivitasSFADNewBLSTSLPG_LastUpdatedBy" for="x_LastUpdatedBy" class="@(subAktivitasSfadNewBlstslpgEdit.LeftColumnClass)">@Html.Raw(subAktivitasSfadNewBlstslpgEdit.LastUpdatedBy.Caption)@Html.Raw(subAktivitasSfadNewBlstslpgEdit.LastUpdatedBy.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(subAktivitasSfadNewBlstslpgEdit.RightColumnClass)"><div @Html.Raw(subAktivitasSfadNewBlstslpgEdit.LastUpdatedBy.CellAttributes)>
+<span id="el_SubAktivitasSFADNewBLSTSLPG_LastUpdatedBy">
+<span @Html.Raw(subAktivitasSfadNewBlstslpgEdit.LastUpdatedBy.ViewAttributes)>
+<input type="text" readonly class="form-control-plaintext" value="@Html.Raw(RemoveHtml(ConvertToString(subAktivitasSfadNewBlstslpgEdit.LastUpdatedBy.EditValue)))"></span>
+<input type="hidden" data-table="SubAktivitasSFADNewBLSTSLPG" data-field="x_LastUpdatedBy" data-hidden="1" name="x_LastUpdatedBy" id="x_LastUpdatedBy" value="@Html.Raw(HtmlEncode(subAktivitasSfadNewBlstslpgEdit.LastUpdatedBy.CurrentValue))">
+</span>
+</div></div>
+    </div>
+} @* subAktivitasSfadNewBlstslpgEdit.LastUpdatedBy.Visible (end) *@
+@if (subAktivitasSfadNewBlstslpgEdit.lastUpdatedDate.Visible) { // subAktivitasSfadNewBlstslpgEdit.lastUpdatedDate.Visible (begin)
+    <div id="r_lastUpdatedDate" @Html.Raw(subAktivitasSfadNewBlstslpgEdit.lastUpdatedDate.RowAttributes)>
+        <label id="elh_SubAktivitasSFADNewBLSTSLPG_lastUpdatedDate" for="x_lastUpdatedDate" class="@(subAktivitasSfadNewBlstslpgEdit.LeftColumnClass)">@Html.Raw(subAktivitasSfadNewBlstslpgEdit.lastUpdatedDate.Caption)@Html.Raw(subAktivitasSfadNewBlstslpgEdit.lastUpdatedDate.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(subAktivitasSfadNewBlstslpgEdit.RightColumnClass)"><div @Html.Raw(subAktivitasSfadNewBlstslpgEdit.lastUpdatedDate.CellAttributes)>
+<span id="el_SubAktivitasSFADNewBLSTSLPG_lastUpdatedDate">
+<span @Html.Raw(subAktivitasSfadNewBlstslpgEdit.lastUpdatedDate.ViewAttributes)>
+<input type="text" readonly class="form-control-plaintext" value="@Html.Raw(RemoveHtml(ConvertToString(subAktivitasSfadNewBlstslpgEdit.lastUpdatedDate.EditValue)))"></span>
+<input type="hidden" data-table="SubAktivitasSFADNewBLSTSLPG" data-field="x_lastUpdatedDate" data-hidden="1" name="x_lastUpdatedDate" id="x_lastUpdatedDate" value="@Html.Raw(HtmlEncode(subAktivitasSfadNewBlstslpgEdit.lastUpdatedDate.CurrentValue))">
+</span>
+</div></div>
+    </div>
+} @* subAktivitasSfadNewBlstslpgEdit.lastUpdatedDate.Visible (end) *@
+@if (subAktivitasSfadNewBlstslpgEdit.ApakahTerdapatROB.Visible) { // subAktivitasSfadNewBlstslpgEdit.ApakahTerdapatROB.Visible (begin)
+    <div id="r_ApakahTerdapatROB" @Html.Raw(subAktivitasSfadNewBlstslpgEdit.ApakahTerdapatROB.RowAttributes)>
+        <label id="elh_SubAktivitasSFADNewBLSTSLPG_ApakahTerdapatROB" class="@(subAktivitasSfadNewBlstslpgEdit.LeftColumnClass)">@Html.Raw(subAktivitasSfadNewBlstslpgEdit.ApakahTerdapatROB.Caption)@Html.Raw(subAktivitasSfadNewBlstslpgEdit.ApakahTerdapatROB.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(subAktivitasSfadNewBlstslpgEdit.RightColumnClass)"><div @Html.Raw(subAktivitasSfadNewBlstslpgEdit.ApakahTerdapatROB.CellAttributes)>
+<span id="el_SubAktivitasSFADNewBLSTSLPG_ApakahTerdapatROB">
+<div class="form-check d-inline-block">
+    <input type="checkbox" class="form-check-input@(subAktivitasSfadNewBlstslpgEdit.ApakahTerdapatROB.IsInvalidClass)" data-table="SubAktivitasSFADNewBLSTSLPG" data-field="x_ApakahTerdapatROB" data-boolean name="x_ApakahTerdapatROB" id="x_ApakahTerdapatROB" value="1" checked="@ConvertToBool(subAktivitasSfadNewBlstslpgEdit.ApakahTerdapatROB.CurrentValue)" @Html.Raw(subAktivitasSfadNewBlstslpgEdit.ApakahTerdapatROB.EditAttributes) aria-describedby="x_ApakahTerdapatROB_help">
+    <div class="invalid-feedback">@Html.Raw(subAktivitasSfadNewBlstslpgEdit.ApakahTerdapatROB.GetErrorMessage())</div>
+</div>
+@Html.Raw(subAktivitasSfadNewBlstslpgEdit.ApakahTerdapatROB.GetCustomMessage)
+</span>
+</div></div>
+    </div>
+} @* subAktivitasSfadNewBlstslpgEdit.ApakahTerdapatROB.Visible (end) *@
+@if (subAktivitasSfadNewBlstslpgEdit.Import.Visible) { // subAktivitasSfadNewBlstslpgEdit.Import.Visible (begin)
+    <div id="r_Import" @Html.Raw(subAktivitasSfadNewBlstslpgEdit.Import.RowAttributes)>
+        <label id="elh_SubAktivitasSFADNewBLSTSLPG_Import" class="@(subAktivitasSfadNewBlstslpgEdit.LeftColumnClass)">@Html.Raw(subAktivitasSfadNewBlstslpgEdit.Import.Caption)@Html.Raw(subAktivitasSfadNewBlstslpgEdit.Import.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(subAktivitasSfadNewBlstslpgEdit.RightColumnClass)"><div @Html.Raw(subAktivitasSfadNewBlstslpgEdit.Import.CellAttributes)>
+<span id="el_SubAktivitasSFADNewBLSTSLPG_Import">
+<div class="form-check d-inline-block">
+    <input type="checkbox" class="form-check-input@(subAktivitasSfadNewBlstslpgEdit.Import.IsInvalidClass)" data-table="SubAktivitasSFADNewBLSTSLPG" data-field="x_Import" data-boolean name="x_Import" id="x_Import" value="1" checked="@ConvertToBool(subAktivitasSfadNewBlstslpgEdit.Import.CurrentValue)" @Html.Raw(subAktivitasSfadNewBlstslpgEdit.Import.EditAttributes) aria-describedby="x_Import_help">
+    <div class="invalid-feedback">@Html.Raw(subAktivitasSfadNewBlstslpgEdit.Import.GetErrorMessage())</div>
+</div>
+@Html.Raw(subAktivitasSfadNewBlstslpgEdit.Import.GetCustomMessage)
+</span>
+</div></div>
+    </div>
+} @* subAktivitasSfadNewBlstslpgEdit.Import.Visible (end) *@
+@if (subAktivitasSfadNewBlstslpgEdit.Tujuan.Visible) { // subAktivitasSfadNewBlstslpgEdit.Tujuan.Visible (begin)
+    <div id="r_Tujuan" @Html.Raw(subAktivitasSfadNewBlstslpgEdit.Tujuan.RowAttributes)>
+        <label id="elh_SubAktivitasSFADNewBLSTSLPG_Tujuan" for="x_Tujuan" class="@(subAktivitasSfadNewBlstslpgEdit.LeftColumnClass)">@Html.Raw(subAktivitasSfadNewBlstslpgEdit.Tujuan.Caption)@Html.Raw(subAktivitasSfadNewBlstslpgEdit.Tujuan.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(subAktivitasSfadNewBlstslpgEdit.RightColumnClass)"><div @Html.Raw(subAktivitasSfadNewBlstslpgEdit.Tujuan.CellAttributes)>
+<span id="el_SubAktivitasSFADNewBLSTSLPG_Tujuan">
+    <select
+        id="x_Tujuan"
+        name="x_Tujuan"
+        class="form-select ew-select@(subAktivitasSfadNewBlstslpgEdit.Tujuan.IsInvalidClass)"
+        data-select2-id="fSubAktivitasSFADNewBLSTSLPGedit_x_Tujuan"
+        data-table="SubAktivitasSFADNewBLSTSLPG"
+        data-field="x_Tujuan"
+        data-value-separator="@(subAktivitasSfadNewBlstslpgEdit.Tujuan.DisplayValueSeparatorAttribute)"
+        data-placeholder="@(HtmlEncode(subAktivitasSfadNewBlstslpgEdit.Tujuan.PlaceHolder))"
+        @Html.Raw(subAktivitasSfadNewBlstslpgEdit.Tujuan.EditAttributes)>
+        @(subAktivitasSfadNewBlstslpgEdit.Tujuan.SelectOptionListHtml("x_Tujuan"))
+    </select>
+    @Html.Raw(subAktivitasSfadNewBlstslpgEdit.Tujuan.GetCustomMessage)
+    <div class="invalid-feedback">@Html.Raw(subAktivitasSfadNewBlstslpgEdit.Tujuan.GetErrorMessage())</div>
+@Html.Raw(subAktivitasSfadNewBlstslpgEdit.Tujuan.Lookup.GetParamTag(subAktivitasSfadNewBlstslpgEdit, "p_x_Tujuan"))
+<script>
+loadjs.ready("fSubAktivitasSFADNewBLSTSLPGedit", function() {
+    var options = { name: "x_Tujuan", selectId: "fSubAktivitasSFADNewBLSTSLPGedit_x_Tujuan" },
+        el = document.querySelector("select[data-select2-id='" + options.selectId + "']");
+    if (!el)
+        return;
+    options.closeOnSelect = !options.multiple;
+    options.dropdownParent = el.closest("#ew-modal-dialog, #ew-add-opt-dialog");
+    if (fSubAktivitasSFADNewBLSTSLPGedit.lists.Tujuan?.lookupOptions.length) {
+        options.data = { id: "x_Tujuan", form: "fSubAktivitasSFADNewBLSTSLPGedit" };
+    } else {
+        options.ajax = { id: "x_Tujuan", form: "fSubAktivitasSFADNewBLSTSLPGedit", limit: ew.LOOKUP_PAGE_SIZE };
+    }
+    options.minimumInputLength = ew.selectMinimumInputLength;
+    options = Object.assign({}, ew.selectOptions, options, ew.vars.tables.SubAktivitasSFADNewBLSTSLPG.fields.Tujuan.selectOptions);
+    ew.createSelect(options);
+});
+</script>
+</span>
+</div></div>
+    </div>
+} @* subAktivitasSfadNewBlstslpgEdit.Tujuan.Visible (end) *@
+@if (subAktivitasSfadNewBlstslpgEdit.SFAD_mt.Visible) { // subAktivitasSfadNewBlstslpgEdit.SFAD_mt.Visible (begin)
+    <div id="r_SFAD_mt" @Html.Raw(subAktivitasSfadNewBlstslpgEdit.SFAD_mt.RowAttributes)>
+        <label id="elh_SubAktivitasSFADNewBLSTSLPG_SFAD_mt" for="x_SFAD_mt" class="@(subAktivitasSfadNewBlstslpgEdit.LeftColumnClass)">@Html.Raw(subAktivitasSfadNewBlstslpgEdit.SFAD_mt.Caption)@Html.Raw(subAktivitasSfadNewBlstslpgEdit.SFAD_mt.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(subAktivitasSfadNewBlstslpgEdit.RightColumnClass)"><div @Html.Raw(subAktivitasSfadNewBlstslpgEdit.SFAD_mt.CellAttributes)>
+<span id="el_SubAktivitasSFADNewBLSTSLPG_SFAD_mt">
+<input type="@(subAktivitasSfadNewBlstslpgEdit.SFAD_mt.InputTextType)" name="x_SFAD_mt" id="x_SFAD_mt" data-table="SubAktivitasSFADNewBLSTSLPG" data-field="x_SFAD_mt" value="@Html.Raw(subAktivitasSfadNewBlstslpgEdit.SFAD_mt.EditValue)" size="30" maxlength="50" placeholder="@Html.Raw(HtmlEncode(subAktivitasSfadNewBlstslpgEdit.SFAD_mt.PlaceHolder))" data-format-pattern="@(subAktivitasSfadNewBlstslpgEdit.SFAD_mt.FormatPattern)"@Html.Raw(subAktivitasSfadNewBlstslpgEdit.SFAD_mt.EditAttributes) aria-describedby="x_SFAD_mt_help">
+@Html.Raw(subAktivitasSfadNewBlstslpgEdit.SFAD_mt.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(subAktivitasSfadNewBlstslpgEdit.SFAD_mt.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* subAktivitasSfadNewBlstslpgEdit.SFAD_mt.Visible (end) *@
+@if (subAktivitasSfadNewBlstslpgEdit.NewBl_mt.Visible) { // subAktivitasSfadNewBlstslpgEdit.NewBl_mt.Visible (begin)
+    <div id="r_NewBl_mt" @Html.Raw(subAktivitasSfadNewBlstslpgEdit.NewBl_mt.RowAttributes)>
+        <label id="elh_SubAktivitasSFADNewBLSTSLPG_NewBl_mt" for="x_NewBl_mt" class="@(subAktivitasSfadNewBlstslpgEdit.LeftColumnClass)">@Html.Raw(subAktivitasSfadNewBlstslpgEdit.NewBl_mt.Caption)@Html.Raw(subAktivitasSfadNewBlstslpgEdit.NewBl_mt.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(subAktivitasSfadNewBlstslpgEdit.RightColumnClass)"><div @Html.Raw(subAktivitasSfadNewBlstslpgEdit.NewBl_mt.CellAttributes)>
+<span id="el_SubAktivitasSFADNewBLSTSLPG_NewBl_mt">
+<input type="@(subAktivitasSfadNewBlstslpgEdit.NewBl_mt.InputTextType)" name="x_NewBl_mt" id="x_NewBl_mt" data-table="SubAktivitasSFADNewBLSTSLPG" data-field="x_NewBl_mt" value="@Html.Raw(subAktivitasSfadNewBlstslpgEdit.NewBl_mt.EditValue)" size="30" maxlength="50" placeholder="@Html.Raw(HtmlEncode(subAktivitasSfadNewBlstslpgEdit.NewBl_mt.PlaceHolder))" data-format-pattern="@(subAktivitasSfadNewBlstslpgEdit.NewBl_mt.FormatPattern)"@Html.Raw(subAktivitasSfadNewBlstslpgEdit.NewBl_mt.EditAttributes) aria-describedby="x_NewBl_mt_help">
+@Html.Raw(subAktivitasSfadNewBlstslpgEdit.NewBl_mt.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(subAktivitasSfadNewBlstslpgEdit.NewBl_mt.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* subAktivitasSfadNewBlstslpgEdit.NewBl_mt.Visible (end) *@
+@if (subAktivitasSfadNewBlstslpgEdit.AR45B_mt.Visible) { // subAktivitasSfadNewBlstslpgEdit.AR45B_mt.Visible (begin)
+    <div id="r_AR45B_mt" @Html.Raw(subAktivitasSfadNewBlstslpgEdit.AR45B_mt.RowAttributes)>
+        <label id="elh_SubAktivitasSFADNewBLSTSLPG_AR45B_mt" for="x_AR45B_mt" class="@(subAktivitasSfadNewBlstslpgEdit.LeftColumnClass)">@Html.Raw(subAktivitasSfadNewBlstslpgEdit.AR45B_mt.Caption)@Html.Raw(subAktivitasSfadNewBlstslpgEdit.AR45B_mt.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(subAktivitasSfadNewBlstslpgEdit.RightColumnClass)"><div @Html.Raw(subAktivitasSfadNewBlstslpgEdit.AR45B_mt.CellAttributes)>
+<span id="el_SubAktivitasSFADNewBLSTSLPG_AR45B_mt">
+<input type="@(subAktivitasSfadNewBlstslpgEdit.AR45B_mt.InputTextType)" name="x_AR45B_mt" id="x_AR45B_mt" data-table="SubAktivitasSFADNewBLSTSLPG" data-field="x_AR45B_mt" value="@Html.Raw(subAktivitasSfadNewBlstslpgEdit.AR45B_mt.EditValue)" size="30" maxlength="50" placeholder="@Html.Raw(HtmlEncode(subAktivitasSfadNewBlstslpgEdit.AR45B_mt.PlaceHolder))" data-format-pattern="@(subAktivitasSfadNewBlstslpgEdit.AR45B_mt.FormatPattern)"@Html.Raw(subAktivitasSfadNewBlstslpgEdit.AR45B_mt.EditAttributes) aria-describedby="x_AR45B_mt_help">
+@Html.Raw(subAktivitasSfadNewBlstslpgEdit.AR45B_mt.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(subAktivitasSfadNewBlstslpgEdit.AR45B_mt.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* subAktivitasSfadNewBlstslpgEdit.AR45B_mt.Visible (end) *@
+</div><!-- /page* -->
+    <input type="hidden" data-table="SubAktivitasSFADNewBLSTSLPG" data-field="x_id" data-hidden="1" name="x_id" id="x_id" value="@Html.Raw(HtmlEncode(subAktivitasSfadNewBlstslpgEdit.id.CurrentValue))">
+@{ subAktivitasSfadNewBlstslpgEdit.CloseRecordset(); }
+@Html.Raw(subAktivitasSfadNewBlstslpgEdit.IsModal ? "<template class=\"ew-modal-buttons\">" : "<div class=\"row ew-buttons\">")<!-- buttons .row -->
+    <div class="@(subAktivitasSfadNewBlstslpgEdit.OffsetColumnClass)"><!-- buttons offset -->
+    <button class="btn btn-primary ew-btn" name="btn-action" id="btn-action" type="submit" form="fSubAktivitasSFADNewBLSTSLPGedit">@Html.Raw(Language.Phrase("SaveBtn"))</button>
+@if (IsJsonResponse()) {
+    <button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" data-bs-dismiss="modal">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+} else {
+    <button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" form="fSubAktivitasSFADNewBLSTSLPGedit" data-href="@AppPath(subAktivitasSfadNewBlstslpgEdit.ReturnUrl)">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+}
+    </div><!-- /buttons offset -->
+@Html.Raw(subAktivitasSfadNewBlstslpgEdit.IsModal ? "</template>" : "</div>")<!-- /buttons .row -->
+</form>
+</main>
+@subAktivitasSfadNewBlstslpgEdit.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("SubAktivitasSFADNewBLSTSLPG");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Startup script
+    // Startup script
+    var IdReferensi = "@subAktivitasSfadNewBlstslpgEdit.NoReferensi.CurrentValue";
+    var IdProses = "@subAktivitasSfadNewBlstslpgEdit.idProses.CurrentValue";
+    var idAktivitas = "@subAktivitasSfadNewBlstslpgEdit.idAktifitas.CurrentValue";
+    var NamaAktivitas = $('#el_SubAktivitasSFADNewBLSTSLPG_idAktifitas').text();
+    let StatusAktivitas = "";
+    const userLevel = "@CurrentUserLevel()";
+    var parent_url = ew.PATH_BASE;
+    var steps = [
+        { number: 1, label: "Penerimaan", url: `${parent_url}PenerimaanList`, icon: "fa-box-open" },
+        { number: 2, label: "Proses", url: `${parent_url}ProsesList?cmd=search&x_IdReferensi%5B%5D=${IdReferensi}&search=&searchtype=`, icon: "fa-gears" },
+        { number: 3, label: "Aktivitas", url: `${parent_url}AktivitasList?cmd=search&x_IdProses%5B%5D=${IdProses}&search=&searchtype=`, icon: "fa-list-check" },
+        { number: 4, label: NamaAktivitas, url: '', icon: "fa-file-circle-check" }
+    ];
+    var currentStep = 4;
+    $("<style>")
+        .prop("type", "text/css")
+        .html(`
+            .stepper {
+                display: flex;
+                counter-reset: step;
+                flex-wrap: nowrap;        /* jangan pecah ke bawah */
+                overflow-x: auto;         /* scroll horizontal */
+                -webkit-overflow-scrolling: touch; /* smooth scroll di mobile */
+                padding-bottom: 8px;      /* space biar scroll bar gak nempel */
+            }
+            .stepper::-webkit-scrollbar {
+            height: 6px; /* tipis */
+            }
+            .stepper::-webkit-scrollbar-thumb {
+                background-color: #ccc;
+                border-radius: 3px;
+            }
+            .step {
+                width: 150px;
+                text-align: center;
+                position: relative;
+            }
+            .step:not(:last-child)::after {
+                content: '';
+                position: absolute;
+                top: 20px;
+                right: -50%;
+                width: 100%;
+                height: 4px;
+                background-color: #ccc;
+                z-index: 0;
+            }
+            .step.completed:not(:last-child)::after {
+                background-color: #3c6dbd;
+            }
+            .step-icon {
+                width: 36px;
+                height: 36px;
+                line-height: 36px;
+                border-radius: 50%;
+                background: #ccc;
+                display: inline-block;
+                z-index: 1;
+                position: relative;
+                color: white;
+                font-weight: bold;
+            }
+            .step.active .step-icon {
+                background: #3c6dbd;
+            }
+            .step-label {
+                margin-top: 8px;
+                font-size: 14px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                gap: 6px;
+                color: #333;
+            }
+            .step-label {
+                color: #3c6dbd !important;
+                text-decoration: none;
+                margin: 0;
+                padding: 0;
+            }
+            .step-label-not-active {
+                color: #CCCCCC !important;
+            }
+            .ag-theme-quartz .ag-header {
+                background-color: #3c6dbd !important;
+            }
+            .ag-theme-quartz .ag-header-cell-label {
+                color: #ffffff !important;
+            }
+            .ag-theme-quartz .ag-icon-filter {
+                color: #ffffff !important;
+            }
+            .rotate-down {
+                transform: rotate(90deg);
+                transition: transform 0.3s ease;
+            }
+            .rotate-right {
+                transform: rotate(0deg);
+                transition: transform 0.3s ease;
+            }
+            .header-table {
+                background-color: #3c6dbd !important;
+                color: #fff !important;
+            }
+            .newblsfad{
+                width: 15%;
+            }
+            .ar45b{
+                width: 15%;
+            }
+            #table_bl_sfad_api table {
+                width: 100%;             
+                table-layout: fixed;    
+                max-width: 850px;        
+            }
+        `)
+        .appendTo("head");
+    var $stepperWrapper = $('<div class="d-flex border-bottom border-2 pb-2"><div class="stepper"></div></div>');
+    var $stepper = $stepperWrapper.find(".stepper");
+    steps.forEach(function (step, i) {
+        var isActive = step.number === currentStep;
+        var isCompleted = step.number < currentStep;
+        var stepClass = isActive ? "active" : isCompleted ? "completed" : "";
+        var icon, labelContent, html;
+        if (isActive) {
+            icon = `<div class="step-icon bg-success">${step.number}</div>`;
+            labelContent = `<div class="step-label"><p class="text-success mb-1"><i class="fa-solid ${step.icon} me-1 text-success"></i> ${step.label}</p></div>`;
+            html = `<div class="step ${stepClass} text-success">${icon}${labelContent}</div>`;
+        } else if (isCompleted) {
+            icon = `<div class="step-icon" style="background: #3c6dbd;">${step.number}</div>`;
+            labelContent = `<div class="step-label"><a href="${step.url}" class="text-primary"><i class="fa-solid ${step.icon} me-1"></i>${step.label}</a></div>`;
+            html = `<div class="step ${stepClass}">${icon}${labelContent}</div>`;
+        } else {
+            icon = `<div class="step-icon">${step.number}</div>`;
+            labelContent = `<div class="step-label-not-active"><p style="margin: 0;"><i class="fa-solid ${step.icon} me-1"></i>${step.label}</p></div>`;
+            html = `<div class="step ${stepClass} text-secondary">${icon}${labelContent}</div>`;
+        }
+        $stepper.append(html);
+    });
+    $(".content-header .container-fluid .row").append($stepperWrapper);
+    $("#btn-action").hide();
+    $("#btn-cancel").html('<i class="fa-solid fa-ban"></i></i> Cancel');
+    const $cancelButton = $("#btn-cancel");
+    const idAktifitas = $("#x_idAktifitas").val();
+
+    // --- log aktivitas start ---
+    $('#el_SubAktivitasSFADNewBLSTSLPG_LastUpdatedBy').addClass('d-flex gap-3');
+    $('#el_SubAktivitasSFADNewBLSTSLPG_LastUpdatedBy').append(`
+        <button type="button" class="btn btn-primary ew-btn ps-2" expand-log="false">
+            <i class="fa-solid fa-caret-right fa-2xl me-2 caret-icon rotate-right"></i>
+            Log History
+            <i class="fa-solid fa-clock-rotate-left ms-1"></i> 
+        </button>
+    `);
+    $(document).on('click', 'button[expand-log]', function () {
+        const $btn = $(this);
+        const isExpanded = $btn.attr('expand-log') === 'true';
+        const $row = $('#log-table-row');
+        const $wrapper = $('#log-table-wrapper');
+        const $caret = $btn.find('.caret-icon');
+        if (!isExpanded) {
+            $btn.attr('expand-log', 'true');
+            $row.removeClass('d-none');
+            setTimeout(() => {
+                $wrapper.css({
+                    maxHeight: '500px'
+                });
+            }, 10);
+            $caret.removeClass('rotate-right').addClass('rotate-down');
+        } else {
+            $btn.attr('expand-log', 'false');
+            $wrapper.css({
+                maxHeight: '0'
+            });
+            setTimeout(() => {
+                $row.addClass('d-none');
+            }, 600);
+            $caret.removeClass('rotate-down').addClass('rotate-right');
+        }
+    });
+    if (idAktivitas && idAktivitas !== "0") {
+        $.ajax({
+            url: parent_url + `api/LookUpList/sub-aktivitas/startup?idAktivitas=${idAktivitas}`,
+            type: 'GET',
+            success: function(response) {
+                // cek status
+                let status = response.StatusAktivitas;
+                if ($cancelButton.length){
+                    currentStatusAktivitas = status;
+                    let $customButtons = ``;
+                    switch (status) {
+                        case "Waiting":
+                            $customButtons = `
+                                <button type="button" class="btn btn-primary ew-btn ml-2" id="btn-draft">
+                                    <i class="fas fa-save"></i> Save
+                                </button>
+                            `;
+                            break;
+                        case "Draft":
+                            $customButtons = `
+                                <button type="button" class="btn btn-primary ew-btn ml-2" id="btn-draft">
+                                    <i class="fas fa-save"></i> Save
+                                </button>
+                                <button type="button" class="btn btn-success ew-btn ml-2" id="btn-completed">
+                                    <i class="fas fa-paper-plane"></i> Submit
+                                </button>
+                            `
+                            break;
+                        case "Completed":
+                            $customButtons = `
+                                <button type="button" class="btn btn-primary ew-btn ml-2" id="btn-editing">
+                                    <i class="fa-solid fa-pen-to-square"></i> Edit
+                                </button>
+                                <button type="button" class="btn btn-success ew-btn ml-2" id="btn-completedEdit">
+                                    <i class="fas fa-paper-plane"></i> Submit
+                                </button>
+                            `;
+                            break;
+                        case "Editing":
+                            $customButtons = `
+                                <button type="button" class="btn btn-primary ew-btn ml-2" id="btn-editing">
+                                    <i class="fa-solid fa-pen-to-square"></i> Edit
+                                </button>
+                                <button type="button" class="btn btn-success ew-btn ml-2" id="btn-completedEdit">
+                                    <i class="fas fa-paper-plane"></i> Submit
+                                </button>
+                            `;
+                            break;
+                        case "Completed Edit":
+                            if (userLevel === '4'){
+                                $customButtons = `
+                                    <button type="button" class="btn btn-warning ew-btn ml-2" id="btn-reverse-status">
+                                        <i class="fa-solid fa-pen-to-square"></i> Edit 
+                                    </button>
+                                `;
+                            }
+                            break;
+                    }
+                    $cancelButton.before($customButtons);
+                }
+
+                // Cek is editable
+                if(!response.IsEditable || response.StatusAktivitas === "Completed Edit"){
+                    $("#btn-draft").hide();
+                    $("#btn-editing").hide();
+                    $("#btn-completed").hide();
+                    $("#btn-completedEdit").hide();
+                    $('input, select, textarea').prop('disabled', true);
+                    $('#catatanReverseStatusEditing').prop('disabled', false);
+                }
+
+                // Log
+                const mappedData = response.LogAktivitas.map(item => ({
+                    Aktivitas: item.Aktivitas,
+                    Username: item.UserName,
+                    StatusAktivitas: item.StatusAktivitas,
+                    Tanggal: item.Tanggal,
+                    Catatan: item.Catatan
+                }));
+                $.getScript('https://cdn.jsdelivr.net/npm/ag-grid-community/dist/ag-grid-community.min.js', function () {
+                    $('#r_LastUpdatedBy').after(`
+                        <div id="log-table-row" class="d-none row m-0">
+                            <div class="p-0 col-2"></div>
+                            <div class="p-0 col-10">
+                                <div id="log-table-wrapper" style="overflow: hidden; transition: all 0.6s ease; max-height: 0;">
+                                    <div id="myGrid" class="ag-theme-quartz w-100 my-3" style="height: 300px;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    `);
+                    const gridOptions = {
+                        rowData: mappedData,
+                        columnDefs: [
+                            {
+                                headerName: 'No.',
+                                valueGetter: 'node.rowIndex + 1',
+                                width: 80,
+                                filter: false
+                            },
+                            {
+                                headerName: 'Aktivitas',
+                                field: 'Aktivitas',
+                                flex: 1
+                            },
+                            {
+                                headerName: 'Username',
+                                field: 'Username',
+                                flex: 1
+                            },
+                            {
+                                headerName: 'Status Aktivitas',
+                                field: 'StatusAktivitas',
+                                flex: 1
+                            },
+                            {
+                                headerName: 'Tanggal',
+                                field: 'Tanggal',
+                                flex: 1
+                            },
+                            {
+                                headerName: 'Catatan',
+                                field: 'Catatan',
+                                flex: 1
+                            }
+                        ],
+                        defaultColDef: {
+                            sortable: false,
+                            suppressMovable: true,
+                            filter: true,
+                            resizable: false
+                        },
+                        rowSelection: 'multiple',
+                        suppressRowClickSelection: true,
+                        pagination: true,
+                        paginationPageSize: 10
+                    };
+                    const myGridElement = document.querySelector('#myGrid');
+                    agGrid.createGrid(myGridElement, gridOptions);
+                });
+                GetOtherValue(status);
+            },
+            error: function(xhr, status, error) {
+                ew.alert(xhr.responseJSON.message ?? "Terjadi kesalahan dalam memuat data");
+            }
+        });
+    } else {
+        console.warn("Skipping startup API: Invalid IdAktivitas");
+        $('button[expand-log]').hide(); 
+        $("#btn-draft, #btn-editing, #btn-completed, #btn-completedEdit").hide();
+        $('input, select, textarea').prop('disabled', true);
+    }
+
+    // --- log aktivitas end ---
+        const tableHtml = `
+        <div class="d-flex flex-column flex-md-row w-100 gap-4">
+            <div id="allValues" class="w-100">
+                <div>
+                    <div id="table_bl_sfad_api" class="table-responsive border rounded-3 mb-4" style="max-width: 850px;">
+                        <table class="table rounded-4 m-0">
+                            <thead>
+                                <tr style="height: 50px;">
+                                    <th class="fw-bold header-table">Satuan</th>
+                                    <th class="fw-bold header-table">BL</th>
+                                    <th class="fw-bold header-table">SFAL</th>
+                                    <th class="fw-bold header-table">SFBD</th>
+                                    <th class="fw-bold header-table">AR</th>
+                                    <th class="fw-bold header-table ar45b" style="min-width:150px;">AR54B</th> 
+                                    <th class="fw-bold header-table newblsfad" style="min-width:150px;">New BL</th>
+                                    <th class="fw-bold header-table newblsfad" style="min-width:150px;">SFAD</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr style="height: 58px;">
+                                    <td><strong>Metric Ton</strong></td>
+                                    <td id="td_BL_Mt_api"></td>
+                                    <td id="td_SFAL_Mt_api"></td>
+                                    <td id="td_SFBD_Mt_api"></td>
+                                    <td id="td_AR_Mt_api"></td>
+                                    <td id="td_ar45b_Mt" class="ar45b"></td>
+                                    <td id="td_BL_Mt" class="newblsfad"></td>
+                                    <td id="td_SFAD_Mt" class="newblsfad"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>           
+                </div>
+                <table aria-hidden="true" class="table table-hover view-page-table w-50 mb-3">
+                    <tbody>
+                        <tr class="newblsfad">
+                            <td class="text-break fw-bold newblsfad">R1'</td>
+                            <td class="text-break body-table fw-bold newblsfad" id="R1_"></td>
+                        </tr>
+                        <tr>
+                            <td class="text-break fw-bold">R1</td>
+                            <td class="text-break body-table fw-bold" id="R1"></td>
+                        </tr>
+                        <tr>
+                            <td class="text-break fw-bold">R2</td>
+                            <td class="text-break body-table fw-bold" id="R2"></td>
+                        </tr>
+                        <tr>
+                            <td class="text-break fw-bold">R3</td>
+                            <td class="text-break body-table fw-bold" id="R3"></td>
+                        </tr>
+                        <tr>
+                            <td class="text-break fw-bold">R4</td>
+                            <td class="text-break body-table fw-bold" id="R4"></td>
+                        </tr>
+                        <tr class="ar45b">
+                            <td class="text-break fw-bold ar45b">R4 Import</td>
+                            <td class="text-break body-table fw-bold ar45b" id="R445"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        `;
+        $("#x_Tujuan").closest(".row").after(tableHtml);
+        const moveField = (fieldId, targetTdId) => {
+            const fieldRow = $("#" + fieldId).closest(".row");
+            $("#" + fieldId).appendTo("#" + targetTdId); // move field to table
+            fieldRow.hide(); // hide original
+        };
+        moveField("el_SubAktivitasSFADNewBLSTSLPG_NewBl_mt", "td_BL_Mt");
+        moveField("el_SubAktivitasSFADNewBLSTSLPG_SFAD_mt", "td_SFAD_Mt");
+        moveField("el_SubAktivitasSFADNewBLSTSLPG_AR45B_mt", "td_ar45b_Mt");
+        var r4Value = 0;
+        var r4ImportValue = 0;
+        // Fungsi toggle
+        function toggleROBSection() {
+            const isChecked = $("#x_ApakahTerdapatROB").prop("checked");
+            if (isChecked) {
+                $("#r_Tujuan").show();
+                $("#robSection").show();
+                $("#r1r4table").show();
+                $('.newblsfad').show();
+                $("#R445").text("0.000%");
+                $("#R4").text("0.000%");
+            } else {
+                $("#r_Tujuan").hide();
+                $("#robSection").hide();
+                $("#r1r4table").hide();
+                $('.newblsfad').hide();
+                $("#R445").text(r4ImportValue.toFixed(3) + "%");
+                if (r4Value < -0.125) {
+                    color = "#ba313b";
+                } else if (r4Value >= -0.125 && r4Value <= 0) {
+                    color = "#3c6dbd";
+                } else {
+                    color = "#198754";
+                }
+                $("#R4").text(r4Value.toFixed(3) + "%");
+                $("#R4").color = color;
+            }
+        }
+        function toggleImportSection() {
+            const isImport = $("#x_Import").prop("checked");
+            if (isImport){
+                $('.ar45b').show();
+            } else {
+                $('.ar45b').hide();
+            }
+        }
+
+        // Jalankan saat awal
+        toggleROBSection();
+        toggleImportSection();
+
+        // Jalankan saat checkbox diubah
+        $("#x_ApakahTerdapatROB").on("change", toggleROBSection);
+        $("#x_Import").on("change", toggleImportSection);
+    function GetOtherValue(StatusAktivitas) {
+        $.ajax({
+            url: parent_url + "api/LookUpList/GetRValue",
+            type: "GET",
+            data: {
+                NoReferensi: IdReferensi,
+                Menu: "NEWBL",
+                Jenis: "STSLPG"
+            },
+            success: function(rs){
+                if (rs.success) {
+
+                    ["R1", "R2", "R3", "R4"].forEach(key => {
+                        let val = parseFloat(rs[key]);
+                        const el = document.getElementById(key);
+                        if (!isNaN(val)) {
+                            let color = "";
+                            val = val * 100;
+                            if (key === "R2") {
+                                if (val < -0.07) {
+                                    color = "#ba313b";
+                                } else if (val >= -0.07 && val <= 0) {
+                                    color = "#3c6dbd";
+                                } else {
+                                    color = "#198754";
+                                }
+                            } else {
+                                if (key == "R4"){
+                                    r4Value = val;
+                                    const isChecked = $("#x_ApakahTerdapatROB").prop("checked");
+                                    if (isChecked){
+                                        val = 0;
+                                    }
+                                }
+                                if (val < -0.125) {
+                                    color = "#ba313b";
+                                } else if (val >= -0.125 && val <= 0) {
+                                    color = "#3c6dbd";
+                                } else {
+                                    color = "#198754";
+                                }
+                            }
+                            el.textContent = val.toFixed(3) + "%";
+                            el.style.color = color;
+                        }
+                    });
+                    $.get(parent_url + `api/LookUpList/GetSFBDValue?NoReferensi=${IdReferensi}&Jenis=STSLPG`, function (data) {
+                        if (data.success) {
+                            $("#td_SFBD_Mt_api").text(data.mt);
+                        }
+                    });
+
+                    // Panggil API BLSFAL
+                    $.get(parent_url + `api/LookUpList/GetBLSFALValue?NoReferensi=${IdReferensi}&Jenis=STSLPG`, function (data) {
+                        if (data.success) {
+                            // BL
+                            $("#td_BL_Mt_api").text(data.bl_mt);
+                            // SFAL
+                            $("#td_SFAL_Mt_api").text(data.sfal_mt);
+                            const ar45Raw = $("#x_AR45B_mt").val();
+                            const ar45 = parseFloat(ar45Raw || "0");
+                            const bl = parseFloat(data.bl_mt);
+                            if (!isNaN(ar45) && !isNaN(bl) && bl !== 0) {
+                                const result = ((ar45 - bl) / bl)*100;
+                                r4ImportValue = result;
+                                const isChecked = $("#x_ApakahTerdapatROB").prop("checked");
+                                if (isChecked){
+                                    $("#R445").text("0.000%");
+                                } else {
+                                    $("#R445").text(result.toFixed(3) + "%");
+                                }
+                            } else {
+                                $("#R445").text("0.000%");
+                            }
+                            const isChecked = $("#x_ApakahTerdapatROB").prop("checked");
+                            if (isChecked){
+                                $("#R445").text("0.000%");
+                            } else {
+                                if (!isNaN(ar45) && !isNaN(bl) && bl !== 0) {
+                                    const result = ((ar45 - bl) / bl)*100;
+                                    $("#R445").text(result.toFixed(3) + "%");
+                                } else {
+                                    $("#R445").text("0.000%");
+                                }
+                            }
+                        }
+                    });
+                    $.get(parent_url + `api/LookUpList/GetARValue?NoReferensi=${IdReferensi}&Jenis=STSLPG`, function (data) {
+                        if (data.success) {
+                            $("#td_AR_Mt_api").text(data.mt);
+                        }
+                    });
+                    $.get(parent_url + `api/LookUpList/GetNewBLValue?NoReferensi=${IdReferensi}&Jenis=STSLPG`, function (data) {
+                        if (data.success) {
+                            if (StatusAktivitas === 'Waiting' || StatusAktivitas === 'Draft' || StatusAktivitas === 'Completed' || StatusAktivitas === "Editing" || StatusAktivitas === "Completed Edit") {
+                                $("#x_NewBl_mt").val(data.mt);
+                            }
+                            const sfadRaw = $("#x_SFAD_mt").val();
+                            const sfad = parseFloat(sfadRaw || "0");
+                            const newbl = parseFloat(data.mt);
+                            if (!isNaN(sfad) && !isNaN(newbl) && newbl !== 0) {
+                                const result = ((sfad - newbl) / newbl);
+                                $("#R1_").text(result.toFixed(3) + "%");
+                            } else {
+                                $("#R1_").text("0.000%");
+                            }
+                        }
+                    });
+                    // $("#x_NewBl_mt").prop("readonly", true);
+                }
+            },
+            error: function (xhr, status, error) {
+                console.log("Error: " + xhr.responseText);
+            }
+        });    
+    }
+    let uploadModal = `<div class="modal fade" id="warningValueModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+            <h1 class="modal-title fs-5" id="warningValueModalTitle">Konfirmasi Simpan Data</h1>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id='warningValueText'>
+            Konfirmasi 
+            </div>
+            <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="btn-cancel-modal">Batal</button>
+            <button type="button" class="btn btn-primary" id="btn-confirm-modal">Lanjutkan</button>
+            </div>
+        </div>
+        </div>
+    </div>`
+    $("body").append(uploadModal);
+    $("#btn-cancel-modal").click(function (event) {
+        event.preventDefault();
+        $("#warningValueModal").modal("hide");
+    });
+    $('#x_NewBl_mt, #x_SFAD_mt, #x_AR45B_mt')
+        .attr('inputmode', 'numeric')
+        .on('input', function () {
+            let val = $(this).val();
+            let isNegative = val.startsWith('-');
+            val = val.replace(',', '.');
+            val = val.replace(/[^0-9.]/g, '');
+            const parts = val.split('.');
+            if (parts.length > 2) {
+                val = parts[0] + '.' + parts.slice(1).join('');
+            }
+            if (isNegative) {
+                val = '-' + val;
+            }
+            $(this).val(val);
+        });
+
+                // Cari elemen container dengan id r_Tujuan
+            var el = document.getElementById("r_Tujuan");
+            if (el) {
+                // Buat elemen note
+                var note = document.createElement("div");
+                note.innerHTML = `
+                <div class="mt-2">
+                    <div class="card border-primary shadow-sm" style="max-width: 850px;">
+                    <div class="card-header bg-primary text-white py-2 px-3">
+                            <strong>Informasi Pengisian AR</strong>
+                    </div>
+                    <div class="card-body py-2 px-3 text-dark">
+                        <p class="mb-2">
+                        Nilai <strong>AR (KL Obs, KL 15, Barrel, Metric Ton, dan Long Ton)</strong> tidak diinput langsung pada form ini.
+                            Pengisian dilakukan melalui menu <strong>Penyimpanan</strong>, kemudian pilih bagian <strong>Proses Penerimaan</strong>, dengan menyesuaikan <strong>Nomor Referensi Penerimaan yang sama.</strong>
+                        </p>
+                    </div>
+                    </div>
+                </div>
+        `;
+                note.style.marginTop = "5px";
+                note.id = 'InfoPengisian';
+
+                // Sisipkan setelah elemen
+                el.parentNode.insertBefore(note, el.nextSibling);
+            }
+
+        // Reverse Status to Editing
+            let reverseStatusModal = `<div class="modal fade" id="confirmReverseStatusEditingModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header bg-primary">
+                    <h1 class="modal-title fs-5" id="confirmReverseStatusEditingModalTitle">Konfirmasi Kembalikan Status</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form id="reverseStatusEditingModalForm">
+                    <div class="modal-body px-2 py-1">
+                        <div class="mb-3">
+                            <label for="message-text" class="col-form-label">Catatan:</label>
+                            <textarea class="form-control" id="catatanReverseStatusEditing" required rows="4"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="btnReverseStatusEditingModalCancel">Batal</button>
+                        <button type="submit" class="btn btn-primary" id="btnReverseStatusEditingModalSubmit">Lanjutkan</button>
+                    </div>
+                    </form>
+                </div>
+                </div>
+            </div>`
+    $("body").append(reverseStatusModal);
+    $("#btnReverseStatusEditingModalCancel").click(function (event) {
+        event.preventDefault();
+        $("#confirmReverseStatusEditingModal").modal("hide");
+    });
+    $(document).on("click", "#btn-reverse-status", function () {
+        $("#confirmReverseStatusEditingModal").modal("show");
+    });
+});
+</script>

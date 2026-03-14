@@ -1,0 +1,961 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (penimbunanList.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = penimbunanList.UseLayout ? "_Layout" : "";
+}
+@if (!penimbunanList.IsExport()) {
+<script>
+var currentTable = @Html.Raw(ConvertToJson(penimbunanList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { Penimbunan: currentTable } });
+var currentPageID = ew.PAGE_ID = "list";
+var currentForm;
+var @(penimbunanList.FormName);
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("@(penimbunanList.FormName)")
+        .setPageId("list")
+        .setSubmitWithFetch(@(penimbunanList.UseAjaxActions ? "true" : "false"))
+        .setFormKeyCountName("@(penimbunanList.FormKeyCountName)")
+
+        // Dynamic selection lists
+        .setLists({
+            "Proses2": @Html.Raw(penimbunanList.Proses2.ToClientList(penimbunanList)),
+            "Plant": @Html.Raw(penimbunanList.Plant.ToClientList(penimbunanList)),
+            "IdPenerimaan": @Html.Raw(penimbunanList.IdPenerimaan.ToClientList(penimbunanList)),
+            "IdTangki": @Html.Raw(penimbunanList.IdTangki.ToClientList(penimbunanList)),
+            "StatusProses": @Html.Raw(penimbunanList.StatusProses.ToClientList(penimbunanList)),
+            "PersentaseProgress": @Html.Raw(penimbunanList.PersentaseProgress.ToClientList(penimbunanList)),
+            "DibuatOleh": @Html.Raw(penimbunanList.DibuatOleh.ToClientList(penimbunanList)),
+            "TanggalDibuat": @Html.Raw(penimbunanList.TanggalDibuat.ToClientList(penimbunanList)),
+            "DiperbaruiOleh": @Html.Raw(penimbunanList.DiperbaruiOleh.ToClientList(penimbunanList)),
+            "TanggalDiperbarui": @Html.Raw(penimbunanList.TanggalDiperbarui.ToClientList(penimbunanList)),
+        })
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Write your client script here, no need to add script tags.
+});
+</script>
+}
+@if (!penimbunanList.IsExport()) {
+<div class="btn-toolbar ew-toolbar">
+@if (penimbunanList.TotalRecords > 0 && penimbunanList.ExportOptions.Visible) {
+    penimbunanList.ExportOptions.Render("body");
+}
+@if (penimbunanList.ImportOptions.Visible) {
+    penimbunanList.ImportOptions.Render("body");
+}
+@if (penimbunanList.SearchOptions.Visible) {
+    penimbunanList.SearchOptions.Render("body");
+}
+@if (penimbunanList.FilterOptions.Visible) {
+    penimbunanList.FilterOptions.Render("body");
+}
+</div>
+}
+@if (penimbunanList.ShowCurrentFilter) {
+    penimbunanList.ShowFilterList();
+}
+@if (!penimbunanList.IsModal) {
+<form name="fPenimbunansrch" id="fPenimbunansrch" class="ew-form ew-ext-search-form" action="@AppPath(CurrentPageName())" novalidate autocomplete="off">
+<div id="fPenimbunansrch_search_panel" class="mb-2 mb-sm-0 @(penimbunanList.SearchPanelClass)"><!-- .ew-search-panel -->
+<script>
+var currentTable = @Html.Raw(ConvertToJson(penimbunanList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { Penimbunan: currentTable } });
+var currentForm;
+var fPenimbunansrch, currentSearchForm, currentAdvancedSearchForm;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery,
+        fields = currentTable.fields;
+
+    // Form object for search
+    let form = new ew.FormBuilder()
+        .setId("fPenimbunansrch")
+        .setPageId("list")
+@if (penimbunanList.UseAjaxActions) {
+        <text>.setSubmitWithFetch(true)</text>
+}
+
+        // Add fields
+        .setFields([
+        ])
+        // Validate form
+        .setValidate(
+            async function () {
+                if (!this.validateRequired)
+                    return true; // Ignore validation
+                let fobj = this.getForm();
+
+                // Validate fields
+                if (!this.validateFields())
+                    return false;
+
+                // Call Form_CustomValidate event
+                if (!(await this.customValidate?.(fobj) ?? true)) {
+                    this.focus();
+                    return false;
+                }
+                return true;
+            }
+        )
+
+        // Form_CustomValidate
+        .setCustomValidate(
+            function(fobj) { // DO NOT CHANGE THIS LINE!
+                    // Your custom validation code here, return false if invalid.
+                    return true;
+                }
+        )
+
+        // Use JavaScript validation or not
+        .setValidateRequired(ew.CLIENT_VALIDATE)
+
+        // Dynamic selection lists
+        .setLists({
+            "Proses2": @Html.Raw(penimbunanList.Proses2.ToClientList(penimbunanList)),
+            "NomorPenimbunan": @Html.Raw(penimbunanList.NomorPenimbunan.ToClientList(penimbunanList)),
+            "Plant": @Html.Raw(penimbunanList.Plant.ToClientList(penimbunanList)),
+            "IdPenerimaan": @Html.Raw(penimbunanList.IdPenerimaan.ToClientList(penimbunanList)),
+            "IdTangki": @Html.Raw(penimbunanList.IdTangki.ToClientList(penimbunanList)),
+            "StatusProses": @Html.Raw(penimbunanList.StatusProses.ToClientList(penimbunanList)),
+            "PersentaseProgress": @Html.Raw(penimbunanList.PersentaseProgress.ToClientList(penimbunanList)),
+            "Catatan": @Html.Raw(penimbunanList.Catatan.ToClientList(penimbunanList)),
+            "DibuatOleh": @Html.Raw(penimbunanList.DibuatOleh.ToClientList(penimbunanList)),
+            "TanggalDibuat": @Html.Raw(penimbunanList.TanggalDibuat.ToClientList(penimbunanList)),
+            "DiperbaruiOleh": @Html.Raw(penimbunanList.DiperbaruiOleh.ToClientList(penimbunanList)),
+            "TanggalDiperbarui": @Html.Raw(penimbunanList.TanggalDiperbarui.ToClientList(penimbunanList)),
+        })
+
+        // Filters
+        .setFilterList(@Html.Raw(penimbunanList.GetFilterList()))
+        .build();
+    window[form.id] = form;
+    currentSearchForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<input type="hidden" name="cmd" value="search">
+@if (Security.CanSearch) {
+if (!penimbunanList.IsExport() && Empty(penimbunanList.CurrentAction) && penimbunanList.HasSearchFields()) { @* Show search form (begin) *@
+<div class="ew-extended-search container-fluid ps-2">
+<div class="row mb-0@(penimbunanList.SearchFieldsPerRow > 0 ? " row-cols-sm-" + penimbunanList.SearchFieldsPerRow : "")">
+@{
+    // Render search row
+    penimbunanList.RowType = RowType.Search;
+    penimbunanList.ResetAttributes();
+    await penimbunanList.RenderRow();
+}
+@if (penimbunanList.Proses2.Visible) { // penimbunanList.Proses2.Visible (begin)
+    if (!penimbunanList.Proses2.UseFilter) {
+        penimbunanList.SearchColumnCount++;
+    }
+    <div id="xs_Proses2" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(penimbunanList.Proses2.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_Proses2"
+            name="x_Proses2[]"
+            class="form-control ew-select@(penimbunanList.Proses2.IsInvalidClass)"
+            data-select2-id="fPenimbunansrch_x_Proses2"
+            data-table="Penimbunan"
+            data-field="x_Proses2"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(penimbunanList.Proses2.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(penimbunanList.Proses2.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(penimbunanList.Proses2.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(penimbunanList.Proses2.EditAttributes)>
+            @(penimbunanList.Proses2.SelectOptionListHtml("x_Proses2", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(penimbunanList.Proses2.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fPenimbunansrch", function() {
+            var options = {
+                name: "x_Proses2",
+                selectId: "fPenimbunansrch_x_Proses2",
+                ajax: { id: "x_Proses2", form: "fPenimbunansrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.Penimbunan.fields.Proses2.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* penimbunanList.Proses2.Visible (end) *@
+@if (penimbunanList.NomorPenimbunan.Visible) { // penimbunanList.NomorPenimbunan.Visible (begin)
+    if (!penimbunanList.NomorPenimbunan.UseFilter) {
+        penimbunanList.SearchColumnCount++;
+    }
+    <div id="xs_NomorPenimbunan" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(penimbunanList.NomorPenimbunan.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_NomorPenimbunan"
+            name="x_NomorPenimbunan[]"
+            class="form-control ew-select@(penimbunanList.NomorPenimbunan.IsInvalidClass)"
+            data-select2-id="fPenimbunansrch_x_NomorPenimbunan"
+            data-table="Penimbunan"
+            data-field="x_NomorPenimbunan"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(penimbunanList.NomorPenimbunan.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(penimbunanList.NomorPenimbunan.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(penimbunanList.NomorPenimbunan.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(penimbunanList.NomorPenimbunan.EditAttributes)>
+            @(penimbunanList.NomorPenimbunan.SelectOptionListHtml("x_NomorPenimbunan", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(penimbunanList.NomorPenimbunan.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fPenimbunansrch", function() {
+            var options = {
+                name: "x_NomorPenimbunan",
+                selectId: "fPenimbunansrch_x_NomorPenimbunan",
+                ajax: { id: "x_NomorPenimbunan", form: "fPenimbunansrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.Penimbunan.fields.NomorPenimbunan.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* penimbunanList.NomorPenimbunan.Visible (end) *@
+@if (penimbunanList.Plant.Visible) { // penimbunanList.Plant.Visible (begin)
+    if (!penimbunanList.Plant.UseFilter) {
+        penimbunanList.SearchColumnCount++;
+    }
+    <div id="xs_Plant" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(penimbunanList.Plant.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_Plant"
+            name="x_Plant[]"
+            class="form-control ew-select@(penimbunanList.Plant.IsInvalidClass)"
+            data-select2-id="fPenimbunansrch_x_Plant"
+            data-table="Penimbunan"
+            data-field="x_Plant"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(penimbunanList.Plant.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(penimbunanList.Plant.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(penimbunanList.Plant.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(penimbunanList.Plant.EditAttributes)>
+            @(penimbunanList.Plant.SelectOptionListHtml("x_Plant", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(penimbunanList.Plant.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fPenimbunansrch", function() {
+            var options = {
+                name: "x_Plant",
+                selectId: "fPenimbunansrch_x_Plant",
+                ajax: { id: "x_Plant", form: "fPenimbunansrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.Penimbunan.fields.Plant.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* penimbunanList.Plant.Visible (end) *@
+@if (penimbunanList.IdPenerimaan.Visible) { // penimbunanList.IdPenerimaan.Visible (begin)
+    if (!penimbunanList.IdPenerimaan.UseFilter) {
+        penimbunanList.SearchColumnCount++;
+    }
+    <div id="xs_IdPenerimaan" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(penimbunanList.IdPenerimaan.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_IdPenerimaan"
+            name="x_IdPenerimaan[]"
+            class="form-control ew-select@(penimbunanList.IdPenerimaan.IsInvalidClass)"
+            data-select2-id="fPenimbunansrch_x_IdPenerimaan"
+            data-table="Penimbunan"
+            data-field="x_IdPenerimaan"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(penimbunanList.IdPenerimaan.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(penimbunanList.IdPenerimaan.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(penimbunanList.IdPenerimaan.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(penimbunanList.IdPenerimaan.EditAttributes)>
+            @(penimbunanList.IdPenerimaan.SelectOptionListHtml("x_IdPenerimaan", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(penimbunanList.IdPenerimaan.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fPenimbunansrch", function() {
+            var options = {
+                name: "x_IdPenerimaan",
+                selectId: "fPenimbunansrch_x_IdPenerimaan",
+                ajax: { id: "x_IdPenerimaan", form: "fPenimbunansrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.Penimbunan.fields.IdPenerimaan.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* penimbunanList.IdPenerimaan.Visible (end) *@
+@if (penimbunanList.IdTangki.Visible) { // penimbunanList.IdTangki.Visible (begin)
+    if (!penimbunanList.IdTangki.UseFilter) {
+        penimbunanList.SearchColumnCount++;
+    }
+    <div id="xs_IdTangki" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(penimbunanList.IdTangki.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_IdTangki"
+            name="x_IdTangki[]"
+            class="form-control ew-select@(penimbunanList.IdTangki.IsInvalidClass)"
+            data-select2-id="fPenimbunansrch_x_IdTangki"
+            data-table="Penimbunan"
+            data-field="x_IdTangki"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(penimbunanList.IdTangki.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(penimbunanList.IdTangki.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(penimbunanList.IdTangki.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(penimbunanList.IdTangki.EditAttributes)>
+            @(penimbunanList.IdTangki.SelectOptionListHtml("x_IdTangki", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(penimbunanList.IdTangki.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fPenimbunansrch", function() {
+            var options = {
+                name: "x_IdTangki",
+                selectId: "fPenimbunansrch_x_IdTangki",
+                ajax: { id: "x_IdTangki", form: "fPenimbunansrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.Penimbunan.fields.IdTangki.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* penimbunanList.IdTangki.Visible (end) *@
+@if (penimbunanList.StatusProses.Visible) { // penimbunanList.StatusProses.Visible (begin)
+    if (!penimbunanList.StatusProses.UseFilter) {
+        penimbunanList.SearchColumnCount++;
+    }
+    <div id="xs_StatusProses" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(penimbunanList.StatusProses.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_StatusProses"
+            name="x_StatusProses[]"
+            class="form-control ew-select@(penimbunanList.StatusProses.IsInvalidClass)"
+            data-select2-id="fPenimbunansrch_x_StatusProses"
+            data-table="Penimbunan"
+            data-field="x_StatusProses"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(penimbunanList.StatusProses.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(penimbunanList.StatusProses.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(penimbunanList.StatusProses.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(penimbunanList.StatusProses.EditAttributes)>
+            @(penimbunanList.StatusProses.SelectOptionListHtml("x_StatusProses", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(penimbunanList.StatusProses.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fPenimbunansrch", function() {
+            var options = {
+                name: "x_StatusProses",
+                selectId: "fPenimbunansrch_x_StatusProses",
+                ajax: { id: "x_StatusProses", form: "fPenimbunansrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.Penimbunan.fields.StatusProses.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* penimbunanList.StatusProses.Visible (end) *@
+@if (penimbunanList.PersentaseProgress.Visible) { // penimbunanList.PersentaseProgress.Visible (begin)
+    if (!penimbunanList.PersentaseProgress.UseFilter) {
+        penimbunanList.SearchColumnCount++;
+    }
+    <div id="xs_PersentaseProgress" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(penimbunanList.PersentaseProgress.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_PersentaseProgress"
+            name="x_PersentaseProgress[]"
+            class="form-control ew-select@(penimbunanList.PersentaseProgress.IsInvalidClass)"
+            data-select2-id="fPenimbunansrch_x_PersentaseProgress"
+            data-table="Penimbunan"
+            data-field="x_PersentaseProgress"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(penimbunanList.PersentaseProgress.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(penimbunanList.PersentaseProgress.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(penimbunanList.PersentaseProgress.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(penimbunanList.PersentaseProgress.EditAttributes)>
+            @(penimbunanList.PersentaseProgress.SelectOptionListHtml("x_PersentaseProgress", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(penimbunanList.PersentaseProgress.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fPenimbunansrch", function() {
+            var options = {
+                name: "x_PersentaseProgress",
+                selectId: "fPenimbunansrch_x_PersentaseProgress",
+                ajax: { id: "x_PersentaseProgress", form: "fPenimbunansrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.Penimbunan.fields.PersentaseProgress.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* penimbunanList.PersentaseProgress.Visible (end) *@
+@if (penimbunanList.Catatan.Visible) { // penimbunanList.Catatan.Visible (begin)
+    if (!penimbunanList.Catatan.UseFilter) {
+        penimbunanList.SearchColumnCount++;
+    }
+    <div id="xs_Catatan" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(penimbunanList.Catatan.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_Catatan"
+            name="x_Catatan[]"
+            class="form-control ew-select@(penimbunanList.Catatan.IsInvalidClass)"
+            data-select2-id="fPenimbunansrch_x_Catatan"
+            data-table="Penimbunan"
+            data-field="x_Catatan"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(penimbunanList.Catatan.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(penimbunanList.Catatan.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(penimbunanList.Catatan.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(penimbunanList.Catatan.EditAttributes)>
+            @(penimbunanList.Catatan.SelectOptionListHtml("x_Catatan", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(penimbunanList.Catatan.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fPenimbunansrch", function() {
+            var options = {
+                name: "x_Catatan",
+                selectId: "fPenimbunansrch_x_Catatan",
+                ajax: { id: "x_Catatan", form: "fPenimbunansrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.Penimbunan.fields.Catatan.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* penimbunanList.Catatan.Visible (end) *@
+@if (penimbunanList.DibuatOleh.Visible) { // penimbunanList.DibuatOleh.Visible (begin)
+    if (!penimbunanList.DibuatOleh.UseFilter) {
+        penimbunanList.SearchColumnCount++;
+    }
+    <div id="xs_DibuatOleh" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(penimbunanList.DibuatOleh.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_DibuatOleh"
+            name="x_DibuatOleh[]"
+            class="form-control ew-select@(penimbunanList.DibuatOleh.IsInvalidClass)"
+            data-select2-id="fPenimbunansrch_x_DibuatOleh"
+            data-table="Penimbunan"
+            data-field="x_DibuatOleh"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(penimbunanList.DibuatOleh.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(penimbunanList.DibuatOleh.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(penimbunanList.DibuatOleh.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(penimbunanList.DibuatOleh.EditAttributes)>
+            @(penimbunanList.DibuatOleh.SelectOptionListHtml("x_DibuatOleh", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(penimbunanList.DibuatOleh.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fPenimbunansrch", function() {
+            var options = {
+                name: "x_DibuatOleh",
+                selectId: "fPenimbunansrch_x_DibuatOleh",
+                ajax: { id: "x_DibuatOleh", form: "fPenimbunansrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.Penimbunan.fields.DibuatOleh.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* penimbunanList.DibuatOleh.Visible (end) *@
+@if (penimbunanList.TanggalDibuat.Visible) { // penimbunanList.TanggalDibuat.Visible (begin)
+    if (!penimbunanList.TanggalDibuat.UseFilter) {
+        penimbunanList.SearchColumnCount++;
+    }
+    <div id="xs_TanggalDibuat" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(penimbunanList.TanggalDibuat.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_TanggalDibuat"
+            name="x_TanggalDibuat[]"
+            class="form-control ew-select@(penimbunanList.TanggalDibuat.IsInvalidClass)"
+            data-select2-id="fPenimbunansrch_x_TanggalDibuat"
+            data-table="Penimbunan"
+            data-field="x_TanggalDibuat"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(penimbunanList.TanggalDibuat.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(penimbunanList.TanggalDibuat.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(penimbunanList.TanggalDibuat.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(penimbunanList.TanggalDibuat.EditAttributes)>
+            @(penimbunanList.TanggalDibuat.SelectOptionListHtml("x_TanggalDibuat", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(penimbunanList.TanggalDibuat.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fPenimbunansrch", function() {
+            var options = {
+                name: "x_TanggalDibuat",
+                selectId: "fPenimbunansrch_x_TanggalDibuat",
+                ajax: { id: "x_TanggalDibuat", form: "fPenimbunansrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.Penimbunan.fields.TanggalDibuat.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* penimbunanList.TanggalDibuat.Visible (end) *@
+@if (penimbunanList.DiperbaruiOleh.Visible) { // penimbunanList.DiperbaruiOleh.Visible (begin)
+    if (!penimbunanList.DiperbaruiOleh.UseFilter) {
+        penimbunanList.SearchColumnCount++;
+    }
+    <div id="xs_DiperbaruiOleh" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(penimbunanList.DiperbaruiOleh.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_DiperbaruiOleh"
+            name="x_DiperbaruiOleh[]"
+            class="form-control ew-select@(penimbunanList.DiperbaruiOleh.IsInvalidClass)"
+            data-select2-id="fPenimbunansrch_x_DiperbaruiOleh"
+            data-table="Penimbunan"
+            data-field="x_DiperbaruiOleh"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(penimbunanList.DiperbaruiOleh.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(penimbunanList.DiperbaruiOleh.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(penimbunanList.DiperbaruiOleh.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(penimbunanList.DiperbaruiOleh.EditAttributes)>
+            @(penimbunanList.DiperbaruiOleh.SelectOptionListHtml("x_DiperbaruiOleh", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(penimbunanList.DiperbaruiOleh.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fPenimbunansrch", function() {
+            var options = {
+                name: "x_DiperbaruiOleh",
+                selectId: "fPenimbunansrch_x_DiperbaruiOleh",
+                ajax: { id: "x_DiperbaruiOleh", form: "fPenimbunansrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.Penimbunan.fields.DiperbaruiOleh.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* penimbunanList.DiperbaruiOleh.Visible (end) *@
+@if (penimbunanList.TanggalDiperbarui.Visible) { // penimbunanList.TanggalDiperbarui.Visible (begin)
+    if (!penimbunanList.TanggalDiperbarui.UseFilter) {
+        penimbunanList.SearchColumnCount++;
+    }
+    <div id="xs_TanggalDiperbarui" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(penimbunanList.TanggalDiperbarui.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_TanggalDiperbarui"
+            name="x_TanggalDiperbarui[]"
+            class="form-control ew-select@(penimbunanList.TanggalDiperbarui.IsInvalidClass)"
+            data-select2-id="fPenimbunansrch_x_TanggalDiperbarui"
+            data-table="Penimbunan"
+            data-field="x_TanggalDiperbarui"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(penimbunanList.TanggalDiperbarui.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(penimbunanList.TanggalDiperbarui.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(penimbunanList.TanggalDiperbarui.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(penimbunanList.TanggalDiperbarui.EditAttributes)>
+            @(penimbunanList.TanggalDiperbarui.SelectOptionListHtml("x_TanggalDiperbarui", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(penimbunanList.TanggalDiperbarui.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fPenimbunansrch", function() {
+            var options = {
+                name: "x_TanggalDiperbarui",
+                selectId: "fPenimbunansrch_x_TanggalDiperbarui",
+                ajax: { id: "x_TanggalDiperbarui", form: "fPenimbunansrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.Penimbunan.fields.TanggalDiperbarui.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* penimbunanList.TanggalDiperbarui.Visible (end) *@
+</div><!-- /.row -->
+<div class="row mb-0">
+    <div class="col-sm-auto px-0 pe-sm-2">
+        <div class="ew-basic-search input-group">
+            <input type="search" name="@(Config.TableBasicSearch)" id="@(Config.TableBasicSearch)" class="form-control ew-basic-search-keyword" value="@Html.Raw(HtmlEncode(penimbunanList.BasicSearch.SessionKeyword))" placeholder="@(HtmlEncode(Language.Phrase("Search")))" aria-label="@(HtmlEncode(Language.Phrase("Search")))">
+            <input type="hidden" name="@(Config.TableBasicSearchType)" id="@(Config.TableBasicSearchType)" class="ew-basic-search-type" value="@(HtmlEncode(penimbunanList.BasicSearch.SessionType))">
+            <button type="button" data-bs-toggle="dropdown" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split" aria-haspopup="true" aria-expanded="false">
+                <span id="searchtype">@Html.Raw(penimbunanList.BasicSearch.TypeNameShort)</span>
+            </button>
+            <div class="dropdown-menu dropdown-menu-end">
+                <button type="button" class="dropdown-item@(penimbunanList.BasicSearch.SessionType == "" ? " active" : "")" form="fPenimbunansrch" data-ew-action="search-type">@Html.Raw(Language.Phrase("QuickSearchAuto"))</button>
+                <button type="button" class="dropdown-item@(penimbunanList.BasicSearch.SessionType == "=" ? " active" : "")" form="fPenimbunansrch" data-ew-action="search-type" data-search-type="=">@Html.Raw(Language.Phrase("QuickSearchExact"))</button>
+                <button type="button" class="dropdown-item@(penimbunanList.BasicSearch.SessionType == "AND" ? " active" : "")" form="fPenimbunansrch" data-ew-action="search-type" data-search-type="AND">@Html.Raw(Language.Phrase("QuickSearchAll"))</button>
+                <button type="button" class="dropdown-item@(penimbunanList.BasicSearch.SessionType == "OR" ? " active" : "")" form="fPenimbunansrch" data-ew-action="search-type" data-search-type="OR">@Html.Raw(Language.Phrase("QuickSearchAny"))</button>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-auto mb-3">
+        <button class="btn btn-primary" name="btn-submit" id="btn-submit" type="submit">@Html.Raw(Language.Phrase("SearchBtn"))</button>
+    </div>
+</div>
+</div><!-- /.ew-extended-search -->
+} @* Show search form (end) *@
+}
+</div><!-- /.ew-search-panel -->
+</form>
+}
+@penimbunanList.ShowPageHeader()
+@penimbunanList.ShowMessages()
+<main class="list @(penimbunanList.TotalRecords == 0 && !penimbunanList.IsAdd ? " ew-no-record" : "")">
+<div id="ew-header-options">
+    @penimbunanList.HeaderOptions.RenderBody()
+</div>
+<div id="ew-list">
+@if (penimbunanList.TotalRecords > 0 || !Empty(penimbunanList.CurrentAction)) {
+<div class="card ew-card ew-grid@(penimbunanList.IsAddOrEdit ? " ew-grid-add-edit" : "") @(penimbunanList.TableGridClass)">
+<form name="@(penimbunanList.FormName)" id="@(penimbunanList.FormName)" class="ew-form ew-list-form" action="@AppPath(penimbunanList.PageName)" method="post" novalidate autocomplete="off">
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+@if (penimbunanList.IsModal) {
+<input type="hidden" name="modal" value="1">
+}
+<div id="gmp_Penimbunan" class="card-body ew-grid-middle-panel @(penimbunanList.TableContainerClass)" style="@(penimbunanList.TableContainerStyle)">
+@if (penimbunanList.TotalRecords > 0 || penimbunanList.IsGridEdit || penimbunanList.IsMultiEdit) {
+<table id="tbl_Penimbunanlist" class="@(penimbunanList.TableClass)"><!-- .ew-table -->
+<thead>
+    <tr class="ew-table-header">
+@{
+    // Header row
+    penimbunanList.RowType = RowType.Header;
+
+    // Render list options
+    await penimbunanList.RenderListOptions();
+}
+@* Render list options (header, left) *@
+@penimbunanList.ListOptions.RenderHeader("left")
+@if (penimbunanList.Proses2.Visible) { // penimbunanList.Proses2.Visible (begin)
+        <th data-name="Proses2" class="@(penimbunanList.Proses2.HeaderCellClass)"><div id="elh_Penimbunan_Proses2" class="Penimbunan_Proses2">@Html.Raw(penimbunanList.RenderFieldHeader(penimbunanList.Proses2))</div></th>
+} @* penimbunanList.Proses2.Visible (end) *@
+@if (penimbunanList.Plant.Visible) { // penimbunanList.Plant.Visible (begin)
+        <th data-name="Plant" class="@(penimbunanList.Plant.HeaderCellClass)"><div id="elh_Penimbunan_Plant" class="Penimbunan_Plant">@Html.Raw(penimbunanList.RenderFieldHeader(penimbunanList.Plant))</div></th>
+} @* penimbunanList.Plant.Visible (end) *@
+@if (penimbunanList.IdPenerimaan.Visible) { // penimbunanList.IdPenerimaan.Visible (begin)
+        <th data-name="IdPenerimaan" class="@(penimbunanList.IdPenerimaan.HeaderCellClass)"><div id="elh_Penimbunan_IdPenerimaan" class="Penimbunan_IdPenerimaan">@Html.Raw(penimbunanList.RenderFieldHeader(penimbunanList.IdPenerimaan))</div></th>
+} @* penimbunanList.IdPenerimaan.Visible (end) *@
+@if (penimbunanList.IdTangki.Visible) { // penimbunanList.IdTangki.Visible (begin)
+        <th data-name="IdTangki" class="@(penimbunanList.IdTangki.HeaderCellClass)"><div id="elh_Penimbunan_IdTangki" class="Penimbunan_IdTangki">@Html.Raw(penimbunanList.RenderFieldHeader(penimbunanList.IdTangki))</div></th>
+} @* penimbunanList.IdTangki.Visible (end) *@
+@if (penimbunanList.StatusProses.Visible) { // penimbunanList.StatusProses.Visible (begin)
+        <th data-name="StatusProses" class="@(penimbunanList.StatusProses.HeaderCellClass)"><div id="elh_Penimbunan_StatusProses" class="Penimbunan_StatusProses">@Html.Raw(penimbunanList.RenderFieldHeader(penimbunanList.StatusProses))</div></th>
+} @* penimbunanList.StatusProses.Visible (end) *@
+@if (penimbunanList.PersentaseProgress.Visible) { // penimbunanList.PersentaseProgress.Visible (begin)
+        <th data-name="PersentaseProgress" class="@(penimbunanList.PersentaseProgress.HeaderCellClass)"><div id="elh_Penimbunan_PersentaseProgress" class="Penimbunan_PersentaseProgress">@Html.Raw(penimbunanList.RenderFieldHeader(penimbunanList.PersentaseProgress))</div></th>
+} @* penimbunanList.PersentaseProgress.Visible (end) *@
+@if (penimbunanList.DibuatOleh.Visible) { // penimbunanList.DibuatOleh.Visible (begin)
+        <th data-name="DibuatOleh" class="@(penimbunanList.DibuatOleh.HeaderCellClass)"><div id="elh_Penimbunan_DibuatOleh" class="Penimbunan_DibuatOleh">@Html.Raw(penimbunanList.RenderFieldHeader(penimbunanList.DibuatOleh))</div></th>
+} @* penimbunanList.DibuatOleh.Visible (end) *@
+@if (penimbunanList.TanggalDibuat.Visible) { // penimbunanList.TanggalDibuat.Visible (begin)
+        <th data-name="TanggalDibuat" class="@(penimbunanList.TanggalDibuat.HeaderCellClass)"><div id="elh_Penimbunan_TanggalDibuat" class="Penimbunan_TanggalDibuat">@Html.Raw(penimbunanList.RenderFieldHeader(penimbunanList.TanggalDibuat))</div></th>
+} @* penimbunanList.TanggalDibuat.Visible (end) *@
+@if (penimbunanList.DiperbaruiOleh.Visible) { // penimbunanList.DiperbaruiOleh.Visible (begin)
+        <th data-name="DiperbaruiOleh" class="@(penimbunanList.DiperbaruiOleh.HeaderCellClass)"><div id="elh_Penimbunan_DiperbaruiOleh" class="Penimbunan_DiperbaruiOleh">@Html.Raw(penimbunanList.RenderFieldHeader(penimbunanList.DiperbaruiOleh))</div></th>
+} @* penimbunanList.DiperbaruiOleh.Visible (end) *@
+@if (penimbunanList.TanggalDiperbarui.Visible) { // penimbunanList.TanggalDiperbarui.Visible (begin)
+        <th data-name="TanggalDiperbarui" class="@(penimbunanList.TanggalDiperbarui.HeaderCellClass)"><div id="elh_Penimbunan_TanggalDiperbarui" class="Penimbunan_TanggalDiperbarui">@Html.Raw(penimbunanList.RenderFieldHeader(penimbunanList.TanggalDiperbarui))</div></th>
+} @* penimbunanList.TanggalDiperbarui.Visible (end) *@
+@* Render list options (header, right) *@
+@penimbunanList.ListOptions.RenderHeader("right")
+    </tr>
+</thead>
+<tbody data-page="@(penimbunanList.PageNumber)">
+@{
+    await penimbunanList.SetupGrid();
+    bool eof = penimbunanList.Recordset == null; // DN
+}
+@while (penimbunanList.RecordCount < penimbunanList.StopRecord || SameString(penimbunanList.RowIndex, "$rowindex$")) { // Begin While
+    if (!eof && !SameString(penimbunanList.RowIndex, "$rowindex$") &&
+        (!penimbunanList.IsGridAdd || penimbunanList.CurrentMode == "copy") &&
+        (!((penimbunanList.IsCopy || penimbunanList.IsAdd) && penimbunanList.RowIndex is int rowIndex && rowIndex == 0))) // DN
+        eof = !await penimbunanList.Recordset.ReadAsync();
+    penimbunanList.RecordCount++;
+    if (penimbunanList.RecordCount >= penimbunanList.StartRecord) {
+        await penimbunanList.SetupRow();
+    <tr @Html.Raw(penimbunanList.RowAttributes)>
+    @* Render list options (body, left) *@
+    @penimbunanList.ListOptions.RenderBody("left", penimbunanList.RowCount)
+    @if (penimbunanList.Proses2.Visible) { // penimbunanList.Proses2.Visible (begin)
+        <td data-name="Proses2" @Html.Raw(penimbunanList.Proses2.CellAttributes)>
+<span id="el@(penimbunanList.RowIndex == "$rowindex$" ? "$rowindex$" : penimbunanList.RowCount)_Penimbunan_Proses2" class="el_Penimbunan_Proses2">
+<span @Html.Raw(penimbunanList.Proses2.ViewAttributes)>
+@Html.Raw(penimbunanList.Proses2.GetViewValue())</span>
+</span>
+</td>
+    } @* penimbunanList.Proses2.Visible (end) *@
+    @if (penimbunanList.Plant.Visible) { // penimbunanList.Plant.Visible (begin)
+        <td data-name="Plant" @Html.Raw(penimbunanList.Plant.CellAttributes)>
+<span id="el@(penimbunanList.RowIndex == "$rowindex$" ? "$rowindex$" : penimbunanList.RowCount)_Penimbunan_Plant" class="el_Penimbunan_Plant">
+<span @Html.Raw(penimbunanList.Plant.ViewAttributes)>
+@Html.Raw(penimbunanList.Plant.GetViewValue())</span>
+</span>
+</td>
+    } @* penimbunanList.Plant.Visible (end) *@
+    @if (penimbunanList.IdPenerimaan.Visible) { // penimbunanList.IdPenerimaan.Visible (begin)
+        <td data-name="IdPenerimaan" @Html.Raw(penimbunanList.IdPenerimaan.CellAttributes)>
+<span id="el@(penimbunanList.RowIndex == "$rowindex$" ? "$rowindex$" : penimbunanList.RowCount)_Penimbunan_IdPenerimaan" class="el_Penimbunan_IdPenerimaan">
+<span @Html.Raw(penimbunanList.IdPenerimaan.ViewAttributes)>
+@Html.Raw(penimbunanList.IdPenerimaan.GetViewValue())</span>
+</span>
+</td>
+    } @* penimbunanList.IdPenerimaan.Visible (end) *@
+    @if (penimbunanList.IdTangki.Visible) { // penimbunanList.IdTangki.Visible (begin)
+        <td data-name="IdTangki" @Html.Raw(penimbunanList.IdTangki.CellAttributes)>
+<span id="el@(penimbunanList.RowIndex == "$rowindex$" ? "$rowindex$" : penimbunanList.RowCount)_Penimbunan_IdTangki" class="el_Penimbunan_IdTangki">
+<span @Html.Raw(penimbunanList.IdTangki.ViewAttributes)>
+@Html.Raw(penimbunanList.IdTangki.GetViewValue())</span>
+</span>
+</td>
+    } @* penimbunanList.IdTangki.Visible (end) *@
+    @if (penimbunanList.StatusProses.Visible) { // penimbunanList.StatusProses.Visible (begin)
+        <td data-name="StatusProses" @Html.Raw(penimbunanList.StatusProses.CellAttributes)>
+<span id="el@(penimbunanList.RowIndex == "$rowindex$" ? "$rowindex$" : penimbunanList.RowCount)_Penimbunan_StatusProses" class="el_Penimbunan_StatusProses">
+<span @Html.Raw(penimbunanList.StatusProses.ViewAttributes)>
+@Html.Raw(penimbunanList.StatusProses.GetViewValue())</span>
+</span>
+</td>
+    } @* penimbunanList.StatusProses.Visible (end) *@
+    @if (penimbunanList.PersentaseProgress.Visible) { // penimbunanList.PersentaseProgress.Visible (begin)
+        <td data-name="PersentaseProgress" @Html.Raw(penimbunanList.PersentaseProgress.CellAttributes)>
+<span id="el@(penimbunanList.RowIndex == "$rowindex$" ? "$rowindex$" : penimbunanList.RowCount)_Penimbunan_PersentaseProgress" class="el_Penimbunan_PersentaseProgress">
+<span @Html.Raw(penimbunanList.PersentaseProgress.ViewAttributes)>
+@Html.Raw(penimbunanList.PersentaseProgress.GetViewValue())</span>
+</span>
+</td>
+    } @* penimbunanList.PersentaseProgress.Visible (end) *@
+    @if (penimbunanList.DibuatOleh.Visible) { // penimbunanList.DibuatOleh.Visible (begin)
+        <td data-name="DibuatOleh" @Html.Raw(penimbunanList.DibuatOleh.CellAttributes)>
+<span id="el@(penimbunanList.RowIndex == "$rowindex$" ? "$rowindex$" : penimbunanList.RowCount)_Penimbunan_DibuatOleh" class="el_Penimbunan_DibuatOleh">
+<span @Html.Raw(penimbunanList.DibuatOleh.ViewAttributes)>
+@Html.Raw(penimbunanList.DibuatOleh.GetViewValue())</span>
+</span>
+</td>
+    } @* penimbunanList.DibuatOleh.Visible (end) *@
+    @if (penimbunanList.TanggalDibuat.Visible) { // penimbunanList.TanggalDibuat.Visible (begin)
+        <td data-name="TanggalDibuat" @Html.Raw(penimbunanList.TanggalDibuat.CellAttributes)>
+<span id="el@(penimbunanList.RowIndex == "$rowindex$" ? "$rowindex$" : penimbunanList.RowCount)_Penimbunan_TanggalDibuat" class="el_Penimbunan_TanggalDibuat">
+<span @Html.Raw(penimbunanList.TanggalDibuat.ViewAttributes)>
+@Html.Raw(penimbunanList.TanggalDibuat.GetViewValue())</span>
+</span>
+</td>
+    } @* penimbunanList.TanggalDibuat.Visible (end) *@
+    @if (penimbunanList.DiperbaruiOleh.Visible) { // penimbunanList.DiperbaruiOleh.Visible (begin)
+        <td data-name="DiperbaruiOleh" @Html.Raw(penimbunanList.DiperbaruiOleh.CellAttributes)>
+<span id="el@(penimbunanList.RowIndex == "$rowindex$" ? "$rowindex$" : penimbunanList.RowCount)_Penimbunan_DiperbaruiOleh" class="el_Penimbunan_DiperbaruiOleh">
+<span @Html.Raw(penimbunanList.DiperbaruiOleh.ViewAttributes)>
+@Html.Raw(penimbunanList.DiperbaruiOleh.GetViewValue())</span>
+</span>
+</td>
+    } @* penimbunanList.DiperbaruiOleh.Visible (end) *@
+    @if (penimbunanList.TanggalDiperbarui.Visible) { // penimbunanList.TanggalDiperbarui.Visible (begin)
+        <td data-name="TanggalDiperbarui" @Html.Raw(penimbunanList.TanggalDiperbarui.CellAttributes)>
+<span id="el@(penimbunanList.RowIndex == "$rowindex$" ? "$rowindex$" : penimbunanList.RowCount)_Penimbunan_TanggalDiperbarui" class="el_Penimbunan_TanggalDiperbarui">
+<span @Html.Raw(penimbunanList.TanggalDiperbarui.ViewAttributes)>
+@Html.Raw(penimbunanList.TanggalDiperbarui.GetViewValue())</span>
+</span>
+</td>
+    } @* penimbunanList.TanggalDiperbarui.Visible (end) *@
+    @* Render list options (body, right) *@
+    @penimbunanList.ListOptions.RenderBody("right", penimbunanList.RowCount)
+    </tr>
+    } @* End if *@
+
+    // Reset for template row
+    if (SameString(penimbunanList.RowIndex, "$rowindex$"))
+        penimbunanList.RowIndex = 0;
+
+    // Reset inline add/copy row
+    if ((penimbunanList.IsCopy || penimbunanList.IsAdd) && penimbunanList.RowIndex is int rowIndex2 && rowIndex2 == 0)
+        penimbunanList.RowIndex = 1;
+} @* End While *@
+</tbody>
+</table><!-- /.ew-table -->
+} @* End If TotalRecords > 0 *@
+</div><!-- /.ew-grid-middle-panel -->
+@if (Empty(penimbunanList.CurrentAction) && !penimbunanList.UseAjaxActions) {
+<input type="hidden" name="action" id="action" value="">
+}
+</form><!-- /.ew-list-form -->
+@{ penimbunanList.CloseRecordset(); }
+@if (!penimbunanList.IsExport()) {
+<div class="card-footer ew-grid-lower-panel">
+@if (!penimbunanList.IsGridAdd && !(penimbunanList.IsGridEdit && penimbunanList.ModalGridEdit) && !penimbunanList.IsMultiEdit) {
+@Html.Raw(penimbunanList.Pager.Render())
+}
+<div class="ew-list-other-options">
+@penimbunanList.OtherOptions.RenderBody("bottom")
+</div>
+</div>
+}
+</div><!-- /.ew-grid -->
+} else { // Show other options
+<div class="ew-list-other-options">
+@penimbunanList.OtherOptions.ForEach(opt => opt.ButtonClass = "").RenderBody()
+</div>
+}
+</div>
+<div id="ew-footer-options">
+    @penimbunanList.FooterOptions.RenderBody()
+</div>
+</main>
+@penimbunanList.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+@if (!penimbunanList.IsExport()) {
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("Penimbunan");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Startup script
+    // Write your table-specific startup script here
+    // document.write("page loaded");
+    var parent_url = ew.PATH_BASE;
+    var steps = [
+        { number: 1, label: "Proses Penerimaan", url: '', icon: "fa-oil-can" },
+    ];
+    var currentStep = 1;
+    $("<style>")
+        .prop("type", "text/css")
+        .html(`
+            .stepper {
+                display: flex;
+                counter-reset: step;
+            }
+            .step {
+                width: 150px;
+                text-align: center;
+                position: relative;
+            }
+            .step:not(:last-child)::after {
+                content: '';
+                position: absolute;
+                top: 20px;
+                right: -50%;
+                width: 100%;
+                height: 4px;
+                background-color: #ccc;
+                z-index: 0;
+            }
+            .step.completed:not(:last-child)::after {
+                background-color: #3c6dbd;
+            }
+            .step-icon {
+                width: 36px;
+                height: 36px;
+                line-height: 36px;
+                border-radius: 50%;
+                background: #ccc;
+                display: inline-block;
+                z-index: 1;
+                position: relative;
+                color: white;
+                font-weight: bold;
+            }
+            .step.active .step-icon {
+                background: #3c6dbd;
+            }
+            .step-label {
+                margin-top: 8px;
+                font-size: 14px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                gap: 6px;
+                color: #333;
+            }
+            .step-label {
+                color: #3c6dbd !important;
+                text-decoration: none;
+                margin: 0;
+                padding: 0;
+            }
+            .step-label-not-active {
+                color: #CCCCCC !important;
+            }
+        `)
+        .appendTo("head");
+    var $stepperWrapper = $('<div id="bread-crumb-nav" class="d-flex border-bottom border-2 pb-2"><div class="stepper"></div></div>');
+    var $stepper = $stepperWrapper.find(".stepper");
+    steps.forEach(function (step, i) {
+        var isActive = step.number === currentStep;
+        var isCompleted = step.number < currentStep;
+        var stepClass = isActive ? "active" : isCompleted ? "completed" : "";
+        var icon, labelContent, html;
+        if (isActive) {
+            icon = `<div class="step-icon bg-success">${step.number}</div>`;
+            labelContent = `<div class="step-label"><p class="text-success mb-1"><i class="fa-solid ${step.icon} me-1 text-success"></i> ${step.label}</p></div>`;
+            html = `<div class="step ${stepClass} text-success">${icon}${labelContent}</div>`;
+        } else if (isCompleted) {
+            icon = `<div class="step-icon" style="background: #3c6dbd;">${step.number}</div>`;
+            labelContent = `<div><a href="${step.url}" class="step-label"><i class="fa-solid ${step.icon} me-1"></i>${step.label}</a></div>`;
+            html = `<div class="step ${stepClass}">${icon}${labelContent}</div>`;
+        } else {
+            icon = `<div class="step-icon">${step.number}</div>`;
+            labelContent = `<div class="step-label-not-active"><p style="margin: 0;"><i class="fa-solid ${step.icon} me-1"></i>${step.label}</p></div>`;
+            html = `<div class="step ${stepClass} text-secondary">${icon}${labelContent}</div>`;
+        }
+        $stepper.append(html);
+    });
+    if ($('#bread-crumb-nav').length == 0) {
+        $(".content-header .container-fluid .row").append($stepperWrapper);
+    }
+    $(document).ready(function() {
+        const UserLevel = "@CurrentUserLevel()";
+        const idRole = '@CurrentUserInfo("Rule")?.ToString()';
+        var parrentButton = $('button.btn-primary[name="btn-submit"]');
+        var addButton = $(`
+            <button class="btn btn-success ms-2" id="btn-add-penimbunan">
+                <i class="fas fa-plus"></i> Add New
+            </button>
+        `);
+        $(`a.btn.btn-default.ew-add-edit.ew-add[href="${parent_url}PenimbunanAdd"]`).remove();
+        parrentButton.parent().append(addButton);
+        if (UserLevel == "2" || UserLevel == "-1" || UserLevel == "4" || UserLevel == "5" || UserLevel == "6") {
+            addButton.on('click', function (e) {
+                e.preventDefault();
+                window.location.href = parent_url+'PenimbunanAdd';
+            });
+        } else if (idRole == '1' || idRole == '12' || idRole == '13') {
+            addButton.on('click', function (e) {
+                e.preventDefault();
+                window.location.href = parent_url+'PenimbunanAdd';
+            });
+        } else {
+            addButton.on('click', function (e) {
+                e.preventDefault();
+                ew.alert('Anda tidak memiliki akses untuk menambah data Proses Penerimaan.');
+            });
+        }
+    });  
+});
+</script>
+}

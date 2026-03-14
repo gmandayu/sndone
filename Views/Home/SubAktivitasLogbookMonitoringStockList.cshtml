@@ -1,0 +1,372 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (subAktivitasLogbookMonitoringStockList.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = subAktivitasLogbookMonitoringStockList.UseLayout ? "_Layout" : "";
+}
+@if (!subAktivitasLogbookMonitoringStockList.IsExport()) {
+<script>
+var currentTable = @Html.Raw(ConvertToJson(subAktivitasLogbookMonitoringStockList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { SubAktivitasLogbookMonitoringStock: currentTable } });
+var currentPageID = ew.PAGE_ID = "list";
+var currentForm;
+var @(subAktivitasLogbookMonitoringStockList.FormName);
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("@(subAktivitasLogbookMonitoringStockList.FormName)")
+        .setPageId("list")
+        .setSubmitWithFetch(@(subAktivitasLogbookMonitoringStockList.UseAjaxActions ? "true" : "false"))
+        .setFormKeyCountName("@(subAktivitasLogbookMonitoringStockList.FormKeyCountName)")
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Write your client script here, no need to add script tags.
+});
+</script>
+}
+@if (!subAktivitasLogbookMonitoringStockList.IsExport()) {
+<div class="btn-toolbar ew-toolbar">
+@if (subAktivitasLogbookMonitoringStockList.TotalRecords > 0 && subAktivitasLogbookMonitoringStockList.ExportOptions.Visible) {
+    subAktivitasLogbookMonitoringStockList.ExportOptions.Render("body");
+}
+@if (subAktivitasLogbookMonitoringStockList.ImportOptions.Visible) {
+    subAktivitasLogbookMonitoringStockList.ImportOptions.Render("body");
+}
+@if (subAktivitasLogbookMonitoringStockList.SearchOptions.Visible) {
+    subAktivitasLogbookMonitoringStockList.SearchOptions.Render("body");
+}
+@if (subAktivitasLogbookMonitoringStockList.FilterOptions.Visible) {
+    subAktivitasLogbookMonitoringStockList.FilterOptions.Render("body");
+}
+</div>
+}
+@if (!subAktivitasLogbookMonitoringStockList.IsModal) {
+<form name="fSubAktivitasLogbookMonitoringStocksrch" id="fSubAktivitasLogbookMonitoringStocksrch" class="ew-form ew-ext-search-form" action="@AppPath(CurrentPageName())" novalidate autocomplete="off">
+<div id="fSubAktivitasLogbookMonitoringStocksrch_search_panel" class="mb-2 mb-sm-0 @(subAktivitasLogbookMonitoringStockList.SearchPanelClass)"><!-- .ew-search-panel -->
+<script>
+var currentTable = @Html.Raw(ConvertToJson(subAktivitasLogbookMonitoringStockList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { SubAktivitasLogbookMonitoringStock: currentTable } });
+var currentForm;
+var fSubAktivitasLogbookMonitoringStocksrch, currentSearchForm, currentAdvancedSearchForm;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery,
+        fields = currentTable.fields;
+
+    // Form object for search
+    let form = new ew.FormBuilder()
+        .setId("fSubAktivitasLogbookMonitoringStocksrch")
+        .setPageId("list")
+@if (subAktivitasLogbookMonitoringStockList.UseAjaxActions) {
+        <text>.setSubmitWithFetch(true)</text>
+}
+
+        // Dynamic selection lists
+        .setLists({
+        })
+
+        // Filters
+        .setFilterList(@Html.Raw(subAktivitasLogbookMonitoringStockList.GetFilterList()))
+        .build();
+    window[form.id] = form;
+    currentSearchForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<input type="hidden" name="cmd" value="search">
+@if (Security.CanSearch) {
+if (!subAktivitasLogbookMonitoringStockList.IsExport() && Empty(subAktivitasLogbookMonitoringStockList.CurrentAction) && subAktivitasLogbookMonitoringStockList.HasSearchFields()) { @* Show search form (begin) *@
+<div class="ew-extended-search container-fluid ps-2">
+<div class="row mb-0">
+    <div class="col-sm-auto px-0 pe-sm-2">
+        <div class="ew-basic-search input-group">
+            <input type="search" name="@(Config.TableBasicSearch)" id="@(Config.TableBasicSearch)" class="form-control ew-basic-search-keyword" value="@Html.Raw(HtmlEncode(subAktivitasLogbookMonitoringStockList.BasicSearch.SessionKeyword))" placeholder="@(HtmlEncode(Language.Phrase("Search")))" aria-label="@(HtmlEncode(Language.Phrase("Search")))">
+            <input type="hidden" name="@(Config.TableBasicSearchType)" id="@(Config.TableBasicSearchType)" class="ew-basic-search-type" value="@(HtmlEncode(subAktivitasLogbookMonitoringStockList.BasicSearch.SessionType))">
+            <button type="button" data-bs-toggle="dropdown" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split" aria-haspopup="true" aria-expanded="false">
+                <span id="searchtype">@Html.Raw(subAktivitasLogbookMonitoringStockList.BasicSearch.TypeNameShort)</span>
+            </button>
+            <div class="dropdown-menu dropdown-menu-end">
+                <button type="button" class="dropdown-item@(subAktivitasLogbookMonitoringStockList.BasicSearch.SessionType == "" ? " active" : "")" form="fSubAktivitasLogbookMonitoringStocksrch" data-ew-action="search-type">@Html.Raw(Language.Phrase("QuickSearchAuto"))</button>
+                <button type="button" class="dropdown-item@(subAktivitasLogbookMonitoringStockList.BasicSearch.SessionType == "=" ? " active" : "")" form="fSubAktivitasLogbookMonitoringStocksrch" data-ew-action="search-type" data-search-type="=">@Html.Raw(Language.Phrase("QuickSearchExact"))</button>
+                <button type="button" class="dropdown-item@(subAktivitasLogbookMonitoringStockList.BasicSearch.SessionType == "AND" ? " active" : "")" form="fSubAktivitasLogbookMonitoringStocksrch" data-ew-action="search-type" data-search-type="AND">@Html.Raw(Language.Phrase("QuickSearchAll"))</button>
+                <button type="button" class="dropdown-item@(subAktivitasLogbookMonitoringStockList.BasicSearch.SessionType == "OR" ? " active" : "")" form="fSubAktivitasLogbookMonitoringStocksrch" data-ew-action="search-type" data-search-type="OR">@Html.Raw(Language.Phrase("QuickSearchAny"))</button>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-auto mb-3">
+        <button class="btn btn-primary" name="btn-submit" id="btn-submit" type="submit">@Html.Raw(Language.Phrase("SearchBtn"))</button>
+    </div>
+</div>
+</div><!-- /.ew-extended-search -->
+} @* Show search form (end) *@
+}
+</div><!-- /.ew-search-panel -->
+</form>
+}
+@subAktivitasLogbookMonitoringStockList.ShowPageHeader()
+@subAktivitasLogbookMonitoringStockList.ShowMessages()
+<main class="list @(subAktivitasLogbookMonitoringStockList.TotalRecords == 0 && !subAktivitasLogbookMonitoringStockList.IsAdd ? " ew-no-record" : "")">
+<div id="ew-header-options">
+    @subAktivitasLogbookMonitoringStockList.HeaderOptions.RenderBody()
+</div>
+<div id="ew-list">
+@if (subAktivitasLogbookMonitoringStockList.TotalRecords > 0 || !Empty(subAktivitasLogbookMonitoringStockList.CurrentAction)) {
+<div class="card ew-card ew-grid@(subAktivitasLogbookMonitoringStockList.IsAddOrEdit ? " ew-grid-add-edit" : "") @(subAktivitasLogbookMonitoringStockList.TableGridClass)">
+<form name="@(subAktivitasLogbookMonitoringStockList.FormName)" id="@(subAktivitasLogbookMonitoringStockList.FormName)" class="ew-form ew-list-form" action="@AppPath(subAktivitasLogbookMonitoringStockList.PageName)" method="post" novalidate autocomplete="off">
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+@if (subAktivitasLogbookMonitoringStockList.IsModal) {
+<input type="hidden" name="modal" value="1">
+}
+<div id="gmp_SubAktivitasLogbookMonitoringStock" class="card-body ew-grid-middle-panel @(subAktivitasLogbookMonitoringStockList.TableContainerClass)" style="@(subAktivitasLogbookMonitoringStockList.TableContainerStyle)">
+@if (subAktivitasLogbookMonitoringStockList.TotalRecords > 0 || subAktivitasLogbookMonitoringStockList.IsGridEdit || subAktivitasLogbookMonitoringStockList.IsMultiEdit) {
+<table id="tbl_SubAktivitasLogbookMonitoringStocklist" class="@(subAktivitasLogbookMonitoringStockList.TableClass)"><!-- .ew-table -->
+<thead>
+    <tr class="ew-table-header">
+@{
+    // Header row
+    subAktivitasLogbookMonitoringStockList.RowType = RowType.Header;
+
+    // Render list options
+    await subAktivitasLogbookMonitoringStockList.RenderListOptions();
+}
+@* Render list options (header, left) *@
+@subAktivitasLogbookMonitoringStockList.ListOptions.RenderHeader("left")
+@if (subAktivitasLogbookMonitoringStockList.idProses.Visible) { // subAktivitasLogbookMonitoringStockList.idProses.Visible (begin)
+        <th data-name="idProses" class="@(subAktivitasLogbookMonitoringStockList.idProses.HeaderCellClass)"><div id="elh_SubAktivitasLogbookMonitoringStock_idProses" class="SubAktivitasLogbookMonitoringStock_idProses">@Html.Raw(subAktivitasLogbookMonitoringStockList.RenderFieldHeader(subAktivitasLogbookMonitoringStockList.idProses))</div></th>
+} @* subAktivitasLogbookMonitoringStockList.idProses.Visible (end) *@
+@if (subAktivitasLogbookMonitoringStockList.idAktifitas.Visible) { // subAktivitasLogbookMonitoringStockList.idAktifitas.Visible (begin)
+        <th data-name="idAktifitas" class="@(subAktivitasLogbookMonitoringStockList.idAktifitas.HeaderCellClass)"><div id="elh_SubAktivitasLogbookMonitoringStock_idAktifitas" class="SubAktivitasLogbookMonitoringStock_idAktifitas">@Html.Raw(subAktivitasLogbookMonitoringStockList.RenderFieldHeader(subAktivitasLogbookMonitoringStockList.idAktifitas))</div></th>
+} @* subAktivitasLogbookMonitoringStockList.idAktifitas.Visible (end) *@
+@if (subAktivitasLogbookMonitoringStockList.NoReferensi.Visible) { // subAktivitasLogbookMonitoringStockList.NoReferensi.Visible (begin)
+        <th data-name="NoReferensi" class="@(subAktivitasLogbookMonitoringStockList.NoReferensi.HeaderCellClass)"><div id="elh_SubAktivitasLogbookMonitoringStock_NoReferensi" class="SubAktivitasLogbookMonitoringStock_NoReferensi">@Html.Raw(subAktivitasLogbookMonitoringStockList.RenderFieldHeader(subAktivitasLogbookMonitoringStockList.NoReferensi))</div></th>
+} @* subAktivitasLogbookMonitoringStockList.NoReferensi.Visible (end) *@
+@if (subAktivitasLogbookMonitoringStockList.Nomor_Tangki.Visible) { // subAktivitasLogbookMonitoringStockList.Nomor_Tangki.Visible (begin)
+        <th data-name="Nomor_Tangki" class="@(subAktivitasLogbookMonitoringStockList.Nomor_Tangki.HeaderCellClass)"><div id="elh_SubAktivitasLogbookMonitoringStock_Nomor_Tangki" class="SubAktivitasLogbookMonitoringStock_Nomor_Tangki">@Html.Raw(subAktivitasLogbookMonitoringStockList.RenderFieldHeader(subAktivitasLogbookMonitoringStockList.Nomor_Tangki))</div></th>
+} @* subAktivitasLogbookMonitoringStockList.Nomor_Tangki.Visible (end) *@
+@if (subAktivitasLogbookMonitoringStockList.Produk.Visible) { // subAktivitasLogbookMonitoringStockList.Produk.Visible (begin)
+        <th data-name="Produk" class="@(subAktivitasLogbookMonitoringStockList.Produk.HeaderCellClass)"><div id="elh_SubAktivitasLogbookMonitoringStock_Produk" class="SubAktivitasLogbookMonitoringStock_Produk">@Html.Raw(subAktivitasLogbookMonitoringStockList.RenderFieldHeader(subAktivitasLogbookMonitoringStockList.Produk))</div></th>
+} @* subAktivitasLogbookMonitoringStockList.Produk.Visible (end) *@
+@if (subAktivitasLogbookMonitoringStockList.StatusAktivitas.Visible) { // subAktivitasLogbookMonitoringStockList.StatusAktivitas.Visible (begin)
+        <th data-name="StatusAktivitas" class="@(subAktivitasLogbookMonitoringStockList.StatusAktivitas.HeaderCellClass)"><div id="elh_SubAktivitasLogbookMonitoringStock_StatusAktivitas" class="SubAktivitasLogbookMonitoringStock_StatusAktivitas">@Html.Raw(subAktivitasLogbookMonitoringStockList.RenderFieldHeader(subAktivitasLogbookMonitoringStockList.StatusAktivitas))</div></th>
+} @* subAktivitasLogbookMonitoringStockList.StatusAktivitas.Visible (end) *@
+@if (subAktivitasLogbookMonitoringStockList.Aktivitas2.Visible) { // subAktivitasLogbookMonitoringStockList.Aktivitas2.Visible (begin)
+        <th data-name="Aktivitas2" class="@(subAktivitasLogbookMonitoringStockList.Aktivitas2.HeaderCellClass)"><div id="elh_SubAktivitasLogbookMonitoringStock_Aktivitas2" class="SubAktivitasLogbookMonitoringStock_Aktivitas2">@Html.Raw(subAktivitasLogbookMonitoringStockList.RenderFieldHeader(subAktivitasLogbookMonitoringStockList.Aktivitas2))</div></th>
+} @* subAktivitasLogbookMonitoringStockList.Aktivitas2.Visible (end) *@
+@if (subAktivitasLogbookMonitoringStockList.Level_Tangki.Visible) { // subAktivitasLogbookMonitoringStockList.Level_Tangki.Visible (begin)
+        <th data-name="Level_Tangki" class="@(subAktivitasLogbookMonitoringStockList.Level_Tangki.HeaderCellClass)"><div id="elh_SubAktivitasLogbookMonitoringStock_Level_Tangki" class="SubAktivitasLogbookMonitoringStock_Level_Tangki">@Html.Raw(subAktivitasLogbookMonitoringStockList.RenderFieldHeader(subAktivitasLogbookMonitoringStockList.Level_Tangki))</div></th>
+} @* subAktivitasLogbookMonitoringStockList.Level_Tangki.Visible (end) *@
+@if (subAktivitasLogbookMonitoringStockList.Volume_KLObs.Visible) { // subAktivitasLogbookMonitoringStockList.Volume_KLObs.Visible (begin)
+        <th data-name="Volume_KLObs" class="@(subAktivitasLogbookMonitoringStockList.Volume_KLObs.HeaderCellClass)"><div id="elh_SubAktivitasLogbookMonitoringStock_Volume_KLObs" class="SubAktivitasLogbookMonitoringStock_Volume_KLObs">@Html.Raw(subAktivitasLogbookMonitoringStockList.RenderFieldHeader(subAktivitasLogbookMonitoringStockList.Volume_KLObs))</div></th>
+} @* subAktivitasLogbookMonitoringStockList.Volume_KLObs.Visible (end) *@
+@if (subAktivitasLogbookMonitoringStockList.userInput.Visible) { // subAktivitasLogbookMonitoringStockList.userInput.Visible (begin)
+        <th data-name="userInput" class="@(subAktivitasLogbookMonitoringStockList.userInput.HeaderCellClass)"><div id="elh_SubAktivitasLogbookMonitoringStock_userInput" class="SubAktivitasLogbookMonitoringStock_userInput">@Html.Raw(subAktivitasLogbookMonitoringStockList.RenderFieldHeader(subAktivitasLogbookMonitoringStockList.userInput))</div></th>
+} @* subAktivitasLogbookMonitoringStockList.userInput.Visible (end) *@
+@if (subAktivitasLogbookMonitoringStockList.LastUpdatedBy.Visible) { // subAktivitasLogbookMonitoringStockList.LastUpdatedBy.Visible (begin)
+        <th data-name="LastUpdatedBy" class="@(subAktivitasLogbookMonitoringStockList.LastUpdatedBy.HeaderCellClass)"><div id="elh_SubAktivitasLogbookMonitoringStock_LastUpdatedBy" class="SubAktivitasLogbookMonitoringStock_LastUpdatedBy">@Html.Raw(subAktivitasLogbookMonitoringStockList.RenderFieldHeader(subAktivitasLogbookMonitoringStockList.LastUpdatedBy))</div></th>
+} @* subAktivitasLogbookMonitoringStockList.LastUpdatedBy.Visible (end) *@
+@if (subAktivitasLogbookMonitoringStockList.lastUpdatedDate.Visible) { // subAktivitasLogbookMonitoringStockList.lastUpdatedDate.Visible (begin)
+        <th data-name="lastUpdatedDate" class="@(subAktivitasLogbookMonitoringStockList.lastUpdatedDate.HeaderCellClass)"><div id="elh_SubAktivitasLogbookMonitoringStock_lastUpdatedDate" class="SubAktivitasLogbookMonitoringStock_lastUpdatedDate">@Html.Raw(subAktivitasLogbookMonitoringStockList.RenderFieldHeader(subAktivitasLogbookMonitoringStockList.lastUpdatedDate))</div></th>
+} @* subAktivitasLogbookMonitoringStockList.lastUpdatedDate.Visible (end) *@
+@if (subAktivitasLogbookMonitoringStockList.IdPlant.Visible) { // subAktivitasLogbookMonitoringStockList.IdPlant.Visible (begin)
+        <th data-name="IdPlant" class="@(subAktivitasLogbookMonitoringStockList.IdPlant.HeaderCellClass)"><div id="elh_SubAktivitasLogbookMonitoringStock_IdPlant" class="SubAktivitasLogbookMonitoringStock_IdPlant">@Html.Raw(subAktivitasLogbookMonitoringStockList.RenderFieldHeader(subAktivitasLogbookMonitoringStockList.IdPlant))</div></th>
+} @* subAktivitasLogbookMonitoringStockList.IdPlant.Visible (end) *@
+@* Render list options (header, right) *@
+@subAktivitasLogbookMonitoringStockList.ListOptions.RenderHeader("right")
+    </tr>
+</thead>
+<tbody data-page="@(subAktivitasLogbookMonitoringStockList.PageNumber)">
+@{
+    await subAktivitasLogbookMonitoringStockList.SetupGrid();
+    bool eof = subAktivitasLogbookMonitoringStockList.Recordset == null; // DN
+}
+@while (subAktivitasLogbookMonitoringStockList.RecordCount < subAktivitasLogbookMonitoringStockList.StopRecord || SameString(subAktivitasLogbookMonitoringStockList.RowIndex, "$rowindex$")) { // Begin While
+    if (!eof && !SameString(subAktivitasLogbookMonitoringStockList.RowIndex, "$rowindex$") &&
+        (!subAktivitasLogbookMonitoringStockList.IsGridAdd || subAktivitasLogbookMonitoringStockList.CurrentMode == "copy") &&
+        (!((subAktivitasLogbookMonitoringStockList.IsCopy || subAktivitasLogbookMonitoringStockList.IsAdd) && subAktivitasLogbookMonitoringStockList.RowIndex is int rowIndex && rowIndex == 0))) // DN
+        eof = !await subAktivitasLogbookMonitoringStockList.Recordset.ReadAsync();
+    subAktivitasLogbookMonitoringStockList.RecordCount++;
+    if (subAktivitasLogbookMonitoringStockList.RecordCount >= subAktivitasLogbookMonitoringStockList.StartRecord) {
+        await subAktivitasLogbookMonitoringStockList.SetupRow();
+    <tr @Html.Raw(subAktivitasLogbookMonitoringStockList.RowAttributes)>
+    @* Render list options (body, left) *@
+    @subAktivitasLogbookMonitoringStockList.ListOptions.RenderBody("left", subAktivitasLogbookMonitoringStockList.RowCount)
+    @if (subAktivitasLogbookMonitoringStockList.idProses.Visible) { // subAktivitasLogbookMonitoringStockList.idProses.Visible (begin)
+        <td data-name="idProses" @Html.Raw(subAktivitasLogbookMonitoringStockList.idProses.CellAttributes)>
+<span id="el@(subAktivitasLogbookMonitoringStockList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasLogbookMonitoringStockList.RowCount)_SubAktivitasLogbookMonitoringStock_idProses" class="el_SubAktivitasLogbookMonitoringStock_idProses">
+<span @Html.Raw(subAktivitasLogbookMonitoringStockList.idProses.ViewAttributes)>
+@Html.Raw(subAktivitasLogbookMonitoringStockList.idProses.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasLogbookMonitoringStockList.idProses.Visible (end) *@
+    @if (subAktivitasLogbookMonitoringStockList.idAktifitas.Visible) { // subAktivitasLogbookMonitoringStockList.idAktifitas.Visible (begin)
+        <td data-name="idAktifitas" @Html.Raw(subAktivitasLogbookMonitoringStockList.idAktifitas.CellAttributes)>
+<span id="el@(subAktivitasLogbookMonitoringStockList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasLogbookMonitoringStockList.RowCount)_SubAktivitasLogbookMonitoringStock_idAktifitas" class="el_SubAktivitasLogbookMonitoringStock_idAktifitas">
+<span @Html.Raw(subAktivitasLogbookMonitoringStockList.idAktifitas.ViewAttributes)>
+@Html.Raw(subAktivitasLogbookMonitoringStockList.idAktifitas.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasLogbookMonitoringStockList.idAktifitas.Visible (end) *@
+    @if (subAktivitasLogbookMonitoringStockList.NoReferensi.Visible) { // subAktivitasLogbookMonitoringStockList.NoReferensi.Visible (begin)
+        <td data-name="NoReferensi" @Html.Raw(subAktivitasLogbookMonitoringStockList.NoReferensi.CellAttributes)>
+<span id="el@(subAktivitasLogbookMonitoringStockList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasLogbookMonitoringStockList.RowCount)_SubAktivitasLogbookMonitoringStock_NoReferensi" class="el_SubAktivitasLogbookMonitoringStock_NoReferensi">
+<span @Html.Raw(subAktivitasLogbookMonitoringStockList.NoReferensi.ViewAttributes)>
+@Html.Raw(subAktivitasLogbookMonitoringStockList.NoReferensi.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasLogbookMonitoringStockList.NoReferensi.Visible (end) *@
+    @if (subAktivitasLogbookMonitoringStockList.Nomor_Tangki.Visible) { // subAktivitasLogbookMonitoringStockList.Nomor_Tangki.Visible (begin)
+        <td data-name="Nomor_Tangki" @Html.Raw(subAktivitasLogbookMonitoringStockList.Nomor_Tangki.CellAttributes)>
+<span id="el@(subAktivitasLogbookMonitoringStockList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasLogbookMonitoringStockList.RowCount)_SubAktivitasLogbookMonitoringStock_Nomor_Tangki" class="el_SubAktivitasLogbookMonitoringStock_Nomor_Tangki">
+<span @Html.Raw(subAktivitasLogbookMonitoringStockList.Nomor_Tangki.ViewAttributes)>
+@Html.Raw(subAktivitasLogbookMonitoringStockList.Nomor_Tangki.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasLogbookMonitoringStockList.Nomor_Tangki.Visible (end) *@
+    @if (subAktivitasLogbookMonitoringStockList.Produk.Visible) { // subAktivitasLogbookMonitoringStockList.Produk.Visible (begin)
+        <td data-name="Produk" @Html.Raw(subAktivitasLogbookMonitoringStockList.Produk.CellAttributes)>
+<span id="el@(subAktivitasLogbookMonitoringStockList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasLogbookMonitoringStockList.RowCount)_SubAktivitasLogbookMonitoringStock_Produk" class="el_SubAktivitasLogbookMonitoringStock_Produk">
+<span @Html.Raw(subAktivitasLogbookMonitoringStockList.Produk.ViewAttributes)>
+@Html.Raw(subAktivitasLogbookMonitoringStockList.Produk.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasLogbookMonitoringStockList.Produk.Visible (end) *@
+    @if (subAktivitasLogbookMonitoringStockList.StatusAktivitas.Visible) { // subAktivitasLogbookMonitoringStockList.StatusAktivitas.Visible (begin)
+        <td data-name="StatusAktivitas" @Html.Raw(subAktivitasLogbookMonitoringStockList.StatusAktivitas.CellAttributes)>
+<span id="el@(subAktivitasLogbookMonitoringStockList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasLogbookMonitoringStockList.RowCount)_SubAktivitasLogbookMonitoringStock_StatusAktivitas" class="el_SubAktivitasLogbookMonitoringStock_StatusAktivitas">
+<span @Html.Raw(subAktivitasLogbookMonitoringStockList.StatusAktivitas.ViewAttributes)>
+@Html.Raw(subAktivitasLogbookMonitoringStockList.StatusAktivitas.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasLogbookMonitoringStockList.StatusAktivitas.Visible (end) *@
+    @if (subAktivitasLogbookMonitoringStockList.Aktivitas2.Visible) { // subAktivitasLogbookMonitoringStockList.Aktivitas2.Visible (begin)
+        <td data-name="Aktivitas2" @Html.Raw(subAktivitasLogbookMonitoringStockList.Aktivitas2.CellAttributes)>
+<span id="el@(subAktivitasLogbookMonitoringStockList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasLogbookMonitoringStockList.RowCount)_SubAktivitasLogbookMonitoringStock_Aktivitas2" class="el_SubAktivitasLogbookMonitoringStock_Aktivitas2">
+<span @Html.Raw(subAktivitasLogbookMonitoringStockList.Aktivitas2.ViewAttributes)>
+@Html.Raw(subAktivitasLogbookMonitoringStockList.Aktivitas2.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasLogbookMonitoringStockList.Aktivitas2.Visible (end) *@
+    @if (subAktivitasLogbookMonitoringStockList.Level_Tangki.Visible) { // subAktivitasLogbookMonitoringStockList.Level_Tangki.Visible (begin)
+        <td data-name="Level_Tangki" @Html.Raw(subAktivitasLogbookMonitoringStockList.Level_Tangki.CellAttributes)>
+<span id="el@(subAktivitasLogbookMonitoringStockList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasLogbookMonitoringStockList.RowCount)_SubAktivitasLogbookMonitoringStock_Level_Tangki" class="el_SubAktivitasLogbookMonitoringStock_Level_Tangki">
+<span @Html.Raw(subAktivitasLogbookMonitoringStockList.Level_Tangki.ViewAttributes)>
+@Html.Raw(subAktivitasLogbookMonitoringStockList.Level_Tangki.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasLogbookMonitoringStockList.Level_Tangki.Visible (end) *@
+    @if (subAktivitasLogbookMonitoringStockList.Volume_KLObs.Visible) { // subAktivitasLogbookMonitoringStockList.Volume_KLObs.Visible (begin)
+        <td data-name="Volume_KLObs" @Html.Raw(subAktivitasLogbookMonitoringStockList.Volume_KLObs.CellAttributes)>
+<span id="el@(subAktivitasLogbookMonitoringStockList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasLogbookMonitoringStockList.RowCount)_SubAktivitasLogbookMonitoringStock_Volume_KLObs" class="el_SubAktivitasLogbookMonitoringStock_Volume_KLObs">
+<span @Html.Raw(subAktivitasLogbookMonitoringStockList.Volume_KLObs.ViewAttributes)>
+@Html.Raw(subAktivitasLogbookMonitoringStockList.Volume_KLObs.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasLogbookMonitoringStockList.Volume_KLObs.Visible (end) *@
+    @if (subAktivitasLogbookMonitoringStockList.userInput.Visible) { // subAktivitasLogbookMonitoringStockList.userInput.Visible (begin)
+        <td data-name="userInput" @Html.Raw(subAktivitasLogbookMonitoringStockList.userInput.CellAttributes)>
+<span id="el@(subAktivitasLogbookMonitoringStockList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasLogbookMonitoringStockList.RowCount)_SubAktivitasLogbookMonitoringStock_userInput" class="el_SubAktivitasLogbookMonitoringStock_userInput">
+<span @Html.Raw(subAktivitasLogbookMonitoringStockList.userInput.ViewAttributes)>
+@Html.Raw(subAktivitasLogbookMonitoringStockList.userInput.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasLogbookMonitoringStockList.userInput.Visible (end) *@
+    @if (subAktivitasLogbookMonitoringStockList.LastUpdatedBy.Visible) { // subAktivitasLogbookMonitoringStockList.LastUpdatedBy.Visible (begin)
+        <td data-name="LastUpdatedBy" @Html.Raw(subAktivitasLogbookMonitoringStockList.LastUpdatedBy.CellAttributes)>
+<span id="el@(subAktivitasLogbookMonitoringStockList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasLogbookMonitoringStockList.RowCount)_SubAktivitasLogbookMonitoringStock_LastUpdatedBy" class="el_SubAktivitasLogbookMonitoringStock_LastUpdatedBy">
+<span @Html.Raw(subAktivitasLogbookMonitoringStockList.LastUpdatedBy.ViewAttributes)>
+@Html.Raw(subAktivitasLogbookMonitoringStockList.LastUpdatedBy.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasLogbookMonitoringStockList.LastUpdatedBy.Visible (end) *@
+    @if (subAktivitasLogbookMonitoringStockList.lastUpdatedDate.Visible) { // subAktivitasLogbookMonitoringStockList.lastUpdatedDate.Visible (begin)
+        <td data-name="lastUpdatedDate" @Html.Raw(subAktivitasLogbookMonitoringStockList.lastUpdatedDate.CellAttributes)>
+<span id="el@(subAktivitasLogbookMonitoringStockList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasLogbookMonitoringStockList.RowCount)_SubAktivitasLogbookMonitoringStock_lastUpdatedDate" class="el_SubAktivitasLogbookMonitoringStock_lastUpdatedDate">
+<span @Html.Raw(subAktivitasLogbookMonitoringStockList.lastUpdatedDate.ViewAttributes)>
+@Html.Raw(subAktivitasLogbookMonitoringStockList.lastUpdatedDate.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasLogbookMonitoringStockList.lastUpdatedDate.Visible (end) *@
+    @if (subAktivitasLogbookMonitoringStockList.IdPlant.Visible) { // subAktivitasLogbookMonitoringStockList.IdPlant.Visible (begin)
+        <td data-name="IdPlant" @Html.Raw(subAktivitasLogbookMonitoringStockList.IdPlant.CellAttributes)>
+<span id="el@(subAktivitasLogbookMonitoringStockList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasLogbookMonitoringStockList.RowCount)_SubAktivitasLogbookMonitoringStock_IdPlant" class="el_SubAktivitasLogbookMonitoringStock_IdPlant">
+<span @Html.Raw(subAktivitasLogbookMonitoringStockList.IdPlant.ViewAttributes)>
+@Html.Raw(subAktivitasLogbookMonitoringStockList.IdPlant.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasLogbookMonitoringStockList.IdPlant.Visible (end) *@
+    @* Render list options (body, right) *@
+    @subAktivitasLogbookMonitoringStockList.ListOptions.RenderBody("right", subAktivitasLogbookMonitoringStockList.RowCount)
+    </tr>
+    } @* End if *@
+
+    // Reset for template row
+    if (SameString(subAktivitasLogbookMonitoringStockList.RowIndex, "$rowindex$"))
+        subAktivitasLogbookMonitoringStockList.RowIndex = 0;
+
+    // Reset inline add/copy row
+    if ((subAktivitasLogbookMonitoringStockList.IsCopy || subAktivitasLogbookMonitoringStockList.IsAdd) && subAktivitasLogbookMonitoringStockList.RowIndex is int rowIndex2 && rowIndex2 == 0)
+        subAktivitasLogbookMonitoringStockList.RowIndex = 1;
+} @* End While *@
+</tbody>
+</table><!-- /.ew-table -->
+} @* End If TotalRecords > 0 *@
+</div><!-- /.ew-grid-middle-panel -->
+@if (Empty(subAktivitasLogbookMonitoringStockList.CurrentAction) && !subAktivitasLogbookMonitoringStockList.UseAjaxActions) {
+<input type="hidden" name="action" id="action" value="">
+}
+</form><!-- /.ew-list-form -->
+@{ subAktivitasLogbookMonitoringStockList.CloseRecordset(); }
+@if (!subAktivitasLogbookMonitoringStockList.IsExport()) {
+<div class="card-footer ew-grid-lower-panel">
+@if (!subAktivitasLogbookMonitoringStockList.IsGridAdd && !(subAktivitasLogbookMonitoringStockList.IsGridEdit && subAktivitasLogbookMonitoringStockList.ModalGridEdit) && !subAktivitasLogbookMonitoringStockList.IsMultiEdit) {
+@Html.Raw(subAktivitasLogbookMonitoringStockList.Pager.Render())
+}
+<div class="ew-list-other-options">
+@subAktivitasLogbookMonitoringStockList.OtherOptions.RenderBody("bottom")
+</div>
+</div>
+}
+</div><!-- /.ew-grid -->
+} else { // Show other options
+<div class="ew-list-other-options">
+@subAktivitasLogbookMonitoringStockList.OtherOptions.ForEach(opt => opt.ButtonClass = "").RenderBody()
+</div>
+}
+</div>
+<div id="ew-footer-options">
+    @subAktivitasLogbookMonitoringStockList.FooterOptions.RenderBody()
+</div>
+</main>
+@subAktivitasLogbookMonitoringStockList.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+@if (!subAktivitasLogbookMonitoringStockList.IsExport()) {
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("SubAktivitasLogbookMonitoringStock");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Write your table-specific startup script here
+    // document.write("page loaded");
+});
+</script>
+}

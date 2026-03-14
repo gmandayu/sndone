@@ -1,0 +1,89 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (masterPicView.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = masterPicView.UseLayout ? "_Layout" : "";
+}
+@if (!masterPicView.IsExport()) {
+<div class="btn-toolbar ew-toolbar">
+    @masterPicView.ExportOptions.RenderBody()
+    @masterPicView.OtherOptions.RenderBody()
+</div>
+}
+@masterPicView.ShowPageHeader()
+@masterPicView.ShowMessages()
+<main class="view">
+<form name="fMasterPICview" id="fMasterPICview" class="ew-form ew-view-form overlay-wrapper" action="@AppPath(CurrentPageName())" method="post" novalidate autocomplete="off">
+@if (!masterPicView.IsExport()) {
+<script>
+var currentTable = @Html.Raw(ConvertToJson(masterPicView.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { MasterPIC: currentTable } });
+var currentPageID = ew.PAGE_ID = "view";
+var currentForm;
+var fMasterPICview;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("fMasterPICview")
+        .setPageId("view")
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Write your client script here, no need to add script tags.
+});
+</script>
+}
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+<input type="hidden" name="modal" value="@ConvertToInt(masterPicView.IsModal)">
+<table class="@(masterPicView.TableClass)">
+@if (masterPicView.IdPIC.Visible) { // masterPicView.IdPIC.Visible (begin)
+    <tr id="r_IdPIC" @Html.Raw(masterPicView.IdPIC.RowAttributes)>
+        <td class="@(masterPicView.TableLeftColumnClass)"><span id="elh_MasterPIC_IdPIC">@Html.Raw(masterPicView.IdPIC.Caption)</span></td>
+        <td data-name="IdPIC" @Html.Raw(masterPicView.IdPIC.CellAttributes)>
+<span id="el_MasterPIC_IdPIC">
+<span @Html.Raw(masterPicView.IdPIC.ViewAttributes)>
+@Html.Raw(masterPicView.IdPIC.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* masterPicView.IdPIC.Visible (end) *@
+@if (masterPicView.NamaPIC.Visible) { // masterPicView.NamaPIC.Visible (begin)
+    <tr id="r_NamaPIC" @Html.Raw(masterPicView.NamaPIC.RowAttributes)>
+        <td class="@(masterPicView.TableLeftColumnClass)"><span id="elh_MasterPIC_NamaPIC">@Html.Raw(masterPicView.NamaPIC.Caption)</span></td>
+        <td data-name="NamaPIC" @Html.Raw(masterPicView.NamaPIC.CellAttributes)>
+<span id="el_MasterPIC_NamaPIC">
+<span @Html.Raw(masterPicView.NamaPIC.ViewAttributes)>
+@Html.Raw(masterPicView.NamaPIC.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* masterPicView.NamaPIC.Visible (end) *@
+</table>
+@{ masterPicView.CloseRecordset(); }
+</form>
+</main>
+@masterPicView.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+@if (!masterPicView.IsExport()) {
+<script>
+loadjs.ready("load", function() {
+    // Write your table-specific startup script here
+    // document.write("page loaded");
+});
+</script>
+}

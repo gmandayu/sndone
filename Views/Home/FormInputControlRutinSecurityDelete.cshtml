@@ -1,0 +1,271 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (formInputControlRutinSecurityDelete.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = formInputControlRutinSecurityDelete.UseLayout ? "_Layout" : "";
+}
+<script>
+var currentTable = @Html.Raw(ConvertToJson(formInputControlRutinSecurityDelete.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { FormInputControlRutinSecurity: currentTable } });
+var currentPageID = ew.PAGE_ID = "delete";
+var currentForm;
+var fFormInputControlRutinSecuritydelete;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("fFormInputControlRutinSecuritydelete")
+        .setPageId("delete")
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Client script
+    const parent_url = ew.PATH_BASE;
+    $(document).on('click', '.download-document', function (e) {
+        e.preventDefault();
+        const idPOV = $(this).data('id');
+        if (!idPOV) {
+            ew.alert("ID dokumen tidak ditemukan.");
+            return;
+        }
+        $.ajax({
+            url: parent_url + 'api/LookUpList/DownloadDocumentZip',
+            type: 'GET',
+            data: { 
+                idRef: idPOV,
+                table: 'DetailUploadCRS',
+                colRef: 'IdCRS',
+                path: 'CRSDocument'
+            },
+            xhrFields: {
+                responseType: 'blob'
+            },
+            beforeSend: function () {
+                showLoading();
+            },
+            success: function (response, status, xhr) {
+                const disposition = xhr.getResponseHeader('Content-Disposition');
+                let fileName = "download_file";
+                if (disposition) {
+                    const fileNameMatch = disposition.match(/filename="?([^";]+)"?/);
+                    if (fileNameMatch && fileNameMatch[1]) {
+                        fileName = decodeURIComponent(fileNameMatch[1]);
+                    }
+                    const utf8FileNameMatch = disposition.match(/filename\*\s*=\s*UTF-8''([^;]+)/);
+                    if (utf8FileNameMatch && utf8FileNameMatch[1]) {
+                        fileName = decodeURIComponent(utf8FileNameMatch[1]);
+                    }
+                }
+                const blobUrl = window.URL.createObjectURL(response);
+                const a = document.createElement('a');
+                a.href = blobUrl;
+                a.download = fileName;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(blobUrl);
+                ew.alert("Download berhasil!");
+            },
+            error: function (xhr, status, error) {
+                if (xhr.status === 404) {
+                    ew.alert("File tidak ditemukan di server.");
+                } else if (xhr.status === 500) {
+                    ew.alert("Terjadi kesalahan server. Coba lagi nanti.");
+                } else {
+                    ew.alert("Gagal mendownload file. Error: " + xhr.responseText);
+                }
+            },
+            complete: function () {
+                hideLoading();
+            }
+        });
+    });
+});
+</script>
+@formInputControlRutinSecurityDelete.ShowPageHeader()
+@formInputControlRutinSecurityDelete.ShowMessages()
+<form name="fFormInputControlRutinSecuritydelete" id="fFormInputControlRutinSecuritydelete" class="ew-form ew-delete-form" action="@AppPath(CurrentPageName())" method="post" novalidate autocomplete="off">
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+<input type="hidden" name="action" id="action" value="delete">
+@foreach (string key in formInputControlRutinSecurityDelete.RecordKeys) {
+<input type="hidden" name="key_m[]" value="@key">
+}
+<div class="card ew-card ew-grid @(formInputControlRutinSecurityDelete.TableGridClass)">
+<div class="card-body ew-grid-middle-panel @(formInputControlRutinSecurityDelete.TableContainerClass)" style="@(formInputControlRutinSecurityDelete.TableContainerStyle)">
+<table class="@(formInputControlRutinSecurityDelete.TableClass)">
+    <thead>
+    <tr class="ew-table-header">
+@if (formInputControlRutinSecurityDelete.NoReferensi.Visible) { // formInputControlRutinSecurityDelete.NoReferensi.Visible (begin)
+        <th class="@Html.Raw(formInputControlRutinSecurityDelete.NoReferensi.HeaderCellClass)"><span id="elh_FormInputControlRutinSecurity_NoReferensi" class="FormInputControlRutinSecurity_NoReferensi">@Html.Raw(formInputControlRutinSecurityDelete.NoReferensi.Caption)</span></th>
+} @* formInputControlRutinSecurityDelete.NoReferensi.Visible (end) *@
+@if (formInputControlRutinSecurityDelete.NamaSecurity.Visible) { // formInputControlRutinSecurityDelete.NamaSecurity.Visible (begin)
+        <th class="@Html.Raw(formInputControlRutinSecurityDelete.NamaSecurity.HeaderCellClass)"><span id="elh_FormInputControlRutinSecurity_NamaSecurity" class="FormInputControlRutinSecurity_NamaSecurity">@Html.Raw(formInputControlRutinSecurityDelete.NamaSecurity.Caption)</span></th>
+} @* formInputControlRutinSecurityDelete.NamaSecurity.Visible (end) *@
+@if (formInputControlRutinSecurityDelete.Tanggal.Visible) { // formInputControlRutinSecurityDelete.Tanggal.Visible (begin)
+        <th class="@Html.Raw(formInputControlRutinSecurityDelete.Tanggal.HeaderCellClass)"><span id="elh_FormInputControlRutinSecurity_Tanggal" class="FormInputControlRutinSecurity_Tanggal">@Html.Raw(formInputControlRutinSecurityDelete.Tanggal.Caption)</span></th>
+} @* formInputControlRutinSecurityDelete.Tanggal.Visible (end) *@
+@if (formInputControlRutinSecurityDelete.Lokasi.Visible) { // formInputControlRutinSecurityDelete.Lokasi.Visible (begin)
+        <th class="@Html.Raw(formInputControlRutinSecurityDelete.Lokasi.HeaderCellClass)"><span id="elh_FormInputControlRutinSecurity_Lokasi" class="FormInputControlRutinSecurity_Lokasi">@Html.Raw(formInputControlRutinSecurityDelete.Lokasi.Caption)</span></th>
+} @* formInputControlRutinSecurityDelete.Lokasi.Visible (end) *@
+@if (formInputControlRutinSecurityDelete.DownloadDokumen.Visible) { // formInputControlRutinSecurityDelete.DownloadDokumen.Visible (begin)
+        <th class="@Html.Raw(formInputControlRutinSecurityDelete.DownloadDokumen.HeaderCellClass)"><span id="elh_FormInputControlRutinSecurity_DownloadDokumen" class="FormInputControlRutinSecurity_DownloadDokumen">@Html.Raw(formInputControlRutinSecurityDelete.DownloadDokumen.Caption)</span></th>
+} @* formInputControlRutinSecurityDelete.DownloadDokumen.Visible (end) *@
+@if (formInputControlRutinSecurityDelete.Ketidaksesuaiaan.Visible) { // formInputControlRutinSecurityDelete.Ketidaksesuaiaan.Visible (begin)
+        <th class="@Html.Raw(formInputControlRutinSecurityDelete.Ketidaksesuaiaan.HeaderCellClass)"><span id="elh_FormInputControlRutinSecurity_Ketidaksesuaiaan" class="FormInputControlRutinSecurity_Ketidaksesuaiaan">@Html.Raw(formInputControlRutinSecurityDelete.Ketidaksesuaiaan.Caption)</span></th>
+} @* formInputControlRutinSecurityDelete.Ketidaksesuaiaan.Visible (end) *@
+@if (formInputControlRutinSecurityDelete.Keterangan.Visible) { // formInputControlRutinSecurityDelete.Keterangan.Visible (begin)
+        <th class="@Html.Raw(formInputControlRutinSecurityDelete.Keterangan.HeaderCellClass)"><span id="elh_FormInputControlRutinSecurity_Keterangan" class="FormInputControlRutinSecurity_Keterangan">@Html.Raw(formInputControlRutinSecurityDelete.Keterangan.Caption)</span></th>
+} @* formInputControlRutinSecurityDelete.Keterangan.Visible (end) *@
+@if (formInputControlRutinSecurityDelete.IdPosition.Visible) { // formInputControlRutinSecurityDelete.IdPosition.Visible (begin)
+        <th class="@Html.Raw(formInputControlRutinSecurityDelete.IdPosition.HeaderCellClass)"><span id="elh_FormInputControlRutinSecurity_IdPosition" class="FormInputControlRutinSecurity_IdPosition">@Html.Raw(formInputControlRutinSecurityDelete.IdPosition.Caption)</span></th>
+} @* formInputControlRutinSecurityDelete.IdPosition.Visible (end) *@
+@if (formInputControlRutinSecurityDelete.UserInput.Visible) { // formInputControlRutinSecurityDelete.UserInput.Visible (begin)
+        <th class="@Html.Raw(formInputControlRutinSecurityDelete.UserInput.HeaderCellClass)"><span id="elh_FormInputControlRutinSecurity_UserInput" class="FormInputControlRutinSecurity_UserInput">@Html.Raw(formInputControlRutinSecurityDelete.UserInput.Caption)</span></th>
+} @* formInputControlRutinSecurityDelete.UserInput.Visible (end) *@
+@if (formInputControlRutinSecurityDelete.EtlDate.Visible) { // formInputControlRutinSecurityDelete.EtlDate.Visible (begin)
+        <th class="@Html.Raw(formInputControlRutinSecurityDelete.EtlDate.HeaderCellClass)"><span id="elh_FormInputControlRutinSecurity_EtlDate" class="FormInputControlRutinSecurity_EtlDate">@Html.Raw(formInputControlRutinSecurityDelete.EtlDate.Caption)</span></th>
+} @* formInputControlRutinSecurityDelete.EtlDate.Visible (end) *@
+@if (formInputControlRutinSecurityDelete.LastUpdatedBy.Visible) { // formInputControlRutinSecurityDelete.LastUpdatedBy.Visible (begin)
+        <th class="@Html.Raw(formInputControlRutinSecurityDelete.LastUpdatedBy.HeaderCellClass)"><span id="elh_FormInputControlRutinSecurity_LastUpdatedBy" class="FormInputControlRutinSecurity_LastUpdatedBy">@Html.Raw(formInputControlRutinSecurityDelete.LastUpdatedBy.Caption)</span></th>
+} @* formInputControlRutinSecurityDelete.LastUpdatedBy.Visible (end) *@
+@if (formInputControlRutinSecurityDelete.LastUpdatedDate.Visible) { // formInputControlRutinSecurityDelete.LastUpdatedDate.Visible (begin)
+        <th class="@Html.Raw(formInputControlRutinSecurityDelete.LastUpdatedDate.HeaderCellClass)"><span id="elh_FormInputControlRutinSecurity_LastUpdatedDate" class="FormInputControlRutinSecurity_LastUpdatedDate">@Html.Raw(formInputControlRutinSecurityDelete.LastUpdatedDate.Caption)</span></th>
+} @* formInputControlRutinSecurityDelete.LastUpdatedDate.Visible (end) *@
+    </tr>
+    </thead>
+    <tbody>
+@{ formInputControlRutinSecurityDelete.RecordCount = 0; }
+@while (formInputControlRutinSecurityDelete.Recordset != null && await formInputControlRutinSecurityDelete.Recordset.ReadAsync()) { // DN
+    formInputControlRutinSecurityDelete.RecordCount++;
+    formInputControlRutinSecurityDelete.RowCount++;
+
+    // Set row properties
+    formInputControlRutinSecurityDelete.ResetAttributes();
+    formInputControlRutinSecurityDelete.RowType = RowType.View; // View
+
+    // Get the field contents
+    await formInputControlRutinSecurityDelete.LoadRowValues(formInputControlRutinSecurityDelete.Recordset);
+
+    // Render row
+    await formInputControlRutinSecurityDelete.RenderRow();
+    <tr @Html.Raw(formInputControlRutinSecurityDelete.RowAttributes)>
+@if (formInputControlRutinSecurityDelete.NoReferensi.Visible) { // formInputControlRutinSecurityDelete.NoReferensi.Visible (begin)
+        <td @Html.Raw(formInputControlRutinSecurityDelete.NoReferensi.CellAttributes)>
+<span id="">
+<span @Html.Raw(formInputControlRutinSecurityDelete.NoReferensi.ViewAttributes)>
+@Html.Raw(formInputControlRutinSecurityDelete.NoReferensi.GetViewValue())</span>
+</span></td>
+} @* formInputControlRutinSecurityDelete.NoReferensi.Visible (end) *@
+@if (formInputControlRutinSecurityDelete.NamaSecurity.Visible) { // formInputControlRutinSecurityDelete.NamaSecurity.Visible (begin)
+        <td @Html.Raw(formInputControlRutinSecurityDelete.NamaSecurity.CellAttributes)>
+<span id="">
+<span @Html.Raw(formInputControlRutinSecurityDelete.NamaSecurity.ViewAttributes)>
+@Html.Raw(formInputControlRutinSecurityDelete.NamaSecurity.GetViewValue())</span>
+</span></td>
+} @* formInputControlRutinSecurityDelete.NamaSecurity.Visible (end) *@
+@if (formInputControlRutinSecurityDelete.Tanggal.Visible) { // formInputControlRutinSecurityDelete.Tanggal.Visible (begin)
+        <td @Html.Raw(formInputControlRutinSecurityDelete.Tanggal.CellAttributes)>
+<span id="">
+<span @Html.Raw(formInputControlRutinSecurityDelete.Tanggal.ViewAttributes)>
+@Html.Raw(formInputControlRutinSecurityDelete.Tanggal.GetViewValue())</span>
+</span></td>
+} @* formInputControlRutinSecurityDelete.Tanggal.Visible (end) *@
+@if (formInputControlRutinSecurityDelete.Lokasi.Visible) { // formInputControlRutinSecurityDelete.Lokasi.Visible (begin)
+        <td @Html.Raw(formInputControlRutinSecurityDelete.Lokasi.CellAttributes)>
+<span id="">
+<span @Html.Raw(formInputControlRutinSecurityDelete.Lokasi.ViewAttributes)>
+@Html.Raw(formInputControlRutinSecurityDelete.Lokasi.GetViewValue())</span>
+</span></td>
+} @* formInputControlRutinSecurityDelete.Lokasi.Visible (end) *@
+@if (formInputControlRutinSecurityDelete.DownloadDokumen.Visible) { // formInputControlRutinSecurityDelete.DownloadDokumen.Visible (begin)
+        <td @Html.Raw(formInputControlRutinSecurityDelete.DownloadDokumen.CellAttributes)>
+<span id="">
+<span @Html.Raw(formInputControlRutinSecurityDelete.DownloadDokumen.ViewAttributes)>
+@Html.Raw(formInputControlRutinSecurityDelete.DownloadDokumen.GetViewValue())</span>
+</span></td>
+} @* formInputControlRutinSecurityDelete.DownloadDokumen.Visible (end) *@
+@if (formInputControlRutinSecurityDelete.Ketidaksesuaiaan.Visible) { // formInputControlRutinSecurityDelete.Ketidaksesuaiaan.Visible (begin)
+        <td @Html.Raw(formInputControlRutinSecurityDelete.Ketidaksesuaiaan.CellAttributes)>
+<span id="">
+<span @Html.Raw(formInputControlRutinSecurityDelete.Ketidaksesuaiaan.ViewAttributes)>
+@Html.Raw(formInputControlRutinSecurityDelete.Ketidaksesuaiaan.GetViewValue())</span>
+</span></td>
+} @* formInputControlRutinSecurityDelete.Ketidaksesuaiaan.Visible (end) *@
+@if (formInputControlRutinSecurityDelete.Keterangan.Visible) { // formInputControlRutinSecurityDelete.Keterangan.Visible (begin)
+        <td @Html.Raw(formInputControlRutinSecurityDelete.Keterangan.CellAttributes)>
+<span id="">
+<span @Html.Raw(formInputControlRutinSecurityDelete.Keterangan.ViewAttributes)>
+@Html.Raw(formInputControlRutinSecurityDelete.Keterangan.GetViewValue())</span>
+</span></td>
+} @* formInputControlRutinSecurityDelete.Keterangan.Visible (end) *@
+@if (formInputControlRutinSecurityDelete.IdPosition.Visible) { // formInputControlRutinSecurityDelete.IdPosition.Visible (begin)
+        <td @Html.Raw(formInputControlRutinSecurityDelete.IdPosition.CellAttributes)>
+<span id="">
+<span @Html.Raw(formInputControlRutinSecurityDelete.IdPosition.ViewAttributes)>
+@Html.Raw(formInputControlRutinSecurityDelete.IdPosition.GetViewValue())</span>
+</span></td>
+} @* formInputControlRutinSecurityDelete.IdPosition.Visible (end) *@
+@if (formInputControlRutinSecurityDelete.UserInput.Visible) { // formInputControlRutinSecurityDelete.UserInput.Visible (begin)
+        <td @Html.Raw(formInputControlRutinSecurityDelete.UserInput.CellAttributes)>
+<span id="">
+<span @Html.Raw(formInputControlRutinSecurityDelete.UserInput.ViewAttributes)>
+@Html.Raw(formInputControlRutinSecurityDelete.UserInput.GetViewValue())</span>
+</span></td>
+} @* formInputControlRutinSecurityDelete.UserInput.Visible (end) *@
+@if (formInputControlRutinSecurityDelete.EtlDate.Visible) { // formInputControlRutinSecurityDelete.EtlDate.Visible (begin)
+        <td @Html.Raw(formInputControlRutinSecurityDelete.EtlDate.CellAttributes)>
+<span id="">
+<span @Html.Raw(formInputControlRutinSecurityDelete.EtlDate.ViewAttributes)>
+@Html.Raw(formInputControlRutinSecurityDelete.EtlDate.GetViewValue())</span>
+</span></td>
+} @* formInputControlRutinSecurityDelete.EtlDate.Visible (end) *@
+@if (formInputControlRutinSecurityDelete.LastUpdatedBy.Visible) { // formInputControlRutinSecurityDelete.LastUpdatedBy.Visible (begin)
+        <td @Html.Raw(formInputControlRutinSecurityDelete.LastUpdatedBy.CellAttributes)>
+<span id="">
+<span @Html.Raw(formInputControlRutinSecurityDelete.LastUpdatedBy.ViewAttributes)>
+@Html.Raw(formInputControlRutinSecurityDelete.LastUpdatedBy.GetViewValue())</span>
+</span></td>
+} @* formInputControlRutinSecurityDelete.LastUpdatedBy.Visible (end) *@
+@if (formInputControlRutinSecurityDelete.LastUpdatedDate.Visible) { // formInputControlRutinSecurityDelete.LastUpdatedDate.Visible (begin)
+        <td @Html.Raw(formInputControlRutinSecurityDelete.LastUpdatedDate.CellAttributes)>
+<span id="">
+<span @Html.Raw(formInputControlRutinSecurityDelete.LastUpdatedDate.ViewAttributes)>
+@Html.Raw(formInputControlRutinSecurityDelete.LastUpdatedDate.GetViewValue())</span>
+</span></td>
+} @* formInputControlRutinSecurityDelete.LastUpdatedDate.Visible (end) *@
+    </tr>
+}
+@{ formInputControlRutinSecurityDelete.CloseRecordset(); }
+</tbody>
+</table>
+</div>
+</div>
+<div class="ew-buttons ew-desktop-buttons">
+<button class="btn btn-primary ew-btn" name="btn-action" id="btn-action" type="submit">@Html.Raw(Language.Phrase("DeleteBtn"))</button>
+<button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" data-href="@AppPath(formInputControlRutinSecurityDelete.ReturnUrl)">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+</div>
+</form>
+@formInputControlRutinSecurityDelete.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+<script>
+loadjs.ready("load", function() {
+    // Write your table-specific startup script here
+    // document.write("page loaded");
+});
+</script>

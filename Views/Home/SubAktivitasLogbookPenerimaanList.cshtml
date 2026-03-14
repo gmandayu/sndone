@@ -1,0 +1,450 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (subAktivitasLogbookPenerimaanList.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = subAktivitasLogbookPenerimaanList.UseLayout ? "_Layout" : "";
+}
+@if (!subAktivitasLogbookPenerimaanList.IsExport()) {
+<script>
+var currentTable = @Html.Raw(ConvertToJson(subAktivitasLogbookPenerimaanList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { SubAktivitasLogbookPenerimaan: currentTable } });
+var currentPageID = ew.PAGE_ID = "list";
+var currentForm;
+var @(subAktivitasLogbookPenerimaanList.FormName);
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("@(subAktivitasLogbookPenerimaanList.FormName)")
+        .setPageId("list")
+        .setSubmitWithFetch(@(subAktivitasLogbookPenerimaanList.UseAjaxActions ? "true" : "false"))
+        .setFormKeyCountName("@(subAktivitasLogbookPenerimaanList.FormKeyCountName)")
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Write your client script here, no need to add script tags.
+});
+</script>
+}
+@if (!subAktivitasLogbookPenerimaanList.IsExport()) {
+<div class="btn-toolbar ew-toolbar">
+@if (subAktivitasLogbookPenerimaanList.TotalRecords > 0 && subAktivitasLogbookPenerimaanList.ExportOptions.Visible) {
+    subAktivitasLogbookPenerimaanList.ExportOptions.Render("body");
+}
+@if (subAktivitasLogbookPenerimaanList.ImportOptions.Visible) {
+    subAktivitasLogbookPenerimaanList.ImportOptions.Render("body");
+}
+@if (subAktivitasLogbookPenerimaanList.SearchOptions.Visible) {
+    subAktivitasLogbookPenerimaanList.SearchOptions.Render("body");
+}
+@if (subAktivitasLogbookPenerimaanList.FilterOptions.Visible) {
+    subAktivitasLogbookPenerimaanList.FilterOptions.Render("body");
+}
+</div>
+}
+@if (!subAktivitasLogbookPenerimaanList.IsModal) {
+<form name="fSubAktivitasLogbookPenerimaansrch" id="fSubAktivitasLogbookPenerimaansrch" class="ew-form ew-ext-search-form" action="@AppPath(CurrentPageName())" novalidate autocomplete="off">
+<div id="fSubAktivitasLogbookPenerimaansrch_search_panel" class="mb-2 mb-sm-0 @(subAktivitasLogbookPenerimaanList.SearchPanelClass)"><!-- .ew-search-panel -->
+<script>
+var currentTable = @Html.Raw(ConvertToJson(subAktivitasLogbookPenerimaanList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { SubAktivitasLogbookPenerimaan: currentTable } });
+var currentForm;
+var fSubAktivitasLogbookPenerimaansrch, currentSearchForm, currentAdvancedSearchForm;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery,
+        fields = currentTable.fields;
+
+    // Form object for search
+    let form = new ew.FormBuilder()
+        .setId("fSubAktivitasLogbookPenerimaansrch")
+        .setPageId("list")
+@if (subAktivitasLogbookPenerimaanList.UseAjaxActions) {
+        <text>.setSubmitWithFetch(true)</text>
+}
+
+        // Dynamic selection lists
+        .setLists({
+        })
+
+        // Filters
+        .setFilterList(@Html.Raw(subAktivitasLogbookPenerimaanList.GetFilterList()))
+        .build();
+    window[form.id] = form;
+    currentSearchForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<input type="hidden" name="cmd" value="search">
+@if (Security.CanSearch) {
+if (!subAktivitasLogbookPenerimaanList.IsExport() && Empty(subAktivitasLogbookPenerimaanList.CurrentAction) && subAktivitasLogbookPenerimaanList.HasSearchFields()) { @* Show search form (begin) *@
+<div class="ew-extended-search container-fluid ps-2">
+<div class="row mb-0">
+    <div class="col-sm-auto px-0 pe-sm-2">
+        <div class="ew-basic-search input-group">
+            <input type="search" name="@(Config.TableBasicSearch)" id="@(Config.TableBasicSearch)" class="form-control ew-basic-search-keyword" value="@Html.Raw(HtmlEncode(subAktivitasLogbookPenerimaanList.BasicSearch.SessionKeyword))" placeholder="@(HtmlEncode(Language.Phrase("Search")))" aria-label="@(HtmlEncode(Language.Phrase("Search")))">
+            <input type="hidden" name="@(Config.TableBasicSearchType)" id="@(Config.TableBasicSearchType)" class="ew-basic-search-type" value="@(HtmlEncode(subAktivitasLogbookPenerimaanList.BasicSearch.SessionType))">
+            <button type="button" data-bs-toggle="dropdown" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split" aria-haspopup="true" aria-expanded="false">
+                <span id="searchtype">@Html.Raw(subAktivitasLogbookPenerimaanList.BasicSearch.TypeNameShort)</span>
+            </button>
+            <div class="dropdown-menu dropdown-menu-end">
+                <button type="button" class="dropdown-item@(subAktivitasLogbookPenerimaanList.BasicSearch.SessionType == "" ? " active" : "")" form="fSubAktivitasLogbookPenerimaansrch" data-ew-action="search-type">@Html.Raw(Language.Phrase("QuickSearchAuto"))</button>
+                <button type="button" class="dropdown-item@(subAktivitasLogbookPenerimaanList.BasicSearch.SessionType == "=" ? " active" : "")" form="fSubAktivitasLogbookPenerimaansrch" data-ew-action="search-type" data-search-type="=">@Html.Raw(Language.Phrase("QuickSearchExact"))</button>
+                <button type="button" class="dropdown-item@(subAktivitasLogbookPenerimaanList.BasicSearch.SessionType == "AND" ? " active" : "")" form="fSubAktivitasLogbookPenerimaansrch" data-ew-action="search-type" data-search-type="AND">@Html.Raw(Language.Phrase("QuickSearchAll"))</button>
+                <button type="button" class="dropdown-item@(subAktivitasLogbookPenerimaanList.BasicSearch.SessionType == "OR" ? " active" : "")" form="fSubAktivitasLogbookPenerimaansrch" data-ew-action="search-type" data-search-type="OR">@Html.Raw(Language.Phrase("QuickSearchAny"))</button>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-auto mb-3">
+        <button class="btn btn-primary" name="btn-submit" id="btn-submit" type="submit">@Html.Raw(Language.Phrase("SearchBtn"))</button>
+    </div>
+</div>
+</div><!-- /.ew-extended-search -->
+} @* Show search form (end) *@
+}
+</div><!-- /.ew-search-panel -->
+</form>
+}
+@subAktivitasLogbookPenerimaanList.ShowPageHeader()
+@subAktivitasLogbookPenerimaanList.ShowMessages()
+<main class="list @(subAktivitasLogbookPenerimaanList.TotalRecords == 0 && !subAktivitasLogbookPenerimaanList.IsAdd ? " ew-no-record" : "")">
+<div id="ew-header-options">
+    @subAktivitasLogbookPenerimaanList.HeaderOptions.RenderBody()
+</div>
+<div id="ew-list">
+@if (subAktivitasLogbookPenerimaanList.TotalRecords > 0 || !Empty(subAktivitasLogbookPenerimaanList.CurrentAction)) {
+<div class="card ew-card ew-grid@(subAktivitasLogbookPenerimaanList.IsAddOrEdit ? " ew-grid-add-edit" : "") @(subAktivitasLogbookPenerimaanList.TableGridClass)">
+<form name="@(subAktivitasLogbookPenerimaanList.FormName)" id="@(subAktivitasLogbookPenerimaanList.FormName)" class="ew-form ew-list-form" action="@AppPath(subAktivitasLogbookPenerimaanList.PageName)" method="post" novalidate autocomplete="off">
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+@if (subAktivitasLogbookPenerimaanList.IsModal) {
+<input type="hidden" name="modal" value="1">
+}
+<div id="gmp_SubAktivitasLogbookPenerimaan" class="card-body ew-grid-middle-panel @(subAktivitasLogbookPenerimaanList.TableContainerClass)" style="@(subAktivitasLogbookPenerimaanList.TableContainerStyle)">
+@if (subAktivitasLogbookPenerimaanList.TotalRecords > 0 || subAktivitasLogbookPenerimaanList.IsGridEdit || subAktivitasLogbookPenerimaanList.IsMultiEdit) {
+<table id="tbl_SubAktivitasLogbookPenerimaanlist" class="@(subAktivitasLogbookPenerimaanList.TableClass)"><!-- .ew-table -->
+<thead>
+    <tr class="ew-table-header">
+@{
+    // Header row
+    subAktivitasLogbookPenerimaanList.RowType = RowType.Header;
+
+    // Render list options
+    await subAktivitasLogbookPenerimaanList.RenderListOptions();
+}
+@* Render list options (header, left) *@
+@subAktivitasLogbookPenerimaanList.ListOptions.RenderHeader("left")
+@if (subAktivitasLogbookPenerimaanList.idProses.Visible) { // subAktivitasLogbookPenerimaanList.idProses.Visible (begin)
+        <th data-name="idProses" class="@(subAktivitasLogbookPenerimaanList.idProses.HeaderCellClass)"><div id="elh_SubAktivitasLogbookPenerimaan_idProses" class="SubAktivitasLogbookPenerimaan_idProses">@Html.Raw(subAktivitasLogbookPenerimaanList.RenderFieldHeader(subAktivitasLogbookPenerimaanList.idProses))</div></th>
+} @* subAktivitasLogbookPenerimaanList.idProses.Visible (end) *@
+@if (subAktivitasLogbookPenerimaanList.idAktifitas.Visible) { // subAktivitasLogbookPenerimaanList.idAktifitas.Visible (begin)
+        <th data-name="idAktifitas" class="@(subAktivitasLogbookPenerimaanList.idAktifitas.HeaderCellClass)"><div id="elh_SubAktivitasLogbookPenerimaan_idAktifitas" class="SubAktivitasLogbookPenerimaan_idAktifitas">@Html.Raw(subAktivitasLogbookPenerimaanList.RenderFieldHeader(subAktivitasLogbookPenerimaanList.idAktifitas))</div></th>
+} @* subAktivitasLogbookPenerimaanList.idAktifitas.Visible (end) *@
+@if (subAktivitasLogbookPenerimaanList.NoReferensi.Visible) { // subAktivitasLogbookPenerimaanList.NoReferensi.Visible (begin)
+        <th data-name="NoReferensi" class="@(subAktivitasLogbookPenerimaanList.NoReferensi.HeaderCellClass)"><div id="elh_SubAktivitasLogbookPenerimaan_NoReferensi" class="SubAktivitasLogbookPenerimaan_NoReferensi">@Html.Raw(subAktivitasLogbookPenerimaanList.RenderFieldHeader(subAktivitasLogbookPenerimaanList.NoReferensi))</div></th>
+} @* subAktivitasLogbookPenerimaanList.NoReferensi.Visible (end) *@
+@if (subAktivitasLogbookPenerimaanList.Nama_Kapal.Visible) { // subAktivitasLogbookPenerimaanList.Nama_Kapal.Visible (begin)
+        <th data-name="Nama_Kapal" class="@(subAktivitasLogbookPenerimaanList.Nama_Kapal.HeaderCellClass)"><div id="elh_SubAktivitasLogbookPenerimaan_Nama_Kapal" class="SubAktivitasLogbookPenerimaan_Nama_Kapal">@Html.Raw(subAktivitasLogbookPenerimaanList.RenderFieldHeader(subAktivitasLogbookPenerimaanList.Nama_Kapal))</div></th>
+} @* subAktivitasLogbookPenerimaanList.Nama_Kapal.Visible (end) *@
+@if (subAktivitasLogbookPenerimaanList.TanggalJam.Visible) { // subAktivitasLogbookPenerimaanList.TanggalJam.Visible (begin)
+        <th data-name="TanggalJam" class="@(subAktivitasLogbookPenerimaanList.TanggalJam.HeaderCellClass)"><div id="elh_SubAktivitasLogbookPenerimaan_TanggalJam" class="SubAktivitasLogbookPenerimaan_TanggalJam">@Html.Raw(subAktivitasLogbookPenerimaanList.RenderFieldHeader(subAktivitasLogbookPenerimaanList.TanggalJam))</div></th>
+} @* subAktivitasLogbookPenerimaanList.TanggalJam.Visible (end) *@
+@if (subAktivitasLogbookPenerimaanList.Nama_Kegiatan.Visible) { // subAktivitasLogbookPenerimaanList.Nama_Kegiatan.Visible (begin)
+        <th data-name="Nama_Kegiatan" class="@(subAktivitasLogbookPenerimaanList.Nama_Kegiatan.HeaderCellClass)"><div id="elh_SubAktivitasLogbookPenerimaan_Nama_Kegiatan" class="SubAktivitasLogbookPenerimaan_Nama_Kegiatan">@Html.Raw(subAktivitasLogbookPenerimaanList.RenderFieldHeader(subAktivitasLogbookPenerimaanList.Nama_Kegiatan))</div></th>
+} @* subAktivitasLogbookPenerimaanList.Nama_Kegiatan.Visible (end) *@
+@if (subAktivitasLogbookPenerimaanList.Produk.Visible) { // subAktivitasLogbookPenerimaanList.Produk.Visible (begin)
+        <th data-name="Produk" class="@(subAktivitasLogbookPenerimaanList.Produk.HeaderCellClass)"><div id="elh_SubAktivitasLogbookPenerimaan_Produk" class="SubAktivitasLogbookPenerimaan_Produk">@Html.Raw(subAktivitasLogbookPenerimaanList.RenderFieldHeader(subAktivitasLogbookPenerimaanList.Produk))</div></th>
+} @* subAktivitasLogbookPenerimaanList.Produk.Visible (end) *@
+@if (subAktivitasLogbookPenerimaanList.StatusAktivitas.Visible) { // subAktivitasLogbookPenerimaanList.StatusAktivitas.Visible (begin)
+        <th data-name="StatusAktivitas" class="@(subAktivitasLogbookPenerimaanList.StatusAktivitas.HeaderCellClass)"><div id="elh_SubAktivitasLogbookPenerimaan_StatusAktivitas" class="SubAktivitasLogbookPenerimaan_StatusAktivitas">@Html.Raw(subAktivitasLogbookPenerimaanList.RenderFieldHeader(subAktivitasLogbookPenerimaanList.StatusAktivitas))</div></th>
+} @* subAktivitasLogbookPenerimaanList.StatusAktivitas.Visible (end) *@
+@if (subAktivitasLogbookPenerimaanList.Density.Visible) { // subAktivitasLogbookPenerimaanList.Density.Visible (begin)
+        <th data-name="Density" class="@(subAktivitasLogbookPenerimaanList.Density.HeaderCellClass)"><div id="elh_SubAktivitasLogbookPenerimaan_Density" class="SubAktivitasLogbookPenerimaan_Density">@Html.Raw(subAktivitasLogbookPenerimaanList.RenderFieldHeader(subAktivitasLogbookPenerimaanList.Density))</div></th>
+} @* subAktivitasLogbookPenerimaanList.Density.Visible (end) *@
+@if (subAktivitasLogbookPenerimaanList.Temperatur.Visible) { // subAktivitasLogbookPenerimaanList.Temperatur.Visible (begin)
+        <th data-name="Temperatur" class="@(subAktivitasLogbookPenerimaanList.Temperatur.HeaderCellClass)"><div id="elh_SubAktivitasLogbookPenerimaan_Temperatur" class="SubAktivitasLogbookPenerimaan_Temperatur">@Html.Raw(subAktivitasLogbookPenerimaanList.RenderFieldHeader(subAktivitasLogbookPenerimaanList.Temperatur))</div></th>
+} @* subAktivitasLogbookPenerimaanList.Temperatur.Visible (end) *@
+@if (subAktivitasLogbookPenerimaanList.userInput.Visible) { // subAktivitasLogbookPenerimaanList.userInput.Visible (begin)
+        <th data-name="userInput" class="@(subAktivitasLogbookPenerimaanList.userInput.HeaderCellClass)"><div id="elh_SubAktivitasLogbookPenerimaan_userInput" class="SubAktivitasLogbookPenerimaan_userInput">@Html.Raw(subAktivitasLogbookPenerimaanList.RenderFieldHeader(subAktivitasLogbookPenerimaanList.userInput))</div></th>
+} @* subAktivitasLogbookPenerimaanList.userInput.Visible (end) *@
+@if (subAktivitasLogbookPenerimaanList.LastUpdatedBy.Visible) { // subAktivitasLogbookPenerimaanList.LastUpdatedBy.Visible (begin)
+        <th data-name="LastUpdatedBy" class="@(subAktivitasLogbookPenerimaanList.LastUpdatedBy.HeaderCellClass)"><div id="elh_SubAktivitasLogbookPenerimaan_LastUpdatedBy" class="SubAktivitasLogbookPenerimaan_LastUpdatedBy">@Html.Raw(subAktivitasLogbookPenerimaanList.RenderFieldHeader(subAktivitasLogbookPenerimaanList.LastUpdatedBy))</div></th>
+} @* subAktivitasLogbookPenerimaanList.LastUpdatedBy.Visible (end) *@
+@if (subAktivitasLogbookPenerimaanList.lastUpdatedDate.Visible) { // subAktivitasLogbookPenerimaanList.lastUpdatedDate.Visible (begin)
+        <th data-name="lastUpdatedDate" class="@(subAktivitasLogbookPenerimaanList.lastUpdatedDate.HeaderCellClass)"><div id="elh_SubAktivitasLogbookPenerimaan_lastUpdatedDate" class="SubAktivitasLogbookPenerimaan_lastUpdatedDate">@Html.Raw(subAktivitasLogbookPenerimaanList.RenderFieldHeader(subAktivitasLogbookPenerimaanList.lastUpdatedDate))</div></th>
+} @* subAktivitasLogbookPenerimaanList.lastUpdatedDate.Visible (end) *@
+@if (subAktivitasLogbookPenerimaanList.SubAktivitasHasilPemeriksaanId.Visible) { // subAktivitasLogbookPenerimaanList.SubAktivitasHasilPemeriksaanId.Visible (begin)
+        <th data-name="SubAktivitasHasilPemeriksaanId" class="@(subAktivitasLogbookPenerimaanList.SubAktivitasHasilPemeriksaanId.HeaderCellClass)"><div id="elh_SubAktivitasLogbookPenerimaan_SubAktivitasHasilPemeriksaanId" class="SubAktivitasLogbookPenerimaan_SubAktivitasHasilPemeriksaanId">@Html.Raw(subAktivitasLogbookPenerimaanList.RenderFieldHeader(subAktivitasLogbookPenerimaanList.SubAktivitasHasilPemeriksaanId))</div></th>
+} @* subAktivitasLogbookPenerimaanList.SubAktivitasHasilPemeriksaanId.Visible (end) *@
+@if (subAktivitasLogbookPenerimaanList.Level.Visible) { // subAktivitasLogbookPenerimaanList.Level.Visible (begin)
+        <th data-name="Level" class="@(subAktivitasLogbookPenerimaanList.Level.HeaderCellClass)"><div id="elh_SubAktivitasLogbookPenerimaan_Level" class="SubAktivitasLogbookPenerimaan_Level">@Html.Raw(subAktivitasLogbookPenerimaanList.RenderFieldHeader(subAktivitasLogbookPenerimaanList.Level))</div></th>
+} @* subAktivitasLogbookPenerimaanList.Level.Visible (end) *@
+@if (subAktivitasLogbookPenerimaanList.Volume.Visible) { // subAktivitasLogbookPenerimaanList.Volume.Visible (begin)
+        <th data-name="Volume" class="@(subAktivitasLogbookPenerimaanList.Volume.HeaderCellClass)"><div id="elh_SubAktivitasLogbookPenerimaan_Volume" class="SubAktivitasLogbookPenerimaan_Volume">@Html.Raw(subAktivitasLogbookPenerimaanList.RenderFieldHeader(subAktivitasLogbookPenerimaanList.Volume))</div></th>
+} @* subAktivitasLogbookPenerimaanList.Volume.Visible (end) *@
+@if (subAktivitasLogbookPenerimaanList.Flowrate.Visible) { // subAktivitasLogbookPenerimaanList.Flowrate.Visible (begin)
+        <th data-name="Flowrate" class="@(subAktivitasLogbookPenerimaanList.Flowrate.HeaderCellClass)"><div id="elh_SubAktivitasLogbookPenerimaan_Flowrate" class="SubAktivitasLogbookPenerimaan_Flowrate">@Html.Raw(subAktivitasLogbookPenerimaanList.RenderFieldHeader(subAktivitasLogbookPenerimaanList.Flowrate))</div></th>
+} @* subAktivitasLogbookPenerimaanList.Flowrate.Visible (end) *@
+@if (subAktivitasLogbookPenerimaanList.TanggalJamSOP.Visible) { // subAktivitasLogbookPenerimaanList.TanggalJamSOP.Visible (begin)
+        <th data-name="TanggalJamSOP" class="@(subAktivitasLogbookPenerimaanList.TanggalJamSOP.HeaderCellClass)"><div id="elh_SubAktivitasLogbookPenerimaan_TanggalJamSOP" class="SubAktivitasLogbookPenerimaan_TanggalJamSOP">@Html.Raw(subAktivitasLogbookPenerimaanList.RenderFieldHeader(subAktivitasLogbookPenerimaanList.TanggalJamSOP))</div></th>
+} @* subAktivitasLogbookPenerimaanList.TanggalJamSOP.Visible (end) *@
+@if (subAktivitasLogbookPenerimaanList.SelisihWaktu.Visible) { // subAktivitasLogbookPenerimaanList.SelisihWaktu.Visible (begin)
+        <th data-name="SelisihWaktu" class="@(subAktivitasLogbookPenerimaanList.SelisihWaktu.HeaderCellClass)"><div id="elh_SubAktivitasLogbookPenerimaan_SelisihWaktu" class="SubAktivitasLogbookPenerimaan_SelisihWaktu">@Html.Raw(subAktivitasLogbookPenerimaanList.RenderFieldHeader(subAktivitasLogbookPenerimaanList.SelisihWaktu))</div></th>
+} @* subAktivitasLogbookPenerimaanList.SelisihWaktu.Visible (end) *@
+@if (subAktivitasLogbookPenerimaanList.IsQualityActive.Visible) { // subAktivitasLogbookPenerimaanList.IsQualityActive.Visible (begin)
+        <th data-name="IsQualityActive" class="@(subAktivitasLogbookPenerimaanList.IsQualityActive.HeaderCellClass)"><div id="elh_SubAktivitasLogbookPenerimaan_IsQualityActive" class="SubAktivitasLogbookPenerimaan_IsQualityActive">@Html.Raw(subAktivitasLogbookPenerimaanList.RenderFieldHeader(subAktivitasLogbookPenerimaanList.IsQualityActive))</div></th>
+} @* subAktivitasLogbookPenerimaanList.IsQualityActive.Visible (end) *@
+@* Render list options (header, right) *@
+@subAktivitasLogbookPenerimaanList.ListOptions.RenderHeader("right")
+    </tr>
+</thead>
+<tbody data-page="@(subAktivitasLogbookPenerimaanList.PageNumber)">
+@{
+    await subAktivitasLogbookPenerimaanList.SetupGrid();
+    bool eof = subAktivitasLogbookPenerimaanList.Recordset == null; // DN
+}
+@while (subAktivitasLogbookPenerimaanList.RecordCount < subAktivitasLogbookPenerimaanList.StopRecord || SameString(subAktivitasLogbookPenerimaanList.RowIndex, "$rowindex$")) { // Begin While
+    if (!eof && !SameString(subAktivitasLogbookPenerimaanList.RowIndex, "$rowindex$") &&
+        (!subAktivitasLogbookPenerimaanList.IsGridAdd || subAktivitasLogbookPenerimaanList.CurrentMode == "copy") &&
+        (!((subAktivitasLogbookPenerimaanList.IsCopy || subAktivitasLogbookPenerimaanList.IsAdd) && subAktivitasLogbookPenerimaanList.RowIndex is int rowIndex && rowIndex == 0))) // DN
+        eof = !await subAktivitasLogbookPenerimaanList.Recordset.ReadAsync();
+    subAktivitasLogbookPenerimaanList.RecordCount++;
+    if (subAktivitasLogbookPenerimaanList.RecordCount >= subAktivitasLogbookPenerimaanList.StartRecord) {
+        await subAktivitasLogbookPenerimaanList.SetupRow();
+    <tr @Html.Raw(subAktivitasLogbookPenerimaanList.RowAttributes)>
+    @* Render list options (body, left) *@
+    @subAktivitasLogbookPenerimaanList.ListOptions.RenderBody("left", subAktivitasLogbookPenerimaanList.RowCount)
+    @if (subAktivitasLogbookPenerimaanList.idProses.Visible) { // subAktivitasLogbookPenerimaanList.idProses.Visible (begin)
+        <td data-name="idProses" @Html.Raw(subAktivitasLogbookPenerimaanList.idProses.CellAttributes)>
+<span id="el@(subAktivitasLogbookPenerimaanList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasLogbookPenerimaanList.RowCount)_SubAktivitasLogbookPenerimaan_idProses" class="el_SubAktivitasLogbookPenerimaan_idProses">
+<span @Html.Raw(subAktivitasLogbookPenerimaanList.idProses.ViewAttributes)>
+@Html.Raw(subAktivitasLogbookPenerimaanList.idProses.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasLogbookPenerimaanList.idProses.Visible (end) *@
+    @if (subAktivitasLogbookPenerimaanList.idAktifitas.Visible) { // subAktivitasLogbookPenerimaanList.idAktifitas.Visible (begin)
+        <td data-name="idAktifitas" @Html.Raw(subAktivitasLogbookPenerimaanList.idAktifitas.CellAttributes)>
+<span id="el@(subAktivitasLogbookPenerimaanList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasLogbookPenerimaanList.RowCount)_SubAktivitasLogbookPenerimaan_idAktifitas" class="el_SubAktivitasLogbookPenerimaan_idAktifitas">
+<span @Html.Raw(subAktivitasLogbookPenerimaanList.idAktifitas.ViewAttributes)>
+@Html.Raw(subAktivitasLogbookPenerimaanList.idAktifitas.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasLogbookPenerimaanList.idAktifitas.Visible (end) *@
+    @if (subAktivitasLogbookPenerimaanList.NoReferensi.Visible) { // subAktivitasLogbookPenerimaanList.NoReferensi.Visible (begin)
+        <td data-name="NoReferensi" @Html.Raw(subAktivitasLogbookPenerimaanList.NoReferensi.CellAttributes)>
+<span id="el@(subAktivitasLogbookPenerimaanList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasLogbookPenerimaanList.RowCount)_SubAktivitasLogbookPenerimaan_NoReferensi" class="el_SubAktivitasLogbookPenerimaan_NoReferensi">
+<span @Html.Raw(subAktivitasLogbookPenerimaanList.NoReferensi.ViewAttributes)>
+@Html.Raw(subAktivitasLogbookPenerimaanList.NoReferensi.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasLogbookPenerimaanList.NoReferensi.Visible (end) *@
+    @if (subAktivitasLogbookPenerimaanList.Nama_Kapal.Visible) { // subAktivitasLogbookPenerimaanList.Nama_Kapal.Visible (begin)
+        <td data-name="Nama_Kapal" @Html.Raw(subAktivitasLogbookPenerimaanList.Nama_Kapal.CellAttributes)>
+<span id="el@(subAktivitasLogbookPenerimaanList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasLogbookPenerimaanList.RowCount)_SubAktivitasLogbookPenerimaan_Nama_Kapal" class="el_SubAktivitasLogbookPenerimaan_Nama_Kapal">
+<span @Html.Raw(subAktivitasLogbookPenerimaanList.Nama_Kapal.ViewAttributes)>
+@Html.Raw(subAktivitasLogbookPenerimaanList.Nama_Kapal.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasLogbookPenerimaanList.Nama_Kapal.Visible (end) *@
+    @if (subAktivitasLogbookPenerimaanList.TanggalJam.Visible) { // subAktivitasLogbookPenerimaanList.TanggalJam.Visible (begin)
+        <td data-name="TanggalJam" @Html.Raw(subAktivitasLogbookPenerimaanList.TanggalJam.CellAttributes)>
+<span id="el@(subAktivitasLogbookPenerimaanList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasLogbookPenerimaanList.RowCount)_SubAktivitasLogbookPenerimaan_TanggalJam" class="el_SubAktivitasLogbookPenerimaan_TanggalJam">
+<span @Html.Raw(subAktivitasLogbookPenerimaanList.TanggalJam.ViewAttributes)>
+@Html.Raw(subAktivitasLogbookPenerimaanList.TanggalJam.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasLogbookPenerimaanList.TanggalJam.Visible (end) *@
+    @if (subAktivitasLogbookPenerimaanList.Nama_Kegiatan.Visible) { // subAktivitasLogbookPenerimaanList.Nama_Kegiatan.Visible (begin)
+        <td data-name="Nama_Kegiatan" @Html.Raw(subAktivitasLogbookPenerimaanList.Nama_Kegiatan.CellAttributes)>
+<span id="el@(subAktivitasLogbookPenerimaanList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasLogbookPenerimaanList.RowCount)_SubAktivitasLogbookPenerimaan_Nama_Kegiatan" class="el_SubAktivitasLogbookPenerimaan_Nama_Kegiatan">
+<span @Html.Raw(subAktivitasLogbookPenerimaanList.Nama_Kegiatan.ViewAttributes)>
+@Html.Raw(subAktivitasLogbookPenerimaanList.Nama_Kegiatan.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasLogbookPenerimaanList.Nama_Kegiatan.Visible (end) *@
+    @if (subAktivitasLogbookPenerimaanList.Produk.Visible) { // subAktivitasLogbookPenerimaanList.Produk.Visible (begin)
+        <td data-name="Produk" @Html.Raw(subAktivitasLogbookPenerimaanList.Produk.CellAttributes)>
+<span id="el@(subAktivitasLogbookPenerimaanList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasLogbookPenerimaanList.RowCount)_SubAktivitasLogbookPenerimaan_Produk" class="el_SubAktivitasLogbookPenerimaan_Produk">
+<span @Html.Raw(subAktivitasLogbookPenerimaanList.Produk.ViewAttributes)>
+@Html.Raw(subAktivitasLogbookPenerimaanList.Produk.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasLogbookPenerimaanList.Produk.Visible (end) *@
+    @if (subAktivitasLogbookPenerimaanList.StatusAktivitas.Visible) { // subAktivitasLogbookPenerimaanList.StatusAktivitas.Visible (begin)
+        <td data-name="StatusAktivitas" @Html.Raw(subAktivitasLogbookPenerimaanList.StatusAktivitas.CellAttributes)>
+<span id="el@(subAktivitasLogbookPenerimaanList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasLogbookPenerimaanList.RowCount)_SubAktivitasLogbookPenerimaan_StatusAktivitas" class="el_SubAktivitasLogbookPenerimaan_StatusAktivitas">
+<span @Html.Raw(subAktivitasLogbookPenerimaanList.StatusAktivitas.ViewAttributes)>
+@Html.Raw(subAktivitasLogbookPenerimaanList.StatusAktivitas.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasLogbookPenerimaanList.StatusAktivitas.Visible (end) *@
+    @if (subAktivitasLogbookPenerimaanList.Density.Visible) { // subAktivitasLogbookPenerimaanList.Density.Visible (begin)
+        <td data-name="Density" @Html.Raw(subAktivitasLogbookPenerimaanList.Density.CellAttributes)>
+<span id="el@(subAktivitasLogbookPenerimaanList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasLogbookPenerimaanList.RowCount)_SubAktivitasLogbookPenerimaan_Density" class="el_SubAktivitasLogbookPenerimaan_Density">
+<span @Html.Raw(subAktivitasLogbookPenerimaanList.Density.ViewAttributes)>
+@Html.Raw(subAktivitasLogbookPenerimaanList.Density.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasLogbookPenerimaanList.Density.Visible (end) *@
+    @if (subAktivitasLogbookPenerimaanList.Temperatur.Visible) { // subAktivitasLogbookPenerimaanList.Temperatur.Visible (begin)
+        <td data-name="Temperatur" @Html.Raw(subAktivitasLogbookPenerimaanList.Temperatur.CellAttributes)>
+<span id="el@(subAktivitasLogbookPenerimaanList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasLogbookPenerimaanList.RowCount)_SubAktivitasLogbookPenerimaan_Temperatur" class="el_SubAktivitasLogbookPenerimaan_Temperatur">
+<span @Html.Raw(subAktivitasLogbookPenerimaanList.Temperatur.ViewAttributes)>
+@Html.Raw(subAktivitasLogbookPenerimaanList.Temperatur.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasLogbookPenerimaanList.Temperatur.Visible (end) *@
+    @if (subAktivitasLogbookPenerimaanList.userInput.Visible) { // subAktivitasLogbookPenerimaanList.userInput.Visible (begin)
+        <td data-name="userInput" @Html.Raw(subAktivitasLogbookPenerimaanList.userInput.CellAttributes)>
+<span id="el@(subAktivitasLogbookPenerimaanList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasLogbookPenerimaanList.RowCount)_SubAktivitasLogbookPenerimaan_userInput" class="el_SubAktivitasLogbookPenerimaan_userInput">
+<span @Html.Raw(subAktivitasLogbookPenerimaanList.userInput.ViewAttributes)>
+@Html.Raw(subAktivitasLogbookPenerimaanList.userInput.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasLogbookPenerimaanList.userInput.Visible (end) *@
+    @if (subAktivitasLogbookPenerimaanList.LastUpdatedBy.Visible) { // subAktivitasLogbookPenerimaanList.LastUpdatedBy.Visible (begin)
+        <td data-name="LastUpdatedBy" @Html.Raw(subAktivitasLogbookPenerimaanList.LastUpdatedBy.CellAttributes)>
+<span id="el@(subAktivitasLogbookPenerimaanList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasLogbookPenerimaanList.RowCount)_SubAktivitasLogbookPenerimaan_LastUpdatedBy" class="el_SubAktivitasLogbookPenerimaan_LastUpdatedBy">
+<span @Html.Raw(subAktivitasLogbookPenerimaanList.LastUpdatedBy.ViewAttributes)>
+@Html.Raw(subAktivitasLogbookPenerimaanList.LastUpdatedBy.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasLogbookPenerimaanList.LastUpdatedBy.Visible (end) *@
+    @if (subAktivitasLogbookPenerimaanList.lastUpdatedDate.Visible) { // subAktivitasLogbookPenerimaanList.lastUpdatedDate.Visible (begin)
+        <td data-name="lastUpdatedDate" @Html.Raw(subAktivitasLogbookPenerimaanList.lastUpdatedDate.CellAttributes)>
+<span id="el@(subAktivitasLogbookPenerimaanList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasLogbookPenerimaanList.RowCount)_SubAktivitasLogbookPenerimaan_lastUpdatedDate" class="el_SubAktivitasLogbookPenerimaan_lastUpdatedDate">
+<span @Html.Raw(subAktivitasLogbookPenerimaanList.lastUpdatedDate.ViewAttributes)>
+@Html.Raw(subAktivitasLogbookPenerimaanList.lastUpdatedDate.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasLogbookPenerimaanList.lastUpdatedDate.Visible (end) *@
+    @if (subAktivitasLogbookPenerimaanList.SubAktivitasHasilPemeriksaanId.Visible) { // subAktivitasLogbookPenerimaanList.SubAktivitasHasilPemeriksaanId.Visible (begin)
+        <td data-name="SubAktivitasHasilPemeriksaanId" @Html.Raw(subAktivitasLogbookPenerimaanList.SubAktivitasHasilPemeriksaanId.CellAttributes)>
+<span id="el@(subAktivitasLogbookPenerimaanList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasLogbookPenerimaanList.RowCount)_SubAktivitasLogbookPenerimaan_SubAktivitasHasilPemeriksaanId" class="el_SubAktivitasLogbookPenerimaan_SubAktivitasHasilPemeriksaanId">
+<span @Html.Raw(subAktivitasLogbookPenerimaanList.SubAktivitasHasilPemeriksaanId.ViewAttributes)>
+@Html.Raw(subAktivitasLogbookPenerimaanList.SubAktivitasHasilPemeriksaanId.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasLogbookPenerimaanList.SubAktivitasHasilPemeriksaanId.Visible (end) *@
+    @if (subAktivitasLogbookPenerimaanList.Level.Visible) { // subAktivitasLogbookPenerimaanList.Level.Visible (begin)
+        <td data-name="Level" @Html.Raw(subAktivitasLogbookPenerimaanList.Level.CellAttributes)>
+<span id="el@(subAktivitasLogbookPenerimaanList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasLogbookPenerimaanList.RowCount)_SubAktivitasLogbookPenerimaan_Level" class="el_SubAktivitasLogbookPenerimaan_Level">
+<span @Html.Raw(subAktivitasLogbookPenerimaanList.Level.ViewAttributes)>
+@Html.Raw(subAktivitasLogbookPenerimaanList.Level.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasLogbookPenerimaanList.Level.Visible (end) *@
+    @if (subAktivitasLogbookPenerimaanList.Volume.Visible) { // subAktivitasLogbookPenerimaanList.Volume.Visible (begin)
+        <td data-name="Volume" @Html.Raw(subAktivitasLogbookPenerimaanList.Volume.CellAttributes)>
+<span id="el@(subAktivitasLogbookPenerimaanList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasLogbookPenerimaanList.RowCount)_SubAktivitasLogbookPenerimaan_Volume" class="el_SubAktivitasLogbookPenerimaan_Volume">
+<span @Html.Raw(subAktivitasLogbookPenerimaanList.Volume.ViewAttributes)>
+@Html.Raw(subAktivitasLogbookPenerimaanList.Volume.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasLogbookPenerimaanList.Volume.Visible (end) *@
+    @if (subAktivitasLogbookPenerimaanList.Flowrate.Visible) { // subAktivitasLogbookPenerimaanList.Flowrate.Visible (begin)
+        <td data-name="Flowrate" @Html.Raw(subAktivitasLogbookPenerimaanList.Flowrate.CellAttributes)>
+<span id="el@(subAktivitasLogbookPenerimaanList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasLogbookPenerimaanList.RowCount)_SubAktivitasLogbookPenerimaan_Flowrate" class="el_SubAktivitasLogbookPenerimaan_Flowrate">
+<span @Html.Raw(subAktivitasLogbookPenerimaanList.Flowrate.ViewAttributes)>
+@Html.Raw(subAktivitasLogbookPenerimaanList.Flowrate.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasLogbookPenerimaanList.Flowrate.Visible (end) *@
+    @if (subAktivitasLogbookPenerimaanList.TanggalJamSOP.Visible) { // subAktivitasLogbookPenerimaanList.TanggalJamSOP.Visible (begin)
+        <td data-name="TanggalJamSOP" @Html.Raw(subAktivitasLogbookPenerimaanList.TanggalJamSOP.CellAttributes)>
+<span id="el@(subAktivitasLogbookPenerimaanList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasLogbookPenerimaanList.RowCount)_SubAktivitasLogbookPenerimaan_TanggalJamSOP" class="el_SubAktivitasLogbookPenerimaan_TanggalJamSOP">
+<span @Html.Raw(subAktivitasLogbookPenerimaanList.TanggalJamSOP.ViewAttributes)>
+@Html.Raw(subAktivitasLogbookPenerimaanList.TanggalJamSOP.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasLogbookPenerimaanList.TanggalJamSOP.Visible (end) *@
+    @if (subAktivitasLogbookPenerimaanList.SelisihWaktu.Visible) { // subAktivitasLogbookPenerimaanList.SelisihWaktu.Visible (begin)
+        <td data-name="SelisihWaktu" @Html.Raw(subAktivitasLogbookPenerimaanList.SelisihWaktu.CellAttributes)>
+<span id="el@(subAktivitasLogbookPenerimaanList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasLogbookPenerimaanList.RowCount)_SubAktivitasLogbookPenerimaan_SelisihWaktu" class="el_SubAktivitasLogbookPenerimaan_SelisihWaktu">
+<span @Html.Raw(subAktivitasLogbookPenerimaanList.SelisihWaktu.ViewAttributes)>
+@Html.Raw(subAktivitasLogbookPenerimaanList.SelisihWaktu.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasLogbookPenerimaanList.SelisihWaktu.Visible (end) *@
+    @if (subAktivitasLogbookPenerimaanList.IsQualityActive.Visible) { // subAktivitasLogbookPenerimaanList.IsQualityActive.Visible (begin)
+        <td data-name="IsQualityActive" @Html.Raw(subAktivitasLogbookPenerimaanList.IsQualityActive.CellAttributes)>
+<span id="el@(subAktivitasLogbookPenerimaanList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasLogbookPenerimaanList.RowCount)_SubAktivitasLogbookPenerimaan_IsQualityActive" class="el_SubAktivitasLogbookPenerimaan_IsQualityActive">
+<span @Html.Raw(subAktivitasLogbookPenerimaanList.IsQualityActive.ViewAttributes)>
+<i class="fa-regular @(ConvertToBool(subAktivitasLogbookPenerimaanList.IsQualityActive.CurrentValue) ? "fa-square-check" : "fa-square") ew-icon ew-boolean"></i>
+</span>
+</span>
+</td>
+    } @* subAktivitasLogbookPenerimaanList.IsQualityActive.Visible (end) *@
+    @* Render list options (body, right) *@
+    @subAktivitasLogbookPenerimaanList.ListOptions.RenderBody("right", subAktivitasLogbookPenerimaanList.RowCount)
+    </tr>
+    } @* End if *@
+
+    // Reset for template row
+    if (SameString(subAktivitasLogbookPenerimaanList.RowIndex, "$rowindex$"))
+        subAktivitasLogbookPenerimaanList.RowIndex = 0;
+
+    // Reset inline add/copy row
+    if ((subAktivitasLogbookPenerimaanList.IsCopy || subAktivitasLogbookPenerimaanList.IsAdd) && subAktivitasLogbookPenerimaanList.RowIndex is int rowIndex2 && rowIndex2 == 0)
+        subAktivitasLogbookPenerimaanList.RowIndex = 1;
+} @* End While *@
+</tbody>
+</table><!-- /.ew-table -->
+} @* End If TotalRecords > 0 *@
+</div><!-- /.ew-grid-middle-panel -->
+@if (Empty(subAktivitasLogbookPenerimaanList.CurrentAction) && !subAktivitasLogbookPenerimaanList.UseAjaxActions) {
+<input type="hidden" name="action" id="action" value="">
+}
+</form><!-- /.ew-list-form -->
+@{ subAktivitasLogbookPenerimaanList.CloseRecordset(); }
+@if (!subAktivitasLogbookPenerimaanList.IsExport()) {
+<div class="card-footer ew-grid-lower-panel">
+@if (!subAktivitasLogbookPenerimaanList.IsGridAdd && !(subAktivitasLogbookPenerimaanList.IsGridEdit && subAktivitasLogbookPenerimaanList.ModalGridEdit) && !subAktivitasLogbookPenerimaanList.IsMultiEdit) {
+@Html.Raw(subAktivitasLogbookPenerimaanList.Pager.Render())
+}
+<div class="ew-list-other-options">
+@subAktivitasLogbookPenerimaanList.OtherOptions.RenderBody("bottom")
+</div>
+</div>
+}
+</div><!-- /.ew-grid -->
+} else { // Show other options
+<div class="ew-list-other-options">
+@subAktivitasLogbookPenerimaanList.OtherOptions.ForEach(opt => opt.ButtonClass = "").RenderBody()
+</div>
+}
+</div>
+<div id="ew-footer-options">
+    @subAktivitasLogbookPenerimaanList.FooterOptions.RenderBody()
+</div>
+</main>
+@subAktivitasLogbookPenerimaanList.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+@if (!subAktivitasLogbookPenerimaanList.IsExport()) {
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("SubAktivitasLogbookPenerimaan");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Write your table-specific startup script here
+    // document.write("page loaded");
+});
+</script>
+}

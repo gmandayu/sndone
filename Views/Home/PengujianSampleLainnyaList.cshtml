@@ -1,0 +1,659 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (pengujianSampleLainnyaList.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = pengujianSampleLainnyaList.UseLayout ? "_Layout" : "";
+}
+@if (!pengujianSampleLainnyaList.IsExport()) {
+<script>
+var currentTable = @Html.Raw(ConvertToJson(pengujianSampleLainnyaList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { PengujianSampleLainnya: currentTable } });
+var currentPageID = ew.PAGE_ID = "list";
+var currentForm;
+var @(pengujianSampleLainnyaList.FormName);
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("@(pengujianSampleLainnyaList.FormName)")
+        .setPageId("list")
+        .setSubmitWithFetch(@(pengujianSampleLainnyaList.UseAjaxActions ? "true" : "false"))
+        .setFormKeyCountName("@(pengujianSampleLainnyaList.FormKeyCountName)")
+
+        // Dynamic selection lists
+        .setLists({
+            "NomorPengujianSampelLainnya": @Html.Raw(pengujianSampleLainnyaList.NomorPengujianSampelLainnya.ToClientList(pengujianSampleLainnyaList)),
+            "idPlant": @Html.Raw(pengujianSampleLainnyaList.idPlant.ToClientList(pengujianSampleLainnyaList)),
+            "Produk": @Html.Raw(pengujianSampleLainnyaList.Produk.ToClientList(pengujianSampleLainnyaList)),
+            "DibuatOleh": @Html.Raw(pengujianSampleLainnyaList.DibuatOleh.ToClientList(pengujianSampleLainnyaList)),
+            "DiperbaruiOleh": @Html.Raw(pengujianSampleLainnyaList.DiperbaruiOleh.ToClientList(pengujianSampleLainnyaList)),
+        })
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Write your client script here, no need to add script tags.
+});
+</script>
+}
+@if (!pengujianSampleLainnyaList.IsExport()) {
+<div class="btn-toolbar ew-toolbar">
+@if (pengujianSampleLainnyaList.TotalRecords > 0 && pengujianSampleLainnyaList.ExportOptions.Visible) {
+    pengujianSampleLainnyaList.ExportOptions.Render("body");
+}
+@if (pengujianSampleLainnyaList.ImportOptions.Visible) {
+    pengujianSampleLainnyaList.ImportOptions.Render("body");
+}
+@if (pengujianSampleLainnyaList.SearchOptions.Visible) {
+    pengujianSampleLainnyaList.SearchOptions.Render("body");
+}
+@if (pengujianSampleLainnyaList.FilterOptions.Visible) {
+    pengujianSampleLainnyaList.FilterOptions.Render("body");
+}
+</div>
+}
+@if (pengujianSampleLainnyaList.ShowCurrentFilter) {
+    pengujianSampleLainnyaList.ShowFilterList();
+}
+@if (!pengujianSampleLainnyaList.IsModal) {
+<form name="fPengujianSampleLainnyasrch" id="fPengujianSampleLainnyasrch" class="ew-form ew-ext-search-form" action="@AppPath(CurrentPageName())" novalidate autocomplete="off">
+<div id="fPengujianSampleLainnyasrch_search_panel" class="mb-2 mb-sm-0 @(pengujianSampleLainnyaList.SearchPanelClass)"><!-- .ew-search-panel -->
+<script>
+var currentTable = @Html.Raw(ConvertToJson(pengujianSampleLainnyaList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { PengujianSampleLainnya: currentTable } });
+var currentForm;
+var fPengujianSampleLainnyasrch, currentSearchForm, currentAdvancedSearchForm;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery,
+        fields = currentTable.fields;
+
+    // Form object for search
+    let form = new ew.FormBuilder()
+        .setId("fPengujianSampleLainnyasrch")
+        .setPageId("list")
+@if (pengujianSampleLainnyaList.UseAjaxActions) {
+        <text>.setSubmitWithFetch(true)</text>
+}
+
+        // Add fields
+        .setFields([
+        ])
+        // Validate form
+        .setValidate(
+            async function () {
+                if (!this.validateRequired)
+                    return true; // Ignore validation
+                let fobj = this.getForm();
+
+                // Validate fields
+                if (!this.validateFields())
+                    return false;
+
+                // Call Form_CustomValidate event
+                if (!(await this.customValidate?.(fobj) ?? true)) {
+                    this.focus();
+                    return false;
+                }
+                return true;
+            }
+        )
+
+        // Form_CustomValidate
+        .setCustomValidate(
+            function(fobj) { // DO NOT CHANGE THIS LINE!
+                    // Your custom validation code here, return false if invalid.
+                    return true;
+                }
+        )
+
+        // Use JavaScript validation or not
+        .setValidateRequired(ew.CLIENT_VALIDATE)
+
+        // Dynamic selection lists
+        .setLists({
+            "NomorPengujianSampelLainnya": @Html.Raw(pengujianSampleLainnyaList.NomorPengujianSampelLainnya.ToClientList(pengujianSampleLainnyaList)),
+            "idPlant": @Html.Raw(pengujianSampleLainnyaList.idPlant.ToClientList(pengujianSampleLainnyaList)),
+            "Produk": @Html.Raw(pengujianSampleLainnyaList.Produk.ToClientList(pengujianSampleLainnyaList)),
+            "DibuatOleh": @Html.Raw(pengujianSampleLainnyaList.DibuatOleh.ToClientList(pengujianSampleLainnyaList)),
+            "DiperbaruiOleh": @Html.Raw(pengujianSampleLainnyaList.DiperbaruiOleh.ToClientList(pengujianSampleLainnyaList)),
+        })
+
+        // Filters
+        .setFilterList(@Html.Raw(pengujianSampleLainnyaList.GetFilterList()))
+        .build();
+    window[form.id] = form;
+    currentSearchForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<input type="hidden" name="cmd" value="search">
+@if (Security.CanSearch) {
+if (!pengujianSampleLainnyaList.IsExport() && Empty(pengujianSampleLainnyaList.CurrentAction) && pengujianSampleLainnyaList.HasSearchFields()) { @* Show search form (begin) *@
+<div class="ew-extended-search container-fluid ps-2">
+<div class="row mb-0@(pengujianSampleLainnyaList.SearchFieldsPerRow > 0 ? " row-cols-sm-" + pengujianSampleLainnyaList.SearchFieldsPerRow : "")">
+@{
+    // Render search row
+    pengujianSampleLainnyaList.RowType = RowType.Search;
+    pengujianSampleLainnyaList.ResetAttributes();
+    await pengujianSampleLainnyaList.RenderRow();
+}
+@if (pengujianSampleLainnyaList.NomorPengujianSampelLainnya.Visible) { // pengujianSampleLainnyaList.NomorPengujianSampelLainnya.Visible (begin)
+    if (!pengujianSampleLainnyaList.NomorPengujianSampelLainnya.UseFilter) {
+        pengujianSampleLainnyaList.SearchColumnCount++;
+    }
+    <div id="xs_NomorPengujianSampelLainnya" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(pengujianSampleLainnyaList.NomorPengujianSampelLainnya.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_NomorPengujianSampelLainnya"
+            name="x_NomorPengujianSampelLainnya[]"
+            class="form-control ew-select@(pengujianSampleLainnyaList.NomorPengujianSampelLainnya.IsInvalidClass)"
+            data-select2-id="fPengujianSampleLainnyasrch_x_NomorPengujianSampelLainnya"
+            data-table="PengujianSampleLainnya"
+            data-field="x_NomorPengujianSampelLainnya"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(pengujianSampleLainnyaList.NomorPengujianSampelLainnya.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(pengujianSampleLainnyaList.NomorPengujianSampelLainnya.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(pengujianSampleLainnyaList.NomorPengujianSampelLainnya.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(pengujianSampleLainnyaList.NomorPengujianSampelLainnya.EditAttributes)>
+            @(pengujianSampleLainnyaList.NomorPengujianSampelLainnya.SelectOptionListHtml("x_NomorPengujianSampelLainnya", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(pengujianSampleLainnyaList.NomorPengujianSampelLainnya.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fPengujianSampleLainnyasrch", function() {
+            var options = {
+                name: "x_NomorPengujianSampelLainnya",
+                selectId: "fPengujianSampleLainnyasrch_x_NomorPengujianSampelLainnya",
+                ajax: { id: "x_NomorPengujianSampelLainnya", form: "fPengujianSampleLainnyasrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.PengujianSampleLainnya.fields.NomorPengujianSampelLainnya.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* pengujianSampleLainnyaList.NomorPengujianSampelLainnya.Visible (end) *@
+@if (pengujianSampleLainnyaList.idPlant.Visible) { // pengujianSampleLainnyaList.idPlant.Visible (begin)
+    if (!pengujianSampleLainnyaList.idPlant.UseFilter) {
+        pengujianSampleLainnyaList.SearchColumnCount++;
+    }
+    <div id="xs_idPlant" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(pengujianSampleLainnyaList.idPlant.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_idPlant"
+            name="x_idPlant[]"
+            class="form-control ew-select@(pengujianSampleLainnyaList.idPlant.IsInvalidClass)"
+            data-select2-id="fPengujianSampleLainnyasrch_x_idPlant"
+            data-table="PengujianSampleLainnya"
+            data-field="x_idPlant"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(pengujianSampleLainnyaList.idPlant.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(pengujianSampleLainnyaList.idPlant.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(pengujianSampleLainnyaList.idPlant.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(pengujianSampleLainnyaList.idPlant.EditAttributes)>
+            @(pengujianSampleLainnyaList.idPlant.SelectOptionListHtml("x_idPlant", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(pengujianSampleLainnyaList.idPlant.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fPengujianSampleLainnyasrch", function() {
+            var options = {
+                name: "x_idPlant",
+                selectId: "fPengujianSampleLainnyasrch_x_idPlant",
+                ajax: { id: "x_idPlant", form: "fPengujianSampleLainnyasrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.PengujianSampleLainnya.fields.idPlant.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* pengujianSampleLainnyaList.idPlant.Visible (end) *@
+@if (pengujianSampleLainnyaList.Produk.Visible) { // pengujianSampleLainnyaList.Produk.Visible (begin)
+    if (!pengujianSampleLainnyaList.Produk.UseFilter) {
+        pengujianSampleLainnyaList.SearchColumnCount++;
+    }
+    <div id="xs_Produk" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(pengujianSampleLainnyaList.Produk.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_Produk"
+            name="x_Produk[]"
+            class="form-control ew-select@(pengujianSampleLainnyaList.Produk.IsInvalidClass)"
+            data-select2-id="fPengujianSampleLainnyasrch_x_Produk"
+            data-table="PengujianSampleLainnya"
+            data-field="x_Produk"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(pengujianSampleLainnyaList.Produk.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(pengujianSampleLainnyaList.Produk.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(pengujianSampleLainnyaList.Produk.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(pengujianSampleLainnyaList.Produk.EditAttributes)>
+            @(pengujianSampleLainnyaList.Produk.SelectOptionListHtml("x_Produk", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(pengujianSampleLainnyaList.Produk.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fPengujianSampleLainnyasrch", function() {
+            var options = {
+                name: "x_Produk",
+                selectId: "fPengujianSampleLainnyasrch_x_Produk",
+                ajax: { id: "x_Produk", form: "fPengujianSampleLainnyasrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.PengujianSampleLainnya.fields.Produk.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* pengujianSampleLainnyaList.Produk.Visible (end) *@
+@if (pengujianSampleLainnyaList.DibuatOleh.Visible) { // pengujianSampleLainnyaList.DibuatOleh.Visible (begin)
+    if (!pengujianSampleLainnyaList.DibuatOleh.UseFilter) {
+        pengujianSampleLainnyaList.SearchColumnCount++;
+    }
+    <div id="xs_DibuatOleh" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(pengujianSampleLainnyaList.DibuatOleh.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_DibuatOleh"
+            name="x_DibuatOleh[]"
+            class="form-control ew-select@(pengujianSampleLainnyaList.DibuatOleh.IsInvalidClass)"
+            data-select2-id="fPengujianSampleLainnyasrch_x_DibuatOleh"
+            data-table="PengujianSampleLainnya"
+            data-field="x_DibuatOleh"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(pengujianSampleLainnyaList.DibuatOleh.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(pengujianSampleLainnyaList.DibuatOleh.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(pengujianSampleLainnyaList.DibuatOleh.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(pengujianSampleLainnyaList.DibuatOleh.EditAttributes)>
+            @(pengujianSampleLainnyaList.DibuatOleh.SelectOptionListHtml("x_DibuatOleh", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(pengujianSampleLainnyaList.DibuatOleh.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fPengujianSampleLainnyasrch", function() {
+            var options = {
+                name: "x_DibuatOleh",
+                selectId: "fPengujianSampleLainnyasrch_x_DibuatOleh",
+                ajax: { id: "x_DibuatOleh", form: "fPengujianSampleLainnyasrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.PengujianSampleLainnya.fields.DibuatOleh.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* pengujianSampleLainnyaList.DibuatOleh.Visible (end) *@
+@if (pengujianSampleLainnyaList.DiperbaruiOleh.Visible) { // pengujianSampleLainnyaList.DiperbaruiOleh.Visible (begin)
+    if (!pengujianSampleLainnyaList.DiperbaruiOleh.UseFilter) {
+        pengujianSampleLainnyaList.SearchColumnCount++;
+    }
+    <div id="xs_DiperbaruiOleh" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(pengujianSampleLainnyaList.DiperbaruiOleh.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_DiperbaruiOleh"
+            name="x_DiperbaruiOleh[]"
+            class="form-control ew-select@(pengujianSampleLainnyaList.DiperbaruiOleh.IsInvalidClass)"
+            data-select2-id="fPengujianSampleLainnyasrch_x_DiperbaruiOleh"
+            data-table="PengujianSampleLainnya"
+            data-field="x_DiperbaruiOleh"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(pengujianSampleLainnyaList.DiperbaruiOleh.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(pengujianSampleLainnyaList.DiperbaruiOleh.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(pengujianSampleLainnyaList.DiperbaruiOleh.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(pengujianSampleLainnyaList.DiperbaruiOleh.EditAttributes)>
+            @(pengujianSampleLainnyaList.DiperbaruiOleh.SelectOptionListHtml("x_DiperbaruiOleh", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(pengujianSampleLainnyaList.DiperbaruiOleh.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fPengujianSampleLainnyasrch", function() {
+            var options = {
+                name: "x_DiperbaruiOleh",
+                selectId: "fPengujianSampleLainnyasrch_x_DiperbaruiOleh",
+                ajax: { id: "x_DiperbaruiOleh", form: "fPengujianSampleLainnyasrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.PengujianSampleLainnya.fields.DiperbaruiOleh.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* pengujianSampleLainnyaList.DiperbaruiOleh.Visible (end) *@
+</div><!-- /.row -->
+<div class="row mb-0">
+    <div class="col-sm-auto px-0 pe-sm-2">
+        <div class="ew-basic-search input-group">
+            <input type="search" name="@(Config.TableBasicSearch)" id="@(Config.TableBasicSearch)" class="form-control ew-basic-search-keyword" value="@Html.Raw(HtmlEncode(pengujianSampleLainnyaList.BasicSearch.SessionKeyword))" placeholder="@(HtmlEncode(Language.Phrase("Search")))" aria-label="@(HtmlEncode(Language.Phrase("Search")))">
+            <input type="hidden" name="@(Config.TableBasicSearchType)" id="@(Config.TableBasicSearchType)" class="ew-basic-search-type" value="@(HtmlEncode(pengujianSampleLainnyaList.BasicSearch.SessionType))">
+            <button type="button" data-bs-toggle="dropdown" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split" aria-haspopup="true" aria-expanded="false">
+                <span id="searchtype">@Html.Raw(pengujianSampleLainnyaList.BasicSearch.TypeNameShort)</span>
+            </button>
+            <div class="dropdown-menu dropdown-menu-end">
+                <button type="button" class="dropdown-item@(pengujianSampleLainnyaList.BasicSearch.SessionType == "" ? " active" : "")" form="fPengujianSampleLainnyasrch" data-ew-action="search-type">@Html.Raw(Language.Phrase("QuickSearchAuto"))</button>
+                <button type="button" class="dropdown-item@(pengujianSampleLainnyaList.BasicSearch.SessionType == "=" ? " active" : "")" form="fPengujianSampleLainnyasrch" data-ew-action="search-type" data-search-type="=">@Html.Raw(Language.Phrase("QuickSearchExact"))</button>
+                <button type="button" class="dropdown-item@(pengujianSampleLainnyaList.BasicSearch.SessionType == "AND" ? " active" : "")" form="fPengujianSampleLainnyasrch" data-ew-action="search-type" data-search-type="AND">@Html.Raw(Language.Phrase("QuickSearchAll"))</button>
+                <button type="button" class="dropdown-item@(pengujianSampleLainnyaList.BasicSearch.SessionType == "OR" ? " active" : "")" form="fPengujianSampleLainnyasrch" data-ew-action="search-type" data-search-type="OR">@Html.Raw(Language.Phrase("QuickSearchAny"))</button>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-auto mb-3">
+        <button class="btn btn-primary" name="btn-submit" id="btn-submit" type="submit">@Html.Raw(Language.Phrase("SearchBtn"))</button>
+    </div>
+</div>
+</div><!-- /.ew-extended-search -->
+} @* Show search form (end) *@
+}
+</div><!-- /.ew-search-panel -->
+</form>
+}
+@pengujianSampleLainnyaList.ShowPageHeader()
+@pengujianSampleLainnyaList.ShowMessages()
+<main class="list @(pengujianSampleLainnyaList.TotalRecords == 0 && !pengujianSampleLainnyaList.IsAdd ? " ew-no-record" : "")">
+<div id="ew-header-options">
+    @pengujianSampleLainnyaList.HeaderOptions.RenderBody()
+</div>
+<div id="ew-list">
+@if (pengujianSampleLainnyaList.TotalRecords > 0 || !Empty(pengujianSampleLainnyaList.CurrentAction)) {
+<div class="card ew-card ew-grid@(pengujianSampleLainnyaList.IsAddOrEdit ? " ew-grid-add-edit" : "") @(pengujianSampleLainnyaList.TableGridClass)">
+<form name="@(pengujianSampleLainnyaList.FormName)" id="@(pengujianSampleLainnyaList.FormName)" class="ew-form ew-list-form" action="@AppPath(pengujianSampleLainnyaList.PageName)" method="post" novalidate autocomplete="off">
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+@if (pengujianSampleLainnyaList.IsModal) {
+<input type="hidden" name="modal" value="1">
+}
+<div id="gmp_PengujianSampleLainnya" class="card-body ew-grid-middle-panel @(pengujianSampleLainnyaList.TableContainerClass)" style="@(pengujianSampleLainnyaList.TableContainerStyle)">
+@if (pengujianSampleLainnyaList.TotalRecords > 0 || pengujianSampleLainnyaList.IsGridEdit || pengujianSampleLainnyaList.IsMultiEdit) {
+<table id="tbl_PengujianSampleLainnyalist" class="@(pengujianSampleLainnyaList.TableClass)"><!-- .ew-table -->
+<thead>
+    <tr class="ew-table-header">
+@{
+    // Header row
+    pengujianSampleLainnyaList.RowType = RowType.Header;
+
+    // Render list options
+    await pengujianSampleLainnyaList.RenderListOptions();
+}
+@* Render list options (header, left) *@
+@pengujianSampleLainnyaList.ListOptions.RenderHeader("left")
+@if (pengujianSampleLainnyaList.NomorPengujianSampelLainnya.Visible) { // pengujianSampleLainnyaList.NomorPengujianSampelLainnya.Visible (begin)
+        <th data-name="NomorPengujianSampelLainnya" class="@(pengujianSampleLainnyaList.NomorPengujianSampelLainnya.HeaderCellClass)"><div id="elh_PengujianSampleLainnya_NomorPengujianSampelLainnya" class="PengujianSampleLainnya_NomorPengujianSampelLainnya">@Html.Raw(pengujianSampleLainnyaList.RenderFieldHeader(pengujianSampleLainnyaList.NomorPengujianSampelLainnya))</div></th>
+} @* pengujianSampleLainnyaList.NomorPengujianSampelLainnya.Visible (end) *@
+@if (pengujianSampleLainnyaList.idPlant.Visible) { // pengujianSampleLainnyaList.idPlant.Visible (begin)
+        <th data-name="idPlant" class="@(pengujianSampleLainnyaList.idPlant.HeaderCellClass)"><div id="elh_PengujianSampleLainnya_idPlant" class="PengujianSampleLainnya_idPlant">@Html.Raw(pengujianSampleLainnyaList.RenderFieldHeader(pengujianSampleLainnyaList.idPlant))</div></th>
+} @* pengujianSampleLainnyaList.idPlant.Visible (end) *@
+@if (pengujianSampleLainnyaList.Tanggal.Visible) { // pengujianSampleLainnyaList.Tanggal.Visible (begin)
+        <th data-name="Tanggal" class="@(pengujianSampleLainnyaList.Tanggal.HeaderCellClass)"><div id="elh_PengujianSampleLainnya_Tanggal" class="PengujianSampleLainnya_Tanggal">@Html.Raw(pengujianSampleLainnyaList.RenderFieldHeader(pengujianSampleLainnyaList.Tanggal))</div></th>
+} @* pengujianSampleLainnyaList.Tanggal.Visible (end) *@
+@if (pengujianSampleLainnyaList.Produk.Visible) { // pengujianSampleLainnyaList.Produk.Visible (begin)
+        <th data-name="Produk" class="@(pengujianSampleLainnyaList.Produk.HeaderCellClass)"><div id="elh_PengujianSampleLainnya_Produk" class="PengujianSampleLainnya_Produk">@Html.Raw(pengujianSampleLainnyaList.RenderFieldHeader(pengujianSampleLainnyaList.Produk))</div></th>
+} @* pengujianSampleLainnyaList.Produk.Visible (end) *@
+@if (pengujianSampleLainnyaList.CF_UploadHasil.Visible) { // pengujianSampleLainnyaList.CF_UploadHasil.Visible (begin)
+        <th data-name="CF_UploadHasil" class="@(pengujianSampleLainnyaList.CF_UploadHasil.HeaderCellClass)" style="white-space: nowrap;"><div id="elh_PengujianSampleLainnya_CF_UploadHasil" class="PengujianSampleLainnya_CF_UploadHasil">@Html.Raw(pengujianSampleLainnyaList.RenderFieldHeader(pengujianSampleLainnyaList.CF_UploadHasil))</div></th>
+} @* pengujianSampleLainnyaList.CF_UploadHasil.Visible (end) *@
+@if (pengujianSampleLainnyaList.Keterangan.Visible) { // pengujianSampleLainnyaList.Keterangan.Visible (begin)
+        <th data-name="Keterangan" class="@(pengujianSampleLainnyaList.Keterangan.HeaderCellClass)"><div id="elh_PengujianSampleLainnya_Keterangan" class="PengujianSampleLainnya_Keterangan">@Html.Raw(pengujianSampleLainnyaList.RenderFieldHeader(pengujianSampleLainnyaList.Keterangan))</div></th>
+} @* pengujianSampleLainnyaList.Keterangan.Visible (end) *@
+@if (pengujianSampleLainnyaList.DibuatOleh.Visible) { // pengujianSampleLainnyaList.DibuatOleh.Visible (begin)
+        <th data-name="DibuatOleh" class="@(pengujianSampleLainnyaList.DibuatOleh.HeaderCellClass)"><div id="elh_PengujianSampleLainnya_DibuatOleh" class="PengujianSampleLainnya_DibuatOleh">@Html.Raw(pengujianSampleLainnyaList.RenderFieldHeader(pengujianSampleLainnyaList.DibuatOleh))</div></th>
+} @* pengujianSampleLainnyaList.DibuatOleh.Visible (end) *@
+@if (pengujianSampleLainnyaList.TanggalDibuat.Visible) { // pengujianSampleLainnyaList.TanggalDibuat.Visible (begin)
+        <th data-name="TanggalDibuat" class="@(pengujianSampleLainnyaList.TanggalDibuat.HeaderCellClass)"><div id="elh_PengujianSampleLainnya_TanggalDibuat" class="PengujianSampleLainnya_TanggalDibuat">@Html.Raw(pengujianSampleLainnyaList.RenderFieldHeader(pengujianSampleLainnyaList.TanggalDibuat))</div></th>
+} @* pengujianSampleLainnyaList.TanggalDibuat.Visible (end) *@
+@if (pengujianSampleLainnyaList.DiperbaruiOleh.Visible) { // pengujianSampleLainnyaList.DiperbaruiOleh.Visible (begin)
+        <th data-name="DiperbaruiOleh" class="@(pengujianSampleLainnyaList.DiperbaruiOleh.HeaderCellClass)"><div id="elh_PengujianSampleLainnya_DiperbaruiOleh" class="PengujianSampleLainnya_DiperbaruiOleh">@Html.Raw(pengujianSampleLainnyaList.RenderFieldHeader(pengujianSampleLainnyaList.DiperbaruiOleh))</div></th>
+} @* pengujianSampleLainnyaList.DiperbaruiOleh.Visible (end) *@
+@if (pengujianSampleLainnyaList.TanggalDiperbarui.Visible) { // pengujianSampleLainnyaList.TanggalDiperbarui.Visible (begin)
+        <th data-name="TanggalDiperbarui" class="@(pengujianSampleLainnyaList.TanggalDiperbarui.HeaderCellClass)"><div id="elh_PengujianSampleLainnya_TanggalDiperbarui" class="PengujianSampleLainnya_TanggalDiperbarui">@Html.Raw(pengujianSampleLainnyaList.RenderFieldHeader(pengujianSampleLainnyaList.TanggalDiperbarui))</div></th>
+} @* pengujianSampleLainnyaList.TanggalDiperbarui.Visible (end) *@
+@* Render list options (header, right) *@
+@pengujianSampleLainnyaList.ListOptions.RenderHeader("right")
+    </tr>
+</thead>
+<tbody data-page="@(pengujianSampleLainnyaList.PageNumber)">
+@{
+    await pengujianSampleLainnyaList.SetupGrid();
+    bool eof = pengujianSampleLainnyaList.Recordset == null; // DN
+}
+@while (pengujianSampleLainnyaList.RecordCount < pengujianSampleLainnyaList.StopRecord || SameString(pengujianSampleLainnyaList.RowIndex, "$rowindex$")) { // Begin While
+    if (!eof && !SameString(pengujianSampleLainnyaList.RowIndex, "$rowindex$") &&
+        (!pengujianSampleLainnyaList.IsGridAdd || pengujianSampleLainnyaList.CurrentMode == "copy") &&
+        (!((pengujianSampleLainnyaList.IsCopy || pengujianSampleLainnyaList.IsAdd) && pengujianSampleLainnyaList.RowIndex is int rowIndex && rowIndex == 0))) // DN
+        eof = !await pengujianSampleLainnyaList.Recordset.ReadAsync();
+    pengujianSampleLainnyaList.RecordCount++;
+    if (pengujianSampleLainnyaList.RecordCount >= pengujianSampleLainnyaList.StartRecord) {
+        await pengujianSampleLainnyaList.SetupRow();
+    <tr @Html.Raw(pengujianSampleLainnyaList.RowAttributes)>
+    @* Render list options (body, left) *@
+    @pengujianSampleLainnyaList.ListOptions.RenderBody("left", pengujianSampleLainnyaList.RowCount)
+    @if (pengujianSampleLainnyaList.NomorPengujianSampelLainnya.Visible) { // pengujianSampleLainnyaList.NomorPengujianSampelLainnya.Visible (begin)
+        <td data-name="NomorPengujianSampelLainnya" @Html.Raw(pengujianSampleLainnyaList.NomorPengujianSampelLainnya.CellAttributes)>
+<span id="el@(pengujianSampleLainnyaList.RowIndex == "$rowindex$" ? "$rowindex$" : pengujianSampleLainnyaList.RowCount)_PengujianSampleLainnya_NomorPengujianSampelLainnya" class="el_PengujianSampleLainnya_NomorPengujianSampelLainnya">
+<span @Html.Raw(pengujianSampleLainnyaList.NomorPengujianSampelLainnya.ViewAttributes)>
+@Html.Raw(pengujianSampleLainnyaList.NomorPengujianSampelLainnya.GetViewValue())</span>
+</span>
+</td>
+    } @* pengujianSampleLainnyaList.NomorPengujianSampelLainnya.Visible (end) *@
+    @if (pengujianSampleLainnyaList.idPlant.Visible) { // pengujianSampleLainnyaList.idPlant.Visible (begin)
+        <td data-name="idPlant" @Html.Raw(pengujianSampleLainnyaList.idPlant.CellAttributes)>
+<span id="el@(pengujianSampleLainnyaList.RowIndex == "$rowindex$" ? "$rowindex$" : pengujianSampleLainnyaList.RowCount)_PengujianSampleLainnya_idPlant" class="el_PengujianSampleLainnya_idPlant">
+<span @Html.Raw(pengujianSampleLainnyaList.idPlant.ViewAttributes)>
+@Html.Raw(pengujianSampleLainnyaList.idPlant.GetViewValue())</span>
+</span>
+</td>
+    } @* pengujianSampleLainnyaList.idPlant.Visible (end) *@
+    @if (pengujianSampleLainnyaList.Tanggal.Visible) { // pengujianSampleLainnyaList.Tanggal.Visible (begin)
+        <td data-name="Tanggal" @Html.Raw(pengujianSampleLainnyaList.Tanggal.CellAttributes)>
+<span id="el@(pengujianSampleLainnyaList.RowIndex == "$rowindex$" ? "$rowindex$" : pengujianSampleLainnyaList.RowCount)_PengujianSampleLainnya_Tanggal" class="el_PengujianSampleLainnya_Tanggal">
+<span @Html.Raw(pengujianSampleLainnyaList.Tanggal.ViewAttributes)>
+@Html.Raw(pengujianSampleLainnyaList.Tanggal.GetViewValue())</span>
+</span>
+</td>
+    } @* pengujianSampleLainnyaList.Tanggal.Visible (end) *@
+    @if (pengujianSampleLainnyaList.Produk.Visible) { // pengujianSampleLainnyaList.Produk.Visible (begin)
+        <td data-name="Produk" @Html.Raw(pengujianSampleLainnyaList.Produk.CellAttributes)>
+<span id="el@(pengujianSampleLainnyaList.RowIndex == "$rowindex$" ? "$rowindex$" : pengujianSampleLainnyaList.RowCount)_PengujianSampleLainnya_Produk" class="el_PengujianSampleLainnya_Produk">
+<span @Html.Raw(pengujianSampleLainnyaList.Produk.ViewAttributes)>
+@Html.Raw(pengujianSampleLainnyaList.Produk.GetViewValue())</span>
+</span>
+</td>
+    } @* pengujianSampleLainnyaList.Produk.Visible (end) *@
+    @if (pengujianSampleLainnyaList.CF_UploadHasil.Visible) { // pengujianSampleLainnyaList.CF_UploadHasil.Visible (begin)
+        <td data-name="CF_UploadHasil" @Html.Raw(pengujianSampleLainnyaList.CF_UploadHasil.CellAttributes)>
+<span id="el@(pengujianSampleLainnyaList.RowIndex == "$rowindex$" ? "$rowindex$" : pengujianSampleLainnyaList.RowCount)_PengujianSampleLainnya_CF_UploadHasil" class="el_PengujianSampleLainnya_CF_UploadHasil">
+<span @Html.Raw(pengujianSampleLainnyaList.CF_UploadHasil.ViewAttributes)>
+@Html.Raw(pengujianSampleLainnyaList.CF_UploadHasil.GetViewValue())</span>
+</span>
+</td>
+    } @* pengujianSampleLainnyaList.CF_UploadHasil.Visible (end) *@
+    @if (pengujianSampleLainnyaList.Keterangan.Visible) { // pengujianSampleLainnyaList.Keterangan.Visible (begin)
+        <td data-name="Keterangan" @Html.Raw(pengujianSampleLainnyaList.Keterangan.CellAttributes)>
+<span id="el@(pengujianSampleLainnyaList.RowIndex == "$rowindex$" ? "$rowindex$" : pengujianSampleLainnyaList.RowCount)_PengujianSampleLainnya_Keterangan" class="el_PengujianSampleLainnya_Keterangan">
+<span @Html.Raw(pengujianSampleLainnyaList.Keterangan.ViewAttributes)>
+@Html.Raw(pengujianSampleLainnyaList.Keterangan.GetViewValue())</span>
+</span>
+</td>
+    } @* pengujianSampleLainnyaList.Keterangan.Visible (end) *@
+    @if (pengujianSampleLainnyaList.DibuatOleh.Visible) { // pengujianSampleLainnyaList.DibuatOleh.Visible (begin)
+        <td data-name="DibuatOleh" @Html.Raw(pengujianSampleLainnyaList.DibuatOleh.CellAttributes)>
+<span id="el@(pengujianSampleLainnyaList.RowIndex == "$rowindex$" ? "$rowindex$" : pengujianSampleLainnyaList.RowCount)_PengujianSampleLainnya_DibuatOleh" class="el_PengujianSampleLainnya_DibuatOleh">
+<span @Html.Raw(pengujianSampleLainnyaList.DibuatOleh.ViewAttributes)>
+@Html.Raw(pengujianSampleLainnyaList.DibuatOleh.GetViewValue())</span>
+</span>
+</td>
+    } @* pengujianSampleLainnyaList.DibuatOleh.Visible (end) *@
+    @if (pengujianSampleLainnyaList.TanggalDibuat.Visible) { // pengujianSampleLainnyaList.TanggalDibuat.Visible (begin)
+        <td data-name="TanggalDibuat" @Html.Raw(pengujianSampleLainnyaList.TanggalDibuat.CellAttributes)>
+<span id="el@(pengujianSampleLainnyaList.RowIndex == "$rowindex$" ? "$rowindex$" : pengujianSampleLainnyaList.RowCount)_PengujianSampleLainnya_TanggalDibuat" class="el_PengujianSampleLainnya_TanggalDibuat">
+<span @Html.Raw(pengujianSampleLainnyaList.TanggalDibuat.ViewAttributes)>
+@Html.Raw(pengujianSampleLainnyaList.TanggalDibuat.GetViewValue())</span>
+</span>
+</td>
+    } @* pengujianSampleLainnyaList.TanggalDibuat.Visible (end) *@
+    @if (pengujianSampleLainnyaList.DiperbaruiOleh.Visible) { // pengujianSampleLainnyaList.DiperbaruiOleh.Visible (begin)
+        <td data-name="DiperbaruiOleh" @Html.Raw(pengujianSampleLainnyaList.DiperbaruiOleh.CellAttributes)>
+<span id="el@(pengujianSampleLainnyaList.RowIndex == "$rowindex$" ? "$rowindex$" : pengujianSampleLainnyaList.RowCount)_PengujianSampleLainnya_DiperbaruiOleh" class="el_PengujianSampleLainnya_DiperbaruiOleh">
+<span @Html.Raw(pengujianSampleLainnyaList.DiperbaruiOleh.ViewAttributes)>
+@Html.Raw(pengujianSampleLainnyaList.DiperbaruiOleh.GetViewValue())</span>
+</span>
+</td>
+    } @* pengujianSampleLainnyaList.DiperbaruiOleh.Visible (end) *@
+    @if (pengujianSampleLainnyaList.TanggalDiperbarui.Visible) { // pengujianSampleLainnyaList.TanggalDiperbarui.Visible (begin)
+        <td data-name="TanggalDiperbarui" @Html.Raw(pengujianSampleLainnyaList.TanggalDiperbarui.CellAttributes)>
+<span id="el@(pengujianSampleLainnyaList.RowIndex == "$rowindex$" ? "$rowindex$" : pengujianSampleLainnyaList.RowCount)_PengujianSampleLainnya_TanggalDiperbarui" class="el_PengujianSampleLainnya_TanggalDiperbarui">
+<span @Html.Raw(pengujianSampleLainnyaList.TanggalDiperbarui.ViewAttributes)>
+@Html.Raw(pengujianSampleLainnyaList.TanggalDiperbarui.GetViewValue())</span>
+</span>
+</td>
+    } @* pengujianSampleLainnyaList.TanggalDiperbarui.Visible (end) *@
+    @* Render list options (body, right) *@
+    @pengujianSampleLainnyaList.ListOptions.RenderBody("right", pengujianSampleLainnyaList.RowCount)
+    </tr>
+    } @* End if *@
+
+    // Reset for template row
+    if (SameString(pengujianSampleLainnyaList.RowIndex, "$rowindex$"))
+        pengujianSampleLainnyaList.RowIndex = 0;
+
+    // Reset inline add/copy row
+    if ((pengujianSampleLainnyaList.IsCopy || pengujianSampleLainnyaList.IsAdd) && pengujianSampleLainnyaList.RowIndex is int rowIndex2 && rowIndex2 == 0)
+        pengujianSampleLainnyaList.RowIndex = 1;
+} @* End While *@
+</tbody>
+</table><!-- /.ew-table -->
+} @* End If TotalRecords > 0 *@
+</div><!-- /.ew-grid-middle-panel -->
+@if (Empty(pengujianSampleLainnyaList.CurrentAction) && !pengujianSampleLainnyaList.UseAjaxActions) {
+<input type="hidden" name="action" id="action" value="">
+}
+</form><!-- /.ew-list-form -->
+@{ pengujianSampleLainnyaList.CloseRecordset(); }
+@if (!pengujianSampleLainnyaList.IsExport()) {
+<div class="card-footer ew-grid-lower-panel">
+@if (!pengujianSampleLainnyaList.IsGridAdd && !(pengujianSampleLainnyaList.IsGridEdit && pengujianSampleLainnyaList.ModalGridEdit) && !pengujianSampleLainnyaList.IsMultiEdit) {
+@Html.Raw(pengujianSampleLainnyaList.Pager.Render())
+}
+<div class="ew-list-other-options">
+@pengujianSampleLainnyaList.OtherOptions.RenderBody("bottom")
+</div>
+</div>
+}
+</div><!-- /.ew-grid -->
+} else { // Show other options
+<div class="ew-list-other-options">
+@pengujianSampleLainnyaList.OtherOptions.ForEach(opt => opt.ButtonClass = "").RenderBody()
+</div>
+}
+</div>
+<div id="ew-footer-options">
+    @pengujianSampleLainnyaList.FooterOptions.RenderBody()
+</div>
+</main>
+@pengujianSampleLainnyaList.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+@if (!pengujianSampleLainnyaList.IsExport()) {
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("PengujianSampleLainnya");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Startup script
+    // Write your table-specific startup script here
+    // document.write("page loaded");
+    const parentURL = ew.PATH_BASE;
+    const showMessage = m => (ew?.alert ? ew.alert(m) : alert(m));
+    const showLoadingSafe = () => (typeof showLoading === 'function' ? showLoading() : null);
+    const hideLoadingSafe = () => (typeof hideLoading === 'function' ? hideLoading() : null);
+    function getFilenamFromDisposition(disposition) {
+        if (!disposition) return 'download_file';
+        const utf8 = disposition.match(/filename\*\s*=\s*UTF-8''([^;]+)/i);
+        if (utf8?.[1]) return decodeURIComponent(utf8[1]);
+        const normal = disposition.match(/filename="?([^";]+)"?/i);
+        if (normal?.[1]) return decodeURIComponent(normal[1]);
+        return 'download_file';
+    }
+    function downloadBlob(blob, fileName) {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName || 'download_file';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+    }
+    async function blobToJson(blob) {
+        const text = await blob.text();
+        try {
+            return JSON.parse(text);
+        } catch {
+            return null;
+        }
+    }
+    $(document).ready(function () {
+        const $oldButton = $('button.btn-primary[name="btn-submit"]');
+        if ($oldButton.length) {
+            const $addButton = $(`
+                <button type="button" class="btn btn-success ms-1" id="btn-add-custom">
+                <i class="fas fa-plus"></i> Add New
+                </button>
+            `);
+            $addButton.on('click', () => {
+                window.location.href = parentURL + 'PengujianSampleLainnyaAdd';
+            });
+            $oldButton.parent().append($addButton);
+        }
+    });
+    $(document).on('click', '.download-document', function (e) {
+        e.preventDefault();
+        const id = $(this).data('id');
+        const type = ($(this).data('type') || 'psl').toString().trim().toLowerCase();
+        if (!id) return showMessage('ID dokumen tidak ditemukan.');
+        if (!type) return showMessage('Type tidak ditemukan.');
+        $.ajax({
+            url: `${parentURL}api/qq/download?id=${encodeURIComponent(id)}&type=${encodeURIComponent(type)}`,
+            method: 'GET',
+            xhrFields: { responseType: 'blob' },
+            beforeSend: showLoadingSafe,
+            success: async (blob, _status, xhr) => {
+                const ct = (xhr.getResponseHeader('Content-Type') || '').toLowerCase();
+                if (ct.includes('application/json')) {
+                    const obj = await blobToJson(blob);
+                    return showMessage(obj.message || 'Gagal download.');
+                }
+                const cd = xhr.getResponseHeader('Content-Disposition');
+                const fileName = getFilenamFromDisposition(cd);
+                downloadBlob(blob, fileName);
+                showMessage('Download berhasil!');
+            },
+            error: async xhr => {
+                try {
+                    const blob = xhr.response;
+                    if (blob instanceof Blob) {
+                        const obj = await blobToJson(blob);
+                        if (obj?.message) return showMessage(obj.message);
+                    }
+                } catch {}
+                console.error(`Gagal mengunduh file. (${xhr.status} ${xhr.statusText})`);
+                return showMessage('Gagal mengunduh file.');
+            },
+            complete: hideLoadingSafe,
+        });
+    });
+});
+</script>
+}

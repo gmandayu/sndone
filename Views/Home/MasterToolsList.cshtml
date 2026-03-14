@@ -1,0 +1,376 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (masterToolsList.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = masterToolsList.UseLayout ? "_Layout" : "";
+}
+@if (!masterToolsList.IsExport()) {
+<script>
+var currentTable = @Html.Raw(ConvertToJson(masterToolsList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { MasterTools: currentTable } });
+var currentPageID = ew.PAGE_ID = "list";
+var currentForm;
+var @(masterToolsList.FormName);
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("@(masterToolsList.FormName)")
+        .setPageId("list")
+        .setSubmitWithFetch(@(masterToolsList.UseAjaxActions ? "true" : "false"))
+        .setFormKeyCountName("@(masterToolsList.FormKeyCountName)")
+
+        // Dynamic selection lists
+        .setLists({
+            "IdTools": @Html.Raw(masterToolsList.IdTools.ToClientList(masterToolsList)),
+            "NamaTools": @Html.Raw(masterToolsList.NamaTools.ToClientList(masterToolsList)),
+        })
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Write your client script here, no need to add script tags.
+});
+</script>
+}
+@if (!masterToolsList.IsExport()) {
+<div class="btn-toolbar ew-toolbar">
+@if (masterToolsList.TotalRecords > 0 && masterToolsList.ExportOptions.Visible) {
+    masterToolsList.ExportOptions.Render("body");
+}
+@if (masterToolsList.ImportOptions.Visible) {
+    masterToolsList.ImportOptions.Render("body");
+}
+@if (masterToolsList.SearchOptions.Visible) {
+    masterToolsList.SearchOptions.Render("body");
+}
+@if (masterToolsList.FilterOptions.Visible) {
+    masterToolsList.FilterOptions.Render("body");
+}
+</div>
+}
+@if (masterToolsList.ShowCurrentFilter) {
+    masterToolsList.ShowFilterList();
+}
+@if (!masterToolsList.IsModal) {
+<form name="fMasterToolssrch" id="fMasterToolssrch" class="ew-form ew-ext-search-form" action="@AppPath(CurrentPageName())" novalidate autocomplete="off">
+<div id="fMasterToolssrch_search_panel" class="mb-2 mb-sm-0 @(masterToolsList.SearchPanelClass)"><!-- .ew-search-panel -->
+<script>
+var currentTable = @Html.Raw(ConvertToJson(masterToolsList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { MasterTools: currentTable } });
+var currentForm;
+var fMasterToolssrch, currentSearchForm, currentAdvancedSearchForm;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery,
+        fields = currentTable.fields;
+
+    // Form object for search
+    let form = new ew.FormBuilder()
+        .setId("fMasterToolssrch")
+        .setPageId("list")
+@if (masterToolsList.UseAjaxActions) {
+        <text>.setSubmitWithFetch(true)</text>
+}
+
+        // Add fields
+        .setFields([
+        ])
+        // Validate form
+        .setValidate(
+            async function () {
+                if (!this.validateRequired)
+                    return true; // Ignore validation
+                let fobj = this.getForm();
+
+                // Validate fields
+                if (!this.validateFields())
+                    return false;
+
+                // Call Form_CustomValidate event
+                if (!(await this.customValidate?.(fobj) ?? true)) {
+                    this.focus();
+                    return false;
+                }
+                return true;
+            }
+        )
+
+        // Form_CustomValidate
+        .setCustomValidate(
+            function(fobj) { // DO NOT CHANGE THIS LINE!
+                    // Your custom validation code here, return false if invalid.
+                    return true;
+                }
+        )
+
+        // Use JavaScript validation or not
+        .setValidateRequired(ew.CLIENT_VALIDATE)
+
+        // Dynamic selection lists
+        .setLists({
+            "IdTools": @Html.Raw(masterToolsList.IdTools.ToClientList(masterToolsList)),
+            "NamaTools": @Html.Raw(masterToolsList.NamaTools.ToClientList(masterToolsList)),
+        })
+
+        // Filters
+        .setFilterList(@Html.Raw(masterToolsList.GetFilterList()))
+        .build();
+    window[form.id] = form;
+    currentSearchForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<input type="hidden" name="cmd" value="search">
+@if (Security.CanSearch) {
+if (!masterToolsList.IsExport() && Empty(masterToolsList.CurrentAction) && masterToolsList.HasSearchFields()) { @* Show search form (begin) *@
+<div class="ew-extended-search container-fluid ps-2">
+<div class="row mb-0@(masterToolsList.SearchFieldsPerRow > 0 ? " row-cols-sm-" + masterToolsList.SearchFieldsPerRow : "")">
+@{
+    // Render search row
+    masterToolsList.RowType = RowType.Search;
+    masterToolsList.ResetAttributes();
+    await masterToolsList.RenderRow();
+}
+@if (masterToolsList.IdTools.Visible) { // masterToolsList.IdTools.Visible (begin)
+    if (!masterToolsList.IdTools.UseFilter) {
+        masterToolsList.SearchColumnCount++;
+    }
+    <div id="xs_IdTools" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(masterToolsList.IdTools.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_IdTools"
+            name="x_IdTools[]"
+            class="form-control ew-select@(masterToolsList.IdTools.IsInvalidClass)"
+            data-select2-id="fMasterToolssrch_x_IdTools"
+            data-table="MasterTools"
+            data-field="x_IdTools"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(masterToolsList.IdTools.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(masterToolsList.IdTools.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(masterToolsList.IdTools.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(masterToolsList.IdTools.EditAttributes)>
+            @(masterToolsList.IdTools.SelectOptionListHtml("x_IdTools", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(masterToolsList.IdTools.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMasterToolssrch", function() {
+            var options = {
+                name: "x_IdTools",
+                selectId: "fMasterToolssrch_x_IdTools",
+                ajax: { id: "x_IdTools", form: "fMasterToolssrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MasterTools.fields.IdTools.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* masterToolsList.IdTools.Visible (end) *@
+@if (masterToolsList.NamaTools.Visible) { // masterToolsList.NamaTools.Visible (begin)
+    if (!masterToolsList.NamaTools.UseFilter) {
+        masterToolsList.SearchColumnCount++;
+    }
+    <div id="xs_NamaTools" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(masterToolsList.NamaTools.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_NamaTools"
+            name="x_NamaTools[]"
+            class="form-control ew-select@(masterToolsList.NamaTools.IsInvalidClass)"
+            data-select2-id="fMasterToolssrch_x_NamaTools"
+            data-table="MasterTools"
+            data-field="x_NamaTools"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(masterToolsList.NamaTools.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(masterToolsList.NamaTools.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(masterToolsList.NamaTools.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(masterToolsList.NamaTools.EditAttributes)>
+            @(masterToolsList.NamaTools.SelectOptionListHtml("x_NamaTools", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(masterToolsList.NamaTools.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMasterToolssrch", function() {
+            var options = {
+                name: "x_NamaTools",
+                selectId: "fMasterToolssrch_x_NamaTools",
+                ajax: { id: "x_NamaTools", form: "fMasterToolssrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MasterTools.fields.NamaTools.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* masterToolsList.NamaTools.Visible (end) *@
+</div><!-- /.row -->
+<div class="row mb-0">
+    <div class="col-sm-auto px-0 pe-sm-2">
+        <div class="ew-basic-search input-group">
+            <input type="search" name="@(Config.TableBasicSearch)" id="@(Config.TableBasicSearch)" class="form-control ew-basic-search-keyword" value="@Html.Raw(HtmlEncode(masterToolsList.BasicSearch.SessionKeyword))" placeholder="@(HtmlEncode(Language.Phrase("Search")))" aria-label="@(HtmlEncode(Language.Phrase("Search")))">
+            <input type="hidden" name="@(Config.TableBasicSearchType)" id="@(Config.TableBasicSearchType)" class="ew-basic-search-type" value="@(HtmlEncode(masterToolsList.BasicSearch.SessionType))">
+            <button type="button" data-bs-toggle="dropdown" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split" aria-haspopup="true" aria-expanded="false">
+                <span id="searchtype">@Html.Raw(masterToolsList.BasicSearch.TypeNameShort)</span>
+            </button>
+            <div class="dropdown-menu dropdown-menu-end">
+                <button type="button" class="dropdown-item@(masterToolsList.BasicSearch.SessionType == "" ? " active" : "")" form="fMasterToolssrch" data-ew-action="search-type">@Html.Raw(Language.Phrase("QuickSearchAuto"))</button>
+                <button type="button" class="dropdown-item@(masterToolsList.BasicSearch.SessionType == "=" ? " active" : "")" form="fMasterToolssrch" data-ew-action="search-type" data-search-type="=">@Html.Raw(Language.Phrase("QuickSearchExact"))</button>
+                <button type="button" class="dropdown-item@(masterToolsList.BasicSearch.SessionType == "AND" ? " active" : "")" form="fMasterToolssrch" data-ew-action="search-type" data-search-type="AND">@Html.Raw(Language.Phrase("QuickSearchAll"))</button>
+                <button type="button" class="dropdown-item@(masterToolsList.BasicSearch.SessionType == "OR" ? " active" : "")" form="fMasterToolssrch" data-ew-action="search-type" data-search-type="OR">@Html.Raw(Language.Phrase("QuickSearchAny"))</button>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-auto mb-3">
+        <button class="btn btn-primary" name="btn-submit" id="btn-submit" type="submit">@Html.Raw(Language.Phrase("SearchBtn"))</button>
+    </div>
+</div>
+</div><!-- /.ew-extended-search -->
+} @* Show search form (end) *@
+}
+</div><!-- /.ew-search-panel -->
+</form>
+}
+@masterToolsList.ShowPageHeader()
+@masterToolsList.ShowMessages()
+<main class="list @(masterToolsList.TotalRecords == 0 && !masterToolsList.IsAdd ? " ew-no-record" : "")">
+<div id="ew-header-options">
+    @masterToolsList.HeaderOptions.RenderBody()
+</div>
+<div id="ew-list">
+@if (masterToolsList.TotalRecords > 0 || !Empty(masterToolsList.CurrentAction)) {
+<div class="card ew-card ew-grid@(masterToolsList.IsAddOrEdit ? " ew-grid-add-edit" : "") @(masterToolsList.TableGridClass)">
+<form name="@(masterToolsList.FormName)" id="@(masterToolsList.FormName)" class="ew-form ew-list-form" action="@AppPath(masterToolsList.PageName)" method="post" novalidate autocomplete="off">
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+@if (masterToolsList.IsModal) {
+<input type="hidden" name="modal" value="1">
+}
+<div id="gmp_MasterTools" class="card-body ew-grid-middle-panel @(masterToolsList.TableContainerClass)" style="@(masterToolsList.TableContainerStyle)">
+@if (masterToolsList.TotalRecords > 0 || masterToolsList.IsGridEdit || masterToolsList.IsMultiEdit) {
+<table id="tbl_MasterToolslist" class="@(masterToolsList.TableClass)"><!-- .ew-table -->
+<thead>
+    <tr class="ew-table-header">
+@{
+    // Header row
+    masterToolsList.RowType = RowType.Header;
+
+    // Render list options
+    await masterToolsList.RenderListOptions();
+}
+@* Render list options (header, left) *@
+@masterToolsList.ListOptions.RenderHeader("left")
+@if (masterToolsList.IdTools.Visible) { // masterToolsList.IdTools.Visible (begin)
+        <th data-name="IdTools" class="@(masterToolsList.IdTools.HeaderCellClass)"><div id="elh_MasterTools_IdTools" class="MasterTools_IdTools">@Html.Raw(masterToolsList.RenderFieldHeader(masterToolsList.IdTools))</div></th>
+} @* masterToolsList.IdTools.Visible (end) *@
+@if (masterToolsList.NamaTools.Visible) { // masterToolsList.NamaTools.Visible (begin)
+        <th data-name="NamaTools" class="@(masterToolsList.NamaTools.HeaderCellClass)"><div id="elh_MasterTools_NamaTools" class="MasterTools_NamaTools">@Html.Raw(masterToolsList.RenderFieldHeader(masterToolsList.NamaTools))</div></th>
+} @* masterToolsList.NamaTools.Visible (end) *@
+@* Render list options (header, right) *@
+@masterToolsList.ListOptions.RenderHeader("right")
+    </tr>
+</thead>
+<tbody data-page="@(masterToolsList.PageNumber)">
+@{
+    await masterToolsList.SetupGrid();
+    bool eof = masterToolsList.Recordset == null; // DN
+}
+@while (masterToolsList.RecordCount < masterToolsList.StopRecord || SameString(masterToolsList.RowIndex, "$rowindex$")) { // Begin While
+    if (!eof && !SameString(masterToolsList.RowIndex, "$rowindex$") &&
+        (!masterToolsList.IsGridAdd || masterToolsList.CurrentMode == "copy") &&
+        (!((masterToolsList.IsCopy || masterToolsList.IsAdd) && masterToolsList.RowIndex is int rowIndex && rowIndex == 0))) // DN
+        eof = !await masterToolsList.Recordset.ReadAsync();
+    masterToolsList.RecordCount++;
+    if (masterToolsList.RecordCount >= masterToolsList.StartRecord) {
+        await masterToolsList.SetupRow();
+    <tr @Html.Raw(masterToolsList.RowAttributes)>
+    @* Render list options (body, left) *@
+    @masterToolsList.ListOptions.RenderBody("left", masterToolsList.RowCount)
+    @if (masterToolsList.IdTools.Visible) { // masterToolsList.IdTools.Visible (begin)
+        <td data-name="IdTools" @Html.Raw(masterToolsList.IdTools.CellAttributes)>
+<span id="el@(masterToolsList.RowIndex == "$rowindex$" ? "$rowindex$" : masterToolsList.RowCount)_MasterTools_IdTools" class="el_MasterTools_IdTools">
+<span @Html.Raw(masterToolsList.IdTools.ViewAttributes)>
+@Html.Raw(masterToolsList.IdTools.GetViewValue())</span>
+</span>
+</td>
+    } @* masterToolsList.IdTools.Visible (end) *@
+    @if (masterToolsList.NamaTools.Visible) { // masterToolsList.NamaTools.Visible (begin)
+        <td data-name="NamaTools" @Html.Raw(masterToolsList.NamaTools.CellAttributes)>
+<span id="el@(masterToolsList.RowIndex == "$rowindex$" ? "$rowindex$" : masterToolsList.RowCount)_MasterTools_NamaTools" class="el_MasterTools_NamaTools">
+<span @Html.Raw(masterToolsList.NamaTools.ViewAttributes)>
+@Html.Raw(masterToolsList.NamaTools.GetViewValue())</span>
+</span>
+</td>
+    } @* masterToolsList.NamaTools.Visible (end) *@
+    @* Render list options (body, right) *@
+    @masterToolsList.ListOptions.RenderBody("right", masterToolsList.RowCount)
+    </tr>
+    } @* End if *@
+
+    // Reset for template row
+    if (SameString(masterToolsList.RowIndex, "$rowindex$"))
+        masterToolsList.RowIndex = 0;
+
+    // Reset inline add/copy row
+    if ((masterToolsList.IsCopy || masterToolsList.IsAdd) && masterToolsList.RowIndex is int rowIndex2 && rowIndex2 == 0)
+        masterToolsList.RowIndex = 1;
+} @* End While *@
+</tbody>
+</table><!-- /.ew-table -->
+} @* End If TotalRecords > 0 *@
+</div><!-- /.ew-grid-middle-panel -->
+@if (Empty(masterToolsList.CurrentAction) && !masterToolsList.UseAjaxActions) {
+<input type="hidden" name="action" id="action" value="">
+}
+</form><!-- /.ew-list-form -->
+@{ masterToolsList.CloseRecordset(); }
+@if (!masterToolsList.IsExport()) {
+<div class="card-footer ew-grid-lower-panel">
+@if (!masterToolsList.IsGridAdd && !(masterToolsList.IsGridEdit && masterToolsList.ModalGridEdit) && !masterToolsList.IsMultiEdit) {
+@Html.Raw(masterToolsList.Pager.Render())
+}
+<div class="ew-list-other-options">
+@masterToolsList.OtherOptions.RenderBody("bottom")
+</div>
+</div>
+}
+</div><!-- /.ew-grid -->
+} else { // Show other options
+<div class="ew-list-other-options">
+@masterToolsList.OtherOptions.ForEach(opt => opt.ButtonClass = "").RenderBody()
+</div>
+}
+</div>
+<div id="ew-footer-options">
+    @masterToolsList.FooterOptions.RenderBody()
+</div>
+</main>
+@masterToolsList.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+@if (!masterToolsList.IsExport()) {
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("MasterTools");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Write your table-specific startup script here
+    // document.write("page loaded");
+});
+</script>
+}

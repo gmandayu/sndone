@@ -1,0 +1,1516 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (penyaluranAdd.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = penyaluranAdd.UseLayout ? "_Layout" : "";
+}
+<script>
+var currentTable = @Html.Raw(ConvertToJson(penyaluranAdd.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { Penyaluran: currentTable } });
+var currentPageID = ew.PAGE_ID = "add";
+var currentForm;
+var fPenyaluranadd;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("fPenyaluranadd")
+        .setPageId("add")
+
+        // Add fields
+        .setFields([
+
+            ["LookupPlant", [fields.LookupPlant.visible && fields.LookupPlant.required ? ew.Validators.required(fields.LookupPlant.caption) : null], fields.LookupPlant.isInvalid],
+            ["IdPlant", [fields.IdPlant.visible && fields.IdPlant.required ? ew.Validators.required(fields.IdPlant.caption) : null, ew.Validators.integer], fields.IdPlant.isInvalid],
+            ["TipePenyaluran", [fields.TipePenyaluran.visible && fields.TipePenyaluran.required ? ew.Validators.required(fields.TipePenyaluran.caption) : null], fields.TipePenyaluran.isInvalid],
+            ["TipeProdukSTS", [fields.TipeProdukSTS.visible && fields.TipeProdukSTS.required ? ew.Validators.required(fields.TipeProdukSTS.caption) : null], fields.TipeProdukSTS.isInvalid],
+            ["KategoriPenyaluran", [fields.KategoriPenyaluran.visible && fields.KategoriPenyaluran.required ? ew.Validators.required(fields.KategoriPenyaluran.caption) : null], fields.KategoriPenyaluran.isInvalid],
+            ["IdModa", [fields.IdModa.visible && fields.IdModa.required ? ew.Validators.required(fields.IdModa.caption) : null], fields.IdModa.isInvalid],
+            ["NoShipment", [fields.NoShipment.visible && fields.NoShipment.required ? ew.Validators.required(fields.NoShipment.caption) : null], fields.NoShipment.isInvalid],
+            ["IdPipa", [fields.IdPipa.visible && fields.IdPipa.required ? ew.Validators.required(fields.IdPipa.caption) : null], fields.IdPipa.isInvalid],
+            ["NomorPolisi", [fields.NomorPolisi.visible && fields.NomorPolisi.required ? ew.Validators.required(fields.NomorPolisi.caption) : null], fields.NomorPolisi.isInvalid],
+            ["NamaKapal", [fields.NamaKapal.visible && fields.NamaKapal.required ? ew.Validators.required(fields.NamaKapal.caption) : null], fields.NamaKapal.isInvalid],
+            ["JenisProduk", [fields.JenisProduk.visible && fields.JenisProduk.required ? ew.Validators.required(fields.JenisProduk.caption) : null], fields.JenisProduk.isInvalid],
+            ["StatusProses", [fields.StatusProses.visible && fields.StatusProses.required ? ew.Validators.required(fields.StatusProses.caption) : null], fields.StatusProses.isInvalid],
+            ["IdTemplate", [fields.IdTemplate.visible && fields.IdTemplate.required ? ew.Validators.required(fields.IdTemplate.caption) : null], fields.IdTemplate.isInvalid],
+            ["PersentaseProgress", [fields.PersentaseProgress.visible && fields.PersentaseProgress.required ? ew.Validators.required(fields.PersentaseProgress.caption) : null], fields.PersentaseProgress.isInvalid],
+            ["Tujuan", [fields.Tujuan.visible && fields.Tujuan.required ? ew.Validators.required(fields.Tujuan.caption) : null], fields.Tujuan.isInvalid],
+            ["TujuanKonsinyasi", [fields.TujuanKonsinyasi.visible && fields.TujuanKonsinyasi.required ? ew.Validators.required(fields.TujuanKonsinyasi.caption) : null], fields.TujuanKonsinyasi.isInvalid],
+            ["Volume", [fields.Volume.visible && fields.Volume.required ? ew.Validators.required(fields.Volume.caption) : null, ew.Validators.float], fields.Volume.isInvalid],
+            ["TanggalSandar", [fields.TanggalSandar.visible && fields.TanggalSandar.required ? ew.Validators.required(fields.TanggalSandar.caption) : null, ew.Validators.datetime(fields.TanggalSandar.clientFormatPattern)], fields.TanggalSandar.isInvalid],
+            ["Catatan", [fields.Catatan.visible && fields.Catatan.required ? ew.Validators.required(fields.Catatan.caption) : null], fields.Catatan.isInvalid],
+            ["LookupTipeProduk", [fields.LookupTipeProduk.visible && fields.LookupTipeProduk.required ? ew.Validators.required(fields.LookupTipeProduk.caption) : null], fields.LookupTipeProduk.isInvalid],
+            ["LookupJenisPlant", [fields.LookupJenisPlant.visible && fields.LookupJenisPlant.required ? ew.Validators.required(fields.LookupJenisPlant.caption) : null], fields.LookupJenisPlant.isInvalid],
+            ["MultipleTujuanKonsinyasi", [fields.MultipleTujuanKonsinyasi.visible && fields.MultipleTujuanKonsinyasi.required ? ew.Validators.required(fields.MultipleTujuanKonsinyasi.caption) : null], fields.MultipleTujuanKonsinyasi.isInvalid],
+            ["MultipleTujuanKonsinyasiHidden", [fields.MultipleTujuanKonsinyasiHidden.visible && fields.MultipleTujuanKonsinyasiHidden.required ? ew.Validators.required(fields.MultipleTujuanKonsinyasiHidden.caption) : null], fields.MultipleTujuanKonsinyasiHidden.isInvalid],
+            ["MultipleQuantity", [fields.MultipleQuantity.visible && fields.MultipleQuantity.required ? ew.Validators.required(fields.MultipleQuantity.caption) : null], fields.MultipleQuantity.isInvalid]
+        ])
+
+        // Form_CustomValidate
+        .setCustomValidate(
+            function(fobj) { // DO NOT CHANGE THIS LINE!
+                    // Your custom validation code here, return false if invalid.
+                    return true;
+                }
+        )
+
+        // Use JavaScript validation or not
+        .setValidateRequired(ew.CLIENT_VALIDATE)
+
+        // Dynamic selection lists
+        .setLists({
+            "LookupPlant": @Html.Raw(penyaluranAdd.LookupPlant.ToClientList(penyaluranAdd)),
+            "IdPlant": @Html.Raw(penyaluranAdd.IdPlant.ToClientList(penyaluranAdd)),
+            "TipePenyaluran": @Html.Raw(penyaluranAdd.TipePenyaluran.ToClientList(penyaluranAdd)),
+            "TipeProdukSTS": @Html.Raw(penyaluranAdd.TipeProdukSTS.ToClientList(penyaluranAdd)),
+            "KategoriPenyaluran": @Html.Raw(penyaluranAdd.KategoriPenyaluran.ToClientList(penyaluranAdd)),
+            "IdModa": @Html.Raw(penyaluranAdd.IdModa.ToClientList(penyaluranAdd)),
+            "IdPipa": @Html.Raw(penyaluranAdd.IdPipa.ToClientList(penyaluranAdd)),
+            "JenisProduk": @Html.Raw(penyaluranAdd.JenisProduk.ToClientList(penyaluranAdd)),
+            "TujuanKonsinyasi": @Html.Raw(penyaluranAdd.TujuanKonsinyasi.ToClientList(penyaluranAdd)),
+            "MultipleTujuanKonsinyasi": @Html.Raw(penyaluranAdd.MultipleTujuanKonsinyasi.ToClientList(penyaluranAdd)),
+        })
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Client script
+    const parent_url = ew.PATH_BASE;
+    const action = '@HttpContext.Request.Query["action"].ToString()';
+    let tujuanOptionsDataGlobal = [];
+    if (action !== "addproduct") {
+        $("#x_TipePenyaluran, #x_IdModa, #x_IdPlant, #x_KategoriPenyaluran, #x_LookupTipeProduk, #x_LookupJenisPlant").change(function (e) {
+            e.preventDefault();
+            let TipePenyaluran = $("#x_TipePenyaluran").val();
+            let IdModa = $("#x_IdModa").val();
+            let IdPlant = $("#x_IdPlant").val();
+            let KategoriPenyaluran = $("#x_KategoriPenyaluran").val();
+            let TipeProduk = $("#x_LookupTipeProduk").val();
+            let JenisPlant = $("#x_LookupJenisPlant").val();
+            let idpipa = $("#x_IdPipa").val();
+            if (IdModa == "1" || IdModa == "2") {
+                $("#r_NamaKapal").show();
+                $("#r_NomorPolisi").hide();
+                $("#x_NomorPolisi").val("");
+            } else if (IdModa == "3") {
+                $("#r_NomorPolisi").show();
+                $("#r_NamaKapal").hide();
+                $("#x_NamaKapal").val("");
+            } else {
+                $("#r_NamaKapal").hide();
+                $("#x_NamaKapal").val("");
+                $("#r_NomorPolisi").hide();
+                $("#x_NomorPolisi").val("");
+            }
+            if (IdModa == "5" || IdModa == "12") {
+                $("#elh_Penyaluran_TanggalSandar").text("Tanggal");
+                $("#x_TanggalSandar").attr("placeholder", "Tanggal");
+                $("#qty_caption").text("Quantity (KL)");
+            } else if (IdModa == "6") {
+                $("#elh_Penyaluran_TanggalSandar").text("Tanggal");
+                $("#x_TanggalSandar").attr("placeholder", "Tanggal");
+                $("#qty_caption").text("Quantity (MT)");
+            } else {
+                $("#elh_Penyaluran_TanggalSandar").text("Tanggal Sandar");
+                $("#x_TanggalSandar").attr("placeholder", "Tanggal Sandar");
+            }
+            if (IdModa == "12"){
+                getTujuanKonsinyasi(0, IdModa);
+            } else if (!idpipa) {
+                $("#tujuanKonsinyasiContainer").remove();
+                $("#x_MultipleTujuanKonsinyasiHidden").val("[]");
+            }
+            if (TipePenyaluran == "Konsinyasi") {
+                if (IdModa == "3" && TipeProduk == "LPG") {
+                    $("#r_Tujuan").show();
+                    $("#r_KategoriPenyaluran").show();
+                    $("#r_KategoriPenyaluran").insertAfter("#r_IdModa");
+                    $("#r_TanggalSandar").hide();
+                    $("#x_TanggalSandar").val("");
+                    $("#r_TujuanKonsinyasi").hide();
+                    $("#x_TujuanKonsinyasi").val("");
+                    $("#r_JenisProduk").hide();
+                    $("#r_Volume").hide();
+                    $("#x_Volume").val("");
+                    if (KategoriPenyaluran == "Non TAS/NGS") {
+                        $("#r_JenisProduk").show();
+                        $("#r_Volume").show();
+                        if (JenisPlant == "STS") {
+                            $("#r_TipeProdukSTS").show();
+                        } else {
+                            $("#r_TipeProdukSTS").hide();
+                            $("#x_TipeProdukSTS").val("");
+                        }
+                    } else if (KategoriPenyaluran == "TAS/NGS") {
+                        $("#r_NomorPolisi").hide();
+                        $("#x_NomorPolisi").val("");
+                        $("#r_Tujuan").hide();
+                        $("#x_Tujuan").val("");
+                    }
+                } else if (IdModa === "3" && TipeProduk == "BBM") {
+                    $("#r_Tujuan").show();
+                    $("#r_KategoriPenyaluran").show();
+                    $("#r_KategoriPenyaluran").insertAfter("#r_IdModa");
+                    $("#r_TanggalSandar").hide();
+                    $("#x_TanggalSandar").val("");
+                    $("#r_Tujuan").hide();
+                    $("#x_Tujuan").val("");
+                    //$("#r_JenisProduk").hide();
+                    //$("#r_Volume").hide();
+                    //$("#x_Volume").val("");
+                    if (KategoriPenyaluran === "Non TAS/NGS") {
+                        $("#r_JenisProduk").show();
+                        $("#r_Volume").show();
+                        if (JenisPlant == "STS") {
+                            $("#r_TipeProdukSTS").show();
+                        } else {
+                            $("#r_TipeProdukSTS").hide();
+                            $("#x_TipeProdukSTS").val("");
+                        }
+                    } else if (KategoriPenyaluran == "TAS/NGS") {
+                        $("#r_NomorPolisi").hide();
+                        $("#x_NomorPolisi").val("");
+                        $("#r_Tujuan").hide();
+                        $("#x_Tujuan").val("");
+                        $("#r_JenisProduk").hide();
+                        $("#x_JenisProduk").val("");
+                        $("#r_Volume").hide();
+                        $("#x_Volume").val("");
+                        $("#r_TujuanKonsinyasi").hide();
+                        $("#x_TujuanKonsinyasi").val("");
+                    }
+                } else {
+                    $("#r_JenisProduk").show();
+                    $("#r_Volume").show();
+                    $("#r_KategoriPenyaluran").hide();
+                    $("#x_KategoriPenyaluran").val("");
+                    $("#r_NoShipment").hide();
+                    $("#r_NoShipment").val("");
+                    if (IdModa == "1" || IdModa == "2") {
+                        $("#r_TanggalSandar").show();
+                        $("#r_TujuanKonsinyasi").show();
+                        $("#r_Tujuan").hide();
+                        $("#x_Tujuan").val("");
+                        $("#r_IdPipa").hide();
+                        $("#x_IdPipa").val("").trigger("change");
+                    } else if (IdModa == "5" || IdModa == "6" || IdModa == "12") {
+                        $("#r_Tujuan").hide();
+                        $("#x_Tujuan").val("");
+                        $("#r_TujuanKonsinyasi").hide();
+                        $("#x_TujuanKonsinyasi").val("");
+                        $("#r_TanggalSandar").hide();
+                        $("#x_TanggalSandar").val("");
+                        $("#r_Volume").hide();
+                        $("#x_Volume").val("");
+                        if (IdModa == "12") {
+                            $("#r_IdPipa").hide();
+                            $("#x_IdPipa").val("");
+                        } else {
+                            $("#r_IdPipa").show();
+                        }
+                    } else if (IdModa == "4") {
+                        $("#r_TujuanKonsinyasi").show();
+                        $("#r_Tujuan").hide();
+                        $("#x_Tujuan").val("");
+                        $("#r_NoShipment").show();
+                    } else if (IdModa == "3") {
+                        // Truck dengan Tipe Produk BBM
+                        $("#r_Tujuan").hide();
+                        $("#x_Tujuan").val("");
+                        $("#r_TujuanKonsinyasi").show();
+                        $("#r_TanggalSandar").hide();
+                        $("#x_TanggalSandar").val("");
+                        $("#r_IdPipa").hide();
+                        $("#x_IdPipa").val("").trigger("change");
+                    } else {
+                        $("#r_TujuanKonsinyasi").show();
+                        $("#r_Tujuan").hide();
+                        $("#x_Tujuan").val("");
+                        $("#r_TanggalSandar").hide();
+                        $("#x_TanggalSandar").val("");
+                        $("#r_IdPipa").hide();
+                        $("#x_IdPipa").val("").trigger("change");
+                    }
+                    if (JenisPlant == "STS") {
+                        $("#r_TipeProdukSTS").show();
+                    } else {
+                        $("#r_TipeProdukSTS").hide();
+                        $("#x_TipeProdukSTS").val("");
+                    }
+                }
+            } else {
+                $("#r_Tujuan").show();
+                $("#r_KategoriPenyaluran").insertBefore("#r_IdModa");
+                $("#r_KategoriPenyaluran").show();
+                $("#r_TanggalSandar").hide();
+                $("#x_TanggalSandar").val("");
+                $("#r_TujuanKonsinyasi").hide();
+                $("#x_TujuanKonsinyasi").val("");
+                $("#r_JenisProduk").hide();
+                $("#x_JenisProduk").val("");
+                $("#r_Volume").hide();
+                $("#x_Volume").val("");
+                if (KategoriPenyaluran == "Non TAS/NGS" && TipeProduk == "LPG") {
+                    $("#r_JenisProduk").show();
+                    $("#r_Volume").show();
+                    if (JenisPlant == "STS") {
+                        $("#r_TipeProdukSTS").show();
+                    } else {
+                        $("#r_TipeProdukSTS").hide();
+                        $("#x_TipeProdukSTS").val("");
+                    }
+                } else if (IdModa == "5") {
+                    $("#r_JenisProduk").show();
+                    if (JenisPlant == "STS") {
+                        $("#r_TipeProdukSTS").show();
+                    } else {
+                        $("#r_TipeProdukSTS").hide();
+                        $("#x_TipeProdukSTS").val("");
+                    }
+                } else {
+                    $("#r_JenisProduk").hide();
+                    $("#x_JenisProduk").val("");
+                }
+                if (KategoriPenyaluran == "TAS/NGS") {
+                    $("#r_NomorPolisi").hide();
+                    $("#x_NomorPolisi").val("");
+                    $("#r_Tujuan").hide();
+                    $("#x_Tujuan").val("");
+                }
+            }
+        });
+    }
+    $("#x_IdPipa").on("change", function (e) {
+        e.preventDefault();
+        const val = $(this).val();
+        const idModa = $("#x_IdModa").val();
+        if (val) {
+            getTujuanKonsinyasi(val, idModa);
+        } else {
+            $("#tujuanKonsinyasiContainer").remove();
+            $("#x_MultipleTujuanKonsinyasiHidden").val("[]");
+        }
+    });
+    function setNumericFields() {
+        $("#x_Volume, .number-format")
+            .attr("inputmode", "numeric")
+            .on("input", function () {
+                let val = $(this).val();
+                let isNegative = val.startsWith("-");
+                val = val.replace(",", ".");
+                val = val.replace(/[^0-9.]/g, "");
+                const parts = val.split(".");
+                if (parts.length > 2) {
+                    val = parts[0] + "." + parts.slice(1).join("");
+                }
+                if (isNegative) {
+                    val = "-" + val;
+                }
+                $(this).val(val);
+            });
+    }
+    $("#fPenyaluranadd button[type=submit]").on("click", function (e) {
+        e.preventDefault();
+        const currentHiddenPlant = $("#x_IdPlant").val();
+        const currentPipa = $("#x_IdPipa").val();
+        const currentModa = $("#x_IdModa").val();
+        const lookupPlantVal = $("#x_LookupPlant").val();
+        if (!currentHiddenPlant && lookupPlantVal) {
+            const lookupPlantText = $("#x_LookupPlant").find("option:selected").text();
+            $("#x_IdPlant").val(lookupPlantVal);
+            $("#sv_x_IdPlant").val(lookupPlantText || "");
+        }
+        if (!$("#x_IdPlant").val()) {
+            ew.alert("Silakan pilih Plant terlebih dahulu");
+            return false;
+        }
+        const parent_url = ew.PATH_BASE;
+        const UserLevel = "@CurrentUserLevel()";
+        const idRole = '@CurrentUserInfo("Rule")?.ToString()';
+        if (UserLevel != "2" && UserLevel != "-1" && UserLevel != "4" && UserLevel != "5" && UserLevel != "6" && idRole != "1" && idRole != "12" && idRole != "13") {
+            ew.alert("Anda tidak memiliki akses untuk menambah data Penerimaan.");
+            setTimeOut(() => {
+                window.location.href = parent_url + "PenerimaanList";
+            }, 1000);
+            return false;
+        }
+        if (currentPipa || currentModa == "12") {
+            syncTujuanKonsinyasiHidden();
+            const payload = $("#x_MultipleTujuanKonsinyasiHidden").val();
+            const arr = payload ? JSON.parse(payload) : [];
+            if (arr.length === 0) {
+                ew.alert("Minimal pilih 1 Tujuan Konsinyasi.");
+                return false;
+            }
+            for (let i = 0; i < arr.length; i++) {
+                const item = arr[i];
+                const tujuan = (item.Label || item.Value || "").toString().trim();
+                const qtyRaw = (item.Qty ?? "").toString().trim();
+                if (!qtyRaw) {
+                    ew.alert(`Quantity untuk "${tujuan}" tidak boleh kosong.`);
+                    return false;
+                }
+                const qtyNumber = parseFloat(qtyRaw.replace(",", "."));
+                if (isNaN(qtyNumber) || qtyNumber <= 0) {
+                    ew.alert(`Quantity untuk "${tujuan}" harus angka lebih dari 0.`);
+                    return false;
+                }
+            }
+        }
+        showLoading();
+        $("#fPenyaluranadd").submit();
+    });
+    $("#x_LookupPlant").on("change", function (e) {
+        e.preventDefault();
+        const selectedValue = $(this).val();
+        $("#x_IdPlant").val(selectedValue).trigger("change");
+    });
+    function getTujuanKonsinyasi(idPipa, idModa) {
+        $.ajax({
+            url: parent_url + "api/LookUpList/get-dropdown/tujuan-konsinyasi?idPipa=" + encodeURIComponent(idPipa) + "&idModa=" + encodeURIComponent(idModa),
+            method: "GET",
+            dataType: "json",
+            success: function (data) {
+                tujuanOptionsDataGlobal = data || [];
+                renderTujuanKonsinyasiTable(data);
+                syncTujuanKonsinyasiHidden();
+                enforceUniqueTujuanSelectionsRemove();
+            },
+            error: function (xhr, status, error) {
+                console.error("Gagal ambil data dropdown:", error);
+                tujuanOptionsDataGlobal = [];
+                renderTujuanKonsinyasiTable([]);
+                syncTujuanKonsinyasiHidden();
+            },
+        });
+    }
+    function renderTujuanKonsinyasiTable(optionsData) {
+        ensureTujuanKonsinyasiUI();
+        const container = $("#tujuanKonsinyasiContainer");
+        const IdModa = $("#x_IdModa").val();
+        container.show();
+        container.empty();
+        let caption = "Quantity";
+        if ($("#x_IdModa").val() == "5") {
+            caption = "Quantity (KL)";
+        } else if ($("#x_IdModa").val() == "6") {
+            caption = "Quantity (MT)";
+        }
+        const html = `
+                    <div class='row'>
+                        <div class='col-2'>
+                        </div>
+                        <div class='col-10'>
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <button type="button" class="btn btn-primary" id="btnAddTujuanRow">
+                                    <i class='fas fa-plus me-2'></i> Tambah
+                                </button>
+                            </div>
+                            <table class="table" id="tblTujuanKonsinyasi">
+                                <thead class="table-primary">
+                                    <tr>
+                                        <th style="width:60px;">No</th>
+                                        <th>Tujuan Konsinyasi</th>
+                                        <th id='qty_caption' style="width:160px;">${caption}</th>
+                                        <th style="width:80px;">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+        container.append(html);
+        if (optionsData && optionsData.length > 0) {
+            if (IdModa == '12') {
+                addTujuanRow(optionsData, '', '');
+            } else {
+                for (let i = 0; i < optionsData.length; i++) {
+                    addTujuanRow(optionsData, optionsData[i].Value, optionsData[i].Volume);
+                }
+            }
+        } else {
+            addTujuanRow([], "", "");
+        }
+        $("#btnAddTujuanRow")
+            .off("click")
+            .on("click", function () {
+                addTujuanRow(optionsData || [], "", "");
+                syncTujuanKonsinyasiHidden();
+                enforceUniqueTujuanSelectionsRemove();
+            });
+        renumberTujuanRows();
+        syncTujuanKonsinyasiHidden();
+        enforceUniqueTujuanSelectionsRemove();
+    }
+    function addTujuanRow(optionsData, selectedValue, qtyValue) {
+        const tbody = $("#tblTujuanKonsinyasi tbody");
+        if (tbody.length === 0) return;
+        const rowId = "tujuanRow_" + Date.now() + "_" + Math.floor(Math.random() * 9999);
+        const selectHtml = buildSelectOptions(optionsData, selectedValue);
+        let caption = "Quantity";
+        if ($("#x_IdModa").val() == "5") {
+            caption = "Quantity (KL)";
+        } else if ($("#x_IdModa").val() == "6") {
+            caption = "Quantity (MT)";
+        }
+        const tr = `
+                    <tr data-rowid="${rowId}">
+                        <td class="text-center nomor"></td>
+                        <td>
+                            <select class="form-select tujuan-select" style="width: 100%;">
+                                ${selectHtml}
+                            </select>
+                        </td>
+                        <td>
+                            <input type="text" class="form-control qty-input number-format"
+                                    placeholder="" value="" />
+                        </td>
+                        <td class="text-center">
+                            <button type="button" class="btn btn-danger btnRemoveTujuanRow">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+        tbody.append(tr);
+        const $row = tbody.find(`tr[data-rowid="${rowId}"]`);
+        $row.find(".tujuan-select").select2({
+            placeholder: "Pilih Tujuan",
+            width: "100%",
+            allowClear: true
+        });
+        $row.find(".tujuan-select")
+            .off("change")
+            .on("change", function () {
+                syncTujuanKonsinyasiHidden();
+            })
+            .on("click.tujuan focus.tujuan", function () {
+                syncTujuanKonsinyasiHidden();
+            });
+        $row.find(".qty-input")
+            .off("input")
+            .on("input", function () {
+                syncTujuanKonsinyasiHidden();
+            });
+        $row.find(".btnRemoveTujuanRow")
+            .off("click")
+            .on("click", function () {
+                $(this).closest("tr").remove();
+                renumberTujuanRows();
+                syncTujuanKonsinyasiHidden();
+                enforceUniqueTujuanSelectionsRemove();
+            });
+        renumberTujuanRows();
+        setNumericFields();
+        enforceUniqueTujuanSelectionsRemove();
+    }
+    function buildSelectOptions(optionsData, selectedValue) {
+        let opt = `<option value="">- Pilih -</option>`;
+        if (optionsData && optionsData.length > 0) {
+            optionsData.forEach((x) => {
+                const isSelected = x.Value == selectedValue ? "selected" : "";
+                opt += `<option value="${x.Value}">${x.Label}</option>`;
+            });
+        }
+        return opt;
+    }
+    function syncTujuanKonsinyasiHidden() {
+        const selected = [];
+        $("#tblTujuanKonsinyasi tbody tr").each(function () {
+            const ddl = $(this).find(".tujuan-select");
+            const val = ddl.val();
+            const text = ddl.find("option:selected").text();
+            const qtyRaw = $(this).find(".qty-input").val();
+            const qty = qtyRaw !== null && qtyRaw !== undefined && qtyRaw !== "" ? qtyRaw : "0";
+            if (val) {
+                selected.push({
+                    Value: val,
+                    Label: text,
+                    Qty: qty,
+                });
+            }
+        });
+        $("#x_MultipleTujuanKonsinyasiHidden").val(JSON.stringify(selected));
+    }
+    function renumberTujuanRows() {
+        $("#tblTujuanKonsinyasi tbody tr").each(function (idx) {
+            $(this)
+                .find("td.nomor")
+                .text(idx + 1);
+        });
+    }
+    function ensureTujuanKonsinyasiUI() {
+        if ($("#x_MultipleTujuanKonsinyasiHidden").length === 0) {
+            $("<input>", {
+                type: "hidden",
+                id: "x_MultipleTujuanKonsinyasiHidden",
+                name: "x_MultipleTujuanKonsinyasiHidden",
+                value: "[]",
+            }).appendTo("#fPenyaluranadd");
+        }
+        if ($("#tujuanKonsinyasiContainer").length === 0) {
+            $("<div>", {
+                id: "tujuanKonsinyasiContainer",
+                class: "mt-2",
+            }).insertAfter($("#r_IdPipa"));
+        }
+    }
+    function enforceUniqueTujuanSelectionsRemove() {
+        const IdPlant = $("#x_IdPlant").val();
+        const IdModa = $("#x_IdModa").val();
+        const allSelected = [];
+        $("#tblTujuanKonsinyasi .tujuan-select").each(function () {
+            const v = $(this).val();
+            if (v) allSelected.push(String(v));
+        });
+        $("#tblTujuanKonsinyasi .tujuan-select").each(function () {
+            const $ddl = $(this);
+            const currentVal = String($ddl.val() || "");
+            const blocked = allSelected.filter(v => v !== currentVal);
+            $ddl.empty();
+
+            // hanya moda 12 yang butuh placeholder kosong
+            if (IdModa === "12") {
+                $ddl.append(`<option value=""></option>`);
+            }
+            (tujuanOptionsDataGlobal || []).forEach((x) => {
+                const v = String(x.Value);
+                const label = x.Label ?? "";
+                if (blocked.includes(v)) return;
+                if (String(IdPlant) === v) return;
+                const selectedAttr = v === currentVal ? "selected" : "";
+                $ddl.append(`<option value="${v}" ${selectedAttr}>${label}</option>`);
+            });
+            $ddl.select2({
+                placeholder: "Pilih Tujuan",
+                width: "100%",
+                allowClear: true
+            });
+            if (IdModa === "12") {
+                if (currentVal) {
+                    $ddl.val(currentVal);
+                } else {
+                    $ddl.val(null);
+                }
+            } else {
+                if (currentVal) {
+                    $ddl.val(currentVal);
+                } else {
+                    const firstVal = $ddl.find("option:first").val();
+                    $ddl.val(firstVal);
+                }
+            }
+            $ddl.trigger("change.select2");
+        });
+    }
+    ensureTujuanKonsinyasiUI();
+    setNumericFields();
+});
+</script>
+@penyaluranAdd.ShowPageHeader()
+@penyaluranAdd.ShowMessages()
+<form name="fPenyaluranadd" id="fPenyaluranadd" class="@(penyaluranAdd.FormClassName)" action="@AppPath(CurrentPageName())" method="post" novalidate autocomplete="off">
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+<input type="hidden" name="action" id="action" value="insert">
+<input type="hidden" name="modal" value="@ConvertToInt(penyaluranAdd.IsModal)">
+@if (IsJsonResponse()) {
+<input type="hidden" name="json" value="1">
+}
+<input type="hidden" name="@(penyaluranAdd.OldKeyName)" value="@Html.Raw(penyaluranAdd.OldKey)">
+<div class="ew-add-div"><!-- page* -->
+@if (penyaluranAdd.LookupPlant.Visible) { // penyaluranAdd.LookupPlant.Visible (begin)
+    <div id="r_LookupPlant" @Html.Raw(penyaluranAdd.LookupPlant.RowAttributes)>
+        <label id="elh_Penyaluran_LookupPlant" for="x_LookupPlant" class="@(penyaluranAdd.LeftColumnClass)">@Html.Raw(penyaluranAdd.LookupPlant.Caption)@Html.Raw(penyaluranAdd.LookupPlant.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(penyaluranAdd.RightColumnClass)"><div @Html.Raw(penyaluranAdd.LookupPlant.CellAttributes)>
+<span id="el_Penyaluran_LookupPlant">
+    <select
+        id="x_LookupPlant"
+        name="x_LookupPlant"
+        class="form-select ew-select@(penyaluranAdd.LookupPlant.IsInvalidClass)"
+        data-select2-id="fPenyaluranadd_x_LookupPlant"
+        data-table="Penyaluran"
+        data-field="x_LookupPlant"
+        data-value-separator="@(penyaluranAdd.LookupPlant.DisplayValueSeparatorAttribute)"
+        data-placeholder="@(HtmlEncode(penyaluranAdd.LookupPlant.PlaceHolder))"
+        @Html.Raw(penyaluranAdd.LookupPlant.EditAttributes)>
+        @(penyaluranAdd.LookupPlant.SelectOptionListHtml("x_LookupPlant"))
+    </select>
+    @Html.Raw(penyaluranAdd.LookupPlant.GetCustomMessage)
+    <div class="invalid-feedback">@Html.Raw(penyaluranAdd.LookupPlant.GetErrorMessage())</div>
+<script>
+loadjs.ready("fPenyaluranadd", function() {
+    var options = { name: "x_LookupPlant", selectId: "fPenyaluranadd_x_LookupPlant" },
+        el = document.querySelector("select[data-select2-id='" + options.selectId + "']");
+    if (!el)
+        return;
+    options.closeOnSelect = !options.multiple;
+    options.dropdownParent = el.closest("#ew-modal-dialog, #ew-add-opt-dialog");
+    if (fPenyaluranadd.lists.LookupPlant?.lookupOptions.length) {
+        options.data = { id: "x_LookupPlant", form: "fPenyaluranadd" };
+    } else {
+        options.ajax = { id: "x_LookupPlant", form: "fPenyaluranadd", limit: ew.LOOKUP_PAGE_SIZE };
+    }
+    options.minimumInputLength = ew.selectMinimumInputLength;
+    options = Object.assign({}, ew.selectOptions, options, ew.vars.tables.Penyaluran.fields.LookupPlant.selectOptions);
+    ew.createSelect(options);
+});
+</script>
+</span>
+</div></div>
+    </div>
+} @* penyaluranAdd.LookupPlant.Visible (end) *@
+@if (penyaluranAdd.IdPlant.Visible) { // penyaluranAdd.IdPlant.Visible (begin)
+    <div id="r_IdPlant" @Html.Raw(penyaluranAdd.IdPlant.RowAttributes)>
+        <label id="elh_Penyaluran_IdPlant" class="@(penyaluranAdd.LeftColumnClass)">@Html.Raw(penyaluranAdd.IdPlant.Caption)@Html.Raw(penyaluranAdd.IdPlant.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(penyaluranAdd.RightColumnClass)"><div @Html.Raw(penyaluranAdd.IdPlant.CellAttributes)>
+<span id="el_Penyaluran_IdPlant">
+<span>@{
+    if (IsRTL) {
+        penyaluranAdd.IdPlant.EditAttrs["dir"] = "rtl";
+    }
+}</span>
+<span id="as_x_IdPlant" class="ew-auto-suggest">
+    <input type="text" class="form-control" name="sv_x_IdPlant" id="sv_x_IdPlant" value="@(RemoveHtml(ConvertToString(penyaluranAdd.IdPlant.EditValue)))" autocomplete="off" size="30" placeholder="@Html.Raw(HtmlEncode(penyaluranAdd.IdPlant.PlaceHolder))" data-placeholder="@Html.Raw(HtmlEncode(penyaluranAdd.IdPlant.PlaceHolder))" data-format-pattern="@(penyaluranAdd.IdPlant.FormatPattern)" @Html.Raw(penyaluranAdd.IdPlant.EditAttributes) aria-describedby="x_IdPlant_help">
+</span>
+<selection-list hidden class="form-control" data-table="Penyaluran" data-field="x_IdPlant" data-input="sv_x_IdPlant" data-value-separator="@(penyaluranAdd.IdPlant.DisplayValueSeparatorAttribute)" name="x_IdPlant" id="x_IdPlant" value="@(HtmlEncode(penyaluranAdd.IdPlant.CurrentValue))" data-ew-action="autofill"></selection-list>
+@Html.Raw(penyaluranAdd.IdPlant.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(penyaluranAdd.IdPlant.GetErrorMessage())</div>
+<script>
+loadjs.ready(["fPenyaluranadd"], function() {
+    fPenyaluranadd.createAutoSuggest(Object.assign({"id":"x_IdPlant","forceSelect":true}, { lookupAllDisplayFields: @(penyaluranAdd.IdPlant.Lookup.LookupAllDisplayFields ? "true" : "false") }, ew.vars.tables.Penyaluran.fields.IdPlant.autoSuggestOptions));
+});
+</script>
+@Html.Raw(penyaluranAdd.IdPlant.Lookup.GetParamTag(penyaluranAdd, "p_x_IdPlant"))
+</span>
+</div></div>
+    </div>
+} @* penyaluranAdd.IdPlant.Visible (end) *@
+@if (penyaluranAdd.TipePenyaluran.Visible) { // penyaluranAdd.TipePenyaluran.Visible (begin)
+    <div id="r_TipePenyaluran" @Html.Raw(penyaluranAdd.TipePenyaluran.RowAttributes)>
+        <label id="elh_Penyaluran_TipePenyaluran" for="x_TipePenyaluran" class="@(penyaluranAdd.LeftColumnClass)">@Html.Raw(penyaluranAdd.TipePenyaluran.Caption)@Html.Raw(penyaluranAdd.TipePenyaluran.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(penyaluranAdd.RightColumnClass)"><div @Html.Raw(penyaluranAdd.TipePenyaluran.CellAttributes)>
+<span id="el_Penyaluran_TipePenyaluran">
+    <select
+        id="x_TipePenyaluran"
+        name="x_TipePenyaluran"
+        class="form-select ew-select@(penyaluranAdd.TipePenyaluran.IsInvalidClass)"
+        data-select2-id="fPenyaluranadd_x_TipePenyaluran"
+        data-table="Penyaluran"
+        data-field="x_TipePenyaluran"
+        data-value-separator="@(penyaluranAdd.TipePenyaluran.DisplayValueSeparatorAttribute)"
+        data-placeholder="@(HtmlEncode(penyaluranAdd.TipePenyaluran.PlaceHolder))"
+        @Html.Raw(penyaluranAdd.TipePenyaluran.EditAttributes)>
+        @(penyaluranAdd.TipePenyaluran.SelectOptionListHtml("x_TipePenyaluran"))
+    </select>
+    @Html.Raw(penyaluranAdd.TipePenyaluran.GetCustomMessage)
+    <div class="invalid-feedback">@Html.Raw(penyaluranAdd.TipePenyaluran.GetErrorMessage())</div>
+<script>
+loadjs.ready("fPenyaluranadd", function() {
+    var options = { name: "x_TipePenyaluran", selectId: "fPenyaluranadd_x_TipePenyaluran" },
+        el = document.querySelector("select[data-select2-id='" + options.selectId + "']");
+    if (!el)
+        return;
+    options.closeOnSelect = !options.multiple;
+    options.dropdownParent = el.closest("#ew-modal-dialog, #ew-add-opt-dialog");
+    if (fPenyaluranadd.lists.TipePenyaluran?.lookupOptions.length) {
+        options.data = { id: "x_TipePenyaluran", form: "fPenyaluranadd" };
+    } else {
+        options.ajax = { id: "x_TipePenyaluran", form: "fPenyaluranadd", limit: ew.LOOKUP_PAGE_SIZE };
+    }
+    options.minimumResultsForSearch = Infinity;
+    options = Object.assign({}, ew.selectOptions, options, ew.vars.tables.Penyaluran.fields.TipePenyaluran.selectOptions);
+    ew.createSelect(options);
+});
+</script>
+</span>
+</div></div>
+    </div>
+} @* penyaluranAdd.TipePenyaluran.Visible (end) *@
+@if (penyaluranAdd.TipeProdukSTS.Visible) { // penyaluranAdd.TipeProdukSTS.Visible (begin)
+    <div id="r_TipeProdukSTS" @Html.Raw(penyaluranAdd.TipeProdukSTS.RowAttributes)>
+        <label id="elh_Penyaluran_TipeProdukSTS" for="x_TipeProdukSTS" class="@(penyaluranAdd.LeftColumnClass)">@Html.Raw(penyaluranAdd.TipeProdukSTS.Caption)@Html.Raw(penyaluranAdd.TipeProdukSTS.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(penyaluranAdd.RightColumnClass)"><div @Html.Raw(penyaluranAdd.TipeProdukSTS.CellAttributes)>
+<span id="el_Penyaluran_TipeProdukSTS">
+    <select
+        id="x_TipeProdukSTS"
+        name="x_TipeProdukSTS"
+        class="form-select ew-select@(penyaluranAdd.TipeProdukSTS.IsInvalidClass)"
+        data-select2-id="fPenyaluranadd_x_TipeProdukSTS"
+        data-table="Penyaluran"
+        data-field="x_TipeProdukSTS"
+        data-value-separator="@(penyaluranAdd.TipeProdukSTS.DisplayValueSeparatorAttribute)"
+        data-placeholder="@(HtmlEncode(penyaluranAdd.TipeProdukSTS.PlaceHolder))"
+        data-ew-action="autofill"
+        @Html.Raw(penyaluranAdd.TipeProdukSTS.EditAttributes)>
+        @(penyaluranAdd.TipeProdukSTS.SelectOptionListHtml("x_TipeProdukSTS"))
+    </select>
+    @Html.Raw(penyaluranAdd.TipeProdukSTS.GetCustomMessage)
+    <div class="invalid-feedback">@Html.Raw(penyaluranAdd.TipeProdukSTS.GetErrorMessage())</div>
+@Html.Raw(penyaluranAdd.TipeProdukSTS.Lookup.GetParamTag(penyaluranAdd, "p_x_TipeProdukSTS"))
+<script>
+loadjs.ready("fPenyaluranadd", function() {
+    var options = { name: "x_TipeProdukSTS", selectId: "fPenyaluranadd_x_TipeProdukSTS" },
+        el = document.querySelector("select[data-select2-id='" + options.selectId + "']");
+    if (!el)
+        return;
+    options.closeOnSelect = !options.multiple;
+    options.dropdownParent = el.closest("#ew-modal-dialog, #ew-add-opt-dialog");
+    if (fPenyaluranadd.lists.TipeProdukSTS?.lookupOptions.length) {
+        options.data = { id: "x_TipeProdukSTS", form: "fPenyaluranadd" };
+    } else {
+        options.ajax = { id: "x_TipeProdukSTS", form: "fPenyaluranadd", limit: ew.LOOKUP_PAGE_SIZE };
+    }
+    options.minimumResultsForSearch = Infinity;
+    options = Object.assign({}, ew.selectOptions, options, ew.vars.tables.Penyaluran.fields.TipeProdukSTS.selectOptions);
+    ew.createSelect(options);
+});
+</script>
+</span>
+</div></div>
+    </div>
+} @* penyaluranAdd.TipeProdukSTS.Visible (end) *@
+@if (penyaluranAdd.KategoriPenyaluran.Visible) { // penyaluranAdd.KategoriPenyaluran.Visible (begin)
+    <div id="r_KategoriPenyaluran" @Html.Raw(penyaluranAdd.KategoriPenyaluran.RowAttributes)>
+        <label id="elh_Penyaluran_KategoriPenyaluran" for="x_KategoriPenyaluran" class="@(penyaluranAdd.LeftColumnClass)">@Html.Raw(penyaluranAdd.KategoriPenyaluran.Caption)@Html.Raw(penyaluranAdd.KategoriPenyaluran.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(penyaluranAdd.RightColumnClass)"><div @Html.Raw(penyaluranAdd.KategoriPenyaluran.CellAttributes)>
+<span id="el_Penyaluran_KategoriPenyaluran">
+    <select
+        id="x_KategoriPenyaluran"
+        name="x_KategoriPenyaluran"
+        class="form-select ew-select@(penyaluranAdd.KategoriPenyaluran.IsInvalidClass)"
+        data-select2-id="fPenyaluranadd_x_KategoriPenyaluran"
+        data-table="Penyaluran"
+        data-field="x_KategoriPenyaluran"
+        data-value-separator="@(penyaluranAdd.KategoriPenyaluran.DisplayValueSeparatorAttribute)"
+        data-placeholder="@(HtmlEncode(penyaluranAdd.KategoriPenyaluran.PlaceHolder))"
+        @Html.Raw(penyaluranAdd.KategoriPenyaluran.EditAttributes)>
+        @(penyaluranAdd.KategoriPenyaluran.SelectOptionListHtml("x_KategoriPenyaluran"))
+    </select>
+    @Html.Raw(penyaluranAdd.KategoriPenyaluran.GetCustomMessage)
+    <div class="invalid-feedback">@Html.Raw(penyaluranAdd.KategoriPenyaluran.GetErrorMessage())</div>
+<script>
+loadjs.ready("fPenyaluranadd", function() {
+    var options = { name: "x_KategoriPenyaluran", selectId: "fPenyaluranadd_x_KategoriPenyaluran" },
+        el = document.querySelector("select[data-select2-id='" + options.selectId + "']");
+    if (!el)
+        return;
+    options.closeOnSelect = !options.multiple;
+    options.dropdownParent = el.closest("#ew-modal-dialog, #ew-add-opt-dialog");
+    if (fPenyaluranadd.lists.KategoriPenyaluran?.lookupOptions.length) {
+        options.data = { id: "x_KategoriPenyaluran", form: "fPenyaluranadd" };
+    } else {
+        options.ajax = { id: "x_KategoriPenyaluran", form: "fPenyaluranadd", limit: ew.LOOKUP_PAGE_SIZE };
+    }
+    options.minimumResultsForSearch = Infinity;
+    options = Object.assign({}, ew.selectOptions, options, ew.vars.tables.Penyaluran.fields.KategoriPenyaluran.selectOptions);
+    ew.createSelect(options);
+});
+</script>
+</span>
+</div></div>
+    </div>
+} @* penyaluranAdd.KategoriPenyaluran.Visible (end) *@
+@if (penyaluranAdd.IdModa.Visible) { // penyaluranAdd.IdModa.Visible (begin)
+    <div id="r_IdModa" @Html.Raw(penyaluranAdd.IdModa.RowAttributes)>
+        <label id="elh_Penyaluran_IdModa" for="x_IdModa" class="@(penyaluranAdd.LeftColumnClass)">@Html.Raw(penyaluranAdd.IdModa.Caption)@Html.Raw(penyaluranAdd.IdModa.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(penyaluranAdd.RightColumnClass)"><div @Html.Raw(penyaluranAdd.IdModa.CellAttributes)>
+<span id="el_Penyaluran_IdModa">
+    <select
+        id="x_IdModa"
+        name="x_IdModa"
+        class="form-select ew-select@(penyaluranAdd.IdModa.IsInvalidClass)"
+        data-select2-id="fPenyaluranadd_x_IdModa"
+        data-table="Penyaluran"
+        data-field="x_IdModa"
+        data-value-separator="@(penyaluranAdd.IdModa.DisplayValueSeparatorAttribute)"
+        data-placeholder="@(HtmlEncode(penyaluranAdd.IdModa.PlaceHolder))"
+        @Html.Raw(penyaluranAdd.IdModa.EditAttributes)>
+        @(penyaluranAdd.IdModa.SelectOptionListHtml("x_IdModa"))
+    </select>
+    @Html.Raw(penyaluranAdd.IdModa.GetCustomMessage)
+    <div class="invalid-feedback">@Html.Raw(penyaluranAdd.IdModa.GetErrorMessage())</div>
+@Html.Raw(penyaluranAdd.IdModa.Lookup.GetParamTag(penyaluranAdd, "p_x_IdModa"))
+<script>
+loadjs.ready("fPenyaluranadd", function() {
+    var options = { name: "x_IdModa", selectId: "fPenyaluranadd_x_IdModa" },
+        el = document.querySelector("select[data-select2-id='" + options.selectId + "']");
+    if (!el)
+        return;
+    options.closeOnSelect = !options.multiple;
+    options.dropdownParent = el.closest("#ew-modal-dialog, #ew-add-opt-dialog");
+    if (fPenyaluranadd.lists.IdModa?.lookupOptions.length) {
+        options.data = { id: "x_IdModa", form: "fPenyaluranadd" };
+    } else {
+        options.ajax = { id: "x_IdModa", form: "fPenyaluranadd", limit: ew.LOOKUP_PAGE_SIZE };
+    }
+    options.minimumInputLength = ew.selectMinimumInputLength;
+    options = Object.assign({}, ew.selectOptions, options, ew.vars.tables.Penyaluran.fields.IdModa.selectOptions);
+    ew.createSelect(options);
+});
+</script>
+</span>
+</div></div>
+    </div>
+} @* penyaluranAdd.IdModa.Visible (end) *@
+@if (penyaluranAdd.NoShipment.Visible) { // penyaluranAdd.NoShipment.Visible (begin)
+    <div id="r_NoShipment" @Html.Raw(penyaluranAdd.NoShipment.RowAttributes)>
+        <label id="elh_Penyaluran_NoShipment" for="x_NoShipment" class="@(penyaluranAdd.LeftColumnClass)">@Html.Raw(penyaluranAdd.NoShipment.Caption)@Html.Raw(penyaluranAdd.NoShipment.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(penyaluranAdd.RightColumnClass)"><div @Html.Raw(penyaluranAdd.NoShipment.CellAttributes)>
+<span id="el_Penyaluran_NoShipment">
+<input type="@(penyaluranAdd.NoShipment.InputTextType)" name="x_NoShipment" id="x_NoShipment" data-table="Penyaluran" data-field="x_NoShipment" value="@Html.Raw(penyaluranAdd.NoShipment.EditValue)" size="30" maxlength="100" placeholder="@Html.Raw(HtmlEncode(penyaluranAdd.NoShipment.PlaceHolder))" data-format-pattern="@(penyaluranAdd.NoShipment.FormatPattern)"@Html.Raw(penyaluranAdd.NoShipment.EditAttributes) aria-describedby="x_NoShipment_help">
+@Html.Raw(penyaluranAdd.NoShipment.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(penyaluranAdd.NoShipment.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* penyaluranAdd.NoShipment.Visible (end) *@
+@if (penyaluranAdd.IdPipa.Visible) { // penyaluranAdd.IdPipa.Visible (begin)
+    <div id="r_IdPipa" @Html.Raw(penyaluranAdd.IdPipa.RowAttributes)>
+        <label id="elh_Penyaluran_IdPipa" for="x_IdPipa" class="@(penyaluranAdd.LeftColumnClass)">@Html.Raw(penyaluranAdd.IdPipa.Caption)@Html.Raw(penyaluranAdd.IdPipa.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(penyaluranAdd.RightColumnClass)"><div @Html.Raw(penyaluranAdd.IdPipa.CellAttributes)>
+<span id="el_Penyaluran_IdPipa">
+    <select
+        id="x_IdPipa"
+        name="x_IdPipa"
+        class="form-select ew-select@(penyaluranAdd.IdPipa.IsInvalidClass)"
+        data-select2-id="fPenyaluranadd_x_IdPipa"
+        data-table="Penyaluran"
+        data-field="x_IdPipa"
+        data-value-separator="@(penyaluranAdd.IdPipa.DisplayValueSeparatorAttribute)"
+        data-placeholder="@(HtmlEncode(penyaluranAdd.IdPipa.PlaceHolder))"
+        @Html.Raw(penyaluranAdd.IdPipa.EditAttributes)>
+        @(penyaluranAdd.IdPipa.SelectOptionListHtml("x_IdPipa"))
+    </select>
+    @Html.Raw(penyaluranAdd.IdPipa.GetCustomMessage)
+    <div class="invalid-feedback">@Html.Raw(penyaluranAdd.IdPipa.GetErrorMessage())</div>
+@Html.Raw(penyaluranAdd.IdPipa.Lookup.GetParamTag(penyaluranAdd, "p_x_IdPipa"))
+<script>
+loadjs.ready("fPenyaluranadd", function() {
+    var options = { name: "x_IdPipa", selectId: "fPenyaluranadd_x_IdPipa" },
+        el = document.querySelector("select[data-select2-id='" + options.selectId + "']");
+    if (!el)
+        return;
+    options.closeOnSelect = !options.multiple;
+    options.dropdownParent = el.closest("#ew-modal-dialog, #ew-add-opt-dialog");
+    if (fPenyaluranadd.lists.IdPipa?.lookupOptions.length) {
+        options.data = { id: "x_IdPipa", form: "fPenyaluranadd" };
+    } else {
+        options.ajax = { id: "x_IdPipa", form: "fPenyaluranadd", limit: ew.LOOKUP_PAGE_SIZE };
+    }
+    options.minimumInputLength = ew.selectMinimumInputLength;
+    options = Object.assign({}, ew.selectOptions, options, ew.vars.tables.Penyaluran.fields.IdPipa.selectOptions);
+    ew.createSelect(options);
+});
+</script>
+</span>
+</div></div>
+    </div>
+} @* penyaluranAdd.IdPipa.Visible (end) *@
+@if (penyaluranAdd.NomorPolisi.Visible) { // penyaluranAdd.NomorPolisi.Visible (begin)
+    <div id="r_NomorPolisi" @Html.Raw(penyaluranAdd.NomorPolisi.RowAttributes)>
+        <label id="elh_Penyaluran_NomorPolisi" for="x_NomorPolisi" class="@(penyaluranAdd.LeftColumnClass)">@Html.Raw(penyaluranAdd.NomorPolisi.Caption)@Html.Raw(penyaluranAdd.NomorPolisi.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(penyaluranAdd.RightColumnClass)"><div @Html.Raw(penyaluranAdd.NomorPolisi.CellAttributes)>
+<span id="el_Penyaluran_NomorPolisi">
+<input type="@(penyaluranAdd.NomorPolisi.InputTextType)" name="x_NomorPolisi" id="x_NomorPolisi" data-table="Penyaluran" data-field="x_NomorPolisi" value="@Html.Raw(penyaluranAdd.NomorPolisi.EditValue)" size="30" maxlength="50" placeholder="@Html.Raw(HtmlEncode(penyaluranAdd.NomorPolisi.PlaceHolder))" data-format-pattern="@(penyaluranAdd.NomorPolisi.FormatPattern)"@Html.Raw(penyaluranAdd.NomorPolisi.EditAttributes) aria-describedby="x_NomorPolisi_help">
+@Html.Raw(penyaluranAdd.NomorPolisi.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(penyaluranAdd.NomorPolisi.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* penyaluranAdd.NomorPolisi.Visible (end) *@
+@if (penyaluranAdd.NamaKapal.Visible) { // penyaluranAdd.NamaKapal.Visible (begin)
+    <div id="r_NamaKapal" @Html.Raw(penyaluranAdd.NamaKapal.RowAttributes)>
+        <label id="elh_Penyaluran_NamaKapal" for="x_NamaKapal" class="@(penyaluranAdd.LeftColumnClass)">@Html.Raw(penyaluranAdd.NamaKapal.Caption)@Html.Raw(penyaluranAdd.NamaKapal.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(penyaluranAdd.RightColumnClass)"><div @Html.Raw(penyaluranAdd.NamaKapal.CellAttributes)>
+<span id="el_Penyaluran_NamaKapal">
+<input type="@(penyaluranAdd.NamaKapal.InputTextType)" name="x_NamaKapal" id="x_NamaKapal" data-table="Penyaluran" data-field="x_NamaKapal" value="@Html.Raw(penyaluranAdd.NamaKapal.EditValue)" size="30" maxlength="255" placeholder="@Html.Raw(HtmlEncode(penyaluranAdd.NamaKapal.PlaceHolder))" data-format-pattern="@(penyaluranAdd.NamaKapal.FormatPattern)"@Html.Raw(penyaluranAdd.NamaKapal.EditAttributes) aria-describedby="x_NamaKapal_help">
+@Html.Raw(penyaluranAdd.NamaKapal.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(penyaluranAdd.NamaKapal.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* penyaluranAdd.NamaKapal.Visible (end) *@
+@if (penyaluranAdd.JenisProduk.Visible) { // penyaluranAdd.JenisProduk.Visible (begin)
+    <div id="r_JenisProduk" @Html.Raw(penyaluranAdd.JenisProduk.RowAttributes)>
+        <label id="elh_Penyaluran_JenisProduk" for="x_JenisProduk" class="@(penyaluranAdd.LeftColumnClass)">@Html.Raw(penyaluranAdd.JenisProduk.Caption)@Html.Raw(penyaluranAdd.JenisProduk.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(penyaluranAdd.RightColumnClass)"><div @Html.Raw(penyaluranAdd.JenisProduk.CellAttributes)>
+<span id="el_Penyaluran_JenisProduk">
+    <select
+        id="x_JenisProduk"
+        name="x_JenisProduk"
+        class="form-select ew-select@(penyaluranAdd.JenisProduk.IsInvalidClass)"
+        data-select2-id="fPenyaluranadd_x_JenisProduk"
+        data-table="Penyaluran"
+        data-field="x_JenisProduk"
+        data-value-separator="@(penyaluranAdd.JenisProduk.DisplayValueSeparatorAttribute)"
+        data-placeholder="@(HtmlEncode(penyaluranAdd.JenisProduk.PlaceHolder))"
+        @Html.Raw(penyaluranAdd.JenisProduk.EditAttributes)>
+        @(penyaluranAdd.JenisProduk.SelectOptionListHtml("x_JenisProduk"))
+    </select>
+    @Html.Raw(penyaluranAdd.JenisProduk.GetCustomMessage)
+    <div class="invalid-feedback">@Html.Raw(penyaluranAdd.JenisProduk.GetErrorMessage())</div>
+@Html.Raw(penyaluranAdd.JenisProduk.Lookup.GetParamTag(penyaluranAdd, "p_x_JenisProduk"))
+<script>
+loadjs.ready("fPenyaluranadd", function() {
+    var options = { name: "x_JenisProduk", selectId: "fPenyaluranadd_x_JenisProduk" },
+        el = document.querySelector("select[data-select2-id='" + options.selectId + "']");
+    if (!el)
+        return;
+    options.closeOnSelect = !options.multiple;
+    options.dropdownParent = el.closest("#ew-modal-dialog, #ew-add-opt-dialog");
+    if (fPenyaluranadd.lists.JenisProduk?.lookupOptions.length) {
+        options.data = { id: "x_JenisProduk", form: "fPenyaluranadd" };
+    } else {
+        options.ajax = { id: "x_JenisProduk", form: "fPenyaluranadd", limit: ew.LOOKUP_PAGE_SIZE };
+    }
+    options.minimumInputLength = ew.selectMinimumInputLength;
+    options = Object.assign({}, ew.selectOptions, options, ew.vars.tables.Penyaluran.fields.JenisProduk.selectOptions);
+    ew.createSelect(options);
+});
+</script>
+</span>
+</div></div>
+    </div>
+} @* penyaluranAdd.JenisProduk.Visible (end) *@
+    <span id="el_Penyaluran_StatusProses">
+    <input type="hidden" data-table="Penyaluran" data-field="x_StatusProses" data-hidden="1" name="x_StatusProses" id="x_StatusProses" value="@Html.Raw(HtmlEncode(penyaluranAdd.StatusProses.CurrentValue))">
+    </span>
+    <span id="el_Penyaluran_IdTemplate">
+    <input type="hidden" data-table="Penyaluran" data-field="x_IdTemplate" data-hidden="1" name="x_IdTemplate" id="x_IdTemplate" value="@Html.Raw(HtmlEncode(penyaluranAdd.IdTemplate.CurrentValue))">
+    </span>
+    <span id="el_Penyaluran_PersentaseProgress">
+    <input type="hidden" data-table="Penyaluran" data-field="x_PersentaseProgress" data-hidden="1" name="x_PersentaseProgress" id="x_PersentaseProgress" value="@Html.Raw(HtmlEncode(penyaluranAdd.PersentaseProgress.CurrentValue))">
+    </span>
+@if (penyaluranAdd.Tujuan.Visible) { // penyaluranAdd.Tujuan.Visible (begin)
+    <div id="r_Tujuan" @Html.Raw(penyaluranAdd.Tujuan.RowAttributes)>
+        <label id="elh_Penyaluran_Tujuan" for="x_Tujuan" class="@(penyaluranAdd.LeftColumnClass)">@Html.Raw(penyaluranAdd.Tujuan.Caption)@Html.Raw(penyaluranAdd.Tujuan.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(penyaluranAdd.RightColumnClass)"><div @Html.Raw(penyaluranAdd.Tujuan.CellAttributes)>
+<span id="el_Penyaluran_Tujuan">
+<input type="@(penyaluranAdd.Tujuan.InputTextType)" name="x_Tujuan" id="x_Tujuan" data-table="Penyaluran" data-field="x_Tujuan" value="@Html.Raw(penyaluranAdd.Tujuan.EditValue)" size="30" maxlength="100" placeholder="@Html.Raw(HtmlEncode(penyaluranAdd.Tujuan.PlaceHolder))" data-format-pattern="@(penyaluranAdd.Tujuan.FormatPattern)"@Html.Raw(penyaluranAdd.Tujuan.EditAttributes) aria-describedby="x_Tujuan_help">
+@Html.Raw(penyaluranAdd.Tujuan.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(penyaluranAdd.Tujuan.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* penyaluranAdd.Tujuan.Visible (end) *@
+@if (penyaluranAdd.TujuanKonsinyasi.Visible) { // penyaluranAdd.TujuanKonsinyasi.Visible (begin)
+    <div id="r_TujuanKonsinyasi" @Html.Raw(penyaluranAdd.TujuanKonsinyasi.RowAttributes)>
+        <label id="elh_Penyaluran_TujuanKonsinyasi" for="x_TujuanKonsinyasi" class="@(penyaluranAdd.LeftColumnClass)">@Html.Raw(penyaluranAdd.TujuanKonsinyasi.Caption)@Html.Raw(penyaluranAdd.TujuanKonsinyasi.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(penyaluranAdd.RightColumnClass)"><div @Html.Raw(penyaluranAdd.TujuanKonsinyasi.CellAttributes)>
+<span id="el_Penyaluran_TujuanKonsinyasi">
+    <select
+        id="x_TujuanKonsinyasi"
+        name="x_TujuanKonsinyasi"
+        class="form-select ew-select@(penyaluranAdd.TujuanKonsinyasi.IsInvalidClass)"
+        data-select2-id="fPenyaluranadd_x_TujuanKonsinyasi"
+        data-table="Penyaluran"
+        data-field="x_TujuanKonsinyasi"
+        data-value-separator="@(penyaluranAdd.TujuanKonsinyasi.DisplayValueSeparatorAttribute)"
+        data-placeholder="@(HtmlEncode(penyaluranAdd.TujuanKonsinyasi.PlaceHolder))"
+        @Html.Raw(penyaluranAdd.TujuanKonsinyasi.EditAttributes)>
+        @(penyaluranAdd.TujuanKonsinyasi.SelectOptionListHtml("x_TujuanKonsinyasi"))
+    </select>
+    @Html.Raw(penyaluranAdd.TujuanKonsinyasi.GetCustomMessage)
+    <div class="invalid-feedback">@Html.Raw(penyaluranAdd.TujuanKonsinyasi.GetErrorMessage())</div>
+@Html.Raw(penyaluranAdd.TujuanKonsinyasi.Lookup.GetParamTag(penyaluranAdd, "p_x_TujuanKonsinyasi"))
+<script>
+loadjs.ready("fPenyaluranadd", function() {
+    var options = { name: "x_TujuanKonsinyasi", selectId: "fPenyaluranadd_x_TujuanKonsinyasi" },
+        el = document.querySelector("select[data-select2-id='" + options.selectId + "']");
+    if (!el)
+        return;
+    options.closeOnSelect = !options.multiple;
+    options.dropdownParent = el.closest("#ew-modal-dialog, #ew-add-opt-dialog");
+    if (fPenyaluranadd.lists.TujuanKonsinyasi?.lookupOptions.length) {
+        options.data = { id: "x_TujuanKonsinyasi", form: "fPenyaluranadd" };
+    } else {
+        options.ajax = { id: "x_TujuanKonsinyasi", form: "fPenyaluranadd", limit: ew.LOOKUP_PAGE_SIZE };
+    }
+    options.minimumInputLength = ew.selectMinimumInputLength;
+    options = Object.assign({}, ew.selectOptions, options, ew.vars.tables.Penyaluran.fields.TujuanKonsinyasi.selectOptions);
+    ew.createSelect(options);
+});
+</script>
+</span>
+</div></div>
+    </div>
+} @* penyaluranAdd.TujuanKonsinyasi.Visible (end) *@
+@if (penyaluranAdd.Volume.Visible) { // penyaluranAdd.Volume.Visible (begin)
+    <div id="r_Volume" @Html.Raw(penyaluranAdd.Volume.RowAttributes)>
+        <label id="elh_Penyaluran_Volume" for="x_Volume" class="@(penyaluranAdd.LeftColumnClass)">@Html.Raw(penyaluranAdd.Volume.Caption)@Html.Raw(penyaluranAdd.Volume.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(penyaluranAdd.RightColumnClass)"><div @Html.Raw(penyaluranAdd.Volume.CellAttributes)>
+<span id="el_Penyaluran_Volume">
+<input type="@(penyaluranAdd.Volume.InputTextType)" name="x_Volume" id="x_Volume" data-table="Penyaluran" data-field="x_Volume" value="@Html.Raw(penyaluranAdd.Volume.EditValue)" size="30" placeholder="@Html.Raw(HtmlEncode(penyaluranAdd.Volume.PlaceHolder))" data-format-pattern="@(penyaluranAdd.Volume.FormatPattern)"@Html.Raw(penyaluranAdd.Volume.EditAttributes) aria-describedby="x_Volume_help">
+@Html.Raw(penyaluranAdd.Volume.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(penyaluranAdd.Volume.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* penyaluranAdd.Volume.Visible (end) *@
+@if (penyaluranAdd.TanggalSandar.Visible) { // penyaluranAdd.TanggalSandar.Visible (begin)
+    <div id="r_TanggalSandar" @Html.Raw(penyaluranAdd.TanggalSandar.RowAttributes)>
+        <label id="elh_Penyaluran_TanggalSandar" for="x_TanggalSandar" class="@(penyaluranAdd.LeftColumnClass)">@Html.Raw(penyaluranAdd.TanggalSandar.Caption)@Html.Raw(penyaluranAdd.TanggalSandar.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(penyaluranAdd.RightColumnClass)"><div @Html.Raw(penyaluranAdd.TanggalSandar.CellAttributes)>
+<span id="el_Penyaluran_TanggalSandar">
+<input type="@(penyaluranAdd.TanggalSandar.InputTextType)" name="x_TanggalSandar" id="x_TanggalSandar" data-table="Penyaluran" data-field="x_TanggalSandar" value="@Html.Raw(penyaluranAdd.TanggalSandar.EditValue)" placeholder="@Html.Raw(HtmlEncode(penyaluranAdd.TanggalSandar.PlaceHolder))" data-format-pattern="@(penyaluranAdd.TanggalSandar.FormatPattern)"@Html.Raw(penyaluranAdd.TanggalSandar.EditAttributes) aria-describedby="x_TanggalSandar_help">
+@Html.Raw(penyaluranAdd.TanggalSandar.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(penyaluranAdd.TanggalSandar.GetErrorMessage())</div>
+@if (!penyaluranAdd.TanggalSandar.ReadOnly && !penyaluranAdd.TanggalSandar.Disabled && !penyaluranAdd.TanggalSandar.EditAttrs.Is("readonly") && !penyaluranAdd.TanggalSandar.EditAttrs.Is("disabled")) {
+<script>
+loadjs.ready(["fPenyaluranadd", "datetimepicker"], function () {
+    let format = "@Html.Raw(DateFormat(9))", // DN
+        options = {
+                localization: {
+                    locale: ew.LANGUAGE_ID + "-u-nu-" + ew.getNumberingSystem(),
+                    hourCycle: format.match(/H/) ? "h24" : "h12",
+                    format,
+                    ...ew.language.phrase("datetimepicker")
+                },
+                display: {
+                    icons: {
+                        previous: ew.IS_RTL ? "fa-solid fa-chevron-right" : "fa-solid fa-chevron-left",
+                        next: ew.IS_RTL ? "fa-solid fa-chevron-left" : "fa-solid fa-chevron-right"
+                    },
+                    components: {
+                        clock: !!format.match(/h/i) || !!format.match(/m/) || !!format.match(/s/i),
+                        hours: !!format.match(/h/i),
+                        minutes: !!format.match(/m/),
+                        seconds: !!format.match(/s/i)
+                    },
+                theme: ew.getPreferredTheme()
+                }
+            };
+    ew.createDateTimePicker("fPenyaluranadd", "x_TanggalSandar", ew.deepAssign({"useCurrent":false,"display":{"sideBySide":false}}, options));
+});
+</script>
+}
+</span>
+</div></div>
+    </div>
+} @* penyaluranAdd.TanggalSandar.Visible (end) *@
+@if (penyaluranAdd.Catatan.Visible) { // penyaluranAdd.Catatan.Visible (begin)
+    <div id="r_Catatan" @Html.Raw(penyaluranAdd.Catatan.RowAttributes)>
+        <label id="elh_Penyaluran_Catatan" for="x_Catatan" class="@(penyaluranAdd.LeftColumnClass)">@Html.Raw(penyaluranAdd.Catatan.Caption)@Html.Raw(penyaluranAdd.Catatan.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(penyaluranAdd.RightColumnClass)"><div @Html.Raw(penyaluranAdd.Catatan.CellAttributes)>
+<span id="el_Penyaluran_Catatan">
+<textarea data-table="Penyaluran" data-field="x_Catatan" name="x_Catatan" id="x_Catatan" cols="35" rows="4" placeholder="@Html.Raw(HtmlEncode(penyaluranAdd.Catatan.PlaceHolder))"@Html.Raw(penyaluranAdd.Catatan.EditAttributes) aria-describedby="x_Catatan_help">@(penyaluranAdd.Catatan.EditValue)</textarea>
+@Html.Raw(penyaluranAdd.Catatan.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(penyaluranAdd.Catatan.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* penyaluranAdd.Catatan.Visible (end) *@
+@if (penyaluranAdd.LookupTipeProduk.Visible) { // penyaluranAdd.LookupTipeProduk.Visible (begin)
+    <div id="r_LookupTipeProduk" @Html.Raw(penyaluranAdd.LookupTipeProduk.RowAttributes)>
+        <label id="elh_Penyaluran_LookupTipeProduk" class="@(penyaluranAdd.LeftColumnClass)">@Html.Raw(penyaluranAdd.LookupTipeProduk.Caption)@Html.Raw(penyaluranAdd.LookupTipeProduk.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(penyaluranAdd.RightColumnClass)"><div @Html.Raw(penyaluranAdd.LookupTipeProduk.CellAttributes)>
+<span id="el_Penyaluran_LookupTipeProduk">
+<input type="@(penyaluranAdd.LookupTipeProduk.InputTextType)" name="x_LookupTipeProduk" id="x_LookupTipeProduk" data-table="Penyaluran" data-field="x_LookupTipeProduk" value="@Html.Raw(penyaluranAdd.LookupTipeProduk.EditValue)" size="30" maxlength="1" placeholder="@Html.Raw(HtmlEncode(penyaluranAdd.LookupTipeProduk.PlaceHolder))" data-format-pattern="@(penyaluranAdd.LookupTipeProduk.FormatPattern)"@Html.Raw(penyaluranAdd.LookupTipeProduk.EditAttributes) aria-describedby="x_LookupTipeProduk_help">
+@Html.Raw(penyaluranAdd.LookupTipeProduk.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(penyaluranAdd.LookupTipeProduk.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* penyaluranAdd.LookupTipeProduk.Visible (end) *@
+@if (penyaluranAdd.LookupJenisPlant.Visible) { // penyaluranAdd.LookupJenisPlant.Visible (begin)
+    <div id="r_LookupJenisPlant" @Html.Raw(penyaluranAdd.LookupJenisPlant.RowAttributes)>
+        <label id="elh_Penyaluran_LookupJenisPlant" class="@(penyaluranAdd.LeftColumnClass)">@Html.Raw(penyaluranAdd.LookupJenisPlant.Caption)@Html.Raw(penyaluranAdd.LookupJenisPlant.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(penyaluranAdd.RightColumnClass)"><div @Html.Raw(penyaluranAdd.LookupJenisPlant.CellAttributes)>
+<span id="el_Penyaluran_LookupJenisPlant">
+<input type="@(penyaluranAdd.LookupJenisPlant.InputTextType)" name="x_LookupJenisPlant" id="x_LookupJenisPlant" data-table="Penyaluran" data-field="x_LookupJenisPlant" value="@Html.Raw(penyaluranAdd.LookupJenisPlant.EditValue)" size="30" maxlength="1" placeholder="@Html.Raw(HtmlEncode(penyaluranAdd.LookupJenisPlant.PlaceHolder))" data-format-pattern="@(penyaluranAdd.LookupJenisPlant.FormatPattern)"@Html.Raw(penyaluranAdd.LookupJenisPlant.EditAttributes) aria-describedby="x_LookupJenisPlant_help">
+@Html.Raw(penyaluranAdd.LookupJenisPlant.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(penyaluranAdd.LookupJenisPlant.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* penyaluranAdd.LookupJenisPlant.Visible (end) *@
+@if (penyaluranAdd.MultipleTujuanKonsinyasi.Visible) { // penyaluranAdd.MultipleTujuanKonsinyasi.Visible (begin)
+    <div id="r_MultipleTujuanKonsinyasi" @Html.Raw(penyaluranAdd.MultipleTujuanKonsinyasi.RowAttributes)>
+        <label id="elh_Penyaluran_MultipleTujuanKonsinyasi" for="x_MultipleTujuanKonsinyasi" class="@(penyaluranAdd.LeftColumnClass)">@Html.Raw(penyaluranAdd.MultipleTujuanKonsinyasi.Caption)@Html.Raw(penyaluranAdd.MultipleTujuanKonsinyasi.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(penyaluranAdd.RightColumnClass)"><div @Html.Raw(penyaluranAdd.MultipleTujuanKonsinyasi.CellAttributes)>
+<span id="el_Penyaluran_MultipleTujuanKonsinyasi">
+    <select
+        id="x_MultipleTujuanKonsinyasi"
+        name="x_MultipleTujuanKonsinyasi"
+        class="form-select ew-select@(penyaluranAdd.MultipleTujuanKonsinyasi.IsInvalidClass)"
+        data-select2-id="fPenyaluranadd_x_MultipleTujuanKonsinyasi"
+        data-table="Penyaluran"
+        data-field="x_MultipleTujuanKonsinyasi"
+        data-value-separator="@(penyaluranAdd.MultipleTujuanKonsinyasi.DisplayValueSeparatorAttribute)"
+        data-placeholder="@(HtmlEncode(penyaluranAdd.MultipleTujuanKonsinyasi.PlaceHolder))"
+        @Html.Raw(penyaluranAdd.MultipleTujuanKonsinyasi.EditAttributes)>
+        @(penyaluranAdd.MultipleTujuanKonsinyasi.SelectOptionListHtml("x_MultipleTujuanKonsinyasi"))
+    </select>
+    @Html.Raw(penyaluranAdd.MultipleTujuanKonsinyasi.GetCustomMessage)
+    <div class="invalid-feedback">@Html.Raw(penyaluranAdd.MultipleTujuanKonsinyasi.GetErrorMessage())</div>
+<script>
+loadjs.ready("fPenyaluranadd", function() {
+    var options = { name: "x_MultipleTujuanKonsinyasi", selectId: "fPenyaluranadd_x_MultipleTujuanKonsinyasi" },
+        el = document.querySelector("select[data-select2-id='" + options.selectId + "']");
+    if (!el)
+        return;
+    options.closeOnSelect = !options.multiple;
+    options.dropdownParent = el.closest("#ew-modal-dialog, #ew-add-opt-dialog");
+    if (fPenyaluranadd.lists.MultipleTujuanKonsinyasi?.lookupOptions.length) {
+        options.data = { id: "x_MultipleTujuanKonsinyasi", form: "fPenyaluranadd" };
+    } else {
+        options.ajax = { id: "x_MultipleTujuanKonsinyasi", form: "fPenyaluranadd", limit: ew.LOOKUP_PAGE_SIZE };
+    }
+    options.minimumInputLength = ew.selectMinimumInputLength;
+    options = Object.assign({}, ew.selectOptions, options, ew.vars.tables.Penyaluran.fields.MultipleTujuanKonsinyasi.selectOptions);
+    ew.createSelect(options);
+});
+</script>
+</span>
+</div></div>
+    </div>
+} @* penyaluranAdd.MultipleTujuanKonsinyasi.Visible (end) *@
+@if (penyaluranAdd.MultipleTujuanKonsinyasiHidden.Visible) { // penyaluranAdd.MultipleTujuanKonsinyasiHidden.Visible (begin)
+    <div id="r_MultipleTujuanKonsinyasiHidden" @Html.Raw(penyaluranAdd.MultipleTujuanKonsinyasiHidden.RowAttributes)>
+        <label id="elh_Penyaluran_MultipleTujuanKonsinyasiHidden" class="@(penyaluranAdd.LeftColumnClass)">@Html.Raw(penyaluranAdd.MultipleTujuanKonsinyasiHidden.Caption)@Html.Raw(penyaluranAdd.MultipleTujuanKonsinyasiHidden.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(penyaluranAdd.RightColumnClass)"><div @Html.Raw(penyaluranAdd.MultipleTujuanKonsinyasiHidden.CellAttributes)>
+<span id="el_Penyaluran_MultipleTujuanKonsinyasiHidden">
+<input type="@(penyaluranAdd.MultipleTujuanKonsinyasiHidden.InputTextType)" name="x_MultipleTujuanKonsinyasiHidden" id="x_MultipleTujuanKonsinyasiHidden" data-table="Penyaluran" data-field="x_MultipleTujuanKonsinyasiHidden" value="@Html.Raw(penyaluranAdd.MultipleTujuanKonsinyasiHidden.EditValue)" size="30" maxlength="1" placeholder="@Html.Raw(HtmlEncode(penyaluranAdd.MultipleTujuanKonsinyasiHidden.PlaceHolder))" data-format-pattern="@(penyaluranAdd.MultipleTujuanKonsinyasiHidden.FormatPattern)"@Html.Raw(penyaluranAdd.MultipleTujuanKonsinyasiHidden.EditAttributes) aria-describedby="x_MultipleTujuanKonsinyasiHidden_help">
+@Html.Raw(penyaluranAdd.MultipleTujuanKonsinyasiHidden.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(penyaluranAdd.MultipleTujuanKonsinyasiHidden.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* penyaluranAdd.MultipleTujuanKonsinyasiHidden.Visible (end) *@
+@if (penyaluranAdd.MultipleQuantity.Visible) { // penyaluranAdd.MultipleQuantity.Visible (begin)
+    <div id="r_MultipleQuantity" @Html.Raw(penyaluranAdd.MultipleQuantity.RowAttributes)>
+        <label id="elh_Penyaluran_MultipleQuantity" for="x_MultipleQuantity" class="@(penyaluranAdd.LeftColumnClass)">@Html.Raw(penyaluranAdd.MultipleQuantity.Caption)@Html.Raw(penyaluranAdd.MultipleQuantity.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(penyaluranAdd.RightColumnClass)"><div @Html.Raw(penyaluranAdd.MultipleQuantity.CellAttributes)>
+<span id="el_Penyaluran_MultipleQuantity">
+<input type="@(penyaluranAdd.MultipleQuantity.InputTextType)" name="x_MultipleQuantity" id="x_MultipleQuantity" data-table="Penyaluran" data-field="x_MultipleQuantity" value="@Html.Raw(penyaluranAdd.MultipleQuantity.EditValue)" size="30" maxlength="1" placeholder="@Html.Raw(HtmlEncode(penyaluranAdd.MultipleQuantity.PlaceHolder))" data-format-pattern="@(penyaluranAdd.MultipleQuantity.FormatPattern)"@Html.Raw(penyaluranAdd.MultipleQuantity.EditAttributes) aria-describedby="x_MultipleQuantity_help">
+@Html.Raw(penyaluranAdd.MultipleQuantity.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(penyaluranAdd.MultipleQuantity.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* penyaluranAdd.MultipleQuantity.Visible (end) *@
+</div><!-- /page* -->
+@{ penyaluranAdd.CloseRecordset(); }
+@Html.Raw(penyaluranAdd.IsModal ? "<template class=\"ew-modal-buttons\">" : "<div class=\"row ew-buttons\">")<!-- buttons .row -->
+    <div class="@(penyaluranAdd.OffsetColumnClass)"><!-- buttons offset -->
+    <button class="btn btn-primary ew-btn" name="btn-action" id="btn-action" type="submit" form="fPenyaluranadd">@Html.Raw(Language.Phrase("AddBtn"))</button>
+@if (IsJsonResponse()) {
+    <button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" data-bs-dismiss="modal">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+} else {
+    <button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" form="fPenyaluranadd" data-href="@AppPath(penyaluranAdd.ReturnUrl)">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+}
+    </div><!-- /buttons offset -->
+@Html.Raw(penyaluranAdd.IsModal ? "</template>" : "</div>")<!-- /buttons .row -->
+</form>
+@penyaluranAdd.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("Penyaluran");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Startup script
+    // Write your table-specific startup script here
+    // document.write("page loaded");
+    var parent_url = ew.PATH_BASE;
+    const userLevel = "@CurrentUserLevel()";
+    const idPic = '@CurrentUserInfo("Rule")?.ToString()';
+    if ((userLevel == "5" || idPic == "1" || idPic == "12") && userLevel != "-1") {
+        $("#x_TipePenyaluran").val("Konsinyasi").trigger("change");
+        setTimeout(() => {
+            $("#x_TipePenyaluran").find("option[value='Sales']").remove();
+        }, 200);
+    } else if (userLevel == "6" || (idPic == "13" && userLevel != "-1")) {
+        $("#x_TipePenyaluran").val("Sales").trigger("change");
+        setTimeout(() => {
+            $("#x_TipePenyaluran").find("option[value='Konsinyasi']").remove();
+        }, 200);
+    }
+    $("#r_NomorPolisi").hide();
+    $("#r_NamaKapal").hide();
+    $("#r_TanggalSandar").hide();
+    $("#r_JenisProduk").hide();
+    $("#r_LookupTipeProduk").hide();
+    $("#r_LookupJenisPlant").hide();
+    $("#r_TipeProdukSTS").hide();
+    $("#r_NomorPenyaluran").hide();
+    $("#r_IdPlant").hide();
+    $("#r_IdPipa").hide();
+    $("#r_Volume2").hide();
+    $("#r_TujuanKonsinyasi2").hide();
+    $("#r_MultipleQuantity").hide();
+    $("#r_MultipleTujuanKonsinyasi").hide();
+    $("#r_MultipleTujuanKonsinyasiHidden").hide();
+    $("#r_MultipleTujuanKonsinyasiHidden").val("[]");
+    $("#r_NoShipment").hide();
+    $(document).ready(function () {
+        const ddl = $("#x_LookupPlant");
+        ddl.empty();
+        ddl.append('<option value="">Loading...</option>');
+        $.ajax({
+            url: parent_url + "api/LookUpList/get-dropdown/plant?Menu=Penyaluran",
+            method: "GET",
+            dataType: "json",
+            success: function (data) {
+                ddl.empty();
+                var targetPlantId = "@Html.Raw(penyaluranAdd.IdPlant.CurrentValue)";
+                $.each(data, function (index, item) {
+                    let isSelected = false;
+                    if (targetPlantId && (item.Value == targetPlantId || item.Value.toString() == targetPlantId.toString())) {
+                        isSelected = true;
+                    } else if (!targetPlantId && index === 0) {
+                        isSelected = true;
+                    }
+                    const selectedAttr = isSelected ? "selected" : "";
+                    ddl.append(`<option value="${item.Value}" ${selectedAttr}>${item.Label}</option>`);
+                    if (isSelected) {
+                        $("#x_IdPlant").val(item.Value).trigger("change");
+                    }
+                });
+            },
+            error: function (xhr, status, error) {
+                console.error("Gagal ambil data dropdown:", error);
+                ddl.empty();
+            },
+        });
+        const UserLevel = "@CurrentUserLevel()";
+        const idRole = '@CurrentUserInfo("Rule")?.ToString()';
+        if (UserLevel != "2" && UserLevel != "-1" && UserLevel != "4" && UserLevel != "5" && UserLevel != "6" && idRole != "1" && idRole != "12" && idRole != "13") {
+            ew.alert("Anda tidak memiliki akses untuk menambah data Proses Penyaluran.");
+            setTimeout(() => {
+                window.location.href = parent_url + "PenyaluranList";
+            }, 1000);
+        }
+    });
+    const action = '@HttpContext.Request.Query["action"].ToString()';
+    if (action === "addproduct") {
+        $("#x_JenisProduk").val("");
+        $("#x_Volume").val("");
+        $("#x_IdPlant").trigger("change");
+        checkInput();
+        setTimeout(() => {
+            $("#x_TipePenyaluran, #x_IdModa, #x_IdPlant, #x_KategoriPenyaluran, #x_LookupTipeProduk, #x_LookupJenisPlant").change(function () {
+                checkInput();
+            });
+        }, 2000);
+    }
+    function checkInput() {
+        let TipePenyaluran = $("#x_TipePenyaluran").val();
+        let IdModa = $("#x_IdModa").val();
+        let IdPlant = $("#x_IdPlant").val();
+        let KategoriPenyaluran = $("#x_KategoriPenyaluran").val();
+        let TipeProduk = $("#x_LookupTipeProduk").val();
+        let JenisPlant = $("#x_LookupJenisPlant").val();
+        let idpipa = $("#x_IdPipa").val();
+        if (IdModa == "1" || IdModa == "2") {
+            $("#r_NamaKapal").show();
+            $("#r_NomorPolisi").hide();
+            $("#x_NomorPolisi").val("");
+        } else if (IdModa == "3") {
+            $("#r_NomorPolisi").show();
+            $("#r_NamaKapal").hide();
+            $("#x_NamaKapal").val("");
+        } else {
+            $("#r_NamaKapal").hide();
+            $("#x_NamaKapal").val("");
+            $("#r_NomorPolisi").hide();
+            $("#x_NomorPolisi").val("");
+        }
+        if (IdModa == "5" || IdModa == "12") {
+            $("#elh_Penyaluran_TanggalSandar").text("Tanggal");
+            $("#x_TanggalSandar").attr("placeholder", "Tanggal");
+            $("#qty_caption").text("Quantity (KL)");
+        } else if (IdModa == "6") {
+            $("#elh_Penyaluran_TanggalSandar").text("Tanggal");
+            $("#x_TanggalSandar").attr("placeholder", "Tanggal");
+            $("#qty_caption").text("Quantity (MT)");
+        } else {
+            $("#elh_Penyaluran_TanggalSandar").text("Tanggal Sandar");
+            $("#x_TanggalSandar").attr("placeholder", "Tanggal Sandar");
+        }
+        if (IdModa == "12"){
+            getTujuanKonsinyasi(0, IdModa);
+        } else if (!idpipa) {
+            $("#tujuanKonsinyasiContainer").remove();
+            $("#x_MultipleTujuanKonsinyasiHidden").val("[]");
+        }
+        if (TipePenyaluran == "Konsinyasi") {
+            if (IdModa == "3" && TipeProduk == "LPG") {
+                $("#r_Tujuan").show();
+                $("#r_KategoriPenyaluran").show();
+                $("#r_KategoriPenyaluran").insertAfter("#r_IdModa");
+                $("#r_TanggalSandar").hide();
+                $("#x_TanggalSandar").val("");
+                $("#r_TujuanKonsinyasi").hide();
+                $("#x_TujuanKonsinyasi").val("");
+                $("#r_JenisProduk").hide();
+                $("#r_Volume").hide();
+                $("#x_Volume").val("");
+                if (KategoriPenyaluran == "Non TAS/NGS") {
+                    $("#r_JenisProduk").show();
+                    $("#r_Volume").show();
+                    if (JenisPlant == "STS") {
+                        $("#r_TipeProdukSTS").show();
+                    } else {
+                        $("#r_TipeProdukSTS").hide();
+                        $("#x_TipeProdukSTS").val("");
+                    }
+                } else if (KategoriPenyaluran == "TAS/NGS") {
+                    $("#r_NomorPolisi").hide();
+                    $("#x_NomorPolisi").val("");
+                    $("#r_Tujuan").hide();
+                    $("#x_Tujuan").val("");
+                }
+            } else if (IdModa === "3" && TipeProduk == "BBM") {
+                $("#r_Tujuan").show();
+                $("#r_KategoriPenyaluran").show();
+                $("#r_KategoriPenyaluran").insertAfter("#r_IdModa");
+                $("#r_TanggalSandar").hide();
+                $("#x_TanggalSandar").val("");
+                $("#r_Tujuan").hide();
+                $("#x_Tujuan").val("");
+                //$("#r_JenisProduk").hide();
+                //$("#r_Volume").hide();
+                //$("#x_Volume").val("");
+                if (KategoriPenyaluran === "Non TAS/NGS") {
+                    $("#r_JenisProduk").show();
+                    $("#r_Volume").show();
+                    if (JenisPlant == "STS") {
+                        $("#r_TipeProdukSTS").show();
+                    } else {
+                        $("#r_TipeProdukSTS").hide();
+                        $("#x_TipeProdukSTS").val("");
+                    }
+                } else if (KategoriPenyaluran == "TAS/NGS") {
+                    $("#r_NomorPolisi").hide();
+                    $("#x_NomorPolisi").val("");
+                    $("#r_Tujuan").hide();
+                    $("#x_Tujuan").val("");
+                    $("#r_JenisProduk").hide();
+                    $("#x_JenisProduk").val("");
+                    $("#r_Volume").hide();
+                    $("#x_Volume").val("");
+                    $("#r_TujuanKonsinyasi").hide();
+                    $("#x_TujuanKonsinyasi").val("");
+                }
+            } else {
+                $("#r_JenisProduk").show();
+                $("#r_Volume").show();
+                $("#r_KategoriPenyaluran").hide();
+                $("#x_KategoriPenyaluran").val("");
+                $("#r_NoShipment").hide();
+                $("#r_NoShipment").val("");
+                if (IdModa == "1" || IdModa == "2") {
+                    $("#r_TanggalSandar").show();
+                    $("#r_TujuanKonsinyasi").show();
+                    $("#r_Tujuan").hide();
+                    $("#x_Tujuan").val("");
+                    $("#r_IdPipa").hide();
+                    $("#x_IdPipa").val("").trigger("change");
+                } else if (IdModa == "5" || IdModa == "6" || IdModa == "12") {
+                    $("#r_Tujuan").hide();
+                    $("#x_Tujuan").val("");
+                    $("#r_TujuanKonsinyasi").hide();
+                    $("#x_TujuanKonsinyasi").val("");
+                    $("#r_TanggalSandar").hide();
+                    $("#x_TanggalSandar").val("");
+                    $("#r_Volume").hide();
+                    $("#x_Volume").val("");
+                    if (IdModa == "12") {
+                        $("#r_IdPipa").hide();
+                        $("#x_IdPipa").val("");
+                    } else {
+                        $("#r_IdPipa").show();
+                    }
+                } else if (IdModa == "4") {
+                    $("#r_TujuanKonsinyasi").show();
+                    $("#r_Tujuan").hide();
+                    $("#x_Tujuan").val("");
+                    $("#r_NoShipment").show();
+                } else if (IdModa == "3") {
+                    // Truck dengan Tipe Produk BBM
+                    $("#r_Tujuan").hide();
+                    $("#x_Tujuan").val("");
+                    $("#r_TujuanKonsinyasi").show();
+                    $("#r_TanggalSandar").hide();
+                    $("#x_TanggalSandar").val("");
+                    $("#r_IdPipa").hide();
+                    $("#x_IdPipa").val("").trigger("change");
+                } else {
+                    $("#r_TujuanKonsinyasi").show();
+                    $("#r_Tujuan").hide();
+                    $("#x_Tujuan").val("");
+                    $("#r_TanggalSandar").hide();
+                    $("#x_TanggalSandar").val("");
+                    $("#r_IdPipa").hide();
+                    $("#x_IdPipa").val("").trigger("change");
+                }
+                if (JenisPlant == "STS") {
+                    $("#r_TipeProdukSTS").show();
+                } else {
+                    $("#r_TipeProdukSTS").hide();
+                    $("#x_TipeProdukSTS").val("");
+                }
+            }
+        } else {
+            $("#r_Tujuan").show();
+            $("#r_KategoriPenyaluran").insertBefore("#r_IdModa");
+            $("#r_KategoriPenyaluran").show();
+            $("#r_TanggalSandar").hide();
+            $("#x_TanggalSandar").val("");
+            $("#r_TujuanKonsinyasi").hide();
+            $("#x_TujuanKonsinyasi").val("");
+            $("#r_JenisProduk").hide();
+            $("#x_JenisProduk").val("");
+            $("#r_Volume").hide();
+            $("#x_Volume").val("");
+            if (KategoriPenyaluran == "Non TAS/NGS" && TipeProduk == "LPG") {
+                $("#r_JenisProduk").show();
+                $("#r_Volume").show();
+                if (JenisPlant == "STS") {
+                    $("#r_TipeProdukSTS").show();
+                } else {
+                    $("#r_TipeProdukSTS").hide();
+                    $("#x_TipeProdukSTS").val("");
+                }
+            } else if (IdModa == "5") {
+                $("#r_JenisProduk").show();
+                if (JenisPlant == "STS") {
+                    $("#r_TipeProdukSTS").show();
+                } else {
+                    $("#r_TipeProdukSTS").hide();
+                    $("#x_TipeProdukSTS").val("");
+                }
+            } else {
+                $("#r_JenisProduk").hide();
+                $("#x_JenisProduk").val("");
+            }
+            if (KategoriPenyaluran == "TAS/NGS") {
+                $("#r_NomorPolisi").hide();
+                $("#x_NomorPolisi").val("");
+                $("#r_Tujuan").hide();
+                $("#x_Tujuan").val("");
+            }
+        }
+    }
+});
+</script>

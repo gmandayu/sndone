@@ -1,0 +1,517 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (subAktivitasSfadNewBlList.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = subAktivitasSfadNewBlList.UseLayout ? "_Layout" : "";
+}
+@if (!subAktivitasSfadNewBlList.IsExport()) {
+<script>
+var currentTable = @Html.Raw(ConvertToJson(subAktivitasSfadNewBlList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { SubAktivitasSFADNewBL: currentTable } });
+var currentPageID = ew.PAGE_ID = "list";
+var currentForm;
+var @(subAktivitasSfadNewBlList.FormName);
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("@(subAktivitasSfadNewBlList.FormName)")
+        .setPageId("list")
+        .setSubmitWithFetch(@(subAktivitasSfadNewBlList.UseAjaxActions ? "true" : "false"))
+        .setFormKeyCountName("@(subAktivitasSfadNewBlList.FormKeyCountName)")
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Write your client script here, no need to add script tags.
+});
+</script>
+}
+@if (!subAktivitasSfadNewBlList.IsExport()) {
+<div class="btn-toolbar ew-toolbar">
+@if (subAktivitasSfadNewBlList.TotalRecords > 0 && subAktivitasSfadNewBlList.ExportOptions.Visible) {
+    subAktivitasSfadNewBlList.ExportOptions.Render("body");
+}
+@if (subAktivitasSfadNewBlList.ImportOptions.Visible) {
+    subAktivitasSfadNewBlList.ImportOptions.Render("body");
+}
+@if (subAktivitasSfadNewBlList.SearchOptions.Visible) {
+    subAktivitasSfadNewBlList.SearchOptions.Render("body");
+}
+@if (subAktivitasSfadNewBlList.FilterOptions.Visible) {
+    subAktivitasSfadNewBlList.FilterOptions.Render("body");
+}
+</div>
+}
+@if (!subAktivitasSfadNewBlList.IsModal) {
+<form name="fSubAktivitasSFADNewBLsrch" id="fSubAktivitasSFADNewBLsrch" class="ew-form ew-ext-search-form" action="@AppPath(CurrentPageName())" novalidate autocomplete="off">
+<div id="fSubAktivitasSFADNewBLsrch_search_panel" class="mb-2 mb-sm-0 @(subAktivitasSfadNewBlList.SearchPanelClass)"><!-- .ew-search-panel -->
+<script>
+var currentTable = @Html.Raw(ConvertToJson(subAktivitasSfadNewBlList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { SubAktivitasSFADNewBL: currentTable } });
+var currentForm;
+var fSubAktivitasSFADNewBLsrch, currentSearchForm, currentAdvancedSearchForm;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery,
+        fields = currentTable.fields;
+
+    // Form object for search
+    let form = new ew.FormBuilder()
+        .setId("fSubAktivitasSFADNewBLsrch")
+        .setPageId("list")
+@if (subAktivitasSfadNewBlList.UseAjaxActions) {
+        <text>.setSubmitWithFetch(true)</text>
+}
+
+        // Dynamic selection lists
+        .setLists({
+        })
+
+        // Filters
+        .setFilterList(@Html.Raw(subAktivitasSfadNewBlList.GetFilterList()))
+        .build();
+    window[form.id] = form;
+    currentSearchForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<input type="hidden" name="cmd" value="search">
+@if (Security.CanSearch) {
+if (!subAktivitasSfadNewBlList.IsExport() && Empty(subAktivitasSfadNewBlList.CurrentAction) && subAktivitasSfadNewBlList.HasSearchFields()) { @* Show search form (begin) *@
+<div class="ew-extended-search container-fluid ps-2">
+<div class="row mb-0">
+    <div class="col-sm-auto px-0 pe-sm-2">
+        <div class="ew-basic-search input-group">
+            <input type="search" name="@(Config.TableBasicSearch)" id="@(Config.TableBasicSearch)" class="form-control ew-basic-search-keyword" value="@Html.Raw(HtmlEncode(subAktivitasSfadNewBlList.BasicSearch.SessionKeyword))" placeholder="@(HtmlEncode(Language.Phrase("Search")))" aria-label="@(HtmlEncode(Language.Phrase("Search")))">
+            <input type="hidden" name="@(Config.TableBasicSearchType)" id="@(Config.TableBasicSearchType)" class="ew-basic-search-type" value="@(HtmlEncode(subAktivitasSfadNewBlList.BasicSearch.SessionType))">
+            <button type="button" data-bs-toggle="dropdown" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split" aria-haspopup="true" aria-expanded="false">
+                <span id="searchtype">@Html.Raw(subAktivitasSfadNewBlList.BasicSearch.TypeNameShort)</span>
+            </button>
+            <div class="dropdown-menu dropdown-menu-end">
+                <button type="button" class="dropdown-item@(subAktivitasSfadNewBlList.BasicSearch.SessionType == "" ? " active" : "")" form="fSubAktivitasSFADNewBLsrch" data-ew-action="search-type">@Html.Raw(Language.Phrase("QuickSearchAuto"))</button>
+                <button type="button" class="dropdown-item@(subAktivitasSfadNewBlList.BasicSearch.SessionType == "=" ? " active" : "")" form="fSubAktivitasSFADNewBLsrch" data-ew-action="search-type" data-search-type="=">@Html.Raw(Language.Phrase("QuickSearchExact"))</button>
+                <button type="button" class="dropdown-item@(subAktivitasSfadNewBlList.BasicSearch.SessionType == "AND" ? " active" : "")" form="fSubAktivitasSFADNewBLsrch" data-ew-action="search-type" data-search-type="AND">@Html.Raw(Language.Phrase("QuickSearchAll"))</button>
+                <button type="button" class="dropdown-item@(subAktivitasSfadNewBlList.BasicSearch.SessionType == "OR" ? " active" : "")" form="fSubAktivitasSFADNewBLsrch" data-ew-action="search-type" data-search-type="OR">@Html.Raw(Language.Phrase("QuickSearchAny"))</button>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-auto mb-3">
+        <button class="btn btn-primary" name="btn-submit" id="btn-submit" type="submit">@Html.Raw(Language.Phrase("SearchBtn"))</button>
+    </div>
+</div>
+</div><!-- /.ew-extended-search -->
+} @* Show search form (end) *@
+}
+</div><!-- /.ew-search-panel -->
+</form>
+}
+@subAktivitasSfadNewBlList.ShowPageHeader()
+@subAktivitasSfadNewBlList.ShowMessages()
+<main class="list @(subAktivitasSfadNewBlList.TotalRecords == 0 && !subAktivitasSfadNewBlList.IsAdd ? " ew-no-record" : "")">
+<div id="ew-header-options">
+    @subAktivitasSfadNewBlList.HeaderOptions.RenderBody()
+</div>
+<div id="ew-list">
+@if (subAktivitasSfadNewBlList.TotalRecords > 0 || !Empty(subAktivitasSfadNewBlList.CurrentAction)) {
+<div class="card ew-card ew-grid@(subAktivitasSfadNewBlList.IsAddOrEdit ? " ew-grid-add-edit" : "") @(subAktivitasSfadNewBlList.TableGridClass)">
+<form name="@(subAktivitasSfadNewBlList.FormName)" id="@(subAktivitasSfadNewBlList.FormName)" class="ew-form ew-list-form" action="@AppPath(subAktivitasSfadNewBlList.PageName)" method="post" novalidate autocomplete="off">
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+@if (subAktivitasSfadNewBlList.IsModal) {
+<input type="hidden" name="modal" value="1">
+}
+<div id="gmp_SubAktivitasSFADNewBL" class="card-body ew-grid-middle-panel @(subAktivitasSfadNewBlList.TableContainerClass)" style="@(subAktivitasSfadNewBlList.TableContainerStyle)">
+@if (subAktivitasSfadNewBlList.TotalRecords > 0 || subAktivitasSfadNewBlList.IsGridEdit || subAktivitasSfadNewBlList.IsMultiEdit) {
+<table id="tbl_SubAktivitasSFADNewBLlist" class="@(subAktivitasSfadNewBlList.TableClass)"><!-- .ew-table -->
+<thead>
+    <tr class="ew-table-header">
+@{
+    // Header row
+    subAktivitasSfadNewBlList.RowType = RowType.Header;
+
+    // Render list options
+    await subAktivitasSfadNewBlList.RenderListOptions();
+}
+@* Render list options (header, left) *@
+@subAktivitasSfadNewBlList.ListOptions.RenderHeader("left")
+@if (subAktivitasSfadNewBlList.idAktifitas.Visible) { // subAktivitasSfadNewBlList.idAktifitas.Visible (begin)
+        <th data-name="idAktifitas" class="@(subAktivitasSfadNewBlList.idAktifitas.HeaderCellClass)"><div id="elh_SubAktivitasSFADNewBL_idAktifitas" class="SubAktivitasSFADNewBL_idAktifitas">@Html.Raw(subAktivitasSfadNewBlList.RenderFieldHeader(subAktivitasSfadNewBlList.idAktifitas))</div></th>
+} @* subAktivitasSfadNewBlList.idAktifitas.Visible (end) *@
+@if (subAktivitasSfadNewBlList.idProses.Visible) { // subAktivitasSfadNewBlList.idProses.Visible (begin)
+        <th data-name="idProses" class="@(subAktivitasSfadNewBlList.idProses.HeaderCellClass)"><div id="elh_SubAktivitasSFADNewBL_idProses" class="SubAktivitasSFADNewBL_idProses">@Html.Raw(subAktivitasSfadNewBlList.RenderFieldHeader(subAktivitasSfadNewBlList.idProses))</div></th>
+} @* subAktivitasSfadNewBlList.idProses.Visible (end) *@
+@if (subAktivitasSfadNewBlList.NoReferensi.Visible) { // subAktivitasSfadNewBlList.NoReferensi.Visible (begin)
+        <th data-name="NoReferensi" class="@(subAktivitasSfadNewBlList.NoReferensi.HeaderCellClass)"><div id="elh_SubAktivitasSFADNewBL_NoReferensi" class="SubAktivitasSFADNewBL_NoReferensi">@Html.Raw(subAktivitasSfadNewBlList.RenderFieldHeader(subAktivitasSfadNewBlList.NoReferensi))</div></th>
+} @* subAktivitasSfadNewBlList.NoReferensi.Visible (end) *@
+@if (subAktivitasSfadNewBlList.LastUpdatedBy.Visible) { // subAktivitasSfadNewBlList.LastUpdatedBy.Visible (begin)
+        <th data-name="LastUpdatedBy" class="@(subAktivitasSfadNewBlList.LastUpdatedBy.HeaderCellClass)"><div id="elh_SubAktivitasSFADNewBL_LastUpdatedBy" class="SubAktivitasSFADNewBL_LastUpdatedBy">@Html.Raw(subAktivitasSfadNewBlList.RenderFieldHeader(subAktivitasSfadNewBlList.LastUpdatedBy))</div></th>
+} @* subAktivitasSfadNewBlList.LastUpdatedBy.Visible (end) *@
+@if (subAktivitasSfadNewBlList.lastUpdatedDate.Visible) { // subAktivitasSfadNewBlList.lastUpdatedDate.Visible (begin)
+        <th data-name="lastUpdatedDate" class="@(subAktivitasSfadNewBlList.lastUpdatedDate.HeaderCellClass)"><div id="elh_SubAktivitasSFADNewBL_lastUpdatedDate" class="SubAktivitasSFADNewBL_lastUpdatedDate">@Html.Raw(subAktivitasSfadNewBlList.RenderFieldHeader(subAktivitasSfadNewBlList.lastUpdatedDate))</div></th>
+} @* subAktivitasSfadNewBlList.lastUpdatedDate.Visible (end) *@
+@if (subAktivitasSfadNewBlList.userInput.Visible) { // subAktivitasSfadNewBlList.userInput.Visible (begin)
+        <th data-name="userInput" class="@(subAktivitasSfadNewBlList.userInput.HeaderCellClass)"><div id="elh_SubAktivitasSFADNewBL_userInput" class="SubAktivitasSFADNewBL_userInput">@Html.Raw(subAktivitasSfadNewBlList.RenderFieldHeader(subAktivitasSfadNewBlList.userInput))</div></th>
+} @* subAktivitasSfadNewBlList.userInput.Visible (end) *@
+@if (subAktivitasSfadNewBlList.StatusAktivitas.Visible) { // subAktivitasSfadNewBlList.StatusAktivitas.Visible (begin)
+        <th data-name="StatusAktivitas" class="@(subAktivitasSfadNewBlList.StatusAktivitas.HeaderCellClass)"><div id="elh_SubAktivitasSFADNewBL_StatusAktivitas" class="SubAktivitasSFADNewBL_StatusAktivitas">@Html.Raw(subAktivitasSfadNewBlList.RenderFieldHeader(subAktivitasSfadNewBlList.StatusAktivitas))</div></th>
+} @* subAktivitasSfadNewBlList.StatusAktivitas.Visible (end) *@
+@if (subAktivitasSfadNewBlList.ApakahAdaROB.Visible) { // subAktivitasSfadNewBlList.ApakahAdaROB.Visible (begin)
+        <th data-name="ApakahAdaROB" class="@(subAktivitasSfadNewBlList.ApakahAdaROB.HeaderCellClass)"><div id="elh_SubAktivitasSFADNewBL_ApakahAdaROB" class="SubAktivitasSFADNewBL_ApakahAdaROB">@Html.Raw(subAktivitasSfadNewBlList.RenderFieldHeader(subAktivitasSfadNewBlList.ApakahAdaROB))</div></th>
+} @* subAktivitasSfadNewBlList.ApakahAdaROB.Visible (end) *@
+@if (subAktivitasSfadNewBlList.Import.Visible) { // subAktivitasSfadNewBlList.Import.Visible (begin)
+        <th data-name="Import" class="@(subAktivitasSfadNewBlList.Import.HeaderCellClass)"><div id="elh_SubAktivitasSFADNewBL_Import" class="SubAktivitasSFADNewBL_Import">@Html.Raw(subAktivitasSfadNewBlList.RenderFieldHeader(subAktivitasSfadNewBlList.Import))</div></th>
+} @* subAktivitasSfadNewBlList.Import.Visible (end) *@
+@if (subAktivitasSfadNewBlList.ApakahTerdapatROB.Visible) { // subAktivitasSfadNewBlList.ApakahTerdapatROB.Visible (begin)
+        <th data-name="ApakahTerdapatROB" class="@(subAktivitasSfadNewBlList.ApakahTerdapatROB.HeaderCellClass)"><div id="elh_SubAktivitasSFADNewBL_ApakahTerdapatROB" class="SubAktivitasSFADNewBL_ApakahTerdapatROB">@Html.Raw(subAktivitasSfadNewBlList.RenderFieldHeader(subAktivitasSfadNewBlList.ApakahTerdapatROB))</div></th>
+} @* subAktivitasSfadNewBlList.ApakahTerdapatROB.Visible (end) *@
+@if (subAktivitasSfadNewBlList.Tujuan.Visible) { // subAktivitasSfadNewBlList.Tujuan.Visible (begin)
+        <th data-name="Tujuan" class="@(subAktivitasSfadNewBlList.Tujuan.HeaderCellClass)"><div id="elh_SubAktivitasSFADNewBL_Tujuan" class="SubAktivitasSFADNewBL_Tujuan">@Html.Raw(subAktivitasSfadNewBlList.RenderFieldHeader(subAktivitasSfadNewBlList.Tujuan))</div></th>
+} @* subAktivitasSfadNewBlList.Tujuan.Visible (end) *@
+@if (subAktivitasSfadNewBlList.SFAD_klobs.Visible) { // subAktivitasSfadNewBlList.SFAD_klobs.Visible (begin)
+        <th data-name="SFAD_klobs" class="@(subAktivitasSfadNewBlList.SFAD_klobs.HeaderCellClass)"><div id="elh_SubAktivitasSFADNewBL_SFAD_klobs" class="SubAktivitasSFADNewBL_SFAD_klobs">@Html.Raw(subAktivitasSfadNewBlList.RenderFieldHeader(subAktivitasSfadNewBlList.SFAD_klobs))</div></th>
+} @* subAktivitasSfadNewBlList.SFAD_klobs.Visible (end) *@
+@if (subAktivitasSfadNewBlList.SFAD_kl15.Visible) { // subAktivitasSfadNewBlList.SFAD_kl15.Visible (begin)
+        <th data-name="SFAD_kl15" class="@(subAktivitasSfadNewBlList.SFAD_kl15.HeaderCellClass)"><div id="elh_SubAktivitasSFADNewBL_SFAD_kl15" class="SubAktivitasSFADNewBL_SFAD_kl15">@Html.Raw(subAktivitasSfadNewBlList.RenderFieldHeader(subAktivitasSfadNewBlList.SFAD_kl15))</div></th>
+} @* subAktivitasSfadNewBlList.SFAD_kl15.Visible (end) *@
+@if (subAktivitasSfadNewBlList.SFAD_barrels.Visible) { // subAktivitasSfadNewBlList.SFAD_barrels.Visible (begin)
+        <th data-name="SFAD_barrels" class="@(subAktivitasSfadNewBlList.SFAD_barrels.HeaderCellClass)"><div id="elh_SubAktivitasSFADNewBL_SFAD_barrels" class="SubAktivitasSFADNewBL_SFAD_barrels">@Html.Raw(subAktivitasSfadNewBlList.RenderFieldHeader(subAktivitasSfadNewBlList.SFAD_barrels))</div></th>
+} @* subAktivitasSfadNewBlList.SFAD_barrels.Visible (end) *@
+@if (subAktivitasSfadNewBlList.SFAD_lt.Visible) { // subAktivitasSfadNewBlList.SFAD_lt.Visible (begin)
+        <th data-name="SFAD_lt" class="@(subAktivitasSfadNewBlList.SFAD_lt.HeaderCellClass)"><div id="elh_SubAktivitasSFADNewBL_SFAD_lt" class="SubAktivitasSFADNewBL_SFAD_lt">@Html.Raw(subAktivitasSfadNewBlList.RenderFieldHeader(subAktivitasSfadNewBlList.SFAD_lt))</div></th>
+} @* subAktivitasSfadNewBlList.SFAD_lt.Visible (end) *@
+@if (subAktivitasSfadNewBlList.SFAD_mt.Visible) { // subAktivitasSfadNewBlList.SFAD_mt.Visible (begin)
+        <th data-name="SFAD_mt" class="@(subAktivitasSfadNewBlList.SFAD_mt.HeaderCellClass)"><div id="elh_SubAktivitasSFADNewBL_SFAD_mt" class="SubAktivitasSFADNewBL_SFAD_mt">@Html.Raw(subAktivitasSfadNewBlList.RenderFieldHeader(subAktivitasSfadNewBlList.SFAD_mt))</div></th>
+} @* subAktivitasSfadNewBlList.SFAD_mt.Visible (end) *@
+@if (subAktivitasSfadNewBlList.NewBl_klobs.Visible) { // subAktivitasSfadNewBlList.NewBl_klobs.Visible (begin)
+        <th data-name="NewBl_klobs" class="@(subAktivitasSfadNewBlList.NewBl_klobs.HeaderCellClass)"><div id="elh_SubAktivitasSFADNewBL_NewBl_klobs" class="SubAktivitasSFADNewBL_NewBl_klobs">@Html.Raw(subAktivitasSfadNewBlList.RenderFieldHeader(subAktivitasSfadNewBlList.NewBl_klobs))</div></th>
+} @* subAktivitasSfadNewBlList.NewBl_klobs.Visible (end) *@
+@if (subAktivitasSfadNewBlList.NewBl_kl15.Visible) { // subAktivitasSfadNewBlList.NewBl_kl15.Visible (begin)
+        <th data-name="NewBl_kl15" class="@(subAktivitasSfadNewBlList.NewBl_kl15.HeaderCellClass)"><div id="elh_SubAktivitasSFADNewBL_NewBl_kl15" class="SubAktivitasSFADNewBL_NewBl_kl15">@Html.Raw(subAktivitasSfadNewBlList.RenderFieldHeader(subAktivitasSfadNewBlList.NewBl_kl15))</div></th>
+} @* subAktivitasSfadNewBlList.NewBl_kl15.Visible (end) *@
+@if (subAktivitasSfadNewBlList.NewBl_barrels.Visible) { // subAktivitasSfadNewBlList.NewBl_barrels.Visible (begin)
+        <th data-name="NewBl_barrels" class="@(subAktivitasSfadNewBlList.NewBl_barrels.HeaderCellClass)"><div id="elh_SubAktivitasSFADNewBL_NewBl_barrels" class="SubAktivitasSFADNewBL_NewBl_barrels">@Html.Raw(subAktivitasSfadNewBlList.RenderFieldHeader(subAktivitasSfadNewBlList.NewBl_barrels))</div></th>
+} @* subAktivitasSfadNewBlList.NewBl_barrels.Visible (end) *@
+@if (subAktivitasSfadNewBlList.NewBl_lt.Visible) { // subAktivitasSfadNewBlList.NewBl_lt.Visible (begin)
+        <th data-name="NewBl_lt" class="@(subAktivitasSfadNewBlList.NewBl_lt.HeaderCellClass)"><div id="elh_SubAktivitasSFADNewBL_NewBl_lt" class="SubAktivitasSFADNewBL_NewBl_lt">@Html.Raw(subAktivitasSfadNewBlList.RenderFieldHeader(subAktivitasSfadNewBlList.NewBl_lt))</div></th>
+} @* subAktivitasSfadNewBlList.NewBl_lt.Visible (end) *@
+@if (subAktivitasSfadNewBlList.NewBl_mt.Visible) { // subAktivitasSfadNewBlList.NewBl_mt.Visible (begin)
+        <th data-name="NewBl_mt" class="@(subAktivitasSfadNewBlList.NewBl_mt.HeaderCellClass)"><div id="elh_SubAktivitasSFADNewBL_NewBl_mt" class="SubAktivitasSFADNewBL_NewBl_mt">@Html.Raw(subAktivitasSfadNewBlList.RenderFieldHeader(subAktivitasSfadNewBlList.NewBl_mt))</div></th>
+} @* subAktivitasSfadNewBlList.NewBl_mt.Visible (end) *@
+@if (subAktivitasSfadNewBlList.AR45B_klobs.Visible) { // subAktivitasSfadNewBlList.AR45B_klobs.Visible (begin)
+        <th data-name="AR45B_klobs" class="@(subAktivitasSfadNewBlList.AR45B_klobs.HeaderCellClass)"><div id="elh_SubAktivitasSFADNewBL_AR45B_klobs" class="SubAktivitasSFADNewBL_AR45B_klobs">@Html.Raw(subAktivitasSfadNewBlList.RenderFieldHeader(subAktivitasSfadNewBlList.AR45B_klobs))</div></th>
+} @* subAktivitasSfadNewBlList.AR45B_klobs.Visible (end) *@
+@if (subAktivitasSfadNewBlList.AR45B_kl15.Visible) { // subAktivitasSfadNewBlList.AR45B_kl15.Visible (begin)
+        <th data-name="AR45B_kl15" class="@(subAktivitasSfadNewBlList.AR45B_kl15.HeaderCellClass)"><div id="elh_SubAktivitasSFADNewBL_AR45B_kl15" class="SubAktivitasSFADNewBL_AR45B_kl15">@Html.Raw(subAktivitasSfadNewBlList.RenderFieldHeader(subAktivitasSfadNewBlList.AR45B_kl15))</div></th>
+} @* subAktivitasSfadNewBlList.AR45B_kl15.Visible (end) *@
+@if (subAktivitasSfadNewBlList.AR45B_barrels.Visible) { // subAktivitasSfadNewBlList.AR45B_barrels.Visible (begin)
+        <th data-name="AR45B_barrels" class="@(subAktivitasSfadNewBlList.AR45B_barrels.HeaderCellClass)"><div id="elh_SubAktivitasSFADNewBL_AR45B_barrels" class="SubAktivitasSFADNewBL_AR45B_barrels">@Html.Raw(subAktivitasSfadNewBlList.RenderFieldHeader(subAktivitasSfadNewBlList.AR45B_barrels))</div></th>
+} @* subAktivitasSfadNewBlList.AR45B_barrels.Visible (end) *@
+@if (subAktivitasSfadNewBlList.AR45B_lt.Visible) { // subAktivitasSfadNewBlList.AR45B_lt.Visible (begin)
+        <th data-name="AR45B_lt" class="@(subAktivitasSfadNewBlList.AR45B_lt.HeaderCellClass)"><div id="elh_SubAktivitasSFADNewBL_AR45B_lt" class="SubAktivitasSFADNewBL_AR45B_lt">@Html.Raw(subAktivitasSfadNewBlList.RenderFieldHeader(subAktivitasSfadNewBlList.AR45B_lt))</div></th>
+} @* subAktivitasSfadNewBlList.AR45B_lt.Visible (end) *@
+@if (subAktivitasSfadNewBlList.AR45B_mt.Visible) { // subAktivitasSfadNewBlList.AR45B_mt.Visible (begin)
+        <th data-name="AR45B_mt" class="@(subAktivitasSfadNewBlList.AR45B_mt.HeaderCellClass)"><div id="elh_SubAktivitasSFADNewBL_AR45B_mt" class="SubAktivitasSFADNewBL_AR45B_mt">@Html.Raw(subAktivitasSfadNewBlList.RenderFieldHeader(subAktivitasSfadNewBlList.AR45B_mt))</div></th>
+} @* subAktivitasSfadNewBlList.AR45B_mt.Visible (end) *@
+@* Render list options (header, right) *@
+@subAktivitasSfadNewBlList.ListOptions.RenderHeader("right")
+    </tr>
+</thead>
+<tbody data-page="@(subAktivitasSfadNewBlList.PageNumber)">
+@{
+    await subAktivitasSfadNewBlList.SetupGrid();
+    bool eof = subAktivitasSfadNewBlList.Recordset == null; // DN
+}
+@while (subAktivitasSfadNewBlList.RecordCount < subAktivitasSfadNewBlList.StopRecord || SameString(subAktivitasSfadNewBlList.RowIndex, "$rowindex$")) { // Begin While
+    if (!eof && !SameString(subAktivitasSfadNewBlList.RowIndex, "$rowindex$") &&
+        (!subAktivitasSfadNewBlList.IsGridAdd || subAktivitasSfadNewBlList.CurrentMode == "copy") &&
+        (!((subAktivitasSfadNewBlList.IsCopy || subAktivitasSfadNewBlList.IsAdd) && subAktivitasSfadNewBlList.RowIndex is int rowIndex && rowIndex == 0))) // DN
+        eof = !await subAktivitasSfadNewBlList.Recordset.ReadAsync();
+    subAktivitasSfadNewBlList.RecordCount++;
+    if (subAktivitasSfadNewBlList.RecordCount >= subAktivitasSfadNewBlList.StartRecord) {
+        await subAktivitasSfadNewBlList.SetupRow();
+    <tr @Html.Raw(subAktivitasSfadNewBlList.RowAttributes)>
+    @* Render list options (body, left) *@
+    @subAktivitasSfadNewBlList.ListOptions.RenderBody("left", subAktivitasSfadNewBlList.RowCount)
+    @if (subAktivitasSfadNewBlList.idAktifitas.Visible) { // subAktivitasSfadNewBlList.idAktifitas.Visible (begin)
+        <td data-name="idAktifitas" @Html.Raw(subAktivitasSfadNewBlList.idAktifitas.CellAttributes)>
+<span id="el@(subAktivitasSfadNewBlList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasSfadNewBlList.RowCount)_SubAktivitasSFADNewBL_idAktifitas" class="el_SubAktivitasSFADNewBL_idAktifitas">
+<span @Html.Raw(subAktivitasSfadNewBlList.idAktifitas.ViewAttributes)>
+@Html.Raw(subAktivitasSfadNewBlList.idAktifitas.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasSfadNewBlList.idAktifitas.Visible (end) *@
+    @if (subAktivitasSfadNewBlList.idProses.Visible) { // subAktivitasSfadNewBlList.idProses.Visible (begin)
+        <td data-name="idProses" @Html.Raw(subAktivitasSfadNewBlList.idProses.CellAttributes)>
+<span id="el@(subAktivitasSfadNewBlList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasSfadNewBlList.RowCount)_SubAktivitasSFADNewBL_idProses" class="el_SubAktivitasSFADNewBL_idProses">
+<span @Html.Raw(subAktivitasSfadNewBlList.idProses.ViewAttributes)>
+@Html.Raw(subAktivitasSfadNewBlList.idProses.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasSfadNewBlList.idProses.Visible (end) *@
+    @if (subAktivitasSfadNewBlList.NoReferensi.Visible) { // subAktivitasSfadNewBlList.NoReferensi.Visible (begin)
+        <td data-name="NoReferensi" @Html.Raw(subAktivitasSfadNewBlList.NoReferensi.CellAttributes)>
+<span id="el@(subAktivitasSfadNewBlList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasSfadNewBlList.RowCount)_SubAktivitasSFADNewBL_NoReferensi" class="el_SubAktivitasSFADNewBL_NoReferensi">
+<span @Html.Raw(subAktivitasSfadNewBlList.NoReferensi.ViewAttributes)>
+@Html.Raw(subAktivitasSfadNewBlList.NoReferensi.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasSfadNewBlList.NoReferensi.Visible (end) *@
+    @if (subAktivitasSfadNewBlList.LastUpdatedBy.Visible) { // subAktivitasSfadNewBlList.LastUpdatedBy.Visible (begin)
+        <td data-name="LastUpdatedBy" @Html.Raw(subAktivitasSfadNewBlList.LastUpdatedBy.CellAttributes)>
+<span id="el@(subAktivitasSfadNewBlList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasSfadNewBlList.RowCount)_SubAktivitasSFADNewBL_LastUpdatedBy" class="el_SubAktivitasSFADNewBL_LastUpdatedBy">
+<span @Html.Raw(subAktivitasSfadNewBlList.LastUpdatedBy.ViewAttributes)>
+@Html.Raw(subAktivitasSfadNewBlList.LastUpdatedBy.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasSfadNewBlList.LastUpdatedBy.Visible (end) *@
+    @if (subAktivitasSfadNewBlList.lastUpdatedDate.Visible) { // subAktivitasSfadNewBlList.lastUpdatedDate.Visible (begin)
+        <td data-name="lastUpdatedDate" @Html.Raw(subAktivitasSfadNewBlList.lastUpdatedDate.CellAttributes)>
+<span id="el@(subAktivitasSfadNewBlList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasSfadNewBlList.RowCount)_SubAktivitasSFADNewBL_lastUpdatedDate" class="el_SubAktivitasSFADNewBL_lastUpdatedDate">
+<span @Html.Raw(subAktivitasSfadNewBlList.lastUpdatedDate.ViewAttributes)>
+@Html.Raw(subAktivitasSfadNewBlList.lastUpdatedDate.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasSfadNewBlList.lastUpdatedDate.Visible (end) *@
+    @if (subAktivitasSfadNewBlList.userInput.Visible) { // subAktivitasSfadNewBlList.userInput.Visible (begin)
+        <td data-name="userInput" @Html.Raw(subAktivitasSfadNewBlList.userInput.CellAttributes)>
+<span id="el@(subAktivitasSfadNewBlList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasSfadNewBlList.RowCount)_SubAktivitasSFADNewBL_userInput" class="el_SubAktivitasSFADNewBL_userInput">
+<span @Html.Raw(subAktivitasSfadNewBlList.userInput.ViewAttributes)>
+@Html.Raw(subAktivitasSfadNewBlList.userInput.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasSfadNewBlList.userInput.Visible (end) *@
+    @if (subAktivitasSfadNewBlList.StatusAktivitas.Visible) { // subAktivitasSfadNewBlList.StatusAktivitas.Visible (begin)
+        <td data-name="StatusAktivitas" @Html.Raw(subAktivitasSfadNewBlList.StatusAktivitas.CellAttributes)>
+<span id="el@(subAktivitasSfadNewBlList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasSfadNewBlList.RowCount)_SubAktivitasSFADNewBL_StatusAktivitas" class="el_SubAktivitasSFADNewBL_StatusAktivitas">
+<span @Html.Raw(subAktivitasSfadNewBlList.StatusAktivitas.ViewAttributes)>
+@Html.Raw(subAktivitasSfadNewBlList.StatusAktivitas.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasSfadNewBlList.StatusAktivitas.Visible (end) *@
+    @if (subAktivitasSfadNewBlList.ApakahAdaROB.Visible) { // subAktivitasSfadNewBlList.ApakahAdaROB.Visible (begin)
+        <td data-name="ApakahAdaROB" @Html.Raw(subAktivitasSfadNewBlList.ApakahAdaROB.CellAttributes)>
+<span id="el@(subAktivitasSfadNewBlList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasSfadNewBlList.RowCount)_SubAktivitasSFADNewBL_ApakahAdaROB" class="el_SubAktivitasSFADNewBL_ApakahAdaROB">
+<span @Html.Raw(subAktivitasSfadNewBlList.ApakahAdaROB.ViewAttributes)>
+@Html.Raw(subAktivitasSfadNewBlList.ApakahAdaROB.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasSfadNewBlList.ApakahAdaROB.Visible (end) *@
+    @if (subAktivitasSfadNewBlList.Import.Visible) { // subAktivitasSfadNewBlList.Import.Visible (begin)
+        <td data-name="Import" @Html.Raw(subAktivitasSfadNewBlList.Import.CellAttributes)>
+<span id="el@(subAktivitasSfadNewBlList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasSfadNewBlList.RowCount)_SubAktivitasSFADNewBL_Import" class="el_SubAktivitasSFADNewBL_Import">
+<span @Html.Raw(subAktivitasSfadNewBlList.Import.ViewAttributes)>
+<i class="fa-regular @(ConvertToBool(subAktivitasSfadNewBlList.Import.CurrentValue) ? "fa-square-check" : "fa-square") ew-icon ew-boolean"></i>
+</span>
+</span>
+</td>
+    } @* subAktivitasSfadNewBlList.Import.Visible (end) *@
+    @if (subAktivitasSfadNewBlList.ApakahTerdapatROB.Visible) { // subAktivitasSfadNewBlList.ApakahTerdapatROB.Visible (begin)
+        <td data-name="ApakahTerdapatROB" @Html.Raw(subAktivitasSfadNewBlList.ApakahTerdapatROB.CellAttributes)>
+<span id="el@(subAktivitasSfadNewBlList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasSfadNewBlList.RowCount)_SubAktivitasSFADNewBL_ApakahTerdapatROB" class="el_SubAktivitasSFADNewBL_ApakahTerdapatROB">
+<span @Html.Raw(subAktivitasSfadNewBlList.ApakahTerdapatROB.ViewAttributes)>
+<i class="fa-regular @(ConvertToBool(subAktivitasSfadNewBlList.ApakahTerdapatROB.CurrentValue) ? "fa-square-check" : "fa-square") ew-icon ew-boolean"></i>
+</span>
+</span>
+</td>
+    } @* subAktivitasSfadNewBlList.ApakahTerdapatROB.Visible (end) *@
+    @if (subAktivitasSfadNewBlList.Tujuan.Visible) { // subAktivitasSfadNewBlList.Tujuan.Visible (begin)
+        <td data-name="Tujuan" @Html.Raw(subAktivitasSfadNewBlList.Tujuan.CellAttributes)>
+<span id="el@(subAktivitasSfadNewBlList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasSfadNewBlList.RowCount)_SubAktivitasSFADNewBL_Tujuan" class="el_SubAktivitasSFADNewBL_Tujuan">
+<span @Html.Raw(subAktivitasSfadNewBlList.Tujuan.ViewAttributes)>
+@Html.Raw(subAktivitasSfadNewBlList.Tujuan.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasSfadNewBlList.Tujuan.Visible (end) *@
+    @if (subAktivitasSfadNewBlList.SFAD_klobs.Visible) { // subAktivitasSfadNewBlList.SFAD_klobs.Visible (begin)
+        <td data-name="SFAD_klobs" @Html.Raw(subAktivitasSfadNewBlList.SFAD_klobs.CellAttributes)>
+<span id="el@(subAktivitasSfadNewBlList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasSfadNewBlList.RowCount)_SubAktivitasSFADNewBL_SFAD_klobs" class="el_SubAktivitasSFADNewBL_SFAD_klobs">
+<span @Html.Raw(subAktivitasSfadNewBlList.SFAD_klobs.ViewAttributes)>
+@Html.Raw(subAktivitasSfadNewBlList.SFAD_klobs.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasSfadNewBlList.SFAD_klobs.Visible (end) *@
+    @if (subAktivitasSfadNewBlList.SFAD_kl15.Visible) { // subAktivitasSfadNewBlList.SFAD_kl15.Visible (begin)
+        <td data-name="SFAD_kl15" @Html.Raw(subAktivitasSfadNewBlList.SFAD_kl15.CellAttributes)>
+<span id="el@(subAktivitasSfadNewBlList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasSfadNewBlList.RowCount)_SubAktivitasSFADNewBL_SFAD_kl15" class="el_SubAktivitasSFADNewBL_SFAD_kl15">
+<span @Html.Raw(subAktivitasSfadNewBlList.SFAD_kl15.ViewAttributes)>
+@Html.Raw(subAktivitasSfadNewBlList.SFAD_kl15.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasSfadNewBlList.SFAD_kl15.Visible (end) *@
+    @if (subAktivitasSfadNewBlList.SFAD_barrels.Visible) { // subAktivitasSfadNewBlList.SFAD_barrels.Visible (begin)
+        <td data-name="SFAD_barrels" @Html.Raw(subAktivitasSfadNewBlList.SFAD_barrels.CellAttributes)>
+<span id="el@(subAktivitasSfadNewBlList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasSfadNewBlList.RowCount)_SubAktivitasSFADNewBL_SFAD_barrels" class="el_SubAktivitasSFADNewBL_SFAD_barrels">
+<span @Html.Raw(subAktivitasSfadNewBlList.SFAD_barrels.ViewAttributes)>
+@Html.Raw(subAktivitasSfadNewBlList.SFAD_barrels.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasSfadNewBlList.SFAD_barrels.Visible (end) *@
+    @if (subAktivitasSfadNewBlList.SFAD_lt.Visible) { // subAktivitasSfadNewBlList.SFAD_lt.Visible (begin)
+        <td data-name="SFAD_lt" @Html.Raw(subAktivitasSfadNewBlList.SFAD_lt.CellAttributes)>
+<span id="el@(subAktivitasSfadNewBlList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasSfadNewBlList.RowCount)_SubAktivitasSFADNewBL_SFAD_lt" class="el_SubAktivitasSFADNewBL_SFAD_lt">
+<span @Html.Raw(subAktivitasSfadNewBlList.SFAD_lt.ViewAttributes)>
+@Html.Raw(subAktivitasSfadNewBlList.SFAD_lt.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasSfadNewBlList.SFAD_lt.Visible (end) *@
+    @if (subAktivitasSfadNewBlList.SFAD_mt.Visible) { // subAktivitasSfadNewBlList.SFAD_mt.Visible (begin)
+        <td data-name="SFAD_mt" @Html.Raw(subAktivitasSfadNewBlList.SFAD_mt.CellAttributes)>
+<span id="el@(subAktivitasSfadNewBlList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasSfadNewBlList.RowCount)_SubAktivitasSFADNewBL_SFAD_mt" class="el_SubAktivitasSFADNewBL_SFAD_mt">
+<span @Html.Raw(subAktivitasSfadNewBlList.SFAD_mt.ViewAttributes)>
+@Html.Raw(subAktivitasSfadNewBlList.SFAD_mt.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasSfadNewBlList.SFAD_mt.Visible (end) *@
+    @if (subAktivitasSfadNewBlList.NewBl_klobs.Visible) { // subAktivitasSfadNewBlList.NewBl_klobs.Visible (begin)
+        <td data-name="NewBl_klobs" @Html.Raw(subAktivitasSfadNewBlList.NewBl_klobs.CellAttributes)>
+<span id="el@(subAktivitasSfadNewBlList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasSfadNewBlList.RowCount)_SubAktivitasSFADNewBL_NewBl_klobs" class="el_SubAktivitasSFADNewBL_NewBl_klobs">
+<span @Html.Raw(subAktivitasSfadNewBlList.NewBl_klobs.ViewAttributes)>
+@Html.Raw(subAktivitasSfadNewBlList.NewBl_klobs.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasSfadNewBlList.NewBl_klobs.Visible (end) *@
+    @if (subAktivitasSfadNewBlList.NewBl_kl15.Visible) { // subAktivitasSfadNewBlList.NewBl_kl15.Visible (begin)
+        <td data-name="NewBl_kl15" @Html.Raw(subAktivitasSfadNewBlList.NewBl_kl15.CellAttributes)>
+<span id="el@(subAktivitasSfadNewBlList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasSfadNewBlList.RowCount)_SubAktivitasSFADNewBL_NewBl_kl15" class="el_SubAktivitasSFADNewBL_NewBl_kl15">
+<span @Html.Raw(subAktivitasSfadNewBlList.NewBl_kl15.ViewAttributes)>
+@Html.Raw(subAktivitasSfadNewBlList.NewBl_kl15.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasSfadNewBlList.NewBl_kl15.Visible (end) *@
+    @if (subAktivitasSfadNewBlList.NewBl_barrels.Visible) { // subAktivitasSfadNewBlList.NewBl_barrels.Visible (begin)
+        <td data-name="NewBl_barrels" @Html.Raw(subAktivitasSfadNewBlList.NewBl_barrels.CellAttributes)>
+<span id="el@(subAktivitasSfadNewBlList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasSfadNewBlList.RowCount)_SubAktivitasSFADNewBL_NewBl_barrels" class="el_SubAktivitasSFADNewBL_NewBl_barrels">
+<span @Html.Raw(subAktivitasSfadNewBlList.NewBl_barrels.ViewAttributes)>
+@Html.Raw(subAktivitasSfadNewBlList.NewBl_barrels.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasSfadNewBlList.NewBl_barrels.Visible (end) *@
+    @if (subAktivitasSfadNewBlList.NewBl_lt.Visible) { // subAktivitasSfadNewBlList.NewBl_lt.Visible (begin)
+        <td data-name="NewBl_lt" @Html.Raw(subAktivitasSfadNewBlList.NewBl_lt.CellAttributes)>
+<span id="el@(subAktivitasSfadNewBlList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasSfadNewBlList.RowCount)_SubAktivitasSFADNewBL_NewBl_lt" class="el_SubAktivitasSFADNewBL_NewBl_lt">
+<span @Html.Raw(subAktivitasSfadNewBlList.NewBl_lt.ViewAttributes)>
+@Html.Raw(subAktivitasSfadNewBlList.NewBl_lt.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasSfadNewBlList.NewBl_lt.Visible (end) *@
+    @if (subAktivitasSfadNewBlList.NewBl_mt.Visible) { // subAktivitasSfadNewBlList.NewBl_mt.Visible (begin)
+        <td data-name="NewBl_mt" @Html.Raw(subAktivitasSfadNewBlList.NewBl_mt.CellAttributes)>
+<span id="el@(subAktivitasSfadNewBlList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasSfadNewBlList.RowCount)_SubAktivitasSFADNewBL_NewBl_mt" class="el_SubAktivitasSFADNewBL_NewBl_mt">
+<span @Html.Raw(subAktivitasSfadNewBlList.NewBl_mt.ViewAttributes)>
+@Html.Raw(subAktivitasSfadNewBlList.NewBl_mt.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasSfadNewBlList.NewBl_mt.Visible (end) *@
+    @if (subAktivitasSfadNewBlList.AR45B_klobs.Visible) { // subAktivitasSfadNewBlList.AR45B_klobs.Visible (begin)
+        <td data-name="AR45B_klobs" @Html.Raw(subAktivitasSfadNewBlList.AR45B_klobs.CellAttributes)>
+<span id="el@(subAktivitasSfadNewBlList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasSfadNewBlList.RowCount)_SubAktivitasSFADNewBL_AR45B_klobs" class="el_SubAktivitasSFADNewBL_AR45B_klobs">
+<span @Html.Raw(subAktivitasSfadNewBlList.AR45B_klobs.ViewAttributes)>
+@Html.Raw(subAktivitasSfadNewBlList.AR45B_klobs.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasSfadNewBlList.AR45B_klobs.Visible (end) *@
+    @if (subAktivitasSfadNewBlList.AR45B_kl15.Visible) { // subAktivitasSfadNewBlList.AR45B_kl15.Visible (begin)
+        <td data-name="AR45B_kl15" @Html.Raw(subAktivitasSfadNewBlList.AR45B_kl15.CellAttributes)>
+<span id="el@(subAktivitasSfadNewBlList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasSfadNewBlList.RowCount)_SubAktivitasSFADNewBL_AR45B_kl15" class="el_SubAktivitasSFADNewBL_AR45B_kl15">
+<span @Html.Raw(subAktivitasSfadNewBlList.AR45B_kl15.ViewAttributes)>
+@Html.Raw(subAktivitasSfadNewBlList.AR45B_kl15.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasSfadNewBlList.AR45B_kl15.Visible (end) *@
+    @if (subAktivitasSfadNewBlList.AR45B_barrels.Visible) { // subAktivitasSfadNewBlList.AR45B_barrels.Visible (begin)
+        <td data-name="AR45B_barrels" @Html.Raw(subAktivitasSfadNewBlList.AR45B_barrels.CellAttributes)>
+<span id="el@(subAktivitasSfadNewBlList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasSfadNewBlList.RowCount)_SubAktivitasSFADNewBL_AR45B_barrels" class="el_SubAktivitasSFADNewBL_AR45B_barrels">
+<span @Html.Raw(subAktivitasSfadNewBlList.AR45B_barrels.ViewAttributes)>
+@Html.Raw(subAktivitasSfadNewBlList.AR45B_barrels.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasSfadNewBlList.AR45B_barrels.Visible (end) *@
+    @if (subAktivitasSfadNewBlList.AR45B_lt.Visible) { // subAktivitasSfadNewBlList.AR45B_lt.Visible (begin)
+        <td data-name="AR45B_lt" @Html.Raw(subAktivitasSfadNewBlList.AR45B_lt.CellAttributes)>
+<span id="el@(subAktivitasSfadNewBlList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasSfadNewBlList.RowCount)_SubAktivitasSFADNewBL_AR45B_lt" class="el_SubAktivitasSFADNewBL_AR45B_lt">
+<span @Html.Raw(subAktivitasSfadNewBlList.AR45B_lt.ViewAttributes)>
+@Html.Raw(subAktivitasSfadNewBlList.AR45B_lt.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasSfadNewBlList.AR45B_lt.Visible (end) *@
+    @if (subAktivitasSfadNewBlList.AR45B_mt.Visible) { // subAktivitasSfadNewBlList.AR45B_mt.Visible (begin)
+        <td data-name="AR45B_mt" @Html.Raw(subAktivitasSfadNewBlList.AR45B_mt.CellAttributes)>
+<span id="el@(subAktivitasSfadNewBlList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasSfadNewBlList.RowCount)_SubAktivitasSFADNewBL_AR45B_mt" class="el_SubAktivitasSFADNewBL_AR45B_mt">
+<span @Html.Raw(subAktivitasSfadNewBlList.AR45B_mt.ViewAttributes)>
+@Html.Raw(subAktivitasSfadNewBlList.AR45B_mt.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasSfadNewBlList.AR45B_mt.Visible (end) *@
+    @* Render list options (body, right) *@
+    @subAktivitasSfadNewBlList.ListOptions.RenderBody("right", subAktivitasSfadNewBlList.RowCount)
+    </tr>
+    } @* End if *@
+
+    // Reset for template row
+    if (SameString(subAktivitasSfadNewBlList.RowIndex, "$rowindex$"))
+        subAktivitasSfadNewBlList.RowIndex = 0;
+
+    // Reset inline add/copy row
+    if ((subAktivitasSfadNewBlList.IsCopy || subAktivitasSfadNewBlList.IsAdd) && subAktivitasSfadNewBlList.RowIndex is int rowIndex2 && rowIndex2 == 0)
+        subAktivitasSfadNewBlList.RowIndex = 1;
+} @* End While *@
+</tbody>
+</table><!-- /.ew-table -->
+} @* End If TotalRecords > 0 *@
+</div><!-- /.ew-grid-middle-panel -->
+@if (Empty(subAktivitasSfadNewBlList.CurrentAction) && !subAktivitasSfadNewBlList.UseAjaxActions) {
+<input type="hidden" name="action" id="action" value="">
+}
+</form><!-- /.ew-list-form -->
+@{ subAktivitasSfadNewBlList.CloseRecordset(); }
+@if (!subAktivitasSfadNewBlList.IsExport()) {
+<div class="card-footer ew-grid-lower-panel">
+@if (!subAktivitasSfadNewBlList.IsGridAdd && !(subAktivitasSfadNewBlList.IsGridEdit && subAktivitasSfadNewBlList.ModalGridEdit) && !subAktivitasSfadNewBlList.IsMultiEdit) {
+@Html.Raw(subAktivitasSfadNewBlList.Pager.Render())
+}
+<div class="ew-list-other-options">
+@subAktivitasSfadNewBlList.OtherOptions.RenderBody("bottom")
+</div>
+</div>
+}
+</div><!-- /.ew-grid -->
+} else { // Show other options
+<div class="ew-list-other-options">
+@subAktivitasSfadNewBlList.OtherOptions.ForEach(opt => opt.ButtonClass = "").RenderBody()
+</div>
+}
+</div>
+<div id="ew-footer-options">
+    @subAktivitasSfadNewBlList.FooterOptions.RenderBody()
+</div>
+</main>
+@subAktivitasSfadNewBlList.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+@if (!subAktivitasSfadNewBlList.IsExport()) {
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("SubAktivitasSFADNewBL");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Write your table-specific startup script here
+    // document.write("page loaded");
+});
+</script>
+}

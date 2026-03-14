@@ -1,0 +1,119 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (masterPicDelete.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = masterPicDelete.UseLayout ? "_Layout" : "";
+}
+<script>
+var currentTable = @Html.Raw(ConvertToJson(masterPicDelete.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { MasterPIC: currentTable } });
+var currentPageID = ew.PAGE_ID = "delete";
+var currentForm;
+var fMasterPICdelete;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("fMasterPICdelete")
+        .setPageId("delete")
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Client script
+    $('#fMasterPICdelete').on('submit', function (e) {
+        e.preventDefault();
+        showLoading();
+        setTimeout(() => {
+            hideLoading();
+        }, 3000);
+        this.requestSubmit();
+    });
+});
+</script>
+@masterPicDelete.ShowPageHeader()
+@masterPicDelete.ShowMessages()
+<form name="fMasterPICdelete" id="fMasterPICdelete" class="ew-form ew-delete-form" action="@AppPath(CurrentPageName())" method="post" novalidate autocomplete="off">
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+<input type="hidden" name="action" id="action" value="delete">
+@foreach (string key in masterPicDelete.RecordKeys) {
+<input type="hidden" name="key_m[]" value="@key">
+}
+<div class="card ew-card ew-grid @(masterPicDelete.TableGridClass)">
+<div class="card-body ew-grid-middle-panel @(masterPicDelete.TableContainerClass)" style="@(masterPicDelete.TableContainerStyle)">
+<table class="@(masterPicDelete.TableClass)">
+    <thead>
+    <tr class="ew-table-header">
+@if (masterPicDelete.IdPIC.Visible) { // masterPicDelete.IdPIC.Visible (begin)
+        <th class="@Html.Raw(masterPicDelete.IdPIC.HeaderCellClass)"><span id="elh_MasterPIC_IdPIC" class="MasterPIC_IdPIC">@Html.Raw(masterPicDelete.IdPIC.Caption)</span></th>
+} @* masterPicDelete.IdPIC.Visible (end) *@
+@if (masterPicDelete.NamaPIC.Visible) { // masterPicDelete.NamaPIC.Visible (begin)
+        <th class="@Html.Raw(masterPicDelete.NamaPIC.HeaderCellClass)"><span id="elh_MasterPIC_NamaPIC" class="MasterPIC_NamaPIC">@Html.Raw(masterPicDelete.NamaPIC.Caption)</span></th>
+} @* masterPicDelete.NamaPIC.Visible (end) *@
+    </tr>
+    </thead>
+    <tbody>
+@{ masterPicDelete.RecordCount = 0; }
+@while (masterPicDelete.Recordset != null && await masterPicDelete.Recordset.ReadAsync()) { // DN
+    masterPicDelete.RecordCount++;
+    masterPicDelete.RowCount++;
+
+    // Set row properties
+    masterPicDelete.ResetAttributes();
+    masterPicDelete.RowType = RowType.View; // View
+
+    // Get the field contents
+    await masterPicDelete.LoadRowValues(masterPicDelete.Recordset);
+
+    // Render row
+    await masterPicDelete.RenderRow();
+    <tr @Html.Raw(masterPicDelete.RowAttributes)>
+@if (masterPicDelete.IdPIC.Visible) { // masterPicDelete.IdPIC.Visible (begin)
+        <td @Html.Raw(masterPicDelete.IdPIC.CellAttributes)>
+<span id="">
+<span @Html.Raw(masterPicDelete.IdPIC.ViewAttributes)>
+@Html.Raw(masterPicDelete.IdPIC.GetViewValue())</span>
+</span></td>
+} @* masterPicDelete.IdPIC.Visible (end) *@
+@if (masterPicDelete.NamaPIC.Visible) { // masterPicDelete.NamaPIC.Visible (begin)
+        <td @Html.Raw(masterPicDelete.NamaPIC.CellAttributes)>
+<span id="">
+<span @Html.Raw(masterPicDelete.NamaPIC.ViewAttributes)>
+@Html.Raw(masterPicDelete.NamaPIC.GetViewValue())</span>
+</span></td>
+} @* masterPicDelete.NamaPIC.Visible (end) *@
+    </tr>
+}
+@{ masterPicDelete.CloseRecordset(); }
+</tbody>
+</table>
+</div>
+</div>
+<div class="ew-buttons ew-desktop-buttons">
+<button class="btn btn-primary ew-btn" name="btn-action" id="btn-action" type="submit">@Html.Raw(Language.Phrase("DeleteBtn"))</button>
+<button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" data-href="@AppPath(masterPicDelete.ReturnUrl)">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+</div>
+</form>
+@masterPicDelete.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+<script>
+loadjs.ready("load", function() {
+    // Write your table-specific startup script here
+    // document.write("page loaded");
+});
+</script>

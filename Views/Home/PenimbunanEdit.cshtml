@@ -1,0 +1,193 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (penimbunanEdit.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = penimbunanEdit.UseLayout ? "_Layout" : "";
+}
+@penimbunanEdit.ShowPageHeader()
+@penimbunanEdit.ShowMessages()
+<main class="edit">
+<form name="fPenimbunanedit" id="fPenimbunanedit" class="@(penimbunanEdit.FormClassName)" action="@AppPath(CurrentPageName())" method="post" novalidate autocomplete="off">
+<script>
+var currentTable = @Html.Raw(ConvertToJson(penimbunanEdit.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { Penimbunan: currentTable } });
+var currentPageID = ew.PAGE_ID = "edit";
+var currentForm;
+var fPenimbunanedit;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("fPenimbunanedit")
+        .setPageId("edit")
+
+        // Add fields
+        .setFields([
+
+            ["NomorPenimbunan", [fields.NomorPenimbunan.visible && fields.NomorPenimbunan.required ? ew.Validators.required(fields.NomorPenimbunan.caption) : null], fields.NomorPenimbunan.isInvalid],
+            ["IdTemplate", [fields.IdTemplate.visible && fields.IdTemplate.required ? ew.Validators.required(fields.IdTemplate.caption) : null], fields.IdTemplate.isInvalid],
+            ["Plant", [fields.Plant.visible && fields.Plant.required ? ew.Validators.required(fields.Plant.caption) : null], fields.Plant.isInvalid],
+            ["IdPenerimaan", [fields.IdPenerimaan.visible && fields.IdPenerimaan.required ? ew.Validators.required(fields.IdPenerimaan.caption) : null], fields.IdPenerimaan.isInvalid],
+            ["IdTangki", [fields.IdTangki.visible && fields.IdTangki.required ? ew.Validators.required(fields.IdTangki.caption) : null], fields.IdTangki.isInvalid],
+            ["Catatan", [fields.Catatan.visible && fields.Catatan.required ? ew.Validators.required(fields.Catatan.caption) : null], fields.Catatan.isInvalid],
+            ["PlantForLookup", [fields.PlantForLookup.visible && fields.PlantForLookup.required ? ew.Validators.required(fields.PlantForLookup.caption) : null], fields.PlantForLookup.isInvalid],
+            ["LookupJenisPlant", [fields.LookupJenisPlant.visible && fields.LookupJenisPlant.required ? ew.Validators.required(fields.LookupJenisPlant.caption) : null], fields.LookupJenisPlant.isInvalid]
+        ])
+
+        // Form_CustomValidate
+        .setCustomValidate(
+            function(fobj) { // DO NOT CHANGE THIS LINE!
+                    // Your custom validation code here, return false if invalid.
+                    return true;
+                }
+        )
+
+        // Use JavaScript validation or not
+        .setValidateRequired(ew.CLIENT_VALIDATE)
+
+        // Dynamic selection lists
+        .setLists({
+        })
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Client script
+    $('#fPenimbunanedit').on('submit', function (e) {
+        e.preventDefault();
+        showLoading();
+        setTimeout(() => {
+            hideLoading();
+        }, 3000);
+        this.requestSubmit();
+    });
+});
+</script>
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+<input type="hidden" name="action" id="action" value="update">
+<input type="hidden" name="modal" value="@ConvertToInt(penimbunanEdit.IsModal)">
+@if (IsJsonResponse()) {
+<input type="hidden" name="json" value="1">
+}
+<input type="hidden" name="@(penimbunanEdit.OldKeyName)" value="@Html.Raw(penimbunanEdit.OldKey)">
+<div class="ew-edit-div"><!-- page* -->
+@if (penimbunanEdit.NomorPenimbunan.Visible) { // penimbunanEdit.NomorPenimbunan.Visible (begin)
+    <div id="r_NomorPenimbunan" @Html.Raw(penimbunanEdit.NomorPenimbunan.RowAttributes)>
+        <label id="elh_Penimbunan_NomorPenimbunan" for="x_NomorPenimbunan" class="@(penimbunanEdit.LeftColumnClass)">@Html.Raw(penimbunanEdit.NomorPenimbunan.Caption)@Html.Raw(penimbunanEdit.NomorPenimbunan.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(penimbunanEdit.RightColumnClass)"><div @Html.Raw(penimbunanEdit.NomorPenimbunan.CellAttributes)>
+<span id="el_Penimbunan_NomorPenimbunan">
+<span @Html.Raw(penimbunanEdit.NomorPenimbunan.ViewAttributes)>
+<input type="text" readonly class="form-control-plaintext" value="@Html.Raw(RemoveHtml(ConvertToString(penimbunanEdit.NomorPenimbunan.EditValue)))"></span>
+<input type="hidden" data-table="Penimbunan" data-field="x_NomorPenimbunan" data-hidden="1" name="x_NomorPenimbunan" id="x_NomorPenimbunan" value="@Html.Raw(HtmlEncode(penimbunanEdit.NomorPenimbunan.CurrentValue))">
+</span>
+</div></div>
+    </div>
+} @* penimbunanEdit.NomorPenimbunan.Visible (end) *@
+@if (penimbunanEdit.Plant.Visible) { // penimbunanEdit.Plant.Visible (begin)
+    <div id="r_Plant" @Html.Raw(penimbunanEdit.Plant.RowAttributes)>
+        <label id="elh_Penimbunan_Plant" class="@(penimbunanEdit.LeftColumnClass)">@Html.Raw(penimbunanEdit.Plant.Caption)@Html.Raw(penimbunanEdit.Plant.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(penimbunanEdit.RightColumnClass)"><div @Html.Raw(penimbunanEdit.Plant.CellAttributes)>
+<span id="el_Penimbunan_Plant">
+<span @Html.Raw(penimbunanEdit.Plant.ViewAttributes)>
+<span class="form-control-plaintext">@Html.Raw(penimbunanEdit.Plant.DisplayValue(penimbunanEdit.Plant.EditValue))</span></span>
+<input type="hidden" data-table="Penimbunan" data-field="x_Plant" data-hidden="1" name="x_Plant" id="x_Plant" value="@Html.Raw(HtmlEncode(penimbunanEdit.Plant.CurrentValue))">
+</span>
+</div></div>
+    </div>
+} @* penimbunanEdit.Plant.Visible (end) *@
+@if (penimbunanEdit.IdPenerimaan.Visible) { // penimbunanEdit.IdPenerimaan.Visible (begin)
+    <div id="r_IdPenerimaan" @Html.Raw(penimbunanEdit.IdPenerimaan.RowAttributes)>
+        <label id="elh_Penimbunan_IdPenerimaan" for="x_IdPenerimaan" class="@(penimbunanEdit.LeftColumnClass)">@Html.Raw(penimbunanEdit.IdPenerimaan.Caption)@Html.Raw(penimbunanEdit.IdPenerimaan.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(penimbunanEdit.RightColumnClass)"><div @Html.Raw(penimbunanEdit.IdPenerimaan.CellAttributes)>
+<span id="el_Penimbunan_IdPenerimaan">
+<span @Html.Raw(penimbunanEdit.IdPenerimaan.ViewAttributes)>
+<input type="text" readonly class="form-control-plaintext" value="@Html.Raw(RemoveHtml(ConvertToString(penimbunanEdit.IdPenerimaan.EditValue)))"></span>
+<input type="hidden" data-table="Penimbunan" data-field="x_IdPenerimaan" data-hidden="1" name="x_IdPenerimaan" id="x_IdPenerimaan" value="@Html.Raw(HtmlEncode(penimbunanEdit.IdPenerimaan.CurrentValue))">
+</span>
+</div></div>
+    </div>
+} @* penimbunanEdit.IdPenerimaan.Visible (end) *@
+@if (penimbunanEdit.IdTangki.Visible) { // penimbunanEdit.IdTangki.Visible (begin)
+    <div id="r_IdTangki" @Html.Raw(penimbunanEdit.IdTangki.RowAttributes)>
+        <label id="elh_Penimbunan_IdTangki" for="x_IdTangki" class="@(penimbunanEdit.LeftColumnClass)">@Html.Raw(penimbunanEdit.IdTangki.Caption)@Html.Raw(penimbunanEdit.IdTangki.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(penimbunanEdit.RightColumnClass)"><div @Html.Raw(penimbunanEdit.IdTangki.CellAttributes)>
+<span id="el_Penimbunan_IdTangki">
+<span @Html.Raw(penimbunanEdit.IdTangki.ViewAttributes)>
+<span class="form-control-plaintext">@Html.Raw(penimbunanEdit.IdTangki.DisplayValue(penimbunanEdit.IdTangki.EditValue))</span></span>
+<input type="hidden" data-table="Penimbunan" data-field="x_IdTangki" data-hidden="1" name="x_IdTangki" id="x_IdTangki" value="@Html.Raw(HtmlEncode(penimbunanEdit.IdTangki.CurrentValue))">
+</span>
+</div></div>
+    </div>
+} @* penimbunanEdit.IdTangki.Visible (end) *@
+@if (penimbunanEdit.Catatan.Visible) { // penimbunanEdit.Catatan.Visible (begin)
+    <div id="r_Catatan" @Html.Raw(penimbunanEdit.Catatan.RowAttributes)>
+        <label id="elh_Penimbunan_Catatan" for="x_Catatan" class="@(penimbunanEdit.LeftColumnClass)">@Html.Raw(penimbunanEdit.Catatan.Caption)@Html.Raw(penimbunanEdit.Catatan.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(penimbunanEdit.RightColumnClass)"><div @Html.Raw(penimbunanEdit.Catatan.CellAttributes)>
+<span id="el_Penimbunan_Catatan">
+<textarea data-table="Penimbunan" data-field="x_Catatan" name="x_Catatan" id="x_Catatan" cols="35" rows="4" placeholder="@Html.Raw(HtmlEncode(penimbunanEdit.Catatan.PlaceHolder))"@Html.Raw(penimbunanEdit.Catatan.EditAttributes) aria-describedby="x_Catatan_help">@(penimbunanEdit.Catatan.EditValue)</textarea>
+@Html.Raw(penimbunanEdit.Catatan.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(penimbunanEdit.Catatan.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* penimbunanEdit.Catatan.Visible (end) *@
+</div><!-- /page* -->
+<span id="el_Penimbunan_IdTemplate">
+<input type="hidden" data-table="Penimbunan" data-field="x_IdTemplate" data-hidden="1" name="x_IdTemplate" id="x_IdTemplate" value="@Html.Raw(HtmlEncode(penimbunanEdit.IdTemplate.CurrentValue))">
+</span>
+<span id="el_Penimbunan_PlantForLookup">
+<input type="hidden" data-table="Penimbunan" data-field="x_PlantForLookup" data-hidden="1" name="x_PlantForLookup" id="x_PlantForLookup" value="@Html.Raw(HtmlEncode(penimbunanEdit.PlantForLookup.CurrentValue))">
+</span>
+<span id="el_Penimbunan_LookupJenisPlant">
+<input type="hidden" data-table="Penimbunan" data-field="x_LookupJenisPlant" data-hidden="1" name="x_LookupJenisPlant" id="x_LookupJenisPlant" value="@Html.Raw(HtmlEncode(penimbunanEdit.LookupJenisPlant.CurrentValue))">
+</span>
+    <input type="hidden" data-table="Penimbunan" data-field="x_IdPenimbunan" data-hidden="1" name="x_IdPenimbunan" id="x_IdPenimbunan" value="@Html.Raw(HtmlEncode(penimbunanEdit.IdPenimbunan.CurrentValue))">
+@{ penimbunanEdit.CloseRecordset(); }
+@Html.Raw(penimbunanEdit.IsModal ? "<template class=\"ew-modal-buttons\">" : "<div class=\"row ew-buttons\">")<!-- buttons .row -->
+    <div class="@(penimbunanEdit.OffsetColumnClass)"><!-- buttons offset -->
+    <button class="btn btn-primary ew-btn" name="btn-action" id="btn-action" type="submit" form="fPenimbunanedit">@Html.Raw(Language.Phrase("SaveBtn"))</button>
+@if (IsJsonResponse()) {
+    <button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" data-bs-dismiss="modal">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+} else {
+    <button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" form="fPenimbunanedit" data-href="@AppPath(penimbunanEdit.ReturnUrl)">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+}
+    </div><!-- /buttons offset -->
+@Html.Raw(penimbunanEdit.IsModal ? "</template>" : "</div>")<!-- /buttons .row -->
+</form>
+</main>
+@penimbunanEdit.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("Penimbunan");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Startup script
+    $('#r_PlantForLookup').hide();
+    $('#r_NomorPenimbunan').hide();
+    $('#r_LookupJenisPlant').hide();
+    if ($('#x_TipeProdukSTS') != '') {
+        $('#r_TipeProdukSTS').show();
+    } else {
+        $('#r_TipeProdukSTS').hide();
+    }
+});
+</script>

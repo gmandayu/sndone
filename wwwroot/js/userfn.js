@@ -1,0 +1,1 @@
+window.showLoading=function(){$("#loading-spinner").css("display","flex");$("#loading-spinner").fadeIn()};window.hideLoading=function(){$("#loading-spinner").css("display","none");$("#loading-spinner").fadeOut()};

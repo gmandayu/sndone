@@ -1,0 +1,119 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (masterDokumenDelete.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = masterDokumenDelete.UseLayout ? "_Layout" : "";
+}
+<script>
+var currentTable = @Html.Raw(ConvertToJson(masterDokumenDelete.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { MasterDokumen: currentTable } });
+var currentPageID = ew.PAGE_ID = "delete";
+var currentForm;
+var fMasterDokumendelete;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("fMasterDokumendelete")
+        .setPageId("delete")
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Client script
+    $('#fMasterDokumendelete').on('submit', function (e) {
+        e.preventDefault();
+        showLoading();
+        setTimeout(() => {
+            hideLoading();
+        }, 3000);
+        this.requestSubmit();
+    });
+});
+</script>
+@masterDokumenDelete.ShowPageHeader()
+@masterDokumenDelete.ShowMessages()
+<form name="fMasterDokumendelete" id="fMasterDokumendelete" class="ew-form ew-delete-form" action="@AppPath(CurrentPageName())" method="post" novalidate autocomplete="off">
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+<input type="hidden" name="action" id="action" value="delete">
+@foreach (string key in masterDokumenDelete.RecordKeys) {
+<input type="hidden" name="key_m[]" value="@key">
+}
+<div class="card ew-card ew-grid @(masterDokumenDelete.TableGridClass)">
+<div class="card-body ew-grid-middle-panel @(masterDokumenDelete.TableContainerClass)" style="@(masterDokumenDelete.TableContainerStyle)">
+<table class="@(masterDokumenDelete.TableClass)">
+    <thead>
+    <tr class="ew-table-header">
+@if (masterDokumenDelete.IdDokumen.Visible) { // masterDokumenDelete.IdDokumen.Visible (begin)
+        <th class="@Html.Raw(masterDokumenDelete.IdDokumen.HeaderCellClass)"><span id="elh_MasterDokumen_IdDokumen" class="MasterDokumen_IdDokumen">@Html.Raw(masterDokumenDelete.IdDokumen.Caption)</span></th>
+} @* masterDokumenDelete.IdDokumen.Visible (end) *@
+@if (masterDokumenDelete.NamaDokumen.Visible) { // masterDokumenDelete.NamaDokumen.Visible (begin)
+        <th class="@Html.Raw(masterDokumenDelete.NamaDokumen.HeaderCellClass)"><span id="elh_MasterDokumen_NamaDokumen" class="MasterDokumen_NamaDokumen">@Html.Raw(masterDokumenDelete.NamaDokumen.Caption)</span></th>
+} @* masterDokumenDelete.NamaDokumen.Visible (end) *@
+    </tr>
+    </thead>
+    <tbody>
+@{ masterDokumenDelete.RecordCount = 0; }
+@while (masterDokumenDelete.Recordset != null && await masterDokumenDelete.Recordset.ReadAsync()) { // DN
+    masterDokumenDelete.RecordCount++;
+    masterDokumenDelete.RowCount++;
+
+    // Set row properties
+    masterDokumenDelete.ResetAttributes();
+    masterDokumenDelete.RowType = RowType.View; // View
+
+    // Get the field contents
+    await masterDokumenDelete.LoadRowValues(masterDokumenDelete.Recordset);
+
+    // Render row
+    await masterDokumenDelete.RenderRow();
+    <tr @Html.Raw(masterDokumenDelete.RowAttributes)>
+@if (masterDokumenDelete.IdDokumen.Visible) { // masterDokumenDelete.IdDokumen.Visible (begin)
+        <td @Html.Raw(masterDokumenDelete.IdDokumen.CellAttributes)>
+<span id="">
+<span @Html.Raw(masterDokumenDelete.IdDokumen.ViewAttributes)>
+@Html.Raw(masterDokumenDelete.IdDokumen.GetViewValue())</span>
+</span></td>
+} @* masterDokumenDelete.IdDokumen.Visible (end) *@
+@if (masterDokumenDelete.NamaDokumen.Visible) { // masterDokumenDelete.NamaDokumen.Visible (begin)
+        <td @Html.Raw(masterDokumenDelete.NamaDokumen.CellAttributes)>
+<span id="">
+<span @Html.Raw(masterDokumenDelete.NamaDokumen.ViewAttributes)>
+@Html.Raw(masterDokumenDelete.NamaDokumen.GetViewValue())</span>
+</span></td>
+} @* masterDokumenDelete.NamaDokumen.Visible (end) *@
+    </tr>
+}
+@{ masterDokumenDelete.CloseRecordset(); }
+</tbody>
+</table>
+</div>
+</div>
+<div class="ew-buttons ew-desktop-buttons">
+<button class="btn btn-primary ew-btn" name="btn-action" id="btn-action" type="submit">@Html.Raw(Language.Phrase("DeleteBtn"))</button>
+<button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" data-href="@AppPath(masterDokumenDelete.ReturnUrl)">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+</div>
+</form>
+@masterDokumenDelete.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+<script>
+loadjs.ready("load", function() {
+    // Write your table-specific startup script here
+    // document.write("page loaded");
+});
+</script>

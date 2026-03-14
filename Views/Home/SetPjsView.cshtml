@@ -1,0 +1,993 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (setPjsView.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = setPjsView.UseLayout ? "_Layout" : "";
+}
+@if (!setPjsView.IsExport()) {
+<div class="btn-toolbar ew-toolbar">
+    @setPjsView.ExportOptions.RenderBody()
+    @setPjsView.OtherOptions.RenderBody()
+</div>
+}
+@setPjsView.ShowPageHeader()
+@setPjsView.ShowMessages()
+<main class="view">
+<form name="fSetPjsview" id="fSetPjsview" class="ew-form ew-view-form overlay-wrapper" action="@AppPath(CurrentPageName())" method="post" novalidate autocomplete="off">
+@if (!setPjsView.IsExport()) {
+<script>
+var currentTable = @Html.Raw(ConvertToJson(setPjsView.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { SetPjs: currentTable } });
+var currentPageID = ew.PAGE_ID = "view";
+var currentForm;
+var fSetPjsview;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("fSetPjsview")
+        .setPageId("view")
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Client script
+    const parent_url = ew.PATH_BASE;
+    $(document).on('click', '.btn-download', function (e) {
+        e.preventDefault();
+        const id = $(this).data('id');
+        if (!id) {
+            ew.alert("ID dokumen tidak ditemukan.");
+            return;
+        }
+        $.ajax({
+            url: parent_url + 'api/LookUpList/DownloadSingleDocument',
+            type: 'GET',
+            data: { 
+                id: id,
+                menu: 'PJS'
+            },
+            xhrFields: {
+                responseType: 'blob'
+            },
+            beforeSend: function () {
+                showLoading();
+            },
+            success: function (response, status, xhr) {
+                const disposition = xhr.getResponseHeader('Content-Disposition');
+                let fileName = "download_file";
+                if (disposition) {
+                    const fileNameMatch = disposition.match(/filename="?([^";]+)"?/);
+                    if (fileNameMatch && fileNameMatch[1]) {
+                        fileName = decodeURIComponent(fileNameMatch[1]);
+                    }
+                    const utf8FileNameMatch = disposition.match(/filename\*\s*=\s*UTF-8''([^;]+)/);
+                    if (utf8FileNameMatch && utf8FileNameMatch[1]) {
+                        fileName = decodeURIComponent(utf8FileNameMatch[1]);
+                    }
+                }
+                const blobUrl = window.URL.createObjectURL(response);
+                const a = document.createElement('a');
+                a.href = blobUrl;
+                a.download = fileName;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(blobUrl);
+                ew.alert("Download berhasil!");
+            },
+            error: function (xhr, status, error) {
+                if (xhr.status === 404) {
+                    ew.alert("File tidak ditemukan di server.");
+                } else if (xhr.status === 500) {
+                    ew.alert("Terjadi kesalahan server. Coba lagi nanti.");
+                } else {
+                    ew.alert("Gagal mendownload file. Error: " + xhr.responseText);
+                }
+            },
+            complete: function () {
+                hideLoading();
+            }
+        });
+    });
+    $("#btn-back").on("click", function (e) {
+        window.location.href = `${parent_url}SetPjsList`;
+    });
+    $('#btn-approve').on('click', function () {
+        Swal.fire({
+            title: 'Approve PJS?',
+            text: 'Apakah anda yakin, ingin approve PJS ini?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Ya, Approve',
+            cancelButtonText: 'Batal',
+            confirmButtonColor: '#198754',
+            cancelButtonColor: '#6c757d'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                approval('Approved');
+            }
+        });
+    });
+    $('#btn-canceling').on('click', function () {
+        Swal.fire({
+            title: 'Cancel PJS?',
+            text: 'Data yang sudah di-cancel tidak bisa diubah.',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Ya, Cancel',
+            cancelButtonText: 'Batal',
+            confirmButtonColor: '#198754',
+            cancelButtonColor: '#6c757d'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                approval('Canceled');
+            }
+        });
+    });
+    $('#btn-reject').on('click', function () {
+        Swal.fire({
+            title: 'Reject PJS',
+            input: 'textarea',
+            inputLabel: 'Remarks',
+            inputPlaceholder: 'Tulis alasan reject di sini...',
+            inputAttributes: {
+                'aria-label': 'Alasan Reject'
+            },
+            showCancelButton: true,
+            confirmButtonText: 'Reject',
+            cancelButtonText: 'Batal',
+            confirmButtonColor: '#dc3545',
+            cancelButtonColor: '#6c757d',
+            inputValidator: (value) => {
+                if (!value) {
+                    return 'Alasan wajib diisi!';
+                }
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                approval('Rejected', result.value);
+            }
+        });
+    });
+    function approval(status, remarks = "") {
+        const Id = "@setPjsView.Id.CurrentValue";
+        const PosisiPJS = "@setPjsView.PosisiPJS.CurrentValue";
+        let formData = new FormData();
+        formData.append("Id", Id);
+        formData.append("PosisiPJS", PosisiPJS);
+        formData.append("ApprovalStatus", status);
+        formData.append("Remarks", remarks);
+        showLoading();
+        $.ajax({
+            url: parent_url + "api/LookUpList/ApprovalPjs",
+            type: "POST",
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(rs) {
+                hideLoading();
+                if (rs.success) {
+                    ew.alert(rs.message);
+                    setTimeout(function() {
+                        window.location.href = `${parent_url}SetPjsList`;
+                    }, 2000);
+                } else {
+                    ew.alert(rs.message);
+                }
+            },
+            error: function(xhr) {
+                hideLoading();
+                ew.alert("Error: " + xhr.responseText);
+            }
+        });
+    }
+    $(document).on('click', 'button[expand-log]', function () {
+        const $btn = $(this);
+        const isExpanded = $btn.attr('expand-log') === 'true';
+        const $row = $('#log-table-row');
+        const $wrapper = $('#log-table-wrapper');
+        const $caret = $btn.find('.caret-icon');
+        if (!isExpanded) {
+            $btn.attr('expand-log', 'true');
+            $row.removeClass('d-none');
+            setTimeout(() => {
+                $wrapper.css({
+                    maxHeight: '500px'
+                });
+            }, 10);
+            $caret.removeClass('rotate-right').addClass('rotate-down');
+        } else {
+            $btn.attr('expand-log', 'false');
+            $wrapper.css({
+                maxHeight: '0'
+            });
+            setTimeout(() => {
+                $row.addClass('d-none');
+            }, 600);
+            $caret.removeClass('rotate-down').addClass('rotate-right');
+        }
+    });
+});
+</script>
+}
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+<input type="hidden" name="modal" value="@ConvertToInt(setPjsView.IsModal)">
+<table class="@(setPjsView.TableClass)">
+@if (setPjsView.Id.Visible) { // setPjsView.Id.Visible (begin)
+    <tr id="r_Id" @Html.Raw(setPjsView.Id.RowAttributes)>
+        <td class="@(setPjsView.TableLeftColumnClass)"><span id="elh_SetPjs_Id"><template id="tpc_SetPjs_Id">@Html.Raw(setPjsView.Id.Caption)</template></span></td>
+        <td data-name="Id" @Html.Raw(setPjsView.Id.CellAttributes)>
+<template id="tpx_SetPjs_Id"><span id="el_SetPjs_Id">
+<span @Html.Raw(setPjsView.Id.ViewAttributes)>
+@Html.Raw(setPjsView.Id.GetViewValue())</span>
+</span></template></td>
+    </tr>
+} @* setPjsView.Id.Visible (end) *@
+@if (setPjsView.NomorPjs.Visible) { // setPjsView.NomorPjs.Visible (begin)
+    <tr id="r_NomorPjs" @Html.Raw(setPjsView.NomorPjs.RowAttributes)>
+        <td class="@(setPjsView.TableLeftColumnClass)"><span id="elh_SetPjs_NomorPjs"><template id="tpc_SetPjs_NomorPjs">@Html.Raw(setPjsView.NomorPjs.Caption)</template></span></td>
+        <td data-name="NomorPjs" @Html.Raw(setPjsView.NomorPjs.CellAttributes)>
+<template id="tpx_SetPjs_NomorPjs"><span id="el_SetPjs_NomorPjs">
+<span @Html.Raw(setPjsView.NomorPjs.ViewAttributes)>
+@Html.Raw(setPjsView.NomorPjs.GetViewValue())</span>
+</span></template></td>
+    </tr>
+} @* setPjsView.NomorPjs.Visible (end) *@
+@if (setPjsView.RedirectLink.Visible) { // setPjsView.RedirectLink.Visible (begin)
+    <tr id="r_RedirectLink" @Html.Raw(setPjsView.RedirectLink.RowAttributes)>
+        <td class="@(setPjsView.TableLeftColumnClass)"><span id="elh_SetPjs_RedirectLink"><template id="tpc_SetPjs_RedirectLink">@Html.Raw(setPjsView.RedirectLink.Caption)</template></span></td>
+        <td data-name="RedirectLink" @Html.Raw(setPjsView.RedirectLink.CellAttributes)>
+<template id="tpx_SetPjs_RedirectLink"><span id="el_SetPjs_RedirectLink">
+<span @Html.Raw(setPjsView.RedirectLink.ViewAttributes)>
+@Html.Raw(setPjsView.RedirectLink.GetViewValue())</span>
+</span></template></td>
+    </tr>
+} @* setPjsView.RedirectLink.Visible (end) *@
+@if (setPjsView.Nama.Visible) { // setPjsView.Nama.Visible (begin)
+    <tr id="r_Nama" @Html.Raw(setPjsView.Nama.RowAttributes)>
+        <td class="@(setPjsView.TableLeftColumnClass)"><span id="elh_SetPjs_Nama"><template id="tpc_SetPjs_Nama">@Html.Raw(setPjsView.Nama.Caption)</template></span></td>
+        <td data-name="Nama" @Html.Raw(setPjsView.Nama.CellAttributes)>
+<template id="tpx_SetPjs_Nama"><span id="el_SetPjs_Nama">
+<span @Html.Raw(setPjsView.Nama.ViewAttributes)>
+@Html.Raw(setPjsView.Nama.GetViewValue())</span>
+</span></template></td>
+    </tr>
+} @* setPjsView.Nama.Visible (end) *@
+@if (setPjsView.OrganizationLevel.Visible) { // setPjsView.OrganizationLevel.Visible (begin)
+    <tr id="r_OrganizationLevel" @Html.Raw(setPjsView.OrganizationLevel.RowAttributes)>
+        <td class="@(setPjsView.TableLeftColumnClass)"><span id="elh_SetPjs_OrganizationLevel"><template id="tpc_SetPjs_OrganizationLevel">@Html.Raw(setPjsView.OrganizationLevel.Caption)</template></span></td>
+        <td data-name="OrganizationLevel" @Html.Raw(setPjsView.OrganizationLevel.CellAttributes)>
+<template id="tpx_SetPjs_OrganizationLevel"><span id="el_SetPjs_OrganizationLevel">
+<span @Html.Raw(setPjsView.OrganizationLevel.ViewAttributes)>
+@Html.Raw(setPjsView.OrganizationLevel.GetViewValue())</span>
+</span></template></td>
+    </tr>
+} @* setPjsView.OrganizationLevel.Visible (end) *@
+@if (setPjsView.Region.Visible) { // setPjsView.Region.Visible (begin)
+    <tr id="r_Region" @Html.Raw(setPjsView.Region.RowAttributes)>
+        <td class="@(setPjsView.TableLeftColumnClass)"><span id="elh_SetPjs_Region"><template id="tpc_SetPjs_Region">@Html.Raw(setPjsView.Region.Caption)</template></span></td>
+        <td data-name="Region" @Html.Raw(setPjsView.Region.CellAttributes)>
+<template id="tpx_SetPjs_Region"><span id="el_SetPjs_Region">
+<span @Html.Raw(setPjsView.Region.ViewAttributes)>
+@Html.Raw(setPjsView.Region.GetViewValue())</span>
+</span></template></td>
+    </tr>
+} @* setPjsView.Region.Visible (end) *@
+@if (setPjsView.Plant.Visible) { // setPjsView.Plant.Visible (begin)
+    <tr id="r_Plant" @Html.Raw(setPjsView.Plant.RowAttributes)>
+        <td class="@(setPjsView.TableLeftColumnClass)"><span id="elh_SetPjs_Plant"><template id="tpc_SetPjs_Plant">@Html.Raw(setPjsView.Plant.Caption)</template></span></td>
+        <td data-name="Plant" @Html.Raw(setPjsView.Plant.CellAttributes)>
+<template id="tpx_SetPjs_Plant"><span id="el_SetPjs_Plant">
+<span @Html.Raw(setPjsView.Plant.ViewAttributes)>
+@Html.Raw(setPjsView.Plant.GetViewValue())</span>
+</span></template></td>
+    </tr>
+} @* setPjsView.Plant.Visible (end) *@
+@if (setPjsView.PosisiAwal.Visible) { // setPjsView.PosisiAwal.Visible (begin)
+    <tr id="r_PosisiAwal" @Html.Raw(setPjsView.PosisiAwal.RowAttributes)>
+        <td class="@(setPjsView.TableLeftColumnClass)"><span id="elh_SetPjs_PosisiAwal"><template id="tpc_SetPjs_PosisiAwal">@Html.Raw(setPjsView.PosisiAwal.Caption)</template></span></td>
+        <td data-name="PosisiAwal" @Html.Raw(setPjsView.PosisiAwal.CellAttributes)>
+<template id="tpx_SetPjs_PosisiAwal"><span id="el_SetPjs_PosisiAwal">
+<span @Html.Raw(setPjsView.PosisiAwal.ViewAttributes)>
+@Html.Raw(setPjsView.PosisiAwal.GetViewValue())</span>
+</span></template></td>
+    </tr>
+} @* setPjsView.PosisiAwal.Visible (end) *@
+@if (setPjsView.PosisiPJS.Visible) { // setPjsView.PosisiPJS.Visible (begin)
+    <tr id="r_PosisiPJS" @Html.Raw(setPjsView.PosisiPJS.RowAttributes)>
+        <td class="@(setPjsView.TableLeftColumnClass)"><span id="elh_SetPjs_PosisiPJS"><template id="tpc_SetPjs_PosisiPJS">@Html.Raw(setPjsView.PosisiPJS.Caption)</template></span></td>
+        <td data-name="PosisiPJS" @Html.Raw(setPjsView.PosisiPJS.CellAttributes)>
+<template id="tpx_SetPjs_PosisiPJS"><span id="el_SetPjs_PosisiPJS">
+<span @Html.Raw(setPjsView.PosisiPJS.ViewAttributes)>
+@Html.Raw(setPjsView.PosisiPJS.GetViewValue())</span>
+</span></template></td>
+    </tr>
+} @* setPjsView.PosisiPJS.Visible (end) *@
+@if (setPjsView.LookupPosition.Visible) { // setPjsView.LookupPosition.Visible (begin)
+    <tr id="r_LookupPosition" @Html.Raw(setPjsView.LookupPosition.RowAttributes)>
+        <td class="@(setPjsView.TableLeftColumnClass)"><span id="elh_SetPjs_LookupPosition"><template id="tpc_SetPjs_LookupPosition">@Html.Raw(setPjsView.LookupPosition.Caption)</template></span></td>
+        <td data-name="LookupPosition" @Html.Raw(setPjsView.LookupPosition.CellAttributes)>
+<template id="tpx_SetPjs_LookupPosition"><span id="el_SetPjs_LookupPosition">
+<span @Html.Raw(setPjsView.LookupPosition.ViewAttributes)>
+@Html.Raw(setPjsView.LookupPosition.GetViewValue())</span>
+</span></template></td>
+    </tr>
+} @* setPjsView.LookupPosition.Visible (end) *@
+@if (setPjsView.TanggalMulai.Visible) { // setPjsView.TanggalMulai.Visible (begin)
+    <tr id="r_TanggalMulai" @Html.Raw(setPjsView.TanggalMulai.RowAttributes)>
+        <td class="@(setPjsView.TableLeftColumnClass)"><span id="elh_SetPjs_TanggalMulai"><template id="tpc_SetPjs_TanggalMulai">@Html.Raw(setPjsView.TanggalMulai.Caption)</template></span></td>
+        <td data-name="TanggalMulai" @Html.Raw(setPjsView.TanggalMulai.CellAttributes)>
+<template id="tpx_SetPjs_TanggalMulai"><span id="el_SetPjs_TanggalMulai">
+<span @Html.Raw(setPjsView.TanggalMulai.ViewAttributes)>
+@Html.Raw(setPjsView.TanggalMulai.GetViewValue())</span>
+</span></template></td>
+    </tr>
+} @* setPjsView.TanggalMulai.Visible (end) *@
+@if (setPjsView.TanggalSelesai.Visible) { // setPjsView.TanggalSelesai.Visible (begin)
+    <tr id="r_TanggalSelesai" @Html.Raw(setPjsView.TanggalSelesai.RowAttributes)>
+        <td class="@(setPjsView.TableLeftColumnClass)"><span id="elh_SetPjs_TanggalSelesai"><template id="tpc_SetPjs_TanggalSelesai">@Html.Raw(setPjsView.TanggalSelesai.Caption)</template></span></td>
+        <td data-name="TanggalSelesai" @Html.Raw(setPjsView.TanggalSelesai.CellAttributes)>
+<template id="tpx_SetPjs_TanggalSelesai"><span id="el_SetPjs_TanggalSelesai">
+<span @Html.Raw(setPjsView.TanggalSelesai.ViewAttributes)>
+@Html.Raw(setPjsView.TanggalSelesai.GetViewValue())</span>
+</span></template></td>
+    </tr>
+} @* setPjsView.TanggalSelesai.Visible (end) *@
+@if (setPjsView.Status.Visible) { // setPjsView.Status.Visible (begin)
+    <tr id="r_Status" @Html.Raw(setPjsView.Status.RowAttributes)>
+        <td class="@(setPjsView.TableLeftColumnClass)"><span id="elh_SetPjs_Status"><template id="tpc_SetPjs_Status">@Html.Raw(setPjsView.Status.Caption)</template></span></td>
+        <td data-name="Status" @Html.Raw(setPjsView.Status.CellAttributes)>
+<template id="tpx_SetPjs_Status"><span id="el_SetPjs_Status">
+<span @Html.Raw(setPjsView.Status.ViewAttributes)>
+@Html.Raw(setPjsView.Status.GetViewValue())</span>
+</span></template></td>
+    </tr>
+} @* setPjsView.Status.Visible (end) *@
+@if (setPjsView.DownloadSuratTugas.Visible) { // setPjsView.DownloadSuratTugas.Visible (begin)
+    <tr id="r_DownloadSuratTugas" @Html.Raw(setPjsView.DownloadSuratTugas.RowAttributes)>
+        <td class="@(setPjsView.TableLeftColumnClass)"><span id="elh_SetPjs_DownloadSuratTugas"><template id="tpc_SetPjs_DownloadSuratTugas">@Html.Raw(setPjsView.DownloadSuratTugas.Caption)</template></span></td>
+        <td data-name="DownloadSuratTugas" @Html.Raw(setPjsView.DownloadSuratTugas.CellAttributes)>
+<template id="tpx_SetPjs_DownloadSuratTugas"><span id="el_SetPjs_DownloadSuratTugas">
+<span @Html.Raw(setPjsView.DownloadSuratTugas.ViewAttributes)>
+@Html.Raw(setPjsView.DownloadSuratTugas.GetViewValue())</span>
+</span></template></td>
+    </tr>
+} @* setPjsView.DownloadSuratTugas.Visible (end) *@
+@if (setPjsView.SuratTugas.Visible) { // setPjsView.SuratTugas.Visible (begin)
+    <tr id="r_SuratTugas" @Html.Raw(setPjsView.SuratTugas.RowAttributes)>
+        <td class="@(setPjsView.TableLeftColumnClass)"><span id="elh_SetPjs_SuratTugas"><template id="tpc_SetPjs_SuratTugas">@Html.Raw(setPjsView.SuratTugas.Caption)</template></span></td>
+        <td data-name="SuratTugas" @Html.Raw(setPjsView.SuratTugas.CellAttributes)>
+<template id="tpx_SetPjs_SuratTugas"><span id="el_SetPjs_SuratTugas">
+<span @Html.Raw(setPjsView.SuratTugas.ViewAttributes)>
+@Html.Raw(setPjsView.SuratTugas.GetViewValue())</span>
+</span></template></td>
+    </tr>
+} @* setPjsView.SuratTugas.Visible (end) *@
+@if (setPjsView.Keterangan.Visible) { // setPjsView.Keterangan.Visible (begin)
+    <tr id="r_Keterangan" @Html.Raw(setPjsView.Keterangan.RowAttributes)>
+        <td class="@(setPjsView.TableLeftColumnClass)"><span id="elh_SetPjs_Keterangan"><template id="tpc_SetPjs_Keterangan">@Html.Raw(setPjsView.Keterangan.Caption)</template></span></td>
+        <td data-name="Keterangan" @Html.Raw(setPjsView.Keterangan.CellAttributes)>
+<template id="tpx_SetPjs_Keterangan"><span id="el_SetPjs_Keterangan">
+<span @Html.Raw(setPjsView.Keterangan.ViewAttributes)>
+@Html.Raw(setPjsView.Keterangan.GetViewValue())</span>
+</span></template></td>
+    </tr>
+} @* setPjsView.Keterangan.Visible (end) *@
+@if (setPjsView.Remaks.Visible) { // setPjsView.Remaks.Visible (begin)
+    <tr id="r_Remaks" @Html.Raw(setPjsView.Remaks.RowAttributes)>
+        <td class="@(setPjsView.TableLeftColumnClass)"><span id="elh_SetPjs_Remaks"><template id="tpc_SetPjs_Remaks">@Html.Raw(setPjsView.Remaks.Caption)</template></span></td>
+        <td data-name="Remaks" @Html.Raw(setPjsView.Remaks.CellAttributes)>
+<template id="tpx_SetPjs_Remaks"><span id="el_SetPjs_Remaks">
+<span @Html.Raw(setPjsView.Remaks.ViewAttributes)>
+@Html.Raw(setPjsView.Remaks.GetViewValue())</span>
+</span></template></td>
+    </tr>
+} @* setPjsView.Remaks.Visible (end) *@
+@if (setPjsView.DibuatOleh.Visible) { // setPjsView.DibuatOleh.Visible (begin)
+    <tr id="r_DibuatOleh" @Html.Raw(setPjsView.DibuatOleh.RowAttributes)>
+        <td class="@(setPjsView.TableLeftColumnClass)"><span id="elh_SetPjs_DibuatOleh"><template id="tpc_SetPjs_DibuatOleh">@Html.Raw(setPjsView.DibuatOleh.Caption)</template></span></td>
+        <td data-name="DibuatOleh" @Html.Raw(setPjsView.DibuatOleh.CellAttributes)>
+<template id="tpx_SetPjs_DibuatOleh"><span id="el_SetPjs_DibuatOleh">
+<span @Html.Raw(setPjsView.DibuatOleh.ViewAttributes)>
+@Html.Raw(setPjsView.DibuatOleh.GetViewValue())</span>
+</span></template></td>
+    </tr>
+} @* setPjsView.DibuatOleh.Visible (end) *@
+@if (setPjsView.TanggalDibuat.Visible) { // setPjsView.TanggalDibuat.Visible (begin)
+    <tr id="r_TanggalDibuat" @Html.Raw(setPjsView.TanggalDibuat.RowAttributes)>
+        <td class="@(setPjsView.TableLeftColumnClass)"><span id="elh_SetPjs_TanggalDibuat"><template id="tpc_SetPjs_TanggalDibuat">@Html.Raw(setPjsView.TanggalDibuat.Caption)</template></span></td>
+        <td data-name="TanggalDibuat" @Html.Raw(setPjsView.TanggalDibuat.CellAttributes)>
+<template id="tpx_SetPjs_TanggalDibuat"><span id="el_SetPjs_TanggalDibuat">
+<span @Html.Raw(setPjsView.TanggalDibuat.ViewAttributes)>
+@Html.Raw(setPjsView.TanggalDibuat.GetViewValue())</span>
+</span></template></td>
+    </tr>
+} @* setPjsView.TanggalDibuat.Visible (end) *@
+@if (setPjsView.DiperbaharuiOleh.Visible) { // setPjsView.DiperbaharuiOleh.Visible (begin)
+    <tr id="r_DiperbaharuiOleh" @Html.Raw(setPjsView.DiperbaharuiOleh.RowAttributes)>
+        <td class="@(setPjsView.TableLeftColumnClass)"><span id="elh_SetPjs_DiperbaharuiOleh"><template id="tpc_SetPjs_DiperbaharuiOleh">@Html.Raw(setPjsView.DiperbaharuiOleh.Caption)</template></span></td>
+        <td data-name="DiperbaharuiOleh" @Html.Raw(setPjsView.DiperbaharuiOleh.CellAttributes)>
+<template id="tpx_SetPjs_DiperbaharuiOleh"><span id="el_SetPjs_DiperbaharuiOleh">
+<span @Html.Raw(setPjsView.DiperbaharuiOleh.ViewAttributes)>
+@Html.Raw(setPjsView.DiperbaharuiOleh.GetViewValue())</span>
+</span></template></td>
+    </tr>
+} @* setPjsView.DiperbaharuiOleh.Visible (end) *@
+@if (setPjsView.DiperbaharuiTanggal.Visible) { // setPjsView.DiperbaharuiTanggal.Visible (begin)
+    <tr id="r_DiperbaharuiTanggal" @Html.Raw(setPjsView.DiperbaharuiTanggal.RowAttributes)>
+        <td class="@(setPjsView.TableLeftColumnClass)"><span id="elh_SetPjs_DiperbaharuiTanggal"><template id="tpc_SetPjs_DiperbaharuiTanggal">@Html.Raw(setPjsView.DiperbaharuiTanggal.Caption)</template></span></td>
+        <td data-name="DiperbaharuiTanggal" @Html.Raw(setPjsView.DiperbaharuiTanggal.CellAttributes)>
+<template id="tpx_SetPjs_DiperbaharuiTanggal"><span id="el_SetPjs_DiperbaharuiTanggal">
+<span @Html.Raw(setPjsView.DiperbaharuiTanggal.ViewAttributes)>
+@Html.Raw(setPjsView.DiperbaharuiTanggal.GetViewValue())</span>
+</span></template></td>
+    </tr>
+} @* setPjsView.DiperbaharuiTanggal.Visible (end) *@
+@if (setPjsView.PlantAwal.Visible) { // setPjsView.PlantAwal.Visible (begin)
+    <tr id="r_PlantAwal" @Html.Raw(setPjsView.PlantAwal.RowAttributes)>
+        <td class="@(setPjsView.TableLeftColumnClass)"><span id="elh_SetPjs_PlantAwal"><template id="tpc_SetPjs_PlantAwal">@Html.Raw(setPjsView.PlantAwal.Caption)</template></span></td>
+        <td data-name="PlantAwal" @Html.Raw(setPjsView.PlantAwal.CellAttributes)>
+<template id="tpx_SetPjs_PlantAwal"><span id="el_SetPjs_PlantAwal">
+<span @Html.Raw(setPjsView.PlantAwal.ViewAttributes)>
+@Html.Raw(setPjsView.PlantAwal.GetViewValue())</span>
+</span></template></td>
+    </tr>
+} @* setPjsView.PlantAwal.Visible (end) *@
+@if (setPjsView.RegionAwal.Visible) { // setPjsView.RegionAwal.Visible (begin)
+    <tr id="r_RegionAwal" @Html.Raw(setPjsView.RegionAwal.RowAttributes)>
+        <td class="@(setPjsView.TableLeftColumnClass)"><span id="elh_SetPjs_RegionAwal"><template id="tpc_SetPjs_RegionAwal">@Html.Raw(setPjsView.RegionAwal.Caption)</template></span></td>
+        <td data-name="RegionAwal" @Html.Raw(setPjsView.RegionAwal.CellAttributes)>
+<template id="tpx_SetPjs_RegionAwal"><span id="el_SetPjs_RegionAwal">
+<span @Html.Raw(setPjsView.RegionAwal.ViewAttributes)>
+@Html.Raw(setPjsView.RegionAwal.GetViewValue())</span>
+</span></template></td>
+    </tr>
+} @* setPjsView.RegionAwal.Visible (end) *@
+</table>
+<div id="tpd_SetPjsview" class="ew-custom-template"></div>
+<template id="tpm_SetPjsview">
+<div id="ct_setPjsView">@{
+    string id = setPjsView.Id.CurrentValue.ToString();
+    string status = setPjsView.Status.CurrentValue.ToString();
+    string idUserPjs = setPjsView.DibuatOleh.CurrentValue.ToString();
+    string idUser = CurrentUserInfo("IdUser").ToString();
+    bool enable = true;
+    Dictionary<string, object> viewData = new Dictionary<string, object>();
+    string sqlQuery = @"
+        SELECT
+            CONCAT(p.PosisiAwal, ' - ', mpAwal.NamaPosition) AS PosisiAwal,
+            CONCAT(p.PosisiPJS, ' - ', mpPjs.NamaPosition) AS PosisiPJS,
+            mpPjs.Role
+        FROM SetPjs p
+        JOIN MasterPosition mpAwal ON p.PosisiAwal = mpAwal.IdPosition
+        JOIN MasterPosition mpPjs ON p.PosisiPJS = mpPjs.IdPosition
+        WHERE p.Id = @Id;
+    ";
+    using (SqlConnection sqlConnection = GetConnection("Db").OpenConnection()) {
+        using (SqlCommand command = new SqlCommand(sqlQuery, sqlConnection)) {
+            command.Parameters.AddWithValue("@Id", id);
+            using (SqlDataReader rs = command.ExecuteReader()) {
+                while (rs.Read()) {
+                    for (int i = 0; i < rs.FieldCount; i++) {
+                        viewData[rs.GetName(i)] = rs[i] != null? rs[i] : "";
+                    }
+                }
+            }
+        }
+        int posisiPjs = Convert.ToInt32(setPjsView.PosisiPJS.CurrentValue);
+        int pjsRole = viewData["Role"] != null ? Convert.ToInt32(viewData["Role"]) : 0;
+        int currentUserLevel = CurrentUserLevel() != null ? Convert.ToInt32(CurrentUserLevel()) : 0;
+        int currentRole = CurrentUserInfo("Rule") != null ? Convert.ToInt32(CurrentUserInfo("Rule")) : 0;
+        int currentUserPositionId = CurrentUserInfo("IdPosition") != null ? Convert.ToInt32(CurrentUserInfo("IdPosition")) : 0;
+        switch (pjsRole)
+        {
+            case 15:
+                if (currentUserLevel != -1)
+                {
+                    enable = false;
+                }
+                break;
+            case 14:
+                if (currentUserLevel != -1 && currentRole != 15)
+                {
+                    enable = false;
+                }
+                break;
+            case 10:
+                if (currentUserLevel != -1 && currentRole != 14)
+                {
+                    enable = false;
+                }
+                bool isSameRegion = false;
+                sqlQuery = @"
+                    SELECT 1
+                    FROM MappingPosition mpPjs
+                    INNER JOIN MappingPosition mpApprover
+                        ON mpPjs.IdRegion = mpApprover.IdRegion
+                    WHERE mpPjs.IdPosition = @PjsPosition
+                    AND mpApprover.IdPosition = @ApproverPosition
+                ";
+                using (SqlCommand cmd = new SqlCommand(sqlQuery, sqlConnection))
+                {
+                    cmd.Parameters.Add("@PjsPosition", SqlDbType.Int).Value = posisiPjs;
+                    cmd.Parameters.Add("@ApproverPosition", SqlDbType.Int).Value = currentUserPositionId;
+                    var result = cmd.ExecuteScalar();
+                    isSameRegion = result != null;
+                }
+                if (currentUserLevel != -1 && !isSameRegion)
+                {
+                    enable = false;
+                }
+                break;
+            default:
+                if (currentUserLevel != -1 && currentRole != 10)
+                {
+                    enable = false;
+                }
+                bool isSamePlant = false;
+                sqlQuery = @"
+                    SELECT 1
+                    FROM MappingPosition mpPjs
+                    INNER JOIN MappingPosition mpApprover
+                        ON mpPjs.IdPlant = mpApprover.IdPlant
+                    WHERE mpPjs.IdPosition = @PjsPosition
+                    AND mpApprover.IdPosition = @ApproverPosition
+                ";
+                using (SqlCommand cmd = new SqlCommand(sqlQuery, sqlConnection))
+                {
+                    cmd.Parameters.Add("@PjsPosition", SqlDbType.Int).Value = posisiPjs;
+                    cmd.Parameters.Add("@ApproverPosition", SqlDbType.Int).Value = currentUserPositionId;
+                    var result = cmd.ExecuteScalar();
+                    isSamePlant = result != null;
+                }
+                if (currentUserLevel != -1 && !isSamePlant)
+                {
+                    enable = false;
+                }
+                break;
+        }
+    }
+}
+<style>
+    .stepper {
+        display: flex;
+        counter-reset: step;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 8px;
+    }
+    .stepper::-webkit-scrollbar {
+        height: 6px; /* tipis */
+    }
+    .stepper::-webkit-scrollbar-thumb {
+        background-color: #ccc;
+        border-radius: 3px;
+    }
+    .step {
+        width: 150px;
+        text-align: center;
+        position: relative;
+    }
+    .step:not(:last-child)::after {
+        content: '';
+        position: absolute;
+        top: 20px;
+        right: -50%;
+        width: 100%;
+        height: 4px;
+        background-color: #ccc;
+        z-index: 0;
+    }
+    .step.completed:not(:last-child)::after {
+        background-color: #3c6dbd;
+    }
+    .step-icon {
+        width: 36px;
+        height: 36px;
+        line-height: 36px;
+        border-radius: 50%;
+        background: #ccc;
+        display: inline-block;
+        z-index: 1;
+        position: relative;
+        color: white;
+        font-weight: bold;
+    }
+    .step.active .step-icon {
+        background: #3c6dbd;
+    }
+    .step-label {
+        margin-top: 8px;
+        font-size: 14px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 6px;
+        color: #333;
+    }
+    .step-label {
+        color: #3c6dbd !important;
+        text-decoration: none;
+        margin: 0;
+        padding: 0;
+    }
+    .step-label-not-active {
+        color: #CCCCCC !important;
+    }
+    .ew-buttons {
+        display: none;
+    }
+    .view-page-table td {
+        white-space: normal !important;
+        word-wrap: break-word;
+    }
+    .view-page-table th {
+        background-color: #006BB7;
+    }
+    .body-table {
+        background-color: #fff;
+    }
+    .header-table {
+        background-color: #006BB7 !important;
+        color: #fff !important;
+    }
+    .view-page-table {
+        table-layout: fixed;
+    }
+    .btn {
+        white-space: nowrap;
+    }
+    .file-input-wrapper {
+        border: 1px solid #ced4da;
+        border-radius: .375rem;
+        overflow: hidden;
+        transition: border-color .15s, box-shadow .15s;
+    }
+    .file-input-wrapper:focus-within {
+        border-color: #86b7fe;
+        box-shadow: 0 0 0 .25rem rgba(13,110,253,.25);
+    }
+    .file-input-wrapper .btn {
+        border-radius: 0;
+    }
+    .file-input-wrapper .form-control {
+        border: none;
+        box-shadow: none !important;
+    }
+    #el_SetPjs_OrganizationLevel,
+    #el_SetPjs_Region,
+    #el_SetPjs_Plant,
+    #el_SetPjs_LookupPosition,
+    #el_SetPjs_TanggalMulai,
+    #el_SetPjs_TanggalSelesai,
+    #el_SetPjs_Keterangan {
+        width: 100%;
+    }
+    .status-approved {
+        background-color: #baffc9 !important;
+        color: #155724;
+    }
+    .status-requested {
+        background-color: #a3e0f7 !important;
+        color: #0c5460;
+    }
+    .status-canceled {
+        background-color: #e2e3e5 !important;
+        color: #41464b;
+    }
+    .btn-toolbar {
+        display: none;
+    }
+    .ag-theme-quartz .ag-header {
+        background-color: #006BB7 !important;
+    }
+    .ag-theme-quartz .ag-header-cell-label {
+        color: #ffffff !important;
+    }
+    .ag-theme-quartz .ag-icon-filter {
+        color: #ffffff !important;
+    }
+    .rotate-down {
+        transform: rotate(90deg);
+        transition: transform 0.3s ease;
+    }
+    .rotate-right {
+        transform: rotate(0deg);
+        transition: transform 0.3s ease;
+    }
+</style>
+<form id="CustomFormPJS" autocomplete="off">
+    <div class="row pb-3 border-bottom">
+        <div class="col-2 fw-bold d-flex align-items-center">
+            Nomor PJS
+        </div>
+        <div class="col-10 d-flex gap-3">
+            @setPjsView.NomorPjs.CurrentValue
+        </div>
+    </div>
+    <div class="row pb-3 border-bottom mb-0">
+        <div class="col-2 fw-bold d-flex align-items-center">
+            Nama
+        </div>
+        <div class="col-10 d-flex gap-3">
+            @setPjsView.Nama.CurrentValue
+        </div>
+    </div>
+    <div class="row border-bottom">
+        <div class="col-2 fw-bold d-flex align-items-center py-3">
+            Status PJS
+        </div>
+        @if (status.ToLower() == "approved") {
+            <div class="col-10 py-3 fw-bold status-approved">
+                @status
+            </div>
+        } else if (status.ToLower() == "requested") {
+            <div class="col-10 py-3 fw-bold status-requested">
+                @status
+            </div>
+        } else if (status.ToLower() == "rejected") {
+            <div class="col-10 py-3 fw-bold bg-danger text-white">
+                @status
+            </div>
+        } else {
+            <div class="col-10 py-3 fw-bold status-canceled">
+                @status
+            </div>
+        }
+    </div>
+    <div class="row pb-3 border-bottom">
+        <div class="col-2 fw-bold d-flex align-items-center">
+            Diperbaharui Oleh
+        </div>
+        <div class="col-10">
+            <div class="d-flex gap-3 align-items-center">
+                <slot class="ew-slot" name="tpx_SetPjs_DiperbaharuiOleh"></slot>
+                <button type="button" class="btn btn-primary ew-btn ps-2" expand-log="false">
+                    <i class="fa-solid fa-caret-right fa-2xl me-2 caret-icon rotate-right"></i>
+                    Log History
+                    <i class="fa-solid fa-clock-rotate-left ms-1"></i> 
+                </button>
+            </div>
+            <div id="log-table-row" class="d-none row m-0">
+                <div class="p-0">
+                    <div id="log-table-wrapper" style="overflow: hidden; transition: all 0.6s ease; max-height: 0;">
+                        <div id="myGrid" class="ag-theme-quartz w-75 my-3" style="height: 300px;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row pb-3 border-bottom">
+        <div class="col-2 fw-bold d-flex align-items-center">
+            Tanggal Diperbaharui
+        </div>
+        <div class="col-10 d-flex gap-3">
+            <slot class="ew-slot" name="tpx_SetPjs_DiperbaharuiTanggal"></slot>
+        </div>
+    </div>
+    <div class="row pb-3 border-bottom">
+        <div class="col-2 fw-bold d-flex align-items-center">
+            Posisi Awal
+        </div>
+        <div class="col-10 d-flex gap-3">
+            @(viewData["PosisiAwal"])
+        </div>
+    </div>
+    <div class="row pb-3 border-bottom">
+        <div class="col-2 fw-bold d-flex align-items-center">
+            Organization Level
+        </div>
+        <div class="col-10 d-flex gap-3">
+            @setPjsView.OrganizationLevel.CurrentValue
+        </div>
+    </div>
+    <div class="row pb-3 border-bottom">
+        <div class="col-2 fw-bold d-flex align-items-center">
+            Posisi PJS
+        </div>
+        <div class="col-10 d-flex gap-3">
+            @(viewData["PosisiPJS"])
+        </div>
+    </div>
+    <div class="row pb-3 border-bottom">
+        <div class="col-2 fw-bold d-flex align-items-center">
+            Tanggal Mulai
+        </div>
+        <div class="col-10 d-flex gap-3">
+            @((setPjsView.TanggalMulai.CurrentValue as DateTime?)?.ToString("yyyy/MM/dd") ?? "")
+        </div>
+    </div>
+    <div class="row pb-3 border-bottom">
+        <div class="col-2 fw-bold d-flex align-items-center">
+            Tanggal Selesai
+        </div>
+        <div class="col-10 d-flex gap-3">
+            @((setPjsView.TanggalSelesai.CurrentValue as DateTime?)?.ToString("yyyy/MM/dd") ?? "")
+        </div>
+    </div>
+    <div class="row pb-3 border-bottom">
+        <div class="col-2 fw-bold d-flex align-items-center">
+            Surat Tugas
+        </div>
+        <div class="col-10">
+            <button type="button" class="btn btn-primary btn-download" data-id="@id">
+                <i class="fa-solid fa-download me-2"></i> 
+                Download Surat Tugas
+            </button>
+        </div>
+    </div>
+    <div class="row pb-3 border-bottom">
+        <div class="col-2 fw-bold d-flex align-items-center">
+            Keterangan
+        </div>
+        <div class="col-10 d-flex gap-3">
+            @setPjsView.Keterangan.CurrentValue
+        </div>
+    </div>
+    @if (status.ToLower() == "rejected") {
+        <div class="row pb-3 border-bottom">
+            <div class="col-2 fw-bold d-flex align-items-center">
+                Remarks
+            </div>
+            <div class="col-10 d-flex gap-3">
+                @setPjsView.Remaks.CurrentValue
+            </div>
+        </div>
+    } 
+    <div class="row pb-3 border-bottom">
+        <div class="col-2">
+        </div>
+        <div class="col-10 d-flex gap-3">
+            <button id="btn-back" class="btn btn-default ew-btn" type="button">
+                <i class="fas fa-circle-chevron-left me-2"></i>Back
+            </button>
+            @if (status.ToLower() == "requested" && idUserPjs != idUser && enable) {
+                <button id="btn-approve" class="btn btn-success ew-btn" type="button">
+                    <i class="fas fa-circle-check me-2"></i>Approve
+                </button>
+                <button id="btn-reject" class="btn btn-danger ew-btn" type="button">
+                    <i class="fas fa-circle-xmark me-2"></i>Reject
+                </button>
+            }
+            @if (status.ToLower() == "approved" && idUserPjs != idUser && enable) {
+                <button id="btn-canceling" class="btn btn-secondary ew-btn" type="button">
+                    <i class="fas fa-clock-rotate-left me-2"></i>Cancel
+                </button>
+            }
+        </div>
+    </div>
+</form></div>
+</template>
+@{ setPjsView.CloseRecordset(); }
+</form>
+<script class="ew-apply-template">
+loadjs.ready(ew.applyTemplateId, function() {
+    var $ = jQuery;
+    ew.templateData = { rows: @Html.Raw(ConvertToJson(setPjsView.Rows)) };
+    ew.applyTemplate("tpd_SetPjsview", "tpm_SetPjsview", "SetPjsview", "@(setPjsView.Export)", "SetPjs", ew.templateData.rows[0], @(setPjsView.IsModal ? "true" : "false"));
+    loadjs.done("customtemplate");
+});
+</script>
+</main>
+@setPjsView.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+@if (!setPjsView.IsExport()) {
+<script>
+loadjs.ready("load", function() {
+    // Startup script
+    const parent_url = ew.PATH_BASE;
+    const steps = [
+        { number: 1, label: "Set User PJS", url: `${parent_url}SetPjsList`, icon: "fa-user-clock" },
+        { number: 2, label: "Approval PJS", url: "", icon: "fa-pen" }
+    ];
+    var currentStep = 2;
+    var $stepperWrapper = $('<div class="d-flex border-bottom border-2 pb-2"><div class="stepper"></div></div>');
+    var $stepper = $stepperWrapper.find(".stepper");
+    steps.forEach(function (step, i) {
+        var isActive = step.number === currentStep;
+        var isCompleted = step.number < currentStep;
+        var stepClass = isActive ? "active" : isCompleted ? "completed" : "";
+        var icon, labelContent, html;
+        if (isActive) {
+            icon = `<div class="step-icon bg-success">${step.number}</div>`;
+            labelContent = `<div class="step-label"><p class="text-success mb-1"><i class="fa-solid ${step.icon} me-1 text-success"></i> ${step.label}</p></div>`;
+            html = `<div class="step ${stepClass} text-success">${icon}${labelContent}</div>`;
+        } else if (isCompleted) {
+            icon = `<div class="step-icon" style="background: #3c6dbd;">${step.number}</div>`;
+            labelContent = `<div class="step-label"><a href="${step.url}" class="text-primary"><i class="fa-solid ${step.icon} me-1"></i>${step.label}</a></div>`;
+            html = `<div class="step ${stepClass}">${icon}${labelContent}</div>`;
+        } else {
+            icon = `<div class="step-icon">${step.number}</div>`;
+            labelContent = `<div class="step-label-not-active"><p style="margin: 0;"><i class="fa-solid ${step.icon} me-1"></i>${step.label}</p></div>`;
+            html = `<div class="step ${stepClass} text-secondary">${icon}${labelContent}</div>`;
+        }
+        $stepper.append(html);
+    });
+    $(".content-header .container-fluid .row").append($stepperWrapper);
+    const NomorPjs = "@setPjsView.NomorPjs.CurrentValue.ToString()";
+    $.ajax({
+        url: parent_url + `api/LookUpList/GetLogPjs?NomorPjs=${NomorPjs}`,
+        type: 'GET',
+        success: function(response) {
+            const mappedData = response.result.map(item => ({
+                Username: item.Username,
+                Status: item.Status,
+                EtlDate: item.EtlDate,
+                Catatan: item.Catatan
+            }));
+            $.getScript('https://cdn.jsdelivr.net/npm/ag-grid-community/dist/ag-grid-community.min.js', function () {
+                const gridOptions = {
+                    rowData: mappedData,
+                    columnDefs: [
+                        {
+                            headerName: 'No.',
+                            valueGetter: 'node.rowIndex + 1',
+                            width: 80,
+                            filter: false
+                        },
+                        {
+                            headerName: 'Username',
+                            field: 'Username',
+                            flex: 1
+                        },
+                        {
+                            headerName: 'Status PJS',
+                            field: 'Status',
+                            flex: 1
+                        },
+                        {
+                            headerName: 'Tanggal',
+                            field: 'EtlDate',
+                            flex: 1
+                        },
+                        {
+                            headerName: 'Catatan',
+                            field: 'Catatan',
+                            flex: 1
+                        }
+                    ],
+                    defaultColDef: {
+                        sortable: false,
+                        suppressMovable: true,
+                        filter: true,
+                        resizable: false,
+                        cellClassRules: {
+                            'status-approved': params => params.colDef.field === 'Status' && params.data.Status.toLowerCase() === 'approved',
+                            'status-requested': params => params.colDef.field === 'Status' && params.data.Status.toLowerCase() === 'requested',
+                            'status-canceled': params => params.colDef.field === 'Status' && params.data.Status.toLowerCase() === 'canceled',
+                            'bg-danger text-white': params => params.colDef.field === 'Status' && params.data.Status.toLowerCase() === 'rejected'
+                        }
+                    },
+                    rowSelection: 'multiple',
+                    suppressRowClickSelection: true,
+                    pagination: true,
+                    paginationPageSize: 10
+                };
+                const myGridElement = document.querySelector('#myGrid');
+                agGrid.createGrid(myGridElement, gridOptions);
+            });
+        },
+        error: function(xhr, status, error) {
+            ew.alert(xhr.responseJSON.message ?? "Terjadi kesalahan dalam memuat data");
+        }
+    });
+});
+</script>
+}

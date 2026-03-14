@@ -1,0 +1,281 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (aktivitasDokumenView.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = aktivitasDokumenView.UseLayout ? "_Layout" : "";
+}
+@if (!aktivitasDokumenView.IsExport()) {
+<div class="btn-toolbar ew-toolbar">
+    @aktivitasDokumenView.ExportOptions.RenderBody()
+    @aktivitasDokumenView.OtherOptions.RenderBody()
+</div>
+}
+@aktivitasDokumenView.ShowPageHeader()
+@aktivitasDokumenView.ShowMessages()
+<main class="view">
+<form name="fAktivitasDokumenview" id="fAktivitasDokumenview" class="ew-form ew-view-form overlay-wrapper" action="@AppPath(CurrentPageName())" method="post" novalidate autocomplete="off">
+@if (!aktivitasDokumenView.IsExport()) {
+<script>
+var currentTable = @Html.Raw(ConvertToJson(aktivitasDokumenView.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { AktivitasDokumen: currentTable } });
+var currentPageID = ew.PAGE_ID = "view";
+var currentForm;
+var fAktivitasDokumenview;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("fAktivitasDokumenview")
+        .setPageId("view")
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Client script
+    var parent_url = ew.PATH_BASE;
+    $(document).on('click', '.download-document', function () {
+        var IdAktivitasDokumen = $(this).attr('IdAktivitasDokumen');
+        event.preventDefault();
+        $.ajax({
+            url: parent_url + 'api/LookUpList/download_activity_document',
+            type: 'GET',
+            data: { IdDokumen: IdAktivitasDokumen },
+            xhrFields: {
+                responseType: 'blob'
+            },
+            success: function(response, status, xhr) {
+                const disposition = xhr.getResponseHeader('Content-Disposition');
+                let fileName = "file_download";
+                if (disposition && disposition.indexOf('filename=') !== -1) {
+                    const fileNameMatch = disposition.match(/filename="?([^";]+)"?/);
+                    if (fileNameMatch && fileNameMatch[1]) {
+                        fileName = fileNameMatch[1];
+                    }
+                }
+                const blobUrl = window.URL.createObjectURL(response);
+                const a = document.createElement('a');
+                a.href = blobUrl;
+                a.download = fileName; 
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(blobUrl);
+                ew.alert("Download successful!");
+            },
+            error: function(xhr, status, error) {
+                if (xhr.status === 404) {
+                    ew.alert("File not found on the server.");
+                } else if (xhr.status === 500) {
+                    ew.alert("An error occurred. Please try again later.");
+                } else {
+                    ew.alert("Failed to download the file. Error: " + xhr.responseText);
+                }
+            }
+        });
+    });
+});
+</script>
+}
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+<input type="hidden" name="modal" value="@ConvertToInt(aktivitasDokumenView.IsModal)">
+<table class="@(aktivitasDokumenView.TableClass)">
+@if (aktivitasDokumenView.NoReferensi.Visible) { // aktivitasDokumenView.NoReferensi.Visible (begin)
+    <tr id="r_NoReferensi" @Html.Raw(aktivitasDokumenView.NoReferensi.RowAttributes)>
+        <td class="@(aktivitasDokumenView.TableLeftColumnClass)"><span id="elh_AktivitasDokumen_NoReferensi">@Html.Raw(aktivitasDokumenView.NoReferensi.Caption)</span></td>
+        <td data-name="NoReferensi" @Html.Raw(aktivitasDokumenView.NoReferensi.CellAttributes)>
+<span id="el_AktivitasDokumen_NoReferensi">
+<span @Html.Raw(aktivitasDokumenView.NoReferensi.ViewAttributes)>
+@Html.Raw(aktivitasDokumenView.NoReferensi.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* aktivitasDokumenView.NoReferensi.Visible (end) *@
+@if (aktivitasDokumenView.IdProses.Visible) { // aktivitasDokumenView.IdProses.Visible (begin)
+    <tr id="r_IdProses" @Html.Raw(aktivitasDokumenView.IdProses.RowAttributes)>
+        <td class="@(aktivitasDokumenView.TableLeftColumnClass)"><span id="elh_AktivitasDokumen_IdProses">@Html.Raw(aktivitasDokumenView.IdProses.Caption)</span></td>
+        <td data-name="IdProses" @Html.Raw(aktivitasDokumenView.IdProses.CellAttributes)>
+<span id="el_AktivitasDokumen_IdProses">
+<span @Html.Raw(aktivitasDokumenView.IdProses.ViewAttributes)>
+@Html.Raw(aktivitasDokumenView.IdProses.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* aktivitasDokumenView.IdProses.Visible (end) *@
+@if (aktivitasDokumenView.IdAktivitas.Visible) { // aktivitasDokumenView.IdAktivitas.Visible (begin)
+    <tr id="r_IdAktivitas" @Html.Raw(aktivitasDokumenView.IdAktivitas.RowAttributes)>
+        <td class="@(aktivitasDokumenView.TableLeftColumnClass)"><span id="elh_AktivitasDokumen_IdAktivitas">@Html.Raw(aktivitasDokumenView.IdAktivitas.Caption)</span></td>
+        <td data-name="IdAktivitas" @Html.Raw(aktivitasDokumenView.IdAktivitas.CellAttributes)>
+<span id="el_AktivitasDokumen_IdAktivitas">
+<span @Html.Raw(aktivitasDokumenView.IdAktivitas.ViewAttributes)>
+@Html.Raw(aktivitasDokumenView.IdAktivitas.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* aktivitasDokumenView.IdAktivitas.Visible (end) *@
+@if (aktivitasDokumenView.IdDokumen.Visible) { // aktivitasDokumenView.IdDokumen.Visible (begin)
+    <tr id="r_IdDokumen" @Html.Raw(aktivitasDokumenView.IdDokumen.RowAttributes)>
+        <td class="@(aktivitasDokumenView.TableLeftColumnClass)"><span id="elh_AktivitasDokumen_IdDokumen">@Html.Raw(aktivitasDokumenView.IdDokumen.Caption)</span></td>
+        <td data-name="IdDokumen" @Html.Raw(aktivitasDokumenView.IdDokumen.CellAttributes)>
+<span id="el_AktivitasDokumen_IdDokumen">
+<span @Html.Raw(aktivitasDokumenView.IdDokumen.ViewAttributes)>
+@Html.Raw(aktivitasDokumenView.IdDokumen.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* aktivitasDokumenView.IdDokumen.Visible (end) *@
+@if (aktivitasDokumenView.NamaDokumen.Visible) { // aktivitasDokumenView.NamaDokumen.Visible (begin)
+    <tr id="r_NamaDokumen" @Html.Raw(aktivitasDokumenView.NamaDokumen.RowAttributes)>
+        <td class="@(aktivitasDokumenView.TableLeftColumnClass)"><span id="elh_AktivitasDokumen_NamaDokumen">@Html.Raw(aktivitasDokumenView.NamaDokumen.Caption)</span></td>
+        <td data-name="NamaDokumen" @Html.Raw(aktivitasDokumenView.NamaDokumen.CellAttributes)>
+<span id="el_AktivitasDokumen_NamaDokumen">
+<span @Html.Raw(aktivitasDokumenView.NamaDokumen.ViewAttributes)>
+@Html.Raw(aktivitasDokumenView.NamaDokumen.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* aktivitasDokumenView.NamaDokumen.Visible (end) *@
+@if (aktivitasDokumenView.TemplateDokumen.Visible) { // aktivitasDokumenView.TemplateDokumen.Visible (begin)
+    <tr id="r_TemplateDokumen" @Html.Raw(aktivitasDokumenView.TemplateDokumen.RowAttributes)>
+        <td class="@(aktivitasDokumenView.TableLeftColumnClass)"><span id="elh_AktivitasDokumen_TemplateDokumen">@Html.Raw(aktivitasDokumenView.TemplateDokumen.Caption)</span></td>
+        <td data-name="TemplateDokumen" @Html.Raw(aktivitasDokumenView.TemplateDokumen.CellAttributes)>
+<span id="el_AktivitasDokumen_TemplateDokumen">
+<span @Html.Raw(aktivitasDokumenView.TemplateDokumen.ViewAttributes)>
+@Html.Raw(aktivitasDokumenView.TemplateDokumen.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* aktivitasDokumenView.TemplateDokumen.Visible (end) *@
+@if (aktivitasDokumenView.UploadDokumen.Visible) { // aktivitasDokumenView.UploadDokumen.Visible (begin)
+    <tr id="r_UploadDokumen" @Html.Raw(aktivitasDokumenView.UploadDokumen.RowAttributes)>
+        <td class="@(aktivitasDokumenView.TableLeftColumnClass)"><span id="elh_AktivitasDokumen_UploadDokumen">@Html.Raw(aktivitasDokumenView.UploadDokumen.Caption)</span></td>
+        <td data-name="UploadDokumen" @Html.Raw(aktivitasDokumenView.UploadDokumen.CellAttributes)>
+<span id="el_AktivitasDokumen_UploadDokumen">
+<span @Html.Raw(aktivitasDokumenView.UploadDokumen.ViewAttributes)>
+@Html.Raw(aktivitasDokumenView.UploadDokumen.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* aktivitasDokumenView.UploadDokumen.Visible (end) *@
+@if (aktivitasDokumenView.DownloadDokumen.Visible) { // aktivitasDokumenView.DownloadDokumen.Visible (begin)
+    <tr id="r_DownloadDokumen" @Html.Raw(aktivitasDokumenView.DownloadDokumen.RowAttributes)>
+        <td class="@(aktivitasDokumenView.TableLeftColumnClass)"><span id="elh_AktivitasDokumen_DownloadDokumen">@Html.Raw(aktivitasDokumenView.DownloadDokumen.Caption)</span></td>
+        <td data-name="DownloadDokumen" @Html.Raw(aktivitasDokumenView.DownloadDokumen.CellAttributes)>
+<span id="el_AktivitasDokumen_DownloadDokumen">
+<span @Html.Raw(aktivitasDokumenView.DownloadDokumen.ViewAttributes)>
+@Html.Raw(aktivitasDokumenView.DownloadDokumen.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* aktivitasDokumenView.DownloadDokumen.Visible (end) *@
+@if (aktivitasDokumenView.Keterangan.Visible) { // aktivitasDokumenView.Keterangan.Visible (begin)
+    <tr id="r_Keterangan" @Html.Raw(aktivitasDokumenView.Keterangan.RowAttributes)>
+        <td class="@(aktivitasDokumenView.TableLeftColumnClass)"><span id="elh_AktivitasDokumen_Keterangan">@Html.Raw(aktivitasDokumenView.Keterangan.Caption)</span></td>
+        <td data-name="Keterangan" @Html.Raw(aktivitasDokumenView.Keterangan.CellAttributes)>
+<span id="el_AktivitasDokumen_Keterangan">
+<span @Html.Raw(aktivitasDokumenView.Keterangan.ViewAttributes)>
+@Html.Raw(aktivitasDokumenView.Keterangan.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* aktivitasDokumenView.Keterangan.Visible (end) *@
+@if (aktivitasDokumenView.StatusUpload.Visible) { // aktivitasDokumenView.StatusUpload.Visible (begin)
+    <tr id="r_StatusUpload" @Html.Raw(aktivitasDokumenView.StatusUpload.RowAttributes)>
+        <td class="@(aktivitasDokumenView.TableLeftColumnClass)"><span id="elh_AktivitasDokumen_StatusUpload">@Html.Raw(aktivitasDokumenView.StatusUpload.Caption)</span></td>
+        <td data-name="StatusUpload" @Html.Raw(aktivitasDokumenView.StatusUpload.CellAttributes)>
+<span id="el_AktivitasDokumen_StatusUpload">
+<span @Html.Raw(aktivitasDokumenView.StatusUpload.ViewAttributes)>
+@Html.Raw(aktivitasDokumenView.StatusUpload.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* aktivitasDokumenView.StatusUpload.Visible (end) *@
+@if (aktivitasDokumenView.DiunggahOleh.Visible) { // aktivitasDokumenView.DiunggahOleh.Visible (begin)
+    <tr id="r_DiunggahOleh" @Html.Raw(aktivitasDokumenView.DiunggahOleh.RowAttributes)>
+        <td class="@(aktivitasDokumenView.TableLeftColumnClass)"><span id="elh_AktivitasDokumen_DiunggahOleh">@Html.Raw(aktivitasDokumenView.DiunggahOleh.Caption)</span></td>
+        <td data-name="DiunggahOleh" @Html.Raw(aktivitasDokumenView.DiunggahOleh.CellAttributes)>
+<span id="el_AktivitasDokumen_DiunggahOleh">
+<span @Html.Raw(aktivitasDokumenView.DiunggahOleh.ViewAttributes)>
+@Html.Raw(aktivitasDokumenView.DiunggahOleh.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* aktivitasDokumenView.DiunggahOleh.Visible (end) *@
+@if (aktivitasDokumenView.TanggalUpload.Visible) { // aktivitasDokumenView.TanggalUpload.Visible (begin)
+    <tr id="r_TanggalUpload" @Html.Raw(aktivitasDokumenView.TanggalUpload.RowAttributes)>
+        <td class="@(aktivitasDokumenView.TableLeftColumnClass)"><span id="elh_AktivitasDokumen_TanggalUpload">@Html.Raw(aktivitasDokumenView.TanggalUpload.Caption)</span></td>
+        <td data-name="TanggalUpload" @Html.Raw(aktivitasDokumenView.TanggalUpload.CellAttributes)>
+<span id="el_AktivitasDokumen_TanggalUpload">
+<span @Html.Raw(aktivitasDokumenView.TanggalUpload.ViewAttributes)>
+@Html.Raw(aktivitasDokumenView.TanggalUpload.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* aktivitasDokumenView.TanggalUpload.Visible (end) *@
+@if (aktivitasDokumenView.DiperbaruiOleh.Visible) { // aktivitasDokumenView.DiperbaruiOleh.Visible (begin)
+    <tr id="r_DiperbaruiOleh" @Html.Raw(aktivitasDokumenView.DiperbaruiOleh.RowAttributes)>
+        <td class="@(aktivitasDokumenView.TableLeftColumnClass)"><span id="elh_AktivitasDokumen_DiperbaruiOleh">@Html.Raw(aktivitasDokumenView.DiperbaruiOleh.Caption)</span></td>
+        <td data-name="DiperbaruiOleh" @Html.Raw(aktivitasDokumenView.DiperbaruiOleh.CellAttributes)>
+<span id="el_AktivitasDokumen_DiperbaruiOleh">
+<span @Html.Raw(aktivitasDokumenView.DiperbaruiOleh.ViewAttributes)>
+@Html.Raw(aktivitasDokumenView.DiperbaruiOleh.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* aktivitasDokumenView.DiperbaruiOleh.Visible (end) *@
+@if (aktivitasDokumenView.TanggalDiperbarui.Visible) { // aktivitasDokumenView.TanggalDiperbarui.Visible (begin)
+    <tr id="r_TanggalDiperbarui" @Html.Raw(aktivitasDokumenView.TanggalDiperbarui.RowAttributes)>
+        <td class="@(aktivitasDokumenView.TableLeftColumnClass)"><span id="elh_AktivitasDokumen_TanggalDiperbarui">@Html.Raw(aktivitasDokumenView.TanggalDiperbarui.Caption)</span></td>
+        <td data-name="TanggalDiperbarui" @Html.Raw(aktivitasDokumenView.TanggalDiperbarui.CellAttributes)>
+<span id="el_AktivitasDokumen_TanggalDiperbarui">
+<span @Html.Raw(aktivitasDokumenView.TanggalDiperbarui.ViewAttributes)>
+@Html.Raw(aktivitasDokumenView.TanggalDiperbarui.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* aktivitasDokumenView.TanggalDiperbarui.Visible (end) *@
+@if (aktivitasDokumenView.IdTemplateAktivitasDokumen.Visible) { // aktivitasDokumenView.IdTemplateAktivitasDokumen.Visible (begin)
+    <tr id="r_IdTemplateAktivitasDokumen" @Html.Raw(aktivitasDokumenView.IdTemplateAktivitasDokumen.RowAttributes)>
+        <td class="@(aktivitasDokumenView.TableLeftColumnClass)"><span id="elh_AktivitasDokumen_IdTemplateAktivitasDokumen">@Html.Raw(aktivitasDokumenView.IdTemplateAktivitasDokumen.Caption)</span></td>
+        <td data-name="IdTemplateAktivitasDokumen" @Html.Raw(aktivitasDokumenView.IdTemplateAktivitasDokumen.CellAttributes)>
+<span id="el_AktivitasDokumen_IdTemplateAktivitasDokumen">
+<span @Html.Raw(aktivitasDokumenView.IdTemplateAktivitasDokumen.ViewAttributes)>
+@Html.Raw(aktivitasDokumenView.IdTemplateAktivitasDokumen.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* aktivitasDokumenView.IdTemplateAktivitasDokumen.Visible (end) *@
+@if (aktivitasDokumenView.WajibUpload.Visible) { // aktivitasDokumenView.WajibUpload.Visible (begin)
+    <tr id="r_WajibUpload" @Html.Raw(aktivitasDokumenView.WajibUpload.RowAttributes)>
+        <td class="@(aktivitasDokumenView.TableLeftColumnClass)"><span id="elh_AktivitasDokumen_WajibUpload">@Html.Raw(aktivitasDokumenView.WajibUpload.Caption)</span></td>
+        <td data-name="WajibUpload" @Html.Raw(aktivitasDokumenView.WajibUpload.CellAttributes)>
+<span id="el_AktivitasDokumen_WajibUpload">
+<span @Html.Raw(aktivitasDokumenView.WajibUpload.ViewAttributes)>
+<i class="fa-regular @(ConvertToBool(aktivitasDokumenView.WajibUpload.CurrentValue) ? "fa-square-check" : "fa-square") ew-icon ew-boolean"></i>
+</span>
+</span></td>
+    </tr>
+} @* aktivitasDokumenView.WajibUpload.Visible (end) *@
+@if (aktivitasDokumenView.TipeProses.Visible) { // aktivitasDokumenView.TipeProses.Visible (begin)
+    <tr id="r_TipeProses" @Html.Raw(aktivitasDokumenView.TipeProses.RowAttributes)>
+        <td class="@(aktivitasDokumenView.TableLeftColumnClass)"><span id="elh_AktivitasDokumen_TipeProses">@Html.Raw(aktivitasDokumenView.TipeProses.Caption)</span></td>
+        <td data-name="TipeProses" @Html.Raw(aktivitasDokumenView.TipeProses.CellAttributes)>
+<span id="el_AktivitasDokumen_TipeProses">
+<span @Html.Raw(aktivitasDokumenView.TipeProses.ViewAttributes)>
+@Html.Raw(aktivitasDokumenView.TipeProses.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* aktivitasDokumenView.TipeProses.Visible (end) *@
+</table>
+@{ aktivitasDokumenView.CloseRecordset(); }
+</form>
+</main>
+@aktivitasDokumenView.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+@if (!aktivitasDokumenView.IsExport()) {
+<script>
+loadjs.ready("load", function() {
+    // Write your table-specific startup script here
+    // document.write("page loaded");
+});
+</script>
+}

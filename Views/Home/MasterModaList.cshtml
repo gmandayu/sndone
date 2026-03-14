@@ -1,0 +1,376 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (masterModaList.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = masterModaList.UseLayout ? "_Layout" : "";
+}
+@if (!masterModaList.IsExport()) {
+<script>
+var currentTable = @Html.Raw(ConvertToJson(masterModaList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { MasterModa: currentTable } });
+var currentPageID = ew.PAGE_ID = "list";
+var currentForm;
+var @(masterModaList.FormName);
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("@(masterModaList.FormName)")
+        .setPageId("list")
+        .setSubmitWithFetch(@(masterModaList.UseAjaxActions ? "true" : "false"))
+        .setFormKeyCountName("@(masterModaList.FormKeyCountName)")
+
+        // Dynamic selection lists
+        .setLists({
+            "IdModa": @Html.Raw(masterModaList.IdModa.ToClientList(masterModaList)),
+            "NamaModa": @Html.Raw(masterModaList.NamaModa.ToClientList(masterModaList)),
+        })
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Write your client script here, no need to add script tags.
+});
+</script>
+}
+@if (!masterModaList.IsExport()) {
+<div class="btn-toolbar ew-toolbar">
+@if (masterModaList.TotalRecords > 0 && masterModaList.ExportOptions.Visible) {
+    masterModaList.ExportOptions.Render("body");
+}
+@if (masterModaList.ImportOptions.Visible) {
+    masterModaList.ImportOptions.Render("body");
+}
+@if (masterModaList.SearchOptions.Visible) {
+    masterModaList.SearchOptions.Render("body");
+}
+@if (masterModaList.FilterOptions.Visible) {
+    masterModaList.FilterOptions.Render("body");
+}
+</div>
+}
+@if (masterModaList.ShowCurrentFilter) {
+    masterModaList.ShowFilterList();
+}
+@if (!masterModaList.IsModal) {
+<form name="fMasterModasrch" id="fMasterModasrch" class="ew-form ew-ext-search-form" action="@AppPath(CurrentPageName())" novalidate autocomplete="off">
+<div id="fMasterModasrch_search_panel" class="mb-2 mb-sm-0 @(masterModaList.SearchPanelClass)"><!-- .ew-search-panel -->
+<script>
+var currentTable = @Html.Raw(ConvertToJson(masterModaList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { MasterModa: currentTable } });
+var currentForm;
+var fMasterModasrch, currentSearchForm, currentAdvancedSearchForm;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery,
+        fields = currentTable.fields;
+
+    // Form object for search
+    let form = new ew.FormBuilder()
+        .setId("fMasterModasrch")
+        .setPageId("list")
+@if (masterModaList.UseAjaxActions) {
+        <text>.setSubmitWithFetch(true)</text>
+}
+
+        // Add fields
+        .setFields([
+        ])
+        // Validate form
+        .setValidate(
+            async function () {
+                if (!this.validateRequired)
+                    return true; // Ignore validation
+                let fobj = this.getForm();
+
+                // Validate fields
+                if (!this.validateFields())
+                    return false;
+
+                // Call Form_CustomValidate event
+                if (!(await this.customValidate?.(fobj) ?? true)) {
+                    this.focus();
+                    return false;
+                }
+                return true;
+            }
+        )
+
+        // Form_CustomValidate
+        .setCustomValidate(
+            function(fobj) { // DO NOT CHANGE THIS LINE!
+                    // Your custom validation code here, return false if invalid.
+                    return true;
+                }
+        )
+
+        // Use JavaScript validation or not
+        .setValidateRequired(ew.CLIENT_VALIDATE)
+
+        // Dynamic selection lists
+        .setLists({
+            "IdModa": @Html.Raw(masterModaList.IdModa.ToClientList(masterModaList)),
+            "NamaModa": @Html.Raw(masterModaList.NamaModa.ToClientList(masterModaList)),
+        })
+
+        // Filters
+        .setFilterList(@Html.Raw(masterModaList.GetFilterList()))
+        .build();
+    window[form.id] = form;
+    currentSearchForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<input type="hidden" name="cmd" value="search">
+@if (Security.CanSearch) {
+if (!masterModaList.IsExport() && Empty(masterModaList.CurrentAction) && masterModaList.HasSearchFields()) { @* Show search form (begin) *@
+<div class="ew-extended-search container-fluid ps-2">
+<div class="row mb-0@(masterModaList.SearchFieldsPerRow > 0 ? " row-cols-sm-" + masterModaList.SearchFieldsPerRow : "")">
+@{
+    // Render search row
+    masterModaList.RowType = RowType.Search;
+    masterModaList.ResetAttributes();
+    await masterModaList.RenderRow();
+}
+@if (masterModaList.IdModa.Visible) { // masterModaList.IdModa.Visible (begin)
+    if (!masterModaList.IdModa.UseFilter) {
+        masterModaList.SearchColumnCount++;
+    }
+    <div id="xs_IdModa" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(masterModaList.IdModa.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_IdModa"
+            name="x_IdModa[]"
+            class="form-control ew-select@(masterModaList.IdModa.IsInvalidClass)"
+            data-select2-id="fMasterModasrch_x_IdModa"
+            data-table="MasterModa"
+            data-field="x_IdModa"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(masterModaList.IdModa.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(masterModaList.IdModa.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(masterModaList.IdModa.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(masterModaList.IdModa.EditAttributes)>
+            @(masterModaList.IdModa.SelectOptionListHtml("x_IdModa", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(masterModaList.IdModa.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMasterModasrch", function() {
+            var options = {
+                name: "x_IdModa",
+                selectId: "fMasterModasrch_x_IdModa",
+                ajax: { id: "x_IdModa", form: "fMasterModasrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MasterModa.fields.IdModa.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* masterModaList.IdModa.Visible (end) *@
+@if (masterModaList.NamaModa.Visible) { // masterModaList.NamaModa.Visible (begin)
+    if (!masterModaList.NamaModa.UseFilter) {
+        masterModaList.SearchColumnCount++;
+    }
+    <div id="xs_NamaModa" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(masterModaList.NamaModa.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_NamaModa"
+            name="x_NamaModa[]"
+            class="form-control ew-select@(masterModaList.NamaModa.IsInvalidClass)"
+            data-select2-id="fMasterModasrch_x_NamaModa"
+            data-table="MasterModa"
+            data-field="x_NamaModa"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(masterModaList.NamaModa.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(masterModaList.NamaModa.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(masterModaList.NamaModa.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(masterModaList.NamaModa.EditAttributes)>
+            @(masterModaList.NamaModa.SelectOptionListHtml("x_NamaModa", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(masterModaList.NamaModa.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMasterModasrch", function() {
+            var options = {
+                name: "x_NamaModa",
+                selectId: "fMasterModasrch_x_NamaModa",
+                ajax: { id: "x_NamaModa", form: "fMasterModasrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MasterModa.fields.NamaModa.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* masterModaList.NamaModa.Visible (end) *@
+</div><!-- /.row -->
+<div class="row mb-0">
+    <div class="col-sm-auto px-0 pe-sm-2">
+        <div class="ew-basic-search input-group">
+            <input type="search" name="@(Config.TableBasicSearch)" id="@(Config.TableBasicSearch)" class="form-control ew-basic-search-keyword" value="@Html.Raw(HtmlEncode(masterModaList.BasicSearch.SessionKeyword))" placeholder="@(HtmlEncode(Language.Phrase("Search")))" aria-label="@(HtmlEncode(Language.Phrase("Search")))">
+            <input type="hidden" name="@(Config.TableBasicSearchType)" id="@(Config.TableBasicSearchType)" class="ew-basic-search-type" value="@(HtmlEncode(masterModaList.BasicSearch.SessionType))">
+            <button type="button" data-bs-toggle="dropdown" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split" aria-haspopup="true" aria-expanded="false">
+                <span id="searchtype">@Html.Raw(masterModaList.BasicSearch.TypeNameShort)</span>
+            </button>
+            <div class="dropdown-menu dropdown-menu-end">
+                <button type="button" class="dropdown-item@(masterModaList.BasicSearch.SessionType == "" ? " active" : "")" form="fMasterModasrch" data-ew-action="search-type">@Html.Raw(Language.Phrase("QuickSearchAuto"))</button>
+                <button type="button" class="dropdown-item@(masterModaList.BasicSearch.SessionType == "=" ? " active" : "")" form="fMasterModasrch" data-ew-action="search-type" data-search-type="=">@Html.Raw(Language.Phrase("QuickSearchExact"))</button>
+                <button type="button" class="dropdown-item@(masterModaList.BasicSearch.SessionType == "AND" ? " active" : "")" form="fMasterModasrch" data-ew-action="search-type" data-search-type="AND">@Html.Raw(Language.Phrase("QuickSearchAll"))</button>
+                <button type="button" class="dropdown-item@(masterModaList.BasicSearch.SessionType == "OR" ? " active" : "")" form="fMasterModasrch" data-ew-action="search-type" data-search-type="OR">@Html.Raw(Language.Phrase("QuickSearchAny"))</button>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-auto mb-3">
+        <button class="btn btn-primary" name="btn-submit" id="btn-submit" type="submit">@Html.Raw(Language.Phrase("SearchBtn"))</button>
+    </div>
+</div>
+</div><!-- /.ew-extended-search -->
+} @* Show search form (end) *@
+}
+</div><!-- /.ew-search-panel -->
+</form>
+}
+@masterModaList.ShowPageHeader()
+@masterModaList.ShowMessages()
+<main class="list @(masterModaList.TotalRecords == 0 && !masterModaList.IsAdd ? " ew-no-record" : "")">
+<div id="ew-header-options">
+    @masterModaList.HeaderOptions.RenderBody()
+</div>
+<div id="ew-list">
+@if (masterModaList.TotalRecords > 0 || !Empty(masterModaList.CurrentAction)) {
+<div class="card ew-card ew-grid@(masterModaList.IsAddOrEdit ? " ew-grid-add-edit" : "") @(masterModaList.TableGridClass)">
+<form name="@(masterModaList.FormName)" id="@(masterModaList.FormName)" class="ew-form ew-list-form" action="@AppPath(masterModaList.PageName)" method="post" novalidate autocomplete="off">
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+@if (masterModaList.IsModal) {
+<input type="hidden" name="modal" value="1">
+}
+<div id="gmp_MasterModa" class="card-body ew-grid-middle-panel @(masterModaList.TableContainerClass)" style="@(masterModaList.TableContainerStyle)">
+@if (masterModaList.TotalRecords > 0 || masterModaList.IsGridEdit || masterModaList.IsMultiEdit) {
+<table id="tbl_MasterModalist" class="@(masterModaList.TableClass)"><!-- .ew-table -->
+<thead>
+    <tr class="ew-table-header">
+@{
+    // Header row
+    masterModaList.RowType = RowType.Header;
+
+    // Render list options
+    await masterModaList.RenderListOptions();
+}
+@* Render list options (header, left) *@
+@masterModaList.ListOptions.RenderHeader("left")
+@if (masterModaList.IdModa.Visible) { // masterModaList.IdModa.Visible (begin)
+        <th data-name="IdModa" class="@(masterModaList.IdModa.HeaderCellClass)"><div id="elh_MasterModa_IdModa" class="MasterModa_IdModa">@Html.Raw(masterModaList.RenderFieldHeader(masterModaList.IdModa))</div></th>
+} @* masterModaList.IdModa.Visible (end) *@
+@if (masterModaList.NamaModa.Visible) { // masterModaList.NamaModa.Visible (begin)
+        <th data-name="NamaModa" class="@(masterModaList.NamaModa.HeaderCellClass)"><div id="elh_MasterModa_NamaModa" class="MasterModa_NamaModa">@Html.Raw(masterModaList.RenderFieldHeader(masterModaList.NamaModa))</div></th>
+} @* masterModaList.NamaModa.Visible (end) *@
+@* Render list options (header, right) *@
+@masterModaList.ListOptions.RenderHeader("right")
+    </tr>
+</thead>
+<tbody data-page="@(masterModaList.PageNumber)">
+@{
+    await masterModaList.SetupGrid();
+    bool eof = masterModaList.Recordset == null; // DN
+}
+@while (masterModaList.RecordCount < masterModaList.StopRecord || SameString(masterModaList.RowIndex, "$rowindex$")) { // Begin While
+    if (!eof && !SameString(masterModaList.RowIndex, "$rowindex$") &&
+        (!masterModaList.IsGridAdd || masterModaList.CurrentMode == "copy") &&
+        (!((masterModaList.IsCopy || masterModaList.IsAdd) && masterModaList.RowIndex is int rowIndex && rowIndex == 0))) // DN
+        eof = !await masterModaList.Recordset.ReadAsync();
+    masterModaList.RecordCount++;
+    if (masterModaList.RecordCount >= masterModaList.StartRecord) {
+        await masterModaList.SetupRow();
+    <tr @Html.Raw(masterModaList.RowAttributes)>
+    @* Render list options (body, left) *@
+    @masterModaList.ListOptions.RenderBody("left", masterModaList.RowCount)
+    @if (masterModaList.IdModa.Visible) { // masterModaList.IdModa.Visible (begin)
+        <td data-name="IdModa" @Html.Raw(masterModaList.IdModa.CellAttributes)>
+<span id="el@(masterModaList.RowIndex == "$rowindex$" ? "$rowindex$" : masterModaList.RowCount)_MasterModa_IdModa" class="el_MasterModa_IdModa">
+<span @Html.Raw(masterModaList.IdModa.ViewAttributes)>
+@Html.Raw(masterModaList.IdModa.GetViewValue())</span>
+</span>
+</td>
+    } @* masterModaList.IdModa.Visible (end) *@
+    @if (masterModaList.NamaModa.Visible) { // masterModaList.NamaModa.Visible (begin)
+        <td data-name="NamaModa" @Html.Raw(masterModaList.NamaModa.CellAttributes)>
+<span id="el@(masterModaList.RowIndex == "$rowindex$" ? "$rowindex$" : masterModaList.RowCount)_MasterModa_NamaModa" class="el_MasterModa_NamaModa">
+<span @Html.Raw(masterModaList.NamaModa.ViewAttributes)>
+@Html.Raw(masterModaList.NamaModa.GetViewValue())</span>
+</span>
+</td>
+    } @* masterModaList.NamaModa.Visible (end) *@
+    @* Render list options (body, right) *@
+    @masterModaList.ListOptions.RenderBody("right", masterModaList.RowCount)
+    </tr>
+    } @* End if *@
+
+    // Reset for template row
+    if (SameString(masterModaList.RowIndex, "$rowindex$"))
+        masterModaList.RowIndex = 0;
+
+    // Reset inline add/copy row
+    if ((masterModaList.IsCopy || masterModaList.IsAdd) && masterModaList.RowIndex is int rowIndex2 && rowIndex2 == 0)
+        masterModaList.RowIndex = 1;
+} @* End While *@
+</tbody>
+</table><!-- /.ew-table -->
+} @* End If TotalRecords > 0 *@
+</div><!-- /.ew-grid-middle-panel -->
+@if (Empty(masterModaList.CurrentAction) && !masterModaList.UseAjaxActions) {
+<input type="hidden" name="action" id="action" value="">
+}
+</form><!-- /.ew-list-form -->
+@{ masterModaList.CloseRecordset(); }
+@if (!masterModaList.IsExport()) {
+<div class="card-footer ew-grid-lower-panel">
+@if (!masterModaList.IsGridAdd && !(masterModaList.IsGridEdit && masterModaList.ModalGridEdit) && !masterModaList.IsMultiEdit) {
+@Html.Raw(masterModaList.Pager.Render())
+}
+<div class="ew-list-other-options">
+@masterModaList.OtherOptions.RenderBody("bottom")
+</div>
+</div>
+}
+</div><!-- /.ew-grid -->
+} else { // Show other options
+<div class="ew-list-other-options">
+@masterModaList.OtherOptions.ForEach(opt => opt.ButtonClass = "").RenderBody()
+</div>
+}
+</div>
+<div id="ew-footer-options">
+    @masterModaList.FooterOptions.RenderBody()
+</div>
+</main>
+@masterModaList.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+@if (!masterModaList.IsExport()) {
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("MasterModa");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Write your table-specific startup script here
+    // document.write("page loaded");
+});
+</script>
+}

@@ -1,0 +1,119 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (masterModaAdd.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = masterModaAdd.UseLayout ? "_Layout" : "";
+}
+<script>
+var currentTable = @Html.Raw(ConvertToJson(masterModaAdd.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { MasterModa: currentTable } });
+var currentPageID = ew.PAGE_ID = "add";
+var currentForm;
+var fMasterModaadd;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("fMasterModaadd")
+        .setPageId("add")
+
+        // Add fields
+        .setFields([
+
+            ["NamaModa", [fields.NamaModa.visible && fields.NamaModa.required ? ew.Validators.required(fields.NamaModa.caption) : null], fields.NamaModa.isInvalid]
+        ])
+
+        // Form_CustomValidate
+        .setCustomValidate(
+            function(fobj) { // DO NOT CHANGE THIS LINE!
+                    // Your custom validation code here, return false if invalid.
+                    return true;
+                }
+        )
+
+        // Use JavaScript validation or not
+        .setValidateRequired(ew.CLIENT_VALIDATE)
+
+        // Dynamic selection lists
+        .setLists({
+        })
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Client script
+    $('#fMasterModaadd').on('submit', function (e) {
+        e.preventDefault();
+        showLoading();
+        setTimeout(() => {
+            hideLoading();
+        }, 3000);
+        this.requestSubmit();
+    });
+});
+</script>
+@masterModaAdd.ShowPageHeader()
+@masterModaAdd.ShowMessages()
+<form name="fMasterModaadd" id="fMasterModaadd" class="@(masterModaAdd.FormClassName)" action="@AppPath(CurrentPageName())" method="post" novalidate autocomplete="off">
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+<input type="hidden" name="action" id="action" value="insert">
+<input type="hidden" name="modal" value="@ConvertToInt(masterModaAdd.IsModal)">
+@if (IsJsonResponse()) {
+<input type="hidden" name="json" value="1">
+}
+<input type="hidden" name="@(masterModaAdd.OldKeyName)" value="@Html.Raw(masterModaAdd.OldKey)">
+<div class="ew-add-div"><!-- page* -->
+@if (masterModaAdd.NamaModa.Visible) { // masterModaAdd.NamaModa.Visible (begin)
+    <div id="r_NamaModa" @Html.Raw(masterModaAdd.NamaModa.RowAttributes)>
+        <label id="elh_MasterModa_NamaModa" for="x_NamaModa" class="@(masterModaAdd.LeftColumnClass)">@Html.Raw(masterModaAdd.NamaModa.Caption)@Html.Raw(masterModaAdd.NamaModa.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(masterModaAdd.RightColumnClass)"><div @Html.Raw(masterModaAdd.NamaModa.CellAttributes)>
+<span id="el_MasterModa_NamaModa">
+<input type="@(masterModaAdd.NamaModa.InputTextType)" name="x_NamaModa" id="x_NamaModa" data-table="MasterModa" data-field="x_NamaModa" value="@Html.Raw(masterModaAdd.NamaModa.EditValue)" size="30" maxlength="100" placeholder="@Html.Raw(HtmlEncode(masterModaAdd.NamaModa.PlaceHolder))" data-format-pattern="@(masterModaAdd.NamaModa.FormatPattern)"@Html.Raw(masterModaAdd.NamaModa.EditAttributes) aria-describedby="x_NamaModa_help">
+@Html.Raw(masterModaAdd.NamaModa.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(masterModaAdd.NamaModa.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* masterModaAdd.NamaModa.Visible (end) *@
+</div><!-- /page* -->
+@{ masterModaAdd.CloseRecordset(); }
+@Html.Raw(masterModaAdd.IsModal ? "<template class=\"ew-modal-buttons\">" : "<div class=\"row ew-buttons\">")<!-- buttons .row -->
+    <div class="@(masterModaAdd.OffsetColumnClass)"><!-- buttons offset -->
+    <button class="btn btn-primary ew-btn" name="btn-action" id="btn-action" type="submit" form="fMasterModaadd">@Html.Raw(Language.Phrase("AddBtn"))</button>
+@if (IsJsonResponse()) {
+    <button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" data-bs-dismiss="modal">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+} else {
+    <button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" form="fMasterModaadd" data-href="@AppPath(masterModaAdd.ReturnUrl)">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+}
+    </div><!-- /buttons offset -->
+@Html.Raw(masterModaAdd.IsModal ? "</template>" : "</div>")<!-- /buttons .row -->
+</form>
+@masterModaAdd.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("MasterModa");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Write your table-specific startup script here
+    // document.write("page loaded");
+});
+</script>

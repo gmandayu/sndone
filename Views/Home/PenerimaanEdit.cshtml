@@ -1,0 +1,378 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (penerimaanEdit.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = penerimaanEdit.UseLayout ? "_Layout" : "";
+}
+@penerimaanEdit.ShowPageHeader()
+@penerimaanEdit.ShowMessages()
+<main class="edit">
+<form name="fPenerimaanedit" id="fPenerimaanedit" class="@(penerimaanEdit.FormClassName)" action="@AppPath(CurrentPageName())" method="post" novalidate autocomplete="off">
+<script>
+var currentTable = @Html.Raw(ConvertToJson(penerimaanEdit.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { Penerimaan: currentTable } });
+var currentPageID = ew.PAGE_ID = "edit";
+var currentForm;
+var fPenerimaanedit;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("fPenerimaanedit")
+        .setPageId("edit")
+
+        // Add fields
+        .setFields([
+
+            ["NomorPenerimaan", [fields.NomorPenerimaan.visible && fields.NomorPenerimaan.required ? ew.Validators.required(fields.NomorPenerimaan.caption) : null], fields.NomorPenerimaan.isInvalid],
+            ["NomorVoyage", [fields.NomorVoyage.visible && fields.NomorVoyage.required ? ew.Validators.required(fields.NomorVoyage.caption) : null], fields.NomorVoyage.isInvalid],
+            ["NomorPengiriman", [fields.NomorPengiriman.visible && fields.NomorPengiriman.required ? ew.Validators.required(fields.NomorPengiriman.caption) : null], fields.NomorPengiriman.isInvalid],
+            ["IdPlant", [fields.IdPlant.visible && fields.IdPlant.required ? ew.Validators.required(fields.IdPlant.caption) : null], fields.IdPlant.isInvalid],
+            ["TipeProdukSTS", [fields.TipeProdukSTS.visible && fields.TipeProdukSTS.required ? ew.Validators.required(fields.TipeProdukSTS.caption) : null], fields.TipeProdukSTS.isInvalid],
+            ["KodeProduk", [fields.KodeProduk.visible && fields.KodeProduk.required ? ew.Validators.required(fields.KodeProduk.caption) : null], fields.KodeProduk.isInvalid],
+            ["ModaTransportasi", [fields.ModaTransportasi.visible && fields.ModaTransportasi.required ? ew.Validators.required(fields.ModaTransportasi.caption) : null], fields.ModaTransportasi.isInvalid],
+            ["NamaKapal", [fields.NamaKapal.visible && fields.NamaKapal.required ? ew.Validators.required(fields.NamaKapal.caption) : null], fields.NamaKapal.isInvalid],
+            ["Refinery", [fields.Refinery.visible && fields.Refinery.required ? ew.Validators.required(fields.Refinery.caption) : null], fields.Refinery.isInvalid],
+            ["IdPenyaluran", [fields.IdPenyaluran.visible && fields.IdPenyaluran.required ? ew.Validators.required(fields.IdPenyaluran.caption) : null], fields.IdPenyaluran.isInvalid],
+            ["PenyaluranLookup", [fields.PenyaluranLookup.visible && fields.PenyaluranLookup.required ? ew.Validators.required(fields.PenyaluranLookup.caption) : null], fields.PenyaluranLookup.isInvalid],
+            ["TanggalSandar", [fields.TanggalSandar.visible && fields.TanggalSandar.required ? ew.Validators.required(fields.TanggalSandar.caption) : null], fields.TanggalSandar.isInvalid],
+            ["IdDermaga", [fields.IdDermaga.visible && fields.IdDermaga.required ? ew.Validators.required(fields.IdDermaga.caption) : null], fields.IdDermaga.isInvalid],
+            ["Catatan", [fields.Catatan.visible && fields.Catatan.required ? ew.Validators.required(fields.Catatan.caption) : null], fields.Catatan.isInvalid],
+            ["LookupTipeProduk", [fields.LookupTipeProduk.visible && fields.LookupTipeProduk.required ? ew.Validators.required(fields.LookupTipeProduk.caption) : null], fields.LookupTipeProduk.isInvalid],
+            ["LookupJenisPlant", [fields.LookupJenisPlant.visible && fields.LookupJenisPlant.required ? ew.Validators.required(fields.LookupJenisPlant.caption) : null], fields.LookupJenisPlant.isInvalid]
+        ])
+
+        // Form_CustomValidate
+        .setCustomValidate(
+            function(fobj) { // DO NOT CHANGE THIS LINE!
+                    // Your custom validation code here, return false if invalid.
+                    return true;
+                }
+        )
+
+        // Use JavaScript validation or not
+        .setValidateRequired(ew.CLIENT_VALIDATE)
+
+        // Dynamic selection lists
+        .setLists({
+        })
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Client script
+    $('#fPenerimaanedit').on('submit', function (e) {
+        e.preventDefault();
+        showLoading();
+        setTimeout(() => {
+            hideLoading();
+        }, 3000);
+        this.requestSubmit();
+    });
+    const selectedValue = $('#x_ModaTransportasi').val();
+    if (selectedValue == 5 || selectedValue == 6){
+        $('#r_NamaKapal').hide();
+        $('#r_IdDermaga').hide();
+        $('#r_NomorVoyage').hide();
+        $('#elh_Penerimaan_TanggalSandar').contents().first()[0].textContent = 'Tanggal';
+        $('#x_TanggalSandar').attr('placeholder', 'Tanggal');
+    } else if (selectedValue == 4){ // RTW
+        $('#r_NamaKapal').hide();
+        $('#r_IdDermaga').hide();
+        $('#r_NomorVoyage').hide();
+        $('#elh_Penerimaan_TanggalSandar').contents().first()[0].textContent = 'Tanggal';
+        $('#x_TanggalSandar').attr('placeholder', 'Tanggal');
+    } else if (selectedValue == 3){ // Truck
+        $('#r_NamaKapal').hide();
+        $('#r_IdDermaga').hide();
+        $('#r_NomorVoyage').hide();
+        $('#elh_Penerimaan_TanggalSandar').contents().first()[0].textContent = 'Tanggal';
+        $('#x_TanggalSandar').attr('placeholder', 'Tanggal');
+    } else if (selectedValue == 4) {
+        $('#r_NamaKapal').hide();
+        $('#r_IdDermaga').hide();
+        $('#r_NomorVoyage').hide();
+        $('#elh_Penerimaan_TanggalSandar').contents().first()[0].textContent = 'Tanggal';
+        $('#x_TanggalSandar').attr('placeholder', 'Tanggal');
+    } else {
+        $('#elh_Penerimaan_TanggalSandar').contents().first()[0].textContent = 'Tanggal Sandar';
+        $('#x_TanggalSandar').attr('placeholder', 'Tanggal Sandar');
+        $('#r_NamaKapal').show();
+        $('#r_IdDermaga').show();
+        $('#r_NomorVoyage').show();
+        $('#r_IdPenyaluran').hide();
+    }
+});
+</script>
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+<input type="hidden" name="action" id="action" value="update">
+<input type="hidden" name="modal" value="@ConvertToInt(penerimaanEdit.IsModal)">
+@if (IsJsonResponse()) {
+<input type="hidden" name="json" value="1">
+}
+<input type="hidden" name="@(penerimaanEdit.OldKeyName)" value="@Html.Raw(penerimaanEdit.OldKey)">
+<div class="ew-edit-div"><!-- page* -->
+@if (penerimaanEdit.NomorPenerimaan.Visible) { // penerimaanEdit.NomorPenerimaan.Visible (begin)
+    <div id="r_NomorPenerimaan" @Html.Raw(penerimaanEdit.NomorPenerimaan.RowAttributes)>
+        <label id="elh_Penerimaan_NomorPenerimaan" for="x_NomorPenerimaan" class="@(penerimaanEdit.LeftColumnClass)">@Html.Raw(penerimaanEdit.NomorPenerimaan.Caption)@Html.Raw(penerimaanEdit.NomorPenerimaan.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(penerimaanEdit.RightColumnClass)"><div @Html.Raw(penerimaanEdit.NomorPenerimaan.CellAttributes)>
+<span id="el_Penerimaan_NomorPenerimaan">
+<span @Html.Raw(penerimaanEdit.NomorPenerimaan.ViewAttributes)>
+<input type="text" readonly class="form-control-plaintext" value="@Html.Raw(RemoveHtml(ConvertToString(penerimaanEdit.NomorPenerimaan.EditValue)))"></span>
+<input type="hidden" data-table="Penerimaan" data-field="x_NomorPenerimaan" data-hidden="1" name="x_NomorPenerimaan" id="x_NomorPenerimaan" value="@Html.Raw(HtmlEncode(penerimaanEdit.NomorPenerimaan.CurrentValue))">
+</span>
+</div></div>
+    </div>
+} @* penerimaanEdit.NomorPenerimaan.Visible (end) *@
+@if (penerimaanEdit.NomorVoyage.Visible) { // penerimaanEdit.NomorVoyage.Visible (begin)
+    <div id="r_NomorVoyage" @Html.Raw(penerimaanEdit.NomorVoyage.RowAttributes)>
+        <label id="elh_Penerimaan_NomorVoyage" for="x_NomorVoyage" class="@(penerimaanEdit.LeftColumnClass)">@Html.Raw(penerimaanEdit.NomorVoyage.Caption)@Html.Raw(penerimaanEdit.NomorVoyage.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(penerimaanEdit.RightColumnClass)"><div @Html.Raw(penerimaanEdit.NomorVoyage.CellAttributes)>
+<span id="el_Penerimaan_NomorVoyage">
+<input type="@(penerimaanEdit.NomorVoyage.InputTextType)" name="x_NomorVoyage" id="x_NomorVoyage" data-table="Penerimaan" data-field="x_NomorVoyage" value="@Html.Raw(penerimaanEdit.NomorVoyage.EditValue)" size="30" maxlength="255" placeholder="@Html.Raw(HtmlEncode(penerimaanEdit.NomorVoyage.PlaceHolder))" data-format-pattern="@(penerimaanEdit.NomorVoyage.FormatPattern)"@Html.Raw(penerimaanEdit.NomorVoyage.EditAttributes) aria-describedby="x_NomorVoyage_help">
+@Html.Raw(penerimaanEdit.NomorVoyage.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(penerimaanEdit.NomorVoyage.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* penerimaanEdit.NomorVoyage.Visible (end) *@
+@if (penerimaanEdit.NomorPengiriman.Visible) { // penerimaanEdit.NomorPengiriman.Visible (begin)
+    <div id="r_NomorPengiriman" @Html.Raw(penerimaanEdit.NomorPengiriman.RowAttributes)>
+        <label id="elh_Penerimaan_NomorPengiriman" for="x_NomorPengiriman" class="@(penerimaanEdit.LeftColumnClass)">@Html.Raw(penerimaanEdit.NomorPengiriman.Caption)@Html.Raw(penerimaanEdit.NomorPengiriman.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(penerimaanEdit.RightColumnClass)"><div @Html.Raw(penerimaanEdit.NomorPengiriman.CellAttributes)>
+<span id="el_Penerimaan_NomorPengiriman">
+<input type="@(penerimaanEdit.NomorPengiriman.InputTextType)" name="x_NomorPengiriman" id="x_NomorPengiriman" data-table="Penerimaan" data-field="x_NomorPengiriman" value="@Html.Raw(penerimaanEdit.NomorPengiriman.EditValue)" size="30" maxlength="50" placeholder="@Html.Raw(HtmlEncode(penerimaanEdit.NomorPengiriman.PlaceHolder))" data-format-pattern="@(penerimaanEdit.NomorPengiriman.FormatPattern)"@Html.Raw(penerimaanEdit.NomorPengiriman.EditAttributes) aria-describedby="x_NomorPengiriman_help">
+@Html.Raw(penerimaanEdit.NomorPengiriman.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(penerimaanEdit.NomorPengiriman.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* penerimaanEdit.NomorPengiriman.Visible (end) *@
+@if (penerimaanEdit.IdPlant.Visible) { // penerimaanEdit.IdPlant.Visible (begin)
+    <div id="r_IdPlant" @Html.Raw(penerimaanEdit.IdPlant.RowAttributes)>
+        <label id="elh_Penerimaan_IdPlant" class="@(penerimaanEdit.LeftColumnClass)">@Html.Raw(penerimaanEdit.IdPlant.Caption)@Html.Raw(penerimaanEdit.IdPlant.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(penerimaanEdit.RightColumnClass)"><div @Html.Raw(penerimaanEdit.IdPlant.CellAttributes)>
+<span id="el_Penerimaan_IdPlant">
+<span @Html.Raw(penerimaanEdit.IdPlant.ViewAttributes)>
+<span class="form-control-plaintext">@Html.Raw(penerimaanEdit.IdPlant.DisplayValue(penerimaanEdit.IdPlant.EditValue))</span></span>
+<input type="hidden" data-table="Penerimaan" data-field="x_IdPlant" data-hidden="1" name="x_IdPlant" id="x_IdPlant" value="@Html.Raw(HtmlEncode(penerimaanEdit.IdPlant.CurrentValue))">
+</span>
+</div></div>
+    </div>
+} @* penerimaanEdit.IdPlant.Visible (end) *@
+@if (penerimaanEdit.TipeProdukSTS.Visible) { // penerimaanEdit.TipeProdukSTS.Visible (begin)
+    <div id="r_TipeProdukSTS" @Html.Raw(penerimaanEdit.TipeProdukSTS.RowAttributes)>
+        <label id="elh_Penerimaan_TipeProdukSTS" for="x_TipeProdukSTS" class="@(penerimaanEdit.LeftColumnClass)">@Html.Raw(penerimaanEdit.TipeProdukSTS.Caption)@Html.Raw(penerimaanEdit.TipeProdukSTS.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(penerimaanEdit.RightColumnClass)"><div @Html.Raw(penerimaanEdit.TipeProdukSTS.CellAttributes)>
+<span id="el_Penerimaan_TipeProdukSTS">
+<span @Html.Raw(penerimaanEdit.TipeProdukSTS.ViewAttributes)>
+<span class="form-control-plaintext">@Html.Raw(penerimaanEdit.TipeProdukSTS.DisplayValue(penerimaanEdit.TipeProdukSTS.EditValue))</span></span>
+<input type="hidden" data-table="Penerimaan" data-field="x_TipeProdukSTS" data-hidden="1" name="x_TipeProdukSTS" id="x_TipeProdukSTS" value="@Html.Raw(HtmlEncode(penerimaanEdit.TipeProdukSTS.CurrentValue))">
+</span>
+</div></div>
+    </div>
+} @* penerimaanEdit.TipeProdukSTS.Visible (end) *@
+@if (penerimaanEdit.KodeProduk.Visible) { // penerimaanEdit.KodeProduk.Visible (begin)
+    <div id="r_KodeProduk" @Html.Raw(penerimaanEdit.KodeProduk.RowAttributes)>
+        <label id="elh_Penerimaan_KodeProduk" for="x_KodeProduk" class="@(penerimaanEdit.LeftColumnClass)">@Html.Raw(penerimaanEdit.KodeProduk.Caption)@Html.Raw(penerimaanEdit.KodeProduk.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(penerimaanEdit.RightColumnClass)"><div @Html.Raw(penerimaanEdit.KodeProduk.CellAttributes)>
+<span id="el_Penerimaan_KodeProduk">
+<span @Html.Raw(penerimaanEdit.KodeProduk.ViewAttributes)>
+<span class="form-control-plaintext">@Html.Raw(penerimaanEdit.KodeProduk.DisplayValue(penerimaanEdit.KodeProduk.EditValue))</span></span>
+<input type="hidden" data-table="Penerimaan" data-field="x_KodeProduk" data-hidden="1" name="x_KodeProduk" id="x_KodeProduk" value="@Html.Raw(HtmlEncode(penerimaanEdit.KodeProduk.CurrentValue))">
+</span>
+</div></div>
+    </div>
+} @* penerimaanEdit.KodeProduk.Visible (end) *@
+@if (penerimaanEdit.ModaTransportasi.Visible) { // penerimaanEdit.ModaTransportasi.Visible (begin)
+    <div id="r_ModaTransportasi" @Html.Raw(penerimaanEdit.ModaTransportasi.RowAttributes)>
+        <label id="elh_Penerimaan_ModaTransportasi" for="x_ModaTransportasi" class="@(penerimaanEdit.LeftColumnClass)">@Html.Raw(penerimaanEdit.ModaTransportasi.Caption)@Html.Raw(penerimaanEdit.ModaTransportasi.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(penerimaanEdit.RightColumnClass)"><div @Html.Raw(penerimaanEdit.ModaTransportasi.CellAttributes)>
+<span id="el_Penerimaan_ModaTransportasi">
+<span @Html.Raw(penerimaanEdit.ModaTransportasi.ViewAttributes)>
+<span class="form-control-plaintext">@Html.Raw(penerimaanEdit.ModaTransportasi.DisplayValue(penerimaanEdit.ModaTransportasi.EditValue))</span></span>
+<input type="hidden" data-table="Penerimaan" data-field="x_ModaTransportasi" data-hidden="1" name="x_ModaTransportasi" id="x_ModaTransportasi" value="@Html.Raw(HtmlEncode(penerimaanEdit.ModaTransportasi.CurrentValue))">
+</span>
+</div></div>
+    </div>
+} @* penerimaanEdit.ModaTransportasi.Visible (end) *@
+@if (penerimaanEdit.NamaKapal.Visible) { // penerimaanEdit.NamaKapal.Visible (begin)
+    <div id="r_NamaKapal" @Html.Raw(penerimaanEdit.NamaKapal.RowAttributes)>
+        <label id="elh_Penerimaan_NamaKapal" for="x_NamaKapal" class="@(penerimaanEdit.LeftColumnClass)">@Html.Raw(penerimaanEdit.NamaKapal.Caption)@Html.Raw(penerimaanEdit.NamaKapal.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(penerimaanEdit.RightColumnClass)"><div @Html.Raw(penerimaanEdit.NamaKapal.CellAttributes)>
+<span id="el_Penerimaan_NamaKapal">
+<span @Html.Raw(penerimaanEdit.NamaKapal.ViewAttributes)>
+<input type="text" readonly class="form-control-plaintext" value="@Html.Raw(RemoveHtml(ConvertToString(penerimaanEdit.NamaKapal.EditValue)))"></span>
+<input type="hidden" data-table="Penerimaan" data-field="x_NamaKapal" data-hidden="1" name="x_NamaKapal" id="x_NamaKapal" value="@Html.Raw(HtmlEncode(penerimaanEdit.NamaKapal.CurrentValue))">
+</span>
+</div></div>
+    </div>
+} @* penerimaanEdit.NamaKapal.Visible (end) *@
+@if (penerimaanEdit.Refinery.Visible) { // penerimaanEdit.Refinery.Visible (begin)
+    <div id="r_Refinery" @Html.Raw(penerimaanEdit.Refinery.RowAttributes)>
+        <label id="elh_Penerimaan_Refinery" class="@(penerimaanEdit.LeftColumnClass)">@Html.Raw(penerimaanEdit.Refinery.Caption)@Html.Raw(penerimaanEdit.Refinery.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(penerimaanEdit.RightColumnClass)"><div @Html.Raw(penerimaanEdit.Refinery.CellAttributes)>
+<span id="el_Penerimaan_Refinery">
+<span @Html.Raw(penerimaanEdit.Refinery.ViewAttributes)>
+<i class="fa-regular @(ConvertToBool(penerimaanEdit.Refinery.CurrentValue) ? "fa-square-check" : "fa-square") ew-icon ew-boolean"></i>
+</span>
+<input type="hidden" data-table="Penerimaan" data-field="x_Refinery" data-hidden="1" name="x_Refinery" id="x_Refinery" value="@Html.Raw(HtmlEncode(penerimaanEdit.Refinery.CurrentValue))">
+</span>
+</div></div>
+    </div>
+} @* penerimaanEdit.Refinery.Visible (end) *@
+@if (penerimaanEdit.IdPenyaluran.Visible) { // penerimaanEdit.IdPenyaluran.Visible (begin)
+    <div id="r_IdPenyaluran" @Html.Raw(penerimaanEdit.IdPenyaluran.RowAttributes)>
+        <label id="elh_Penerimaan_IdPenyaluran" for="x_IdPenyaluran" class="@(penerimaanEdit.LeftColumnClass)">@Html.Raw(penerimaanEdit.IdPenyaluran.Caption)@Html.Raw(penerimaanEdit.IdPenyaluran.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(penerimaanEdit.RightColumnClass)"><div @Html.Raw(penerimaanEdit.IdPenyaluran.CellAttributes)>
+<span id="el_Penerimaan_IdPenyaluran">
+<span @Html.Raw(penerimaanEdit.IdPenyaluran.ViewAttributes)>
+<span class="form-control-plaintext">@Html.Raw(penerimaanEdit.IdPenyaluran.DisplayValue(penerimaanEdit.IdPenyaluran.EditValue))</span></span>
+<input type="hidden" data-table="Penerimaan" data-field="x_IdPenyaluran" data-hidden="1" name="x_IdPenyaluran" id="x_IdPenyaluran" value="@Html.Raw(HtmlEncode(penerimaanEdit.IdPenyaluran.CurrentValue))">
+</span>
+</div></div>
+    </div>
+} @* penerimaanEdit.IdPenyaluran.Visible (end) *@
+@if (penerimaanEdit.PenyaluranLookup.Visible) { // penerimaanEdit.PenyaluranLookup.Visible (begin)
+    <div id="r_PenyaluranLookup" @Html.Raw(penerimaanEdit.PenyaluranLookup.RowAttributes)>
+        <label id="elh_Penerimaan_PenyaluranLookup" class="@(penerimaanEdit.LeftColumnClass)">@Html.Raw(penerimaanEdit.PenyaluranLookup.Caption)@Html.Raw(penerimaanEdit.PenyaluranLookup.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(penerimaanEdit.RightColumnClass)"><div @Html.Raw(penerimaanEdit.PenyaluranLookup.CellAttributes)>
+<span id="el_Penerimaan_PenyaluranLookup">
+<span @Html.Raw(penerimaanEdit.PenyaluranLookup.ViewAttributes)>
+<span class="form-control-plaintext">@Html.Raw(penerimaanEdit.PenyaluranLookup.DisplayValue(penerimaanEdit.PenyaluranLookup.EditValue))</span></span>
+<input type="hidden" data-table="Penerimaan" data-field="x_PenyaluranLookup" data-hidden="1" name="x_PenyaluranLookup" id="x_PenyaluranLookup" value="@Html.Raw(HtmlEncode(penerimaanEdit.PenyaluranLookup.CurrentValue))">
+</span>
+</div></div>
+    </div>
+} @* penerimaanEdit.PenyaluranLookup.Visible (end) *@
+@if (penerimaanEdit.TanggalSandar.Visible) { // penerimaanEdit.TanggalSandar.Visible (begin)
+    <div id="r_TanggalSandar" @Html.Raw(penerimaanEdit.TanggalSandar.RowAttributes)>
+        <label id="elh_Penerimaan_TanggalSandar" for="x_TanggalSandar" class="@(penerimaanEdit.LeftColumnClass)">@Html.Raw(penerimaanEdit.TanggalSandar.Caption)@Html.Raw(penerimaanEdit.TanggalSandar.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(penerimaanEdit.RightColumnClass)"><div @Html.Raw(penerimaanEdit.TanggalSandar.CellAttributes)>
+<span id="el_Penerimaan_TanggalSandar">
+<span @Html.Raw(penerimaanEdit.TanggalSandar.ViewAttributes)>
+<input type="text" readonly class="form-control-plaintext" value="@Html.Raw(RemoveHtml(ConvertToString(penerimaanEdit.TanggalSandar.EditValue)))"></span>
+<input type="hidden" data-table="Penerimaan" data-field="x_TanggalSandar" data-hidden="1" name="x_TanggalSandar" id="x_TanggalSandar" value="@Html.Raw(HtmlEncode(penerimaanEdit.TanggalSandar.CurrentValue))">
+</span>
+</div></div>
+    </div>
+} @* penerimaanEdit.TanggalSandar.Visible (end) *@
+@if (penerimaanEdit.IdDermaga.Visible) { // penerimaanEdit.IdDermaga.Visible (begin)
+    <div id="r_IdDermaga" @Html.Raw(penerimaanEdit.IdDermaga.RowAttributes)>
+        <label id="elh_Penerimaan_IdDermaga" for="x_IdDermaga" class="@(penerimaanEdit.LeftColumnClass)">@Html.Raw(penerimaanEdit.IdDermaga.Caption)@Html.Raw(penerimaanEdit.IdDermaga.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(penerimaanEdit.RightColumnClass)"><div @Html.Raw(penerimaanEdit.IdDermaga.CellAttributes)>
+<span id="el_Penerimaan_IdDermaga">
+<span @Html.Raw(penerimaanEdit.IdDermaga.ViewAttributes)>
+<span class="form-control-plaintext">@Html.Raw(penerimaanEdit.IdDermaga.DisplayValue(penerimaanEdit.IdDermaga.EditValue))</span></span>
+<input type="hidden" data-table="Penerimaan" data-field="x_IdDermaga" data-hidden="1" name="x_IdDermaga" id="x_IdDermaga" value="@Html.Raw(HtmlEncode(penerimaanEdit.IdDermaga.CurrentValue))">
+</span>
+</div></div>
+    </div>
+} @* penerimaanEdit.IdDermaga.Visible (end) *@
+@if (penerimaanEdit.Catatan.Visible) { // penerimaanEdit.Catatan.Visible (begin)
+    <div id="r_Catatan" @Html.Raw(penerimaanEdit.Catatan.RowAttributes)>
+        <label id="elh_Penerimaan_Catatan" for="x_Catatan" class="@(penerimaanEdit.LeftColumnClass)">@Html.Raw(penerimaanEdit.Catatan.Caption)@Html.Raw(penerimaanEdit.Catatan.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(penerimaanEdit.RightColumnClass)"><div @Html.Raw(penerimaanEdit.Catatan.CellAttributes)>
+<span id="el_Penerimaan_Catatan">
+<textarea data-table="Penerimaan" data-field="x_Catatan" name="x_Catatan" id="x_Catatan" cols="35" rows="4" placeholder="@Html.Raw(HtmlEncode(penerimaanEdit.Catatan.PlaceHolder))"@Html.Raw(penerimaanEdit.Catatan.EditAttributes) aria-describedby="x_Catatan_help">@(penerimaanEdit.Catatan.EditValue)</textarea>
+@Html.Raw(penerimaanEdit.Catatan.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(penerimaanEdit.Catatan.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* penerimaanEdit.Catatan.Visible (end) *@
+</div><!-- /page* -->
+<span id="el_Penerimaan_LookupTipeProduk">
+<input type="hidden" data-table="Penerimaan" data-field="x_LookupTipeProduk" data-hidden="1" name="x_LookupTipeProduk" id="x_LookupTipeProduk" value="@Html.Raw(HtmlEncode(penerimaanEdit.LookupTipeProduk.CurrentValue))">
+</span>
+<span id="el_Penerimaan_LookupJenisPlant">
+<input type="hidden" data-table="Penerimaan" data-field="x_LookupJenisPlant" data-hidden="1" name="x_LookupJenisPlant" id="x_LookupJenisPlant" value="@Html.Raw(HtmlEncode(penerimaanEdit.LookupJenisPlant.CurrentValue))">
+</span>
+    <input type="hidden" data-table="Penerimaan" data-field="x_IdPenerimaan" data-hidden="1" name="x_IdPenerimaan" id="x_IdPenerimaan" value="@Html.Raw(HtmlEncode(penerimaanEdit.IdPenerimaan.CurrentValue))">
+@{ penerimaanEdit.CloseRecordset(); }
+@Html.Raw(penerimaanEdit.IsModal ? "<template class=\"ew-modal-buttons\">" : "<div class=\"row ew-buttons\">")<!-- buttons .row -->
+    <div class="@(penerimaanEdit.OffsetColumnClass)"><!-- buttons offset -->
+    <button class="btn btn-primary ew-btn" name="btn-action" id="btn-action" type="submit" form="fPenerimaanedit">@Html.Raw(Language.Phrase("SaveBtn"))</button>
+@if (IsJsonResponse()) {
+    <button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" data-bs-dismiss="modal">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+} else {
+    <button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" form="fPenerimaanedit" data-href="@AppPath(penerimaanEdit.ReturnUrl)">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+}
+    </div><!-- /buttons offset -->
+@Html.Raw(penerimaanEdit.IsModal ? "</template>" : "</div>")<!-- /buttons .row -->
+</form>
+</main>
+@penerimaanEdit.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("Penerimaan");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Startup script
+    // Write your table-specific startup script here
+    // document.write("page loaded");
+    var parent_url = ew.PATH_BASE;
+    const idModa = $('#x_ModaTransportasi').val();
+    if (idModa !== '5' && idModa !== '6'){
+        $('#r_PenyaluranLookup').hide();
+    } else {
+        const penyaluranId = $('#x_IdPenyaluran').val();
+        if (penyaluranId){
+            $('#r_PenyaluranLookup').show();
+            $('#r_IdPenyaluran').hide();
+        } else {
+            if (idModa == '5' || idModa == '6'){
+                const plantId = $("#x_IdPlant").val();
+                const penyaluranSelection = $("#x_IdPenyaluran");
+                penyaluranSelection.empty();
+                penyaluranSelection.append('<option value="">Loading...</option>');
+                $.ajax({
+                    url: parent_url + 'api/LookUpList/get-dropdown/penyaluran-to-penerimaan',
+                    method: 'GET',
+                    dataType: 'json',
+                    data: {
+                        plantId: plantId,
+                        modaId: idModa
+                    },
+                    success: function (data) {
+                        penyaluranSelection.empty(); 
+                        $.each(data, function (index, item) {
+                            penyaluranSelection.append(`<option value="${item.Value}">${item.Label}</option>`);
+                        });
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("Gagal ambil data dropdown:", error);
+                        penyaluranSelection.empty();
+                    }        
+                });
+                $('#r_IdPenyaluran').show();
+                $('#r_PenyaluranLookup').hide();
+            }
+        }
+        $('#r_NamaKapal').hide();
+        $('#r_IdDermaga').hide();
+        $('#r_NomorVoyage').hide();
+        $('#elh_Penerimaan_TanggalSandar').contents().first()[0].textContent = 'Tanggal';
+        $('#x_TanggalSandar').attr('placeholder', 'Tanggal');
+    }
+});
+</script>

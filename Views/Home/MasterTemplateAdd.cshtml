@@ -1,0 +1,385 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (masterTemplateAdd.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = masterTemplateAdd.UseLayout ? "_Layout" : "";
+}
+<script>
+var currentTable = @Html.Raw(ConvertToJson(masterTemplateAdd.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { MasterTemplate: currentTable } });
+var currentPageID = ew.PAGE_ID = "add";
+var currentForm;
+var fMasterTemplateadd;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("fMasterTemplateadd")
+        .setPageId("add")
+
+        // Add fields
+        .setFields([
+
+            ["NamaTemplate", [fields.NamaTemplate.visible && fields.NamaTemplate.required ? ew.Validators.required(fields.NamaTemplate.caption) : null], fields.NamaTemplate.isInvalid],
+            ["IdModa", [fields.IdModa.visible && fields.IdModa.required ? ew.Validators.required(fields.IdModa.caption) : null], fields.IdModa.isInvalid],
+            ["JenisProses", [fields.JenisProses.visible && fields.JenisProses.required ? ew.Validators.required(fields.JenisProses.caption) : null], fields.JenisProses.isInvalid],
+            ["Keterangan", [fields.Keterangan.visible && fields.Keterangan.required ? ew.Validators.required(fields.Keterangan.caption) : null], fields.Keterangan.isInvalid],
+            ["TipePenimbunan", [fields.TipePenimbunan.visible && fields.TipePenimbunan.required ? ew.Validators.required(fields.TipePenimbunan.caption) : null], fields.TipePenimbunan.isInvalid],
+            ["TipePenyaluran", [fields.TipePenyaluran.visible && fields.TipePenyaluran.required ? ew.Validators.required(fields.TipePenyaluran.caption) : null], fields.TipePenyaluran.isInvalid],
+            ["KategoriPenyaluran", [fields.KategoriPenyaluran.visible && fields.KategoriPenyaluran.required ? ew.Validators.required(fields.KategoriPenyaluran.caption) : null], fields.KategoriPenyaluran.isInvalid],
+            ["NamaDokumen", [fields.NamaDokumen.visible && fields.NamaDokumen.required ? ew.Validators.required(fields.NamaDokumen.caption) : null], fields.NamaDokumen.isInvalid]
+        ])
+
+        // Form_CustomValidate
+        .setCustomValidate(
+            function(fobj) { // DO NOT CHANGE THIS LINE!
+                    // Your custom validation code here, return false if invalid.
+                    return true;
+                }
+        )
+
+        // Use JavaScript validation or not
+        .setValidateRequired(ew.CLIENT_VALIDATE)
+
+        // Dynamic selection lists
+        .setLists({
+            "IdModa": @Html.Raw(masterTemplateAdd.IdModa.ToClientList(masterTemplateAdd)),
+            "JenisProses": @Html.Raw(masterTemplateAdd.JenisProses.ToClientList(masterTemplateAdd)),
+            "TipePenimbunan": @Html.Raw(masterTemplateAdd.TipePenimbunan.ToClientList(masterTemplateAdd)),
+            "TipePenyaluran": @Html.Raw(masterTemplateAdd.TipePenyaluran.ToClientList(masterTemplateAdd)),
+            "KategoriPenyaluran": @Html.Raw(masterTemplateAdd.KategoriPenyaluran.ToClientList(masterTemplateAdd)),
+        })
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Client script
+    $('#fMasterTemplateadd').on('submit', function (e) {
+        e.preventDefault();
+        showLoading();
+        setTimeout(() => {
+            hideLoading();
+        }, 3000);
+        this.requestSubmit();
+    });
+    $('#x_JenisProses').change(function(){
+        if ($(this).val() == 'SamplingLabTest' || $(this).val() == 'RencanaPenyaluran' || $(this).val() == 'Penyaluran') {
+            $('#r_TipePenyaluran').show();
+            $('#r_KategoriPenyaluran').show();
+            $('#r_TipePenimbunan').hide();
+        } else if ($(this).val() == 'Penimbunan') {
+            $('#r_TipePenimbunan').show();
+            $('#r_TipePenyaluran').hide();
+            $('#r_KategoriPenyaluran').hide();
+        } else {
+            $('#r_TipePenyaluran').hide();
+            $('#r_KategoriPenyaluran').hide();
+            $('#r_TipePenimbunan').hide();
+        }
+    });
+});
+</script>
+@masterTemplateAdd.ShowPageHeader()
+@masterTemplateAdd.ShowMessages()
+<form name="fMasterTemplateadd" id="fMasterTemplateadd" class="@(masterTemplateAdd.FormClassName)" action="@AppPath(CurrentPageName())" method="post" novalidate autocomplete="off">
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+<input type="hidden" name="action" id="action" value="insert">
+<input type="hidden" name="modal" value="@ConvertToInt(masterTemplateAdd.IsModal)">
+@if (IsJsonResponse()) {
+<input type="hidden" name="json" value="1">
+}
+<input type="hidden" name="@(masterTemplateAdd.OldKeyName)" value="@Html.Raw(masterTemplateAdd.OldKey)">
+<div class="ew-add-div"><!-- page* -->
+@if (masterTemplateAdd.NamaTemplate.Visible) { // masterTemplateAdd.NamaTemplate.Visible (begin)
+    <div id="r_NamaTemplate" @Html.Raw(masterTemplateAdd.NamaTemplate.RowAttributes)>
+        <label id="elh_MasterTemplate_NamaTemplate" for="x_NamaTemplate" class="@(masterTemplateAdd.LeftColumnClass)">@Html.Raw(masterTemplateAdd.NamaTemplate.Caption)@Html.Raw(masterTemplateAdd.NamaTemplate.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(masterTemplateAdd.RightColumnClass)"><div @Html.Raw(masterTemplateAdd.NamaTemplate.CellAttributes)>
+<span id="el_MasterTemplate_NamaTemplate">
+<input type="@(masterTemplateAdd.NamaTemplate.InputTextType)" name="x_NamaTemplate" id="x_NamaTemplate" data-table="MasterTemplate" data-field="x_NamaTemplate" value="@Html.Raw(masterTemplateAdd.NamaTemplate.EditValue)" size="30" maxlength="100" placeholder="@Html.Raw(HtmlEncode(masterTemplateAdd.NamaTemplate.PlaceHolder))" data-format-pattern="@(masterTemplateAdd.NamaTemplate.FormatPattern)"@Html.Raw(masterTemplateAdd.NamaTemplate.EditAttributes) aria-describedby="x_NamaTemplate_help">
+@Html.Raw(masterTemplateAdd.NamaTemplate.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(masterTemplateAdd.NamaTemplate.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* masterTemplateAdd.NamaTemplate.Visible (end) *@
+@if (masterTemplateAdd.IdModa.Visible) { // masterTemplateAdd.IdModa.Visible (begin)
+    <div id="r_IdModa" @Html.Raw(masterTemplateAdd.IdModa.RowAttributes)>
+        <label id="elh_MasterTemplate_IdModa" for="x_IdModa" class="@(masterTemplateAdd.LeftColumnClass)">@Html.Raw(masterTemplateAdd.IdModa.Caption)@Html.Raw(masterTemplateAdd.IdModa.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(masterTemplateAdd.RightColumnClass)"><div @Html.Raw(masterTemplateAdd.IdModa.CellAttributes)>
+<span id="el_MasterTemplate_IdModa">
+    <select
+        id="x_IdModa"
+        name="x_IdModa"
+        class="form-select ew-select@(masterTemplateAdd.IdModa.IsInvalidClass)"
+        data-select2-id="fMasterTemplateadd_x_IdModa"
+        data-table="MasterTemplate"
+        data-field="x_IdModa"
+        data-value-separator="@(masterTemplateAdd.IdModa.DisplayValueSeparatorAttribute)"
+        data-placeholder="@(HtmlEncode(masterTemplateAdd.IdModa.PlaceHolder))"
+        @Html.Raw(masterTemplateAdd.IdModa.EditAttributes)>
+        @(masterTemplateAdd.IdModa.SelectOptionListHtml("x_IdModa"))
+    </select>
+    @Html.Raw(masterTemplateAdd.IdModa.GetCustomMessage)
+    <div class="invalid-feedback">@Html.Raw(masterTemplateAdd.IdModa.GetErrorMessage())</div>
+@Html.Raw(masterTemplateAdd.IdModa.Lookup.GetParamTag(masterTemplateAdd, "p_x_IdModa"))
+<script>
+loadjs.ready("fMasterTemplateadd", function() {
+    var options = { name: "x_IdModa", selectId: "fMasterTemplateadd_x_IdModa" },
+        el = document.querySelector("select[data-select2-id='" + options.selectId + "']");
+    if (!el)
+        return;
+    options.closeOnSelect = !options.multiple;
+    options.dropdownParent = el.closest("#ew-modal-dialog, #ew-add-opt-dialog");
+    if (fMasterTemplateadd.lists.IdModa?.lookupOptions.length) {
+        options.data = { id: "x_IdModa", form: "fMasterTemplateadd" };
+    } else {
+        options.ajax = { id: "x_IdModa", form: "fMasterTemplateadd", limit: ew.LOOKUP_PAGE_SIZE };
+    }
+    options.minimumInputLength = ew.selectMinimumInputLength;
+    options = Object.assign({}, ew.selectOptions, options, ew.vars.tables.MasterTemplate.fields.IdModa.selectOptions);
+    ew.createSelect(options);
+});
+</script>
+</span>
+</div></div>
+    </div>
+} @* masterTemplateAdd.IdModa.Visible (end) *@
+@if (masterTemplateAdd.JenisProses.Visible) { // masterTemplateAdd.JenisProses.Visible (begin)
+    <div id="r_JenisProses" @Html.Raw(masterTemplateAdd.JenisProses.RowAttributes)>
+        <label id="elh_MasterTemplate_JenisProses" for="x_JenisProses" class="@(masterTemplateAdd.LeftColumnClass)">@Html.Raw(masterTemplateAdd.JenisProses.Caption)@Html.Raw(masterTemplateAdd.JenisProses.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(masterTemplateAdd.RightColumnClass)"><div @Html.Raw(masterTemplateAdd.JenisProses.CellAttributes)>
+<span id="el_MasterTemplate_JenisProses">
+    <select
+        id="x_JenisProses"
+        name="x_JenisProses"
+        class="form-select ew-select@(masterTemplateAdd.JenisProses.IsInvalidClass)"
+        data-select2-id="fMasterTemplateadd_x_JenisProses"
+        data-table="MasterTemplate"
+        data-field="x_JenisProses"
+        data-value-separator="@(masterTemplateAdd.JenisProses.DisplayValueSeparatorAttribute)"
+        data-placeholder="@(HtmlEncode(masterTemplateAdd.JenisProses.PlaceHolder))"
+        @Html.Raw(masterTemplateAdd.JenisProses.EditAttributes)>
+        @(masterTemplateAdd.JenisProses.SelectOptionListHtml("x_JenisProses"))
+    </select>
+    @Html.Raw(masterTemplateAdd.JenisProses.GetCustomMessage)
+    <div class="invalid-feedback">@Html.Raw(masterTemplateAdd.JenisProses.GetErrorMessage())</div>
+<script>
+loadjs.ready("fMasterTemplateadd", function() {
+    var options = { name: "x_JenisProses", selectId: "fMasterTemplateadd_x_JenisProses" },
+        el = document.querySelector("select[data-select2-id='" + options.selectId + "']");
+    if (!el)
+        return;
+    options.closeOnSelect = !options.multiple;
+    options.dropdownParent = el.closest("#ew-modal-dialog, #ew-add-opt-dialog");
+    if (fMasterTemplateadd.lists.JenisProses?.lookupOptions.length) {
+        options.data = { id: "x_JenisProses", form: "fMasterTemplateadd" };
+    } else {
+        options.ajax = { id: "x_JenisProses", form: "fMasterTemplateadd", limit: ew.LOOKUP_PAGE_SIZE };
+    }
+    options.minimumResultsForSearch = Infinity;
+    options = Object.assign({}, ew.selectOptions, options, ew.vars.tables.MasterTemplate.fields.JenisProses.selectOptions);
+    ew.createSelect(options);
+});
+</script>
+</span>
+</div></div>
+    </div>
+} @* masterTemplateAdd.JenisProses.Visible (end) *@
+@if (masterTemplateAdd.Keterangan.Visible) { // masterTemplateAdd.Keterangan.Visible (begin)
+    <div id="r_Keterangan" @Html.Raw(masterTemplateAdd.Keterangan.RowAttributes)>
+        <label id="elh_MasterTemplate_Keterangan" for="x_Keterangan" class="@(masterTemplateAdd.LeftColumnClass)">@Html.Raw(masterTemplateAdd.Keterangan.Caption)@Html.Raw(masterTemplateAdd.Keterangan.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(masterTemplateAdd.RightColumnClass)"><div @Html.Raw(masterTemplateAdd.Keterangan.CellAttributes)>
+<span id="el_MasterTemplate_Keterangan">
+<textarea data-table="MasterTemplate" data-field="x_Keterangan" name="x_Keterangan" id="x_Keterangan" cols="35" rows="4" placeholder="@Html.Raw(HtmlEncode(masterTemplateAdd.Keterangan.PlaceHolder))"@Html.Raw(masterTemplateAdd.Keterangan.EditAttributes) aria-describedby="x_Keterangan_help">@(masterTemplateAdd.Keterangan.EditValue)</textarea>
+@Html.Raw(masterTemplateAdd.Keterangan.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(masterTemplateAdd.Keterangan.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* masterTemplateAdd.Keterangan.Visible (end) *@
+@if (masterTemplateAdd.TipePenimbunan.Visible) { // masterTemplateAdd.TipePenimbunan.Visible (begin)
+    <div id="r_TipePenimbunan" @Html.Raw(masterTemplateAdd.TipePenimbunan.RowAttributes)>
+        <label id="elh_MasterTemplate_TipePenimbunan" for="x_TipePenimbunan" class="@(masterTemplateAdd.LeftColumnClass)">@Html.Raw(masterTemplateAdd.TipePenimbunan.Caption)@Html.Raw(masterTemplateAdd.TipePenimbunan.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(masterTemplateAdd.RightColumnClass)"><div @Html.Raw(masterTemplateAdd.TipePenimbunan.CellAttributes)>
+<span id="el_MasterTemplate_TipePenimbunan">
+    <select
+        id="x_TipePenimbunan"
+        name="x_TipePenimbunan"
+        class="form-select ew-select@(masterTemplateAdd.TipePenimbunan.IsInvalidClass)"
+        data-select2-id="fMasterTemplateadd_x_TipePenimbunan"
+        data-table="MasterTemplate"
+        data-field="x_TipePenimbunan"
+        data-value-separator="@(masterTemplateAdd.TipePenimbunan.DisplayValueSeparatorAttribute)"
+        data-placeholder="@(HtmlEncode(masterTemplateAdd.TipePenimbunan.PlaceHolder))"
+        @Html.Raw(masterTemplateAdd.TipePenimbunan.EditAttributes)>
+        @(masterTemplateAdd.TipePenimbunan.SelectOptionListHtml("x_TipePenimbunan"))
+    </select>
+    @Html.Raw(masterTemplateAdd.TipePenimbunan.GetCustomMessage)
+    <div class="invalid-feedback">@Html.Raw(masterTemplateAdd.TipePenimbunan.GetErrorMessage())</div>
+<script>
+loadjs.ready("fMasterTemplateadd", function() {
+    var options = { name: "x_TipePenimbunan", selectId: "fMasterTemplateadd_x_TipePenimbunan" },
+        el = document.querySelector("select[data-select2-id='" + options.selectId + "']");
+    if (!el)
+        return;
+    options.closeOnSelect = !options.multiple;
+    options.dropdownParent = el.closest("#ew-modal-dialog, #ew-add-opt-dialog");
+    if (fMasterTemplateadd.lists.TipePenimbunan?.lookupOptions.length) {
+        options.data = { id: "x_TipePenimbunan", form: "fMasterTemplateadd" };
+    } else {
+        options.ajax = { id: "x_TipePenimbunan", form: "fMasterTemplateadd", limit: ew.LOOKUP_PAGE_SIZE };
+    }
+    options.minimumResultsForSearch = Infinity;
+    options = Object.assign({}, ew.selectOptions, options, ew.vars.tables.MasterTemplate.fields.TipePenimbunan.selectOptions);
+    ew.createSelect(options);
+});
+</script>
+</span>
+</div></div>
+    </div>
+} @* masterTemplateAdd.TipePenimbunan.Visible (end) *@
+@if (masterTemplateAdd.TipePenyaluran.Visible) { // masterTemplateAdd.TipePenyaluran.Visible (begin)
+    <div id="r_TipePenyaluran" @Html.Raw(masterTemplateAdd.TipePenyaluran.RowAttributes)>
+        <label id="elh_MasterTemplate_TipePenyaluran" for="x_TipePenyaluran" class="@(masterTemplateAdd.LeftColumnClass)">@Html.Raw(masterTemplateAdd.TipePenyaluran.Caption)@Html.Raw(masterTemplateAdd.TipePenyaluran.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(masterTemplateAdd.RightColumnClass)"><div @Html.Raw(masterTemplateAdd.TipePenyaluran.CellAttributes)>
+<span id="el_MasterTemplate_TipePenyaluran">
+    <select
+        id="x_TipePenyaluran"
+        name="x_TipePenyaluran"
+        class="form-select ew-select@(masterTemplateAdd.TipePenyaluran.IsInvalidClass)"
+        data-select2-id="fMasterTemplateadd_x_TipePenyaluran"
+        data-table="MasterTemplate"
+        data-field="x_TipePenyaluran"
+        data-value-separator="@(masterTemplateAdd.TipePenyaluran.DisplayValueSeparatorAttribute)"
+        data-placeholder="@(HtmlEncode(masterTemplateAdd.TipePenyaluran.PlaceHolder))"
+        @Html.Raw(masterTemplateAdd.TipePenyaluran.EditAttributes)>
+        @(masterTemplateAdd.TipePenyaluran.SelectOptionListHtml("x_TipePenyaluran"))
+    </select>
+    @Html.Raw(masterTemplateAdd.TipePenyaluran.GetCustomMessage)
+    <div class="invalid-feedback">@Html.Raw(masterTemplateAdd.TipePenyaluran.GetErrorMessage())</div>
+<script>
+loadjs.ready("fMasterTemplateadd", function() {
+    var options = { name: "x_TipePenyaluran", selectId: "fMasterTemplateadd_x_TipePenyaluran" },
+        el = document.querySelector("select[data-select2-id='" + options.selectId + "']");
+    if (!el)
+        return;
+    options.closeOnSelect = !options.multiple;
+    options.dropdownParent = el.closest("#ew-modal-dialog, #ew-add-opt-dialog");
+    if (fMasterTemplateadd.lists.TipePenyaluran?.lookupOptions.length) {
+        options.data = { id: "x_TipePenyaluran", form: "fMasterTemplateadd" };
+    } else {
+        options.ajax = { id: "x_TipePenyaluran", form: "fMasterTemplateadd", limit: ew.LOOKUP_PAGE_SIZE };
+    }
+    options.minimumResultsForSearch = Infinity;
+    options = Object.assign({}, ew.selectOptions, options, ew.vars.tables.MasterTemplate.fields.TipePenyaluran.selectOptions);
+    ew.createSelect(options);
+});
+</script>
+</span>
+</div></div>
+    </div>
+} @* masterTemplateAdd.TipePenyaluran.Visible (end) *@
+@if (masterTemplateAdd.KategoriPenyaluran.Visible) { // masterTemplateAdd.KategoriPenyaluran.Visible (begin)
+    <div id="r_KategoriPenyaluran" @Html.Raw(masterTemplateAdd.KategoriPenyaluran.RowAttributes)>
+        <label id="elh_MasterTemplate_KategoriPenyaluran" for="x_KategoriPenyaluran" class="@(masterTemplateAdd.LeftColumnClass)">@Html.Raw(masterTemplateAdd.KategoriPenyaluran.Caption)@Html.Raw(masterTemplateAdd.KategoriPenyaluran.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(masterTemplateAdd.RightColumnClass)"><div @Html.Raw(masterTemplateAdd.KategoriPenyaluran.CellAttributes)>
+<span id="el_MasterTemplate_KategoriPenyaluran">
+    <select
+        id="x_KategoriPenyaluran"
+        name="x_KategoriPenyaluran"
+        class="form-select ew-select@(masterTemplateAdd.KategoriPenyaluran.IsInvalidClass)"
+        data-select2-id="fMasterTemplateadd_x_KategoriPenyaluran"
+        data-table="MasterTemplate"
+        data-field="x_KategoriPenyaluran"
+        data-value-separator="@(masterTemplateAdd.KategoriPenyaluran.DisplayValueSeparatorAttribute)"
+        data-placeholder="@(HtmlEncode(masterTemplateAdd.KategoriPenyaluran.PlaceHolder))"
+        @Html.Raw(masterTemplateAdd.KategoriPenyaluran.EditAttributes)>
+        @(masterTemplateAdd.KategoriPenyaluran.SelectOptionListHtml("x_KategoriPenyaluran"))
+    </select>
+    @Html.Raw(masterTemplateAdd.KategoriPenyaluran.GetCustomMessage)
+    <div class="invalid-feedback">@Html.Raw(masterTemplateAdd.KategoriPenyaluran.GetErrorMessage())</div>
+<script>
+loadjs.ready("fMasterTemplateadd", function() {
+    var options = { name: "x_KategoriPenyaluran", selectId: "fMasterTemplateadd_x_KategoriPenyaluran" },
+        el = document.querySelector("select[data-select2-id='" + options.selectId + "']");
+    if (!el)
+        return;
+    options.closeOnSelect = !options.multiple;
+    options.dropdownParent = el.closest("#ew-modal-dialog, #ew-add-opt-dialog");
+    if (fMasterTemplateadd.lists.KategoriPenyaluran?.lookupOptions.length) {
+        options.data = { id: "x_KategoriPenyaluran", form: "fMasterTemplateadd" };
+    } else {
+        options.ajax = { id: "x_KategoriPenyaluran", form: "fMasterTemplateadd", limit: ew.LOOKUP_PAGE_SIZE };
+    }
+    options.minimumResultsForSearch = Infinity;
+    options = Object.assign({}, ew.selectOptions, options, ew.vars.tables.MasterTemplate.fields.KategoriPenyaluran.selectOptions);
+    ew.createSelect(options);
+});
+</script>
+</span>
+</div></div>
+    </div>
+} @* masterTemplateAdd.KategoriPenyaluran.Visible (end) *@
+@if (masterTemplateAdd.NamaDokumen.Visible) { // masterTemplateAdd.NamaDokumen.Visible (begin)
+    <div id="r_NamaDokumen" @Html.Raw(masterTemplateAdd.NamaDokumen.RowAttributes)>
+        <label id="elh_MasterTemplate_NamaDokumen" for="x_NamaDokumen" class="@(masterTemplateAdd.LeftColumnClass)">@Html.Raw(masterTemplateAdd.NamaDokumen.Caption)@Html.Raw(masterTemplateAdd.NamaDokumen.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(masterTemplateAdd.RightColumnClass)"><div @Html.Raw(masterTemplateAdd.NamaDokumen.CellAttributes)>
+<span id="el_MasterTemplate_NamaDokumen">
+<input type="@(masterTemplateAdd.NamaDokumen.InputTextType)" name="x_NamaDokumen" id="x_NamaDokumen" data-table="MasterTemplate" data-field="x_NamaDokumen" value="@Html.Raw(masterTemplateAdd.NamaDokumen.EditValue)" size="30" maxlength="100" placeholder="@Html.Raw(HtmlEncode(masterTemplateAdd.NamaDokumen.PlaceHolder))" data-format-pattern="@(masterTemplateAdd.NamaDokumen.FormatPattern)"@Html.Raw(masterTemplateAdd.NamaDokumen.EditAttributes) aria-describedby="x_NamaDokumen_help">
+@Html.Raw(masterTemplateAdd.NamaDokumen.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(masterTemplateAdd.NamaDokumen.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* masterTemplateAdd.NamaDokumen.Visible (end) *@
+</div><!-- /page* -->
+@{ masterTemplateAdd.CloseRecordset(); }
+@if (masterTemplateAdd.CurrentDetailTables.Contains("TemplateProses") && Resolve("TemplateProses").DetailAdd) {
+    if (!Empty(masterTemplateAdd.CurrentDetailTable)) {
+<h4 class="ew-detail-caption">@Html.Raw(Language.TablePhrase("TemplateProses", "TblCaption"))</h4>
+    }
+        @await Html.PartialAsync("TemplateProsesGrid")
+    View = this;
+}
+@Html.Raw(masterTemplateAdd.IsModal ? "<template class=\"ew-modal-buttons\">" : "<div class=\"row ew-buttons\">")<!-- buttons .row -->
+    <div class="@(masterTemplateAdd.OffsetColumnClass)"><!-- buttons offset -->
+    <button class="btn btn-primary ew-btn" name="btn-action" id="btn-action" type="submit" form="fMasterTemplateadd">@Html.Raw(Language.Phrase("AddBtn"))</button>
+@if (IsJsonResponse()) {
+    <button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" data-bs-dismiss="modal">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+} else {
+    <button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" form="fMasterTemplateadd" data-href="@AppPath(masterTemplateAdd.ReturnUrl)">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+}
+    </div><!-- /buttons offset -->
+@Html.Raw(masterTemplateAdd.IsModal ? "</template>" : "</div>")<!-- /buttons .row -->
+</form>
+@masterTemplateAdd.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("MasterTemplate");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Startup script
+    $('#r_TipePenyaluran').hide();
+    $('#r_KategoriPenyaluran').hide();
+    $('#r_TipePenimbunan').hide();
+});
+</script>

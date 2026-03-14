@@ -1,0 +1,849 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (setUserModList.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = setUserModList.UseLayout ? "_Layout" : "";
+}
+@if (!setUserModList.IsExport()) {
+<script>
+var currentTable = @Html.Raw(ConvertToJson(setUserModList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { SetUserMOD: currentTable } });
+var currentPageID = ew.PAGE_ID = "list";
+var currentForm;
+var @(setUserModList.FormName);
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("@(setUserModList.FormName)")
+        .setPageId("list")
+        .setSubmitWithFetch(@(setUserModList.UseAjaxActions ? "true" : "false"))
+        .setFormKeyCountName("@(setUserModList.FormKeyCountName)")
+
+        // Dynamic selection lists
+        .setLists({
+            "Tanggal": @Html.Raw(setUserModList.Tanggal.ToClientList(setUserModList)),
+            "Plant": @Html.Raw(setUserModList.Plant.ToClientList(setUserModList)),
+            "UserMOD": @Html.Raw(setUserModList.UserMOD.ToClientList(setUserModList)),
+            "userInput": @Html.Raw(setUserModList.userInput.ToClientList(setUserModList)),
+            "etlDate": @Html.Raw(setUserModList.etlDate.ToClientList(setUserModList)),
+            "LastUpdatedBy": @Html.Raw(setUserModList.LastUpdatedBy.ToClientList(setUserModList)),
+            "lastUpdatedDate": @Html.Raw(setUserModList.lastUpdatedDate.ToClientList(setUserModList)),
+        })
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Write your client script here, no need to add script tags.
+});
+</script>
+}
+@if (!setUserModList.IsExport()) {
+<div class="btn-toolbar ew-toolbar">
+@if (setUserModList.TotalRecords > 0 && setUserModList.ExportOptions.Visible) {
+    setUserModList.ExportOptions.Render("body");
+}
+@if (setUserModList.ImportOptions.Visible) {
+    setUserModList.ImportOptions.Render("body");
+}
+@if (setUserModList.SearchOptions.Visible) {
+    setUserModList.SearchOptions.Render("body");
+}
+@if (setUserModList.FilterOptions.Visible) {
+    setUserModList.FilterOptions.Render("body");
+}
+</div>
+}
+@if (setUserModList.ShowCurrentFilter) {
+    setUserModList.ShowFilterList();
+}
+@if (!setUserModList.IsModal) {
+<form name="fSetUserMODsrch" id="fSetUserMODsrch" class="ew-form ew-ext-search-form" action="@AppPath(CurrentPageName())" novalidate autocomplete="off">
+<div id="fSetUserMODsrch_search_panel" class="mb-2 mb-sm-0 @(setUserModList.SearchPanelClass)"><!-- .ew-search-panel -->
+<script>
+var currentTable = @Html.Raw(ConvertToJson(setUserModList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { SetUserMOD: currentTable } });
+var currentForm;
+var fSetUserMODsrch, currentSearchForm, currentAdvancedSearchForm;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery,
+        fields = currentTable.fields;
+
+    // Form object for search
+    let form = new ew.FormBuilder()
+        .setId("fSetUserMODsrch")
+        .setPageId("list")
+@if (setUserModList.UseAjaxActions) {
+        <text>.setSubmitWithFetch(true)</text>
+}
+
+        // Add fields
+        .setFields([
+        ])
+        // Validate form
+        .setValidate(
+            async function () {
+                if (!this.validateRequired)
+                    return true; // Ignore validation
+                let fobj = this.getForm();
+
+                // Validate fields
+                if (!this.validateFields())
+                    return false;
+
+                // Call Form_CustomValidate event
+                if (!(await this.customValidate?.(fobj) ?? true)) {
+                    this.focus();
+                    return false;
+                }
+                return true;
+            }
+        )
+
+        // Form_CustomValidate
+        .setCustomValidate(
+            function(fobj) { // DO NOT CHANGE THIS LINE!
+                    // Your custom validation code here, return false if invalid.
+                    return true;
+                }
+        )
+
+        // Use JavaScript validation or not
+        .setValidateRequired(ew.CLIENT_VALIDATE)
+
+        // Dynamic selection lists
+        .setLists({
+            "id": @Html.Raw(setUserModList.id.ToClientList(setUserModList)),
+            "Tanggal": @Html.Raw(setUserModList.Tanggal.ToClientList(setUserModList)),
+            "LookupPlant": @Html.Raw(setUserModList.LookupPlant.ToClientList(setUserModList)),
+            "Plant": @Html.Raw(setUserModList.Plant.ToClientList(setUserModList)),
+            "LookupUserMod": @Html.Raw(setUserModList.LookupUserMod.ToClientList(setUserModList)),
+            "UserMOD": @Html.Raw(setUserModList.UserMOD.ToClientList(setUserModList)),
+            "userInput": @Html.Raw(setUserModList.userInput.ToClientList(setUserModList)),
+            "etlDate": @Html.Raw(setUserModList.etlDate.ToClientList(setUserModList)),
+            "LastUpdatedBy": @Html.Raw(setUserModList.LastUpdatedBy.ToClientList(setUserModList)),
+            "lastUpdatedDate": @Html.Raw(setUserModList.lastUpdatedDate.ToClientList(setUserModList)),
+        })
+
+        // Filters
+        .setFilterList(@Html.Raw(setUserModList.GetFilterList()))
+        .build();
+    window[form.id] = form;
+    currentSearchForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<input type="hidden" name="cmd" value="search">
+@if (Security.CanSearch) {
+if (!setUserModList.IsExport() && Empty(setUserModList.CurrentAction) && setUserModList.HasSearchFields()) { @* Show search form (begin) *@
+<div class="ew-extended-search container-fluid ps-2">
+<div class="row mb-0@(setUserModList.SearchFieldsPerRow > 0 ? " row-cols-sm-" + setUserModList.SearchFieldsPerRow : "")">
+@{
+    // Render search row
+    setUserModList.RowType = RowType.Search;
+    setUserModList.ResetAttributes();
+    await setUserModList.RenderRow();
+}
+@if (setUserModList.id.Visible) { // setUserModList.id.Visible (begin)
+    if (!setUserModList.id.UseFilter) {
+        setUserModList.SearchColumnCount++;
+    }
+    <div id="xs_id" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(setUserModList.id.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_id"
+            name="x_id[]"
+            class="form-control ew-select@(setUserModList.id.IsInvalidClass)"
+            data-select2-id="fSetUserMODsrch_x_id"
+            data-table="SetUserMOD"
+            data-field="x_id"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(setUserModList.id.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(setUserModList.id.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(setUserModList.id.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(setUserModList.id.EditAttributes)>
+            @(setUserModList.id.SelectOptionListHtml("x_id", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(setUserModList.id.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fSetUserMODsrch", function() {
+            var options = {
+                name: "x_id",
+                selectId: "fSetUserMODsrch_x_id",
+                ajax: { id: "x_id", form: "fSetUserMODsrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.SetUserMOD.fields.id.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* setUserModList.id.Visible (end) *@
+@if (setUserModList.Tanggal.Visible) { // setUserModList.Tanggal.Visible (begin)
+    if (!setUserModList.Tanggal.UseFilter) {
+        setUserModList.SearchColumnCount++;
+    }
+    <div id="xs_Tanggal" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(setUserModList.Tanggal.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_Tanggal"
+            name="x_Tanggal[]"
+            class="form-control ew-select@(setUserModList.Tanggal.IsInvalidClass)"
+            data-select2-id="fSetUserMODsrch_x_Tanggal"
+            data-table="SetUserMOD"
+            data-field="x_Tanggal"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(setUserModList.Tanggal.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(setUserModList.Tanggal.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(setUserModList.Tanggal.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(setUserModList.Tanggal.EditAttributes)>
+            @(setUserModList.Tanggal.SelectOptionListHtml("x_Tanggal", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(setUserModList.Tanggal.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fSetUserMODsrch", function() {
+            var options = {
+                name: "x_Tanggal",
+                selectId: "fSetUserMODsrch_x_Tanggal",
+                ajax: { id: "x_Tanggal", form: "fSetUserMODsrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.SetUserMOD.fields.Tanggal.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* setUserModList.Tanggal.Visible (end) *@
+@if (setUserModList.LookupPlant.Visible) { // setUserModList.LookupPlant.Visible (begin)
+    if (!setUserModList.LookupPlant.UseFilter) {
+        setUserModList.SearchColumnCount++;
+    }
+    <div id="xs_LookupPlant" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(setUserModList.LookupPlant.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_LookupPlant"
+            name="x_LookupPlant[]"
+            class="form-control ew-select@(setUserModList.LookupPlant.IsInvalidClass)"
+            data-select2-id="fSetUserMODsrch_x_LookupPlant"
+            data-table="SetUserMOD"
+            data-field="x_LookupPlant"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(setUserModList.LookupPlant.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(setUserModList.LookupPlant.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(setUserModList.LookupPlant.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(setUserModList.LookupPlant.EditAttributes)>
+            @(setUserModList.LookupPlant.SelectOptionListHtml("x_LookupPlant", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(setUserModList.LookupPlant.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fSetUserMODsrch", function() {
+            var options = {
+                name: "x_LookupPlant",
+                selectId: "fSetUserMODsrch_x_LookupPlant",
+                ajax: { id: "x_LookupPlant", form: "fSetUserMODsrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.SetUserMOD.fields.LookupPlant.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* setUserModList.LookupPlant.Visible (end) *@
+@if (setUserModList.Plant.Visible) { // setUserModList.Plant.Visible (begin)
+    if (!setUserModList.Plant.UseFilter) {
+        setUserModList.SearchColumnCount++;
+    }
+    <div id="xs_Plant" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(setUserModList.Plant.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_Plant"
+            name="x_Plant[]"
+            class="form-control ew-select@(setUserModList.Plant.IsInvalidClass)"
+            data-select2-id="fSetUserMODsrch_x_Plant"
+            data-table="SetUserMOD"
+            data-field="x_Plant"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(setUserModList.Plant.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(setUserModList.Plant.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(setUserModList.Plant.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(setUserModList.Plant.EditAttributes)>
+            @(setUserModList.Plant.SelectOptionListHtml("x_Plant", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(setUserModList.Plant.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fSetUserMODsrch", function() {
+            var options = {
+                name: "x_Plant",
+                selectId: "fSetUserMODsrch_x_Plant",
+                ajax: { id: "x_Plant", form: "fSetUserMODsrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.SetUserMOD.fields.Plant.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* setUserModList.Plant.Visible (end) *@
+@if (setUserModList.LookupUserMod.Visible) { // setUserModList.LookupUserMod.Visible (begin)
+    if (!setUserModList.LookupUserMod.UseFilter) {
+        setUserModList.SearchColumnCount++;
+    }
+    <div id="xs_LookupUserMod" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(setUserModList.LookupUserMod.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_LookupUserMod"
+            name="x_LookupUserMod[]"
+            class="form-control ew-select@(setUserModList.LookupUserMod.IsInvalidClass)"
+            data-select2-id="fSetUserMODsrch_x_LookupUserMod"
+            data-table="SetUserMOD"
+            data-field="x_LookupUserMod"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(setUserModList.LookupUserMod.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(setUserModList.LookupUserMod.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(setUserModList.LookupUserMod.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(setUserModList.LookupUserMod.EditAttributes)>
+            @(setUserModList.LookupUserMod.SelectOptionListHtml("x_LookupUserMod", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(setUserModList.LookupUserMod.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fSetUserMODsrch", function() {
+            var options = {
+                name: "x_LookupUserMod",
+                selectId: "fSetUserMODsrch_x_LookupUserMod",
+                ajax: { id: "x_LookupUserMod", form: "fSetUserMODsrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.SetUserMOD.fields.LookupUserMod.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* setUserModList.LookupUserMod.Visible (end) *@
+@if (setUserModList.UserMOD.Visible) { // setUserModList.UserMOD.Visible (begin)
+    if (!setUserModList.UserMOD.UseFilter) {
+        setUserModList.SearchColumnCount++;
+    }
+    <div id="xs_UserMOD" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(setUserModList.UserMOD.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_UserMOD"
+            name="x_UserMOD[]"
+            class="form-control ew-select@(setUserModList.UserMOD.IsInvalidClass)"
+            data-select2-id="fSetUserMODsrch_x_UserMOD"
+            data-table="SetUserMOD"
+            data-field="x_UserMOD"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(setUserModList.UserMOD.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(setUserModList.UserMOD.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(setUserModList.UserMOD.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(setUserModList.UserMOD.EditAttributes)>
+            @(setUserModList.UserMOD.SelectOptionListHtml("x_UserMOD", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(setUserModList.UserMOD.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fSetUserMODsrch", function() {
+            var options = {
+                name: "x_UserMOD",
+                selectId: "fSetUserMODsrch_x_UserMOD",
+                ajax: { id: "x_UserMOD", form: "fSetUserMODsrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.SetUserMOD.fields.UserMOD.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* setUserModList.UserMOD.Visible (end) *@
+@if (setUserModList.userInput.Visible) { // setUserModList.userInput.Visible (begin)
+    if (!setUserModList.userInput.UseFilter) {
+        setUserModList.SearchColumnCount++;
+    }
+    <div id="xs_userInput" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(setUserModList.userInput.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_userInput"
+            name="x_userInput[]"
+            class="form-control ew-select@(setUserModList.userInput.IsInvalidClass)"
+            data-select2-id="fSetUserMODsrch_x_userInput"
+            data-table="SetUserMOD"
+            data-field="x_userInput"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(setUserModList.userInput.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(setUserModList.userInput.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(setUserModList.userInput.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(setUserModList.userInput.EditAttributes)>
+            @(setUserModList.userInput.SelectOptionListHtml("x_userInput", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(setUserModList.userInput.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fSetUserMODsrch", function() {
+            var options = {
+                name: "x_userInput",
+                selectId: "fSetUserMODsrch_x_userInput",
+                ajax: { id: "x_userInput", form: "fSetUserMODsrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.SetUserMOD.fields.userInput.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* setUserModList.userInput.Visible (end) *@
+@if (setUserModList.etlDate.Visible) { // setUserModList.etlDate.Visible (begin)
+    if (!setUserModList.etlDate.UseFilter) {
+        setUserModList.SearchColumnCount++;
+    }
+    <div id="xs_etlDate" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(setUserModList.etlDate.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_etlDate"
+            name="x_etlDate[]"
+            class="form-control ew-select@(setUserModList.etlDate.IsInvalidClass)"
+            data-select2-id="fSetUserMODsrch_x_etlDate"
+            data-table="SetUserMOD"
+            data-field="x_etlDate"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(setUserModList.etlDate.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(setUserModList.etlDate.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(setUserModList.etlDate.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(setUserModList.etlDate.EditAttributes)>
+            @(setUserModList.etlDate.SelectOptionListHtml("x_etlDate", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(setUserModList.etlDate.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fSetUserMODsrch", function() {
+            var options = {
+                name: "x_etlDate",
+                selectId: "fSetUserMODsrch_x_etlDate",
+                ajax: { id: "x_etlDate", form: "fSetUserMODsrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.SetUserMOD.fields.etlDate.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* setUserModList.etlDate.Visible (end) *@
+@if (setUserModList.LastUpdatedBy.Visible) { // setUserModList.LastUpdatedBy.Visible (begin)
+    if (!setUserModList.LastUpdatedBy.UseFilter) {
+        setUserModList.SearchColumnCount++;
+    }
+    <div id="xs_LastUpdatedBy" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(setUserModList.LastUpdatedBy.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_LastUpdatedBy"
+            name="x_LastUpdatedBy[]"
+            class="form-control ew-select@(setUserModList.LastUpdatedBy.IsInvalidClass)"
+            data-select2-id="fSetUserMODsrch_x_LastUpdatedBy"
+            data-table="SetUserMOD"
+            data-field="x_LastUpdatedBy"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(setUserModList.LastUpdatedBy.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(setUserModList.LastUpdatedBy.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(setUserModList.LastUpdatedBy.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(setUserModList.LastUpdatedBy.EditAttributes)>
+            @(setUserModList.LastUpdatedBy.SelectOptionListHtml("x_LastUpdatedBy", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(setUserModList.LastUpdatedBy.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fSetUserMODsrch", function() {
+            var options = {
+                name: "x_LastUpdatedBy",
+                selectId: "fSetUserMODsrch_x_LastUpdatedBy",
+                ajax: { id: "x_LastUpdatedBy", form: "fSetUserMODsrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.SetUserMOD.fields.LastUpdatedBy.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* setUserModList.LastUpdatedBy.Visible (end) *@
+@if (setUserModList.lastUpdatedDate.Visible) { // setUserModList.lastUpdatedDate.Visible (begin)
+    if (!setUserModList.lastUpdatedDate.UseFilter) {
+        setUserModList.SearchColumnCount++;
+    }
+    <div id="xs_lastUpdatedDate" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(setUserModList.lastUpdatedDate.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_lastUpdatedDate"
+            name="x_lastUpdatedDate[]"
+            class="form-control ew-select@(setUserModList.lastUpdatedDate.IsInvalidClass)"
+            data-select2-id="fSetUserMODsrch_x_lastUpdatedDate"
+            data-table="SetUserMOD"
+            data-field="x_lastUpdatedDate"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(setUserModList.lastUpdatedDate.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(setUserModList.lastUpdatedDate.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(setUserModList.lastUpdatedDate.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(setUserModList.lastUpdatedDate.EditAttributes)>
+            @(setUserModList.lastUpdatedDate.SelectOptionListHtml("x_lastUpdatedDate", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(setUserModList.lastUpdatedDate.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fSetUserMODsrch", function() {
+            var options = {
+                name: "x_lastUpdatedDate",
+                selectId: "fSetUserMODsrch_x_lastUpdatedDate",
+                ajax: { id: "x_lastUpdatedDate", form: "fSetUserMODsrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.SetUserMOD.fields.lastUpdatedDate.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* setUserModList.lastUpdatedDate.Visible (end) *@
+</div><!-- /.row -->
+<div class="row mb-0">
+    <div class="col-sm-auto px-0 pe-sm-2">
+        <div class="ew-basic-search input-group">
+            <input type="search" name="@(Config.TableBasicSearch)" id="@(Config.TableBasicSearch)" class="form-control ew-basic-search-keyword" value="@Html.Raw(HtmlEncode(setUserModList.BasicSearch.SessionKeyword))" placeholder="@(HtmlEncode(Language.Phrase("Search")))" aria-label="@(HtmlEncode(Language.Phrase("Search")))">
+            <input type="hidden" name="@(Config.TableBasicSearchType)" id="@(Config.TableBasicSearchType)" class="ew-basic-search-type" value="@(HtmlEncode(setUserModList.BasicSearch.SessionType))">
+            <button type="button" data-bs-toggle="dropdown" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split" aria-haspopup="true" aria-expanded="false">
+                <span id="searchtype">@Html.Raw(setUserModList.BasicSearch.TypeNameShort)</span>
+            </button>
+            <div class="dropdown-menu dropdown-menu-end">
+                <button type="button" class="dropdown-item@(setUserModList.BasicSearch.SessionType == "" ? " active" : "")" form="fSetUserMODsrch" data-ew-action="search-type">@Html.Raw(Language.Phrase("QuickSearchAuto"))</button>
+                <button type="button" class="dropdown-item@(setUserModList.BasicSearch.SessionType == "=" ? " active" : "")" form="fSetUserMODsrch" data-ew-action="search-type" data-search-type="=">@Html.Raw(Language.Phrase("QuickSearchExact"))</button>
+                <button type="button" class="dropdown-item@(setUserModList.BasicSearch.SessionType == "AND" ? " active" : "")" form="fSetUserMODsrch" data-ew-action="search-type" data-search-type="AND">@Html.Raw(Language.Phrase("QuickSearchAll"))</button>
+                <button type="button" class="dropdown-item@(setUserModList.BasicSearch.SessionType == "OR" ? " active" : "")" form="fSetUserMODsrch" data-ew-action="search-type" data-search-type="OR">@Html.Raw(Language.Phrase("QuickSearchAny"))</button>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-auto mb-3">
+        <button class="btn btn-primary" name="btn-submit" id="btn-submit" type="submit">@Html.Raw(Language.Phrase("SearchBtn"))</button>
+    </div>
+</div>
+</div><!-- /.ew-extended-search -->
+} @* Show search form (end) *@
+}
+</div><!-- /.ew-search-panel -->
+</form>
+}
+@setUserModList.ShowPageHeader()
+@setUserModList.ShowMessages()
+<main class="list @(setUserModList.TotalRecords == 0 && !setUserModList.IsAdd ? " ew-no-record" : "")">
+<div id="ew-header-options">
+    @setUserModList.HeaderOptions.RenderBody()
+</div>
+<div id="ew-list">
+@if (setUserModList.TotalRecords > 0 || !Empty(setUserModList.CurrentAction)) {
+<div class="card ew-card ew-grid@(setUserModList.IsAddOrEdit ? " ew-grid-add-edit" : "") @(setUserModList.TableGridClass)">
+<form name="@(setUserModList.FormName)" id="@(setUserModList.FormName)" class="ew-form ew-list-form" action="@AppPath(setUserModList.PageName)" method="post" novalidate autocomplete="off">
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+@if (setUserModList.IsModal) {
+<input type="hidden" name="modal" value="1">
+}
+<div id="gmp_SetUserMOD" class="card-body ew-grid-middle-panel @(setUserModList.TableContainerClass)" style="@(setUserModList.TableContainerStyle)">
+@if (setUserModList.TotalRecords > 0 || setUserModList.IsGridEdit || setUserModList.IsMultiEdit) {
+<table id="tbl_SetUserMODlist" class="@(setUserModList.TableClass)"><!-- .ew-table -->
+<thead>
+    <tr class="ew-table-header">
+@{
+    // Header row
+    setUserModList.RowType = RowType.Header;
+
+    // Render list options
+    await setUserModList.RenderListOptions();
+}
+@* Render list options (header, left) *@
+@setUserModList.ListOptions.RenderHeader("left")
+@if (setUserModList.Tanggal.Visible) { // setUserModList.Tanggal.Visible (begin)
+        <th data-name="Tanggal" class="@(setUserModList.Tanggal.HeaderCellClass)"><div id="elh_SetUserMOD_Tanggal" class="SetUserMOD_Tanggal">@Html.Raw(setUserModList.RenderFieldHeader(setUserModList.Tanggal))</div></th>
+} @* setUserModList.Tanggal.Visible (end) *@
+@if (setUserModList.Plant.Visible) { // setUserModList.Plant.Visible (begin)
+        <th data-name="Plant" class="@(setUserModList.Plant.HeaderCellClass)"><div id="elh_SetUserMOD_Plant" class="SetUserMOD_Plant">@Html.Raw(setUserModList.RenderFieldHeader(setUserModList.Plant))</div></th>
+} @* setUserModList.Plant.Visible (end) *@
+@if (setUserModList.UserMOD.Visible) { // setUserModList.UserMOD.Visible (begin)
+        <th data-name="UserMOD" class="@(setUserModList.UserMOD.HeaderCellClass)"><div id="elh_SetUserMOD_UserMOD" class="SetUserMOD_UserMOD">@Html.Raw(setUserModList.RenderFieldHeader(setUserModList.UserMOD))</div></th>
+} @* setUserModList.UserMOD.Visible (end) *@
+@if (setUserModList.userInput.Visible) { // setUserModList.userInput.Visible (begin)
+        <th data-name="userInput" class="@(setUserModList.userInput.HeaderCellClass)"><div id="elh_SetUserMOD_userInput" class="SetUserMOD_userInput">@Html.Raw(setUserModList.RenderFieldHeader(setUserModList.userInput))</div></th>
+} @* setUserModList.userInput.Visible (end) *@
+@if (setUserModList.etlDate.Visible) { // setUserModList.etlDate.Visible (begin)
+        <th data-name="etlDate" class="@(setUserModList.etlDate.HeaderCellClass)"><div id="elh_SetUserMOD_etlDate" class="SetUserMOD_etlDate">@Html.Raw(setUserModList.RenderFieldHeader(setUserModList.etlDate))</div></th>
+} @* setUserModList.etlDate.Visible (end) *@
+@if (setUserModList.LastUpdatedBy.Visible) { // setUserModList.LastUpdatedBy.Visible (begin)
+        <th data-name="LastUpdatedBy" class="@(setUserModList.LastUpdatedBy.HeaderCellClass)"><div id="elh_SetUserMOD_LastUpdatedBy" class="SetUserMOD_LastUpdatedBy">@Html.Raw(setUserModList.RenderFieldHeader(setUserModList.LastUpdatedBy))</div></th>
+} @* setUserModList.LastUpdatedBy.Visible (end) *@
+@if (setUserModList.lastUpdatedDate.Visible) { // setUserModList.lastUpdatedDate.Visible (begin)
+        <th data-name="lastUpdatedDate" class="@(setUserModList.lastUpdatedDate.HeaderCellClass)"><div id="elh_SetUserMOD_lastUpdatedDate" class="SetUserMOD_lastUpdatedDate">@Html.Raw(setUserModList.RenderFieldHeader(setUserModList.lastUpdatedDate))</div></th>
+} @* setUserModList.lastUpdatedDate.Visible (end) *@
+@* Render list options (header, right) *@
+@setUserModList.ListOptions.RenderHeader("right")
+    </tr>
+</thead>
+<tbody data-page="@(setUserModList.PageNumber)">
+@{
+    await setUserModList.SetupGrid();
+    bool eof = setUserModList.Recordset == null; // DN
+}
+@while (setUserModList.RecordCount < setUserModList.StopRecord || SameString(setUserModList.RowIndex, "$rowindex$")) { // Begin While
+    if (!eof && !SameString(setUserModList.RowIndex, "$rowindex$") &&
+        (!setUserModList.IsGridAdd || setUserModList.CurrentMode == "copy") &&
+        (!((setUserModList.IsCopy || setUserModList.IsAdd) && setUserModList.RowIndex is int rowIndex && rowIndex == 0))) // DN
+        eof = !await setUserModList.Recordset.ReadAsync();
+    setUserModList.RecordCount++;
+    if (setUserModList.RecordCount >= setUserModList.StartRecord) {
+        await setUserModList.SetupRow();
+    <tr @Html.Raw(setUserModList.RowAttributes)>
+    @* Render list options (body, left) *@
+    @setUserModList.ListOptions.RenderBody("left", setUserModList.RowCount)
+    @if (setUserModList.Tanggal.Visible) { // setUserModList.Tanggal.Visible (begin)
+        <td data-name="Tanggal" @Html.Raw(setUserModList.Tanggal.CellAttributes)>
+<span id="el@(setUserModList.RowIndex == "$rowindex$" ? "$rowindex$" : setUserModList.RowCount)_SetUserMOD_Tanggal" class="el_SetUserMOD_Tanggal">
+<span @Html.Raw(setUserModList.Tanggal.ViewAttributes)>
+@Html.Raw(setUserModList.Tanggal.GetViewValue())</span>
+</span>
+</td>
+    } @* setUserModList.Tanggal.Visible (end) *@
+    @if (setUserModList.Plant.Visible) { // setUserModList.Plant.Visible (begin)
+        <td data-name="Plant" @Html.Raw(setUserModList.Plant.CellAttributes)>
+<span id="el@(setUserModList.RowIndex == "$rowindex$" ? "$rowindex$" : setUserModList.RowCount)_SetUserMOD_Plant" class="el_SetUserMOD_Plant">
+<span @Html.Raw(setUserModList.Plant.ViewAttributes)>
+@Html.Raw(setUserModList.Plant.GetViewValue())</span>
+</span>
+</td>
+    } @* setUserModList.Plant.Visible (end) *@
+    @if (setUserModList.UserMOD.Visible) { // setUserModList.UserMOD.Visible (begin)
+        <td data-name="UserMOD" @Html.Raw(setUserModList.UserMOD.CellAttributes)>
+<span id="el@(setUserModList.RowIndex == "$rowindex$" ? "$rowindex$" : setUserModList.RowCount)_SetUserMOD_UserMOD" class="el_SetUserMOD_UserMOD">
+<span @Html.Raw(setUserModList.UserMOD.ViewAttributes)>
+@Html.Raw(setUserModList.UserMOD.GetViewValue())</span>
+</span>
+</td>
+    } @* setUserModList.UserMOD.Visible (end) *@
+    @if (setUserModList.userInput.Visible) { // setUserModList.userInput.Visible (begin)
+        <td data-name="userInput" @Html.Raw(setUserModList.userInput.CellAttributes)>
+<span id="el@(setUserModList.RowIndex == "$rowindex$" ? "$rowindex$" : setUserModList.RowCount)_SetUserMOD_userInput" class="el_SetUserMOD_userInput">
+<span @Html.Raw(setUserModList.userInput.ViewAttributes)>
+@Html.Raw(setUserModList.userInput.GetViewValue())</span>
+</span>
+</td>
+    } @* setUserModList.userInput.Visible (end) *@
+    @if (setUserModList.etlDate.Visible) { // setUserModList.etlDate.Visible (begin)
+        <td data-name="etlDate" @Html.Raw(setUserModList.etlDate.CellAttributes)>
+<span id="el@(setUserModList.RowIndex == "$rowindex$" ? "$rowindex$" : setUserModList.RowCount)_SetUserMOD_etlDate" class="el_SetUserMOD_etlDate">
+<span @Html.Raw(setUserModList.etlDate.ViewAttributes)>
+@Html.Raw(setUserModList.etlDate.GetViewValue())</span>
+</span>
+</td>
+    } @* setUserModList.etlDate.Visible (end) *@
+    @if (setUserModList.LastUpdatedBy.Visible) { // setUserModList.LastUpdatedBy.Visible (begin)
+        <td data-name="LastUpdatedBy" @Html.Raw(setUserModList.LastUpdatedBy.CellAttributes)>
+<span id="el@(setUserModList.RowIndex == "$rowindex$" ? "$rowindex$" : setUserModList.RowCount)_SetUserMOD_LastUpdatedBy" class="el_SetUserMOD_LastUpdatedBy">
+<span @Html.Raw(setUserModList.LastUpdatedBy.ViewAttributes)>
+@Html.Raw(setUserModList.LastUpdatedBy.GetViewValue())</span>
+</span>
+</td>
+    } @* setUserModList.LastUpdatedBy.Visible (end) *@
+    @if (setUserModList.lastUpdatedDate.Visible) { // setUserModList.lastUpdatedDate.Visible (begin)
+        <td data-name="lastUpdatedDate" @Html.Raw(setUserModList.lastUpdatedDate.CellAttributes)>
+<span id="el@(setUserModList.RowIndex == "$rowindex$" ? "$rowindex$" : setUserModList.RowCount)_SetUserMOD_lastUpdatedDate" class="el_SetUserMOD_lastUpdatedDate">
+<span @Html.Raw(setUserModList.lastUpdatedDate.ViewAttributes)>
+@Html.Raw(setUserModList.lastUpdatedDate.GetViewValue())</span>
+</span>
+</td>
+    } @* setUserModList.lastUpdatedDate.Visible (end) *@
+    @* Render list options (body, right) *@
+    @setUserModList.ListOptions.RenderBody("right", setUserModList.RowCount)
+    </tr>
+    } @* End if *@
+
+    // Reset for template row
+    if (SameString(setUserModList.RowIndex, "$rowindex$"))
+        setUserModList.RowIndex = 0;
+
+    // Reset inline add/copy row
+    if ((setUserModList.IsCopy || setUserModList.IsAdd) && setUserModList.RowIndex is int rowIndex2 && rowIndex2 == 0)
+        setUserModList.RowIndex = 1;
+} @* End While *@
+</tbody>
+</table><!-- /.ew-table -->
+} @* End If TotalRecords > 0 *@
+</div><!-- /.ew-grid-middle-panel -->
+@if (Empty(setUserModList.CurrentAction) && !setUserModList.UseAjaxActions) {
+<input type="hidden" name="action" id="action" value="">
+}
+</form><!-- /.ew-list-form -->
+@{ setUserModList.CloseRecordset(); }
+@if (!setUserModList.IsExport()) {
+<div class="card-footer ew-grid-lower-panel">
+@if (!setUserModList.IsGridAdd && !(setUserModList.IsGridEdit && setUserModList.ModalGridEdit) && !setUserModList.IsMultiEdit) {
+@Html.Raw(setUserModList.Pager.Render())
+}
+<div class="ew-list-other-options">
+@setUserModList.OtherOptions.RenderBody("bottom")
+</div>
+</div>
+}
+</div><!-- /.ew-grid -->
+} else { // Show other options
+<div class="ew-list-other-options">
+@setUserModList.OtherOptions.ForEach(opt => opt.ButtonClass = "").RenderBody()
+</div>
+}
+</div>
+<div id="ew-footer-options">
+    @setUserModList.FooterOptions.RenderBody()
+</div>
+</main>
+@setUserModList.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+@if (!setUserModList.IsExport()) {
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("SetUserMOD");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Startup script
+    /* === Stepper: Set User MOD (single step) === */
+    (function () {
+        if (document.querySelector('style[data-hsse-stepper]')) return;
+        $("<style data-hsse-stepper>")
+            .prop("type", "text/css")
+            .html(`
+            .stepper{display:flex;counter-reset:step}
+            .step{width:150px;text-align:center;position:relative}
+            .step:not(:last-child)::after{content:'';position:absolute;top:20px;right:-50%;width:100%;height:4px;background-color:#ccc;z-index:0}
+            .step-icon{width:36px;height:36px;line-height:36px;border-radius:50%;background:#3c6dbd;display:inline-block;color:#fff;font-weight:bold}
+            .step-label{margin-top:8px;font-size:14px;display:flex;justify-content:center;align-items:center;gap:6px;color:#198754}
+            `).appendTo("head");
+        const html = `
+            <div class="d-flex border-bottom border-2 pb-2">
+            <div class="stepper">
+                <div class="step active text-success">
+                <div class="step-icon">1</div>
+                <div class="step-label"><i class="fa-solid fa-user-shield me-1"></i>Set User MOD</div>
+                </div>
+            </div>
+            </div>`;
+        $(".content-header .container-fluid .row").append(html);
+    })();
+
+    /* === Custom Add Button (drop-in) + Role Gate (Rule 0/10 only) === */
+    (function () {
+        const parent_url = ew.PATH_BASE;
+        const role = parseInt('@CurrentUserInfo("Rule")') || 0; // 0=Superadmin, 10=OH
+        const isAllowed = (role === 0 || role === 10);
+
+        // ——— HILANGKAN ADD bawaan supaya tidak dobel ———
+        const hideDefaultAdds = () => {
+            $('.ew-toolbar a.ew-add, .ew-grid-lower-panel .ew-list-other-options a, .ew-grid-lower-panel a')
+            .filter(function () {
+                const href = (this.href || "").toLowerCase();
+                return href.includes("setusermodadd");
+            })
+            .closest('.ew-list-other-options, .btn, a').hide();
+        };
+
+        // ——— HILANGKAN DELETE untuk user non-allowed ———
+        const hideDeleteUI = () => {
+            // Multi-delete (toolbar / bawah grid)
+            $('.ew-toolbar .ew-multi-delete, .ew-grid-lower-panel .ew-multi-delete')
+            .closest('.ew-list-other-options, .btn-group, .btn, button, a').hide();
+
+            // Per-row delete
+            $('a.ew-row-link.ew-delete, button.ew-row-link.ew-delete')
+            .closest('li, .btn, a, button, .ew-list-option-body').hide();
+
+            // Checkbox seleksi (untuk multi-delete)
+            $('input[type="checkbox"][name="key_m[]"], input#key, input#toggle-all')
+            .closest('th, td, .form-check, label').hide();
+        };
+
+        // ——— HILANGKAN EDIT untuk user non-allowed ———
+        const hideEditUI = (ctx) => {
+            const $root = ctx ? $(ctx) : $(document);
+            // Link/tombol Edit di baris
+            $root.find('a.ew-row-link.ew-edit, button.ew-row-link.ew-edit')
+                .closest('li, .btn, a, button, .ew-list-option-body').hide();
+            // Item dropdown “Edit”
+            $root.find('.dropdown-menu .ew-edit.dropdown-item')
+                .closest('li').hide();
+            // Inline edit trigger (jika ada)
+            $root.find('.ew-inline-edit, a.ew-edit-inline, button.ew-edit-inline')
+                .closest('li, .btn, a, button').hide();
+        };
+
+        // deteksi tombol Add default (case-insensitive path)
+        const $defaultAddAny =
+            $(`a.btn.btn-default.ew-add-edit.ew-add[href^="${parent_url}SetUserMODAdd"]`).first()
+            .add($(`a.btn.btn-default.ew-add-edit.ew-add[href^="${parent_url}SetUserModAdd"]`).first());
+        const detectedPath = ($defaultAddAny.attr("href") || "").replace(parent_url, "");
+        const targetAddPath = detectedPath || "SetUserMODAdd";
+        if (!isAllowed) {
+            hideDefaultAdds(); // sembunyikan Add
+            hideDeleteUI();    // sembunyikan Delete
+            hideEditUI();      // sembunyikan Edit
+
+            // Re-apply ketika dropdown dibuka (agar item Edit yang muncul disembunyikan)
+            $(document).on('shown.bs.dropdown', function (e) {
+            const menu = $(e.target).siblings('.dropdown-menu')[0] || $(e.target).closest('.dropdown-menu')[0];
+            if (menu) hideEditUI(menu);
+            });
+
+            // Re-apply setelah AJAX (paging/sort/filter)
+            $(document).on('ajaxComplete', function () {
+            hideDeleteUI();
+            hideEditUI();
+            });
+            return;
+        }
+
+        // user allowed → ganti Add default dengan tombol custom
+        if ($defaultAddAny.length) $defaultAddAny.remove();
+        hideDefaultAdds(); // bersihkan footer/fallback
+        const $customAdd = $(`
+            <button class="btn btn-success ms-2" id="btn-add-custom">
+            <i class="fas fa-plus"></i> Add New
+            </button>
+        `).on("click", function (e) {
+            e.preventDefault();
+            const url = new URL(parent_url + targetAddPath, location.origin);
+            window.location.href = url.toString().replace(location.origin, "");
+        });
+
+        // taruh di samping tombol Search; fallback: samping submit utama; terakhir: toolbar
+        const $searchBtn =
+            $('.ew-search-panel button[type="submit"].btn-primary').first()
+            .add($('#btn-search').first()).first();
+        if ($searchBtn.length) {
+            $searchBtn.after($customAdd);
+        } else {
+            const $submit = $('button.btn-primary[name="btn-submit"]').first();
+            ($submit.length ? $submit.parent() : $(".ew-toolbar").first()).append($customAdd);
+        }
+    })();
+});
+</script>
+}

@@ -1,0 +1,596 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (penyaluranSearch.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = penyaluranSearch.UseLayout ? "_Layout" : "";
+}
+<script>
+var currentTable = @Html.Raw(ConvertToJson(penyaluranSearch.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { Penyaluran: currentTable } });
+var currentPageID = ew.PAGE_ID = "search";
+var currentForm;
+var fPenyaluransearch, currentSearchForm, currentAdvancedSearchForm;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery,
+        fields = currentTable.fields;
+
+    // Form object for search
+    let form = new ew.FormBuilder()
+        .setId("fPenyaluransearch")
+        .setPageId("search")
+@if (penyaluranSearch.IsModal && penyaluranSearch.UseAjaxActions) {
+        <text>.setSubmitWithFetch(true)</text>
+}
+
+        // Add fields
+        .setFields([
+
+            ["NoShipment", [], fields.NoShipment.isInvalid],
+            ["IdPipa", [], fields.IdPipa.isInvalid],
+            ["TujuanKonsinyasiPipa", [], fields.TujuanKonsinyasiPipa.isInvalid],
+            ["QuantityKonsinyasiPipa", [], fields.QuantityKonsinyasiPipa.isInvalid],
+            ["TanggalSandar", [ew.Validators.datetime(fields.TanggalSandar.clientFormatPattern)], fields.TanggalSandar.isInvalid],
+            ["y_TanggalSandar", [ew.Validators.between], false],
+            ["TanggalDibuat", [ew.Validators.datetime(fields.TanggalDibuat.clientFormatPattern)], fields.TanggalDibuat.isInvalid],
+            ["y_TanggalDibuat", [ew.Validators.between], false],
+            ["TanggalDiperbarui", [ew.Validators.datetime(fields.TanggalDiperbarui.clientFormatPattern)], fields.TanggalDiperbarui.isInvalid],
+            ["y_TanggalDiperbarui", [ew.Validators.between], false],
+            ["MultipleTujuanKonsinyasi", [], fields.MultipleTujuanKonsinyasi.isInvalid],
+            ["MultipleTujuanKonsinyasiHidden", [], fields.MultipleTujuanKonsinyasiHidden.isInvalid],
+            ["MultipleQuantity", [], fields.MultipleQuantity.isInvalid]
+        ])
+        // Validate form
+        .setValidate(
+            async function () {
+                if (!this.validateRequired)
+                    return true; // Ignore validation
+                let fobj = this.getForm();
+
+                // Validate fields
+                if (!this.validateFields())
+                    return false;
+
+                // Call Form_CustomValidate event
+                if (!(await this.customValidate?.(fobj) ?? true)) {
+                    this.focus();
+                    return false;
+                }
+                return true;
+            }
+        )
+
+        // Form_CustomValidate
+        .setCustomValidate(
+            function(fobj) { // DO NOT CHANGE THIS LINE!
+                    // Your custom validation code here, return false if invalid.
+                    return true;
+                }
+        )
+
+        // Use JavaScript validation or not
+        .setValidateRequired(ew.CLIENT_VALIDATE)
+
+        // Dynamic selection lists
+        .setLists({
+            "IdPipa": @Html.Raw(penyaluranSearch.IdPipa.ToClientList(penyaluranSearch)),
+            "MultipleTujuanKonsinyasi": @Html.Raw(penyaluranSearch.MultipleTujuanKonsinyasi.ToClientList(penyaluranSearch)),
+        })
+        .build();
+    window[form.id] = form;
+@if (penyaluranSearch.IsModal) {
+    <text>currentAdvancedSearchForm = form;</text>
+} else {
+    <text>currentForm = form;</text>
+}
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Write your client script here, no need to add script tags.
+});
+</script>
+@penyaluranSearch.ShowPageHeader()
+@penyaluranSearch.ShowMessages()
+<form name="fPenyaluransearch" id="fPenyaluransearch" class="@(penyaluranSearch.FormClassName)" action="@AppPath(CurrentPageName())" method="post" novalidate autocomplete="off">
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+<input type="hidden" name="action" id="action" value="search">
+@if (penyaluranSearch.IsModal) {
+<input type="hidden" name="modal" value="1">
+}
+<div class="ew-search-div"><!-- page* -->
+@if (penyaluranSearch.NoShipment.Visible) { // penyaluranSearch.NoShipment.Visible (begin)
+    <div id="r_NoShipment" class="row" @Html.Raw(penyaluranSearch.NoShipment.RowAttributes)>
+        <label for="x_NoShipment" class="@(penyaluranSearch.LeftColumnClass)"><span id="elh_Penyaluran_NoShipment">@Html.Raw(penyaluranSearch.NoShipment.Caption)</span>
+        <span class="ew-search-operator">
+@Html.Raw(Language.Phrase("LIKE"))
+<input type="hidden" name="z_NoShipment" id="z_NoShipment" value="LIKE">
+</span>
+        </label>
+        <div class="@(penyaluranSearch.RightColumnClass)">
+            <div @Html.Raw(penyaluranSearch.NoShipment.CellAttributes)>
+                <div class="d-flex align-items-start">
+                <span id="el_Penyaluran_NoShipment" class="ew-search-field ew-search-field-single">
+<input type="@(penyaluranSearch.NoShipment.InputTextType)" name="x_NoShipment" id="x_NoShipment" data-table="Penyaluran" data-field="x_NoShipment" value="@Html.Raw(penyaluranSearch.NoShipment.EditValue)" size="30" maxlength="100" placeholder="@Html.Raw(HtmlEncode(penyaluranSearch.NoShipment.PlaceHolder))" data-format-pattern="@(penyaluranSearch.NoShipment.FormatPattern)"@Html.Raw(penyaluranSearch.NoShipment.EditAttributes)>
+<div class="invalid-feedback">@Html.Raw(penyaluranSearch.NoShipment.GetErrorMessage(false))</div>
+</span>
+                </div>
+            </div>
+        </div>
+    </div>
+} @* penyaluranSearch.NoShipment.Visible (end) *@
+@if (penyaluranSearch.IdPipa.Visible) { // penyaluranSearch.IdPipa.Visible (begin)
+    <div id="r_IdPipa" class="row" @Html.Raw(penyaluranSearch.IdPipa.RowAttributes)>
+        <label for="x_IdPipa" class="@(penyaluranSearch.LeftColumnClass)"><span id="elh_Penyaluran_IdPipa">@Html.Raw(penyaluranSearch.IdPipa.Caption)</span>
+        <span class="ew-search-operator">
+@Html.Raw(Language.Phrase("="))
+<input type="hidden" name="z_IdPipa" id="z_IdPipa" value="=">
+</span>
+        </label>
+        <div class="@(penyaluranSearch.RightColumnClass)">
+            <div @Html.Raw(penyaluranSearch.IdPipa.CellAttributes)>
+                <div class="d-flex align-items-start">
+                <span id="el_Penyaluran_IdPipa" class="ew-search-field ew-search-field-single">
+    <select
+        id="x_IdPipa"
+        name="x_IdPipa"
+        class="form-select ew-select@(penyaluranSearch.IdPipa.IsInvalidClass)"
+        data-select2-id="fPenyaluransearch_x_IdPipa"
+        data-table="Penyaluran"
+        data-field="x_IdPipa"
+        data-value-separator="@(penyaluranSearch.IdPipa.DisplayValueSeparatorAttribute)"
+        data-placeholder="@(HtmlEncode(penyaluranSearch.IdPipa.PlaceHolder))"
+        @Html.Raw(penyaluranSearch.IdPipa.EditAttributes)>
+        @(penyaluranSearch.IdPipa.SelectOptionListHtml("x_IdPipa"))
+    </select>
+    <div class="invalid-feedback">@Html.Raw(penyaluranSearch.IdPipa.GetErrorMessage(false))</div>
+@Html.Raw(penyaluranSearch.IdPipa.Lookup.GetParamTag(penyaluranSearch, "p_x_IdPipa"))
+<script>
+loadjs.ready("fPenyaluransearch", function() {
+    var options = { name: "x_IdPipa", selectId: "fPenyaluransearch_x_IdPipa" },
+        el = document.querySelector("select[data-select2-id='" + options.selectId + "']");
+    if (!el)
+        return;
+    options.closeOnSelect = !options.multiple;
+    options.dropdownParent = el.closest("#ew-modal-dialog, #ew-add-opt-dialog");
+    if (fPenyaluransearch.lists.IdPipa?.lookupOptions.length) {
+        options.data = { id: "x_IdPipa", form: "fPenyaluransearch" };
+    } else {
+        options.ajax = { id: "x_IdPipa", form: "fPenyaluransearch", limit: ew.LOOKUP_PAGE_SIZE };
+    }
+    options.minimumInputLength = ew.selectMinimumInputLength;
+    options = Object.assign({}, ew.selectOptions, options, ew.vars.tables.Penyaluran.fields.IdPipa.selectOptions);
+    ew.createSelect(options);
+});
+</script>
+</span>
+                </div>
+            </div>
+        </div>
+    </div>
+} @* penyaluranSearch.IdPipa.Visible (end) *@
+@if (penyaluranSearch.TujuanKonsinyasiPipa.Visible) { // penyaluranSearch.TujuanKonsinyasiPipa.Visible (begin)
+    <div id="r_TujuanKonsinyasiPipa" class="row" @Html.Raw(penyaluranSearch.TujuanKonsinyasiPipa.RowAttributes)>
+        <label for="x_TujuanKonsinyasiPipa" class="@(penyaluranSearch.LeftColumnClass)"><span id="elh_Penyaluran_TujuanKonsinyasiPipa">@Html.Raw(penyaluranSearch.TujuanKonsinyasiPipa.Caption)</span>
+        <span class="ew-search-operator">
+@Html.Raw(Language.Phrase("LIKE"))
+<input type="hidden" name="z_TujuanKonsinyasiPipa" id="z_TujuanKonsinyasiPipa" value="LIKE">
+</span>
+        </label>
+        <div class="@(penyaluranSearch.RightColumnClass)">
+            <div @Html.Raw(penyaluranSearch.TujuanKonsinyasiPipa.CellAttributes)>
+                <div class="d-flex align-items-start">
+                <span id="el_Penyaluran_TujuanKonsinyasiPipa" class="ew-search-field ew-search-field-single">
+<input type="@(penyaluranSearch.TujuanKonsinyasiPipa.InputTextType)" name="x_TujuanKonsinyasiPipa" id="x_TujuanKonsinyasiPipa" data-table="Penyaluran" data-field="x_TujuanKonsinyasiPipa" value="@Html.Raw(penyaluranSearch.TujuanKonsinyasiPipa.EditValue)" size="30" maxlength="50" placeholder="@Html.Raw(HtmlEncode(penyaluranSearch.TujuanKonsinyasiPipa.PlaceHolder))" data-format-pattern="@(penyaluranSearch.TujuanKonsinyasiPipa.FormatPattern)"@Html.Raw(penyaluranSearch.TujuanKonsinyasiPipa.EditAttributes)>
+<div class="invalid-feedback">@Html.Raw(penyaluranSearch.TujuanKonsinyasiPipa.GetErrorMessage(false))</div>
+</span>
+                </div>
+            </div>
+        </div>
+    </div>
+} @* penyaluranSearch.TujuanKonsinyasiPipa.Visible (end) *@
+@if (penyaluranSearch.QuantityKonsinyasiPipa.Visible) { // penyaluranSearch.QuantityKonsinyasiPipa.Visible (begin)
+    <div id="r_QuantityKonsinyasiPipa" class="row" @Html.Raw(penyaluranSearch.QuantityKonsinyasiPipa.RowAttributes)>
+        <label for="x_QuantityKonsinyasiPipa" class="@(penyaluranSearch.LeftColumnClass)"><span id="elh_Penyaluran_QuantityKonsinyasiPipa">@Html.Raw(penyaluranSearch.QuantityKonsinyasiPipa.Caption)</span>
+        <span class="ew-search-operator">
+@Html.Raw(Language.Phrase("LIKE"))
+<input type="hidden" name="z_QuantityKonsinyasiPipa" id="z_QuantityKonsinyasiPipa" value="LIKE">
+</span>
+        </label>
+        <div class="@(penyaluranSearch.RightColumnClass)">
+            <div @Html.Raw(penyaluranSearch.QuantityKonsinyasiPipa.CellAttributes)>
+                <div class="d-flex align-items-start">
+                <span id="el_Penyaluran_QuantityKonsinyasiPipa" class="ew-search-field ew-search-field-single">
+<input type="@(penyaluranSearch.QuantityKonsinyasiPipa.InputTextType)" name="x_QuantityKonsinyasiPipa" id="x_QuantityKonsinyasiPipa" data-table="Penyaluran" data-field="x_QuantityKonsinyasiPipa" value="@Html.Raw(penyaluranSearch.QuantityKonsinyasiPipa.EditValue)" size="30" maxlength="1" placeholder="@Html.Raw(HtmlEncode(penyaluranSearch.QuantityKonsinyasiPipa.PlaceHolder))" data-format-pattern="@(penyaluranSearch.QuantityKonsinyasiPipa.FormatPattern)"@Html.Raw(penyaluranSearch.QuantityKonsinyasiPipa.EditAttributes)>
+<div class="invalid-feedback">@Html.Raw(penyaluranSearch.QuantityKonsinyasiPipa.GetErrorMessage(false))</div>
+</span>
+                </div>
+            </div>
+        </div>
+    </div>
+} @* penyaluranSearch.QuantityKonsinyasiPipa.Visible (end) *@
+@if (penyaluranSearch.TanggalSandar.Visible) { // penyaluranSearch.TanggalSandar.Visible (begin)
+    <div id="r_TanggalSandar" class="row" @Html.Raw(penyaluranSearch.TanggalSandar.RowAttributes)>
+        <label for="x_TanggalSandar" class="@(penyaluranSearch.LeftColumnClass)"><span id="elh_Penyaluran_TanggalSandar">@Html.Raw(penyaluranSearch.TanggalSandar.Caption)</span>
+        <span class="ew-search-operator">
+@Html.Raw(Language.Phrase("BETWEEN"))
+<input type="hidden" name="z_TanggalSandar" id="z_TanggalSandar" value="BETWEEN">
+</span>
+        </label>
+        <div class="@(penyaluranSearch.RightColumnClass)">
+            <div @Html.Raw(penyaluranSearch.TanggalSandar.CellAttributes)>
+                <div class="d-flex align-items-start">
+                <span id="el_Penyaluran_TanggalSandar" class="ew-search-field">
+<input type="@(penyaluranSearch.TanggalSandar.InputTextType)" name="x_TanggalSandar" id="x_TanggalSandar" data-table="Penyaluran" data-field="x_TanggalSandar" value="@Html.Raw(penyaluranSearch.TanggalSandar.EditValue)" placeholder="@Html.Raw(HtmlEncode(penyaluranSearch.TanggalSandar.PlaceHolder))" data-format-pattern="@(penyaluranSearch.TanggalSandar.FormatPattern)"@Html.Raw(penyaluranSearch.TanggalSandar.EditAttributes)>
+<div class="invalid-feedback">@Html.Raw(penyaluranSearch.TanggalSandar.GetErrorMessage(false))</div>
+@if (!penyaluranSearch.TanggalSandar.ReadOnly && !penyaluranSearch.TanggalSandar.Disabled && !penyaluranSearch.TanggalSandar.EditAttrs.Is("readonly") && !penyaluranSearch.TanggalSandar.EditAttrs.Is("disabled")) {
+<script>
+loadjs.ready(["fPenyaluransearch", "datetimepicker"], function () {
+    let format = "@Html.Raw(DateFormat(9))", // DN
+        options = {
+                localization: {
+                    locale: ew.LANGUAGE_ID + "-u-nu-" + ew.getNumberingSystem(),
+                    hourCycle: format.match(/H/) ? "h24" : "h12",
+                    format,
+                    ...ew.language.phrase("datetimepicker")
+                },
+                display: {
+                    icons: {
+                        previous: ew.IS_RTL ? "fa-solid fa-chevron-right" : "fa-solid fa-chevron-left",
+                        next: ew.IS_RTL ? "fa-solid fa-chevron-left" : "fa-solid fa-chevron-right"
+                    },
+                    components: {
+                        clock: !!format.match(/h/i) || !!format.match(/m/) || !!format.match(/s/i),
+                        hours: !!format.match(/h/i),
+                        minutes: !!format.match(/m/),
+                        seconds: !!format.match(/s/i)
+                    },
+                theme: ew.getPreferredTheme()
+                }
+            };
+    ew.createDateTimePicker("fPenyaluransearch", "x_TanggalSandar", ew.deepAssign({"useCurrent":false,"display":{"sideBySide":false}}, options));
+});
+</script>
+}
+</span>
+                    <span class="ew-search-and"><label>@Html.Raw(Language.Phrase("AND"))</label></span>
+                    <span id="el2_Penyaluran_TanggalSandar" class="ew-search-field2">
+<input type="@(penyaluranSearch.TanggalSandar.InputTextType)" name="y_TanggalSandar" id="y_TanggalSandar" data-table="Penyaluran" data-field="x_TanggalSandar" value="@Html.Raw(penyaluranSearch.TanggalSandar.EditValue2)" placeholder="@Html.Raw(HtmlEncode(penyaluranSearch.TanggalSandar.PlaceHolder))" data-format-pattern="@(penyaluranSearch.TanggalSandar.FormatPattern)"@Html.Raw(penyaluranSearch.TanggalSandar.EditAttributes)>
+<div class="invalid-feedback">@Html.Raw(penyaluranSearch.TanggalSandar.GetErrorMessage(false))</div>
+@if (!penyaluranSearch.TanggalSandar.ReadOnly && !penyaluranSearch.TanggalSandar.Disabled && !penyaluranSearch.TanggalSandar.EditAttrs.Is("readonly") && !penyaluranSearch.TanggalSandar.EditAttrs.Is("disabled")) {
+<script>
+loadjs.ready(["fPenyaluransearch", "datetimepicker"], function () {
+    let format = "@Html.Raw(DateFormat(9))", // DN
+        options = {
+                localization: {
+                    locale: ew.LANGUAGE_ID + "-u-nu-" + ew.getNumberingSystem(),
+                    hourCycle: format.match(/H/) ? "h24" : "h12",
+                    format,
+                    ...ew.language.phrase("datetimepicker")
+                },
+                display: {
+                    icons: {
+                        previous: ew.IS_RTL ? "fa-solid fa-chevron-right" : "fa-solid fa-chevron-left",
+                        next: ew.IS_RTL ? "fa-solid fa-chevron-left" : "fa-solid fa-chevron-right"
+                    },
+                    components: {
+                        clock: !!format.match(/h/i) || !!format.match(/m/) || !!format.match(/s/i),
+                        hours: !!format.match(/h/i),
+                        minutes: !!format.match(/m/),
+                        seconds: !!format.match(/s/i)
+                    },
+                theme: ew.getPreferredTheme()
+                }
+            };
+    ew.createDateTimePicker("fPenyaluransearch", "y_TanggalSandar", ew.deepAssign({"useCurrent":false,"display":{"sideBySide":false}}, options));
+});
+</script>
+}
+</span>
+                </div>
+            </div>
+        </div>
+    </div>
+} @* penyaluranSearch.TanggalSandar.Visible (end) *@
+@if (penyaluranSearch.TanggalDibuat.Visible) { // penyaluranSearch.TanggalDibuat.Visible (begin)
+    <div id="r_TanggalDibuat" class="row" @Html.Raw(penyaluranSearch.TanggalDibuat.RowAttributes)>
+        <label for="x_TanggalDibuat" class="@(penyaluranSearch.LeftColumnClass)"><span id="elh_Penyaluran_TanggalDibuat">@Html.Raw(penyaluranSearch.TanggalDibuat.Caption)</span>
+        <span class="ew-search-operator">
+@Html.Raw(Language.Phrase("BETWEEN"))
+<input type="hidden" name="z_TanggalDibuat" id="z_TanggalDibuat" value="BETWEEN">
+</span>
+        </label>
+        <div class="@(penyaluranSearch.RightColumnClass)">
+            <div @Html.Raw(penyaluranSearch.TanggalDibuat.CellAttributes)>
+                <div class="d-flex align-items-start">
+                <span id="el_Penyaluran_TanggalDibuat" class="ew-search-field">
+<input type="@(penyaluranSearch.TanggalDibuat.InputTextType)" name="x_TanggalDibuat" id="x_TanggalDibuat" data-table="Penyaluran" data-field="x_TanggalDibuat" value="@Html.Raw(penyaluranSearch.TanggalDibuat.EditValue)" placeholder="@Html.Raw(HtmlEncode(penyaluranSearch.TanggalDibuat.PlaceHolder))" data-format-pattern="@(penyaluranSearch.TanggalDibuat.FormatPattern)"@Html.Raw(penyaluranSearch.TanggalDibuat.EditAttributes)>
+<div class="invalid-feedback">@Html.Raw(penyaluranSearch.TanggalDibuat.GetErrorMessage(false))</div>
+@if (!penyaluranSearch.TanggalDibuat.ReadOnly && !penyaluranSearch.TanggalDibuat.Disabled && !penyaluranSearch.TanggalDibuat.EditAttrs.Is("readonly") && !penyaluranSearch.TanggalDibuat.EditAttrs.Is("disabled")) {
+<script>
+loadjs.ready(["fPenyaluransearch", "datetimepicker"], function () {
+    let format = "@Html.Raw(DateFormat(9))", // DN
+        options = {
+                localization: {
+                    locale: ew.LANGUAGE_ID + "-u-nu-" + ew.getNumberingSystem(),
+                    hourCycle: format.match(/H/) ? "h24" : "h12",
+                    format,
+                    ...ew.language.phrase("datetimepicker")
+                },
+                display: {
+                    icons: {
+                        previous: ew.IS_RTL ? "fa-solid fa-chevron-right" : "fa-solid fa-chevron-left",
+                        next: ew.IS_RTL ? "fa-solid fa-chevron-left" : "fa-solid fa-chevron-right"
+                    },
+                    components: {
+                        clock: !!format.match(/h/i) || !!format.match(/m/) || !!format.match(/s/i),
+                        hours: !!format.match(/h/i),
+                        minutes: !!format.match(/m/),
+                        seconds: !!format.match(/s/i)
+                    },
+                theme: ew.getPreferredTheme()
+                }
+            };
+    ew.createDateTimePicker("fPenyaluransearch", "x_TanggalDibuat", ew.deepAssign({"useCurrent":false,"display":{"sideBySide":false}}, options));
+});
+</script>
+}
+</span>
+                    <span class="ew-search-and"><label>@Html.Raw(Language.Phrase("AND"))</label></span>
+                    <span id="el2_Penyaluran_TanggalDibuat" class="ew-search-field2">
+<input type="@(penyaluranSearch.TanggalDibuat.InputTextType)" name="y_TanggalDibuat" id="y_TanggalDibuat" data-table="Penyaluran" data-field="x_TanggalDibuat" value="@Html.Raw(penyaluranSearch.TanggalDibuat.EditValue2)" placeholder="@Html.Raw(HtmlEncode(penyaluranSearch.TanggalDibuat.PlaceHolder))" data-format-pattern="@(penyaluranSearch.TanggalDibuat.FormatPattern)"@Html.Raw(penyaluranSearch.TanggalDibuat.EditAttributes)>
+<div class="invalid-feedback">@Html.Raw(penyaluranSearch.TanggalDibuat.GetErrorMessage(false))</div>
+@if (!penyaluranSearch.TanggalDibuat.ReadOnly && !penyaluranSearch.TanggalDibuat.Disabled && !penyaluranSearch.TanggalDibuat.EditAttrs.Is("readonly") && !penyaluranSearch.TanggalDibuat.EditAttrs.Is("disabled")) {
+<script>
+loadjs.ready(["fPenyaluransearch", "datetimepicker"], function () {
+    let format = "@Html.Raw(DateFormat(9))", // DN
+        options = {
+                localization: {
+                    locale: ew.LANGUAGE_ID + "-u-nu-" + ew.getNumberingSystem(),
+                    hourCycle: format.match(/H/) ? "h24" : "h12",
+                    format,
+                    ...ew.language.phrase("datetimepicker")
+                },
+                display: {
+                    icons: {
+                        previous: ew.IS_RTL ? "fa-solid fa-chevron-right" : "fa-solid fa-chevron-left",
+                        next: ew.IS_RTL ? "fa-solid fa-chevron-left" : "fa-solid fa-chevron-right"
+                    },
+                    components: {
+                        clock: !!format.match(/h/i) || !!format.match(/m/) || !!format.match(/s/i),
+                        hours: !!format.match(/h/i),
+                        minutes: !!format.match(/m/),
+                        seconds: !!format.match(/s/i)
+                    },
+                theme: ew.getPreferredTheme()
+                }
+            };
+    ew.createDateTimePicker("fPenyaluransearch", "y_TanggalDibuat", ew.deepAssign({"useCurrent":false,"display":{"sideBySide":false}}, options));
+});
+</script>
+}
+</span>
+                </div>
+            </div>
+        </div>
+    </div>
+} @* penyaluranSearch.TanggalDibuat.Visible (end) *@
+@if (penyaluranSearch.TanggalDiperbarui.Visible) { // penyaluranSearch.TanggalDiperbarui.Visible (begin)
+    <div id="r_TanggalDiperbarui" class="row" @Html.Raw(penyaluranSearch.TanggalDiperbarui.RowAttributes)>
+        <label for="x_TanggalDiperbarui" class="@(penyaluranSearch.LeftColumnClass)"><span id="elh_Penyaluran_TanggalDiperbarui">@Html.Raw(penyaluranSearch.TanggalDiperbarui.Caption)</span>
+        <span class="ew-search-operator">
+@Html.Raw(Language.Phrase("BETWEEN"))
+<input type="hidden" name="z_TanggalDiperbarui" id="z_TanggalDiperbarui" value="BETWEEN">
+</span>
+        </label>
+        <div class="@(penyaluranSearch.RightColumnClass)">
+            <div @Html.Raw(penyaluranSearch.TanggalDiperbarui.CellAttributes)>
+                <div class="d-flex align-items-start">
+                <span id="el_Penyaluran_TanggalDiperbarui" class="ew-search-field">
+<input type="@(penyaluranSearch.TanggalDiperbarui.InputTextType)" name="x_TanggalDiperbarui" id="x_TanggalDiperbarui" data-table="Penyaluran" data-field="x_TanggalDiperbarui" value="@Html.Raw(penyaluranSearch.TanggalDiperbarui.EditValue)" placeholder="@Html.Raw(HtmlEncode(penyaluranSearch.TanggalDiperbarui.PlaceHolder))" data-format-pattern="@(penyaluranSearch.TanggalDiperbarui.FormatPattern)"@Html.Raw(penyaluranSearch.TanggalDiperbarui.EditAttributes)>
+<div class="invalid-feedback">@Html.Raw(penyaluranSearch.TanggalDiperbarui.GetErrorMessage(false))</div>
+@if (!penyaluranSearch.TanggalDiperbarui.ReadOnly && !penyaluranSearch.TanggalDiperbarui.Disabled && !penyaluranSearch.TanggalDiperbarui.EditAttrs.Is("readonly") && !penyaluranSearch.TanggalDiperbarui.EditAttrs.Is("disabled")) {
+<script>
+loadjs.ready(["fPenyaluransearch", "datetimepicker"], function () {
+    let format = "@Html.Raw(DateFormat(9))", // DN
+        options = {
+                localization: {
+                    locale: ew.LANGUAGE_ID + "-u-nu-" + ew.getNumberingSystem(),
+                    hourCycle: format.match(/H/) ? "h24" : "h12",
+                    format,
+                    ...ew.language.phrase("datetimepicker")
+                },
+                display: {
+                    icons: {
+                        previous: ew.IS_RTL ? "fa-solid fa-chevron-right" : "fa-solid fa-chevron-left",
+                        next: ew.IS_RTL ? "fa-solid fa-chevron-left" : "fa-solid fa-chevron-right"
+                    },
+                    components: {
+                        clock: !!format.match(/h/i) || !!format.match(/m/) || !!format.match(/s/i),
+                        hours: !!format.match(/h/i),
+                        minutes: !!format.match(/m/),
+                        seconds: !!format.match(/s/i)
+                    },
+                theme: ew.getPreferredTheme()
+                }
+            };
+    ew.createDateTimePicker("fPenyaluransearch", "x_TanggalDiperbarui", ew.deepAssign({"useCurrent":false,"display":{"sideBySide":false}}, options));
+});
+</script>
+}
+</span>
+                    <span class="ew-search-and"><label>@Html.Raw(Language.Phrase("AND"))</label></span>
+                    <span id="el2_Penyaluran_TanggalDiperbarui" class="ew-search-field2">
+<input type="@(penyaluranSearch.TanggalDiperbarui.InputTextType)" name="y_TanggalDiperbarui" id="y_TanggalDiperbarui" data-table="Penyaluran" data-field="x_TanggalDiperbarui" value="@Html.Raw(penyaluranSearch.TanggalDiperbarui.EditValue2)" placeholder="@Html.Raw(HtmlEncode(penyaluranSearch.TanggalDiperbarui.PlaceHolder))" data-format-pattern="@(penyaluranSearch.TanggalDiperbarui.FormatPattern)"@Html.Raw(penyaluranSearch.TanggalDiperbarui.EditAttributes)>
+<div class="invalid-feedback">@Html.Raw(penyaluranSearch.TanggalDiperbarui.GetErrorMessage(false))</div>
+@if (!penyaluranSearch.TanggalDiperbarui.ReadOnly && !penyaluranSearch.TanggalDiperbarui.Disabled && !penyaluranSearch.TanggalDiperbarui.EditAttrs.Is("readonly") && !penyaluranSearch.TanggalDiperbarui.EditAttrs.Is("disabled")) {
+<script>
+loadjs.ready(["fPenyaluransearch", "datetimepicker"], function () {
+    let format = "@Html.Raw(DateFormat(9))", // DN
+        options = {
+                localization: {
+                    locale: ew.LANGUAGE_ID + "-u-nu-" + ew.getNumberingSystem(),
+                    hourCycle: format.match(/H/) ? "h24" : "h12",
+                    format,
+                    ...ew.language.phrase("datetimepicker")
+                },
+                display: {
+                    icons: {
+                        previous: ew.IS_RTL ? "fa-solid fa-chevron-right" : "fa-solid fa-chevron-left",
+                        next: ew.IS_RTL ? "fa-solid fa-chevron-left" : "fa-solid fa-chevron-right"
+                    },
+                    components: {
+                        clock: !!format.match(/h/i) || !!format.match(/m/) || !!format.match(/s/i),
+                        hours: !!format.match(/h/i),
+                        minutes: !!format.match(/m/),
+                        seconds: !!format.match(/s/i)
+                    },
+                theme: ew.getPreferredTheme()
+                }
+            };
+    ew.createDateTimePicker("fPenyaluransearch", "y_TanggalDiperbarui", ew.deepAssign({"useCurrent":false,"display":{"sideBySide":false}}, options));
+});
+</script>
+}
+</span>
+                </div>
+            </div>
+        </div>
+    </div>
+} @* penyaluranSearch.TanggalDiperbarui.Visible (end) *@
+@if (penyaluranSearch.MultipleTujuanKonsinyasi.Visible) { // penyaluranSearch.MultipleTujuanKonsinyasi.Visible (begin)
+    <div id="r_MultipleTujuanKonsinyasi" class="row" @Html.Raw(penyaluranSearch.MultipleTujuanKonsinyasi.RowAttributes)>
+        <label for="x_MultipleTujuanKonsinyasi" class="@(penyaluranSearch.LeftColumnClass)"><span id="elh_Penyaluran_MultipleTujuanKonsinyasi">@Html.Raw(penyaluranSearch.MultipleTujuanKonsinyasi.Caption)</span>
+        <span class="ew-search-operator">
+@Html.Raw(Language.Phrase("LIKE"))
+<input type="hidden" name="z_MultipleTujuanKonsinyasi" id="z_MultipleTujuanKonsinyasi" value="LIKE">
+</span>
+        </label>
+        <div class="@(penyaluranSearch.RightColumnClass)">
+            <div @Html.Raw(penyaluranSearch.MultipleTujuanKonsinyasi.CellAttributes)>
+                <div class="d-flex align-items-start">
+                <span id="el_Penyaluran_MultipleTujuanKonsinyasi" class="ew-search-field ew-search-field-single">
+    <select
+        id="x_MultipleTujuanKonsinyasi"
+        name="x_MultipleTujuanKonsinyasi"
+        class="form-select ew-select@(penyaluranSearch.MultipleTujuanKonsinyasi.IsInvalidClass)"
+        data-select2-id="fPenyaluransearch_x_MultipleTujuanKonsinyasi"
+        data-table="Penyaluran"
+        data-field="x_MultipleTujuanKonsinyasi"
+        data-value-separator="@(penyaluranSearch.MultipleTujuanKonsinyasi.DisplayValueSeparatorAttribute)"
+        data-placeholder="@(HtmlEncode(penyaluranSearch.MultipleTujuanKonsinyasi.PlaceHolder))"
+        @Html.Raw(penyaluranSearch.MultipleTujuanKonsinyasi.EditAttributes)>
+        @(penyaluranSearch.MultipleTujuanKonsinyasi.SelectOptionListHtml("x_MultipleTujuanKonsinyasi"))
+    </select>
+    <div class="invalid-feedback">@Html.Raw(penyaluranSearch.MultipleTujuanKonsinyasi.GetErrorMessage(false))</div>
+<script>
+loadjs.ready("fPenyaluransearch", function() {
+    var options = { name: "x_MultipleTujuanKonsinyasi", selectId: "fPenyaluransearch_x_MultipleTujuanKonsinyasi" },
+        el = document.querySelector("select[data-select2-id='" + options.selectId + "']");
+    if (!el)
+        return;
+    options.closeOnSelect = !options.multiple;
+    options.dropdownParent = el.closest("#ew-modal-dialog, #ew-add-opt-dialog");
+    if (fPenyaluransearch.lists.MultipleTujuanKonsinyasi?.lookupOptions.length) {
+        options.data = { id: "x_MultipleTujuanKonsinyasi", form: "fPenyaluransearch" };
+    } else {
+        options.ajax = { id: "x_MultipleTujuanKonsinyasi", form: "fPenyaluransearch", limit: ew.LOOKUP_PAGE_SIZE };
+    }
+    options.minimumInputLength = ew.selectMinimumInputLength;
+    options = Object.assign({}, ew.selectOptions, options, ew.vars.tables.Penyaluran.fields.MultipleTujuanKonsinyasi.selectOptions);
+    ew.createSelect(options);
+});
+</script>
+</span>
+                </div>
+            </div>
+        </div>
+    </div>
+} @* penyaluranSearch.MultipleTujuanKonsinyasi.Visible (end) *@
+@if (penyaluranSearch.MultipleTujuanKonsinyasiHidden.Visible) { // penyaluranSearch.MultipleTujuanKonsinyasiHidden.Visible (begin)
+    <div id="r_MultipleTujuanKonsinyasiHidden" class="row" @Html.Raw(penyaluranSearch.MultipleTujuanKonsinyasiHidden.RowAttributes)>
+        <label class="@(penyaluranSearch.LeftColumnClass)"><span id="elh_Penyaluran_MultipleTujuanKonsinyasiHidden">@Html.Raw(penyaluranSearch.MultipleTujuanKonsinyasiHidden.Caption)</span>
+        <span class="ew-search-operator">
+@Html.Raw(Language.Phrase("LIKE"))
+<input type="hidden" name="z_MultipleTujuanKonsinyasiHidden" id="z_MultipleTujuanKonsinyasiHidden" value="LIKE">
+</span>
+        </label>
+        <div class="@(penyaluranSearch.RightColumnClass)">
+            <div @Html.Raw(penyaluranSearch.MultipleTujuanKonsinyasiHidden.CellAttributes)>
+                <div class="d-flex align-items-start">
+                <span id="el_Penyaluran_MultipleTujuanKonsinyasiHidden" class="ew-search-field ew-search-field-single">
+<input type="@(penyaluranSearch.MultipleTujuanKonsinyasiHidden.InputTextType)" name="x_MultipleTujuanKonsinyasiHidden" id="x_MultipleTujuanKonsinyasiHidden" data-table="Penyaluran" data-field="x_MultipleTujuanKonsinyasiHidden" value="@Html.Raw(penyaluranSearch.MultipleTujuanKonsinyasiHidden.EditValue)" size="30" maxlength="1" placeholder="@Html.Raw(HtmlEncode(penyaluranSearch.MultipleTujuanKonsinyasiHidden.PlaceHolder))" data-format-pattern="@(penyaluranSearch.MultipleTujuanKonsinyasiHidden.FormatPattern)"@Html.Raw(penyaluranSearch.MultipleTujuanKonsinyasiHidden.EditAttributes)>
+<div class="invalid-feedback">@Html.Raw(penyaluranSearch.MultipleTujuanKonsinyasiHidden.GetErrorMessage(false))</div>
+</span>
+                </div>
+            </div>
+        </div>
+    </div>
+} @* penyaluranSearch.MultipleTujuanKonsinyasiHidden.Visible (end) *@
+@if (penyaluranSearch.MultipleQuantity.Visible) { // penyaluranSearch.MultipleQuantity.Visible (begin)
+    <div id="r_MultipleQuantity" class="row" @Html.Raw(penyaluranSearch.MultipleQuantity.RowAttributes)>
+        <label for="x_MultipleQuantity" class="@(penyaluranSearch.LeftColumnClass)"><span id="elh_Penyaluran_MultipleQuantity">@Html.Raw(penyaluranSearch.MultipleQuantity.Caption)</span>
+        <span class="ew-search-operator">
+@Html.Raw(Language.Phrase("LIKE"))
+<input type="hidden" name="z_MultipleQuantity" id="z_MultipleQuantity" value="LIKE">
+</span>
+        </label>
+        <div class="@(penyaluranSearch.RightColumnClass)">
+            <div @Html.Raw(penyaluranSearch.MultipleQuantity.CellAttributes)>
+                <div class="d-flex align-items-start">
+                <span id="el_Penyaluran_MultipleQuantity" class="ew-search-field ew-search-field-single">
+<input type="@(penyaluranSearch.MultipleQuantity.InputTextType)" name="x_MultipleQuantity" id="x_MultipleQuantity" data-table="Penyaluran" data-field="x_MultipleQuantity" value="@Html.Raw(penyaluranSearch.MultipleQuantity.EditValue)" size="30" maxlength="1" placeholder="@Html.Raw(HtmlEncode(penyaluranSearch.MultipleQuantity.PlaceHolder))" data-format-pattern="@(penyaluranSearch.MultipleQuantity.FormatPattern)"@Html.Raw(penyaluranSearch.MultipleQuantity.EditAttributes)>
+<div class="invalid-feedback">@Html.Raw(penyaluranSearch.MultipleQuantity.GetErrorMessage(false))</div>
+</span>
+                </div>
+            </div>
+        </div>
+    </div>
+} @* penyaluranSearch.MultipleQuantity.Visible (end) *@
+</div><!-- /page* -->
+@Html.Raw(penyaluranSearch.IsModal ? Html.Raw("<template class=\"ew-modal-buttons\">") : Html.Raw("<div class=\"row ew-buttons\">"))<!-- buttons .row -->
+    <div class="@(penyaluranSearch.OffsetColumnClass)"><!-- buttons offset -->
+        <button class="btn btn-primary ew-btn" name="btn-action" id="btn-action" type="submit" form="fPenyaluransearch">@Html.Raw(Language.Phrase("Search"))</button>
+@if (penyaluranSearch.IsModal) {
+        <button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" form="fPenyaluransearch">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+} else {
+        <button class="btn btn-default ew-btn" name="btn-reset" id="btn-reset" type="button" form="fPenyaluransearch" data-ew-action="reload">@Html.Raw(Language.Phrase("Reset"))</button>
+}
+    </div><!-- /buttons offset -->
+@Html.Raw(penyaluranSearch.IsModal ? Html.Raw("</template>") : Html.Raw("</div>"))<!-- /buttons .row -->
+</form>
+@penyaluranSearch.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("Penyaluran");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Startup script
+    $('.ew-search-operator').hide();
+    $('.ew-search-and').hide();
+    $('.ew-search-field2').addClass('ew-search-field').removeClass('ew-search-field2');
+    $('.ew-search-field').addClass('align-items-center');
+    $('.modal-header').addClass('bg-primary');
+    const fromEl = '<p class="p-0 m-0 fw-bold me-2" style="width: 80px;">Start Date</p>';
+    const toEl = '<p class="p-0 m-0 fw-bold mx-2" style="width: 70px;">End Date</p>';
+    $('#datetimepicker_fPenerimaansearch_x_TanggalSandar').before(fromEl);
+    $('#datetimepicker_fPenerimaansearch_y_TanggalSandar').before(toEl);
+    $('#datetimepicker_fPenerimaansearch_x_TanggalDibuat').before(fromEl);
+    $('#datetimepicker_fPenerimaansearch_y_TanggalDibuat').before(toEl);
+    $('#datetimepicker_fPenerimaansearch_x_TanggalDiperbarui').before(fromEl);
+    $('#datetimepicker_fPenerimaansearch_y_TanggalDiperbarui').before(toEl);
+});
+</script>

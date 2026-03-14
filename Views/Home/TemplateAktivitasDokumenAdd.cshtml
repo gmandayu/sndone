@@ -1,0 +1,220 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (templateAktivitasDokumenAdd.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = templateAktivitasDokumenAdd.UseLayout ? "_Layout" : "";
+}
+<script>
+var currentTable = @Html.Raw(ConvertToJson(templateAktivitasDokumenAdd.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { TemplateAktivitasDokumen: currentTable } });
+var currentPageID = ew.PAGE_ID = "add";
+var currentForm;
+var fTemplateAktivitasDokumenadd;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("fTemplateAktivitasDokumenadd")
+        .setPageId("add")
+
+        // Add fields
+        .setFields([
+
+            ["IdTemplateAktivitas", [fields.IdTemplateAktivitas.visible && fields.IdTemplateAktivitas.required ? ew.Validators.required(fields.IdTemplateAktivitas.caption) : null], fields.IdTemplateAktivitas.isInvalid],
+            ["IdDokumen", [fields.IdDokumen.visible && fields.IdDokumen.required ? ew.Validators.required(fields.IdDokumen.caption) : null], fields.IdDokumen.isInvalid],
+            ["WajibUpload", [fields.WajibUpload.visible && fields.WajibUpload.required ? ew.Validators.required(fields.WajibUpload.caption) : null], fields.WajibUpload.isInvalid]
+        ])
+
+        // Form_CustomValidate
+        .setCustomValidate(
+            function(fobj) { // DO NOT CHANGE THIS LINE!
+                    // Your custom validation code here, return false if invalid.
+                    return true;
+                }
+        )
+
+        // Use JavaScript validation or not
+        .setValidateRequired(ew.CLIENT_VALIDATE)
+
+        // Dynamic selection lists
+        .setLists({
+            "IdTemplateAktivitas": @Html.Raw(templateAktivitasDokumenAdd.IdTemplateAktivitas.ToClientList(templateAktivitasDokumenAdd)),
+            "IdDokumen": @Html.Raw(templateAktivitasDokumenAdd.IdDokumen.ToClientList(templateAktivitasDokumenAdd)),
+            "WajibUpload": @Html.Raw(templateAktivitasDokumenAdd.WajibUpload.ToClientList(templateAktivitasDokumenAdd)),
+        })
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Client script
+    $('#fTemplateAktivitasDokumenadd').on('submit', function (e) {
+        e.preventDefault();
+        showLoading();
+        setTimeout(() => {
+            hideLoading();
+        }, 3000);
+        this.requestSubmit();
+    });
+});
+</script>
+@templateAktivitasDokumenAdd.ShowPageHeader()
+@templateAktivitasDokumenAdd.ShowMessages()
+<form name="fTemplateAktivitasDokumenadd" id="fTemplateAktivitasDokumenadd" class="@(templateAktivitasDokumenAdd.FormClassName)" action="@AppPath(CurrentPageName())" method="post" novalidate autocomplete="off">
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+<input type="hidden" name="action" id="action" value="insert">
+<input type="hidden" name="modal" value="@ConvertToInt(templateAktivitasDokumenAdd.IsModal)">
+@if (IsJsonResponse()) {
+<input type="hidden" name="json" value="1">
+}
+<input type="hidden" name="@(templateAktivitasDokumenAdd.OldKeyName)" value="@Html.Raw(templateAktivitasDokumenAdd.OldKey)">
+@if (templateAktivitasDokumenAdd.CurrentMasterTable == "TemplateAktivitas") {
+<input type="hidden" name="@Config.TableShowMaster" value="TemplateAktivitas">
+<input type="hidden" name="fk_IdTemplateAktivitas" value="@(HtmlEncode(templateAktivitasDokumenAdd.IdTemplateAktivitas.SessionValue))">
+}
+<div class="ew-add-div"><!-- page* -->
+@if (templateAktivitasDokumenAdd.IdTemplateAktivitas.Visible) { // templateAktivitasDokumenAdd.IdTemplateAktivitas.Visible (begin)
+    <div id="r_IdTemplateAktivitas" @Html.Raw(templateAktivitasDokumenAdd.IdTemplateAktivitas.RowAttributes)>
+        <label id="elh_TemplateAktivitasDokumen_IdTemplateAktivitas" for="x_IdTemplateAktivitas" class="@(templateAktivitasDokumenAdd.LeftColumnClass)">@Html.Raw(templateAktivitasDokumenAdd.IdTemplateAktivitas.Caption)@Html.Raw(templateAktivitasDokumenAdd.IdTemplateAktivitas.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(templateAktivitasDokumenAdd.RightColumnClass)"><div @Html.Raw(templateAktivitasDokumenAdd.IdTemplateAktivitas.CellAttributes)>
+@if (!Empty(templateAktivitasDokumenAdd.IdTemplateAktivitas.SessionValue)) {
+<span @Html.Raw(templateAktivitasDokumenAdd.IdTemplateAktivitas.ViewAttributes)>
+<span class="form-control-plaintext">@Html.Raw(templateAktivitasDokumenAdd.IdTemplateAktivitas.DisplayValue(templateAktivitasDokumenAdd.IdTemplateAktivitas.ViewValue))</span></span>
+<input type="hidden" id="x_IdTemplateAktivitas" name="x_IdTemplateAktivitas" value="@(HtmlEncode(templateAktivitasDokumenAdd.IdTemplateAktivitas.CurrentValue))" data-hidden="1">
+} else {
+<span id="el_TemplateAktivitasDokumen_IdTemplateAktivitas">
+    <select
+        id="x_IdTemplateAktivitas"
+        name="x_IdTemplateAktivitas"
+        class="form-select ew-select@(templateAktivitasDokumenAdd.IdTemplateAktivitas.IsInvalidClass)"
+        data-select2-id="fTemplateAktivitasDokumenadd_x_IdTemplateAktivitas"
+        data-table="TemplateAktivitasDokumen"
+        data-field="x_IdTemplateAktivitas"
+        data-value-separator="@(templateAktivitasDokumenAdd.IdTemplateAktivitas.DisplayValueSeparatorAttribute)"
+        data-placeholder="@(HtmlEncode(templateAktivitasDokumenAdd.IdTemplateAktivitas.PlaceHolder))"
+        @Html.Raw(templateAktivitasDokumenAdd.IdTemplateAktivitas.EditAttributes)>
+        @(templateAktivitasDokumenAdd.IdTemplateAktivitas.SelectOptionListHtml("x_IdTemplateAktivitas"))
+    </select>
+    @Html.Raw(templateAktivitasDokumenAdd.IdTemplateAktivitas.GetCustomMessage)
+    <div class="invalid-feedback">@Html.Raw(templateAktivitasDokumenAdd.IdTemplateAktivitas.GetErrorMessage())</div>
+@Html.Raw(templateAktivitasDokumenAdd.IdTemplateAktivitas.Lookup.GetParamTag(templateAktivitasDokumenAdd, "p_x_IdTemplateAktivitas"))
+<script>
+loadjs.ready("fTemplateAktivitasDokumenadd", function() {
+    var options = { name: "x_IdTemplateAktivitas", selectId: "fTemplateAktivitasDokumenadd_x_IdTemplateAktivitas" },
+        el = document.querySelector("select[data-select2-id='" + options.selectId + "']");
+    if (!el)
+        return;
+    options.closeOnSelect = !options.multiple;
+    options.dropdownParent = el.closest("#ew-modal-dialog, #ew-add-opt-dialog");
+    if (fTemplateAktivitasDokumenadd.lists.IdTemplateAktivitas?.lookupOptions.length) {
+        options.data = { id: "x_IdTemplateAktivitas", form: "fTemplateAktivitasDokumenadd" };
+    } else {
+        options.ajax = { id: "x_IdTemplateAktivitas", form: "fTemplateAktivitasDokumenadd", limit: ew.LOOKUP_PAGE_SIZE };
+    }
+    options.minimumInputLength = ew.selectMinimumInputLength;
+    options = Object.assign({}, ew.selectOptions, options, ew.vars.tables.TemplateAktivitasDokumen.fields.IdTemplateAktivitas.selectOptions);
+    ew.createSelect(options);
+});
+</script>
+</span>
+}
+</div></div>
+    </div>
+} @* templateAktivitasDokumenAdd.IdTemplateAktivitas.Visible (end) *@
+@if (templateAktivitasDokumenAdd.IdDokumen.Visible) { // templateAktivitasDokumenAdd.IdDokumen.Visible (begin)
+    <div id="r_IdDokumen" @Html.Raw(templateAktivitasDokumenAdd.IdDokumen.RowAttributes)>
+        <label id="elh_TemplateAktivitasDokumen_IdDokumen" for="x_IdDokumen" class="@(templateAktivitasDokumenAdd.LeftColumnClass)">@Html.Raw(templateAktivitasDokumenAdd.IdDokumen.Caption)@Html.Raw(templateAktivitasDokumenAdd.IdDokumen.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(templateAktivitasDokumenAdd.RightColumnClass)"><div @Html.Raw(templateAktivitasDokumenAdd.IdDokumen.CellAttributes)>
+<span id="el_TemplateAktivitasDokumen_IdDokumen">
+    <select
+        id="x_IdDokumen"
+        name="x_IdDokumen"
+        class="form-select ew-select@(templateAktivitasDokumenAdd.IdDokumen.IsInvalidClass)"
+        data-select2-id="fTemplateAktivitasDokumenadd_x_IdDokumen"
+        data-table="TemplateAktivitasDokumen"
+        data-field="x_IdDokumen"
+        data-value-separator="@(templateAktivitasDokumenAdd.IdDokumen.DisplayValueSeparatorAttribute)"
+        data-placeholder="@(HtmlEncode(templateAktivitasDokumenAdd.IdDokumen.PlaceHolder))"
+        @Html.Raw(templateAktivitasDokumenAdd.IdDokumen.EditAttributes)>
+        @(templateAktivitasDokumenAdd.IdDokumen.SelectOptionListHtml("x_IdDokumen"))
+    </select>
+    @Html.Raw(templateAktivitasDokumenAdd.IdDokumen.GetCustomMessage)
+    <div class="invalid-feedback">@Html.Raw(templateAktivitasDokumenAdd.IdDokumen.GetErrorMessage())</div>
+@Html.Raw(templateAktivitasDokumenAdd.IdDokumen.Lookup.GetParamTag(templateAktivitasDokumenAdd, "p_x_IdDokumen"))
+<script>
+loadjs.ready("fTemplateAktivitasDokumenadd", function() {
+    var options = { name: "x_IdDokumen", selectId: "fTemplateAktivitasDokumenadd_x_IdDokumen" },
+        el = document.querySelector("select[data-select2-id='" + options.selectId + "']");
+    if (!el)
+        return;
+    options.closeOnSelect = !options.multiple;
+    options.dropdownParent = el.closest("#ew-modal-dialog, #ew-add-opt-dialog");
+    if (fTemplateAktivitasDokumenadd.lists.IdDokumen?.lookupOptions.length) {
+        options.data = { id: "x_IdDokumen", form: "fTemplateAktivitasDokumenadd" };
+    } else {
+        options.ajax = { id: "x_IdDokumen", form: "fTemplateAktivitasDokumenadd", limit: ew.LOOKUP_PAGE_SIZE };
+    }
+    options.minimumInputLength = ew.selectMinimumInputLength;
+    options = Object.assign({}, ew.selectOptions, options, ew.vars.tables.TemplateAktivitasDokumen.fields.IdDokumen.selectOptions);
+    ew.createSelect(options);
+});
+</script>
+</span>
+</div></div>
+    </div>
+} @* templateAktivitasDokumenAdd.IdDokumen.Visible (end) *@
+@if (templateAktivitasDokumenAdd.WajibUpload.Visible) { // templateAktivitasDokumenAdd.WajibUpload.Visible (begin)
+    <div id="r_WajibUpload" @Html.Raw(templateAktivitasDokumenAdd.WajibUpload.RowAttributes)>
+        <label id="elh_TemplateAktivitasDokumen_WajibUpload" class="@(templateAktivitasDokumenAdd.LeftColumnClass)">@Html.Raw(templateAktivitasDokumenAdd.WajibUpload.Caption)@Html.Raw(templateAktivitasDokumenAdd.WajibUpload.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(templateAktivitasDokumenAdd.RightColumnClass)"><div @Html.Raw(templateAktivitasDokumenAdd.WajibUpload.CellAttributes)>
+<span id="el_TemplateAktivitasDokumen_WajibUpload">
+<div class="form-check d-inline-block">
+    <input type="checkbox" class="form-check-input@(templateAktivitasDokumenAdd.WajibUpload.IsInvalidClass)" data-table="TemplateAktivitasDokumen" data-field="x_WajibUpload" data-boolean name="x_WajibUpload" id="x_WajibUpload" value="1" checked="@ConvertToBool(templateAktivitasDokumenAdd.WajibUpload.CurrentValue)" @Html.Raw(templateAktivitasDokumenAdd.WajibUpload.EditAttributes) aria-describedby="x_WajibUpload_help">
+    <div class="invalid-feedback">@Html.Raw(templateAktivitasDokumenAdd.WajibUpload.GetErrorMessage())</div>
+</div>
+@Html.Raw(templateAktivitasDokumenAdd.WajibUpload.GetCustomMessage)
+</span>
+</div></div>
+    </div>
+} @* templateAktivitasDokumenAdd.WajibUpload.Visible (end) *@
+</div><!-- /page* -->
+@{ templateAktivitasDokumenAdd.CloseRecordset(); }
+@Html.Raw(templateAktivitasDokumenAdd.IsModal ? "<template class=\"ew-modal-buttons\">" : "<div class=\"row ew-buttons\">")<!-- buttons .row -->
+    <div class="@(templateAktivitasDokumenAdd.OffsetColumnClass)"><!-- buttons offset -->
+    <button class="btn btn-primary ew-btn" name="btn-action" id="btn-action" type="submit" form="fTemplateAktivitasDokumenadd">@Html.Raw(Language.Phrase("AddBtn"))</button>
+@if (IsJsonResponse()) {
+    <button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" data-bs-dismiss="modal">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+} else {
+    <button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" form="fTemplateAktivitasDokumenadd" data-href="@AppPath(templateAktivitasDokumenAdd.ReturnUrl)">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+}
+    </div><!-- /buttons offset -->
+@Html.Raw(templateAktivitasDokumenAdd.IsModal ? "</template>" : "</div>")<!-- /buttons .row -->
+</form>
+@templateAktivitasDokumenAdd.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("TemplateAktivitasDokumen");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Write your table-specific startup script here
+    // document.write("page loaded");
+});
+</script>

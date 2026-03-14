@@ -1,0 +1,344 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (penyaluranDelete.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = penyaluranDelete.UseLayout ? "_Layout" : "";
+}
+<script>
+var currentTable = @Html.Raw(ConvertToJson(penyaluranDelete.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { Penyaluran: currentTable } });
+var currentPageID = ew.PAGE_ID = "delete";
+var currentForm;
+var fPenyalurandelete;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("fPenyalurandelete")
+        .setPageId("delete")
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Client script
+    $('#fPenyalurandelete button[type=submit]').on('click', function(e) {
+        e.preventDefault();
+        const data = $('#fPenyalurandelete').serializeArray();
+        const parent_url = ew.PATH_BASE;
+        const submitData = data
+            .filter(field => field.name === "key_m[]")
+            .map(field => field.value);
+        showLoading();
+        $.ajax({
+            url: parent_url + 'api/LookUpList/CheckDeletableReferensi',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({
+                Referensi: 'Penyaluran',
+                IdReferensi: submitData
+            }),
+            success: function (res) {
+                if (res.success) {
+                    $('#fPenyalurandelete').submit();
+                } else {
+                    hideLoading();
+                    ew.alert(res.message);
+                    return false;
+                }
+            },
+            error: function (err) {
+                hideLoading();
+                ew.alert('An error occured on the server.');
+                console.error(err);
+                return false;
+            },
+        });
+    });
+});
+</script>
+@penyaluranDelete.ShowPageHeader()
+@penyaluranDelete.ShowMessages()
+<form name="fPenyalurandelete" id="fPenyalurandelete" class="ew-form ew-delete-form" action="@AppPath(CurrentPageName())" method="post" novalidate autocomplete="off">
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+<input type="hidden" name="action" id="action" value="delete">
+@foreach (string key in penyaluranDelete.RecordKeys) {
+<input type="hidden" name="key_m[]" value="@key">
+}
+<div class="card ew-card ew-grid @(penyaluranDelete.TableGridClass)">
+<div class="card-body ew-grid-middle-panel @(penyaluranDelete.TableContainerClass)" style="@(penyaluranDelete.TableContainerStyle)">
+<table class="@(penyaluranDelete.TableClass)">
+    <thead>
+    <tr class="ew-table-header">
+@if (penyaluranDelete.LinkProses.Visible) { // penyaluranDelete.LinkProses.Visible (begin)
+        <th class="@Html.Raw(penyaluranDelete.LinkProses.HeaderCellClass)"><span id="elh_Penyaluran_LinkProses" class="Penyaluran_LinkProses">@Html.Raw(penyaluranDelete.LinkProses.Caption)</span></th>
+} @* penyaluranDelete.LinkProses.Visible (end) *@
+@if (penyaluranDelete.IdPlant.Visible) { // penyaluranDelete.IdPlant.Visible (begin)
+        <th class="@Html.Raw(penyaluranDelete.IdPlant.HeaderCellClass)"><span id="elh_Penyaluran_IdPlant" class="Penyaluran_IdPlant">@Html.Raw(penyaluranDelete.IdPlant.Caption)</span></th>
+} @* penyaluranDelete.IdPlant.Visible (end) *@
+@if (penyaluranDelete.TipePenyaluran.Visible) { // penyaluranDelete.TipePenyaluran.Visible (begin)
+        <th class="@Html.Raw(penyaluranDelete.TipePenyaluran.HeaderCellClass)"><span id="elh_Penyaluran_TipePenyaluran" class="Penyaluran_TipePenyaluran">@Html.Raw(penyaluranDelete.TipePenyaluran.Caption)</span></th>
+} @* penyaluranDelete.TipePenyaluran.Visible (end) *@
+@if (penyaluranDelete.TipeProdukSTS.Visible) { // penyaluranDelete.TipeProdukSTS.Visible (begin)
+        <th class="@Html.Raw(penyaluranDelete.TipeProdukSTS.HeaderCellClass)"><span id="elh_Penyaluran_TipeProdukSTS" class="Penyaluran_TipeProdukSTS">@Html.Raw(penyaluranDelete.TipeProdukSTS.Caption)</span></th>
+} @* penyaluranDelete.TipeProdukSTS.Visible (end) *@
+@if (penyaluranDelete.KategoriPenyaluran.Visible) { // penyaluranDelete.KategoriPenyaluran.Visible (begin)
+        <th class="@Html.Raw(penyaluranDelete.KategoriPenyaluran.HeaderCellClass)"><span id="elh_Penyaluran_KategoriPenyaluran" class="Penyaluran_KategoriPenyaluran">@Html.Raw(penyaluranDelete.KategoriPenyaluran.Caption)</span></th>
+} @* penyaluranDelete.KategoriPenyaluran.Visible (end) *@
+@if (penyaluranDelete.IdModa.Visible) { // penyaluranDelete.IdModa.Visible (begin)
+        <th class="@Html.Raw(penyaluranDelete.IdModa.HeaderCellClass)"><span id="elh_Penyaluran_IdModa" class="Penyaluran_IdModa">@Html.Raw(penyaluranDelete.IdModa.Caption)</span></th>
+} @* penyaluranDelete.IdModa.Visible (end) *@
+@if (penyaluranDelete.IdPipa.Visible) { // penyaluranDelete.IdPipa.Visible (begin)
+        <th class="@Html.Raw(penyaluranDelete.IdPipa.HeaderCellClass)"><span id="elh_Penyaluran_IdPipa" class="Penyaluran_IdPipa">@Html.Raw(penyaluranDelete.IdPipa.Caption)</span></th>
+} @* penyaluranDelete.IdPipa.Visible (end) *@
+@if (penyaluranDelete.NomorPolisi.Visible) { // penyaluranDelete.NomorPolisi.Visible (begin)
+        <th class="@Html.Raw(penyaluranDelete.NomorPolisi.HeaderCellClass)"><span id="elh_Penyaluran_NomorPolisi" class="Penyaluran_NomorPolisi">@Html.Raw(penyaluranDelete.NomorPolisi.Caption)</span></th>
+} @* penyaluranDelete.NomorPolisi.Visible (end) *@
+@if (penyaluranDelete.NamaKapal.Visible) { // penyaluranDelete.NamaKapal.Visible (begin)
+        <th class="@Html.Raw(penyaluranDelete.NamaKapal.HeaderCellClass)"><span id="elh_Penyaluran_NamaKapal" class="Penyaluran_NamaKapal">@Html.Raw(penyaluranDelete.NamaKapal.Caption)</span></th>
+} @* penyaluranDelete.NamaKapal.Visible (end) *@
+@if (penyaluranDelete.JenisProduk.Visible) { // penyaluranDelete.JenisProduk.Visible (begin)
+        <th class="@Html.Raw(penyaluranDelete.JenisProduk.HeaderCellClass)"><span id="elh_Penyaluran_JenisProduk" class="Penyaluran_JenisProduk">@Html.Raw(penyaluranDelete.JenisProduk.Caption)</span></th>
+} @* penyaluranDelete.JenisProduk.Visible (end) *@
+@if (penyaluranDelete.StatusProses.Visible) { // penyaluranDelete.StatusProses.Visible (begin)
+        <th class="@Html.Raw(penyaluranDelete.StatusProses.HeaderCellClass)"><span id="elh_Penyaluran_StatusProses" class="Penyaluran_StatusProses">@Html.Raw(penyaluranDelete.StatusProses.Caption)</span></th>
+} @* penyaluranDelete.StatusProses.Visible (end) *@
+@if (penyaluranDelete.PersentaseProgress.Visible) { // penyaluranDelete.PersentaseProgress.Visible (begin)
+        <th class="@Html.Raw(penyaluranDelete.PersentaseProgress.HeaderCellClass)"><span id="elh_Penyaluran_PersentaseProgress" class="Penyaluran_PersentaseProgress">@Html.Raw(penyaluranDelete.PersentaseProgress.Caption)</span></th>
+} @* penyaluranDelete.PersentaseProgress.Visible (end) *@
+@if (penyaluranDelete.Tujuan.Visible) { // penyaluranDelete.Tujuan.Visible (begin)
+        <th class="@Html.Raw(penyaluranDelete.Tujuan.HeaderCellClass)"><span id="elh_Penyaluran_Tujuan" class="Penyaluran_Tujuan">@Html.Raw(penyaluranDelete.Tujuan.Caption)</span></th>
+} @* penyaluranDelete.Tujuan.Visible (end) *@
+@if (penyaluranDelete.TujuanKonsinyasi.Visible) { // penyaluranDelete.TujuanKonsinyasi.Visible (begin)
+        <th class="@Html.Raw(penyaluranDelete.TujuanKonsinyasi.HeaderCellClass)"><span id="elh_Penyaluran_TujuanKonsinyasi" class="Penyaluran_TujuanKonsinyasi">@Html.Raw(penyaluranDelete.TujuanKonsinyasi.Caption)</span></th>
+} @* penyaluranDelete.TujuanKonsinyasi.Visible (end) *@
+@if (penyaluranDelete.Volume.Visible) { // penyaluranDelete.Volume.Visible (begin)
+        <th class="@Html.Raw(penyaluranDelete.Volume.HeaderCellClass)"><span id="elh_Penyaluran_Volume" class="Penyaluran_Volume">@Html.Raw(penyaluranDelete.Volume.Caption)</span></th>
+} @* penyaluranDelete.Volume.Visible (end) *@
+@if (penyaluranDelete.TujuanKonsinyasiPipa.Visible) { // penyaluranDelete.TujuanKonsinyasiPipa.Visible (begin)
+        <th class="@Html.Raw(penyaluranDelete.TujuanKonsinyasiPipa.HeaderCellClass)"><span id="elh_Penyaluran_TujuanKonsinyasiPipa" class="Penyaluran_TujuanKonsinyasiPipa">@Html.Raw(penyaluranDelete.TujuanKonsinyasiPipa.Caption)</span></th>
+} @* penyaluranDelete.TujuanKonsinyasiPipa.Visible (end) *@
+@if (penyaluranDelete.QuantityKonsinyasiPipa.Visible) { // penyaluranDelete.QuantityKonsinyasiPipa.Visible (begin)
+        <th class="@Html.Raw(penyaluranDelete.QuantityKonsinyasiPipa.HeaderCellClass)"><span id="elh_Penyaluran_QuantityKonsinyasiPipa" class="Penyaluran_QuantityKonsinyasiPipa">@Html.Raw(penyaluranDelete.QuantityKonsinyasiPipa.Caption)</span></th>
+} @* penyaluranDelete.QuantityKonsinyasiPipa.Visible (end) *@
+@if (penyaluranDelete.TanggalSandar.Visible) { // penyaluranDelete.TanggalSandar.Visible (begin)
+        <th class="@Html.Raw(penyaluranDelete.TanggalSandar.HeaderCellClass)"><span id="elh_Penyaluran_TanggalSandar" class="Penyaluran_TanggalSandar">@Html.Raw(penyaluranDelete.TanggalSandar.Caption)</span></th>
+} @* penyaluranDelete.TanggalSandar.Visible (end) *@
+@if (penyaluranDelete.DibuatOleh.Visible) { // penyaluranDelete.DibuatOleh.Visible (begin)
+        <th class="@Html.Raw(penyaluranDelete.DibuatOleh.HeaderCellClass)"><span id="elh_Penyaluran_DibuatOleh" class="Penyaluran_DibuatOleh">@Html.Raw(penyaluranDelete.DibuatOleh.Caption)</span></th>
+} @* penyaluranDelete.DibuatOleh.Visible (end) *@
+@if (penyaluranDelete.TanggalDibuat.Visible) { // penyaluranDelete.TanggalDibuat.Visible (begin)
+        <th class="@Html.Raw(penyaluranDelete.TanggalDibuat.HeaderCellClass)"><span id="elh_Penyaluran_TanggalDibuat" class="Penyaluran_TanggalDibuat">@Html.Raw(penyaluranDelete.TanggalDibuat.Caption)</span></th>
+} @* penyaluranDelete.TanggalDibuat.Visible (end) *@
+@if (penyaluranDelete.DiperbaruiOleh.Visible) { // penyaluranDelete.DiperbaruiOleh.Visible (begin)
+        <th class="@Html.Raw(penyaluranDelete.DiperbaruiOleh.HeaderCellClass)"><span id="elh_Penyaluran_DiperbaruiOleh" class="Penyaluran_DiperbaruiOleh">@Html.Raw(penyaluranDelete.DiperbaruiOleh.Caption)</span></th>
+} @* penyaluranDelete.DiperbaruiOleh.Visible (end) *@
+@if (penyaluranDelete.TanggalDiperbarui.Visible) { // penyaluranDelete.TanggalDiperbarui.Visible (begin)
+        <th class="@Html.Raw(penyaluranDelete.TanggalDiperbarui.HeaderCellClass)"><span id="elh_Penyaluran_TanggalDiperbarui" class="Penyaluran_TanggalDiperbarui">@Html.Raw(penyaluranDelete.TanggalDiperbarui.Caption)</span></th>
+} @* penyaluranDelete.TanggalDiperbarui.Visible (end) *@
+    </tr>
+    </thead>
+    <tbody>
+@{ penyaluranDelete.RecordCount = 0; }
+@while (penyaluranDelete.Recordset != null && await penyaluranDelete.Recordset.ReadAsync()) { // DN
+    penyaluranDelete.RecordCount++;
+    penyaluranDelete.RowCount++;
+
+    // Set row properties
+    penyaluranDelete.ResetAttributes();
+    penyaluranDelete.RowType = RowType.View; // View
+
+    // Get the field contents
+    await penyaluranDelete.LoadRowValues(penyaluranDelete.Recordset);
+
+    // Render row
+    await penyaluranDelete.RenderRow();
+    <tr @Html.Raw(penyaluranDelete.RowAttributes)>
+@if (penyaluranDelete.LinkProses.Visible) { // penyaluranDelete.LinkProses.Visible (begin)
+        <td @Html.Raw(penyaluranDelete.LinkProses.CellAttributes)>
+<span id="">
+<span @Html.Raw(penyaluranDelete.LinkProses.ViewAttributes)>
+@Html.Raw(penyaluranDelete.LinkProses.GetViewValue())</span>
+</span></td>
+} @* penyaluranDelete.LinkProses.Visible (end) *@
+@if (penyaluranDelete.IdPlant.Visible) { // penyaluranDelete.IdPlant.Visible (begin)
+        <td @Html.Raw(penyaluranDelete.IdPlant.CellAttributes)>
+<span id="">
+<span @Html.Raw(penyaluranDelete.IdPlant.ViewAttributes)>
+@Html.Raw(penyaluranDelete.IdPlant.GetViewValue())</span>
+</span></td>
+} @* penyaluranDelete.IdPlant.Visible (end) *@
+@if (penyaluranDelete.TipePenyaluran.Visible) { // penyaluranDelete.TipePenyaluran.Visible (begin)
+        <td @Html.Raw(penyaluranDelete.TipePenyaluran.CellAttributes)>
+<span id="">
+<span @Html.Raw(penyaluranDelete.TipePenyaluran.ViewAttributes)>
+@Html.Raw(penyaluranDelete.TipePenyaluran.GetViewValue())</span>
+</span></td>
+} @* penyaluranDelete.TipePenyaluran.Visible (end) *@
+@if (penyaluranDelete.TipeProdukSTS.Visible) { // penyaluranDelete.TipeProdukSTS.Visible (begin)
+        <td @Html.Raw(penyaluranDelete.TipeProdukSTS.CellAttributes)>
+<span id="">
+<span @Html.Raw(penyaluranDelete.TipeProdukSTS.ViewAttributes)>
+@Html.Raw(penyaluranDelete.TipeProdukSTS.GetViewValue())</span>
+</span></td>
+} @* penyaluranDelete.TipeProdukSTS.Visible (end) *@
+@if (penyaluranDelete.KategoriPenyaluran.Visible) { // penyaluranDelete.KategoriPenyaluran.Visible (begin)
+        <td @Html.Raw(penyaluranDelete.KategoriPenyaluran.CellAttributes)>
+<span id="">
+<span @Html.Raw(penyaluranDelete.KategoriPenyaluran.ViewAttributes)>
+@Html.Raw(penyaluranDelete.KategoriPenyaluran.GetViewValue())</span>
+</span></td>
+} @* penyaluranDelete.KategoriPenyaluran.Visible (end) *@
+@if (penyaluranDelete.IdModa.Visible) { // penyaluranDelete.IdModa.Visible (begin)
+        <td @Html.Raw(penyaluranDelete.IdModa.CellAttributes)>
+<span id="">
+<span @Html.Raw(penyaluranDelete.IdModa.ViewAttributes)>
+@Html.Raw(penyaluranDelete.IdModa.GetViewValue())</span>
+</span></td>
+} @* penyaluranDelete.IdModa.Visible (end) *@
+@if (penyaluranDelete.IdPipa.Visible) { // penyaluranDelete.IdPipa.Visible (begin)
+        <td @Html.Raw(penyaluranDelete.IdPipa.CellAttributes)>
+<span id="">
+<span @Html.Raw(penyaluranDelete.IdPipa.ViewAttributes)>
+@Html.Raw(penyaluranDelete.IdPipa.GetViewValue())</span>
+</span></td>
+} @* penyaluranDelete.IdPipa.Visible (end) *@
+@if (penyaluranDelete.NomorPolisi.Visible) { // penyaluranDelete.NomorPolisi.Visible (begin)
+        <td @Html.Raw(penyaluranDelete.NomorPolisi.CellAttributes)>
+<span id="">
+<span @Html.Raw(penyaluranDelete.NomorPolisi.ViewAttributes)>
+@Html.Raw(penyaluranDelete.NomorPolisi.GetViewValue())</span>
+</span></td>
+} @* penyaluranDelete.NomorPolisi.Visible (end) *@
+@if (penyaluranDelete.NamaKapal.Visible) { // penyaluranDelete.NamaKapal.Visible (begin)
+        <td @Html.Raw(penyaluranDelete.NamaKapal.CellAttributes)>
+<span id="">
+<span @Html.Raw(penyaluranDelete.NamaKapal.ViewAttributes)>
+@Html.Raw(penyaluranDelete.NamaKapal.GetViewValue())</span>
+</span></td>
+} @* penyaluranDelete.NamaKapal.Visible (end) *@
+@if (penyaluranDelete.JenisProduk.Visible) { // penyaluranDelete.JenisProduk.Visible (begin)
+        <td @Html.Raw(penyaluranDelete.JenisProduk.CellAttributes)>
+<span id="">
+<span @Html.Raw(penyaluranDelete.JenisProduk.ViewAttributes)>
+@Html.Raw(penyaluranDelete.JenisProduk.GetViewValue())</span>
+</span></td>
+} @* penyaluranDelete.JenisProduk.Visible (end) *@
+@if (penyaluranDelete.StatusProses.Visible) { // penyaluranDelete.StatusProses.Visible (begin)
+        <td @Html.Raw(penyaluranDelete.StatusProses.CellAttributes)>
+<span id="">
+<span @Html.Raw(penyaluranDelete.StatusProses.ViewAttributes)>
+@Html.Raw(penyaluranDelete.StatusProses.GetViewValue())</span>
+</span></td>
+} @* penyaluranDelete.StatusProses.Visible (end) *@
+@if (penyaluranDelete.PersentaseProgress.Visible) { // penyaluranDelete.PersentaseProgress.Visible (begin)
+        <td @Html.Raw(penyaluranDelete.PersentaseProgress.CellAttributes)>
+<span id="">
+<span @Html.Raw(penyaluranDelete.PersentaseProgress.ViewAttributes)>
+@Html.Raw(penyaluranDelete.PersentaseProgress.GetViewValue())</span>
+</span></td>
+} @* penyaluranDelete.PersentaseProgress.Visible (end) *@
+@if (penyaluranDelete.Tujuan.Visible) { // penyaluranDelete.Tujuan.Visible (begin)
+        <td @Html.Raw(penyaluranDelete.Tujuan.CellAttributes)>
+<span id="">
+<span @Html.Raw(penyaluranDelete.Tujuan.ViewAttributes)>
+@Html.Raw(penyaluranDelete.Tujuan.GetViewValue())</span>
+</span></td>
+} @* penyaluranDelete.Tujuan.Visible (end) *@
+@if (penyaluranDelete.TujuanKonsinyasi.Visible) { // penyaluranDelete.TujuanKonsinyasi.Visible (begin)
+        <td @Html.Raw(penyaluranDelete.TujuanKonsinyasi.CellAttributes)>
+<span id="">
+<span @Html.Raw(penyaluranDelete.TujuanKonsinyasi.ViewAttributes)>
+@Html.Raw(penyaluranDelete.TujuanKonsinyasi.GetViewValue())</span>
+</span></td>
+} @* penyaluranDelete.TujuanKonsinyasi.Visible (end) *@
+@if (penyaluranDelete.Volume.Visible) { // penyaluranDelete.Volume.Visible (begin)
+        <td @Html.Raw(penyaluranDelete.Volume.CellAttributes)>
+<span id="">
+<span @Html.Raw(penyaluranDelete.Volume.ViewAttributes)>
+@Html.Raw(penyaluranDelete.Volume.GetViewValue())</span>
+</span></td>
+} @* penyaluranDelete.Volume.Visible (end) *@
+@if (penyaluranDelete.TujuanKonsinyasiPipa.Visible) { // penyaluranDelete.TujuanKonsinyasiPipa.Visible (begin)
+        <td @Html.Raw(penyaluranDelete.TujuanKonsinyasiPipa.CellAttributes)>
+<span id="">
+<span @Html.Raw(penyaluranDelete.TujuanKonsinyasiPipa.ViewAttributes)>
+@Html.Raw(penyaluranDelete.TujuanKonsinyasiPipa.GetViewValue())</span>
+</span></td>
+} @* penyaluranDelete.TujuanKonsinyasiPipa.Visible (end) *@
+@if (penyaluranDelete.QuantityKonsinyasiPipa.Visible) { // penyaluranDelete.QuantityKonsinyasiPipa.Visible (begin)
+        <td @Html.Raw(penyaluranDelete.QuantityKonsinyasiPipa.CellAttributes)>
+<span id="">
+<span @Html.Raw(penyaluranDelete.QuantityKonsinyasiPipa.ViewAttributes)>
+@Html.Raw(penyaluranDelete.QuantityKonsinyasiPipa.GetViewValue())</span>
+</span></td>
+} @* penyaluranDelete.QuantityKonsinyasiPipa.Visible (end) *@
+@if (penyaluranDelete.TanggalSandar.Visible) { // penyaluranDelete.TanggalSandar.Visible (begin)
+        <td @Html.Raw(penyaluranDelete.TanggalSandar.CellAttributes)>
+<span id="">
+<span @Html.Raw(penyaluranDelete.TanggalSandar.ViewAttributes)>
+@Html.Raw(penyaluranDelete.TanggalSandar.GetViewValue())</span>
+</span></td>
+} @* penyaluranDelete.TanggalSandar.Visible (end) *@
+@if (penyaluranDelete.DibuatOleh.Visible) { // penyaluranDelete.DibuatOleh.Visible (begin)
+        <td @Html.Raw(penyaluranDelete.DibuatOleh.CellAttributes)>
+<span id="">
+<span @Html.Raw(penyaluranDelete.DibuatOleh.ViewAttributes)>
+@Html.Raw(penyaluranDelete.DibuatOleh.GetViewValue())</span>
+</span></td>
+} @* penyaluranDelete.DibuatOleh.Visible (end) *@
+@if (penyaluranDelete.TanggalDibuat.Visible) { // penyaluranDelete.TanggalDibuat.Visible (begin)
+        <td @Html.Raw(penyaluranDelete.TanggalDibuat.CellAttributes)>
+<span id="">
+<span @Html.Raw(penyaluranDelete.TanggalDibuat.ViewAttributes)>
+@Html.Raw(penyaluranDelete.TanggalDibuat.GetViewValue())</span>
+</span></td>
+} @* penyaluranDelete.TanggalDibuat.Visible (end) *@
+@if (penyaluranDelete.DiperbaruiOleh.Visible) { // penyaluranDelete.DiperbaruiOleh.Visible (begin)
+        <td @Html.Raw(penyaluranDelete.DiperbaruiOleh.CellAttributes)>
+<span id="">
+<span @Html.Raw(penyaluranDelete.DiperbaruiOleh.ViewAttributes)>
+@Html.Raw(penyaluranDelete.DiperbaruiOleh.GetViewValue())</span>
+</span></td>
+} @* penyaluranDelete.DiperbaruiOleh.Visible (end) *@
+@if (penyaluranDelete.TanggalDiperbarui.Visible) { // penyaluranDelete.TanggalDiperbarui.Visible (begin)
+        <td @Html.Raw(penyaluranDelete.TanggalDiperbarui.CellAttributes)>
+<span id="">
+<span @Html.Raw(penyaluranDelete.TanggalDiperbarui.ViewAttributes)>
+@Html.Raw(penyaluranDelete.TanggalDiperbarui.GetViewValue())</span>
+</span></td>
+} @* penyaluranDelete.TanggalDiperbarui.Visible (end) *@
+    </tr>
+}
+@{ penyaluranDelete.CloseRecordset(); }
+</tbody>
+</table>
+</div>
+</div>
+<div class="ew-buttons ew-desktop-buttons">
+<button class="btn btn-primary ew-btn" name="btn-action" id="btn-action" type="submit">@Html.Raw(Language.Phrase("DeleteBtn"))</button>
+<button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" data-href="@AppPath(penyaluranDelete.ReturnUrl)">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+</div>
+</form>
+@penyaluranDelete.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+<script>
+loadjs.ready("load", function() {
+    // Write your table-specific startup script here
+    // document.write("page loaded");
+});
+</script>

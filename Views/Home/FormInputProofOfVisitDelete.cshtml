@@ -1,0 +1,261 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (formInputProofOfVisitDelete.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = formInputProofOfVisitDelete.UseLayout ? "_Layout" : "";
+}
+<script>
+var currentTable = @Html.Raw(ConvertToJson(formInputProofOfVisitDelete.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { FormInputProofOfVisit: currentTable } });
+var currentPageID = ew.PAGE_ID = "delete";
+var currentForm;
+var fFormInputProofOfVisitdelete;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("fFormInputProofOfVisitdelete")
+        .setPageId("delete")
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Client script
+    const parent_url = ew.PATH_BASE;
+    $(document).on('click', '.download-document', function (e) {
+        e.preventDefault();
+        const idPOV = $(this).data('id');
+        if (!idPOV) {
+            ew.alert("ID dokumen tidak ditemukan.");
+            return;
+        }
+        $.ajax({
+            url: parent_url + 'api/LookUpList/DownloadDocumentZip',
+            type: 'GET',
+            data: { 
+                idRef: idPOV,
+                table: 'DetailUploadPOV',
+                colRef: 'idPOV',
+                path: 'POVDocument'
+            },
+            xhrFields: {
+                responseType: 'blob'
+            },
+            beforeSend: function () {
+                showLoading();
+            },
+            success: function (response, status, xhr) {
+                const disposition = xhr.getResponseHeader('Content-Disposition');
+                let fileName = "download_file";
+                if (disposition) {
+                    const fileNameMatch = disposition.match(/filename="?([^";]+)"?/);
+                    if (fileNameMatch && fileNameMatch[1]) {
+                        fileName = decodeURIComponent(fileNameMatch[1]);
+                    }
+                    const utf8FileNameMatch = disposition.match(/filename\*\s*=\s*UTF-8''([^;]+)/);
+                    if (utf8FileNameMatch && utf8FileNameMatch[1]) {
+                        fileName = decodeURIComponent(utf8FileNameMatch[1]);
+                    }
+                }
+                const blobUrl = window.URL.createObjectURL(response);
+                const a = document.createElement('a');
+                a.href = blobUrl;
+                a.download = fileName;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(blobUrl);
+                ew.alert("Download berhasil!");
+            },
+            error: function (xhr, status, error) {
+                if (xhr.status === 404) {
+                    ew.alert("File tidak ditemukan di server.");
+                } else if (xhr.status === 500) {
+                    ew.alert("Terjadi kesalahan server. Coba lagi nanti.");
+                } else {
+                    ew.alert("Gagal mendownload file. Error: " + xhr.responseText);
+                }
+            },
+            complete: function () {
+                hideLoading();
+            }
+        });
+    });
+});
+</script>
+@formInputProofOfVisitDelete.ShowPageHeader()
+@formInputProofOfVisitDelete.ShowMessages()
+<form name="fFormInputProofOfVisitdelete" id="fFormInputProofOfVisitdelete" class="ew-form ew-delete-form" action="@AppPath(CurrentPageName())" method="post" novalidate autocomplete="off">
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+<input type="hidden" name="action" id="action" value="delete">
+@foreach (string key in formInputProofOfVisitDelete.RecordKeys) {
+<input type="hidden" name="key_m[]" value="@key">
+}
+<div class="card ew-card ew-grid @(formInputProofOfVisitDelete.TableGridClass)">
+<div class="card-body ew-grid-middle-panel @(formInputProofOfVisitDelete.TableContainerClass)" style="@(formInputProofOfVisitDelete.TableContainerStyle)">
+<table class="@(formInputProofOfVisitDelete.TableClass)">
+    <thead>
+    <tr class="ew-table-header">
+@if (formInputProofOfVisitDelete.NoReferensi.Visible) { // formInputProofOfVisitDelete.NoReferensi.Visible (begin)
+        <th class="@Html.Raw(formInputProofOfVisitDelete.NoReferensi.HeaderCellClass)"><span id="elh_FormInputProofOfVisit_NoReferensi" class="FormInputProofOfVisit_NoReferensi">@Html.Raw(formInputProofOfVisitDelete.NoReferensi.Caption)</span></th>
+} @* formInputProofOfVisitDelete.NoReferensi.Visible (end) *@
+@if (formInputProofOfVisitDelete.Tanggal.Visible) { // formInputProofOfVisitDelete.Tanggal.Visible (begin)
+        <th class="@Html.Raw(formInputProofOfVisitDelete.Tanggal.HeaderCellClass)"><span id="elh_FormInputProofOfVisit_Tanggal" class="FormInputProofOfVisit_Tanggal">@Html.Raw(formInputProofOfVisitDelete.Tanggal.Caption)</span></th>
+} @* formInputProofOfVisitDelete.Tanggal.Visible (end) *@
+@if (formInputProofOfVisitDelete.Lokasi.Visible) { // formInputProofOfVisitDelete.Lokasi.Visible (begin)
+        <th class="@Html.Raw(formInputProofOfVisitDelete.Lokasi.HeaderCellClass)"><span id="elh_FormInputProofOfVisit_Lokasi" class="FormInputProofOfVisit_Lokasi">@Html.Raw(formInputProofOfVisitDelete.Lokasi.Caption)</span></th>
+} @* formInputProofOfVisitDelete.Lokasi.Visible (end) *@
+@if (formInputProofOfVisitDelete.DownloadDokumen.Visible) { // formInputProofOfVisitDelete.DownloadDokumen.Visible (begin)
+        <th class="@Html.Raw(formInputProofOfVisitDelete.DownloadDokumen.HeaderCellClass)"><span id="elh_FormInputProofOfVisit_DownloadDokumen" class="FormInputProofOfVisit_DownloadDokumen">@Html.Raw(formInputProofOfVisitDelete.DownloadDokumen.Caption)</span></th>
+} @* formInputProofOfVisitDelete.DownloadDokumen.Visible (end) *@
+@if (formInputProofOfVisitDelete.Ketidaksesuaiaan.Visible) { // formInputProofOfVisitDelete.Ketidaksesuaiaan.Visible (begin)
+        <th class="@Html.Raw(formInputProofOfVisitDelete.Ketidaksesuaiaan.HeaderCellClass)"><span id="elh_FormInputProofOfVisit_Ketidaksesuaiaan" class="FormInputProofOfVisit_Ketidaksesuaiaan">@Html.Raw(formInputProofOfVisitDelete.Ketidaksesuaiaan.Caption)</span></th>
+} @* formInputProofOfVisitDelete.Ketidaksesuaiaan.Visible (end) *@
+@if (formInputProofOfVisitDelete.Keterangan.Visible) { // formInputProofOfVisitDelete.Keterangan.Visible (begin)
+        <th class="@Html.Raw(formInputProofOfVisitDelete.Keterangan.HeaderCellClass)"><span id="elh_FormInputProofOfVisit_Keterangan" class="FormInputProofOfVisit_Keterangan">@Html.Raw(formInputProofOfVisitDelete.Keterangan.Caption)</span></th>
+} @* formInputProofOfVisitDelete.Keterangan.Visible (end) *@
+@if (formInputProofOfVisitDelete.IdPosition.Visible) { // formInputProofOfVisitDelete.IdPosition.Visible (begin)
+        <th class="@Html.Raw(formInputProofOfVisitDelete.IdPosition.HeaderCellClass)"><span id="elh_FormInputProofOfVisit_IdPosition" class="FormInputProofOfVisit_IdPosition">@Html.Raw(formInputProofOfVisitDelete.IdPosition.Caption)</span></th>
+} @* formInputProofOfVisitDelete.IdPosition.Visible (end) *@
+@if (formInputProofOfVisitDelete.userInput.Visible) { // formInputProofOfVisitDelete.userInput.Visible (begin)
+        <th class="@Html.Raw(formInputProofOfVisitDelete.userInput.HeaderCellClass)"><span id="elh_FormInputProofOfVisit_userInput" class="FormInputProofOfVisit_userInput">@Html.Raw(formInputProofOfVisitDelete.userInput.Caption)</span></th>
+} @* formInputProofOfVisitDelete.userInput.Visible (end) *@
+@if (formInputProofOfVisitDelete.etlDate.Visible) { // formInputProofOfVisitDelete.etlDate.Visible (begin)
+        <th class="@Html.Raw(formInputProofOfVisitDelete.etlDate.HeaderCellClass)"><span id="elh_FormInputProofOfVisit_etlDate" class="FormInputProofOfVisit_etlDate">@Html.Raw(formInputProofOfVisitDelete.etlDate.Caption)</span></th>
+} @* formInputProofOfVisitDelete.etlDate.Visible (end) *@
+@if (formInputProofOfVisitDelete.lastUpdatedBy.Visible) { // formInputProofOfVisitDelete.lastUpdatedBy.Visible (begin)
+        <th class="@Html.Raw(formInputProofOfVisitDelete.lastUpdatedBy.HeaderCellClass)"><span id="elh_FormInputProofOfVisit_lastUpdatedBy" class="FormInputProofOfVisit_lastUpdatedBy">@Html.Raw(formInputProofOfVisitDelete.lastUpdatedBy.Caption)</span></th>
+} @* formInputProofOfVisitDelete.lastUpdatedBy.Visible (end) *@
+@if (formInputProofOfVisitDelete.lastUpdatedDate.Visible) { // formInputProofOfVisitDelete.lastUpdatedDate.Visible (begin)
+        <th class="@Html.Raw(formInputProofOfVisitDelete.lastUpdatedDate.HeaderCellClass)"><span id="elh_FormInputProofOfVisit_lastUpdatedDate" class="FormInputProofOfVisit_lastUpdatedDate">@Html.Raw(formInputProofOfVisitDelete.lastUpdatedDate.Caption)</span></th>
+} @* formInputProofOfVisitDelete.lastUpdatedDate.Visible (end) *@
+    </tr>
+    </thead>
+    <tbody>
+@{ formInputProofOfVisitDelete.RecordCount = 0; }
+@while (formInputProofOfVisitDelete.Recordset != null && await formInputProofOfVisitDelete.Recordset.ReadAsync()) { // DN
+    formInputProofOfVisitDelete.RecordCount++;
+    formInputProofOfVisitDelete.RowCount++;
+
+    // Set row properties
+    formInputProofOfVisitDelete.ResetAttributes();
+    formInputProofOfVisitDelete.RowType = RowType.View; // View
+
+    // Get the field contents
+    await formInputProofOfVisitDelete.LoadRowValues(formInputProofOfVisitDelete.Recordset);
+
+    // Render row
+    await formInputProofOfVisitDelete.RenderRow();
+    <tr @Html.Raw(formInputProofOfVisitDelete.RowAttributes)>
+@if (formInputProofOfVisitDelete.NoReferensi.Visible) { // formInputProofOfVisitDelete.NoReferensi.Visible (begin)
+        <td @Html.Raw(formInputProofOfVisitDelete.NoReferensi.CellAttributes)>
+<span id="">
+<span @Html.Raw(formInputProofOfVisitDelete.NoReferensi.ViewAttributes)>
+@Html.Raw(formInputProofOfVisitDelete.NoReferensi.GetViewValue())</span>
+</span></td>
+} @* formInputProofOfVisitDelete.NoReferensi.Visible (end) *@
+@if (formInputProofOfVisitDelete.Tanggal.Visible) { // formInputProofOfVisitDelete.Tanggal.Visible (begin)
+        <td @Html.Raw(formInputProofOfVisitDelete.Tanggal.CellAttributes)>
+<span id="">
+<span @Html.Raw(formInputProofOfVisitDelete.Tanggal.ViewAttributes)>
+@Html.Raw(formInputProofOfVisitDelete.Tanggal.GetViewValue())</span>
+</span></td>
+} @* formInputProofOfVisitDelete.Tanggal.Visible (end) *@
+@if (formInputProofOfVisitDelete.Lokasi.Visible) { // formInputProofOfVisitDelete.Lokasi.Visible (begin)
+        <td @Html.Raw(formInputProofOfVisitDelete.Lokasi.CellAttributes)>
+<span id="">
+<span @Html.Raw(formInputProofOfVisitDelete.Lokasi.ViewAttributes)>
+@Html.Raw(formInputProofOfVisitDelete.Lokasi.GetViewValue())</span>
+</span></td>
+} @* formInputProofOfVisitDelete.Lokasi.Visible (end) *@
+@if (formInputProofOfVisitDelete.DownloadDokumen.Visible) { // formInputProofOfVisitDelete.DownloadDokumen.Visible (begin)
+        <td @Html.Raw(formInputProofOfVisitDelete.DownloadDokumen.CellAttributes)>
+<span id="">
+<span @Html.Raw(formInputProofOfVisitDelete.DownloadDokumen.ViewAttributes)>
+@Html.Raw(formInputProofOfVisitDelete.DownloadDokumen.GetViewValue())</span>
+</span></td>
+} @* formInputProofOfVisitDelete.DownloadDokumen.Visible (end) *@
+@if (formInputProofOfVisitDelete.Ketidaksesuaiaan.Visible) { // formInputProofOfVisitDelete.Ketidaksesuaiaan.Visible (begin)
+        <td @Html.Raw(formInputProofOfVisitDelete.Ketidaksesuaiaan.CellAttributes)>
+<span id="">
+<span @Html.Raw(formInputProofOfVisitDelete.Ketidaksesuaiaan.ViewAttributes)>
+@Html.Raw(formInputProofOfVisitDelete.Ketidaksesuaiaan.GetViewValue())</span>
+</span></td>
+} @* formInputProofOfVisitDelete.Ketidaksesuaiaan.Visible (end) *@
+@if (formInputProofOfVisitDelete.Keterangan.Visible) { // formInputProofOfVisitDelete.Keterangan.Visible (begin)
+        <td @Html.Raw(formInputProofOfVisitDelete.Keterangan.CellAttributes)>
+<span id="">
+<span @Html.Raw(formInputProofOfVisitDelete.Keterangan.ViewAttributes)>
+@Html.Raw(formInputProofOfVisitDelete.Keterangan.GetViewValue())</span>
+</span></td>
+} @* formInputProofOfVisitDelete.Keterangan.Visible (end) *@
+@if (formInputProofOfVisitDelete.IdPosition.Visible) { // formInputProofOfVisitDelete.IdPosition.Visible (begin)
+        <td @Html.Raw(formInputProofOfVisitDelete.IdPosition.CellAttributes)>
+<span id="">
+<span @Html.Raw(formInputProofOfVisitDelete.IdPosition.ViewAttributes)>
+@Html.Raw(formInputProofOfVisitDelete.IdPosition.GetViewValue())</span>
+</span></td>
+} @* formInputProofOfVisitDelete.IdPosition.Visible (end) *@
+@if (formInputProofOfVisitDelete.userInput.Visible) { // formInputProofOfVisitDelete.userInput.Visible (begin)
+        <td @Html.Raw(formInputProofOfVisitDelete.userInput.CellAttributes)>
+<span id="">
+<span @Html.Raw(formInputProofOfVisitDelete.userInput.ViewAttributes)>
+@Html.Raw(formInputProofOfVisitDelete.userInput.GetViewValue())</span>
+</span></td>
+} @* formInputProofOfVisitDelete.userInput.Visible (end) *@
+@if (formInputProofOfVisitDelete.etlDate.Visible) { // formInputProofOfVisitDelete.etlDate.Visible (begin)
+        <td @Html.Raw(formInputProofOfVisitDelete.etlDate.CellAttributes)>
+<span id="">
+<span @Html.Raw(formInputProofOfVisitDelete.etlDate.ViewAttributes)>
+@Html.Raw(formInputProofOfVisitDelete.etlDate.GetViewValue())</span>
+</span></td>
+} @* formInputProofOfVisitDelete.etlDate.Visible (end) *@
+@if (formInputProofOfVisitDelete.lastUpdatedBy.Visible) { // formInputProofOfVisitDelete.lastUpdatedBy.Visible (begin)
+        <td @Html.Raw(formInputProofOfVisitDelete.lastUpdatedBy.CellAttributes)>
+<span id="">
+<span @Html.Raw(formInputProofOfVisitDelete.lastUpdatedBy.ViewAttributes)>
+@Html.Raw(formInputProofOfVisitDelete.lastUpdatedBy.GetViewValue())</span>
+</span></td>
+} @* formInputProofOfVisitDelete.lastUpdatedBy.Visible (end) *@
+@if (formInputProofOfVisitDelete.lastUpdatedDate.Visible) { // formInputProofOfVisitDelete.lastUpdatedDate.Visible (begin)
+        <td @Html.Raw(formInputProofOfVisitDelete.lastUpdatedDate.CellAttributes)>
+<span id="">
+<span @Html.Raw(formInputProofOfVisitDelete.lastUpdatedDate.ViewAttributes)>
+@Html.Raw(formInputProofOfVisitDelete.lastUpdatedDate.GetViewValue())</span>
+</span></td>
+} @* formInputProofOfVisitDelete.lastUpdatedDate.Visible (end) *@
+    </tr>
+}
+@{ formInputProofOfVisitDelete.CloseRecordset(); }
+</tbody>
+</table>
+</div>
+</div>
+<div class="ew-buttons ew-desktop-buttons">
+<button class="btn btn-primary ew-btn" name="btn-action" id="btn-action" type="submit">@Html.Raw(Language.Phrase("DeleteBtn"))</button>
+<button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" data-href="@AppPath(formInputProofOfVisitDelete.ReturnUrl)">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+</div>
+</form>
+@formInputProofOfVisitDelete.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+<script>
+loadjs.ready("load", function() {
+    // Write your table-specific startup script here
+    // document.write("page loaded");
+});
+</script>

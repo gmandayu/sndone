@@ -1,0 +1,361 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (subAktivitasCatatanKhususList.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = subAktivitasCatatanKhususList.UseLayout ? "_Layout" : "";
+}
+@if (!subAktivitasCatatanKhususList.IsExport()) {
+<script>
+var currentTable = @Html.Raw(ConvertToJson(subAktivitasCatatanKhususList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { SubAktivitasCatatanKhusus: currentTable } });
+var currentPageID = ew.PAGE_ID = "list";
+var currentForm;
+var @(subAktivitasCatatanKhususList.FormName);
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("@(subAktivitasCatatanKhususList.FormName)")
+        .setPageId("list")
+        .setSubmitWithFetch(@(subAktivitasCatatanKhususList.UseAjaxActions ? "true" : "false"))
+        .setFormKeyCountName("@(subAktivitasCatatanKhususList.FormKeyCountName)")
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Write your client script here, no need to add script tags.
+});
+</script>
+}
+@if (!subAktivitasCatatanKhususList.IsExport()) {
+<div class="btn-toolbar ew-toolbar">
+@if (subAktivitasCatatanKhususList.TotalRecords > 0 && subAktivitasCatatanKhususList.ExportOptions.Visible) {
+    subAktivitasCatatanKhususList.ExportOptions.Render("body");
+}
+@if (subAktivitasCatatanKhususList.ImportOptions.Visible) {
+    subAktivitasCatatanKhususList.ImportOptions.Render("body");
+}
+@if (subAktivitasCatatanKhususList.SearchOptions.Visible) {
+    subAktivitasCatatanKhususList.SearchOptions.Render("body");
+}
+@if (subAktivitasCatatanKhususList.FilterOptions.Visible) {
+    subAktivitasCatatanKhususList.FilterOptions.Render("body");
+}
+</div>
+}
+@if (!subAktivitasCatatanKhususList.IsModal) {
+<form name="fSubAktivitasCatatanKhusussrch" id="fSubAktivitasCatatanKhusussrch" class="ew-form ew-ext-search-form" action="@AppPath(CurrentPageName())" novalidate autocomplete="off">
+<div id="fSubAktivitasCatatanKhusussrch_search_panel" class="mb-2 mb-sm-0 @(subAktivitasCatatanKhususList.SearchPanelClass)"><!-- .ew-search-panel -->
+<script>
+var currentTable = @Html.Raw(ConvertToJson(subAktivitasCatatanKhususList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { SubAktivitasCatatanKhusus: currentTable } });
+var currentForm;
+var fSubAktivitasCatatanKhusussrch, currentSearchForm, currentAdvancedSearchForm;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery,
+        fields = currentTable.fields;
+
+    // Form object for search
+    let form = new ew.FormBuilder()
+        .setId("fSubAktivitasCatatanKhusussrch")
+        .setPageId("list")
+@if (subAktivitasCatatanKhususList.UseAjaxActions) {
+        <text>.setSubmitWithFetch(true)</text>
+}
+
+        // Dynamic selection lists
+        .setLists({
+        })
+
+        // Filters
+        .setFilterList(@Html.Raw(subAktivitasCatatanKhususList.GetFilterList()))
+        .build();
+    window[form.id] = form;
+    currentSearchForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<input type="hidden" name="cmd" value="search">
+@if (Security.CanSearch) {
+if (!subAktivitasCatatanKhususList.IsExport() && Empty(subAktivitasCatatanKhususList.CurrentAction) && subAktivitasCatatanKhususList.HasSearchFields()) { @* Show search form (begin) *@
+<div class="ew-extended-search container-fluid ps-2">
+<div class="row mb-0">
+    <div class="col-sm-auto px-0 pe-sm-2">
+        <div class="ew-basic-search input-group">
+            <input type="search" name="@(Config.TableBasicSearch)" id="@(Config.TableBasicSearch)" class="form-control ew-basic-search-keyword" value="@Html.Raw(HtmlEncode(subAktivitasCatatanKhususList.BasicSearch.SessionKeyword))" placeholder="@(HtmlEncode(Language.Phrase("Search")))" aria-label="@(HtmlEncode(Language.Phrase("Search")))">
+            <input type="hidden" name="@(Config.TableBasicSearchType)" id="@(Config.TableBasicSearchType)" class="ew-basic-search-type" value="@(HtmlEncode(subAktivitasCatatanKhususList.BasicSearch.SessionType))">
+            <button type="button" data-bs-toggle="dropdown" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split" aria-haspopup="true" aria-expanded="false">
+                <span id="searchtype">@Html.Raw(subAktivitasCatatanKhususList.BasicSearch.TypeNameShort)</span>
+            </button>
+            <div class="dropdown-menu dropdown-menu-end">
+                <button type="button" class="dropdown-item@(subAktivitasCatatanKhususList.BasicSearch.SessionType == "" ? " active" : "")" form="fSubAktivitasCatatanKhusussrch" data-ew-action="search-type">@Html.Raw(Language.Phrase("QuickSearchAuto"))</button>
+                <button type="button" class="dropdown-item@(subAktivitasCatatanKhususList.BasicSearch.SessionType == "=" ? " active" : "")" form="fSubAktivitasCatatanKhusussrch" data-ew-action="search-type" data-search-type="=">@Html.Raw(Language.Phrase("QuickSearchExact"))</button>
+                <button type="button" class="dropdown-item@(subAktivitasCatatanKhususList.BasicSearch.SessionType == "AND" ? " active" : "")" form="fSubAktivitasCatatanKhusussrch" data-ew-action="search-type" data-search-type="AND">@Html.Raw(Language.Phrase("QuickSearchAll"))</button>
+                <button type="button" class="dropdown-item@(subAktivitasCatatanKhususList.BasicSearch.SessionType == "OR" ? " active" : "")" form="fSubAktivitasCatatanKhusussrch" data-ew-action="search-type" data-search-type="OR">@Html.Raw(Language.Phrase("QuickSearchAny"))</button>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-auto mb-3">
+        <button class="btn btn-primary" name="btn-submit" id="btn-submit" type="submit">@Html.Raw(Language.Phrase("SearchBtn"))</button>
+    </div>
+</div>
+</div><!-- /.ew-extended-search -->
+} @* Show search form (end) *@
+}
+</div><!-- /.ew-search-panel -->
+</form>
+}
+@subAktivitasCatatanKhususList.ShowPageHeader()
+@subAktivitasCatatanKhususList.ShowMessages()
+<main class="list @(subAktivitasCatatanKhususList.TotalRecords == 0 && !subAktivitasCatatanKhususList.IsAdd ? " ew-no-record" : "")">
+<div id="ew-header-options">
+    @subAktivitasCatatanKhususList.HeaderOptions.RenderBody()
+</div>
+<div id="ew-list">
+@if (subAktivitasCatatanKhususList.TotalRecords > 0 || !Empty(subAktivitasCatatanKhususList.CurrentAction)) {
+<div class="card ew-card ew-grid@(subAktivitasCatatanKhususList.IsAddOrEdit ? " ew-grid-add-edit" : "") @(subAktivitasCatatanKhususList.TableGridClass)">
+<form name="@(subAktivitasCatatanKhususList.FormName)" id="@(subAktivitasCatatanKhususList.FormName)" class="ew-form ew-list-form" action="@AppPath(subAktivitasCatatanKhususList.PageName)" method="post" novalidate autocomplete="off">
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+@if (subAktivitasCatatanKhususList.IsModal) {
+<input type="hidden" name="modal" value="1">
+}
+<div id="gmp_SubAktivitasCatatanKhusus" class="card-body ew-grid-middle-panel @(subAktivitasCatatanKhususList.TableContainerClass)" style="@(subAktivitasCatatanKhususList.TableContainerStyle)">
+@if (subAktivitasCatatanKhususList.TotalRecords > 0 || subAktivitasCatatanKhususList.IsGridEdit || subAktivitasCatatanKhususList.IsMultiEdit) {
+<table id="tbl_SubAktivitasCatatanKhususlist" class="@(subAktivitasCatatanKhususList.TableClass)"><!-- .ew-table -->
+<thead>
+    <tr class="ew-table-header">
+@{
+    // Header row
+    subAktivitasCatatanKhususList.RowType = RowType.Header;
+
+    // Render list options
+    await subAktivitasCatatanKhususList.RenderListOptions();
+}
+@* Render list options (header, left) *@
+@subAktivitasCatatanKhususList.ListOptions.RenderHeader("left")
+@if (subAktivitasCatatanKhususList.idProses.Visible) { // subAktivitasCatatanKhususList.idProses.Visible (begin)
+        <th data-name="idProses" class="@(subAktivitasCatatanKhususList.idProses.HeaderCellClass)"><div id="elh_SubAktivitasCatatanKhusus_idProses" class="SubAktivitasCatatanKhusus_idProses">@Html.Raw(subAktivitasCatatanKhususList.RenderFieldHeader(subAktivitasCatatanKhususList.idProses))</div></th>
+} @* subAktivitasCatatanKhususList.idProses.Visible (end) *@
+@if (subAktivitasCatatanKhususList.idAktifitas.Visible) { // subAktivitasCatatanKhususList.idAktifitas.Visible (begin)
+        <th data-name="idAktifitas" class="@(subAktivitasCatatanKhususList.idAktifitas.HeaderCellClass)"><div id="elh_SubAktivitasCatatanKhusus_idAktifitas" class="SubAktivitasCatatanKhusus_idAktifitas">@Html.Raw(subAktivitasCatatanKhususList.RenderFieldHeader(subAktivitasCatatanKhususList.idAktifitas))</div></th>
+} @* subAktivitasCatatanKhususList.idAktifitas.Visible (end) *@
+@if (subAktivitasCatatanKhususList.NoReferensi.Visible) { // subAktivitasCatatanKhususList.NoReferensi.Visible (begin)
+        <th data-name="NoReferensi" class="@(subAktivitasCatatanKhususList.NoReferensi.HeaderCellClass)"><div id="elh_SubAktivitasCatatanKhusus_NoReferensi" class="SubAktivitasCatatanKhusus_NoReferensi">@Html.Raw(subAktivitasCatatanKhususList.RenderFieldHeader(subAktivitasCatatanKhususList.NoReferensi))</div></th>
+} @* subAktivitasCatatanKhususList.NoReferensi.Visible (end) *@
+@if (subAktivitasCatatanKhususList.Kontaminasi.Visible) { // subAktivitasCatatanKhususList.Kontaminasi.Visible (begin)
+        <th data-name="Kontaminasi" class="@(subAktivitasCatatanKhususList.Kontaminasi.HeaderCellClass)"><div id="elh_SubAktivitasCatatanKhusus_Kontaminasi" class="SubAktivitasCatatanKhusus_Kontaminasi">@Html.Raw(subAktivitasCatatanKhususList.RenderFieldHeader(subAktivitasCatatanKhususList.Kontaminasi))</div></th>
+} @* subAktivitasCatatanKhususList.Kontaminasi.Visible (end) *@
+@if (subAktivitasCatatanKhususList.Insident.Visible) { // subAktivitasCatatanKhususList.Insident.Visible (begin)
+        <th data-name="Insident" class="@(subAktivitasCatatanKhususList.Insident.HeaderCellClass)"><div id="elh_SubAktivitasCatatanKhusus_Insident" class="SubAktivitasCatatanKhusus_Insident">@Html.Raw(subAktivitasCatatanKhususList.RenderFieldHeader(subAktivitasCatatanKhususList.Insident))</div></th>
+} @* subAktivitasCatatanKhususList.Insident.Visible (end) *@
+@if (subAktivitasCatatanKhususList.CuacaBuruk.Visible) { // subAktivitasCatatanKhususList.CuacaBuruk.Visible (begin)
+        <th data-name="CuacaBuruk" class="@(subAktivitasCatatanKhususList.CuacaBuruk.HeaderCellClass)"><div id="elh_SubAktivitasCatatanKhusus_CuacaBuruk" class="SubAktivitasCatatanKhusus_CuacaBuruk">@Html.Raw(subAktivitasCatatanKhususList.RenderFieldHeader(subAktivitasCatatanKhususList.CuacaBuruk))</div></th>
+} @* subAktivitasCatatanKhususList.CuacaBuruk.Visible (end) *@
+@if (subAktivitasCatatanKhususList.Keterangan.Visible) { // subAktivitasCatatanKhususList.Keterangan.Visible (begin)
+        <th data-name="Keterangan" class="@(subAktivitasCatatanKhususList.Keterangan.HeaderCellClass)"><div id="elh_SubAktivitasCatatanKhusus_Keterangan" class="SubAktivitasCatatanKhusus_Keterangan">@Html.Raw(subAktivitasCatatanKhususList.RenderFieldHeader(subAktivitasCatatanKhususList.Keterangan))</div></th>
+} @* subAktivitasCatatanKhususList.Keterangan.Visible (end) *@
+@if (subAktivitasCatatanKhususList.userInput.Visible) { // subAktivitasCatatanKhususList.userInput.Visible (begin)
+        <th data-name="userInput" class="@(subAktivitasCatatanKhususList.userInput.HeaderCellClass)"><div id="elh_SubAktivitasCatatanKhusus_userInput" class="SubAktivitasCatatanKhusus_userInput">@Html.Raw(subAktivitasCatatanKhususList.RenderFieldHeader(subAktivitasCatatanKhususList.userInput))</div></th>
+} @* subAktivitasCatatanKhususList.userInput.Visible (end) *@
+@if (subAktivitasCatatanKhususList.etlDate.Visible) { // subAktivitasCatatanKhususList.etlDate.Visible (begin)
+        <th data-name="etlDate" class="@(subAktivitasCatatanKhususList.etlDate.HeaderCellClass)"><div id="elh_SubAktivitasCatatanKhusus_etlDate" class="SubAktivitasCatatanKhusus_etlDate">@Html.Raw(subAktivitasCatatanKhususList.RenderFieldHeader(subAktivitasCatatanKhususList.etlDate))</div></th>
+} @* subAktivitasCatatanKhususList.etlDate.Visible (end) *@
+@if (subAktivitasCatatanKhususList.LastUpdatedBy.Visible) { // subAktivitasCatatanKhususList.LastUpdatedBy.Visible (begin)
+        <th data-name="LastUpdatedBy" class="@(subAktivitasCatatanKhususList.LastUpdatedBy.HeaderCellClass)"><div id="elh_SubAktivitasCatatanKhusus_LastUpdatedBy" class="SubAktivitasCatatanKhusus_LastUpdatedBy">@Html.Raw(subAktivitasCatatanKhususList.RenderFieldHeader(subAktivitasCatatanKhususList.LastUpdatedBy))</div></th>
+} @* subAktivitasCatatanKhususList.LastUpdatedBy.Visible (end) *@
+@if (subAktivitasCatatanKhususList.lastUpdatedDate.Visible) { // subAktivitasCatatanKhususList.lastUpdatedDate.Visible (begin)
+        <th data-name="lastUpdatedDate" class="@(subAktivitasCatatanKhususList.lastUpdatedDate.HeaderCellClass)"><div id="elh_SubAktivitasCatatanKhusus_lastUpdatedDate" class="SubAktivitasCatatanKhusus_lastUpdatedDate">@Html.Raw(subAktivitasCatatanKhususList.RenderFieldHeader(subAktivitasCatatanKhususList.lastUpdatedDate))</div></th>
+} @* subAktivitasCatatanKhususList.lastUpdatedDate.Visible (end) *@
+@if (subAktivitasCatatanKhususList.StatusAktivitas.Visible) { // subAktivitasCatatanKhususList.StatusAktivitas.Visible (begin)
+        <th data-name="StatusAktivitas" class="@(subAktivitasCatatanKhususList.StatusAktivitas.HeaderCellClass)"><div id="elh_SubAktivitasCatatanKhusus_StatusAktivitas" class="SubAktivitasCatatanKhusus_StatusAktivitas">@Html.Raw(subAktivitasCatatanKhususList.RenderFieldHeader(subAktivitasCatatanKhususList.StatusAktivitas))</div></th>
+} @* subAktivitasCatatanKhususList.StatusAktivitas.Visible (end) *@
+@* Render list options (header, right) *@
+@subAktivitasCatatanKhususList.ListOptions.RenderHeader("right")
+    </tr>
+</thead>
+<tbody data-page="@(subAktivitasCatatanKhususList.PageNumber)">
+@{
+    await subAktivitasCatatanKhususList.SetupGrid();
+    bool eof = subAktivitasCatatanKhususList.Recordset == null; // DN
+}
+@while (subAktivitasCatatanKhususList.RecordCount < subAktivitasCatatanKhususList.StopRecord || SameString(subAktivitasCatatanKhususList.RowIndex, "$rowindex$")) { // Begin While
+    if (!eof && !SameString(subAktivitasCatatanKhususList.RowIndex, "$rowindex$") &&
+        (!subAktivitasCatatanKhususList.IsGridAdd || subAktivitasCatatanKhususList.CurrentMode == "copy") &&
+        (!((subAktivitasCatatanKhususList.IsCopy || subAktivitasCatatanKhususList.IsAdd) && subAktivitasCatatanKhususList.RowIndex is int rowIndex && rowIndex == 0))) // DN
+        eof = !await subAktivitasCatatanKhususList.Recordset.ReadAsync();
+    subAktivitasCatatanKhususList.RecordCount++;
+    if (subAktivitasCatatanKhususList.RecordCount >= subAktivitasCatatanKhususList.StartRecord) {
+        await subAktivitasCatatanKhususList.SetupRow();
+    <tr @Html.Raw(subAktivitasCatatanKhususList.RowAttributes)>
+    @* Render list options (body, left) *@
+    @subAktivitasCatatanKhususList.ListOptions.RenderBody("left", subAktivitasCatatanKhususList.RowCount)
+    @if (subAktivitasCatatanKhususList.idProses.Visible) { // subAktivitasCatatanKhususList.idProses.Visible (begin)
+        <td data-name="idProses" @Html.Raw(subAktivitasCatatanKhususList.idProses.CellAttributes)>
+<span id="el@(subAktivitasCatatanKhususList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasCatatanKhususList.RowCount)_SubAktivitasCatatanKhusus_idProses" class="el_SubAktivitasCatatanKhusus_idProses">
+<span @Html.Raw(subAktivitasCatatanKhususList.idProses.ViewAttributes)>
+@Html.Raw(subAktivitasCatatanKhususList.idProses.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasCatatanKhususList.idProses.Visible (end) *@
+    @if (subAktivitasCatatanKhususList.idAktifitas.Visible) { // subAktivitasCatatanKhususList.idAktifitas.Visible (begin)
+        <td data-name="idAktifitas" @Html.Raw(subAktivitasCatatanKhususList.idAktifitas.CellAttributes)>
+<span id="el@(subAktivitasCatatanKhususList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasCatatanKhususList.RowCount)_SubAktivitasCatatanKhusus_idAktifitas" class="el_SubAktivitasCatatanKhusus_idAktifitas">
+<span @Html.Raw(subAktivitasCatatanKhususList.idAktifitas.ViewAttributes)>
+@Html.Raw(subAktivitasCatatanKhususList.idAktifitas.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasCatatanKhususList.idAktifitas.Visible (end) *@
+    @if (subAktivitasCatatanKhususList.NoReferensi.Visible) { // subAktivitasCatatanKhususList.NoReferensi.Visible (begin)
+        <td data-name="NoReferensi" @Html.Raw(subAktivitasCatatanKhususList.NoReferensi.CellAttributes)>
+<span id="el@(subAktivitasCatatanKhususList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasCatatanKhususList.RowCount)_SubAktivitasCatatanKhusus_NoReferensi" class="el_SubAktivitasCatatanKhusus_NoReferensi">
+<span @Html.Raw(subAktivitasCatatanKhususList.NoReferensi.ViewAttributes)>
+@Html.Raw(subAktivitasCatatanKhususList.NoReferensi.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasCatatanKhususList.NoReferensi.Visible (end) *@
+    @if (subAktivitasCatatanKhususList.Kontaminasi.Visible) { // subAktivitasCatatanKhususList.Kontaminasi.Visible (begin)
+        <td data-name="Kontaminasi" @Html.Raw(subAktivitasCatatanKhususList.Kontaminasi.CellAttributes)>
+<span id="el@(subAktivitasCatatanKhususList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasCatatanKhususList.RowCount)_SubAktivitasCatatanKhusus_Kontaminasi" class="el_SubAktivitasCatatanKhusus_Kontaminasi">
+<span @Html.Raw(subAktivitasCatatanKhususList.Kontaminasi.ViewAttributes)>
+@Html.Raw(subAktivitasCatatanKhususList.Kontaminasi.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasCatatanKhususList.Kontaminasi.Visible (end) *@
+    @if (subAktivitasCatatanKhususList.Insident.Visible) { // subAktivitasCatatanKhususList.Insident.Visible (begin)
+        <td data-name="Insident" @Html.Raw(subAktivitasCatatanKhususList.Insident.CellAttributes)>
+<span id="el@(subAktivitasCatatanKhususList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasCatatanKhususList.RowCount)_SubAktivitasCatatanKhusus_Insident" class="el_SubAktivitasCatatanKhusus_Insident">
+<span @Html.Raw(subAktivitasCatatanKhususList.Insident.ViewAttributes)>
+@Html.Raw(subAktivitasCatatanKhususList.Insident.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasCatatanKhususList.Insident.Visible (end) *@
+    @if (subAktivitasCatatanKhususList.CuacaBuruk.Visible) { // subAktivitasCatatanKhususList.CuacaBuruk.Visible (begin)
+        <td data-name="CuacaBuruk" @Html.Raw(subAktivitasCatatanKhususList.CuacaBuruk.CellAttributes)>
+<span id="el@(subAktivitasCatatanKhususList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasCatatanKhususList.RowCount)_SubAktivitasCatatanKhusus_CuacaBuruk" class="el_SubAktivitasCatatanKhusus_CuacaBuruk">
+<span @Html.Raw(subAktivitasCatatanKhususList.CuacaBuruk.ViewAttributes)>
+@Html.Raw(subAktivitasCatatanKhususList.CuacaBuruk.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasCatatanKhususList.CuacaBuruk.Visible (end) *@
+    @if (subAktivitasCatatanKhususList.Keterangan.Visible) { // subAktivitasCatatanKhususList.Keterangan.Visible (begin)
+        <td data-name="Keterangan" @Html.Raw(subAktivitasCatatanKhususList.Keterangan.CellAttributes)>
+<span id="el@(subAktivitasCatatanKhususList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasCatatanKhususList.RowCount)_SubAktivitasCatatanKhusus_Keterangan" class="el_SubAktivitasCatatanKhusus_Keterangan">
+<span @Html.Raw(subAktivitasCatatanKhususList.Keterangan.ViewAttributes)>
+@Html.Raw(subAktivitasCatatanKhususList.Keterangan.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasCatatanKhususList.Keterangan.Visible (end) *@
+    @if (subAktivitasCatatanKhususList.userInput.Visible) { // subAktivitasCatatanKhususList.userInput.Visible (begin)
+        <td data-name="userInput" @Html.Raw(subAktivitasCatatanKhususList.userInput.CellAttributes)>
+<span id="el@(subAktivitasCatatanKhususList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasCatatanKhususList.RowCount)_SubAktivitasCatatanKhusus_userInput" class="el_SubAktivitasCatatanKhusus_userInput">
+<span @Html.Raw(subAktivitasCatatanKhususList.userInput.ViewAttributes)>
+@Html.Raw(subAktivitasCatatanKhususList.userInput.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasCatatanKhususList.userInput.Visible (end) *@
+    @if (subAktivitasCatatanKhususList.etlDate.Visible) { // subAktivitasCatatanKhususList.etlDate.Visible (begin)
+        <td data-name="etlDate" @Html.Raw(subAktivitasCatatanKhususList.etlDate.CellAttributes)>
+<span id="el@(subAktivitasCatatanKhususList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasCatatanKhususList.RowCount)_SubAktivitasCatatanKhusus_etlDate" class="el_SubAktivitasCatatanKhusus_etlDate">
+<span @Html.Raw(subAktivitasCatatanKhususList.etlDate.ViewAttributes)>
+@Html.Raw(subAktivitasCatatanKhususList.etlDate.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasCatatanKhususList.etlDate.Visible (end) *@
+    @if (subAktivitasCatatanKhususList.LastUpdatedBy.Visible) { // subAktivitasCatatanKhususList.LastUpdatedBy.Visible (begin)
+        <td data-name="LastUpdatedBy" @Html.Raw(subAktivitasCatatanKhususList.LastUpdatedBy.CellAttributes)>
+<span id="el@(subAktivitasCatatanKhususList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasCatatanKhususList.RowCount)_SubAktivitasCatatanKhusus_LastUpdatedBy" class="el_SubAktivitasCatatanKhusus_LastUpdatedBy">
+<span @Html.Raw(subAktivitasCatatanKhususList.LastUpdatedBy.ViewAttributes)>
+@Html.Raw(subAktivitasCatatanKhususList.LastUpdatedBy.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasCatatanKhususList.LastUpdatedBy.Visible (end) *@
+    @if (subAktivitasCatatanKhususList.lastUpdatedDate.Visible) { // subAktivitasCatatanKhususList.lastUpdatedDate.Visible (begin)
+        <td data-name="lastUpdatedDate" @Html.Raw(subAktivitasCatatanKhususList.lastUpdatedDate.CellAttributes)>
+<span id="el@(subAktivitasCatatanKhususList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasCatatanKhususList.RowCount)_SubAktivitasCatatanKhusus_lastUpdatedDate" class="el_SubAktivitasCatatanKhusus_lastUpdatedDate">
+<span @Html.Raw(subAktivitasCatatanKhususList.lastUpdatedDate.ViewAttributes)>
+@Html.Raw(subAktivitasCatatanKhususList.lastUpdatedDate.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasCatatanKhususList.lastUpdatedDate.Visible (end) *@
+    @if (subAktivitasCatatanKhususList.StatusAktivitas.Visible) { // subAktivitasCatatanKhususList.StatusAktivitas.Visible (begin)
+        <td data-name="StatusAktivitas" @Html.Raw(subAktivitasCatatanKhususList.StatusAktivitas.CellAttributes)>
+<span id="el@(subAktivitasCatatanKhususList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasCatatanKhususList.RowCount)_SubAktivitasCatatanKhusus_StatusAktivitas" class="el_SubAktivitasCatatanKhusus_StatusAktivitas">
+<span @Html.Raw(subAktivitasCatatanKhususList.StatusAktivitas.ViewAttributes)>
+@Html.Raw(subAktivitasCatatanKhususList.StatusAktivitas.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasCatatanKhususList.StatusAktivitas.Visible (end) *@
+    @* Render list options (body, right) *@
+    @subAktivitasCatatanKhususList.ListOptions.RenderBody("right", subAktivitasCatatanKhususList.RowCount)
+    </tr>
+    } @* End if *@
+
+    // Reset for template row
+    if (SameString(subAktivitasCatatanKhususList.RowIndex, "$rowindex$"))
+        subAktivitasCatatanKhususList.RowIndex = 0;
+
+    // Reset inline add/copy row
+    if ((subAktivitasCatatanKhususList.IsCopy || subAktivitasCatatanKhususList.IsAdd) && subAktivitasCatatanKhususList.RowIndex is int rowIndex2 && rowIndex2 == 0)
+        subAktivitasCatatanKhususList.RowIndex = 1;
+} @* End While *@
+</tbody>
+</table><!-- /.ew-table -->
+} @* End If TotalRecords > 0 *@
+</div><!-- /.ew-grid-middle-panel -->
+@if (Empty(subAktivitasCatatanKhususList.CurrentAction) && !subAktivitasCatatanKhususList.UseAjaxActions) {
+<input type="hidden" name="action" id="action" value="">
+}
+</form><!-- /.ew-list-form -->
+@{ subAktivitasCatatanKhususList.CloseRecordset(); }
+@if (!subAktivitasCatatanKhususList.IsExport()) {
+<div class="card-footer ew-grid-lower-panel">
+@if (!subAktivitasCatatanKhususList.IsGridAdd && !(subAktivitasCatatanKhususList.IsGridEdit && subAktivitasCatatanKhususList.ModalGridEdit) && !subAktivitasCatatanKhususList.IsMultiEdit) {
+@Html.Raw(subAktivitasCatatanKhususList.Pager.Render())
+}
+<div class="ew-list-other-options">
+@subAktivitasCatatanKhususList.OtherOptions.RenderBody("bottom")
+</div>
+</div>
+}
+</div><!-- /.ew-grid -->
+} else { // Show other options
+<div class="ew-list-other-options">
+@subAktivitasCatatanKhususList.OtherOptions.ForEach(opt => opt.ButtonClass = "").RenderBody()
+</div>
+}
+</div>
+<div id="ew-footer-options">
+    @subAktivitasCatatanKhususList.FooterOptions.RenderBody()
+</div>
+</main>
+@subAktivitasCatatanKhususList.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+@if (!subAktivitasCatatanKhususList.IsExport()) {
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("SubAktivitasCatatanKhusus");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Write your table-specific startup script here
+    // document.write("page loaded");
+});
+</script>
+}

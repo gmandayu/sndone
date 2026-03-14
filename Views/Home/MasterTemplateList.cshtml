@@ -1,0 +1,866 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (masterTemplateList.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = masterTemplateList.UseLayout ? "_Layout" : "";
+}
+@if (!masterTemplateList.IsExport()) {
+<script>
+var currentTable = @Html.Raw(ConvertToJson(masterTemplateList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { MasterTemplate: currentTable } });
+var currentPageID = ew.PAGE_ID = "list";
+var currentForm;
+var @(masterTemplateList.FormName);
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("@(masterTemplateList.FormName)")
+        .setPageId("list")
+        .setSubmitWithFetch(@(masterTemplateList.UseAjaxActions ? "true" : "false"))
+        .setFormKeyCountName("@(masterTemplateList.FormKeyCountName)")
+
+        // Dynamic selection lists
+        .setLists({
+            "NamaTemplate": @Html.Raw(masterTemplateList.NamaTemplate.ToClientList(masterTemplateList)),
+            "IdModa": @Html.Raw(masterTemplateList.IdModa.ToClientList(masterTemplateList)),
+            "JenisProses": @Html.Raw(masterTemplateList.JenisProses.ToClientList(masterTemplateList)),
+            "Keterangan": @Html.Raw(masterTemplateList.Keterangan.ToClientList(masterTemplateList)),
+            "DibuatOleh": @Html.Raw(masterTemplateList.DibuatOleh.ToClientList(masterTemplateList)),
+            "TanggalDibuat": @Html.Raw(masterTemplateList.TanggalDibuat.ToClientList(masterTemplateList)),
+            "DiperbaruiOleh": @Html.Raw(masterTemplateList.DiperbaruiOleh.ToClientList(masterTemplateList)),
+            "TanggalDiperbarui": @Html.Raw(masterTemplateList.TanggalDiperbarui.ToClientList(masterTemplateList)),
+            "TipePenimbunan": @Html.Raw(masterTemplateList.TipePenimbunan.ToClientList(masterTemplateList)),
+            "TipePenyaluran": @Html.Raw(masterTemplateList.TipePenyaluran.ToClientList(masterTemplateList)),
+            "KategoriPenyaluran": @Html.Raw(masterTemplateList.KategoriPenyaluran.ToClientList(masterTemplateList)),
+            "NamaDokumen": @Html.Raw(masterTemplateList.NamaDokumen.ToClientList(masterTemplateList)),
+        })
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Write your client script here, no need to add script tags.
+});
+</script>
+}
+@if (!masterTemplateList.IsExport()) {
+<div class="btn-toolbar ew-toolbar">
+@if (masterTemplateList.TotalRecords > 0 && masterTemplateList.ExportOptions.Visible) {
+    masterTemplateList.ExportOptions.Render("body");
+}
+@if (masterTemplateList.ImportOptions.Visible) {
+    masterTemplateList.ImportOptions.Render("body");
+}
+@if (masterTemplateList.SearchOptions.Visible) {
+    masterTemplateList.SearchOptions.Render("body");
+}
+@if (masterTemplateList.FilterOptions.Visible) {
+    masterTemplateList.FilterOptions.Render("body");
+}
+</div>
+}
+@if (masterTemplateList.ShowCurrentFilter) {
+    masterTemplateList.ShowFilterList();
+}
+@if (!masterTemplateList.IsModal) {
+<form name="fMasterTemplatesrch" id="fMasterTemplatesrch" class="ew-form ew-ext-search-form" action="@AppPath(CurrentPageName())" novalidate autocomplete="off">
+<div id="fMasterTemplatesrch_search_panel" class="mb-2 mb-sm-0 @(masterTemplateList.SearchPanelClass)"><!-- .ew-search-panel -->
+<script>
+var currentTable = @Html.Raw(ConvertToJson(masterTemplateList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { MasterTemplate: currentTable } });
+var currentForm;
+var fMasterTemplatesrch, currentSearchForm, currentAdvancedSearchForm;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery,
+        fields = currentTable.fields;
+
+    // Form object for search
+    let form = new ew.FormBuilder()
+        .setId("fMasterTemplatesrch")
+        .setPageId("list")
+@if (masterTemplateList.UseAjaxActions) {
+        <text>.setSubmitWithFetch(true)</text>
+}
+
+        // Add fields
+        .setFields([
+        ])
+        // Validate form
+        .setValidate(
+            async function () {
+                if (!this.validateRequired)
+                    return true; // Ignore validation
+                let fobj = this.getForm();
+
+                // Validate fields
+                if (!this.validateFields())
+                    return false;
+
+                // Call Form_CustomValidate event
+                if (!(await this.customValidate?.(fobj) ?? true)) {
+                    this.focus();
+                    return false;
+                }
+                return true;
+            }
+        )
+
+        // Form_CustomValidate
+        .setCustomValidate(
+            function(fobj) { // DO NOT CHANGE THIS LINE!
+                    // Your custom validation code here, return false if invalid.
+                    return true;
+                }
+        )
+
+        // Use JavaScript validation or not
+        .setValidateRequired(ew.CLIENT_VALIDATE)
+
+        // Dynamic selection lists
+        .setLists({
+            "NamaTemplate": @Html.Raw(masterTemplateList.NamaTemplate.ToClientList(masterTemplateList)),
+            "IdModa": @Html.Raw(masterTemplateList.IdModa.ToClientList(masterTemplateList)),
+            "JenisProses": @Html.Raw(masterTemplateList.JenisProses.ToClientList(masterTemplateList)),
+            "Keterangan": @Html.Raw(masterTemplateList.Keterangan.ToClientList(masterTemplateList)),
+            "DibuatOleh": @Html.Raw(masterTemplateList.DibuatOleh.ToClientList(masterTemplateList)),
+            "TanggalDibuat": @Html.Raw(masterTemplateList.TanggalDibuat.ToClientList(masterTemplateList)),
+            "DiperbaruiOleh": @Html.Raw(masterTemplateList.DiperbaruiOleh.ToClientList(masterTemplateList)),
+            "TanggalDiperbarui": @Html.Raw(masterTemplateList.TanggalDiperbarui.ToClientList(masterTemplateList)),
+            "TipePenimbunan": @Html.Raw(masterTemplateList.TipePenimbunan.ToClientList(masterTemplateList)),
+            "TipePenyaluran": @Html.Raw(masterTemplateList.TipePenyaluran.ToClientList(masterTemplateList)),
+            "KategoriPenyaluran": @Html.Raw(masterTemplateList.KategoriPenyaluran.ToClientList(masterTemplateList)),
+            "NamaDokumen": @Html.Raw(masterTemplateList.NamaDokumen.ToClientList(masterTemplateList)),
+        })
+
+        // Filters
+        .setFilterList(@Html.Raw(masterTemplateList.GetFilterList()))
+        .build();
+    window[form.id] = form;
+    currentSearchForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<input type="hidden" name="cmd" value="search">
+@if (Security.CanSearch) {
+if (!masterTemplateList.IsExport() && Empty(masterTemplateList.CurrentAction) && masterTemplateList.HasSearchFields()) { @* Show search form (begin) *@
+<div class="ew-extended-search container-fluid ps-2">
+<div class="row mb-0@(masterTemplateList.SearchFieldsPerRow > 0 ? " row-cols-sm-" + masterTemplateList.SearchFieldsPerRow : "")">
+@{
+    // Render search row
+    masterTemplateList.RowType = RowType.Search;
+    masterTemplateList.ResetAttributes();
+    await masterTemplateList.RenderRow();
+}
+@if (masterTemplateList.NamaTemplate.Visible) { // masterTemplateList.NamaTemplate.Visible (begin)
+    if (!masterTemplateList.NamaTemplate.UseFilter) {
+        masterTemplateList.SearchColumnCount++;
+    }
+    <div id="xs_NamaTemplate" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(masterTemplateList.NamaTemplate.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_NamaTemplate"
+            name="x_NamaTemplate[]"
+            class="form-control ew-select@(masterTemplateList.NamaTemplate.IsInvalidClass)"
+            data-select2-id="fMasterTemplatesrch_x_NamaTemplate"
+            data-table="MasterTemplate"
+            data-field="x_NamaTemplate"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(masterTemplateList.NamaTemplate.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(masterTemplateList.NamaTemplate.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(masterTemplateList.NamaTemplate.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(masterTemplateList.NamaTemplate.EditAttributes)>
+            @(masterTemplateList.NamaTemplate.SelectOptionListHtml("x_NamaTemplate", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(masterTemplateList.NamaTemplate.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMasterTemplatesrch", function() {
+            var options = {
+                name: "x_NamaTemplate",
+                selectId: "fMasterTemplatesrch_x_NamaTemplate",
+                ajax: { id: "x_NamaTemplate", form: "fMasterTemplatesrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MasterTemplate.fields.NamaTemplate.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* masterTemplateList.NamaTemplate.Visible (end) *@
+@if (masterTemplateList.IdModa.Visible) { // masterTemplateList.IdModa.Visible (begin)
+    if (!masterTemplateList.IdModa.UseFilter) {
+        masterTemplateList.SearchColumnCount++;
+    }
+    <div id="xs_IdModa" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(masterTemplateList.IdModa.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_IdModa"
+            name="x_IdModa[]"
+            class="form-control ew-select@(masterTemplateList.IdModa.IsInvalidClass)"
+            data-select2-id="fMasterTemplatesrch_x_IdModa"
+            data-table="MasterTemplate"
+            data-field="x_IdModa"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(masterTemplateList.IdModa.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(masterTemplateList.IdModa.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(masterTemplateList.IdModa.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(masterTemplateList.IdModa.EditAttributes)>
+            @(masterTemplateList.IdModa.SelectOptionListHtml("x_IdModa", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(masterTemplateList.IdModa.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMasterTemplatesrch", function() {
+            var options = {
+                name: "x_IdModa",
+                selectId: "fMasterTemplatesrch_x_IdModa",
+                ajax: { id: "x_IdModa", form: "fMasterTemplatesrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MasterTemplate.fields.IdModa.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* masterTemplateList.IdModa.Visible (end) *@
+@if (masterTemplateList.JenisProses.Visible) { // masterTemplateList.JenisProses.Visible (begin)
+    if (!masterTemplateList.JenisProses.UseFilter) {
+        masterTemplateList.SearchColumnCount++;
+    }
+    <div id="xs_JenisProses" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(masterTemplateList.JenisProses.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_JenisProses"
+            name="x_JenisProses[]"
+            class="form-control ew-select@(masterTemplateList.JenisProses.IsInvalidClass)"
+            data-select2-id="fMasterTemplatesrch_x_JenisProses"
+            data-table="MasterTemplate"
+            data-field="x_JenisProses"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(masterTemplateList.JenisProses.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(masterTemplateList.JenisProses.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(masterTemplateList.JenisProses.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(masterTemplateList.JenisProses.EditAttributes)>
+            @(masterTemplateList.JenisProses.SelectOptionListHtml("x_JenisProses", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(masterTemplateList.JenisProses.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMasterTemplatesrch", function() {
+            var options = {
+                name: "x_JenisProses",
+                selectId: "fMasterTemplatesrch_x_JenisProses",
+                ajax: { id: "x_JenisProses", form: "fMasterTemplatesrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MasterTemplate.fields.JenisProses.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* masterTemplateList.JenisProses.Visible (end) *@
+@if (masterTemplateList.Keterangan.Visible) { // masterTemplateList.Keterangan.Visible (begin)
+    if (!masterTemplateList.Keterangan.UseFilter) {
+        masterTemplateList.SearchColumnCount++;
+    }
+    <div id="xs_Keterangan" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(masterTemplateList.Keterangan.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_Keterangan"
+            name="x_Keterangan[]"
+            class="form-control ew-select@(masterTemplateList.Keterangan.IsInvalidClass)"
+            data-select2-id="fMasterTemplatesrch_x_Keterangan"
+            data-table="MasterTemplate"
+            data-field="x_Keterangan"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(masterTemplateList.Keterangan.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(masterTemplateList.Keterangan.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(masterTemplateList.Keterangan.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(masterTemplateList.Keterangan.EditAttributes)>
+            @(masterTemplateList.Keterangan.SelectOptionListHtml("x_Keterangan", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(masterTemplateList.Keterangan.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMasterTemplatesrch", function() {
+            var options = {
+                name: "x_Keterangan",
+                selectId: "fMasterTemplatesrch_x_Keterangan",
+                ajax: { id: "x_Keterangan", form: "fMasterTemplatesrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MasterTemplate.fields.Keterangan.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* masterTemplateList.Keterangan.Visible (end) *@
+@if (masterTemplateList.DibuatOleh.Visible) { // masterTemplateList.DibuatOleh.Visible (begin)
+    if (!masterTemplateList.DibuatOleh.UseFilter) {
+        masterTemplateList.SearchColumnCount++;
+    }
+    <div id="xs_DibuatOleh" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(masterTemplateList.DibuatOleh.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_DibuatOleh"
+            name="x_DibuatOleh[]"
+            class="form-control ew-select@(masterTemplateList.DibuatOleh.IsInvalidClass)"
+            data-select2-id="fMasterTemplatesrch_x_DibuatOleh"
+            data-table="MasterTemplate"
+            data-field="x_DibuatOleh"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(masterTemplateList.DibuatOleh.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(masterTemplateList.DibuatOleh.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(masterTemplateList.DibuatOleh.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(masterTemplateList.DibuatOleh.EditAttributes)>
+            @(masterTemplateList.DibuatOleh.SelectOptionListHtml("x_DibuatOleh", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(masterTemplateList.DibuatOleh.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMasterTemplatesrch", function() {
+            var options = {
+                name: "x_DibuatOleh",
+                selectId: "fMasterTemplatesrch_x_DibuatOleh",
+                ajax: { id: "x_DibuatOleh", form: "fMasterTemplatesrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MasterTemplate.fields.DibuatOleh.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* masterTemplateList.DibuatOleh.Visible (end) *@
+@if (masterTemplateList.TanggalDibuat.Visible) { // masterTemplateList.TanggalDibuat.Visible (begin)
+    if (!masterTemplateList.TanggalDibuat.UseFilter) {
+        masterTemplateList.SearchColumnCount++;
+    }
+    <div id="xs_TanggalDibuat" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(masterTemplateList.TanggalDibuat.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_TanggalDibuat"
+            name="x_TanggalDibuat[]"
+            class="form-control ew-select@(masterTemplateList.TanggalDibuat.IsInvalidClass)"
+            data-select2-id="fMasterTemplatesrch_x_TanggalDibuat"
+            data-table="MasterTemplate"
+            data-field="x_TanggalDibuat"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(masterTemplateList.TanggalDibuat.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(masterTemplateList.TanggalDibuat.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(masterTemplateList.TanggalDibuat.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(masterTemplateList.TanggalDibuat.EditAttributes)>
+            @(masterTemplateList.TanggalDibuat.SelectOptionListHtml("x_TanggalDibuat", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(masterTemplateList.TanggalDibuat.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMasterTemplatesrch", function() {
+            var options = {
+                name: "x_TanggalDibuat",
+                selectId: "fMasterTemplatesrch_x_TanggalDibuat",
+                ajax: { id: "x_TanggalDibuat", form: "fMasterTemplatesrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MasterTemplate.fields.TanggalDibuat.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* masterTemplateList.TanggalDibuat.Visible (end) *@
+@if (masterTemplateList.DiperbaruiOleh.Visible) { // masterTemplateList.DiperbaruiOleh.Visible (begin)
+    if (!masterTemplateList.DiperbaruiOleh.UseFilter) {
+        masterTemplateList.SearchColumnCount++;
+    }
+    <div id="xs_DiperbaruiOleh" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(masterTemplateList.DiperbaruiOleh.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_DiperbaruiOleh"
+            name="x_DiperbaruiOleh[]"
+            class="form-control ew-select@(masterTemplateList.DiperbaruiOleh.IsInvalidClass)"
+            data-select2-id="fMasterTemplatesrch_x_DiperbaruiOleh"
+            data-table="MasterTemplate"
+            data-field="x_DiperbaruiOleh"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(masterTemplateList.DiperbaruiOleh.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(masterTemplateList.DiperbaruiOleh.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(masterTemplateList.DiperbaruiOleh.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(masterTemplateList.DiperbaruiOleh.EditAttributes)>
+            @(masterTemplateList.DiperbaruiOleh.SelectOptionListHtml("x_DiperbaruiOleh", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(masterTemplateList.DiperbaruiOleh.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMasterTemplatesrch", function() {
+            var options = {
+                name: "x_DiperbaruiOleh",
+                selectId: "fMasterTemplatesrch_x_DiperbaruiOleh",
+                ajax: { id: "x_DiperbaruiOleh", form: "fMasterTemplatesrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MasterTemplate.fields.DiperbaruiOleh.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* masterTemplateList.DiperbaruiOleh.Visible (end) *@
+@if (masterTemplateList.TanggalDiperbarui.Visible) { // masterTemplateList.TanggalDiperbarui.Visible (begin)
+    if (!masterTemplateList.TanggalDiperbarui.UseFilter) {
+        masterTemplateList.SearchColumnCount++;
+    }
+    <div id="xs_TanggalDiperbarui" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(masterTemplateList.TanggalDiperbarui.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_TanggalDiperbarui"
+            name="x_TanggalDiperbarui[]"
+            class="form-control ew-select@(masterTemplateList.TanggalDiperbarui.IsInvalidClass)"
+            data-select2-id="fMasterTemplatesrch_x_TanggalDiperbarui"
+            data-table="MasterTemplate"
+            data-field="x_TanggalDiperbarui"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(masterTemplateList.TanggalDiperbarui.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(masterTemplateList.TanggalDiperbarui.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(masterTemplateList.TanggalDiperbarui.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(masterTemplateList.TanggalDiperbarui.EditAttributes)>
+            @(masterTemplateList.TanggalDiperbarui.SelectOptionListHtml("x_TanggalDiperbarui", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(masterTemplateList.TanggalDiperbarui.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMasterTemplatesrch", function() {
+            var options = {
+                name: "x_TanggalDiperbarui",
+                selectId: "fMasterTemplatesrch_x_TanggalDiperbarui",
+                ajax: { id: "x_TanggalDiperbarui", form: "fMasterTemplatesrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MasterTemplate.fields.TanggalDiperbarui.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* masterTemplateList.TanggalDiperbarui.Visible (end) *@
+@if (masterTemplateList.TipePenimbunan.Visible) { // masterTemplateList.TipePenimbunan.Visible (begin)
+    if (!masterTemplateList.TipePenimbunan.UseFilter) {
+        masterTemplateList.SearchColumnCount++;
+    }
+    <div id="xs_TipePenimbunan" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(masterTemplateList.TipePenimbunan.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_TipePenimbunan"
+            name="x_TipePenimbunan[]"
+            class="form-control ew-select@(masterTemplateList.TipePenimbunan.IsInvalidClass)"
+            data-select2-id="fMasterTemplatesrch_x_TipePenimbunan"
+            data-table="MasterTemplate"
+            data-field="x_TipePenimbunan"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(masterTemplateList.TipePenimbunan.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(masterTemplateList.TipePenimbunan.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(masterTemplateList.TipePenimbunan.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(masterTemplateList.TipePenimbunan.EditAttributes)>
+            @(masterTemplateList.TipePenimbunan.SelectOptionListHtml("x_TipePenimbunan", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(masterTemplateList.TipePenimbunan.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMasterTemplatesrch", function() {
+            var options = {
+                name: "x_TipePenimbunan",
+                selectId: "fMasterTemplatesrch_x_TipePenimbunan",
+                ajax: { id: "x_TipePenimbunan", form: "fMasterTemplatesrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MasterTemplate.fields.TipePenimbunan.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* masterTemplateList.TipePenimbunan.Visible (end) *@
+@if (masterTemplateList.TipePenyaluran.Visible) { // masterTemplateList.TipePenyaluran.Visible (begin)
+    if (!masterTemplateList.TipePenyaluran.UseFilter) {
+        masterTemplateList.SearchColumnCount++;
+    }
+    <div id="xs_TipePenyaluran" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(masterTemplateList.TipePenyaluran.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_TipePenyaluran"
+            name="x_TipePenyaluran[]"
+            class="form-control ew-select@(masterTemplateList.TipePenyaluran.IsInvalidClass)"
+            data-select2-id="fMasterTemplatesrch_x_TipePenyaluran"
+            data-table="MasterTemplate"
+            data-field="x_TipePenyaluran"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(masterTemplateList.TipePenyaluran.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(masterTemplateList.TipePenyaluran.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(masterTemplateList.TipePenyaluran.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(masterTemplateList.TipePenyaluran.EditAttributes)>
+            @(masterTemplateList.TipePenyaluran.SelectOptionListHtml("x_TipePenyaluran", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(masterTemplateList.TipePenyaluran.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMasterTemplatesrch", function() {
+            var options = {
+                name: "x_TipePenyaluran",
+                selectId: "fMasterTemplatesrch_x_TipePenyaluran",
+                ajax: { id: "x_TipePenyaluran", form: "fMasterTemplatesrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MasterTemplate.fields.TipePenyaluran.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* masterTemplateList.TipePenyaluran.Visible (end) *@
+@if (masterTemplateList.KategoriPenyaluran.Visible) { // masterTemplateList.KategoriPenyaluran.Visible (begin)
+    if (!masterTemplateList.KategoriPenyaluran.UseFilter) {
+        masterTemplateList.SearchColumnCount++;
+    }
+    <div id="xs_KategoriPenyaluran" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(masterTemplateList.KategoriPenyaluran.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_KategoriPenyaluran"
+            name="x_KategoriPenyaluran[]"
+            class="form-control ew-select@(masterTemplateList.KategoriPenyaluran.IsInvalidClass)"
+            data-select2-id="fMasterTemplatesrch_x_KategoriPenyaluran"
+            data-table="MasterTemplate"
+            data-field="x_KategoriPenyaluran"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(masterTemplateList.KategoriPenyaluran.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(masterTemplateList.KategoriPenyaluran.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(masterTemplateList.KategoriPenyaluran.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(masterTemplateList.KategoriPenyaluran.EditAttributes)>
+            @(masterTemplateList.KategoriPenyaluran.SelectOptionListHtml("x_KategoriPenyaluran", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(masterTemplateList.KategoriPenyaluran.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMasterTemplatesrch", function() {
+            var options = {
+                name: "x_KategoriPenyaluran",
+                selectId: "fMasterTemplatesrch_x_KategoriPenyaluran",
+                ajax: { id: "x_KategoriPenyaluran", form: "fMasterTemplatesrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MasterTemplate.fields.KategoriPenyaluran.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* masterTemplateList.KategoriPenyaluran.Visible (end) *@
+@if (masterTemplateList.NamaDokumen.Visible) { // masterTemplateList.NamaDokumen.Visible (begin)
+    if (!masterTemplateList.NamaDokumen.UseFilter) {
+        masterTemplateList.SearchColumnCount++;
+    }
+    <div id="xs_NamaDokumen" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(masterTemplateList.NamaDokumen.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_NamaDokumen"
+            name="x_NamaDokumen[]"
+            class="form-control ew-select@(masterTemplateList.NamaDokumen.IsInvalidClass)"
+            data-select2-id="fMasterTemplatesrch_x_NamaDokumen"
+            data-table="MasterTemplate"
+            data-field="x_NamaDokumen"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(masterTemplateList.NamaDokumen.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(masterTemplateList.NamaDokumen.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(masterTemplateList.NamaDokumen.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(masterTemplateList.NamaDokumen.EditAttributes)>
+            @(masterTemplateList.NamaDokumen.SelectOptionListHtml("x_NamaDokumen", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(masterTemplateList.NamaDokumen.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMasterTemplatesrch", function() {
+            var options = {
+                name: "x_NamaDokumen",
+                selectId: "fMasterTemplatesrch_x_NamaDokumen",
+                ajax: { id: "x_NamaDokumen", form: "fMasterTemplatesrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MasterTemplate.fields.NamaDokumen.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* masterTemplateList.NamaDokumen.Visible (end) *@
+</div><!-- /.row -->
+<div class="row mb-0">
+    <div class="col-sm-auto px-0 pe-sm-2">
+        <div class="ew-basic-search input-group">
+            <input type="search" name="@(Config.TableBasicSearch)" id="@(Config.TableBasicSearch)" class="form-control ew-basic-search-keyword" value="@Html.Raw(HtmlEncode(masterTemplateList.BasicSearch.SessionKeyword))" placeholder="@(HtmlEncode(Language.Phrase("Search")))" aria-label="@(HtmlEncode(Language.Phrase("Search")))">
+            <input type="hidden" name="@(Config.TableBasicSearchType)" id="@(Config.TableBasicSearchType)" class="ew-basic-search-type" value="@(HtmlEncode(masterTemplateList.BasicSearch.SessionType))">
+            <button type="button" data-bs-toggle="dropdown" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split" aria-haspopup="true" aria-expanded="false">
+                <span id="searchtype">@Html.Raw(masterTemplateList.BasicSearch.TypeNameShort)</span>
+            </button>
+            <div class="dropdown-menu dropdown-menu-end">
+                <button type="button" class="dropdown-item@(masterTemplateList.BasicSearch.SessionType == "" ? " active" : "")" form="fMasterTemplatesrch" data-ew-action="search-type">@Html.Raw(Language.Phrase("QuickSearchAuto"))</button>
+                <button type="button" class="dropdown-item@(masterTemplateList.BasicSearch.SessionType == "=" ? " active" : "")" form="fMasterTemplatesrch" data-ew-action="search-type" data-search-type="=">@Html.Raw(Language.Phrase("QuickSearchExact"))</button>
+                <button type="button" class="dropdown-item@(masterTemplateList.BasicSearch.SessionType == "AND" ? " active" : "")" form="fMasterTemplatesrch" data-ew-action="search-type" data-search-type="AND">@Html.Raw(Language.Phrase("QuickSearchAll"))</button>
+                <button type="button" class="dropdown-item@(masterTemplateList.BasicSearch.SessionType == "OR" ? " active" : "")" form="fMasterTemplatesrch" data-ew-action="search-type" data-search-type="OR">@Html.Raw(Language.Phrase("QuickSearchAny"))</button>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-auto mb-3">
+        <button class="btn btn-primary" name="btn-submit" id="btn-submit" type="submit">@Html.Raw(Language.Phrase("SearchBtn"))</button>
+    </div>
+</div>
+</div><!-- /.ew-extended-search -->
+} @* Show search form (end) *@
+}
+</div><!-- /.ew-search-panel -->
+</form>
+}
+@masterTemplateList.ShowPageHeader()
+@masterTemplateList.ShowMessages()
+<main class="list @(masterTemplateList.TotalRecords == 0 && !masterTemplateList.IsAdd ? " ew-no-record" : "")">
+<div id="ew-header-options">
+    @masterTemplateList.HeaderOptions.RenderBody()
+</div>
+<div id="ew-list">
+@if (masterTemplateList.TotalRecords > 0 || !Empty(masterTemplateList.CurrentAction)) {
+<div class="card ew-card ew-grid@(masterTemplateList.IsAddOrEdit ? " ew-grid-add-edit" : "") @(masterTemplateList.TableGridClass)">
+<form name="@(masterTemplateList.FormName)" id="@(masterTemplateList.FormName)" class="ew-form ew-list-form" action="@AppPath(masterTemplateList.PageName)" method="post" novalidate autocomplete="off">
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+@if (masterTemplateList.IsModal) {
+<input type="hidden" name="modal" value="1">
+}
+<div id="gmp_MasterTemplate" class="card-body ew-grid-middle-panel @(masterTemplateList.TableContainerClass)" style="@(masterTemplateList.TableContainerStyle)">
+@if (masterTemplateList.TotalRecords > 0 || masterTemplateList.IsGridEdit || masterTemplateList.IsMultiEdit) {
+<table id="tbl_MasterTemplatelist" class="@(masterTemplateList.TableClass)"><!-- .ew-table -->
+<thead>
+    <tr class="ew-table-header">
+@{
+    // Header row
+    masterTemplateList.RowType = RowType.Header;
+
+    // Render list options
+    await masterTemplateList.RenderListOptions();
+}
+@* Render list options (header, left) *@
+@masterTemplateList.ListOptions.RenderHeader("left")
+@if (masterTemplateList.NamaTemplate.Visible) { // masterTemplateList.NamaTemplate.Visible (begin)
+        <th data-name="NamaTemplate" class="@(masterTemplateList.NamaTemplate.HeaderCellClass)"><div id="elh_MasterTemplate_NamaTemplate" class="MasterTemplate_NamaTemplate">@Html.Raw(masterTemplateList.RenderFieldHeader(masterTemplateList.NamaTemplate))</div></th>
+} @* masterTemplateList.NamaTemplate.Visible (end) *@
+@if (masterTemplateList.IdModa.Visible) { // masterTemplateList.IdModa.Visible (begin)
+        <th data-name="IdModa" class="@(masterTemplateList.IdModa.HeaderCellClass)"><div id="elh_MasterTemplate_IdModa" class="MasterTemplate_IdModa">@Html.Raw(masterTemplateList.RenderFieldHeader(masterTemplateList.IdModa))</div></th>
+} @* masterTemplateList.IdModa.Visible (end) *@
+@if (masterTemplateList.JenisProses.Visible) { // masterTemplateList.JenisProses.Visible (begin)
+        <th data-name="JenisProses" class="@(masterTemplateList.JenisProses.HeaderCellClass)"><div id="elh_MasterTemplate_JenisProses" class="MasterTemplate_JenisProses">@Html.Raw(masterTemplateList.RenderFieldHeader(masterTemplateList.JenisProses))</div></th>
+} @* masterTemplateList.JenisProses.Visible (end) *@
+@if (masterTemplateList.Keterangan.Visible) { // masterTemplateList.Keterangan.Visible (begin)
+        <th data-name="Keterangan" class="@(masterTemplateList.Keterangan.HeaderCellClass)"><div id="elh_MasterTemplate_Keterangan" class="MasterTemplate_Keterangan">@Html.Raw(masterTemplateList.RenderFieldHeader(masterTemplateList.Keterangan))</div></th>
+} @* masterTemplateList.Keterangan.Visible (end) *@
+@if (masterTemplateList.DibuatOleh.Visible) { // masterTemplateList.DibuatOleh.Visible (begin)
+        <th data-name="DibuatOleh" class="@(masterTemplateList.DibuatOleh.HeaderCellClass)"><div id="elh_MasterTemplate_DibuatOleh" class="MasterTemplate_DibuatOleh">@Html.Raw(masterTemplateList.RenderFieldHeader(masterTemplateList.DibuatOleh))</div></th>
+} @* masterTemplateList.DibuatOleh.Visible (end) *@
+@if (masterTemplateList.TanggalDibuat.Visible) { // masterTemplateList.TanggalDibuat.Visible (begin)
+        <th data-name="TanggalDibuat" class="@(masterTemplateList.TanggalDibuat.HeaderCellClass)"><div id="elh_MasterTemplate_TanggalDibuat" class="MasterTemplate_TanggalDibuat">@Html.Raw(masterTemplateList.RenderFieldHeader(masterTemplateList.TanggalDibuat))</div></th>
+} @* masterTemplateList.TanggalDibuat.Visible (end) *@
+@if (masterTemplateList.DiperbaruiOleh.Visible) { // masterTemplateList.DiperbaruiOleh.Visible (begin)
+        <th data-name="DiperbaruiOleh" class="@(masterTemplateList.DiperbaruiOleh.HeaderCellClass)"><div id="elh_MasterTemplate_DiperbaruiOleh" class="MasterTemplate_DiperbaruiOleh">@Html.Raw(masterTemplateList.RenderFieldHeader(masterTemplateList.DiperbaruiOleh))</div></th>
+} @* masterTemplateList.DiperbaruiOleh.Visible (end) *@
+@if (masterTemplateList.TanggalDiperbarui.Visible) { // masterTemplateList.TanggalDiperbarui.Visible (begin)
+        <th data-name="TanggalDiperbarui" class="@(masterTemplateList.TanggalDiperbarui.HeaderCellClass)"><div id="elh_MasterTemplate_TanggalDiperbarui" class="MasterTemplate_TanggalDiperbarui">@Html.Raw(masterTemplateList.RenderFieldHeader(masterTemplateList.TanggalDiperbarui))</div></th>
+} @* masterTemplateList.TanggalDiperbarui.Visible (end) *@
+@if (masterTemplateList.TipePenimbunan.Visible) { // masterTemplateList.TipePenimbunan.Visible (begin)
+        <th data-name="TipePenimbunan" class="@(masterTemplateList.TipePenimbunan.HeaderCellClass)"><div id="elh_MasterTemplate_TipePenimbunan" class="MasterTemplate_TipePenimbunan">@Html.Raw(masterTemplateList.RenderFieldHeader(masterTemplateList.TipePenimbunan))</div></th>
+} @* masterTemplateList.TipePenimbunan.Visible (end) *@
+@if (masterTemplateList.TipePenyaluran.Visible) { // masterTemplateList.TipePenyaluran.Visible (begin)
+        <th data-name="TipePenyaluran" class="@(masterTemplateList.TipePenyaluran.HeaderCellClass)"><div id="elh_MasterTemplate_TipePenyaluran" class="MasterTemplate_TipePenyaluran">@Html.Raw(masterTemplateList.RenderFieldHeader(masterTemplateList.TipePenyaluran))</div></th>
+} @* masterTemplateList.TipePenyaluran.Visible (end) *@
+@if (masterTemplateList.KategoriPenyaluran.Visible) { // masterTemplateList.KategoriPenyaluran.Visible (begin)
+        <th data-name="KategoriPenyaluran" class="@(masterTemplateList.KategoriPenyaluran.HeaderCellClass)"><div id="elh_MasterTemplate_KategoriPenyaluran" class="MasterTemplate_KategoriPenyaluran">@Html.Raw(masterTemplateList.RenderFieldHeader(masterTemplateList.KategoriPenyaluran))</div></th>
+} @* masterTemplateList.KategoriPenyaluran.Visible (end) *@
+@if (masterTemplateList.NamaDokumen.Visible) { // masterTemplateList.NamaDokumen.Visible (begin)
+        <th data-name="NamaDokumen" class="@(masterTemplateList.NamaDokumen.HeaderCellClass)"><div id="elh_MasterTemplate_NamaDokumen" class="MasterTemplate_NamaDokumen">@Html.Raw(masterTemplateList.RenderFieldHeader(masterTemplateList.NamaDokumen))</div></th>
+} @* masterTemplateList.NamaDokumen.Visible (end) *@
+@* Render list options (header, right) *@
+@masterTemplateList.ListOptions.RenderHeader("right")
+    </tr>
+</thead>
+<tbody data-page="@(masterTemplateList.PageNumber)">
+@{
+    await masterTemplateList.SetupGrid();
+    bool eof = masterTemplateList.Recordset == null; // DN
+}
+@while (masterTemplateList.RecordCount < masterTemplateList.StopRecord || SameString(masterTemplateList.RowIndex, "$rowindex$")) { // Begin While
+    if (!eof && !SameString(masterTemplateList.RowIndex, "$rowindex$") &&
+        (!masterTemplateList.IsGridAdd || masterTemplateList.CurrentMode == "copy") &&
+        (!((masterTemplateList.IsCopy || masterTemplateList.IsAdd) && masterTemplateList.RowIndex is int rowIndex && rowIndex == 0))) // DN
+        eof = !await masterTemplateList.Recordset.ReadAsync();
+    masterTemplateList.RecordCount++;
+    if (masterTemplateList.RecordCount >= masterTemplateList.StartRecord) {
+        await masterTemplateList.SetupRow();
+    <tr @Html.Raw(masterTemplateList.RowAttributes)>
+    @* Render list options (body, left) *@
+    @masterTemplateList.ListOptions.RenderBody("left", masterTemplateList.RowCount)
+    @if (masterTemplateList.NamaTemplate.Visible) { // masterTemplateList.NamaTemplate.Visible (begin)
+        <td data-name="NamaTemplate" @Html.Raw(masterTemplateList.NamaTemplate.CellAttributes)>
+<span id="el@(masterTemplateList.RowIndex == "$rowindex$" ? "$rowindex$" : masterTemplateList.RowCount)_MasterTemplate_NamaTemplate" class="el_MasterTemplate_NamaTemplate">
+<span @Html.Raw(masterTemplateList.NamaTemplate.ViewAttributes)>
+@Html.Raw(masterTemplateList.NamaTemplate.GetViewValue())</span>
+</span>
+</td>
+    } @* masterTemplateList.NamaTemplate.Visible (end) *@
+    @if (masterTemplateList.IdModa.Visible) { // masterTemplateList.IdModa.Visible (begin)
+        <td data-name="IdModa" @Html.Raw(masterTemplateList.IdModa.CellAttributes)>
+<span id="el@(masterTemplateList.RowIndex == "$rowindex$" ? "$rowindex$" : masterTemplateList.RowCount)_MasterTemplate_IdModa" class="el_MasterTemplate_IdModa">
+<span @Html.Raw(masterTemplateList.IdModa.ViewAttributes)>
+@Html.Raw(masterTemplateList.IdModa.GetViewValue())</span>
+</span>
+</td>
+    } @* masterTemplateList.IdModa.Visible (end) *@
+    @if (masterTemplateList.JenisProses.Visible) { // masterTemplateList.JenisProses.Visible (begin)
+        <td data-name="JenisProses" @Html.Raw(masterTemplateList.JenisProses.CellAttributes)>
+<span id="el@(masterTemplateList.RowIndex == "$rowindex$" ? "$rowindex$" : masterTemplateList.RowCount)_MasterTemplate_JenisProses" class="el_MasterTemplate_JenisProses">
+<span @Html.Raw(masterTemplateList.JenisProses.ViewAttributes)>
+@Html.Raw(masterTemplateList.JenisProses.GetViewValue())</span>
+</span>
+</td>
+    } @* masterTemplateList.JenisProses.Visible (end) *@
+    @if (masterTemplateList.Keterangan.Visible) { // masterTemplateList.Keterangan.Visible (begin)
+        <td data-name="Keterangan" @Html.Raw(masterTemplateList.Keterangan.CellAttributes)>
+<span id="el@(masterTemplateList.RowIndex == "$rowindex$" ? "$rowindex$" : masterTemplateList.RowCount)_MasterTemplate_Keterangan" class="el_MasterTemplate_Keterangan">
+<span @Html.Raw(masterTemplateList.Keterangan.ViewAttributes)>
+@Html.Raw(masterTemplateList.Keterangan.GetViewValue())</span>
+</span>
+</td>
+    } @* masterTemplateList.Keterangan.Visible (end) *@
+    @if (masterTemplateList.DibuatOleh.Visible) { // masterTemplateList.DibuatOleh.Visible (begin)
+        <td data-name="DibuatOleh" @Html.Raw(masterTemplateList.DibuatOleh.CellAttributes)>
+<span id="el@(masterTemplateList.RowIndex == "$rowindex$" ? "$rowindex$" : masterTemplateList.RowCount)_MasterTemplate_DibuatOleh" class="el_MasterTemplate_DibuatOleh">
+<span @Html.Raw(masterTemplateList.DibuatOleh.ViewAttributes)>
+@Html.Raw(masterTemplateList.DibuatOleh.GetViewValue())</span>
+</span>
+</td>
+    } @* masterTemplateList.DibuatOleh.Visible (end) *@
+    @if (masterTemplateList.TanggalDibuat.Visible) { // masterTemplateList.TanggalDibuat.Visible (begin)
+        <td data-name="TanggalDibuat" @Html.Raw(masterTemplateList.TanggalDibuat.CellAttributes)>
+<span id="el@(masterTemplateList.RowIndex == "$rowindex$" ? "$rowindex$" : masterTemplateList.RowCount)_MasterTemplate_TanggalDibuat" class="el_MasterTemplate_TanggalDibuat">
+<span @Html.Raw(masterTemplateList.TanggalDibuat.ViewAttributes)>
+@Html.Raw(masterTemplateList.TanggalDibuat.GetViewValue())</span>
+</span>
+</td>
+    } @* masterTemplateList.TanggalDibuat.Visible (end) *@
+    @if (masterTemplateList.DiperbaruiOleh.Visible) { // masterTemplateList.DiperbaruiOleh.Visible (begin)
+        <td data-name="DiperbaruiOleh" @Html.Raw(masterTemplateList.DiperbaruiOleh.CellAttributes)>
+<span id="el@(masterTemplateList.RowIndex == "$rowindex$" ? "$rowindex$" : masterTemplateList.RowCount)_MasterTemplate_DiperbaruiOleh" class="el_MasterTemplate_DiperbaruiOleh">
+<span @Html.Raw(masterTemplateList.DiperbaruiOleh.ViewAttributes)>
+@Html.Raw(masterTemplateList.DiperbaruiOleh.GetViewValue())</span>
+</span>
+</td>
+    } @* masterTemplateList.DiperbaruiOleh.Visible (end) *@
+    @if (masterTemplateList.TanggalDiperbarui.Visible) { // masterTemplateList.TanggalDiperbarui.Visible (begin)
+        <td data-name="TanggalDiperbarui" @Html.Raw(masterTemplateList.TanggalDiperbarui.CellAttributes)>
+<span id="el@(masterTemplateList.RowIndex == "$rowindex$" ? "$rowindex$" : masterTemplateList.RowCount)_MasterTemplate_TanggalDiperbarui" class="el_MasterTemplate_TanggalDiperbarui">
+<span @Html.Raw(masterTemplateList.TanggalDiperbarui.ViewAttributes)>
+@Html.Raw(masterTemplateList.TanggalDiperbarui.GetViewValue())</span>
+</span>
+</td>
+    } @* masterTemplateList.TanggalDiperbarui.Visible (end) *@
+    @if (masterTemplateList.TipePenimbunan.Visible) { // masterTemplateList.TipePenimbunan.Visible (begin)
+        <td data-name="TipePenimbunan" @Html.Raw(masterTemplateList.TipePenimbunan.CellAttributes)>
+<span id="el@(masterTemplateList.RowIndex == "$rowindex$" ? "$rowindex$" : masterTemplateList.RowCount)_MasterTemplate_TipePenimbunan" class="el_MasterTemplate_TipePenimbunan">
+<span @Html.Raw(masterTemplateList.TipePenimbunan.ViewAttributes)>
+@Html.Raw(masterTemplateList.TipePenimbunan.GetViewValue())</span>
+</span>
+</td>
+    } @* masterTemplateList.TipePenimbunan.Visible (end) *@
+    @if (masterTemplateList.TipePenyaluran.Visible) { // masterTemplateList.TipePenyaluran.Visible (begin)
+        <td data-name="TipePenyaluran" @Html.Raw(masterTemplateList.TipePenyaluran.CellAttributes)>
+<span id="el@(masterTemplateList.RowIndex == "$rowindex$" ? "$rowindex$" : masterTemplateList.RowCount)_MasterTemplate_TipePenyaluran" class="el_MasterTemplate_TipePenyaluran">
+<span @Html.Raw(masterTemplateList.TipePenyaluran.ViewAttributes)>
+@Html.Raw(masterTemplateList.TipePenyaluran.GetViewValue())</span>
+</span>
+</td>
+    } @* masterTemplateList.TipePenyaluran.Visible (end) *@
+    @if (masterTemplateList.KategoriPenyaluran.Visible) { // masterTemplateList.KategoriPenyaluran.Visible (begin)
+        <td data-name="KategoriPenyaluran" @Html.Raw(masterTemplateList.KategoriPenyaluran.CellAttributes)>
+<span id="el@(masterTemplateList.RowIndex == "$rowindex$" ? "$rowindex$" : masterTemplateList.RowCount)_MasterTemplate_KategoriPenyaluran" class="el_MasterTemplate_KategoriPenyaluran">
+<span @Html.Raw(masterTemplateList.KategoriPenyaluran.ViewAttributes)>
+@Html.Raw(masterTemplateList.KategoriPenyaluran.GetViewValue())</span>
+</span>
+</td>
+    } @* masterTemplateList.KategoriPenyaluran.Visible (end) *@
+    @if (masterTemplateList.NamaDokumen.Visible) { // masterTemplateList.NamaDokumen.Visible (begin)
+        <td data-name="NamaDokumen" @Html.Raw(masterTemplateList.NamaDokumen.CellAttributes)>
+<span id="el@(masterTemplateList.RowIndex == "$rowindex$" ? "$rowindex$" : masterTemplateList.RowCount)_MasterTemplate_NamaDokumen" class="el_MasterTemplate_NamaDokumen">
+<span @Html.Raw(masterTemplateList.NamaDokumen.ViewAttributes)>
+@Html.Raw(masterTemplateList.NamaDokumen.GetViewValue())</span>
+</span>
+</td>
+    } @* masterTemplateList.NamaDokumen.Visible (end) *@
+    @* Render list options (body, right) *@
+    @masterTemplateList.ListOptions.RenderBody("right", masterTemplateList.RowCount)
+    </tr>
+    } @* End if *@
+
+    // Reset for template row
+    if (SameString(masterTemplateList.RowIndex, "$rowindex$"))
+        masterTemplateList.RowIndex = 0;
+
+    // Reset inline add/copy row
+    if ((masterTemplateList.IsCopy || masterTemplateList.IsAdd) && masterTemplateList.RowIndex is int rowIndex2 && rowIndex2 == 0)
+        masterTemplateList.RowIndex = 1;
+} @* End While *@
+</tbody>
+</table><!-- /.ew-table -->
+} @* End If TotalRecords > 0 *@
+</div><!-- /.ew-grid-middle-panel -->
+@if (Empty(masterTemplateList.CurrentAction) && !masterTemplateList.UseAjaxActions) {
+<input type="hidden" name="action" id="action" value="">
+}
+</form><!-- /.ew-list-form -->
+@{ masterTemplateList.CloseRecordset(); }
+@if (!masterTemplateList.IsExport()) {
+<div class="card-footer ew-grid-lower-panel">
+@if (!masterTemplateList.IsGridAdd && !(masterTemplateList.IsGridEdit && masterTemplateList.ModalGridEdit) && !masterTemplateList.IsMultiEdit) {
+@Html.Raw(masterTemplateList.Pager.Render())
+}
+<div class="ew-list-other-options">
+@masterTemplateList.OtherOptions.RenderBody("bottom")
+</div>
+</div>
+}
+</div><!-- /.ew-grid -->
+} else { // Show other options
+<div class="ew-list-other-options">
+@masterTemplateList.OtherOptions.ForEach(opt => opt.ButtonClass = "").RenderBody()
+</div>
+}
+</div>
+<div id="ew-footer-options">
+    @masterTemplateList.FooterOptions.RenderBody()
+</div>
+</main>
+@masterTemplateList.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+@if (!masterTemplateList.IsExport()) {
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("MasterTemplate");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Write your table-specific startup script here
+    // document.write("page loaded");
+});
+</script>
+}

@@ -1,0 +1,719 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (detailMasterPipaList.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = detailMasterPipaList.UseLayout ? "_Layout" : "";
+}
+@if (!detailMasterPipaList.IsExport()) {
+<script>
+var currentTable = @Html.Raw(ConvertToJson(detailMasterPipaList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { DetailMasterPipa: currentTable } });
+var currentPageID = ew.PAGE_ID = "list";
+var currentForm;
+var @(detailMasterPipaList.FormName);
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("@(detailMasterPipaList.FormName)")
+        .setPageId("list")
+        .setSubmitWithFetch(@(detailMasterPipaList.UseAjaxActions ? "true" : "false"))
+        .setFormKeyCountName("@(detailMasterPipaList.FormKeyCountName)")
+
+        // Dynamic selection lists
+        .setLists({
+            "idPipa": @Html.Raw(detailMasterPipaList.idPipa.ToClientList(detailMasterPipaList)),
+            "idPlantTujuan": @Html.Raw(detailMasterPipaList.idPlantTujuan.ToClientList(detailMasterPipaList)),
+            "Panjang": @Html.Raw(detailMasterPipaList.Panjang.ToClientList(detailMasterPipaList)),
+            "Diameter": @Html.Raw(detailMasterPipaList.Diameter.ToClientList(detailMasterPipaList)),
+            "Volume": @Html.Raw(detailMasterPipaList.Volume.ToClientList(detailMasterPipaList)),
+            "CreatedBy": @Html.Raw(detailMasterPipaList.CreatedBy.ToClientList(detailMasterPipaList)),
+            "etlDate": @Html.Raw(detailMasterPipaList.etlDate.ToClientList(detailMasterPipaList)),
+            "LastUpdatedBy": @Html.Raw(detailMasterPipaList.LastUpdatedBy.ToClientList(detailMasterPipaList)),
+            "LastUpdatedDate": @Html.Raw(detailMasterPipaList.LastUpdatedDate.ToClientList(detailMasterPipaList)),
+        })
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Write your client script here, no need to add script tags.
+});
+</script>
+}
+@if (!detailMasterPipaList.IsExport()) {
+<div class="btn-toolbar ew-toolbar">
+@if (detailMasterPipaList.TotalRecords > 0 && detailMasterPipaList.ExportOptions.Visible) {
+    detailMasterPipaList.ExportOptions.Render("body");
+}
+@if (detailMasterPipaList.ImportOptions.Visible) {
+    detailMasterPipaList.ImportOptions.Render("body");
+}
+@if (detailMasterPipaList.SearchOptions.Visible) {
+    detailMasterPipaList.SearchOptions.Render("body");
+}
+@if (detailMasterPipaList.FilterOptions.Visible) {
+    detailMasterPipaList.FilterOptions.Render("body");
+}
+</div>
+}
+@if (detailMasterPipaList.ShowCurrentFilter) {
+    detailMasterPipaList.ShowFilterList();
+}
+@if (!detailMasterPipaList.IsModal) {
+<form name="fDetailMasterPipasrch" id="fDetailMasterPipasrch" class="ew-form ew-ext-search-form" action="@AppPath(CurrentPageName())" novalidate autocomplete="off">
+<div id="fDetailMasterPipasrch_search_panel" class="mb-2 mb-sm-0 @(detailMasterPipaList.SearchPanelClass)"><!-- .ew-search-panel -->
+<script>
+var currentTable = @Html.Raw(ConvertToJson(detailMasterPipaList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { DetailMasterPipa: currentTable } });
+var currentForm;
+var fDetailMasterPipasrch, currentSearchForm, currentAdvancedSearchForm;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery,
+        fields = currentTable.fields;
+
+    // Form object for search
+    let form = new ew.FormBuilder()
+        .setId("fDetailMasterPipasrch")
+        .setPageId("list")
+@if (detailMasterPipaList.UseAjaxActions) {
+        <text>.setSubmitWithFetch(true)</text>
+}
+
+        // Add fields
+        .setFields([
+        ])
+        // Validate form
+        .setValidate(
+            async function () {
+                if (!this.validateRequired)
+                    return true; // Ignore validation
+                let fobj = this.getForm();
+
+                // Validate fields
+                if (!this.validateFields())
+                    return false;
+
+                // Call Form_CustomValidate event
+                if (!(await this.customValidate?.(fobj) ?? true)) {
+                    this.focus();
+                    return false;
+                }
+                return true;
+            }
+        )
+
+        // Form_CustomValidate
+        .setCustomValidate(
+            function(fobj) { // DO NOT CHANGE THIS LINE!
+                    // Your custom validation code here, return false if invalid.
+                    return true;
+                }
+        )
+
+        // Use JavaScript validation or not
+        .setValidateRequired(ew.CLIENT_VALIDATE)
+
+        // Dynamic selection lists
+        .setLists({
+            "idPipa": @Html.Raw(detailMasterPipaList.idPipa.ToClientList(detailMasterPipaList)),
+            "idPlantTujuan": @Html.Raw(detailMasterPipaList.idPlantTujuan.ToClientList(detailMasterPipaList)),
+            "Panjang": @Html.Raw(detailMasterPipaList.Panjang.ToClientList(detailMasterPipaList)),
+            "Diameter": @Html.Raw(detailMasterPipaList.Diameter.ToClientList(detailMasterPipaList)),
+            "Volume": @Html.Raw(detailMasterPipaList.Volume.ToClientList(detailMasterPipaList)),
+            "CreatedBy": @Html.Raw(detailMasterPipaList.CreatedBy.ToClientList(detailMasterPipaList)),
+            "etlDate": @Html.Raw(detailMasterPipaList.etlDate.ToClientList(detailMasterPipaList)),
+            "LastUpdatedBy": @Html.Raw(detailMasterPipaList.LastUpdatedBy.ToClientList(detailMasterPipaList)),
+            "LastUpdatedDate": @Html.Raw(detailMasterPipaList.LastUpdatedDate.ToClientList(detailMasterPipaList)),
+        })
+
+        // Filters
+        .setFilterList(@Html.Raw(detailMasterPipaList.GetFilterList()))
+        .build();
+    window[form.id] = form;
+    currentSearchForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<input type="hidden" name="cmd" value="search">
+@if (Security.CanSearch) {
+if (!detailMasterPipaList.IsExport() && Empty(detailMasterPipaList.CurrentAction) && detailMasterPipaList.HasSearchFields()) { @* Show search form (begin) *@
+<div class="ew-extended-search container-fluid ps-2">
+<div class="row mb-0@(detailMasterPipaList.SearchFieldsPerRow > 0 ? " row-cols-sm-" + detailMasterPipaList.SearchFieldsPerRow : "")">
+@{
+    // Render search row
+    detailMasterPipaList.RowType = RowType.Search;
+    detailMasterPipaList.ResetAttributes();
+    await detailMasterPipaList.RenderRow();
+}
+@if (detailMasterPipaList.idPipa.Visible) { // detailMasterPipaList.idPipa.Visible (begin)
+    if (!detailMasterPipaList.idPipa.UseFilter) {
+        detailMasterPipaList.SearchColumnCount++;
+    }
+    <div id="xs_idPipa" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(detailMasterPipaList.idPipa.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_idPipa"
+            name="x_idPipa[]"
+            class="form-control ew-select@(detailMasterPipaList.idPipa.IsInvalidClass)"
+            data-select2-id="fDetailMasterPipasrch_x_idPipa"
+            data-table="DetailMasterPipa"
+            data-field="x_idPipa"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(detailMasterPipaList.idPipa.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(detailMasterPipaList.idPipa.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(detailMasterPipaList.idPipa.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(detailMasterPipaList.idPipa.EditAttributes)>
+            @(detailMasterPipaList.idPipa.SelectOptionListHtml("x_idPipa", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(detailMasterPipaList.idPipa.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fDetailMasterPipasrch", function() {
+            var options = {
+                name: "x_idPipa",
+                selectId: "fDetailMasterPipasrch_x_idPipa",
+                ajax: { id: "x_idPipa", form: "fDetailMasterPipasrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.DetailMasterPipa.fields.idPipa.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* detailMasterPipaList.idPipa.Visible (end) *@
+@if (detailMasterPipaList.idPlantTujuan.Visible) { // detailMasterPipaList.idPlantTujuan.Visible (begin)
+    if (!detailMasterPipaList.idPlantTujuan.UseFilter) {
+        detailMasterPipaList.SearchColumnCount++;
+    }
+    <div id="xs_idPlantTujuan" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(detailMasterPipaList.idPlantTujuan.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_idPlantTujuan"
+            name="x_idPlantTujuan[]"
+            class="form-control ew-select@(detailMasterPipaList.idPlantTujuan.IsInvalidClass)"
+            data-select2-id="fDetailMasterPipasrch_x_idPlantTujuan"
+            data-table="DetailMasterPipa"
+            data-field="x_idPlantTujuan"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(detailMasterPipaList.idPlantTujuan.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(detailMasterPipaList.idPlantTujuan.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(detailMasterPipaList.idPlantTujuan.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(detailMasterPipaList.idPlantTujuan.EditAttributes)>
+            @(detailMasterPipaList.idPlantTujuan.SelectOptionListHtml("x_idPlantTujuan", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(detailMasterPipaList.idPlantTujuan.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fDetailMasterPipasrch", function() {
+            var options = {
+                name: "x_idPlantTujuan",
+                selectId: "fDetailMasterPipasrch_x_idPlantTujuan",
+                ajax: { id: "x_idPlantTujuan", form: "fDetailMasterPipasrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.DetailMasterPipa.fields.idPlantTujuan.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* detailMasterPipaList.idPlantTujuan.Visible (end) *@
+@if (detailMasterPipaList.Panjang.Visible) { // detailMasterPipaList.Panjang.Visible (begin)
+    if (!detailMasterPipaList.Panjang.UseFilter) {
+        detailMasterPipaList.SearchColumnCount++;
+    }
+    <div id="xs_Panjang" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(detailMasterPipaList.Panjang.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_Panjang"
+            name="x_Panjang[]"
+            class="form-control ew-select@(detailMasterPipaList.Panjang.IsInvalidClass)"
+            data-select2-id="fDetailMasterPipasrch_x_Panjang"
+            data-table="DetailMasterPipa"
+            data-field="x_Panjang"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(detailMasterPipaList.Panjang.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(detailMasterPipaList.Panjang.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(detailMasterPipaList.Panjang.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(detailMasterPipaList.Panjang.EditAttributes)>
+            @(detailMasterPipaList.Panjang.SelectOptionListHtml("x_Panjang", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(detailMasterPipaList.Panjang.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fDetailMasterPipasrch", function() {
+            var options = {
+                name: "x_Panjang",
+                selectId: "fDetailMasterPipasrch_x_Panjang",
+                ajax: { id: "x_Panjang", form: "fDetailMasterPipasrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.DetailMasterPipa.fields.Panjang.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* detailMasterPipaList.Panjang.Visible (end) *@
+@if (detailMasterPipaList.Diameter.Visible) { // detailMasterPipaList.Diameter.Visible (begin)
+    if (!detailMasterPipaList.Diameter.UseFilter) {
+        detailMasterPipaList.SearchColumnCount++;
+    }
+    <div id="xs_Diameter" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(detailMasterPipaList.Diameter.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_Diameter"
+            name="x_Diameter[]"
+            class="form-control ew-select@(detailMasterPipaList.Diameter.IsInvalidClass)"
+            data-select2-id="fDetailMasterPipasrch_x_Diameter"
+            data-table="DetailMasterPipa"
+            data-field="x_Diameter"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(detailMasterPipaList.Diameter.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(detailMasterPipaList.Diameter.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(detailMasterPipaList.Diameter.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(detailMasterPipaList.Diameter.EditAttributes)>
+            @(detailMasterPipaList.Diameter.SelectOptionListHtml("x_Diameter", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(detailMasterPipaList.Diameter.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fDetailMasterPipasrch", function() {
+            var options = {
+                name: "x_Diameter",
+                selectId: "fDetailMasterPipasrch_x_Diameter",
+                ajax: { id: "x_Diameter", form: "fDetailMasterPipasrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.DetailMasterPipa.fields.Diameter.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* detailMasterPipaList.Diameter.Visible (end) *@
+@if (detailMasterPipaList.Volume.Visible) { // detailMasterPipaList.Volume.Visible (begin)
+    if (!detailMasterPipaList.Volume.UseFilter) {
+        detailMasterPipaList.SearchColumnCount++;
+    }
+    <div id="xs_Volume" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(detailMasterPipaList.Volume.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_Volume"
+            name="x_Volume[]"
+            class="form-control ew-select@(detailMasterPipaList.Volume.IsInvalidClass)"
+            data-select2-id="fDetailMasterPipasrch_x_Volume"
+            data-table="DetailMasterPipa"
+            data-field="x_Volume"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(detailMasterPipaList.Volume.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(detailMasterPipaList.Volume.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(detailMasterPipaList.Volume.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(detailMasterPipaList.Volume.EditAttributes)>
+            @(detailMasterPipaList.Volume.SelectOptionListHtml("x_Volume", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(detailMasterPipaList.Volume.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fDetailMasterPipasrch", function() {
+            var options = {
+                name: "x_Volume",
+                selectId: "fDetailMasterPipasrch_x_Volume",
+                ajax: { id: "x_Volume", form: "fDetailMasterPipasrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.DetailMasterPipa.fields.Volume.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* detailMasterPipaList.Volume.Visible (end) *@
+@if (detailMasterPipaList.CreatedBy.Visible) { // detailMasterPipaList.CreatedBy.Visible (begin)
+    if (!detailMasterPipaList.CreatedBy.UseFilter) {
+        detailMasterPipaList.SearchColumnCount++;
+    }
+    <div id="xs_CreatedBy" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(detailMasterPipaList.CreatedBy.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_CreatedBy"
+            name="x_CreatedBy[]"
+            class="form-control ew-select@(detailMasterPipaList.CreatedBy.IsInvalidClass)"
+            data-select2-id="fDetailMasterPipasrch_x_CreatedBy"
+            data-table="DetailMasterPipa"
+            data-field="x_CreatedBy"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(detailMasterPipaList.CreatedBy.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(detailMasterPipaList.CreatedBy.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(detailMasterPipaList.CreatedBy.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(detailMasterPipaList.CreatedBy.EditAttributes)>
+            @(detailMasterPipaList.CreatedBy.SelectOptionListHtml("x_CreatedBy", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(detailMasterPipaList.CreatedBy.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fDetailMasterPipasrch", function() {
+            var options = {
+                name: "x_CreatedBy",
+                selectId: "fDetailMasterPipasrch_x_CreatedBy",
+                ajax: { id: "x_CreatedBy", form: "fDetailMasterPipasrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.DetailMasterPipa.fields.CreatedBy.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* detailMasterPipaList.CreatedBy.Visible (end) *@
+@if (detailMasterPipaList.etlDate.Visible) { // detailMasterPipaList.etlDate.Visible (begin)
+    if (!detailMasterPipaList.etlDate.UseFilter) {
+        detailMasterPipaList.SearchColumnCount++;
+    }
+    <div id="xs_etlDate" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(detailMasterPipaList.etlDate.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_etlDate"
+            name="x_etlDate[]"
+            class="form-control ew-select@(detailMasterPipaList.etlDate.IsInvalidClass)"
+            data-select2-id="fDetailMasterPipasrch_x_etlDate"
+            data-table="DetailMasterPipa"
+            data-field="x_etlDate"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(detailMasterPipaList.etlDate.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(detailMasterPipaList.etlDate.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(detailMasterPipaList.etlDate.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(detailMasterPipaList.etlDate.EditAttributes)>
+            @(detailMasterPipaList.etlDate.SelectOptionListHtml("x_etlDate", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(detailMasterPipaList.etlDate.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fDetailMasterPipasrch", function() {
+            var options = {
+                name: "x_etlDate",
+                selectId: "fDetailMasterPipasrch_x_etlDate",
+                ajax: { id: "x_etlDate", form: "fDetailMasterPipasrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.DetailMasterPipa.fields.etlDate.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* detailMasterPipaList.etlDate.Visible (end) *@
+@if (detailMasterPipaList.LastUpdatedBy.Visible) { // detailMasterPipaList.LastUpdatedBy.Visible (begin)
+    if (!detailMasterPipaList.LastUpdatedBy.UseFilter) {
+        detailMasterPipaList.SearchColumnCount++;
+    }
+    <div id="xs_LastUpdatedBy" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(detailMasterPipaList.LastUpdatedBy.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_LastUpdatedBy"
+            name="x_LastUpdatedBy[]"
+            class="form-control ew-select@(detailMasterPipaList.LastUpdatedBy.IsInvalidClass)"
+            data-select2-id="fDetailMasterPipasrch_x_LastUpdatedBy"
+            data-table="DetailMasterPipa"
+            data-field="x_LastUpdatedBy"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(detailMasterPipaList.LastUpdatedBy.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(detailMasterPipaList.LastUpdatedBy.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(detailMasterPipaList.LastUpdatedBy.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(detailMasterPipaList.LastUpdatedBy.EditAttributes)>
+            @(detailMasterPipaList.LastUpdatedBy.SelectOptionListHtml("x_LastUpdatedBy", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(detailMasterPipaList.LastUpdatedBy.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fDetailMasterPipasrch", function() {
+            var options = {
+                name: "x_LastUpdatedBy",
+                selectId: "fDetailMasterPipasrch_x_LastUpdatedBy",
+                ajax: { id: "x_LastUpdatedBy", form: "fDetailMasterPipasrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.DetailMasterPipa.fields.LastUpdatedBy.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* detailMasterPipaList.LastUpdatedBy.Visible (end) *@
+@if (detailMasterPipaList.LastUpdatedDate.Visible) { // detailMasterPipaList.LastUpdatedDate.Visible (begin)
+    if (!detailMasterPipaList.LastUpdatedDate.UseFilter) {
+        detailMasterPipaList.SearchColumnCount++;
+    }
+    <div id="xs_LastUpdatedDate" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(detailMasterPipaList.LastUpdatedDate.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_LastUpdatedDate"
+            name="x_LastUpdatedDate[]"
+            class="form-control ew-select@(detailMasterPipaList.LastUpdatedDate.IsInvalidClass)"
+            data-select2-id="fDetailMasterPipasrch_x_LastUpdatedDate"
+            data-table="DetailMasterPipa"
+            data-field="x_LastUpdatedDate"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(detailMasterPipaList.LastUpdatedDate.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(detailMasterPipaList.LastUpdatedDate.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(detailMasterPipaList.LastUpdatedDate.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(detailMasterPipaList.LastUpdatedDate.EditAttributes)>
+            @(detailMasterPipaList.LastUpdatedDate.SelectOptionListHtml("x_LastUpdatedDate", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(detailMasterPipaList.LastUpdatedDate.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fDetailMasterPipasrch", function() {
+            var options = {
+                name: "x_LastUpdatedDate",
+                selectId: "fDetailMasterPipasrch_x_LastUpdatedDate",
+                ajax: { id: "x_LastUpdatedDate", form: "fDetailMasterPipasrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.DetailMasterPipa.fields.LastUpdatedDate.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* detailMasterPipaList.LastUpdatedDate.Visible (end) *@
+</div><!-- /.row -->
+<div class="row mb-0">
+    <div class="col-sm-auto px-0 pe-sm-2">
+        <div class="ew-basic-search input-group">
+            <input type="search" name="@(Config.TableBasicSearch)" id="@(Config.TableBasicSearch)" class="form-control ew-basic-search-keyword" value="@Html.Raw(HtmlEncode(detailMasterPipaList.BasicSearch.SessionKeyword))" placeholder="@(HtmlEncode(Language.Phrase("Search")))" aria-label="@(HtmlEncode(Language.Phrase("Search")))">
+            <input type="hidden" name="@(Config.TableBasicSearchType)" id="@(Config.TableBasicSearchType)" class="ew-basic-search-type" value="@(HtmlEncode(detailMasterPipaList.BasicSearch.SessionType))">
+            <button type="button" data-bs-toggle="dropdown" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split" aria-haspopup="true" aria-expanded="false">
+                <span id="searchtype">@Html.Raw(detailMasterPipaList.BasicSearch.TypeNameShort)</span>
+            </button>
+            <div class="dropdown-menu dropdown-menu-end">
+                <button type="button" class="dropdown-item@(detailMasterPipaList.BasicSearch.SessionType == "" ? " active" : "")" form="fDetailMasterPipasrch" data-ew-action="search-type">@Html.Raw(Language.Phrase("QuickSearchAuto"))</button>
+                <button type="button" class="dropdown-item@(detailMasterPipaList.BasicSearch.SessionType == "=" ? " active" : "")" form="fDetailMasterPipasrch" data-ew-action="search-type" data-search-type="=">@Html.Raw(Language.Phrase("QuickSearchExact"))</button>
+                <button type="button" class="dropdown-item@(detailMasterPipaList.BasicSearch.SessionType == "AND" ? " active" : "")" form="fDetailMasterPipasrch" data-ew-action="search-type" data-search-type="AND">@Html.Raw(Language.Phrase("QuickSearchAll"))</button>
+                <button type="button" class="dropdown-item@(detailMasterPipaList.BasicSearch.SessionType == "OR" ? " active" : "")" form="fDetailMasterPipasrch" data-ew-action="search-type" data-search-type="OR">@Html.Raw(Language.Phrase("QuickSearchAny"))</button>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-auto mb-3">
+        <button class="btn btn-primary" name="btn-submit" id="btn-submit" type="submit">@Html.Raw(Language.Phrase("SearchBtn"))</button>
+    </div>
+</div>
+</div><!-- /.ew-extended-search -->
+} @* Show search form (end) *@
+}
+</div><!-- /.ew-search-panel -->
+</form>
+}
+@detailMasterPipaList.ShowPageHeader()
+@detailMasterPipaList.ShowMessages()
+<main class="list @(detailMasterPipaList.TotalRecords == 0 && !detailMasterPipaList.IsAdd ? " ew-no-record" : "")">
+<div id="ew-header-options">
+    @detailMasterPipaList.HeaderOptions.RenderBody()
+</div>
+<div id="ew-list">
+@if (detailMasterPipaList.TotalRecords > 0 || !Empty(detailMasterPipaList.CurrentAction)) {
+<div class="card ew-card ew-grid@(detailMasterPipaList.IsAddOrEdit ? " ew-grid-add-edit" : "") @(detailMasterPipaList.TableGridClass)">
+<form name="@(detailMasterPipaList.FormName)" id="@(detailMasterPipaList.FormName)" class="ew-form ew-list-form" action="@AppPath(detailMasterPipaList.PageName)" method="post" novalidate autocomplete="off">
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+@if (detailMasterPipaList.IsModal) {
+<input type="hidden" name="modal" value="1">
+}
+<div id="gmp_DetailMasterPipa" class="card-body ew-grid-middle-panel @(detailMasterPipaList.TableContainerClass)" style="@(detailMasterPipaList.TableContainerStyle)">
+@if (detailMasterPipaList.TotalRecords > 0 || detailMasterPipaList.IsGridEdit || detailMasterPipaList.IsMultiEdit) {
+<table id="tbl_DetailMasterPipalist" class="@(detailMasterPipaList.TableClass)"><!-- .ew-table -->
+<thead>
+    <tr class="ew-table-header">
+@{
+    // Header row
+    detailMasterPipaList.RowType = RowType.Header;
+
+    // Render list options
+    await detailMasterPipaList.RenderListOptions();
+}
+@* Render list options (header, left) *@
+@detailMasterPipaList.ListOptions.RenderHeader("left")
+@if (detailMasterPipaList.idPipa.Visible) { // detailMasterPipaList.idPipa.Visible (begin)
+        <th data-name="idPipa" class="@(detailMasterPipaList.idPipa.HeaderCellClass)"><div id="elh_DetailMasterPipa_idPipa" class="DetailMasterPipa_idPipa">@Html.Raw(detailMasterPipaList.RenderFieldHeader(detailMasterPipaList.idPipa))</div></th>
+} @* detailMasterPipaList.idPipa.Visible (end) *@
+@if (detailMasterPipaList.idPlantTujuan.Visible) { // detailMasterPipaList.idPlantTujuan.Visible (begin)
+        <th data-name="idPlantTujuan" class="@(detailMasterPipaList.idPlantTujuan.HeaderCellClass)"><div id="elh_DetailMasterPipa_idPlantTujuan" class="DetailMasterPipa_idPlantTujuan">@Html.Raw(detailMasterPipaList.RenderFieldHeader(detailMasterPipaList.idPlantTujuan))</div></th>
+} @* detailMasterPipaList.idPlantTujuan.Visible (end) *@
+@if (detailMasterPipaList.Panjang.Visible) { // detailMasterPipaList.Panjang.Visible (begin)
+        <th data-name="Panjang" class="@(detailMasterPipaList.Panjang.HeaderCellClass)"><div id="elh_DetailMasterPipa_Panjang" class="DetailMasterPipa_Panjang">@Html.Raw(detailMasterPipaList.RenderFieldHeader(detailMasterPipaList.Panjang))</div></th>
+} @* detailMasterPipaList.Panjang.Visible (end) *@
+@if (detailMasterPipaList.Diameter.Visible) { // detailMasterPipaList.Diameter.Visible (begin)
+        <th data-name="Diameter" class="@(detailMasterPipaList.Diameter.HeaderCellClass)"><div id="elh_DetailMasterPipa_Diameter" class="DetailMasterPipa_Diameter">@Html.Raw(detailMasterPipaList.RenderFieldHeader(detailMasterPipaList.Diameter))</div></th>
+} @* detailMasterPipaList.Diameter.Visible (end) *@
+@if (detailMasterPipaList.Volume.Visible) { // detailMasterPipaList.Volume.Visible (begin)
+        <th data-name="Volume" class="@(detailMasterPipaList.Volume.HeaderCellClass)"><div id="elh_DetailMasterPipa_Volume" class="DetailMasterPipa_Volume">@Html.Raw(detailMasterPipaList.RenderFieldHeader(detailMasterPipaList.Volume))</div></th>
+} @* detailMasterPipaList.Volume.Visible (end) *@
+@if (detailMasterPipaList.CreatedBy.Visible) { // detailMasterPipaList.CreatedBy.Visible (begin)
+        <th data-name="CreatedBy" class="@(detailMasterPipaList.CreatedBy.HeaderCellClass)"><div id="elh_DetailMasterPipa_CreatedBy" class="DetailMasterPipa_CreatedBy">@Html.Raw(detailMasterPipaList.RenderFieldHeader(detailMasterPipaList.CreatedBy))</div></th>
+} @* detailMasterPipaList.CreatedBy.Visible (end) *@
+@if (detailMasterPipaList.etlDate.Visible) { // detailMasterPipaList.etlDate.Visible (begin)
+        <th data-name="etlDate" class="@(detailMasterPipaList.etlDate.HeaderCellClass)"><div id="elh_DetailMasterPipa_etlDate" class="DetailMasterPipa_etlDate">@Html.Raw(detailMasterPipaList.RenderFieldHeader(detailMasterPipaList.etlDate))</div></th>
+} @* detailMasterPipaList.etlDate.Visible (end) *@
+@if (detailMasterPipaList.LastUpdatedBy.Visible) { // detailMasterPipaList.LastUpdatedBy.Visible (begin)
+        <th data-name="LastUpdatedBy" class="@(detailMasterPipaList.LastUpdatedBy.HeaderCellClass)"><div id="elh_DetailMasterPipa_LastUpdatedBy" class="DetailMasterPipa_LastUpdatedBy">@Html.Raw(detailMasterPipaList.RenderFieldHeader(detailMasterPipaList.LastUpdatedBy))</div></th>
+} @* detailMasterPipaList.LastUpdatedBy.Visible (end) *@
+@if (detailMasterPipaList.LastUpdatedDate.Visible) { // detailMasterPipaList.LastUpdatedDate.Visible (begin)
+        <th data-name="LastUpdatedDate" class="@(detailMasterPipaList.LastUpdatedDate.HeaderCellClass)"><div id="elh_DetailMasterPipa_LastUpdatedDate" class="DetailMasterPipa_LastUpdatedDate">@Html.Raw(detailMasterPipaList.RenderFieldHeader(detailMasterPipaList.LastUpdatedDate))</div></th>
+} @* detailMasterPipaList.LastUpdatedDate.Visible (end) *@
+@* Render list options (header, right) *@
+@detailMasterPipaList.ListOptions.RenderHeader("right")
+    </tr>
+</thead>
+<tbody data-page="@(detailMasterPipaList.PageNumber)">
+@{
+    await detailMasterPipaList.SetupGrid();
+    bool eof = detailMasterPipaList.Recordset == null; // DN
+}
+@while (detailMasterPipaList.RecordCount < detailMasterPipaList.StopRecord || SameString(detailMasterPipaList.RowIndex, "$rowindex$")) { // Begin While
+    if (!eof && !SameString(detailMasterPipaList.RowIndex, "$rowindex$") &&
+        (!detailMasterPipaList.IsGridAdd || detailMasterPipaList.CurrentMode == "copy") &&
+        (!((detailMasterPipaList.IsCopy || detailMasterPipaList.IsAdd) && detailMasterPipaList.RowIndex is int rowIndex && rowIndex == 0))) // DN
+        eof = !await detailMasterPipaList.Recordset.ReadAsync();
+    detailMasterPipaList.RecordCount++;
+    if (detailMasterPipaList.RecordCount >= detailMasterPipaList.StartRecord) {
+        await detailMasterPipaList.SetupRow();
+    <tr @Html.Raw(detailMasterPipaList.RowAttributes)>
+    @* Render list options (body, left) *@
+    @detailMasterPipaList.ListOptions.RenderBody("left", detailMasterPipaList.RowCount)
+    @if (detailMasterPipaList.idPipa.Visible) { // detailMasterPipaList.idPipa.Visible (begin)
+        <td data-name="idPipa" @Html.Raw(detailMasterPipaList.idPipa.CellAttributes)>
+<span id="el@(detailMasterPipaList.RowIndex == "$rowindex$" ? "$rowindex$" : detailMasterPipaList.RowCount)_DetailMasterPipa_idPipa" class="el_DetailMasterPipa_idPipa">
+<span @Html.Raw(detailMasterPipaList.idPipa.ViewAttributes)>
+@Html.Raw(detailMasterPipaList.idPipa.GetViewValue())</span>
+</span>
+</td>
+    } @* detailMasterPipaList.idPipa.Visible (end) *@
+    @if (detailMasterPipaList.idPlantTujuan.Visible) { // detailMasterPipaList.idPlantTujuan.Visible (begin)
+        <td data-name="idPlantTujuan" @Html.Raw(detailMasterPipaList.idPlantTujuan.CellAttributes)>
+<span id="el@(detailMasterPipaList.RowIndex == "$rowindex$" ? "$rowindex$" : detailMasterPipaList.RowCount)_DetailMasterPipa_idPlantTujuan" class="el_DetailMasterPipa_idPlantTujuan">
+<span @Html.Raw(detailMasterPipaList.idPlantTujuan.ViewAttributes)>
+@Html.Raw(detailMasterPipaList.idPlantTujuan.GetViewValue())</span>
+</span>
+</td>
+    } @* detailMasterPipaList.idPlantTujuan.Visible (end) *@
+    @if (detailMasterPipaList.Panjang.Visible) { // detailMasterPipaList.Panjang.Visible (begin)
+        <td data-name="Panjang" @Html.Raw(detailMasterPipaList.Panjang.CellAttributes)>
+<span id="el@(detailMasterPipaList.RowIndex == "$rowindex$" ? "$rowindex$" : detailMasterPipaList.RowCount)_DetailMasterPipa_Panjang" class="el_DetailMasterPipa_Panjang">
+<span @Html.Raw(detailMasterPipaList.Panjang.ViewAttributes)>
+@Html.Raw(detailMasterPipaList.Panjang.GetViewValue())</span>
+</span>
+</td>
+    } @* detailMasterPipaList.Panjang.Visible (end) *@
+    @if (detailMasterPipaList.Diameter.Visible) { // detailMasterPipaList.Diameter.Visible (begin)
+        <td data-name="Diameter" @Html.Raw(detailMasterPipaList.Diameter.CellAttributes)>
+<span id="el@(detailMasterPipaList.RowIndex == "$rowindex$" ? "$rowindex$" : detailMasterPipaList.RowCount)_DetailMasterPipa_Diameter" class="el_DetailMasterPipa_Diameter">
+<span @Html.Raw(detailMasterPipaList.Diameter.ViewAttributes)>
+@Html.Raw(detailMasterPipaList.Diameter.GetViewValue())</span>
+</span>
+</td>
+    } @* detailMasterPipaList.Diameter.Visible (end) *@
+    @if (detailMasterPipaList.Volume.Visible) { // detailMasterPipaList.Volume.Visible (begin)
+        <td data-name="Volume" @Html.Raw(detailMasterPipaList.Volume.CellAttributes)>
+<span id="el@(detailMasterPipaList.RowIndex == "$rowindex$" ? "$rowindex$" : detailMasterPipaList.RowCount)_DetailMasterPipa_Volume" class="el_DetailMasterPipa_Volume">
+<span @Html.Raw(detailMasterPipaList.Volume.ViewAttributes)>
+@Html.Raw(detailMasterPipaList.Volume.GetViewValue())</span>
+</span>
+</td>
+    } @* detailMasterPipaList.Volume.Visible (end) *@
+    @if (detailMasterPipaList.CreatedBy.Visible) { // detailMasterPipaList.CreatedBy.Visible (begin)
+        <td data-name="CreatedBy" @Html.Raw(detailMasterPipaList.CreatedBy.CellAttributes)>
+<span id="el@(detailMasterPipaList.RowIndex == "$rowindex$" ? "$rowindex$" : detailMasterPipaList.RowCount)_DetailMasterPipa_CreatedBy" class="el_DetailMasterPipa_CreatedBy">
+<span @Html.Raw(detailMasterPipaList.CreatedBy.ViewAttributes)>
+@Html.Raw(detailMasterPipaList.CreatedBy.GetViewValue())</span>
+</span>
+</td>
+    } @* detailMasterPipaList.CreatedBy.Visible (end) *@
+    @if (detailMasterPipaList.etlDate.Visible) { // detailMasterPipaList.etlDate.Visible (begin)
+        <td data-name="etlDate" @Html.Raw(detailMasterPipaList.etlDate.CellAttributes)>
+<span id="el@(detailMasterPipaList.RowIndex == "$rowindex$" ? "$rowindex$" : detailMasterPipaList.RowCount)_DetailMasterPipa_etlDate" class="el_DetailMasterPipa_etlDate">
+<span @Html.Raw(detailMasterPipaList.etlDate.ViewAttributes)>
+@Html.Raw(detailMasterPipaList.etlDate.GetViewValue())</span>
+</span>
+</td>
+    } @* detailMasterPipaList.etlDate.Visible (end) *@
+    @if (detailMasterPipaList.LastUpdatedBy.Visible) { // detailMasterPipaList.LastUpdatedBy.Visible (begin)
+        <td data-name="LastUpdatedBy" @Html.Raw(detailMasterPipaList.LastUpdatedBy.CellAttributes)>
+<span id="el@(detailMasterPipaList.RowIndex == "$rowindex$" ? "$rowindex$" : detailMasterPipaList.RowCount)_DetailMasterPipa_LastUpdatedBy" class="el_DetailMasterPipa_LastUpdatedBy">
+<span @Html.Raw(detailMasterPipaList.LastUpdatedBy.ViewAttributes)>
+@Html.Raw(detailMasterPipaList.LastUpdatedBy.GetViewValue())</span>
+</span>
+</td>
+    } @* detailMasterPipaList.LastUpdatedBy.Visible (end) *@
+    @if (detailMasterPipaList.LastUpdatedDate.Visible) { // detailMasterPipaList.LastUpdatedDate.Visible (begin)
+        <td data-name="LastUpdatedDate" @Html.Raw(detailMasterPipaList.LastUpdatedDate.CellAttributes)>
+<span id="el@(detailMasterPipaList.RowIndex == "$rowindex$" ? "$rowindex$" : detailMasterPipaList.RowCount)_DetailMasterPipa_LastUpdatedDate" class="el_DetailMasterPipa_LastUpdatedDate">
+<span @Html.Raw(detailMasterPipaList.LastUpdatedDate.ViewAttributes)>
+@Html.Raw(detailMasterPipaList.LastUpdatedDate.GetViewValue())</span>
+</span>
+</td>
+    } @* detailMasterPipaList.LastUpdatedDate.Visible (end) *@
+    @* Render list options (body, right) *@
+    @detailMasterPipaList.ListOptions.RenderBody("right", detailMasterPipaList.RowCount)
+    </tr>
+    } @* End if *@
+
+    // Reset for template row
+    if (SameString(detailMasterPipaList.RowIndex, "$rowindex$"))
+        detailMasterPipaList.RowIndex = 0;
+
+    // Reset inline add/copy row
+    if ((detailMasterPipaList.IsCopy || detailMasterPipaList.IsAdd) && detailMasterPipaList.RowIndex is int rowIndex2 && rowIndex2 == 0)
+        detailMasterPipaList.RowIndex = 1;
+} @* End While *@
+</tbody>
+</table><!-- /.ew-table -->
+} @* End If TotalRecords > 0 *@
+</div><!-- /.ew-grid-middle-panel -->
+@if (Empty(detailMasterPipaList.CurrentAction) && !detailMasterPipaList.UseAjaxActions) {
+<input type="hidden" name="action" id="action" value="">
+}
+</form><!-- /.ew-list-form -->
+@{ detailMasterPipaList.CloseRecordset(); }
+@if (!detailMasterPipaList.IsExport()) {
+<div class="card-footer ew-grid-lower-panel">
+@if (!detailMasterPipaList.IsGridAdd && !(detailMasterPipaList.IsGridEdit && detailMasterPipaList.ModalGridEdit) && !detailMasterPipaList.IsMultiEdit) {
+@Html.Raw(detailMasterPipaList.Pager.Render())
+}
+<div class="ew-list-other-options">
+@detailMasterPipaList.OtherOptions.RenderBody("bottom")
+</div>
+</div>
+}
+</div><!-- /.ew-grid -->
+} else { // Show other options
+<div class="ew-list-other-options">
+@detailMasterPipaList.OtherOptions.ForEach(opt => opt.ButtonClass = "").RenderBody()
+</div>
+}
+</div>
+<div id="ew-footer-options">
+    @detailMasterPipaList.FooterOptions.RenderBody()
+</div>
+</main>
+@detailMasterPipaList.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+@if (!detailMasterPipaList.IsExport()) {
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("DetailMasterPipa");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Write your table-specific startup script here
+    // document.write("page loaded");
+});
+</script>
+}

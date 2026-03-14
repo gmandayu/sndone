@@ -1,0 +1,1110 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (mwtOnlineList.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = mwtOnlineList.UseLayout ? "_Layout" : "";
+}
+@if (!mwtOnlineList.IsExport()) {
+<script>
+var currentTable = @Html.Raw(ConvertToJson(mwtOnlineList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { MWTOnline: currentTable } });
+var currentPageID = ew.PAGE_ID = "list";
+var currentForm;
+var @(mwtOnlineList.FormName);
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("@(mwtOnlineList.FormName)")
+        .setPageId("list")
+        .setSubmitWithFetch(@(mwtOnlineList.UseAjaxActions ? "true" : "false"))
+        .setFormKeyCountName("@(mwtOnlineList.FormKeyCountName)")
+
+        // Dynamic selection lists
+        .setLists({
+            "LinkRedirect": @Html.Raw(mwtOnlineList.LinkRedirect.ToClientList(mwtOnlineList)),
+            "IdPlant": @Html.Raw(mwtOnlineList.IdPlant.ToClientList(mwtOnlineList)),
+            "Status": @Html.Raw(mwtOnlineList.Status.ToClientList(mwtOnlineList)),
+            "CreatedBy": @Html.Raw(mwtOnlineList.CreatedBy.ToClientList(mwtOnlineList)),
+            "CreatedDate": @Html.Raw(mwtOnlineList.CreatedDate.ToClientList(mwtOnlineList)),
+            "LastUpdatedBy": @Html.Raw(mwtOnlineList.LastUpdatedBy.ToClientList(mwtOnlineList)),
+            "LastUpdatedDate": @Html.Raw(mwtOnlineList.LastUpdatedDate.ToClientList(mwtOnlineList)),
+            "CompletedBy": @Html.Raw(mwtOnlineList.CompletedBy.ToClientList(mwtOnlineList)),
+            "CompletedDate": @Html.Raw(mwtOnlineList.CompletedDate.ToClientList(mwtOnlineList)),
+        })
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Write your client script here, no need to add script tags.
+});
+</script>
+}
+@if (!mwtOnlineList.IsExport()) {
+<div class="btn-toolbar ew-toolbar">
+@if (mwtOnlineList.TotalRecords > 0 && mwtOnlineList.ExportOptions.Visible) {
+    mwtOnlineList.ExportOptions.Render("body");
+}
+@if (mwtOnlineList.ImportOptions.Visible) {
+    mwtOnlineList.ImportOptions.Render("body");
+}
+@if (mwtOnlineList.SearchOptions.Visible) {
+    mwtOnlineList.SearchOptions.Render("body");
+}
+@if (mwtOnlineList.FilterOptions.Visible) {
+    mwtOnlineList.FilterOptions.Render("body");
+}
+</div>
+}
+@if (mwtOnlineList.ShowCurrentFilter) {
+    mwtOnlineList.ShowFilterList();
+}
+@if (!mwtOnlineList.IsModal) {
+<form name="fMWTOnlinesrch" id="fMWTOnlinesrch" class="ew-form ew-ext-search-form" action="@AppPath(CurrentPageName())" novalidate autocomplete="off">
+<div id="fMWTOnlinesrch_search_panel" class="mb-2 mb-sm-0 @(mwtOnlineList.SearchPanelClass)"><!-- .ew-search-panel -->
+<script>
+var currentTable = @Html.Raw(ConvertToJson(mwtOnlineList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { MWTOnline: currentTable } });
+var currentForm;
+var fMWTOnlinesrch, currentSearchForm, currentAdvancedSearchForm;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery,
+        fields = currentTable.fields;
+
+    // Form object for search
+    let form = new ew.FormBuilder()
+        .setId("fMWTOnlinesrch")
+        .setPageId("list")
+@if (mwtOnlineList.UseAjaxActions) {
+        <text>.setSubmitWithFetch(true)</text>
+}
+
+        // Add fields
+        .setFields([
+        ])
+        // Validate form
+        .setValidate(
+            async function () {
+                if (!this.validateRequired)
+                    return true; // Ignore validation
+                let fobj = this.getForm();
+
+                // Validate fields
+                if (!this.validateFields())
+                    return false;
+
+                // Call Form_CustomValidate event
+                if (!(await this.customValidate?.(fobj) ?? true)) {
+                    this.focus();
+                    return false;
+                }
+                return true;
+            }
+        )
+
+        // Form_CustomValidate
+        .setCustomValidate(
+            function(fobj) { // DO NOT CHANGE THIS LINE!
+                    // Your custom validation code here, return false if invalid.
+                    return true;
+                }
+        )
+
+        // Use JavaScript validation or not
+        .setValidateRequired(ew.CLIENT_VALIDATE)
+
+        // Dynamic selection lists
+        .setLists({
+            "NoMWTOnline": @Html.Raw(mwtOnlineList.NoMWTOnline.ToClientList(mwtOnlineList)),
+            "LinkRedirect": @Html.Raw(mwtOnlineList.LinkRedirect.ToClientList(mwtOnlineList)),
+            "LookupPlant": @Html.Raw(mwtOnlineList.LookupPlant.ToClientList(mwtOnlineList)),
+            "IdPlant": @Html.Raw(mwtOnlineList.IdPlant.ToClientList(mwtOnlineList)),
+            "TaskList": @Html.Raw(mwtOnlineList.TaskList.ToClientList(mwtOnlineList)),
+            "Status": @Html.Raw(mwtOnlineList.Status.ToClientList(mwtOnlineList)),
+            "_File": @Html.Raw(mwtOnlineList._File.ToClientList(mwtOnlineList)),
+            "StatusEmail": @Html.Raw(mwtOnlineList.StatusEmail.ToClientList(mwtOnlineList)),
+            "CreatedBy": @Html.Raw(mwtOnlineList.CreatedBy.ToClientList(mwtOnlineList)),
+            "CreatedDate": @Html.Raw(mwtOnlineList.CreatedDate.ToClientList(mwtOnlineList)),
+            "LastUpdatedBy": @Html.Raw(mwtOnlineList.LastUpdatedBy.ToClientList(mwtOnlineList)),
+            "LastUpdatedDate": @Html.Raw(mwtOnlineList.LastUpdatedDate.ToClientList(mwtOnlineList)),
+            "CompletedBy": @Html.Raw(mwtOnlineList.CompletedBy.ToClientList(mwtOnlineList)),
+            "CompletedDate": @Html.Raw(mwtOnlineList.CompletedDate.ToClientList(mwtOnlineList)),
+        })
+
+        // Filters
+        .setFilterList(@Html.Raw(mwtOnlineList.GetFilterList()))
+        .build();
+    window[form.id] = form;
+    currentSearchForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<input type="hidden" name="cmd" value="search">
+@if (Security.CanSearch) {
+if (!mwtOnlineList.IsExport() && Empty(mwtOnlineList.CurrentAction) && mwtOnlineList.HasSearchFields()) { @* Show search form (begin) *@
+<div class="ew-extended-search container-fluid ps-2">
+<div class="row mb-0@(mwtOnlineList.SearchFieldsPerRow > 0 ? " row-cols-sm-" + mwtOnlineList.SearchFieldsPerRow : "")">
+@{
+    // Render search row
+    mwtOnlineList.RowType = RowType.Search;
+    mwtOnlineList.ResetAttributes();
+    await mwtOnlineList.RenderRow();
+}
+@if (mwtOnlineList.NoMWTOnline.Visible) { // mwtOnlineList.NoMWTOnline.Visible (begin)
+    if (!mwtOnlineList.NoMWTOnline.UseFilter) {
+        mwtOnlineList.SearchColumnCount++;
+    }
+    <div id="xs_NoMWTOnline" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(mwtOnlineList.NoMWTOnline.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_NoMWTOnline"
+            name="x_NoMWTOnline[]"
+            class="form-control ew-select@(mwtOnlineList.NoMWTOnline.IsInvalidClass)"
+            data-select2-id="fMWTOnlinesrch_x_NoMWTOnline"
+            data-table="MWTOnline"
+            data-field="x_NoMWTOnline"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(mwtOnlineList.NoMWTOnline.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(mwtOnlineList.NoMWTOnline.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(mwtOnlineList.NoMWTOnline.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(mwtOnlineList.NoMWTOnline.EditAttributes)>
+            @(mwtOnlineList.NoMWTOnline.SelectOptionListHtml("x_NoMWTOnline", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(mwtOnlineList.NoMWTOnline.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMWTOnlinesrch", function() {
+            var options = {
+                name: "x_NoMWTOnline",
+                selectId: "fMWTOnlinesrch_x_NoMWTOnline",
+                ajax: { id: "x_NoMWTOnline", form: "fMWTOnlinesrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MWTOnline.fields.NoMWTOnline.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* mwtOnlineList.NoMWTOnline.Visible (end) *@
+@if (mwtOnlineList.LinkRedirect.Visible) { // mwtOnlineList.LinkRedirect.Visible (begin)
+    if (!mwtOnlineList.LinkRedirect.UseFilter) {
+        mwtOnlineList.SearchColumnCount++;
+    }
+    <div id="xs_LinkRedirect" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(mwtOnlineList.LinkRedirect.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_LinkRedirect"
+            name="x_LinkRedirect[]"
+            class="form-control ew-select@(mwtOnlineList.LinkRedirect.IsInvalidClass)"
+            data-select2-id="fMWTOnlinesrch_x_LinkRedirect"
+            data-table="MWTOnline"
+            data-field="x_LinkRedirect"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(mwtOnlineList.LinkRedirect.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(mwtOnlineList.LinkRedirect.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(mwtOnlineList.LinkRedirect.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(mwtOnlineList.LinkRedirect.EditAttributes)>
+            @(mwtOnlineList.LinkRedirect.SelectOptionListHtml("x_LinkRedirect", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(mwtOnlineList.LinkRedirect.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMWTOnlinesrch", function() {
+            var options = {
+                name: "x_LinkRedirect",
+                selectId: "fMWTOnlinesrch_x_LinkRedirect",
+                ajax: { id: "x_LinkRedirect", form: "fMWTOnlinesrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MWTOnline.fields.LinkRedirect.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* mwtOnlineList.LinkRedirect.Visible (end) *@
+@if (mwtOnlineList.LookupPlant.Visible) { // mwtOnlineList.LookupPlant.Visible (begin)
+    if (!mwtOnlineList.LookupPlant.UseFilter) {
+        mwtOnlineList.SearchColumnCount++;
+    }
+    <div id="xs_LookupPlant" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(mwtOnlineList.LookupPlant.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_LookupPlant"
+            name="x_LookupPlant[]"
+            class="form-control ew-select@(mwtOnlineList.LookupPlant.IsInvalidClass)"
+            data-select2-id="fMWTOnlinesrch_x_LookupPlant"
+            data-table="MWTOnline"
+            data-field="x_LookupPlant"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(mwtOnlineList.LookupPlant.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(mwtOnlineList.LookupPlant.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(mwtOnlineList.LookupPlant.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(mwtOnlineList.LookupPlant.EditAttributes)>
+            @(mwtOnlineList.LookupPlant.SelectOptionListHtml("x_LookupPlant", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(mwtOnlineList.LookupPlant.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMWTOnlinesrch", function() {
+            var options = {
+                name: "x_LookupPlant",
+                selectId: "fMWTOnlinesrch_x_LookupPlant",
+                ajax: { id: "x_LookupPlant", form: "fMWTOnlinesrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MWTOnline.fields.LookupPlant.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* mwtOnlineList.LookupPlant.Visible (end) *@
+@if (mwtOnlineList.IdPlant.Visible) { // mwtOnlineList.IdPlant.Visible (begin)
+    if (!mwtOnlineList.IdPlant.UseFilter) {
+        mwtOnlineList.SearchColumnCount++;
+    }
+    <div id="xs_IdPlant" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(mwtOnlineList.IdPlant.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_IdPlant"
+            name="x_IdPlant[]"
+            class="form-control ew-select@(mwtOnlineList.IdPlant.IsInvalidClass)"
+            data-select2-id="fMWTOnlinesrch_x_IdPlant"
+            data-table="MWTOnline"
+            data-field="x_IdPlant"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(mwtOnlineList.IdPlant.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(mwtOnlineList.IdPlant.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(mwtOnlineList.IdPlant.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(mwtOnlineList.IdPlant.EditAttributes)>
+            @(mwtOnlineList.IdPlant.SelectOptionListHtml("x_IdPlant", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(mwtOnlineList.IdPlant.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMWTOnlinesrch", function() {
+            var options = {
+                name: "x_IdPlant",
+                selectId: "fMWTOnlinesrch_x_IdPlant",
+                ajax: { id: "x_IdPlant", form: "fMWTOnlinesrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MWTOnline.fields.IdPlant.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* mwtOnlineList.IdPlant.Visible (end) *@
+@if (mwtOnlineList.TaskList.Visible) { // mwtOnlineList.TaskList.Visible (begin)
+    if (!mwtOnlineList.TaskList.UseFilter) {
+        mwtOnlineList.SearchColumnCount++;
+    }
+    <div id="xs_TaskList" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(mwtOnlineList.TaskList.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_TaskList"
+            name="x_TaskList[]"
+            class="form-control ew-select@(mwtOnlineList.TaskList.IsInvalidClass)"
+            data-select2-id="fMWTOnlinesrch_x_TaskList"
+            data-table="MWTOnline"
+            data-field="x_TaskList"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(mwtOnlineList.TaskList.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(mwtOnlineList.TaskList.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(mwtOnlineList.TaskList.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(mwtOnlineList.TaskList.EditAttributes)>
+            @(mwtOnlineList.TaskList.SelectOptionListHtml("x_TaskList", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(mwtOnlineList.TaskList.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMWTOnlinesrch", function() {
+            var options = {
+                name: "x_TaskList",
+                selectId: "fMWTOnlinesrch_x_TaskList",
+                ajax: { id: "x_TaskList", form: "fMWTOnlinesrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MWTOnline.fields.TaskList.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* mwtOnlineList.TaskList.Visible (end) *@
+@if (mwtOnlineList.Status.Visible) { // mwtOnlineList.Status.Visible (begin)
+    if (!mwtOnlineList.Status.UseFilter) {
+        mwtOnlineList.SearchColumnCount++;
+    }
+    <div id="xs_Status" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(mwtOnlineList.Status.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_Status"
+            name="x_Status[]"
+            class="form-control ew-select@(mwtOnlineList.Status.IsInvalidClass)"
+            data-select2-id="fMWTOnlinesrch_x_Status"
+            data-table="MWTOnline"
+            data-field="x_Status"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(mwtOnlineList.Status.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(mwtOnlineList.Status.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(mwtOnlineList.Status.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(mwtOnlineList.Status.EditAttributes)>
+            @(mwtOnlineList.Status.SelectOptionListHtml("x_Status", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(mwtOnlineList.Status.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMWTOnlinesrch", function() {
+            var options = {
+                name: "x_Status",
+                selectId: "fMWTOnlinesrch_x_Status",
+                ajax: { id: "x_Status", form: "fMWTOnlinesrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MWTOnline.fields.Status.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* mwtOnlineList.Status.Visible (end) *@
+@if (mwtOnlineList._File.Visible) { // mwtOnlineList._File.Visible (begin)
+    if (!mwtOnlineList._File.UseFilter) {
+        mwtOnlineList.SearchColumnCount++;
+    }
+    <div id="xs__File" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(mwtOnlineList._File.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x__File"
+            name="x__File[]"
+            class="form-control ew-select@(mwtOnlineList._File.IsInvalidClass)"
+            data-select2-id="fMWTOnlinesrch_x__File"
+            data-table="MWTOnline"
+            data-field="x__File"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(mwtOnlineList._File.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(mwtOnlineList._File.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(mwtOnlineList._File.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(mwtOnlineList._File.EditAttributes)>
+            @(mwtOnlineList._File.SelectOptionListHtml("x__File", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(mwtOnlineList._File.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMWTOnlinesrch", function() {
+            var options = {
+                name: "x__File",
+                selectId: "fMWTOnlinesrch_x__File",
+                ajax: { id: "x__File", form: "fMWTOnlinesrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MWTOnline.fields._File.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* mwtOnlineList._File.Visible (end) *@
+@if (mwtOnlineList.StatusEmail.Visible) { // mwtOnlineList.StatusEmail.Visible (begin)
+    if (!mwtOnlineList.StatusEmail.UseFilter) {
+        mwtOnlineList.SearchColumnCount++;
+    }
+    <div id="xs_StatusEmail" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(mwtOnlineList.StatusEmail.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_StatusEmail"
+            name="x_StatusEmail[]"
+            class="form-control ew-select@(mwtOnlineList.StatusEmail.IsInvalidClass)"
+            data-select2-id="fMWTOnlinesrch_x_StatusEmail"
+            data-table="MWTOnline"
+            data-field="x_StatusEmail"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(mwtOnlineList.StatusEmail.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(mwtOnlineList.StatusEmail.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(mwtOnlineList.StatusEmail.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(mwtOnlineList.StatusEmail.EditAttributes)>
+            @(mwtOnlineList.StatusEmail.SelectOptionListHtml("x_StatusEmail", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(mwtOnlineList.StatusEmail.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMWTOnlinesrch", function() {
+            var options = {
+                name: "x_StatusEmail",
+                selectId: "fMWTOnlinesrch_x_StatusEmail",
+                ajax: { id: "x_StatusEmail", form: "fMWTOnlinesrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MWTOnline.fields.StatusEmail.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* mwtOnlineList.StatusEmail.Visible (end) *@
+@if (mwtOnlineList.CreatedBy.Visible) { // mwtOnlineList.CreatedBy.Visible (begin)
+    if (!mwtOnlineList.CreatedBy.UseFilter) {
+        mwtOnlineList.SearchColumnCount++;
+    }
+    <div id="xs_CreatedBy" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(mwtOnlineList.CreatedBy.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_CreatedBy"
+            name="x_CreatedBy[]"
+            class="form-control ew-select@(mwtOnlineList.CreatedBy.IsInvalidClass)"
+            data-select2-id="fMWTOnlinesrch_x_CreatedBy"
+            data-table="MWTOnline"
+            data-field="x_CreatedBy"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(mwtOnlineList.CreatedBy.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(mwtOnlineList.CreatedBy.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(mwtOnlineList.CreatedBy.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(mwtOnlineList.CreatedBy.EditAttributes)>
+            @(mwtOnlineList.CreatedBy.SelectOptionListHtml("x_CreatedBy", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(mwtOnlineList.CreatedBy.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMWTOnlinesrch", function() {
+            var options = {
+                name: "x_CreatedBy",
+                selectId: "fMWTOnlinesrch_x_CreatedBy",
+                ajax: { id: "x_CreatedBy", form: "fMWTOnlinesrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MWTOnline.fields.CreatedBy.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* mwtOnlineList.CreatedBy.Visible (end) *@
+@if (mwtOnlineList.CreatedDate.Visible) { // mwtOnlineList.CreatedDate.Visible (begin)
+    if (!mwtOnlineList.CreatedDate.UseFilter) {
+        mwtOnlineList.SearchColumnCount++;
+    }
+    <div id="xs_CreatedDate" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(mwtOnlineList.CreatedDate.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_CreatedDate"
+            name="x_CreatedDate[]"
+            class="form-control ew-select@(mwtOnlineList.CreatedDate.IsInvalidClass)"
+            data-select2-id="fMWTOnlinesrch_x_CreatedDate"
+            data-table="MWTOnline"
+            data-field="x_CreatedDate"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(mwtOnlineList.CreatedDate.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(mwtOnlineList.CreatedDate.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(mwtOnlineList.CreatedDate.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(mwtOnlineList.CreatedDate.EditAttributes)>
+            @(mwtOnlineList.CreatedDate.SelectOptionListHtml("x_CreatedDate", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(mwtOnlineList.CreatedDate.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMWTOnlinesrch", function() {
+            var options = {
+                name: "x_CreatedDate",
+                selectId: "fMWTOnlinesrch_x_CreatedDate",
+                ajax: { id: "x_CreatedDate", form: "fMWTOnlinesrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MWTOnline.fields.CreatedDate.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* mwtOnlineList.CreatedDate.Visible (end) *@
+@if (mwtOnlineList.LastUpdatedBy.Visible) { // mwtOnlineList.LastUpdatedBy.Visible (begin)
+    if (!mwtOnlineList.LastUpdatedBy.UseFilter) {
+        mwtOnlineList.SearchColumnCount++;
+    }
+    <div id="xs_LastUpdatedBy" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(mwtOnlineList.LastUpdatedBy.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_LastUpdatedBy"
+            name="x_LastUpdatedBy[]"
+            class="form-control ew-select@(mwtOnlineList.LastUpdatedBy.IsInvalidClass)"
+            data-select2-id="fMWTOnlinesrch_x_LastUpdatedBy"
+            data-table="MWTOnline"
+            data-field="x_LastUpdatedBy"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(mwtOnlineList.LastUpdatedBy.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(mwtOnlineList.LastUpdatedBy.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(mwtOnlineList.LastUpdatedBy.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(mwtOnlineList.LastUpdatedBy.EditAttributes)>
+            @(mwtOnlineList.LastUpdatedBy.SelectOptionListHtml("x_LastUpdatedBy", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(mwtOnlineList.LastUpdatedBy.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMWTOnlinesrch", function() {
+            var options = {
+                name: "x_LastUpdatedBy",
+                selectId: "fMWTOnlinesrch_x_LastUpdatedBy",
+                ajax: { id: "x_LastUpdatedBy", form: "fMWTOnlinesrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MWTOnline.fields.LastUpdatedBy.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* mwtOnlineList.LastUpdatedBy.Visible (end) *@
+@if (mwtOnlineList.LastUpdatedDate.Visible) { // mwtOnlineList.LastUpdatedDate.Visible (begin)
+    if (!mwtOnlineList.LastUpdatedDate.UseFilter) {
+        mwtOnlineList.SearchColumnCount++;
+    }
+    <div id="xs_LastUpdatedDate" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(mwtOnlineList.LastUpdatedDate.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_LastUpdatedDate"
+            name="x_LastUpdatedDate[]"
+            class="form-control ew-select@(mwtOnlineList.LastUpdatedDate.IsInvalidClass)"
+            data-select2-id="fMWTOnlinesrch_x_LastUpdatedDate"
+            data-table="MWTOnline"
+            data-field="x_LastUpdatedDate"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(mwtOnlineList.LastUpdatedDate.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(mwtOnlineList.LastUpdatedDate.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(mwtOnlineList.LastUpdatedDate.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(mwtOnlineList.LastUpdatedDate.EditAttributes)>
+            @(mwtOnlineList.LastUpdatedDate.SelectOptionListHtml("x_LastUpdatedDate", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(mwtOnlineList.LastUpdatedDate.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMWTOnlinesrch", function() {
+            var options = {
+                name: "x_LastUpdatedDate",
+                selectId: "fMWTOnlinesrch_x_LastUpdatedDate",
+                ajax: { id: "x_LastUpdatedDate", form: "fMWTOnlinesrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MWTOnline.fields.LastUpdatedDate.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* mwtOnlineList.LastUpdatedDate.Visible (end) *@
+@if (mwtOnlineList.CompletedBy.Visible) { // mwtOnlineList.CompletedBy.Visible (begin)
+    if (!mwtOnlineList.CompletedBy.UseFilter) {
+        mwtOnlineList.SearchColumnCount++;
+    }
+    <div id="xs_CompletedBy" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(mwtOnlineList.CompletedBy.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_CompletedBy"
+            name="x_CompletedBy[]"
+            class="form-control ew-select@(mwtOnlineList.CompletedBy.IsInvalidClass)"
+            data-select2-id="fMWTOnlinesrch_x_CompletedBy"
+            data-table="MWTOnline"
+            data-field="x_CompletedBy"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(mwtOnlineList.CompletedBy.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(mwtOnlineList.CompletedBy.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(mwtOnlineList.CompletedBy.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(mwtOnlineList.CompletedBy.EditAttributes)>
+            @(mwtOnlineList.CompletedBy.SelectOptionListHtml("x_CompletedBy", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(mwtOnlineList.CompletedBy.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMWTOnlinesrch", function() {
+            var options = {
+                name: "x_CompletedBy",
+                selectId: "fMWTOnlinesrch_x_CompletedBy",
+                ajax: { id: "x_CompletedBy", form: "fMWTOnlinesrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MWTOnline.fields.CompletedBy.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* mwtOnlineList.CompletedBy.Visible (end) *@
+@if (mwtOnlineList.CompletedDate.Visible) { // mwtOnlineList.CompletedDate.Visible (begin)
+    if (!mwtOnlineList.CompletedDate.UseFilter) {
+        mwtOnlineList.SearchColumnCount++;
+    }
+    <div id="xs_CompletedDate" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(mwtOnlineList.CompletedDate.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_CompletedDate"
+            name="x_CompletedDate[]"
+            class="form-control ew-select@(mwtOnlineList.CompletedDate.IsInvalidClass)"
+            data-select2-id="fMWTOnlinesrch_x_CompletedDate"
+            data-table="MWTOnline"
+            data-field="x_CompletedDate"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(mwtOnlineList.CompletedDate.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(mwtOnlineList.CompletedDate.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(mwtOnlineList.CompletedDate.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(mwtOnlineList.CompletedDate.EditAttributes)>
+            @(mwtOnlineList.CompletedDate.SelectOptionListHtml("x_CompletedDate", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(mwtOnlineList.CompletedDate.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMWTOnlinesrch", function() {
+            var options = {
+                name: "x_CompletedDate",
+                selectId: "fMWTOnlinesrch_x_CompletedDate",
+                ajax: { id: "x_CompletedDate", form: "fMWTOnlinesrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MWTOnline.fields.CompletedDate.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* mwtOnlineList.CompletedDate.Visible (end) *@
+</div><!-- /.row -->
+<div class="row mb-0">
+    <div class="col-sm-auto px-0 pe-sm-2">
+        <div class="ew-basic-search input-group">
+            <input type="search" name="@(Config.TableBasicSearch)" id="@(Config.TableBasicSearch)" class="form-control ew-basic-search-keyword" value="@Html.Raw(HtmlEncode(mwtOnlineList.BasicSearch.SessionKeyword))" placeholder="@(HtmlEncode(Language.Phrase("Search")))" aria-label="@(HtmlEncode(Language.Phrase("Search")))">
+            <input type="hidden" name="@(Config.TableBasicSearchType)" id="@(Config.TableBasicSearchType)" class="ew-basic-search-type" value="@(HtmlEncode(mwtOnlineList.BasicSearch.SessionType))">
+            <button type="button" data-bs-toggle="dropdown" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split" aria-haspopup="true" aria-expanded="false">
+                <span id="searchtype">@Html.Raw(mwtOnlineList.BasicSearch.TypeNameShort)</span>
+            </button>
+            <div class="dropdown-menu dropdown-menu-end">
+                <button type="button" class="dropdown-item@(mwtOnlineList.BasicSearch.SessionType == "" ? " active" : "")" form="fMWTOnlinesrch" data-ew-action="search-type">@Html.Raw(Language.Phrase("QuickSearchAuto"))</button>
+                <button type="button" class="dropdown-item@(mwtOnlineList.BasicSearch.SessionType == "=" ? " active" : "")" form="fMWTOnlinesrch" data-ew-action="search-type" data-search-type="=">@Html.Raw(Language.Phrase("QuickSearchExact"))</button>
+                <button type="button" class="dropdown-item@(mwtOnlineList.BasicSearch.SessionType == "AND" ? " active" : "")" form="fMWTOnlinesrch" data-ew-action="search-type" data-search-type="AND">@Html.Raw(Language.Phrase("QuickSearchAll"))</button>
+                <button type="button" class="dropdown-item@(mwtOnlineList.BasicSearch.SessionType == "OR" ? " active" : "")" form="fMWTOnlinesrch" data-ew-action="search-type" data-search-type="OR">@Html.Raw(Language.Phrase("QuickSearchAny"))</button>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-auto mb-3">
+        <button class="btn btn-primary" name="btn-submit" id="btn-submit" type="submit">@Html.Raw(Language.Phrase("SearchBtn"))</button>
+    </div>
+</div>
+</div><!-- /.ew-extended-search -->
+} @* Show search form (end) *@
+}
+</div><!-- /.ew-search-panel -->
+</form>
+}
+@mwtOnlineList.ShowPageHeader()
+@mwtOnlineList.ShowMessages()
+<main class="list @(mwtOnlineList.TotalRecords == 0 && !mwtOnlineList.IsAdd ? " ew-no-record" : "")">
+<div id="ew-header-options">
+    @mwtOnlineList.HeaderOptions.RenderBody()
+</div>
+<div id="ew-list">
+@if (mwtOnlineList.TotalRecords > 0 || !Empty(mwtOnlineList.CurrentAction)) {
+<div class="card ew-card ew-grid@(mwtOnlineList.IsAddOrEdit ? " ew-grid-add-edit" : "") @(mwtOnlineList.TableGridClass)">
+<form name="@(mwtOnlineList.FormName)" id="@(mwtOnlineList.FormName)" class="ew-form ew-list-form" action="@AppPath(mwtOnlineList.PageName)" method="post" novalidate autocomplete="off">
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+@if (mwtOnlineList.IsModal) {
+<input type="hidden" name="modal" value="1">
+}
+<div id="gmp_MWTOnline" class="card-body ew-grid-middle-panel @(mwtOnlineList.TableContainerClass)" style="@(mwtOnlineList.TableContainerStyle)">
+@if (mwtOnlineList.TotalRecords > 0 || mwtOnlineList.IsGridEdit || mwtOnlineList.IsMultiEdit) {
+<table id="tbl_MWTOnlinelist" class="@(mwtOnlineList.TableClass)"><!-- .ew-table -->
+<thead>
+    <tr class="ew-table-header">
+@{
+    // Header row
+    mwtOnlineList.RowType = RowType.Header;
+
+    // Render list options
+    await mwtOnlineList.RenderListOptions();
+}
+@* Render list options (header, left) *@
+@mwtOnlineList.ListOptions.RenderHeader("left")
+@if (mwtOnlineList.LinkRedirect.Visible) { // mwtOnlineList.LinkRedirect.Visible (begin)
+        <th data-name="LinkRedirect" class="@(mwtOnlineList.LinkRedirect.HeaderCellClass)"><div id="elh_MWTOnline_LinkRedirect" class="MWTOnline_LinkRedirect">@Html.Raw(mwtOnlineList.RenderFieldHeader(mwtOnlineList.LinkRedirect))</div></th>
+} @* mwtOnlineList.LinkRedirect.Visible (end) *@
+@if (mwtOnlineList.IdPlant.Visible) { // mwtOnlineList.IdPlant.Visible (begin)
+        <th data-name="IdPlant" class="@(mwtOnlineList.IdPlant.HeaderCellClass)"><div id="elh_MWTOnline_IdPlant" class="MWTOnline_IdPlant">@Html.Raw(mwtOnlineList.RenderFieldHeader(mwtOnlineList.IdPlant))</div></th>
+} @* mwtOnlineList.IdPlant.Visible (end) *@
+@if (mwtOnlineList.Status.Visible) { // mwtOnlineList.Status.Visible (begin)
+        <th data-name="Status" class="@(mwtOnlineList.Status.HeaderCellClass)"><div id="elh_MWTOnline_Status" class="MWTOnline_Status">@Html.Raw(mwtOnlineList.RenderFieldHeader(mwtOnlineList.Status))</div></th>
+} @* mwtOnlineList.Status.Visible (end) *@
+@if (mwtOnlineList.DownloadFile.Visible) { // mwtOnlineList.DownloadFile.Visible (begin)
+        <th data-name="DownloadFile" class="@(mwtOnlineList.DownloadFile.HeaderCellClass)"><div id="elh_MWTOnline_DownloadFile" class="MWTOnline_DownloadFile">@Html.Raw(mwtOnlineList.RenderFieldHeader(mwtOnlineList.DownloadFile))</div></th>
+} @* mwtOnlineList.DownloadFile.Visible (end) *@
+@if (mwtOnlineList.CreatedBy.Visible) { // mwtOnlineList.CreatedBy.Visible (begin)
+        <th data-name="CreatedBy" class="@(mwtOnlineList.CreatedBy.HeaderCellClass)"><div id="elh_MWTOnline_CreatedBy" class="MWTOnline_CreatedBy">@Html.Raw(mwtOnlineList.RenderFieldHeader(mwtOnlineList.CreatedBy))</div></th>
+} @* mwtOnlineList.CreatedBy.Visible (end) *@
+@if (mwtOnlineList.CreatedDate.Visible) { // mwtOnlineList.CreatedDate.Visible (begin)
+        <th data-name="CreatedDate" class="@(mwtOnlineList.CreatedDate.HeaderCellClass)"><div id="elh_MWTOnline_CreatedDate" class="MWTOnline_CreatedDate">@Html.Raw(mwtOnlineList.RenderFieldHeader(mwtOnlineList.CreatedDate))</div></th>
+} @* mwtOnlineList.CreatedDate.Visible (end) *@
+@if (mwtOnlineList.LastUpdatedBy.Visible) { // mwtOnlineList.LastUpdatedBy.Visible (begin)
+        <th data-name="LastUpdatedBy" class="@(mwtOnlineList.LastUpdatedBy.HeaderCellClass)"><div id="elh_MWTOnline_LastUpdatedBy" class="MWTOnline_LastUpdatedBy">@Html.Raw(mwtOnlineList.RenderFieldHeader(mwtOnlineList.LastUpdatedBy))</div></th>
+} @* mwtOnlineList.LastUpdatedBy.Visible (end) *@
+@if (mwtOnlineList.LastUpdatedDate.Visible) { // mwtOnlineList.LastUpdatedDate.Visible (begin)
+        <th data-name="LastUpdatedDate" class="@(mwtOnlineList.LastUpdatedDate.HeaderCellClass)"><div id="elh_MWTOnline_LastUpdatedDate" class="MWTOnline_LastUpdatedDate">@Html.Raw(mwtOnlineList.RenderFieldHeader(mwtOnlineList.LastUpdatedDate))</div></th>
+} @* mwtOnlineList.LastUpdatedDate.Visible (end) *@
+@if (mwtOnlineList.CompletedBy.Visible) { // mwtOnlineList.CompletedBy.Visible (begin)
+        <th data-name="CompletedBy" class="@(mwtOnlineList.CompletedBy.HeaderCellClass)"><div id="elh_MWTOnline_CompletedBy" class="MWTOnline_CompletedBy">@Html.Raw(mwtOnlineList.RenderFieldHeader(mwtOnlineList.CompletedBy))</div></th>
+} @* mwtOnlineList.CompletedBy.Visible (end) *@
+@if (mwtOnlineList.CompletedDate.Visible) { // mwtOnlineList.CompletedDate.Visible (begin)
+        <th data-name="CompletedDate" class="@(mwtOnlineList.CompletedDate.HeaderCellClass)"><div id="elh_MWTOnline_CompletedDate" class="MWTOnline_CompletedDate">@Html.Raw(mwtOnlineList.RenderFieldHeader(mwtOnlineList.CompletedDate))</div></th>
+} @* mwtOnlineList.CompletedDate.Visible (end) *@
+@* Render list options (header, right) *@
+@mwtOnlineList.ListOptions.RenderHeader("right")
+    </tr>
+</thead>
+<tbody data-page="@(mwtOnlineList.PageNumber)">
+@{
+    await mwtOnlineList.SetupGrid();
+    bool eof = mwtOnlineList.Recordset == null; // DN
+}
+@while (mwtOnlineList.RecordCount < mwtOnlineList.StopRecord || SameString(mwtOnlineList.RowIndex, "$rowindex$")) { // Begin While
+    if (!eof && !SameString(mwtOnlineList.RowIndex, "$rowindex$") &&
+        (!mwtOnlineList.IsGridAdd || mwtOnlineList.CurrentMode == "copy") &&
+        (!((mwtOnlineList.IsCopy || mwtOnlineList.IsAdd) && mwtOnlineList.RowIndex is int rowIndex && rowIndex == 0))) // DN
+        eof = !await mwtOnlineList.Recordset.ReadAsync();
+    mwtOnlineList.RecordCount++;
+    if (mwtOnlineList.RecordCount >= mwtOnlineList.StartRecord) {
+        await mwtOnlineList.SetupRow();
+    <tr @Html.Raw(mwtOnlineList.RowAttributes)>
+    @* Render list options (body, left) *@
+    @mwtOnlineList.ListOptions.RenderBody("left", mwtOnlineList.RowCount)
+    @if (mwtOnlineList.LinkRedirect.Visible) { // mwtOnlineList.LinkRedirect.Visible (begin)
+        <td data-name="LinkRedirect" @Html.Raw(mwtOnlineList.LinkRedirect.CellAttributes)>
+<span id="el@(mwtOnlineList.RowIndex == "$rowindex$" ? "$rowindex$" : mwtOnlineList.RowCount)_MWTOnline_LinkRedirect" class="el_MWTOnline_LinkRedirect">
+<span @Html.Raw(mwtOnlineList.LinkRedirect.ViewAttributes)>
+@Html.Raw(mwtOnlineList.LinkRedirect.GetViewValue())</span>
+</span>
+</td>
+    } @* mwtOnlineList.LinkRedirect.Visible (end) *@
+    @if (mwtOnlineList.IdPlant.Visible) { // mwtOnlineList.IdPlant.Visible (begin)
+        <td data-name="IdPlant" @Html.Raw(mwtOnlineList.IdPlant.CellAttributes)>
+<span id="el@(mwtOnlineList.RowIndex == "$rowindex$" ? "$rowindex$" : mwtOnlineList.RowCount)_MWTOnline_IdPlant" class="el_MWTOnline_IdPlant">
+<span @Html.Raw(mwtOnlineList.IdPlant.ViewAttributes)>
+@Html.Raw(mwtOnlineList.IdPlant.GetViewValue())</span>
+</span>
+</td>
+    } @* mwtOnlineList.IdPlant.Visible (end) *@
+    @if (mwtOnlineList.Status.Visible) { // mwtOnlineList.Status.Visible (begin)
+        <td data-name="Status" @Html.Raw(mwtOnlineList.Status.CellAttributes)>
+<span id="el@(mwtOnlineList.RowIndex == "$rowindex$" ? "$rowindex$" : mwtOnlineList.RowCount)_MWTOnline_Status" class="el_MWTOnline_Status">
+<span @Html.Raw(mwtOnlineList.Status.ViewAttributes)>
+@Html.Raw(mwtOnlineList.Status.GetViewValue())</span>
+</span>
+</td>
+    } @* mwtOnlineList.Status.Visible (end) *@
+    @if (mwtOnlineList.DownloadFile.Visible) { // mwtOnlineList.DownloadFile.Visible (begin)
+        <td data-name="DownloadFile" @Html.Raw(mwtOnlineList.DownloadFile.CellAttributes)>
+<span id="el@(mwtOnlineList.RowIndex == "$rowindex$" ? "$rowindex$" : mwtOnlineList.RowCount)_MWTOnline_DownloadFile" class="el_MWTOnline_DownloadFile">
+<span @Html.Raw(mwtOnlineList.DownloadFile.ViewAttributes)>
+@Html.Raw(mwtOnlineList.DownloadFile.GetViewValue())</span>
+</span>
+</td>
+    } @* mwtOnlineList.DownloadFile.Visible (end) *@
+    @if (mwtOnlineList.CreatedBy.Visible) { // mwtOnlineList.CreatedBy.Visible (begin)
+        <td data-name="CreatedBy" @Html.Raw(mwtOnlineList.CreatedBy.CellAttributes)>
+<span id="el@(mwtOnlineList.RowIndex == "$rowindex$" ? "$rowindex$" : mwtOnlineList.RowCount)_MWTOnline_CreatedBy" class="el_MWTOnline_CreatedBy">
+<span @Html.Raw(mwtOnlineList.CreatedBy.ViewAttributes)>
+@Html.Raw(mwtOnlineList.CreatedBy.GetViewValue())</span>
+</span>
+</td>
+    } @* mwtOnlineList.CreatedBy.Visible (end) *@
+    @if (mwtOnlineList.CreatedDate.Visible) { // mwtOnlineList.CreatedDate.Visible (begin)
+        <td data-name="CreatedDate" @Html.Raw(mwtOnlineList.CreatedDate.CellAttributes)>
+<span id="el@(mwtOnlineList.RowIndex == "$rowindex$" ? "$rowindex$" : mwtOnlineList.RowCount)_MWTOnline_CreatedDate" class="el_MWTOnline_CreatedDate">
+<span @Html.Raw(mwtOnlineList.CreatedDate.ViewAttributes)>
+@Html.Raw(mwtOnlineList.CreatedDate.GetViewValue())</span>
+</span>
+</td>
+    } @* mwtOnlineList.CreatedDate.Visible (end) *@
+    @if (mwtOnlineList.LastUpdatedBy.Visible) { // mwtOnlineList.LastUpdatedBy.Visible (begin)
+        <td data-name="LastUpdatedBy" @Html.Raw(mwtOnlineList.LastUpdatedBy.CellAttributes)>
+<span id="el@(mwtOnlineList.RowIndex == "$rowindex$" ? "$rowindex$" : mwtOnlineList.RowCount)_MWTOnline_LastUpdatedBy" class="el_MWTOnline_LastUpdatedBy">
+<span @Html.Raw(mwtOnlineList.LastUpdatedBy.ViewAttributes)>
+@Html.Raw(mwtOnlineList.LastUpdatedBy.GetViewValue())</span>
+</span>
+</td>
+    } @* mwtOnlineList.LastUpdatedBy.Visible (end) *@
+    @if (mwtOnlineList.LastUpdatedDate.Visible) { // mwtOnlineList.LastUpdatedDate.Visible (begin)
+        <td data-name="LastUpdatedDate" @Html.Raw(mwtOnlineList.LastUpdatedDate.CellAttributes)>
+<span id="el@(mwtOnlineList.RowIndex == "$rowindex$" ? "$rowindex$" : mwtOnlineList.RowCount)_MWTOnline_LastUpdatedDate" class="el_MWTOnline_LastUpdatedDate">
+<span @Html.Raw(mwtOnlineList.LastUpdatedDate.ViewAttributes)>
+@Html.Raw(mwtOnlineList.LastUpdatedDate.GetViewValue())</span>
+</span>
+</td>
+    } @* mwtOnlineList.LastUpdatedDate.Visible (end) *@
+    @if (mwtOnlineList.CompletedBy.Visible) { // mwtOnlineList.CompletedBy.Visible (begin)
+        <td data-name="CompletedBy" @Html.Raw(mwtOnlineList.CompletedBy.CellAttributes)>
+<span id="el@(mwtOnlineList.RowIndex == "$rowindex$" ? "$rowindex$" : mwtOnlineList.RowCount)_MWTOnline_CompletedBy" class="el_MWTOnline_CompletedBy">
+<span @Html.Raw(mwtOnlineList.CompletedBy.ViewAttributes)>
+@Html.Raw(mwtOnlineList.CompletedBy.GetViewValue())</span>
+</span>
+</td>
+    } @* mwtOnlineList.CompletedBy.Visible (end) *@
+    @if (mwtOnlineList.CompletedDate.Visible) { // mwtOnlineList.CompletedDate.Visible (begin)
+        <td data-name="CompletedDate" @Html.Raw(mwtOnlineList.CompletedDate.CellAttributes)>
+<span id="el@(mwtOnlineList.RowIndex == "$rowindex$" ? "$rowindex$" : mwtOnlineList.RowCount)_MWTOnline_CompletedDate" class="el_MWTOnline_CompletedDate">
+<span @Html.Raw(mwtOnlineList.CompletedDate.ViewAttributes)>
+@Html.Raw(mwtOnlineList.CompletedDate.GetViewValue())</span>
+</span>
+</td>
+    } @* mwtOnlineList.CompletedDate.Visible (end) *@
+    @* Render list options (body, right) *@
+    @mwtOnlineList.ListOptions.RenderBody("right", mwtOnlineList.RowCount)
+    </tr>
+    } @* End if *@
+
+    // Reset for template row
+    if (SameString(mwtOnlineList.RowIndex, "$rowindex$"))
+        mwtOnlineList.RowIndex = 0;
+
+    // Reset inline add/copy row
+    if ((mwtOnlineList.IsCopy || mwtOnlineList.IsAdd) && mwtOnlineList.RowIndex is int rowIndex2 && rowIndex2 == 0)
+        mwtOnlineList.RowIndex = 1;
+} @* End While *@
+</tbody>
+</table><!-- /.ew-table -->
+} @* End If TotalRecords > 0 *@
+</div><!-- /.ew-grid-middle-panel -->
+@if (Empty(mwtOnlineList.CurrentAction) && !mwtOnlineList.UseAjaxActions) {
+<input type="hidden" name="action" id="action" value="">
+}
+</form><!-- /.ew-list-form -->
+@{ mwtOnlineList.CloseRecordset(); }
+@if (!mwtOnlineList.IsExport()) {
+<div class="card-footer ew-grid-lower-panel">
+@if (!mwtOnlineList.IsGridAdd && !(mwtOnlineList.IsGridEdit && mwtOnlineList.ModalGridEdit) && !mwtOnlineList.IsMultiEdit) {
+@Html.Raw(mwtOnlineList.Pager.Render())
+}
+<div class="ew-list-other-options">
+@mwtOnlineList.OtherOptions.RenderBody("bottom")
+</div>
+</div>
+}
+</div><!-- /.ew-grid -->
+} else { // Show other options
+<div class="ew-list-other-options">
+@mwtOnlineList.OtherOptions.ForEach(opt => opt.ButtonClass = "").RenderBody()
+</div>
+}
+</div>
+<div id="ew-footer-options">
+    @mwtOnlineList.FooterOptions.RenderBody()
+</div>
+</main>
+@mwtOnlineList.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+@if (!mwtOnlineList.IsExport()) {
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("MWTOnline");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Startup script
+    var parent_url = ew.PATH_BASE;
+    let index = $('th[data-name="edit"]').index();
+    $('th[data-name="edit"]').hide();
+    $('td:nth-child(' + (index + 1) + ')').hide();
+    $('th[data-name="File"], td[data-name="File"]').css('display', 'none');
+    var steps = [
+        { number: 1, label: "MWT Online", url: '', icon: "fa-comment-dots" },
+    ];
+    var currentStep = 1;
+    $("<style>")
+        .prop("type", "text/css")
+        .html(`
+            .stepper {
+                display: flex;
+                counter-reset: step;
+            }
+            .step {
+                width: 150px;
+                text-align: center;
+                position: relative;
+            }
+            .step:not(:last-child)::after {
+                content: '';
+                position: absolute;
+                top: 20px;
+                right: -50%;
+                width: 100%;
+                height: 4px;
+                background-color: #ccc;
+                z-index: 0;
+            }
+            .step.completed:not(:last-child)::after {
+                background-color: #3c6dbd;
+            }
+            .step-icon {
+                width: 36px;
+                height: 36px;
+                line-height: 36px;
+                border-radius: 50%;
+                background: #ccc;
+                display: inline-block;
+                z-index: 1;
+                position: relative;
+                color: white;
+                font-weight: bold;
+            }
+            .step.active .step-icon {
+                background: #3c6dbd;
+            }
+            .step-label {
+                margin-top: 8px;
+                font-size: 14px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                gap: 6px;
+                color: #333;
+            }
+            .step-label {
+                color: #3c6dbd !important;
+                text-decoration: none;
+                margin: 0;
+                padding: 0;
+            }
+            .step-label-not-active {
+                color: #CCCCCC !important;
+            }
+        `)
+        .appendTo("head");
+    var $stepperWrapper = $('<div id="bread-crumb-nav" class="d-flex border-bottom border-2 pb-2"><div class="stepper"></div></div>');
+    var $stepper = $stepperWrapper.find(".stepper");
+    steps.forEach(function (step, i) {
+        var isActive = step.number === currentStep;
+        var isCompleted = step.number < currentStep;
+        var stepClass = isActive ? "active" : isCompleted ? "completed" : "";
+        var icon, labelContent, html;
+        if (isActive) {
+            icon = `<div class="step-icon bg-success">${step.number}</div>`;
+            labelContent = `<div class="step-label"><p class="text-success mb-1"><i class="fa-solid ${step.icon} me-1 text-success"></i> ${step.label}</p></div>`;
+            html = `<div class="step ${stepClass} text-success">${icon}${labelContent}</div>`;
+        } else if (isCompleted) {
+            icon = `<div class="step-icon" style="background: #3c6dbd;">${step.number}</div>`;
+            labelContent = `<div><a href="${step.url}" class="step-label"><i class="fa-solid ${step.icon} me-1"></i>${step.label}</a></div>`;
+            html = `<div class="step ${stepClass}">${icon}${labelContent}</div>`;
+        } else {
+            icon = `<div class="step-icon">${step.number}</div>`;
+            labelContent = `<div class="step-label-not-active"><p style="margin: 0;"><i class="fa-solid ${step.icon} me-1"></i>${step.label}</p></div>`;
+            html = `<div class="step ${stepClass} text-secondary">${icon}${labelContent}</div>`;
+        }
+        $stepper.append(html);
+    });
+    if ($('#bread-crumb-nav').length == 0) {
+        $(".content-header .container-fluid .row").append($stepperWrapper);
+    }
+    $(document).ready(function() {
+        $.post(parent_url + "api/LookUpList/CheckAndSetBacklog", function(res) {
+            if (res.success) {
+                console.log("Backlog check completed.");
+            }
+        });
+        const UserLevel = "@CurrentUserLevel()";
+        const idRole = '@CurrentUserInfo("Rule")?.ToString()';
+        var parrentButton = $('button.btn-primary[name="btn-submit"]');
+        var addButton = $(`
+            <button class="btn btn-success ms-2" id="btn-add-mwt">
+                <i class="fas fa-plus me-1"></i> Add New
+            </button>
+        `);
+        $(`a.btn.btn-default.ew-add-edit.ew-add[href="${parent_url}MwtOnlineAdd"]`).remove();
+        parrentButton.parent().append(addButton);
+        addButton.on('click', function (e) {
+            e.preventDefault();
+            window.location.href = parent_url+'MwtOnlineAdd';
+        });
+    }); 
+
+    // $('#tbl_MWTOnlinelist tbody tr').each(function() {
+    //     var $row = $(this);
+    //     var $fileCell = $row.find('td[data-name="File"]');
+    //     var fileName = $fileCell.text().trim();
+    //     var $downloadCell = $row.find('td[data-name="DownloadFile"] .el_MWTOnline_DownloadFile');
+
+    //     var editLink = $row.find('a.ew-row-link.ew-edit').attr('href');
+    //     var viewLink = $row.find('a.ew-row-link.ew-view').attr('href');
+    //     var urlWithId = editLink || viewLink;
+    //     var id = null;
+
+    //     if (urlWithId) {
+    //         var match = urlWithId.match(/\/(\d+)$/) || urlWithId.match(/id=(\d+)/);
+    //         if (match && match[1]) {
+    //             id = match[1];
+    //         }
+    //     }
+
+    //     if (fileName && id) {
+    //         var downloadBtn = `
+    //             <button type="button" 
+    //                     class="btn btn-sm btn-info text-white btn-download-mwt" 
+    //                     data-id="${id}"
+    //                     data-filename="${fileName}"
+    //                     title="Download ${fileName}">
+    //                 <i class="fas fa-download me-1"></i> Download
+    //             </button>`;
+    //         $downloadCell.html(downloadBtn);
+    //     } else {
+    //         $downloadCell.html('<span class="badge bg-secondary">Not Uploaded</span>');
+    //     }
+    // });
+    $(document).on('click', '.btn-download-mwt', function(e) {
+        e.preventDefault();
+        var $btn = $(this);
+        var id = $btn.data('id');
+        var originalContent = $btn.html();
+        if (!id) {
+            ew.alert("ID file tidak ditemukan.");
+            return;
+        }
+        $btn.html('<i class="fas fa-spinner fa-spin me-2"></i> Downloading...');
+        $btn.prop('disabled', true);
+        $.ajax({
+            url: parent_url + "api/LookUpList/DownloadMwtMainFile",
+            type: "GET",
+            data: { id: id },
+            xhrFields: {
+                responseType: 'blob' 
+            },
+            success: function(blob, status, xhr) {
+                var disposition = xhr.getResponseHeader('Content-Disposition');
+                if (disposition && disposition.indexOf('attachment') !== -1) {
+                    var filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
+                    var matches = filenameRegex.exec(disposition);
+                    if (matches != null && matches[1]) { 
+                        fileName = matches[1].replace(/['"]/g, '');
+                    }
+                }
+                var link = document.createElement('a');
+                var url = window.URL.createObjectURL(blob);
+                link.href = url;
+                link.download = fileName;
+                document.body.appendChild(link);
+                link.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(link);
+            },
+            error: function(xhr, status, error) {
+                console.error("Download error:", xhr);
+                var msg = "Gagal mengunduh file.";
+                if(xhr.status === 404) msg = "File tidak ditemukan di server.";
+                ew.alert(msg);
+            },
+            complete: function() {
+                $btn.html(originalContent);
+                $btn.prop('disabled', false);
+            }
+        });
+    });
+});
+</script>
+}

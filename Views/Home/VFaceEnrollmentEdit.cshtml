@@ -1,0 +1,753 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (vFaceEnrollmentEdit.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = vFaceEnrollmentEdit.UseLayout ? "_Layout" : "";
+}
+@vFaceEnrollmentEdit.ShowPageHeader()
+@vFaceEnrollmentEdit.ShowMessages()
+<main class="edit">
+<form name="fVFaceEnrollmentedit" id="fVFaceEnrollmentedit" class="@(vFaceEnrollmentEdit.FormClassName)" action="@AppPath(CurrentPageName())" method="post" novalidate autocomplete="off">
+<script>
+var currentTable = @Html.Raw(ConvertToJson(vFaceEnrollmentEdit.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { VFaceEnrollment: currentTable } });
+var currentPageID = ew.PAGE_ID = "edit";
+var currentForm;
+var fVFaceEnrollmentedit;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("fVFaceEnrollmentedit")
+        .setPageId("edit")
+
+        // Add fields
+        .setFields([
+
+            ["IdUser", [fields.IdUser.visible && fields.IdUser.required ? ew.Validators.required(fields.IdUser.caption) : null, ew.Validators.integer], fields.IdUser.isInvalid],
+            ["_Username", [fields._Username.visible && fields._Username.required ? ew.Validators.required(fields._Username.caption) : null], fields._Username.isInvalid],
+            ["LinkRedirect", [fields.LinkRedirect.visible && fields.LinkRedirect.required ? ew.Validators.required(fields.LinkRedirect.caption) : null], fields.LinkRedirect.isInvalid],
+            ["_Email", [fields._Email.visible && fields._Email.required ? ew.Validators.required(fields._Email.caption) : null], fields._Email.isInvalid],
+            ["NamaLengkap", [fields.NamaLengkap.visible && fields.NamaLengkap.required ? ew.Validators.required(fields.NamaLengkap.caption) : null], fields.NamaLengkap.isInvalid],
+            ["DownloadFace", [fields.DownloadFace.visible && fields.DownloadFace.required ? ew.Validators.required(fields.DownloadFace.caption) : null], fields.DownloadFace.isInvalid],
+            ["IdPosition", [fields.IdPosition.visible && fields.IdPosition.required ? ew.Validators.required(fields.IdPosition.caption) : null, ew.Validators.integer], fields.IdPosition.isInvalid],
+            ["Jabatan", [fields.Jabatan.visible && fields.Jabatan.required ? ew.Validators.required(fields.Jabatan.caption) : null], fields.Jabatan.isInvalid],
+            ["Face", [fields.Face.visible && fields.Face.required ? ew.Validators.required(fields.Face.caption) : null], fields.Face.isInvalid],
+            ["TanggalInputFace", [fields.TanggalInputFace.visible && fields.TanggalInputFace.required ? ew.Validators.required(fields.TanggalInputFace.caption) : null, ew.Validators.datetime(fields.TanggalInputFace.clientFormatPattern)], fields.TanggalInputFace.isInvalid],
+            ["UserInputFace", [fields.UserInputFace.visible && fields.UserInputFace.required ? ew.Validators.required(fields.UserInputFace.caption) : null], fields.UserInputFace.isInvalid],
+            ["AzurePersonId", [fields.AzurePersonId.visible && fields.AzurePersonId.required ? ew.Validators.required(fields.AzurePersonId.caption) : null, ew.Validators.guid], fields.AzurePersonId.isInvalid]
+        ])
+
+        // Form_CustomValidate
+        .setCustomValidate(
+            function(fobj) { // DO NOT CHANGE THIS LINE!
+                    // Your custom validation code here, return false if invalid.
+                    return true;
+                }
+        )
+
+        // Use JavaScript validation or not
+        .setValidateRequired(ew.CLIENT_VALIDATE)
+
+        // Dynamic selection lists
+        .setLists({
+            "IdPosition": @Html.Raw(vFaceEnrollmentEdit.IdPosition.ToClientList(vFaceEnrollmentEdit)),
+        })
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Client script
+    const IdUser = "@vFaceEnrollment.IdUser.CurrentValue";
+    const Username = "@vFaceEnrollment._Username.CurrentValue";
+    const AzurePersonId = "@vFaceEnrollment.AzurePersonId.CurrentValue";
+    const parent_url = ew.PATH_BASE;
+    $("#FaceInput").on("change", function(e) {
+        const file = $(this)[0].files[0];
+        $("#FaceInput-Name").val(file.name);
+    });
+    $("#FaceInput-Name").on("click", function (e) {
+        $("#FaceInput").trigger("click");
+    });
+    const selfieTrigger = $("#selfie-trigger");
+    const selfiePreview = $("#selfie-preview");
+    const cameraView = $("#camera-view");
+    const selfieVideo = document.getElementById("selfie-video");
+    const captureButton = $("#capture-button");
+    const cancelCaptureButton = $("#cancel-capture-button");
+    let selfieBlob = null;
+    let stream = null;
+    selfieTrigger.on("click", async function() {
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: 'user' }
+                });
+                cameraView.show();
+                selfieVideo.srcObject = stream;
+                selfieTrigger.hide();
+            } catch (error) {
+                console.error("Error accessing camera:", error);
+                ew.alert("Could not access the camera. Please ensure you are on HTTPS and have granted camera permissions.");
+            }
+        } else {
+            ew.alert("Your browser does not support camera access.");
+        }
+    });
+    captureButton.on("click", function() {
+        const canvas = document.createElement("canvas");
+        canvas.width = selfieVideo.videoWidth;
+        canvas.height = selfieVideo.videoHeight;
+        const context = canvas.getContext("2d");
+        context.drawImage(selfieVideo, 0, 0, canvas.width, canvas.height);
+        canvas.toBlob(function(blob) {
+            selfieBlob = blob;
+            const previewUrl = URL.createObjectURL(blob);
+            selfiePreview.attr("src", previewUrl).show();
+            stopCamera();
+            formInputsToDisable.prop("disabled", false).css("background-color", "");
+            $("#fileName").parent().css("cursor", "pointer").on("click", function() {
+                $("#fileInput").trigger("click");
+            });
+            ew.alert("Verification selfie captured successfully! You can now fill out the rest of the form.");
+        }, "image/jpeg", 0.9);
+    });
+    cancelCaptureButton.on("click", function() {
+        stopCamera();
+    });
+    function stopCamera() {
+        if (stream) {
+            stream.getTracks().forEach(track => track.stop());
+        }
+        cameraView.hide();
+        selfieTrigger.show();
+    }
+    $(document).on('click', '#btn-cancel-custom', function () {
+        window.location.href = `${parent_url}VFaceEnrollmentList`;
+    });
+    $(document).on('click', '#btn-cancel-modal', function () {
+        $("#TestFace").modal("hide");
+    });
+    $(document).on('click', '#btn-test-face', function () {
+        $("#TestFace").modal("show");
+    });
+    $(document).on('click', '#btn-submit-custom', function () {
+        const file = $("#FaceInput")[0].files[0];
+        if (!file) {
+            ew.alert("Face picture is required!");
+            return;
+        }
+        showLoading();
+        const today = new Date();
+        const formattedDate =
+            today.getFullYear() + "/" +
+            String(today.getMonth() + 1).padStart(2, '0') + "/" +
+            String(today.getDate()).padStart(2, '0') + " " +
+            String(today.getHours()).padStart(2, '0') + ":" +
+            String(today.getMinutes()).padStart(2, '0') + ":" +
+            String(today.getSeconds()).padStart(2, '0');
+        let formData = new FormData();
+        formData.append("IdUser", IdUser);
+        formData.append("Username", Username);
+        formData.append("Face", file);
+        formData.append("Tanggal", formattedDate);
+        $.ajax({
+            url: parent_url + "api/LookUpList/FaceEnrollment",
+            type: "POST",
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(rs){
+                hideLoading();
+                if (rs.success) {
+                    ew.alert({
+                        text: `${rs.message}, ingin test wajah yang baru saja didaftarkan?`,
+                        showCancelButton: true,
+                        confirmButtonText: 'Yes',
+                        cancelButtonText: 'No',
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            $("#TestFace").modal("show");
+                        } else if (result.dismiss === 'cancel') {
+                            location.reload();
+                        }
+                    });
+                } else {
+                    ew.alert(rs.message);
+                }
+            },
+            error: function(xhr){
+                hideLoading();
+                ew.alert("Upload gagal: " + xhr.responseText);
+            }
+        });
+    });
+    $(document).on('click', '#btn-submit-modal', function () {
+        if (!selfieBlob) {
+            ew.alert("Face picture is required!");
+            return;
+        }
+        showLoading();
+        let formData = new FormData();
+        formData.append("IdUser", IdUser);
+        formData.append("Username", Username);
+        formData.append("Face", selfieBlob);
+        $.ajax({
+            url: parent_url + "api/LookUpList/TestFace",
+            type: "POST",
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(rs){
+                hideLoading();
+                ew.alert(rs.message).then((result) => {
+                    if (result.isConfirmed) {
+                        location.reload();
+                    }
+                });
+            },
+            error: function(xhr){
+                hideLoading();
+                ew.alert("Upload gagal: " + xhr.responseText);
+            }
+        });
+    });
+    $(document).on('click', '.download-face', function (e) {
+        e.preventDefault();
+        const url = $(this).data('url');
+        if (!url) {
+            ew.alert("URL dokumen tidak ditemukan.");
+            return;
+        }
+        $.ajax({
+            url: parent_url + 'api/LookUpList/DownloadFaceEnrollment',
+            type: 'GET',
+            data: { FileName: url },
+            xhrFields: {
+                responseType: 'blob'
+            },
+            beforeSend: function () {
+                showLoading();
+            },
+            success: function (response, status, xhr) {
+                const disposition = xhr.getResponseHeader('Content-Disposition');
+                let fileName = "download_file";
+                if (disposition) {
+                    const fileNameMatch = disposition.match(/filename="?([^";]+)"?/);
+                    if (fileNameMatch && fileNameMatch[1]) {
+                        fileName = decodeURIComponent(fileNameMatch[1]);
+                    }
+                    const utf8FileNameMatch = disposition.match(/filename\*\s*=\s*UTF-8''([^;]+)/);
+                    if (utf8FileNameMatch && utf8FileNameMatch[1]) {
+                        fileName = decodeURIComponent(utf8FileNameMatch[1]);
+                    }
+                }
+                const blobUrl = window.URL.createObjectURL(response);
+                const a = document.createElement('a');
+                a.href = blobUrl;
+                a.download = fileName;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(blobUrl);
+                ew.alert("Download berhasil!");
+            },
+            error: function (xhr, status, error) {
+                if (xhr.status === 404) {
+                    ew.alert("File tidak ditemukan di server.");
+                } else if (xhr.status === 500) {
+                    ew.alert("Terjadi kesalahan server. Coba lagi nanti.");
+                } else {
+                    ew.alert("Gagal mendownload file. Error: " + xhr.responseText);
+                }
+            },
+            complete: function () {
+                hideLoading();
+            }
+        });
+    });
+    $(document).on('click', '#btn-delete-face', function () {
+        if (!AzurePersonId || AzurePersonId === "" || AzurePersonId === "00000000-0000-0000-0000-000000000000") {
+            ew.alert("This user has not been enrolled yet!");
+            return;
+        }
+        showLoading();
+        const today = new Date();
+        const formattedDate =
+            today.getFullYear() + "/" +
+            String(today.getMonth() + 1).padStart(2, '0') + "/" +
+            String(today.getDate()).padStart(2, '0') + " " +
+            String(today.getHours()).padStart(2, '0') + ":" +
+            String(today.getMinutes()).padStart(2, '0') + ":" +
+            String(today.getSeconds()).padStart(2, '0');
+        let formData = new FormData();
+        formData.append("IdUser", IdUser);
+        formData.append("Username", Username);
+        formData.append("AzurePersonId", AzurePersonId);
+        formData.append("Tanggal", formattedDate);
+        $.ajax({
+            url: parent_url + "api/LookUpList/DeleteFaceEnrollment",
+            type: "POST",
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(rs){
+                hideLoading();
+                if (rs.success) {
+                    window.location.href = `${parent_url}VFaceEnrollmentList`;
+                } else {
+                    ew.alert(rs.message);
+                }
+            },
+            error: function(xhr){
+                hideLoading();
+                let errorMessage = "Penghapusan gagal: Terjadi kesalahan."; 
+                if (xhr.responseText) {
+                    try {
+                        const response = JSON.parse(xhr.responseText);
+                        if (response && response.message) {
+                            errorMessage = response.message; 
+                        } else {
+                            errorMessage = xhr.responseText; 
+                        }
+                    } catch (e) {
+                        errorMessage = xhr.responseText; 
+                    }
+                }
+                ew.alert(errorMessage);
+            }
+        });
+    });
+    const userLevel = "@CurrentUserLevel()"; 
+    const userRule = "@CurrentUserInfo("Rule")"; 
+    const isAdmin = userLevel === "-1";
+    const isRegion = userLevel === "4";
+    const isOH = userLevel === "2" && userRule === "10";
+    if (!(isAdmin || isOH)) {
+        console.log("Hiding Face Enrollment buttons for UserLevel:", userLevel, "UserRule:", userRule); 
+        $("#btn-submit-custom").hide(); 
+        $("#btn-delete-face").hide(); 
+        $("#btn-test-face").hide();  
+        $("#btn-cancel-custom").hide(); 
+        $("#FaceInput").prop("disabled", true); 
+        $("#FaceInput-Name")
+            .prop("disabled", true)
+            .css("cursor", "not-allowed")
+            .css("background-color", "#e9ecef") 
+            .off("click"); 
+        $(".file-input-wrapper label.btn") 
+            .addClass("disabled") 
+            .css("pointer-events", "none");
+    }
+    if (isOH){
+        $("#btn-delete-face").hide(); 
+    }
+    if (isRegion){
+        $("#btn-delete-face").show(); 
+    }
+});
+</script>
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+<input type="hidden" name="action" id="action" value="update">
+<input type="hidden" name="modal" value="@ConvertToInt(vFaceEnrollmentEdit.IsModal)">
+@if (IsJsonResponse()) {
+<input type="hidden" name="json" value="1">
+}
+<input type="hidden" name="@(vFaceEnrollmentEdit.OldKeyName)" value="@Html.Raw(vFaceEnrollmentEdit.OldKey)">
+<div class="ew-edit-div d-none"><!-- page* -->
+@if (vFaceEnrollmentEdit.IdUser.Visible) { // vFaceEnrollmentEdit.IdUser.Visible (begin)
+    <div id="r_IdUser" @Html.Raw(vFaceEnrollmentEdit.IdUser.RowAttributes)>
+        <label id="elh_VFaceEnrollment_IdUser" for="x_IdUser" class="@(vFaceEnrollmentEdit.LeftColumnClass)"><template id="tpc_VFaceEnrollment_IdUser">@Html.Raw(vFaceEnrollmentEdit.IdUser.Caption)@Html.Raw(vFaceEnrollmentEdit.IdUser.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(vFaceEnrollmentEdit.RightColumnClass)"><div @Html.Raw(vFaceEnrollmentEdit.IdUser.CellAttributes)>
+<template id="tpx_VFaceEnrollment_IdUser"><span id="el_VFaceEnrollment_IdUser">
+<input type="@(vFaceEnrollmentEdit.IdUser.InputTextType)" name="x_IdUser" id="x_IdUser" data-table="VFaceEnrollment" data-field="x_IdUser" value="@Html.Raw(vFaceEnrollmentEdit.IdUser.EditValue)" size="30" placeholder="@Html.Raw(HtmlEncode(vFaceEnrollmentEdit.IdUser.PlaceHolder))" data-format-pattern="@(vFaceEnrollmentEdit.IdUser.FormatPattern)"@Html.Raw(vFaceEnrollmentEdit.IdUser.EditAttributes) aria-describedby="x_IdUser_help">
+@Html.Raw(vFaceEnrollmentEdit.IdUser.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(vFaceEnrollmentEdit.IdUser.GetErrorMessage())</div>
+<input type="hidden" data-table="VFaceEnrollment" data-field="x_IdUser" data-hidden="1" data-old name="o_IdUser" id="o_IdUser" value="@Html.Raw(HtmlEncode(vFaceEnrollmentEdit.IdUser.OldValue ?? vFaceEnrollmentEdit.IdUser.CurrentValue))">
+</span></template>
+</div></div>
+    </div>
+} @* vFaceEnrollmentEdit.IdUser.Visible (end) *@
+@if (vFaceEnrollmentEdit._Username.Visible) { // vFaceEnrollmentEdit._Username.Visible (begin)
+    <div id="r__Username" @Html.Raw(vFaceEnrollmentEdit._Username.RowAttributes)>
+        <label id="elh_VFaceEnrollment__Username" for="x__Username" class="@(vFaceEnrollmentEdit.LeftColumnClass)"><template id="tpc_VFaceEnrollment__Username">@Html.Raw(vFaceEnrollmentEdit._Username.Caption)@Html.Raw(vFaceEnrollmentEdit._Username.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(vFaceEnrollmentEdit.RightColumnClass)"><div @Html.Raw(vFaceEnrollmentEdit._Username.CellAttributes)>
+<template id="tpx_VFaceEnrollment__Username"><span id="el_VFaceEnrollment__Username">
+<span @Html.Raw(vFaceEnrollmentEdit._Username.ViewAttributes)>
+<input type="text" readonly class="form-control-plaintext" value="@Html.Raw(RemoveHtml(ConvertToString(vFaceEnrollmentEdit._Username.EditValue)))"></span>
+<input type="hidden" data-table="VFaceEnrollment" data-field="x__Username" data-hidden="1" name="x__Username" id="x__Username" value="@Html.Raw(HtmlEncode(vFaceEnrollmentEdit._Username.CurrentValue))">
+</span></template>
+</div></div>
+    </div>
+} @* vFaceEnrollmentEdit._Username.Visible (end) *@
+@if (vFaceEnrollmentEdit.LinkRedirect.Visible) { // vFaceEnrollmentEdit.LinkRedirect.Visible (begin)
+    <div id="r_LinkRedirect" @Html.Raw(vFaceEnrollmentEdit.LinkRedirect.RowAttributes)>
+        <label id="elh_VFaceEnrollment_LinkRedirect" for="x_LinkRedirect" class="@(vFaceEnrollmentEdit.LeftColumnClass)"><template id="tpc_VFaceEnrollment_LinkRedirect">@Html.Raw(vFaceEnrollmentEdit.LinkRedirect.Caption)@Html.Raw(vFaceEnrollmentEdit.LinkRedirect.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(vFaceEnrollmentEdit.RightColumnClass)"><div @Html.Raw(vFaceEnrollmentEdit.LinkRedirect.CellAttributes)>
+<template id="tpx_VFaceEnrollment_LinkRedirect"><span id="el_VFaceEnrollment_LinkRedirect">
+<input type="@(vFaceEnrollmentEdit.LinkRedirect.InputTextType)" name="x_LinkRedirect" id="x_LinkRedirect" data-table="VFaceEnrollment" data-field="x_LinkRedirect" value="@Html.Raw(vFaceEnrollmentEdit.LinkRedirect.EditValue)" size="30" maxlength="133" placeholder="@Html.Raw(HtmlEncode(vFaceEnrollmentEdit.LinkRedirect.PlaceHolder))" data-format-pattern="@(vFaceEnrollmentEdit.LinkRedirect.FormatPattern)"@Html.Raw(vFaceEnrollmentEdit.LinkRedirect.EditAttributes) aria-describedby="x_LinkRedirect_help">
+@Html.Raw(vFaceEnrollmentEdit.LinkRedirect.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(vFaceEnrollmentEdit.LinkRedirect.GetErrorMessage())</div>
+</span></template>
+</div></div>
+    </div>
+} @* vFaceEnrollmentEdit.LinkRedirect.Visible (end) *@
+@if (vFaceEnrollmentEdit._Email.Visible) { // vFaceEnrollmentEdit._Email.Visible (begin)
+    <div id="r__Email" @Html.Raw(vFaceEnrollmentEdit._Email.RowAttributes)>
+        <label id="elh_VFaceEnrollment__Email" for="x__Email" class="@(vFaceEnrollmentEdit.LeftColumnClass)"><template id="tpc_VFaceEnrollment__Email">@Html.Raw(vFaceEnrollmentEdit._Email.Caption)@Html.Raw(vFaceEnrollmentEdit._Email.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(vFaceEnrollmentEdit.RightColumnClass)"><div @Html.Raw(vFaceEnrollmentEdit._Email.CellAttributes)>
+<template id="tpx_VFaceEnrollment__Email"><span id="el_VFaceEnrollment__Email">
+<span @Html.Raw(vFaceEnrollmentEdit._Email.ViewAttributes)>
+<input type="text" readonly class="form-control-plaintext" value="@Html.Raw(RemoveHtml(ConvertToString(vFaceEnrollmentEdit._Email.EditValue)))"></span>
+<input type="hidden" data-table="VFaceEnrollment" data-field="x__Email" data-hidden="1" name="x__Email" id="x__Email" value="@Html.Raw(HtmlEncode(vFaceEnrollmentEdit._Email.CurrentValue))">
+</span></template>
+</div></div>
+    </div>
+} @* vFaceEnrollmentEdit._Email.Visible (end) *@
+@if (vFaceEnrollmentEdit.NamaLengkap.Visible) { // vFaceEnrollmentEdit.NamaLengkap.Visible (begin)
+    <div id="r_NamaLengkap" @Html.Raw(vFaceEnrollmentEdit.NamaLengkap.RowAttributes)>
+        <label id="elh_VFaceEnrollment_NamaLengkap" for="x_NamaLengkap" class="@(vFaceEnrollmentEdit.LeftColumnClass)"><template id="tpc_VFaceEnrollment_NamaLengkap">@Html.Raw(vFaceEnrollmentEdit.NamaLengkap.Caption)@Html.Raw(vFaceEnrollmentEdit.NamaLengkap.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(vFaceEnrollmentEdit.RightColumnClass)"><div @Html.Raw(vFaceEnrollmentEdit.NamaLengkap.CellAttributes)>
+<template id="tpx_VFaceEnrollment_NamaLengkap"><span id="el_VFaceEnrollment_NamaLengkap">
+<span @Html.Raw(vFaceEnrollmentEdit.NamaLengkap.ViewAttributes)>
+<input type="text" readonly class="form-control-plaintext" value="@Html.Raw(RemoveHtml(ConvertToString(vFaceEnrollmentEdit.NamaLengkap.EditValue)))"></span>
+<input type="hidden" data-table="VFaceEnrollment" data-field="x_NamaLengkap" data-hidden="1" name="x_NamaLengkap" id="x_NamaLengkap" value="@Html.Raw(HtmlEncode(vFaceEnrollmentEdit.NamaLengkap.CurrentValue))">
+</span></template>
+</div></div>
+    </div>
+} @* vFaceEnrollmentEdit.NamaLengkap.Visible (end) *@
+@if (vFaceEnrollmentEdit.DownloadFace.Visible) { // vFaceEnrollmentEdit.DownloadFace.Visible (begin)
+    <div id="r_DownloadFace" @Html.Raw(vFaceEnrollmentEdit.DownloadFace.RowAttributes)>
+        <label id="elh_VFaceEnrollment_DownloadFace" for="x_DownloadFace" class="@(vFaceEnrollmentEdit.LeftColumnClass)"><template id="tpc_VFaceEnrollment_DownloadFace">@Html.Raw(vFaceEnrollmentEdit.DownloadFace.Caption)@Html.Raw(vFaceEnrollmentEdit.DownloadFace.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(vFaceEnrollmentEdit.RightColumnClass)"><div @Html.Raw(vFaceEnrollmentEdit.DownloadFace.CellAttributes)>
+<template id="tpx_VFaceEnrollment_DownloadFace"><span id="el_VFaceEnrollment_DownloadFace">
+<span @Html.Raw(vFaceEnrollmentEdit.DownloadFace.ViewAttributes)>
+@Html.Raw(vFaceEnrollmentEdit.DownloadFace.EditValue)</span>
+<input type="hidden" data-table="VFaceEnrollment" data-field="x_DownloadFace" data-hidden="1" name="x_DownloadFace" id="x_DownloadFace" value="@Html.Raw(HtmlEncode(vFaceEnrollmentEdit.DownloadFace.CurrentValue))">
+</span></template>
+</div></div>
+    </div>
+} @* vFaceEnrollmentEdit.DownloadFace.Visible (end) *@
+@if (vFaceEnrollmentEdit.IdPosition.Visible) { // vFaceEnrollmentEdit.IdPosition.Visible (begin)
+    <div id="r_IdPosition" @Html.Raw(vFaceEnrollmentEdit.IdPosition.RowAttributes)>
+        <label id="elh_VFaceEnrollment_IdPosition" class="@(vFaceEnrollmentEdit.LeftColumnClass)"><template id="tpc_VFaceEnrollment_IdPosition">@Html.Raw(vFaceEnrollmentEdit.IdPosition.Caption)@Html.Raw(vFaceEnrollmentEdit.IdPosition.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(vFaceEnrollmentEdit.RightColumnClass)"><div @Html.Raw(vFaceEnrollmentEdit.IdPosition.CellAttributes)>
+<template id="tpx_VFaceEnrollment_IdPosition"><span id="el_VFaceEnrollment_IdPosition">
+<span>@{
+    if (IsRTL) {
+        vFaceEnrollmentEdit.IdPosition.EditAttrs["dir"] = "rtl";
+    }
+}</span>
+<span id="as_x_IdPosition" class="ew-auto-suggest">
+    <input type="text" class="form-control" name="sv_x_IdPosition" id="sv_x_IdPosition" value="@(RemoveHtml(ConvertToString(vFaceEnrollmentEdit.IdPosition.EditValue)))" autocomplete="off" size="30" placeholder="@Html.Raw(HtmlEncode(vFaceEnrollmentEdit.IdPosition.PlaceHolder))" data-placeholder="@Html.Raw(HtmlEncode(vFaceEnrollmentEdit.IdPosition.PlaceHolder))" data-format-pattern="@(vFaceEnrollmentEdit.IdPosition.FormatPattern)" @Html.Raw(vFaceEnrollmentEdit.IdPosition.EditAttributes) aria-describedby="x_IdPosition_help">
+</span>
+<selection-list hidden class="form-control" data-table="VFaceEnrollment" data-field="x_IdPosition" data-input="sv_x_IdPosition" data-value-separator="@(vFaceEnrollmentEdit.IdPosition.DisplayValueSeparatorAttribute)" name="x_IdPosition" id="x_IdPosition" value="@(HtmlEncode(vFaceEnrollmentEdit.IdPosition.CurrentValue))"></selection-list>
+@Html.Raw(vFaceEnrollmentEdit.IdPosition.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(vFaceEnrollmentEdit.IdPosition.GetErrorMessage())</div>
+<script>
+loadjs.ready(["fVFaceEnrollmentedit"], function() {
+    fVFaceEnrollmentedit.createAutoSuggest(Object.assign({"id":"x_IdPosition","forceSelect":false}, { lookupAllDisplayFields: @(vFaceEnrollmentEdit.IdPosition.Lookup.LookupAllDisplayFields ? "true" : "false") }, ew.vars.tables.VFaceEnrollment.fields.IdPosition.autoSuggestOptions));
+});
+</script>
+@Html.Raw(vFaceEnrollmentEdit.IdPosition.Lookup.GetParamTag(vFaceEnrollmentEdit, "p_x_IdPosition"))
+</span></template>
+</div></div>
+    </div>
+} @* vFaceEnrollmentEdit.IdPosition.Visible (end) *@
+@if (vFaceEnrollmentEdit.Jabatan.Visible) { // vFaceEnrollmentEdit.Jabatan.Visible (begin)
+    <div id="r_Jabatan" @Html.Raw(vFaceEnrollmentEdit.Jabatan.RowAttributes)>
+        <label id="elh_VFaceEnrollment_Jabatan" for="x_Jabatan" class="@(vFaceEnrollmentEdit.LeftColumnClass)"><template id="tpc_VFaceEnrollment_Jabatan">@Html.Raw(vFaceEnrollmentEdit.Jabatan.Caption)@Html.Raw(vFaceEnrollmentEdit.Jabatan.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(vFaceEnrollmentEdit.RightColumnClass)"><div @Html.Raw(vFaceEnrollmentEdit.Jabatan.CellAttributes)>
+<template id="tpx_VFaceEnrollment_Jabatan"><span id="el_VFaceEnrollment_Jabatan">
+<input type="@(vFaceEnrollmentEdit.Jabatan.InputTextType)" name="x_Jabatan" id="x_Jabatan" data-table="VFaceEnrollment" data-field="x_Jabatan" value="@Html.Raw(vFaceEnrollmentEdit.Jabatan.EditValue)" size="30" maxlength="100" placeholder="@Html.Raw(HtmlEncode(vFaceEnrollmentEdit.Jabatan.PlaceHolder))" data-format-pattern="@(vFaceEnrollmentEdit.Jabatan.FormatPattern)"@Html.Raw(vFaceEnrollmentEdit.Jabatan.EditAttributes) aria-describedby="x_Jabatan_help">
+@Html.Raw(vFaceEnrollmentEdit.Jabatan.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(vFaceEnrollmentEdit.Jabatan.GetErrorMessage())</div>
+</span></template>
+</div></div>
+    </div>
+} @* vFaceEnrollmentEdit.Jabatan.Visible (end) *@
+@if (vFaceEnrollmentEdit.Face.Visible) { // vFaceEnrollmentEdit.Face.Visible (begin)
+    <div id="r_Face" @Html.Raw(vFaceEnrollmentEdit.Face.RowAttributes)>
+        <label id="elh_VFaceEnrollment_Face" for="x_Face" class="@(vFaceEnrollmentEdit.LeftColumnClass)"><template id="tpc_VFaceEnrollment_Face">@Html.Raw(vFaceEnrollmentEdit.Face.Caption)@Html.Raw(vFaceEnrollmentEdit.Face.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(vFaceEnrollmentEdit.RightColumnClass)"><div @Html.Raw(vFaceEnrollmentEdit.Face.CellAttributes)>
+<template id="tpx_VFaceEnrollment_Face"><span id="el_VFaceEnrollment_Face">
+<input type="@(vFaceEnrollmentEdit.Face.InputTextType)" name="x_Face" id="x_Face" data-table="VFaceEnrollment" data-field="x_Face" value="@Html.Raw(vFaceEnrollmentEdit.Face.EditValue)" size="30" maxlength="255" placeholder="@Html.Raw(HtmlEncode(vFaceEnrollmentEdit.Face.PlaceHolder))" data-format-pattern="@(vFaceEnrollmentEdit.Face.FormatPattern)"@Html.Raw(vFaceEnrollmentEdit.Face.EditAttributes) aria-describedby="x_Face_help">
+@Html.Raw(vFaceEnrollmentEdit.Face.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(vFaceEnrollmentEdit.Face.GetErrorMessage())</div>
+</span></template>
+</div></div>
+    </div>
+} @* vFaceEnrollmentEdit.Face.Visible (end) *@
+@if (vFaceEnrollmentEdit.TanggalInputFace.Visible) { // vFaceEnrollmentEdit.TanggalInputFace.Visible (begin)
+    <div id="r_TanggalInputFace" @Html.Raw(vFaceEnrollmentEdit.TanggalInputFace.RowAttributes)>
+        <label id="elh_VFaceEnrollment_TanggalInputFace" for="x_TanggalInputFace" class="@(vFaceEnrollmentEdit.LeftColumnClass)"><template id="tpc_VFaceEnrollment_TanggalInputFace">@Html.Raw(vFaceEnrollmentEdit.TanggalInputFace.Caption)@Html.Raw(vFaceEnrollmentEdit.TanggalInputFace.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(vFaceEnrollmentEdit.RightColumnClass)"><div @Html.Raw(vFaceEnrollmentEdit.TanggalInputFace.CellAttributes)>
+<template id="tpx_VFaceEnrollment_TanggalInputFace"><span id="el_VFaceEnrollment_TanggalInputFace">
+<input type="@(vFaceEnrollmentEdit.TanggalInputFace.InputTextType)" name="x_TanggalInputFace" id="x_TanggalInputFace" data-table="VFaceEnrollment" data-field="x_TanggalInputFace" value="@Html.Raw(vFaceEnrollmentEdit.TanggalInputFace.EditValue)" placeholder="@Html.Raw(HtmlEncode(vFaceEnrollmentEdit.TanggalInputFace.PlaceHolder))" data-format-pattern="@(vFaceEnrollmentEdit.TanggalInputFace.FormatPattern)"@Html.Raw(vFaceEnrollmentEdit.TanggalInputFace.EditAttributes) aria-describedby="x_TanggalInputFace_help">
+@Html.Raw(vFaceEnrollmentEdit.TanggalInputFace.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(vFaceEnrollmentEdit.TanggalInputFace.GetErrorMessage())</div>
+@if (!vFaceEnrollmentEdit.TanggalInputFace.ReadOnly && !vFaceEnrollmentEdit.TanggalInputFace.Disabled && !vFaceEnrollmentEdit.TanggalInputFace.EditAttrs.Is("readonly") && !vFaceEnrollmentEdit.TanggalInputFace.EditAttrs.Is("disabled")) {
+<script>
+loadjs.ready(["fVFaceEnrollmentedit", "datetimepicker"], function () {
+    let format = "@Html.Raw(DateFormat(9))", // DN
+        options = {
+                localization: {
+                    locale: ew.LANGUAGE_ID + "-u-nu-" + ew.getNumberingSystem(),
+                    hourCycle: format.match(/H/) ? "h24" : "h12",
+                    format,
+                    ...ew.language.phrase("datetimepicker")
+                },
+                display: {
+                    icons: {
+                        previous: ew.IS_RTL ? "fa-solid fa-chevron-right" : "fa-solid fa-chevron-left",
+                        next: ew.IS_RTL ? "fa-solid fa-chevron-left" : "fa-solid fa-chevron-right"
+                    },
+                    components: {
+                        clock: !!format.match(/h/i) || !!format.match(/m/) || !!format.match(/s/i),
+                        hours: !!format.match(/h/i),
+                        minutes: !!format.match(/m/),
+                        seconds: !!format.match(/s/i)
+                    },
+                theme: ew.getPreferredTheme()
+                }
+            };
+    ew.createDateTimePicker("fVFaceEnrollmentedit", "x_TanggalInputFace", ew.deepAssign({"useCurrent":false,"display":{"sideBySide":false}}, options));
+});
+</script>
+}
+</span></template>
+</div></div>
+    </div>
+} @* vFaceEnrollmentEdit.TanggalInputFace.Visible (end) *@
+@if (vFaceEnrollmentEdit.UserInputFace.Visible) { // vFaceEnrollmentEdit.UserInputFace.Visible (begin)
+    <div id="r_UserInputFace" @Html.Raw(vFaceEnrollmentEdit.UserInputFace.RowAttributes)>
+        <label id="elh_VFaceEnrollment_UserInputFace" for="x_UserInputFace" class="@(vFaceEnrollmentEdit.LeftColumnClass)"><template id="tpc_VFaceEnrollment_UserInputFace">@Html.Raw(vFaceEnrollmentEdit.UserInputFace.Caption)@Html.Raw(vFaceEnrollmentEdit.UserInputFace.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(vFaceEnrollmentEdit.RightColumnClass)"><div @Html.Raw(vFaceEnrollmentEdit.UserInputFace.CellAttributes)>
+<template id="tpx_VFaceEnrollment_UserInputFace"><span id="el_VFaceEnrollment_UserInputFace">
+<input type="@(vFaceEnrollmentEdit.UserInputFace.InputTextType)" name="x_UserInputFace" id="x_UserInputFace" data-table="VFaceEnrollment" data-field="x_UserInputFace" value="@Html.Raw(vFaceEnrollmentEdit.UserInputFace.EditValue)" size="30" maxlength="255" placeholder="@Html.Raw(HtmlEncode(vFaceEnrollmentEdit.UserInputFace.PlaceHolder))" data-format-pattern="@(vFaceEnrollmentEdit.UserInputFace.FormatPattern)"@Html.Raw(vFaceEnrollmentEdit.UserInputFace.EditAttributes) aria-describedby="x_UserInputFace_help">
+@Html.Raw(vFaceEnrollmentEdit.UserInputFace.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(vFaceEnrollmentEdit.UserInputFace.GetErrorMessage())</div>
+</span></template>
+</div></div>
+    </div>
+} @* vFaceEnrollmentEdit.UserInputFace.Visible (end) *@
+@if (vFaceEnrollmentEdit.AzurePersonId.Visible) { // vFaceEnrollmentEdit.AzurePersonId.Visible (begin)
+    <div id="r_AzurePersonId" @Html.Raw(vFaceEnrollmentEdit.AzurePersonId.RowAttributes)>
+        <label id="elh_VFaceEnrollment_AzurePersonId" for="x_AzurePersonId" class="@(vFaceEnrollmentEdit.LeftColumnClass)"><template id="tpc_VFaceEnrollment_AzurePersonId">@Html.Raw(vFaceEnrollmentEdit.AzurePersonId.Caption)@Html.Raw(vFaceEnrollmentEdit.AzurePersonId.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(vFaceEnrollmentEdit.RightColumnClass)"><div @Html.Raw(vFaceEnrollmentEdit.AzurePersonId.CellAttributes)>
+<template id="tpx_VFaceEnrollment_AzurePersonId"><span id="el_VFaceEnrollment_AzurePersonId">
+<input type="@(vFaceEnrollmentEdit.AzurePersonId.InputTextType)" name="x_AzurePersonId" id="x_AzurePersonId" data-table="VFaceEnrollment" data-field="x_AzurePersonId" value="@Html.Raw(vFaceEnrollmentEdit.AzurePersonId.EditValue)" size="38" maxlength="38" placeholder="@Html.Raw(HtmlEncode(vFaceEnrollmentEdit.AzurePersonId.PlaceHolder))" data-format-pattern="@(vFaceEnrollmentEdit.AzurePersonId.FormatPattern)"@Html.Raw(vFaceEnrollmentEdit.AzurePersonId.EditAttributes) aria-describedby="x_AzurePersonId_help">
+@Html.Raw(vFaceEnrollmentEdit.AzurePersonId.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(vFaceEnrollmentEdit.AzurePersonId.GetErrorMessage())</div>
+</span></template>
+</div></div>
+    </div>
+} @* vFaceEnrollmentEdit.AzurePersonId.Visible (end) *@
+</div><!-- /page* -->
+<div id="tpd_VFaceEnrollmentedit" class="ew-custom-template"></div>
+<template id="tpm_VFaceEnrollmentedit">
+<div id="ct_vFaceEnrollmentEdit"><style>
+    .ew-buttons {
+        display: none;
+    }
+    .view-page-table td {
+        white-space: normal !important;
+        word-wrap: break-word;
+    }
+    .view-page-table th {
+        background-color: #006BB7;
+    }
+    .body-table {
+        background-color: #fff;
+    }
+    .header-table {
+        background-color: #006BB7 !important;
+        color: #fff !important;
+    }
+    .view-page-table {
+        table-layout: fixed;
+    }
+    .btn {
+        white-space: nowrap;
+    }
+    .file-input-wrapper {
+        border: 1px solid #ced4da;
+        border-radius: .375rem;
+        overflow: hidden;
+        transition: border-color .15s, box-shadow .15s;
+    }
+    .file-input-wrapper:focus-within {
+        border-color: #86b7fe;
+        box-shadow: 0 0 0 .25rem rgba(13,110,253,.25);
+    }
+    .file-input-wrapper .btn {
+        border-radius: 0;
+    }
+    .file-input-wrapper .form-control {
+        border: none;
+        box-shadow: none !important;
+    }
+</style>
+<form id="CustomFormFaceEnrollment" autocomplete="off">
+    <div class="row mb-3 align-items-center">
+        <div class="col-2 fw-bold d-flex align-items-center gap-2">
+            @Html.Raw(vFaceEnrollmentEdit._Username.Caption)
+        </div>
+        <div class="col-10">
+            <slot class="ew-slot" name="tpx_VFaceEnrollment__Username"></slot>
+        </div>
+    </div>
+    <div class="row mb-3 align-items-center">
+        <div class="col-2 fw-bold d-flex align-items-center gap-2">
+            @Html.Raw(vFaceEnrollmentEdit._Email.Caption)
+        </div>
+        <div class="col-10">
+            <slot class="ew-slot" name="tpx_VFaceEnrollment__Email"></slot>
+        </div>
+    </div>
+    <div class="row mb-3 align-items-center">
+        <div class="col-2 fw-bold d-flex align-items-center gap-2">
+            @Html.Raw(vFaceEnrollmentEdit.NamaLengkap.Caption)
+        </div>
+        <div class="col-10">
+            <slot class="ew-slot" name="tpx_VFaceEnrollment_NamaLengkap"></slot>
+        </div>
+    </div>
+    <div class="row mb-3 align-items-center">
+        <div class="col-2 fw-bold d-flex align-items-center gap-2">
+            Latest Face
+        </div>
+        <div class="col-10">
+            <slot class="ew-slot" name="tpx_VFaceEnrollment_DownloadFace"></slot>
+        </div>
+    </div>
+    <div class="row mb-3">
+        <div class="col-2 fw-bold d-flex gap-2">
+            Input New Face
+            <span class="text-danger">*</span>
+        </div>
+        <div class="col-10">
+            <div class="d-flex gap-2">
+                <div class="input-group file-input-wrapper">
+                    <label class="btn btn-primary mb-0">
+                        Add Images <input type="file" id="FaceInput" hidden multiple>
+                    </label>
+                    <input type="text" class="form-control" id="FaceInput-Name" style="cursor: pointer;" value="Add Images" readonly>
+                </div>
+                <button type="button" class="btn ew-btn btn-primary" id="btn-test-face">
+                    <i class="fa-solid fa-camera me-2"></i> Test Face
+                </button>
+            </div>
+            <small class="text-muted">Maximum file size: 20 MB</small>
+        </div>
+    </div>
+    <div class="row mb-3">
+        <div class="col-2 fw-bold d-flex align-items-center">
+        </div>
+        <div class="col-10">
+            <button id="btn-submit-custom" class="btn btn-primary ew-btn" type="button">
+                <i class="fas fa-save me-2"></i>Save
+            </button>
+            <button id="btn-delete-face" class="btn btn-danger ew-btn" type="button">
+                <i class="fas fa-trash me-2"></i>Delete
+            </button>
+            <button id="btn-cancel-custom" class="btn btn-default ew-btn" type="button">
+                <i class="fas fa-ban me-2"></i>cancel
+            </button>
+        </div>
+    </div>
+</form>
+<div class="modal modal-lg fade" id="TestFace" tabindex="-1" aria-labelledby="TestFaceLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header" style="background-color: #3c6dbd; color: white;">
+                <h5 class="modal-title" id="TestFaceLabel">Test Face Enrollment</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body mx-0 px-0">
+                <form id="TestFaceEnrollment">
+                    <div class="pt-2 pb-4 border-bottom px-3">
+                        <div class="row align-items-center">
+                            <div class="col-2 fw-bold d-flex gap-2">
+                                Input Face
+                                <span class="text-danger">*</span>
+                            </div>
+                            <div class="col-10">
+                                <div id="selfie-container">
+                                    <button type="button" id="selfie-trigger" class="btn btn-primary ew-btn">
+                                        <i class="fa-solid fa-camera me-2"></i>Take Picture
+                                    </button>
+                                    <img id="selfie-preview" src="" alt="Selfie Preview" class="img-thumbnail ms-3" style="display: none; max-width: 150px;"/>
+                                </div>
+                                <div id="camera-view" style="display: none; margin-top: 15px; border: 1px solid #ddd; padding: 10px; border-radius: 5px; background-color: #f8f9fa;">
+                                    <video id="selfie-video" width="100%" autoplay playsinline></video>
+                                    <button type="button" id="capture-button" class="btn btn-success mt-2">
+                                        <i class="fa-solid fa-circle-check me-2"></i>Capture Face
+                                    </button>
+                                    <button type="button" id="cancel-capture-button" class="btn btn-secondary mt-2">
+                                        <i class="fa-solid fa-times me-2"></i>Cancel
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="pt-2 px-3 d-flex justify-content-end gap-2">
+                        <button type="button" class="btn btn-primary" id="btn-submit-modal"><i class="fas fa-upload"></i> Upload</button>
+                        <button type="button" id="btn-cancel-modal" class="btn btn-default ew-btn"><i class="fas fa-ban"></i> Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div></div>
+</template>
+@{ vFaceEnrollmentEdit.CloseRecordset(); }
+@Html.Raw(vFaceEnrollmentEdit.IsModal ? "<template class=\"ew-modal-buttons\">" : "<div class=\"row ew-buttons\">")<!-- buttons .row -->
+    <div class="@(vFaceEnrollmentEdit.OffsetColumnClass)"><!-- buttons offset -->
+    <button class="btn btn-primary ew-btn" name="btn-action" id="btn-action" type="submit" form="fVFaceEnrollmentedit">@Html.Raw(Language.Phrase("SaveBtn"))</button>
+@if (IsJsonResponse()) {
+    <button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" data-bs-dismiss="modal">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+} else {
+    <button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" form="fVFaceEnrollmentedit" data-href="@AppPath(vFaceEnrollmentEdit.ReturnUrl)">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+}
+    </div><!-- /buttons offset -->
+@Html.Raw(vFaceEnrollmentEdit.IsModal ? "</template>" : "</div>")<!-- /buttons .row -->
+</form>
+<script class="ew-apply-template">
+loadjs.ready(ew.applyTemplateId, function() {
+    var $ = jQuery;
+    ew.templateData = { rows: @Html.Raw(ConvertToJson(vFaceEnrollmentEdit.Rows)) };
+    ew.applyTemplate("tpd_VFaceEnrollmentedit", "tpm_VFaceEnrollmentedit", "VFaceEnrollmentedit", "@(vFaceEnrollmentEdit.Export)", "VFaceEnrollment", ew.templateData.rows[0], @(vFaceEnrollmentEdit.IsModal ? "true" : "false"));
+    loadjs.done("customtemplate");
+});
+</script>
+</main>
+@vFaceEnrollmentEdit.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("VFaceEnrollment");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Write your table-specific startup script here
+    // document.write("page loaded");
+});
+</script>

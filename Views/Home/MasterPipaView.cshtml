@@ -1,0 +1,169 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (masterPipaView.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = masterPipaView.UseLayout ? "_Layout" : "";
+}
+@if (!masterPipaView.IsExport()) {
+<div class="btn-toolbar ew-toolbar">
+    @masterPipaView.ExportOptions.RenderBody()
+    @masterPipaView.OtherOptions.RenderBody()
+</div>
+}
+@masterPipaView.ShowPageHeader()
+@masterPipaView.ShowMessages()
+<main class="view">
+<form name="fMasterPipaview" id="fMasterPipaview" class="ew-form ew-view-form overlay-wrapper" action="@AppPath(CurrentPageName())" method="post" novalidate autocomplete="off">
+@if (!masterPipaView.IsExport()) {
+<script>
+var currentTable = @Html.Raw(ConvertToJson(masterPipaView.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { MasterPipa: currentTable } });
+var currentPageID = ew.PAGE_ID = "view";
+var currentForm;
+var fMasterPipaview;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("fMasterPipaview")
+        .setPageId("view")
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Write your client script here, no need to add script tags.
+});
+</script>
+}
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+<input type="hidden" name="modal" value="@ConvertToInt(masterPipaView.IsModal)">
+<table class="@(masterPipaView.TableClass)">
+@if (masterPipaView.KeteranganPipa.Visible) { // masterPipaView.KeteranganPipa.Visible (begin)
+    <tr id="r_KeteranganPipa" @Html.Raw(masterPipaView.KeteranganPipa.RowAttributes)>
+        <td class="@(masterPipaView.TableLeftColumnClass)"><span id="elh_MasterPipa_KeteranganPipa">@Html.Raw(masterPipaView.KeteranganPipa.Caption)</span></td>
+        <td data-name="KeteranganPipa" @Html.Raw(masterPipaView.KeteranganPipa.CellAttributes)>
+<span id="el_MasterPipa_KeteranganPipa">
+<span @Html.Raw(masterPipaView.KeteranganPipa.ViewAttributes)>
+@Html.Raw(masterPipaView.KeteranganPipa.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* masterPipaView.KeteranganPipa.Visible (end) *@
+@if (masterPipaView.idPlantAsal.Visible) { // masterPipaView.idPlantAsal.Visible (begin)
+    <tr id="r_idPlantAsal" @Html.Raw(masterPipaView.idPlantAsal.RowAttributes)>
+        <td class="@(masterPipaView.TableLeftColumnClass)"><span id="elh_MasterPipa_idPlantAsal">@Html.Raw(masterPipaView.idPlantAsal.Caption)</span></td>
+        <td data-name="idPlantAsal" @Html.Raw(masterPipaView.idPlantAsal.CellAttributes)>
+<span id="el_MasterPipa_idPlantAsal">
+<span @Html.Raw(masterPipaView.idPlantAsal.ViewAttributes)>
+@Html.Raw(masterPipaView.idPlantAsal.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* masterPipaView.idPlantAsal.Visible (end) *@
+@if (masterPipaView.Flowrate.Visible) { // masterPipaView.Flowrate.Visible (begin)
+    <tr id="r_Flowrate" @Html.Raw(masterPipaView.Flowrate.RowAttributes)>
+        <td class="@(masterPipaView.TableLeftColumnClass)"><span id="elh_MasterPipa_Flowrate">@Html.Raw(masterPipaView.Flowrate.Caption)</span></td>
+        <td data-name="Flowrate" @Html.Raw(masterPipaView.Flowrate.CellAttributes)>
+<span id="el_MasterPipa_Flowrate">
+<span @Html.Raw(masterPipaView.Flowrate.ViewAttributes)>
+@Html.Raw(masterPipaView.Flowrate.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* masterPipaView.Flowrate.Visible (end) *@
+@if (masterPipaView.BiayaProject.Visible) { // masterPipaView.BiayaProject.Visible (begin)
+    <tr id="r_BiayaProject" @Html.Raw(masterPipaView.BiayaProject.RowAttributes)>
+        <td class="@(masterPipaView.TableLeftColumnClass)"><span id="elh_MasterPipa_BiayaProject">@Html.Raw(masterPipaView.BiayaProject.Caption)</span></td>
+        <td data-name="BiayaProject" @Html.Raw(masterPipaView.BiayaProject.CellAttributes)>
+<span id="el_MasterPipa_BiayaProject">
+<span @Html.Raw(masterPipaView.BiayaProject.ViewAttributes)>
+@Html.Raw(masterPipaView.BiayaProject.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* masterPipaView.BiayaProject.Visible (end) *@
+@if (masterPipaView.PlantAsal.Visible) { // masterPipaView.PlantAsal.Visible (begin)
+    <tr id="r_PlantAsal" @Html.Raw(masterPipaView.PlantAsal.RowAttributes)>
+        <td class="@(masterPipaView.TableLeftColumnClass)"><span id="elh_MasterPipa_PlantAsal">@Html.Raw(masterPipaView.PlantAsal.Caption)</span></td>
+        <td data-name="PlantAsal" @Html.Raw(masterPipaView.PlantAsal.CellAttributes)>
+<span id="el_MasterPipa_PlantAsal">
+<span @Html.Raw(masterPipaView.PlantAsal.ViewAttributes)>
+@Html.Raw(masterPipaView.PlantAsal.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* masterPipaView.PlantAsal.Visible (end) *@
+@if (masterPipaView.NamaPlantAsal.Visible) { // masterPipaView.NamaPlantAsal.Visible (begin)
+    <tr id="r_NamaPlantAsal" @Html.Raw(masterPipaView.NamaPlantAsal.RowAttributes)>
+        <td class="@(masterPipaView.TableLeftColumnClass)"><span id="elh_MasterPipa_NamaPlantAsal">@Html.Raw(masterPipaView.NamaPlantAsal.Caption)</span></td>
+        <td data-name="NamaPlantAsal" @Html.Raw(masterPipaView.NamaPlantAsal.CellAttributes)>
+<span id="el_MasterPipa_NamaPlantAsal">
+<span @Html.Raw(masterPipaView.NamaPlantAsal.ViewAttributes)>
+@Html.Raw(masterPipaView.NamaPlantAsal.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* masterPipaView.NamaPlantAsal.Visible (end) *@
+@if (masterPipaView.CreatedBy.Visible) { // masterPipaView.CreatedBy.Visible (begin)
+    <tr id="r_CreatedBy" @Html.Raw(masterPipaView.CreatedBy.RowAttributes)>
+        <td class="@(masterPipaView.TableLeftColumnClass)"><span id="elh_MasterPipa_CreatedBy">@Html.Raw(masterPipaView.CreatedBy.Caption)</span></td>
+        <td data-name="CreatedBy" @Html.Raw(masterPipaView.CreatedBy.CellAttributes)>
+<span id="el_MasterPipa_CreatedBy">
+<span @Html.Raw(masterPipaView.CreatedBy.ViewAttributes)>
+@Html.Raw(masterPipaView.CreatedBy.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* masterPipaView.CreatedBy.Visible (end) *@
+@if (masterPipaView.etlDate.Visible) { // masterPipaView.etlDate.Visible (begin)
+    <tr id="r_etlDate" @Html.Raw(masterPipaView.etlDate.RowAttributes)>
+        <td class="@(masterPipaView.TableLeftColumnClass)"><span id="elh_MasterPipa_etlDate">@Html.Raw(masterPipaView.etlDate.Caption)</span></td>
+        <td data-name="etlDate" @Html.Raw(masterPipaView.etlDate.CellAttributes)>
+<span id="el_MasterPipa_etlDate">
+<span @Html.Raw(masterPipaView.etlDate.ViewAttributes)>
+@Html.Raw(masterPipaView.etlDate.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* masterPipaView.etlDate.Visible (end) *@
+@if (masterPipaView.LastUpdatedBy.Visible) { // masterPipaView.LastUpdatedBy.Visible (begin)
+    <tr id="r_LastUpdatedBy" @Html.Raw(masterPipaView.LastUpdatedBy.RowAttributes)>
+        <td class="@(masterPipaView.TableLeftColumnClass)"><span id="elh_MasterPipa_LastUpdatedBy">@Html.Raw(masterPipaView.LastUpdatedBy.Caption)</span></td>
+        <td data-name="LastUpdatedBy" @Html.Raw(masterPipaView.LastUpdatedBy.CellAttributes)>
+<span id="el_MasterPipa_LastUpdatedBy">
+<span @Html.Raw(masterPipaView.LastUpdatedBy.ViewAttributes)>
+@Html.Raw(masterPipaView.LastUpdatedBy.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* masterPipaView.LastUpdatedBy.Visible (end) *@
+@if (masterPipaView.LastUpdatedDate.Visible) { // masterPipaView.LastUpdatedDate.Visible (begin)
+    <tr id="r_LastUpdatedDate" @Html.Raw(masterPipaView.LastUpdatedDate.RowAttributes)>
+        <td class="@(masterPipaView.TableLeftColumnClass)"><span id="elh_MasterPipa_LastUpdatedDate">@Html.Raw(masterPipaView.LastUpdatedDate.Caption)</span></td>
+        <td data-name="LastUpdatedDate" @Html.Raw(masterPipaView.LastUpdatedDate.CellAttributes)>
+<span id="el_MasterPipa_LastUpdatedDate">
+<span @Html.Raw(masterPipaView.LastUpdatedDate.ViewAttributes)>
+@Html.Raw(masterPipaView.LastUpdatedDate.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* masterPipaView.LastUpdatedDate.Visible (end) *@
+</table>
+@{ masterPipaView.CloseRecordset(); }
+</form>
+</main>
+@masterPipaView.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+@if (!masterPipaView.IsExport()) {
+<script>
+loadjs.ready("load", function() {
+    // Write your table-specific startup script here
+    // document.write("page loaded");
+});
+</script>
+}

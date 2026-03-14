@@ -1,0 +1,995 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (subAktivitasNilaiSfbdlpgEdit.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = subAktivitasNilaiSfbdlpgEdit.UseLayout ? "_Layout" : "";
+}
+@subAktivitasNilaiSfbdlpgEdit.ShowPageHeader()
+@subAktivitasNilaiSfbdlpgEdit.ShowMessages()
+<main class="edit">
+<form name="fSubAktivitasNilaiSFBDLPGedit" id="fSubAktivitasNilaiSFBDLPGedit" class="@(subAktivitasNilaiSfbdlpgEdit.FormClassName)" action="@AppPath(CurrentPageName())" method="post" novalidate autocomplete="off">
+<script>
+var currentTable = @Html.Raw(ConvertToJson(subAktivitasNilaiSfbdlpgEdit.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { SubAktivitasNilaiSFBDLPG: currentTable } });
+var currentPageID = ew.PAGE_ID = "edit";
+var currentForm;
+var fSubAktivitasNilaiSFBDLPGedit;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("fSubAktivitasNilaiSFBDLPGedit")
+        .setPageId("edit")
+
+        // Add fields
+        .setFields([
+
+            ["idProses", [fields.idProses.visible && fields.idProses.required ? ew.Validators.required(fields.idProses.caption) : null], fields.idProses.isInvalid],
+            ["idAktifitas", [fields.idAktifitas.visible && fields.idAktifitas.required ? ew.Validators.required(fields.idAktifitas.caption) : null], fields.idAktifitas.isInvalid],
+            ["NoReferensi", [fields.NoReferensi.visible && fields.NoReferensi.required ? ew.Validators.required(fields.NoReferensi.caption) : null], fields.NoReferensi.isInvalid],
+            ["StatusAktivitas", [fields.StatusAktivitas.visible && fields.StatusAktivitas.required ? ew.Validators.required(fields.StatusAktivitas.caption) : null], fields.StatusAktivitas.isInvalid],
+            ["mt", [fields.mt.visible && fields.mt.required ? ew.Validators.required(fields.mt.caption) : null], fields.mt.isInvalid],
+            ["LastUpdatedBy", [fields.LastUpdatedBy.visible && fields.LastUpdatedBy.required ? ew.Validators.required(fields.LastUpdatedBy.caption) : null], fields.LastUpdatedBy.isInvalid],
+            ["lastUpdatedDate", [fields.lastUpdatedDate.visible && fields.lastUpdatedDate.required ? ew.Validators.required(fields.lastUpdatedDate.caption) : null], fields.lastUpdatedDate.isInvalid]
+        ])
+
+        // Form_CustomValidate
+        .setCustomValidate(
+            function(fobj) { // DO NOT CHANGE THIS LINE!
+                    // Your custom validation code here, return false if invalid.
+                    return true;
+                }
+        )
+
+        // Use JavaScript validation or not
+        .setValidateRequired(ew.CLIENT_VALIDATE)
+
+        // Dynamic selection lists
+        .setLists({
+        })
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Client script
+    // Write your client script here, no need to add script tags.
+    var parent_url = ew.PATH_BASE;
+    var NoReferensi = $("#x_NoReferensi").val();
+    var IdProses = $("#x_idProses").val();
+    var IdAktivitas = $("#x_idAktifitas").val();
+    let proceedSubmitStatus = null;
+    $("#x_mt").on('focus', function () {
+        hideFeedback($(this));
+    });
+    function hideFeedback(el) {
+        let feedback = el.siblings('.invalid-feedback');
+        feedback.hide();
+    }
+    function validasiInput() {
+        var inputMap = {
+            "#x_mt": "Mt"
+        };
+        let isValid = true;
+        $('.invalid-feedback').hide();
+        let zeroOrNegativeFields = [];
+        for (var id in inputMap) {
+            var el = $(id);
+            var label = inputMap[id];
+            var val = el.val().trim();
+            el.val(val);
+            var feedback = el.siblings('.invalid-feedback');
+            if (val === "") {
+                feedback.text('*' + label + ' tidak boleh kosong.').show();
+                isValid = false;
+                continue;
+            }
+            if (isNaN(val)) {
+                feedback.text('*' + label + ' harus diisi dengan angka desimal yang valid.').show();
+                isValid = false;
+                continue;
+            }
+            var number = parseFloat(val);
+            if (number <= 0) {
+                zeroOrNegativeFields.push(label)
+                // feedback.text('*' + label + ' tidak boleh bernilai 0.').show();
+                // isValid = false;
+            }
+        }
+        let fieldNotValid = [];
+        for (const fieldId in inputMap) {
+            const el = $(fieldId);
+            const label = inputMap[fieldId];
+            if (el.length && !el.val().trim()) {
+                fieldNotValid.push(label);
+                isValid = false
+            }
+        }
+        if (!isValid) {
+            ew.alert("Field tidak boleh kosong: " + fieldNotValid.join(", "));
+            return { isValid: false}; // Gagal submit
+        } else {
+            $('.invalid-feedback').hide();
+            if (zeroOrNegativeFields.length > 0) {
+                return { isValid: false, hasNegative: true, fields: zeroOrNegativeFields };
+            }
+                return { isValid: true};
+        }
+        return { isValid: true};
+    }
+    function handleCustomSubmit(status) {
+        let idAktivitas = $("#x_idAktifitas").val();
+        const originalStatus = document.querySelector('#el_SubAktivitasNilaiSFBDLPG_StatusAktivitas .form-control-plaintext').textContent;
+        const isValidInput = validasiInput();
+        if (!isValidInput.isValid && !isValidInput.hasNegative) return;
+        let allNegativeFields = [];
+        if (isValidInput.hasNegative) allNegativeFields = allNegativeFields.concat(isValidInput.fields);
+        if (allNegativeFields.length > 0) {
+            let warningText = "Field berikut bernilai 0 atau kurang: " + allNegativeFields.join(", ") + ". Apakah Anda ingin tetap menyimpan?";
+            $("#warningValueText").text(warningText);
+            proceedSubmitStatus = status;
+            $("#warningValueModal").modal("show");
+            return;
+        }
+
+        // Jika nilai valid langsung submit
+        submitFinal(status);
+    }
+    function submitFinal(status) {
+        let idAktivitas = $("#x_idAktifitas").val();
+        const originalStatus = document.querySelector('#el_SubAktivitasNilaiSFBDLPG_StatusAktivitas .form-control-plaintext').textContent;
+        $.ajax({
+            url: parent_url + `api/LookUpList/check_valid_status_aktivitas?idAktivitas=${idAktivitas}&originalStatus=${originalStatus}`,
+            type: 'GET',
+            beforeSend: function () {
+                showLoading();
+            },
+            success: function (response) {
+                if (!response.IsValid){
+                    hideLoading();
+                    ew.alert(response.Message ?? "Status aktivitas telah diubah oleh pengguna lain");
+                    return;
+                } else {
+                    let form = $("#fSubAktivitasNilaiSFBDLPGedit");
+                    $.ajax({
+                        url: form.attr("action"),
+                        type: form.attr("method"),
+                        data: form.serialize(),
+                        success: function (response) {
+                            updateStatus(idAktivitas, status);
+                        },
+                        error: function (xhr, status, error) {
+                            hideLoading();
+                            ew.alert("Gagal menyimpan data.");
+                            console.error("Form submit gagal:", error);
+                        }
+                    }); 
+                }
+            },
+            error: function (xhr, status, error) {
+                hideLoading();
+                ew.alert("Gagal menyimpan data.");
+                console.error("Form submit gagal:", error);
+            }
+        }); 
+    }
+    function updateStatus(idAktivitas, status) {
+        $.ajax({
+            url: parent_url + `api/LookUpList/update_status_aktivitas?idAktivitas=${idAktivitas}&statusAktivitas=${status}`,
+            type: 'POST',
+            success: function () {
+                $.ajax({
+                    url: parent_url + 'api/LookUpList/update_lop_r2',
+                    type: 'POST',
+                    data: JSON.stringify({
+                        NoReferensi: NoReferensi,
+                        IdProses: IdProses,
+                        IdAktivitas: IdAktivitas
+                    }),
+                    contentType: 'application/json',
+                    success: function (res) {
+                        if (status == "Completed" || status == "Completed Edit") {
+                            $.ajax({
+                                url: parent_url + 'api/LookUpList/update_lop_r3_r4',
+                                type: 'POST',
+                                data: JSON.stringify({
+                                    NoReferensi: NoReferensi,
+                                    IdProses: IdProses,
+                                    IdAktivitas: IdAktivitas
+                                }),
+                                contentType: 'application/json',
+                                success: function (res) {
+                                    window.location.href = `${parent_url}AktivitasList?cmd=search&x_IdProses%5B%5D=${IdProses}&search=&searchtype=`;
+                                },
+                                error: function (xhr, status, error) {
+                                    console.error("Update Aktivitas Dokumen gagal:", error);
+                                },
+                                complete: function () {
+                                    hideLoading();
+                                }
+                            });
+                        } else {
+                            hideLoading();
+                            location.reload();
+                        }    
+                    },
+                    error: function (xhr, status, error) {
+                        hideLoading();
+                        console.error("Update Aktivitas Dokumen gagal:", error);
+                    }
+                });
+            },
+            error: function (xhr, status, error) {
+                hideLoading();
+                ew.alert("Status gagal diperbarui.");
+                console.error("Update status gagal:", error);
+            }
+        });
+    }
+    function reverseStatus(status, catatan) {
+            showLoading();
+            let idAktivitas = $("#x_idAktifitas").val();
+            $.ajax({
+                    url: parent_url + `api/LookUpList/update_status_aktivitas-v2`,
+                    type: 'POST',
+                    data: JSON.stringify({ IdAktivitas: idAktivitas, StatusAktivitas: status, Catatan: catatan ?? null }),
+                    contentType: 'application/json',
+                    success: function () {
+                        $.ajax({
+                            url: parent_url + 'api/LookUpList/generate_etc',
+                            method: 'POST',
+                            data: JSON.stringify({ NoReferensi: NoReferensi }),
+                            contentType: 'application/json',
+                            success: function (res) {
+                                setTimeout(function () {
+                                    window.location.href = `${parent_url}AktivitasList?cmd=search&x_IdProses%5B%5D=${IdProses}&search=&searchtype=`;
+                                }, 1000);
+                            },
+                            error: function (err) {
+                                hideLoading();
+                                ew.alert('Perubahan gagal disimpan.');
+                                console.error(err);
+                            },
+                        });
+                    },
+                    error: function (xhr, status, error) {
+                        ew.alert("Status gagal diperbarui.");
+                        console.error("Update status gagal:", error);
+                    },
+                    complete: function () {
+                        hideLoading();
+                    }
+                });
+            }
+    $(document).on("click", "#btn-draft", function () {
+        handleCustomSubmit("Draft");
+    });
+    $(document).on("click", "#btn-completed", function () {
+        handleCustomSubmit("Completed");
+    });
+    $(document).on("click", "#btn-editing", function () {
+        handleCustomSubmit("Editing");
+    });
+    $(document).on("click", "#btn-completedEdit", function () {
+        handleCustomSubmit("Completed Edit");
+    });
+    $(document).on("click", "#btn-confirm-modal", function () {
+        $("#warningValueModal").modal("hide");
+        submitFinal(proceedSubmitStatus);
+    });
+    $(document).on("submit", "#reverseStatusEditingModalForm", function (e) {
+        e.preventDefault();
+        let catatanText = $("#catatanReverseStatusEditing").val();
+        reverseStatus("Editing", catatanText);
+    });
+});
+</script>
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+<input type="hidden" name="action" id="action" value="update">
+<input type="hidden" name="modal" value="@ConvertToInt(subAktivitasNilaiSfbdlpgEdit.IsModal)">
+@if (IsJsonResponse()) {
+<input type="hidden" name="json" value="1">
+}
+<input type="hidden" name="@(subAktivitasNilaiSfbdlpgEdit.OldKeyName)" value="@Html.Raw(subAktivitasNilaiSfbdlpgEdit.OldKey)">
+<div class="ew-edit-div d-none"><!-- page* -->
+@if (subAktivitasNilaiSfbdlpgEdit.idProses.Visible) { // subAktivitasNilaiSfbdlpgEdit.idProses.Visible (begin)
+    <div id="r_idProses" @Html.Raw(subAktivitasNilaiSfbdlpgEdit.idProses.RowAttributes)>
+        <label id="elh_SubAktivitasNilaiSFBDLPG_idProses" for="x_idProses" class="@(subAktivitasNilaiSfbdlpgEdit.LeftColumnClass)"><template id="tpc_SubAktivitasNilaiSFBDLPG_idProses">@Html.Raw(subAktivitasNilaiSfbdlpgEdit.idProses.Caption)@Html.Raw(subAktivitasNilaiSfbdlpgEdit.idProses.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(subAktivitasNilaiSfbdlpgEdit.RightColumnClass)"><div @Html.Raw(subAktivitasNilaiSfbdlpgEdit.idProses.CellAttributes)>
+<template id="tpx_SubAktivitasNilaiSFBDLPG_idProses"><span id="el_SubAktivitasNilaiSFBDLPG_idProses">
+<span @Html.Raw(subAktivitasNilaiSfbdlpgEdit.idProses.ViewAttributes)>
+<span class="form-control-plaintext">@Html.Raw(subAktivitasNilaiSfbdlpgEdit.idProses.DisplayValue(subAktivitasNilaiSfbdlpgEdit.idProses.EditValue))</span></span>
+<input type="hidden" data-table="SubAktivitasNilaiSFBDLPG" data-field="x_idProses" data-hidden="1" name="x_idProses" id="x_idProses" value="@Html.Raw(HtmlEncode(subAktivitasNilaiSfbdlpgEdit.idProses.CurrentValue))">
+</span></template>
+</div></div>
+    </div>
+} @* subAktivitasNilaiSfbdlpgEdit.idProses.Visible (end) *@
+@if (subAktivitasNilaiSfbdlpgEdit.idAktifitas.Visible) { // subAktivitasNilaiSfbdlpgEdit.idAktifitas.Visible (begin)
+    <div id="r_idAktifitas" @Html.Raw(subAktivitasNilaiSfbdlpgEdit.idAktifitas.RowAttributes)>
+        <label id="elh_SubAktivitasNilaiSFBDLPG_idAktifitas" for="x_idAktifitas" class="@(subAktivitasNilaiSfbdlpgEdit.LeftColumnClass)"><template id="tpc_SubAktivitasNilaiSFBDLPG_idAktifitas">@Html.Raw(subAktivitasNilaiSfbdlpgEdit.idAktifitas.Caption)@Html.Raw(subAktivitasNilaiSfbdlpgEdit.idAktifitas.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(subAktivitasNilaiSfbdlpgEdit.RightColumnClass)"><div @Html.Raw(subAktivitasNilaiSfbdlpgEdit.idAktifitas.CellAttributes)>
+<template id="tpx_SubAktivitasNilaiSFBDLPG_idAktifitas"><span id="el_SubAktivitasNilaiSFBDLPG_idAktifitas">
+<span @Html.Raw(subAktivitasNilaiSfbdlpgEdit.idAktifitas.ViewAttributes)>
+<span class="form-control-plaintext">@Html.Raw(subAktivitasNilaiSfbdlpgEdit.idAktifitas.DisplayValue(subAktivitasNilaiSfbdlpgEdit.idAktifitas.EditValue))</span></span>
+<input type="hidden" data-table="SubAktivitasNilaiSFBDLPG" data-field="x_idAktifitas" data-hidden="1" name="x_idAktifitas" id="x_idAktifitas" value="@Html.Raw(HtmlEncode(subAktivitasNilaiSfbdlpgEdit.idAktifitas.CurrentValue))">
+</span></template>
+</div></div>
+    </div>
+} @* subAktivitasNilaiSfbdlpgEdit.idAktifitas.Visible (end) *@
+@if (subAktivitasNilaiSfbdlpgEdit.NoReferensi.Visible) { // subAktivitasNilaiSfbdlpgEdit.NoReferensi.Visible (begin)
+    <div id="r_NoReferensi" @Html.Raw(subAktivitasNilaiSfbdlpgEdit.NoReferensi.RowAttributes)>
+        <label id="elh_SubAktivitasNilaiSFBDLPG_NoReferensi" for="x_NoReferensi" class="@(subAktivitasNilaiSfbdlpgEdit.LeftColumnClass)"><template id="tpc_SubAktivitasNilaiSFBDLPG_NoReferensi">@Html.Raw(subAktivitasNilaiSfbdlpgEdit.NoReferensi.Caption)@Html.Raw(subAktivitasNilaiSfbdlpgEdit.NoReferensi.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(subAktivitasNilaiSfbdlpgEdit.RightColumnClass)"><div @Html.Raw(subAktivitasNilaiSfbdlpgEdit.NoReferensi.CellAttributes)>
+<template id="tpx_SubAktivitasNilaiSFBDLPG_NoReferensi"><span id="el_SubAktivitasNilaiSFBDLPG_NoReferensi">
+<span @Html.Raw(subAktivitasNilaiSfbdlpgEdit.NoReferensi.ViewAttributes)>
+<input type="text" readonly class="form-control-plaintext" value="@Html.Raw(RemoveHtml(ConvertToString(subAktivitasNilaiSfbdlpgEdit.NoReferensi.EditValue)))"></span>
+<input type="hidden" data-table="SubAktivitasNilaiSFBDLPG" data-field="x_NoReferensi" data-hidden="1" name="x_NoReferensi" id="x_NoReferensi" value="@Html.Raw(HtmlEncode(subAktivitasNilaiSfbdlpgEdit.NoReferensi.CurrentValue))">
+</span></template>
+</div></div>
+    </div>
+} @* subAktivitasNilaiSfbdlpgEdit.NoReferensi.Visible (end) *@
+@if (subAktivitasNilaiSfbdlpgEdit.StatusAktivitas.Visible) { // subAktivitasNilaiSfbdlpgEdit.StatusAktivitas.Visible (begin)
+    <div id="r_StatusAktivitas" @Html.Raw(subAktivitasNilaiSfbdlpgEdit.StatusAktivitas.RowAttributes)>
+        <label id="elh_SubAktivitasNilaiSFBDLPG_StatusAktivitas" for="x_StatusAktivitas" class="@(subAktivitasNilaiSfbdlpgEdit.LeftColumnClass)"><template id="tpc_SubAktivitasNilaiSFBDLPG_StatusAktivitas">@Html.Raw(subAktivitasNilaiSfbdlpgEdit.StatusAktivitas.Caption)@Html.Raw(subAktivitasNilaiSfbdlpgEdit.StatusAktivitas.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(subAktivitasNilaiSfbdlpgEdit.RightColumnClass)"><div @Html.Raw(subAktivitasNilaiSfbdlpgEdit.StatusAktivitas.CellAttributes)>
+<template id="tpx_SubAktivitasNilaiSFBDLPG_StatusAktivitas"><span id="el_SubAktivitasNilaiSFBDLPG_StatusAktivitas">
+<span @Html.Raw(subAktivitasNilaiSfbdlpgEdit.StatusAktivitas.ViewAttributes)>
+<span class="form-control-plaintext">@Html.Raw(subAktivitasNilaiSfbdlpgEdit.StatusAktivitas.DisplayValue(subAktivitasNilaiSfbdlpgEdit.StatusAktivitas.EditValue))</span></span>
+<input type="hidden" data-table="SubAktivitasNilaiSFBDLPG" data-field="x_StatusAktivitas" data-hidden="1" name="x_StatusAktivitas" id="x_StatusAktivitas" value="@Html.Raw(HtmlEncode(subAktivitasNilaiSfbdlpgEdit.StatusAktivitas.CurrentValue))">
+</span></template>
+</div></div>
+    </div>
+} @* subAktivitasNilaiSfbdlpgEdit.StatusAktivitas.Visible (end) *@
+@if (subAktivitasNilaiSfbdlpgEdit.mt.Visible) { // subAktivitasNilaiSfbdlpgEdit.mt.Visible (begin)
+    <div id="r_mt" @Html.Raw(subAktivitasNilaiSfbdlpgEdit.mt.RowAttributes)>
+        <label id="elh_SubAktivitasNilaiSFBDLPG_mt" for="x_mt" class="@(subAktivitasNilaiSfbdlpgEdit.LeftColumnClass)"><template id="tpc_SubAktivitasNilaiSFBDLPG_mt">@Html.Raw(subAktivitasNilaiSfbdlpgEdit.mt.Caption)@Html.Raw(subAktivitasNilaiSfbdlpgEdit.mt.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(subAktivitasNilaiSfbdlpgEdit.RightColumnClass)"><div @Html.Raw(subAktivitasNilaiSfbdlpgEdit.mt.CellAttributes)>
+<template id="tpx_SubAktivitasNilaiSFBDLPG_mt"><span id="el_SubAktivitasNilaiSFBDLPG_mt">
+<input type="@(subAktivitasNilaiSfbdlpgEdit.mt.InputTextType)" name="x_mt" id="x_mt" data-table="SubAktivitasNilaiSFBDLPG" data-field="x_mt" value="@Html.Raw(subAktivitasNilaiSfbdlpgEdit.mt.EditValue)" size="30" maxlength="50" placeholder="@Html.Raw(HtmlEncode(subAktivitasNilaiSfbdlpgEdit.mt.PlaceHolder))" data-format-pattern="@(subAktivitasNilaiSfbdlpgEdit.mt.FormatPattern)"@Html.Raw(subAktivitasNilaiSfbdlpgEdit.mt.EditAttributes) aria-describedby="x_mt_help">
+@Html.Raw(subAktivitasNilaiSfbdlpgEdit.mt.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(subAktivitasNilaiSfbdlpgEdit.mt.GetErrorMessage())</div>
+</span></template>
+</div></div>
+    </div>
+} @* subAktivitasNilaiSfbdlpgEdit.mt.Visible (end) *@
+@if (subAktivitasNilaiSfbdlpgEdit.LastUpdatedBy.Visible) { // subAktivitasNilaiSfbdlpgEdit.LastUpdatedBy.Visible (begin)
+    <div id="r_LastUpdatedBy" @Html.Raw(subAktivitasNilaiSfbdlpgEdit.LastUpdatedBy.RowAttributes)>
+        <label id="elh_SubAktivitasNilaiSFBDLPG_LastUpdatedBy" for="x_LastUpdatedBy" class="@(subAktivitasNilaiSfbdlpgEdit.LeftColumnClass)"><template id="tpc_SubAktivitasNilaiSFBDLPG_LastUpdatedBy">@Html.Raw(subAktivitasNilaiSfbdlpgEdit.LastUpdatedBy.Caption)@Html.Raw(subAktivitasNilaiSfbdlpgEdit.LastUpdatedBy.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(subAktivitasNilaiSfbdlpgEdit.RightColumnClass)"><div @Html.Raw(subAktivitasNilaiSfbdlpgEdit.LastUpdatedBy.CellAttributes)>
+<template id="tpx_SubAktivitasNilaiSFBDLPG_LastUpdatedBy"><span id="el_SubAktivitasNilaiSFBDLPG_LastUpdatedBy">
+<span @Html.Raw(subAktivitasNilaiSfbdlpgEdit.LastUpdatedBy.ViewAttributes)>
+<input type="text" readonly class="form-control-plaintext" value="@Html.Raw(RemoveHtml(ConvertToString(subAktivitasNilaiSfbdlpgEdit.LastUpdatedBy.EditValue)))"></span>
+<input type="hidden" data-table="SubAktivitasNilaiSFBDLPG" data-field="x_LastUpdatedBy" data-hidden="1" name="x_LastUpdatedBy" id="x_LastUpdatedBy" value="@Html.Raw(HtmlEncode(subAktivitasNilaiSfbdlpgEdit.LastUpdatedBy.CurrentValue))">
+</span></template>
+</div></div>
+    </div>
+} @* subAktivitasNilaiSfbdlpgEdit.LastUpdatedBy.Visible (end) *@
+@if (subAktivitasNilaiSfbdlpgEdit.lastUpdatedDate.Visible) { // subAktivitasNilaiSfbdlpgEdit.lastUpdatedDate.Visible (begin)
+    <div id="r_lastUpdatedDate" @Html.Raw(subAktivitasNilaiSfbdlpgEdit.lastUpdatedDate.RowAttributes)>
+        <label id="elh_SubAktivitasNilaiSFBDLPG_lastUpdatedDate" for="x_lastUpdatedDate" class="@(subAktivitasNilaiSfbdlpgEdit.LeftColumnClass)"><template id="tpc_SubAktivitasNilaiSFBDLPG_lastUpdatedDate">@Html.Raw(subAktivitasNilaiSfbdlpgEdit.lastUpdatedDate.Caption)@Html.Raw(subAktivitasNilaiSfbdlpgEdit.lastUpdatedDate.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(subAktivitasNilaiSfbdlpgEdit.RightColumnClass)"><div @Html.Raw(subAktivitasNilaiSfbdlpgEdit.lastUpdatedDate.CellAttributes)>
+<template id="tpx_SubAktivitasNilaiSFBDLPG_lastUpdatedDate"><span id="el_SubAktivitasNilaiSFBDLPG_lastUpdatedDate">
+<span @Html.Raw(subAktivitasNilaiSfbdlpgEdit.lastUpdatedDate.ViewAttributes)>
+<input type="text" readonly class="form-control-plaintext" value="@Html.Raw(RemoveHtml(ConvertToString(subAktivitasNilaiSfbdlpgEdit.lastUpdatedDate.EditValue)))"></span>
+<input type="hidden" data-table="SubAktivitasNilaiSFBDLPG" data-field="x_lastUpdatedDate" data-hidden="1" name="x_lastUpdatedDate" id="x_lastUpdatedDate" value="@Html.Raw(HtmlEncode(subAktivitasNilaiSfbdlpgEdit.lastUpdatedDate.CurrentValue))">
+</span></template>
+</div></div>
+    </div>
+} @* subAktivitasNilaiSfbdlpgEdit.lastUpdatedDate.Visible (end) *@
+</div><!-- /page* -->
+    <input type="hidden" data-table="SubAktivitasNilaiSFBDLPG" data-field="x_id" data-hidden="1" name="x_id" id="x_id" value="@Html.Raw(HtmlEncode(subAktivitasNilaiSfbdlpgEdit.id.CurrentValue))">
+<div id="tpd_SubAktivitasNilaiSFBDLPGedit" class="ew-custom-template"></div>
+<template id="tpm_SubAktivitasNilaiSFBDLPGedit">
+<div id="ct_subAktivitasNilaiSfbdlpgEdit"><style>
+    .view-page-table td {
+        white-space: normal !important;
+        word-wrap: break-word;
+    }
+    .view-page-table th {
+        background-color: #006BB7;
+    }
+    .body-table {
+        background-color: #fff;
+    }
+    .header-table {
+        background-color: #006BB7 !important;
+        color: #fff !important;
+    }
+    .view-page-table {
+        table-layout: fixed;
+    }
+    .tab-content {
+    display: none;
+    }
+    .tab-content.active {
+        display: block;
+    }
+    .ag-theme-quartz .ag-header {
+        background-color: #006BB7 !important;
+    }
+    .ag-theme-quartz .ag-header-cell-label {
+        color: #ffffff !important;
+    }
+    .ag-theme-quartz .ag-icon-filter {
+        color: #ffffff !important;
+    }
+    .rotate-down {
+        transform: rotate(90deg);
+        transition: transform 0.3s ease;
+    }
+    .rotate-right {
+        transform: rotate(0deg);
+        transition: transform 0.3s ease;
+    }
+</style>
+<div class="row mb-2">
+    <div class="col-2 fw-bold d-flex align-items-center">
+        @Html.Raw(subAktivitasNilaiSfbdlpgEdit.idAktifitas.Caption)
+    </div>
+    <div class="col-10">
+        <slot class="ew-slot" name="tpx_SubAktivitasNilaiSFBDLPG_idAktifitas"></slot>
+    </div>
+</div>
+<div class="row mb-2">
+    <div class="col-2 fw-bold d-flex align-items-center">
+        @Html.Raw(subAktivitasNilaiSfbdlpgEdit.idProses.Caption)
+    </div>
+    <div class="col-10">
+        <slot class="ew-slot" name="tpx_SubAktivitasNilaiSFBDLPG_idProses"></slot>
+    </div>
+</div>
+<div class="row mb-2">
+    <div class="col-2 fw-bold d-flex align-items-center">
+        @Html.Raw(subAktivitasNilaiSfbdlpgEdit.NoReferensi.Caption)
+    </div>
+    <div class="col-10">
+        <slot class="ew-slot" name="tpx_SubAktivitasNilaiSFBDLPG_NoReferensi"></slot>
+    </div>
+</div>
+<div class="row mb-3">
+    <div class="col-2 fw-bold d-flex align-items-center">
+        @Html.Raw(subAktivitasNilaiSfbdlpgEdit.StatusAktivitas.Caption)
+    </div>
+    <div class="col-10">
+        <slot class="ew-slot" name="tpx_SubAktivitasNilaiSFBDLPG_StatusAktivitas"></slot>
+    </div>
+</div>
+<div class="row mb-3">
+    <div class="col-2 fw-bold d-flex align-items-center">
+        @Html.Raw(subAktivitasNilaiSfbdlpgEdit.LastUpdatedBy.Caption)
+    </div>
+    <div class="col-10 d-flex gap-3">
+        <slot class="ew-slot" name="tpx_SubAktivitasNilaiSFBDLPG_LastUpdatedBy"></slot>
+        <button type="button" class="btn btn-primary ew-btn ps-2" expand-log="false">
+            <i class="fa-solid fa-caret-right fa-2xl me-2 caret-icon rotate-right"></i>
+            Log History
+            <i class="fa-solid fa-clock-rotate-left ms-1"></i> 
+        </button>
+    </div>
+</div>
+<div id="log-table-row" class="d-none row m-0">
+    <div class="p-0">
+        <div id="log-table-wrapper" style="overflow: hidden; transition: all 0.6s ease; max-height: 0;">
+            <div id="myGrid" class="ag-theme-quartz w-75 my-3" style="height: 300px;"></div>
+        </div>
+    </div>
+</div>
+<div class="row mb-3">
+    <div class="col-2 fw-bold d-flex align-items-center">
+        @Html.Raw(subAktivitasNilaiSfbdlpgEdit.lastUpdatedDate.Caption)
+    </div>
+    <div class="col-10">
+        <slot class="ew-slot" name="tpx_SubAktivitasNilaiSFBDLPG_lastUpdatedDate"></slot>
+    </div>
+</div>
+<div class="row">
+    <div class="col-12 col-md-9 border rounded p-0 mb-3">
+        <table aria-hidden="true" class="table table-hover view-page-table w-100 m-0">
+            <tbody>
+                <tr>
+                    <td class="fw-bold header-table">Satuan</td>
+                    <td class="fw-bold header-table">BL</td>
+                    <td class="fw-bold header-table">SFAL</td>
+                    <td width="25%" class="fw-bold header-table">SFBD</td>
+                    <td class="fw-bold header-table">AR</td>
+                </tr>
+                <tr>
+                    <td class="text-break fw-bold">Metric Ton</td>
+                    <td class="text-break body-table"><p id="BL-mt"></p></td>
+                    <td class="text-break body-table"><p id="SFAL-mt"></p></td>
+                    <td class="text-break body-table"><slot class="ew-slot" name="tpx_SubAktivitasNilaiSFBDLPG_mt"></slot></td>
+                    <td class="text-break body-table"><p id="AR-mt"></p></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+<table aria-hidden="true" class="table table-hover view-page-table w-25 mb-3">
+    <tbody>
+        <tr>
+            <td class="text-break fw-bold">R1</td>
+            <td class="text-break body-table fw-bold" id="R1"></td>
+        </tr>
+        <tr>
+            <td class="text-break fw-bold">R2</td>
+            <td class="text-break body-table fw-bold" id="R2"></td>
+        </tr>
+        <tr>
+            <td class="text-break fw-bold">R3</td>
+            <td class="text-break body-table fw-bold" id="R3"></td>
+        </tr>
+        <tr>
+            <td class="text-break fw-bold">R4</td>
+            <td class="text-break body-table fw-bold" id="R4"></td>
+        </tr>
+    </tbody>
+</table></div>
+</template>
+@{ subAktivitasNilaiSfbdlpgEdit.CloseRecordset(); }
+@Html.Raw(subAktivitasNilaiSfbdlpgEdit.IsModal ? "<template class=\"ew-modal-buttons\">" : "<div class=\"row ew-buttons\">")<!-- buttons .row -->
+    <div class="@(subAktivitasNilaiSfbdlpgEdit.OffsetColumnClass)"><!-- buttons offset -->
+    <button class="btn btn-primary ew-btn" name="btn-action" id="btn-action" type="submit" form="fSubAktivitasNilaiSFBDLPGedit">@Html.Raw(Language.Phrase("SaveBtn"))</button>
+@if (IsJsonResponse()) {
+    <button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" data-bs-dismiss="modal">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+} else {
+    <button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" form="fSubAktivitasNilaiSFBDLPGedit" data-href="@AppPath(subAktivitasNilaiSfbdlpgEdit.ReturnUrl)">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+}
+    </div><!-- /buttons offset -->
+@Html.Raw(subAktivitasNilaiSfbdlpgEdit.IsModal ? "</template>" : "</div>")<!-- /buttons .row -->
+</form>
+<script class="ew-apply-template">
+loadjs.ready(ew.applyTemplateId, function() {
+    var $ = jQuery;
+    ew.templateData = { rows: @Html.Raw(ConvertToJson(subAktivitasNilaiSfbdlpgEdit.Rows)) };
+    ew.applyTemplate("tpd_SubAktivitasNilaiSFBDLPGedit", "tpm_SubAktivitasNilaiSFBDLPGedit", "SubAktivitasNilaiSFBDLPGedit", "@(subAktivitasNilaiSfbdlpgEdit.Export)", "SubAktivitasNilaiSFBDLPG", ew.templateData.rows[0], @(subAktivitasNilaiSfbdlpgEdit.IsModal ? "true" : "false"));
+    loadjs.done("customtemplate");
+});
+</script>
+</main>
+@subAktivitasNilaiSfbdlpgEdit.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("SubAktivitasNilaiSFBDLPG");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Startup script
+    var NoReferensi = "@subAktivitasNilaiSfbdlpgEdit.NoReferensi.CurrentValue";
+    var IdProses = "@subAktivitasNilaiSfbdlpgEdit.idProses.CurrentValue";
+    var idAktivitas = "@subAktivitasNilaiSfbdlpgEdit.idAktifitas.CurrentValue";
+    var NamaAktivitas = $('#el_SubAktivitasNilaiSFBDLPG_idAktifitas').text();
+    const userLevel = "@CurrentUserLevel()";
+    let currentStatusAktivitas = "";
+    var parent_url = ew.PATH_BASE;
+    var steps = [
+        { number: 1, label: "Penerimaan", url: `${parent_url}PenerimaanList`, icon: "fa-box-open" },
+        { number: 2, label: "Proses", url: `${parent_url}ProsesList?cmd=search&x_IdReferensi%5B%5D=${NoReferensi}&search=&searchtype=`, icon: "fa-gears" },
+        { number: 3, label: "Aktivitas", url: `${parent_url}AktivitasList?cmd=search&x_IdProses%5B%5D=${IdProses}&search=&searchtype=`, icon: "fa-list-check" },
+        { number: 4, label: NamaAktivitas, url: '', icon: "fa-file-circle-check" }
+    ];
+    var currentStep = 4;
+    $("<style>")
+        .prop("type", "text/css")
+        .html(`
+            .stepper {
+                display: flex;
+                counter-reset: step;
+                flex-wrap: nowrap;        /* jangan pecah ke bawah */
+                overflow-x: auto;         /* scroll horizontal */
+                -webkit-overflow-scrolling: touch; /* smooth scroll di mobile */
+                padding-bottom: 8px;      /* space biar scroll bar gak nempel */
+            }
+            .stepper::-webkit-scrollbar {
+            height: 6px; /* tipis */
+            }
+            .stepper::-webkit-scrollbar-thumb {
+                background-color: #ccc;
+                border-radius: 3px;
+            }
+            .step {
+                width: 150px;
+                text-align: center;
+                position: relative;
+            }
+            .step:not(:last-child)::after {
+                content: '';
+                position: absolute;
+                top: 20px;
+                right: -50%;
+                width: 100%;
+                height: 4px;
+                background-color: #ccc;
+                z-index: 0;
+            }
+            .step.completed:not(:last-child)::after {
+                background-color: #3c6dbd;
+            }
+            .step-icon {
+                width: 36px;
+                height: 36px;
+                line-height: 36px;
+                border-radius: 50%;
+                background: #ccc;
+                display: inline-block;
+                z-index: 1;
+                position: relative;
+                color: white;
+                font-weight: bold;
+            }
+            .step.active .step-icon {
+                background: #3c6dbd;
+            }
+            .step-label {
+                margin-top: 8px;
+                font-size: 14px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                gap: 6px;
+                color: #333;
+            }
+            .step-label {
+                color: #3c6dbd !important;
+                text-decoration: none;
+                margin: 0;
+                padding: 0;
+            }
+            .step-label-not-active {
+                color: #CCCCCC !important;
+            }
+        `)
+        .appendTo("head");
+    var $stepperWrapper = $('<div class="d-flex border-bottom border-2 pb-2"><div class="stepper"></div></div>');
+    var $stepper = $stepperWrapper.find(".stepper");
+    steps.forEach(function (step, i) {
+        var isActive = step.number === currentStep;
+        var isCompleted = step.number < currentStep;
+        var stepClass = isActive ? "active" : isCompleted ? "completed" : "";
+        var icon, labelContent, html;
+        if (isActive) {
+            icon = `<div class="step-icon bg-success">${step.number}</div>`;
+            labelContent = `<div class="step-label"><p class="text-success mb-1"><i class="fa-solid ${step.icon} me-1 text-success"></i> ${step.label}</p></div>`;
+            html = `<div class="step ${stepClass} text-success">${icon}${labelContent}</div>`;
+        } else if (isCompleted) {
+            icon = `<div class="step-icon" style="background: #3c6dbd;">${step.number}</div>`;
+            labelContent = `<div class="step-label"><a href="${step.url}" class="text-primary"><i class="fa-solid ${step.icon} me-1"></i>${step.label}</a></div>`;
+            html = `<div class="step ${stepClass}">${icon}${labelContent}</div>`;
+        } else {
+            icon = `<div class="step-icon">${step.number}</div>`;
+            labelContent = `<div class="step-label-not-active"><p style="margin: 0;"><i class="fa-solid ${step.icon} me-1"></i>${step.label}</p></div>`;
+            html = `<div class="step ${stepClass} text-secondary">${icon}${labelContent}</div>`;
+        }
+        $stepper.append(html);
+    });
+    $(".content-header .container-fluid .row").append($stepperWrapper);
+    $("#btn-action").hide();
+    $("#btn-cancel").html('<i class="fa-solid fa-ban"></i></i> Cancel');
+    const $cancelButton = $("#btn-cancel");
+    const idAktifitas = $("#x_idAktifitas").val();
+    $.ajax({
+        url: parent_url + "api/LookUpList/GetBLSFALValue",
+        type: "GET",
+        data: {NoReferensi: NoReferensi, Jenis: "LPG"},
+        success: function(rs){
+            if (rs.success) {
+                $('#BL-mt').text(rs.bl_mt);
+                $('#SFAL-mt').text(rs.sfal_mt);
+            }
+        },
+        error: function (xhr, status, error) {
+            console.log("Error: " + xhr.responseText);
+        }
+    });
+    $.ajax({
+        url: parent_url + "api/LookUpList/GetARValue",
+        type: "GET",
+        data: {NoReferensi: NoReferensi, Jenis: "LPG"},
+        success: function(rs){
+            if (rs.success) {
+                $('#AR-mt').text(rs.mt);
+            }
+        },
+        error: function (xhr, status, error) {
+            console.log("Error: " + xhr.responseText);
+        }
+    });
+    $.ajax({
+        url: parent_url + "api/LookUpList/GetRValue",
+        type: "GET",
+        data: {
+            NoReferensi: NoReferensi,
+            Menu: "SFBD",
+            Jenis: "LPG"
+        },
+        success: function(rs){
+            if (rs.success) {
+
+                ["R1", "R2", "R3", "R4"].forEach(key => {
+                    let val = parseFloat(rs[key]);
+                    const el = document.getElementById(key);
+                    if (!isNaN(val)) {
+                        let color = "";
+                        val = val * 100;
+                        if (key === "R2") {
+                            if (val < -0.07) {
+                                color = "#ba313b";
+                            } else if (val >= -0.07 && val <= 0) {
+                                color = "#3c6dbd";
+                            } else {
+                                color = "#198754";
+                            }
+                        } else {
+                            if (val < -0.125) {
+                                color = "#ba313b";
+                            } else if (val >= -0.125 && val <= 0) {
+                                color = "#3c6dbd";
+                            } else {
+                                color = "#198754";
+                            }
+                        }
+                        el.textContent = val.toFixed(3) + "%";
+                        el.style.color = color;
+                    }
+                });
+            }
+        },
+        error: function (xhr, status, error) {
+            console.log("Error: " + xhr.responseText);
+        }
+    });
+
+    // --- log aktivitas start ---
+    $(document).on('click', 'button[expand-log]', function () {
+        const $btn = $(this);
+        const isExpanded = $btn.attr('expand-log') === 'true';
+        const $row = $('#log-table-row');
+        const $wrapper = $('#log-table-wrapper');
+        const $caret = $btn.find('.caret-icon');
+        if (!isExpanded) {
+            $btn.attr('expand-log', 'true');
+            $row.removeClass('d-none');
+            setTimeout(() => {
+                $wrapper.css({
+                    maxHeight: '500px'
+                });
+            }, 10);
+            $caret.removeClass('rotate-right').addClass('rotate-down');
+        } else {
+            $btn.attr('expand-log', 'false');
+            $wrapper.css({
+                maxHeight: '0'
+            });
+            setTimeout(() => {
+                $row.addClass('d-none');
+            }, 600);
+            $caret.removeClass('rotate-down').addClass('rotate-right');
+        }
+    });
+    if (idAktivitas && idAktivitas !== "0") {
+        $.ajax({
+            url: parent_url + `api/LookUpList/sub-aktivitas/startup?idAktivitas=${idAktivitas}`,
+            type: 'GET',
+            success: function(response) {
+                // cek status
+                if ($cancelButton.length){
+                    let status = response.StatusAktivitas;
+                    currentStatusAktivitas = status;
+                    let $customButtons = ``;
+                    switch (status) {
+                        case "Waiting":
+                            $customButtons = `
+                                <button type="button" class="btn btn-primary ew-btn ml-2" id="btn-draft">
+                                    <i class="fas fa-save"></i> Save
+                                </button>
+                            `;
+                            break;
+                        case "Draft":
+                            $customButtons = `
+                                <button type="button" class="btn btn-primary ew-btn ml-2" id="btn-draft">
+                                    <i class="fas fa-save"></i> Save
+                                </button>
+                                <button type="button" class="btn btn-success ew-btn ml-2" id="btn-completed">
+                                    <i class="fas fa-paper-plane"></i> Submit
+                                </button>
+                            `
+                            break;
+                        case "Completed":
+                            $customButtons = `
+                                <button type="button" class="btn btn-primary ew-btn ml-2" id="btn-editing">
+                                    <i class="fa-solid fa-pen-to-square"></i> Edit
+                                </button>
+                                <button type="button" class="btn btn-success ew-btn ml-2" id="btn-completedEdit">
+                                    <i class="fas fa-paper-plane"></i> Submit
+                                </button>
+                            `;
+                            break;
+                        case "Editing":
+                            $customButtons = `
+                                <button type="button" class="btn btn-primary ew-btn ml-2" id="btn-editing">
+                                    <i class="fa-solid fa-pen-to-square"></i> Edit
+                                </button>
+                                <button type="button" class="btn btn-success ew-btn ml-2" id="btn-completedEdit">
+                                    <i class="fas fa-paper-plane"></i> Submit
+                                </button>
+                            `;
+                                break;
+                        case "Completed Edit":
+                            if (userLevel === '4'){
+                                $customButtons = `
+                                    <button type="button" class="btn btn-warning ew-btn ml-2" id="btn-reverse-status">
+                                        <i class="fa-solid fa-pen-to-square"></i> Edit 
+                                    </button>
+                                `;
+                            }
+                        break;
+                    }
+                    $cancelButton.before($customButtons);
+                }
+
+                // Cek is editable
+                if(!response.IsEditable || response.StatusAktivitas === "Completed Edit"){
+                    $("#btn-draft").hide();
+                    $("#btn-editing").hide();
+                    $("#btn-completed").hide();
+                    $("#btn-completedEdit").hide();
+                    $('input, select, textarea').prop('disabled', true);
+                    $('#catatanReverseStatusEditing').prop('disabled', false);
+                }
+
+                // Log
+                const mappedData = response.LogAktivitas.map(item => ({
+                    Aktivitas: item.Aktivitas,
+                    Username: item.UserName,
+                    StatusAktivitas: item.StatusAktivitas,
+                    Tanggal: item.Tanggal,
+                    Catatan: item.Catatan
+                }));
+                $.getScript('https://cdn.jsdelivr.net/npm/ag-grid-community/dist/ag-grid-community.min.js', function () {
+                    const gridOptions = {
+                        rowData: mappedData,
+                        columnDefs: [
+                            {
+                                headerName: 'No.',
+                                valueGetter: 'node.rowIndex + 1',
+                                width: 80,
+                                filter: false
+                            },
+                            {
+                                headerName: 'Aktivitas',
+                                field: 'Aktivitas',
+                                flex: 1
+                            },
+                            {
+                                headerName: 'Username',
+                                field: 'Username',
+                                flex: 1
+                            },
+                            {
+                                headerName: 'Status Aktivitas',
+                                field: 'StatusAktivitas',
+                                flex: 1
+                            },
+                            {
+                                headerName: 'Tanggal',
+                                field: 'Tanggal',
+                                flex: 1
+                            },
+                            {
+                                headerName: 'Catatan',
+                                field: 'Catatan',
+                                flex: 1
+                            }
+                        ],
+                        defaultColDef: {
+                            sortable: false,
+                            suppressMovable: true,
+                            filter: true,
+                            resizable: false
+                        },
+                        rowSelection: 'multiple',
+                        suppressRowClickSelection: true,
+                        pagination: true,
+                        paginationPageSize: 10
+                    };
+                    const myGridElement = document.querySelector('#myGrid');
+                    agGrid.createGrid(myGridElement, gridOptions);
+                });
+            },
+            error: function(xhr, status, error) {
+                ew.alert(xhr.responseJSON.message ?? "Terjadi kesalahan dalam memuat data");
+            }
+        });
+    } else {
+        console.warn("Skipping startup API: Invalid IdAktivitas");
+        $('button[expand-log]').hide(); 
+        $("#btn-draft, #btn-editing, #btn-completed, #btn-completedEdit").hide();
+        $('input, select, textarea').prop('disabled', true);
+    }
+    // --- log aktivitas end ---
+    $('#x_mt')
+        .attr('inputmode', 'numeric')
+        .on('input', function () {
+            let val = $(this).val();
+            let isNegative = val.startsWith('-');
+            val = val.replace(',', '.');
+            val = val.replace(/[^0-9.]/g, '');
+            const parts = val.split('.');
+            if (parts.length > 2) {
+                val = parts[0] + '.' + parts.slice(1).join('');
+            }
+            if (isNegative) {
+                val = '-' + val;
+            }
+            $(this).val(val);
+        });
+    let uploadModal = `<div class="modal fade" id="warningValueModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h1 class="modal-title fs-5" id="warningValueModalTitle">Konfirmasi Simpan Data</h1>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body" id='warningValueText'>
+            Konfirmasi 
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="btn-cancel-modal">Batal</button>
+            <button type="button" class="btn btn-primary" id="btn-confirm-modal">Lanjutkan</button>
+          </div>
+        </div>
+      </div>
+    </div>`
+     let reverseStatusModal = `<div class="modal fade" id="confirmReverseStatusEditingModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <div class="modal-header bg-primary">
+                    <h1 class="modal-title fs-5" id="confirmReverseStatusEditingModalTitle">Konfirmasi Kembalikan Status</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                  </div>
+                  <form id="reverseStatusEditingModalForm">
+                    <div class="modal-body px-2 py-1">
+                        <div class="mb-3">
+                            <label for="message-text" class="col-form-label">Catatan:</label>
+                            <textarea class="form-control" id="catatanReverseStatusEditing" required rows="4"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="btnReverseStatusEditingModalCancel">Batal</button>
+                        <button type="submit" class="btn btn-primary" id="btnReverseStatusEditingModalSubmit">Lanjutkan</button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>`
+    $("body").append(uploadModal);
+    $("body").append(reverseStatusModal);
+    $("#btn-cancel-modal").click(function (event) {
+        event.preventDefault();
+        $("#warningValueModal").modal("hide");
+    });
+    $("#btnReverseStatusEditingModalCancel").click(function (event) {
+        event.preventDefault();
+        $("#confirmReverseStatusEditingModal").modal("hide");
+    });
+    $(document).on("click", "#btn-reverse-status", function () {
+        $("#confirmReverseStatusEditingModal").modal("show");
+    });
+});
+</script>

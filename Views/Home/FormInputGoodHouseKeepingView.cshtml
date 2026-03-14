@@ -1,0 +1,219 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (formInputGoodHouseKeepingView.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = formInputGoodHouseKeepingView.UseLayout ? "_Layout" : "";
+}
+@if (!formInputGoodHouseKeepingView.IsExport()) {
+<div class="btn-toolbar ew-toolbar">
+    @formInputGoodHouseKeepingView.ExportOptions.RenderBody()
+    @formInputGoodHouseKeepingView.OtherOptions.RenderBody()
+</div>
+}
+@formInputGoodHouseKeepingView.ShowPageHeader()
+@formInputGoodHouseKeepingView.ShowMessages()
+<main class="view">
+<form name="fFormInputGoodHouseKeepingview" id="fFormInputGoodHouseKeepingview" class="ew-form ew-view-form overlay-wrapper" action="@AppPath(CurrentPageName())" method="post" novalidate autocomplete="off">
+@if (!formInputGoodHouseKeepingView.IsExport()) {
+<script>
+var currentTable = @Html.Raw(ConvertToJson(formInputGoodHouseKeepingView.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { FormInputGoodHouseKeeping: currentTable } });
+var currentPageID = ew.PAGE_ID = "view";
+var currentForm;
+var fFormInputGoodHouseKeepingview;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("fFormInputGoodHouseKeepingview")
+        .setPageId("view")
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Client script
+    const parent_url = ew.PATH_BASE;
+    $(document).on('click', '.download-document', function (e) {
+        e.preventDefault();
+        const idGHK = $(this).data('id');
+        if (!idGHK) {
+            ew.alert("ID dokumen tidak ditemukan.");
+            return;
+        }
+        $.ajax({
+            url: parent_url + 'api/LookUpList/DownloadDocumentZip',
+            type: 'GET',
+            data: { 
+                idRef: idGHK,
+                table: 'DetailUploadGHK',
+                colRef: 'idGHK',
+                path: 'GHKDocument'
+            },
+            xhrFields: {
+                responseType: 'blob'
+            },
+            beforeSend: function () {
+                showLoading();
+            },
+            success: function (response, status, xhr) {
+                const disposition = xhr.getResponseHeader('Content-Disposition');
+                let fileName = "download_file";
+                if (disposition) {
+                    const fileNameMatch = disposition.match(/filename="?([^";]+)"?/);
+                    if (fileNameMatch && fileNameMatch[1]) {
+                        fileName = decodeURIComponent(fileNameMatch[1]);
+                    }
+                    const utf8FileNameMatch = disposition.match(/filename\*\s*=\s*UTF-8''([^;]+)/);
+                    if (utf8FileNameMatch && utf8FileNameMatch[1]) {
+                        fileName = decodeURIComponent(utf8FileNameMatch[1]);
+                    }
+                }
+                const blobUrl = window.URL.createObjectURL(response);
+                const a = document.createElement('a');
+                a.href = blobUrl;
+                a.download = fileName;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(blobUrl);
+                ew.alert("Download berhasil!");
+            },
+            error: function (xhr, status, error) {
+                if (xhr.status === 404) {
+                    ew.alert("File tidak ditemukan di server.");
+                } else if (xhr.status === 500) {
+                    ew.alert("Terjadi kesalahan server. Coba lagi nanti.");
+                } else {
+                    ew.alert("Gagal mendownload file. Error: " + xhr.responseText);
+                }
+            },
+            complete: function () {
+                hideLoading();
+            }
+        });
+    });
+});
+</script>
+}
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+<input type="hidden" name="modal" value="@ConvertToInt(formInputGoodHouseKeepingView.IsModal)">
+<table class="@(formInputGoodHouseKeepingView.TableClass)">
+@if (formInputGoodHouseKeepingView.NoReferensi.Visible) { // formInputGoodHouseKeepingView.NoReferensi.Visible (begin)
+    <tr id="r_NoReferensi" @Html.Raw(formInputGoodHouseKeepingView.NoReferensi.RowAttributes)>
+        <td class="@(formInputGoodHouseKeepingView.TableLeftColumnClass)"><span id="elh_FormInputGoodHouseKeeping_NoReferensi">@Html.Raw(formInputGoodHouseKeepingView.NoReferensi.Caption)</span></td>
+        <td data-name="NoReferensi" @Html.Raw(formInputGoodHouseKeepingView.NoReferensi.CellAttributes)>
+<span id="el_FormInputGoodHouseKeeping_NoReferensi">
+<span @Html.Raw(formInputGoodHouseKeepingView.NoReferensi.ViewAttributes)>
+@Html.Raw(formInputGoodHouseKeepingView.NoReferensi.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* formInputGoodHouseKeepingView.NoReferensi.Visible (end) *@
+@if (formInputGoodHouseKeepingView.tgltiba.Visible) { // formInputGoodHouseKeepingView.tgltiba.Visible (begin)
+    <tr id="r_tgltiba" @Html.Raw(formInputGoodHouseKeepingView.tgltiba.RowAttributes)>
+        <td class="@(formInputGoodHouseKeepingView.TableLeftColumnClass)"><span id="elh_FormInputGoodHouseKeeping_tgltiba">@Html.Raw(formInputGoodHouseKeepingView.tgltiba.Caption)</span></td>
+        <td data-name="tgltiba" @Html.Raw(formInputGoodHouseKeepingView.tgltiba.CellAttributes)>
+<span id="el_FormInputGoodHouseKeeping_tgltiba">
+<span @Html.Raw(formInputGoodHouseKeepingView.tgltiba.ViewAttributes)>
+@Html.Raw(formInputGoodHouseKeepingView.tgltiba.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* formInputGoodHouseKeepingView.tgltiba.Visible (end) *@
+@if (formInputGoodHouseKeepingView.Lokasi.Visible) { // formInputGoodHouseKeepingView.Lokasi.Visible (begin)
+    <tr id="r_Lokasi" @Html.Raw(formInputGoodHouseKeepingView.Lokasi.RowAttributes)>
+        <td class="@(formInputGoodHouseKeepingView.TableLeftColumnClass)"><span id="elh_FormInputGoodHouseKeeping_Lokasi">@Html.Raw(formInputGoodHouseKeepingView.Lokasi.Caption)</span></td>
+        <td data-name="Lokasi" @Html.Raw(formInputGoodHouseKeepingView.Lokasi.CellAttributes)>
+<span id="el_FormInputGoodHouseKeeping_Lokasi">
+<span @Html.Raw(formInputGoodHouseKeepingView.Lokasi.ViewAttributes)>
+@Html.Raw(formInputGoodHouseKeepingView.Lokasi.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* formInputGoodHouseKeepingView.Lokasi.Visible (end) *@
+@if (formInputGoodHouseKeepingView.DownloadDokumen.Visible) { // formInputGoodHouseKeepingView.DownloadDokumen.Visible (begin)
+    <tr id="r_DownloadDokumen" @Html.Raw(formInputGoodHouseKeepingView.DownloadDokumen.RowAttributes)>
+        <td class="@(formInputGoodHouseKeepingView.TableLeftColumnClass)"><span id="elh_FormInputGoodHouseKeeping_DownloadDokumen">@Html.Raw(formInputGoodHouseKeepingView.DownloadDokumen.Caption)</span></td>
+        <td data-name="DownloadDokumen" @Html.Raw(formInputGoodHouseKeepingView.DownloadDokumen.CellAttributes)>
+<span id="el_FormInputGoodHouseKeeping_DownloadDokumen">
+<span @Html.Raw(formInputGoodHouseKeepingView.DownloadDokumen.ViewAttributes)>
+@Html.Raw(formInputGoodHouseKeepingView.DownloadDokumen.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* formInputGoodHouseKeepingView.DownloadDokumen.Visible (end) *@
+@if (formInputGoodHouseKeepingView.Keterangan.Visible) { // formInputGoodHouseKeepingView.Keterangan.Visible (begin)
+    <tr id="r_Keterangan" @Html.Raw(formInputGoodHouseKeepingView.Keterangan.RowAttributes)>
+        <td class="@(formInputGoodHouseKeepingView.TableLeftColumnClass)"><span id="elh_FormInputGoodHouseKeeping_Keterangan">@Html.Raw(formInputGoodHouseKeepingView.Keterangan.Caption)</span></td>
+        <td data-name="Keterangan" @Html.Raw(formInputGoodHouseKeepingView.Keterangan.CellAttributes)>
+<span id="el_FormInputGoodHouseKeeping_Keterangan">
+<span @Html.Raw(formInputGoodHouseKeepingView.Keterangan.ViewAttributes)>
+@Html.Raw(formInputGoodHouseKeepingView.Keterangan.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* formInputGoodHouseKeepingView.Keterangan.Visible (end) *@
+@if (formInputGoodHouseKeepingView.userInput.Visible) { // formInputGoodHouseKeepingView.userInput.Visible (begin)
+    <tr id="r_userInput" @Html.Raw(formInputGoodHouseKeepingView.userInput.RowAttributes)>
+        <td class="@(formInputGoodHouseKeepingView.TableLeftColumnClass)"><span id="elh_FormInputGoodHouseKeeping_userInput">@Html.Raw(formInputGoodHouseKeepingView.userInput.Caption)</span></td>
+        <td data-name="userInput" @Html.Raw(formInputGoodHouseKeepingView.userInput.CellAttributes)>
+<span id="el_FormInputGoodHouseKeeping_userInput">
+<span @Html.Raw(formInputGoodHouseKeepingView.userInput.ViewAttributes)>
+@Html.Raw(formInputGoodHouseKeepingView.userInput.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* formInputGoodHouseKeepingView.userInput.Visible (end) *@
+@if (formInputGoodHouseKeepingView.etlDate.Visible) { // formInputGoodHouseKeepingView.etlDate.Visible (begin)
+    <tr id="r_etlDate" @Html.Raw(formInputGoodHouseKeepingView.etlDate.RowAttributes)>
+        <td class="@(formInputGoodHouseKeepingView.TableLeftColumnClass)"><span id="elh_FormInputGoodHouseKeeping_etlDate">@Html.Raw(formInputGoodHouseKeepingView.etlDate.Caption)</span></td>
+        <td data-name="etlDate" @Html.Raw(formInputGoodHouseKeepingView.etlDate.CellAttributes)>
+<span id="el_FormInputGoodHouseKeeping_etlDate">
+<span @Html.Raw(formInputGoodHouseKeepingView.etlDate.ViewAttributes)>
+@Html.Raw(formInputGoodHouseKeepingView.etlDate.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* formInputGoodHouseKeepingView.etlDate.Visible (end) *@
+@if (formInputGoodHouseKeepingView.lastUpdatedBy.Visible) { // formInputGoodHouseKeepingView.lastUpdatedBy.Visible (begin)
+    <tr id="r_lastUpdatedBy" @Html.Raw(formInputGoodHouseKeepingView.lastUpdatedBy.RowAttributes)>
+        <td class="@(formInputGoodHouseKeepingView.TableLeftColumnClass)"><span id="elh_FormInputGoodHouseKeeping_lastUpdatedBy">@Html.Raw(formInputGoodHouseKeepingView.lastUpdatedBy.Caption)</span></td>
+        <td data-name="lastUpdatedBy" @Html.Raw(formInputGoodHouseKeepingView.lastUpdatedBy.CellAttributes)>
+<span id="el_FormInputGoodHouseKeeping_lastUpdatedBy">
+<span @Html.Raw(formInputGoodHouseKeepingView.lastUpdatedBy.ViewAttributes)>
+@Html.Raw(formInputGoodHouseKeepingView.lastUpdatedBy.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* formInputGoodHouseKeepingView.lastUpdatedBy.Visible (end) *@
+@if (formInputGoodHouseKeepingView.lastUpdatedDate.Visible) { // formInputGoodHouseKeepingView.lastUpdatedDate.Visible (begin)
+    <tr id="r_lastUpdatedDate" @Html.Raw(formInputGoodHouseKeepingView.lastUpdatedDate.RowAttributes)>
+        <td class="@(formInputGoodHouseKeepingView.TableLeftColumnClass)"><span id="elh_FormInputGoodHouseKeeping_lastUpdatedDate">@Html.Raw(formInputGoodHouseKeepingView.lastUpdatedDate.Caption)</span></td>
+        <td data-name="lastUpdatedDate" @Html.Raw(formInputGoodHouseKeepingView.lastUpdatedDate.CellAttributes)>
+<span id="el_FormInputGoodHouseKeeping_lastUpdatedDate">
+<span @Html.Raw(formInputGoodHouseKeepingView.lastUpdatedDate.ViewAttributes)>
+@Html.Raw(formInputGoodHouseKeepingView.lastUpdatedDate.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* formInputGoodHouseKeepingView.lastUpdatedDate.Visible (end) *@
+</table>
+@{ formInputGoodHouseKeepingView.CloseRecordset(); }
+</form>
+</main>
+@formInputGoodHouseKeepingView.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+@if (!formInputGoodHouseKeepingView.IsExport()) {
+<script>
+loadjs.ready("load", function() {
+    // Write your table-specific startup script here
+    // document.write("page loaded");
+});
+</script>
+}

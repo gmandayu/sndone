@@ -1,0 +1,1726 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (bukuTamuEdit.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = bukuTamuEdit.UseLayout ? "_Layout" : "";
+}
+@bukuTamuEdit.ShowPageHeader()
+@bukuTamuEdit.ShowMessages()
+<main class="edit">
+<form name="fBukuTamuedit" id="fBukuTamuedit" class="@(bukuTamuEdit.FormClassName)" action="@AppPath(CurrentPageName())" method="post" novalidate autocomplete="off">
+<script>
+var currentTable = @Html.Raw(ConvertToJson(bukuTamuEdit.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { BukuTamu: currentTable } });
+var currentPageID = ew.PAGE_ID = "edit";
+var currentForm;
+var fBukuTamuedit;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("fBukuTamuedit")
+        .setPageId("edit")
+
+        // Add fields
+        .setFields([
+
+            ["id", [fields.id.visible && fields.id.required ? ew.Validators.required(fields.id.caption) : null], fields.id.isInvalid],
+            ["NomorBukuTamu", [fields.NomorBukuTamu.visible && fields.NomorBukuTamu.required ? ew.Validators.required(fields.NomorBukuTamu.caption) : null], fields.NomorBukuTamu.isInvalid],
+            ["LinkRedirect", [fields.LinkRedirect.visible && fields.LinkRedirect.required ? ew.Validators.required(fields.LinkRedirect.caption) : null], fields.LinkRedirect.isInvalid],
+            ["Plant", [fields.Plant.visible && fields.Plant.required ? ew.Validators.required(fields.Plant.caption) : null], fields.Plant.isInvalid],
+            ["Tanggal", [fields.Tanggal.visible && fields.Tanggal.required ? ew.Validators.required(fields.Tanggal.caption) : null], fields.Tanggal.isInvalid],
+            ["StatusZona", [fields.StatusZona.visible && fields.StatusZona.required ? ew.Validators.required(fields.StatusZona.caption) : null], fields.StatusZona.isInvalid],
+            ["Nama", [fields.Nama.visible && fields.Nama.required ? ew.Validators.required(fields.Nama.caption) : null], fields.Nama.isInvalid],
+            ["AsalPerusahaan", [fields.AsalPerusahaan.visible && fields.AsalPerusahaan.required ? ew.Validators.required(fields.AsalPerusahaan.caption) : null], fields.AsalPerusahaan.isInvalid],
+            ["Jabatan", [fields.Jabatan.visible && fields.Jabatan.required ? ew.Validators.required(fields.Jabatan.caption) : null], fields.Jabatan.isInvalid],
+            ["FungsiygDikunjungi", [fields.FungsiygDikunjungi.visible && fields.FungsiygDikunjungi.required ? ew.Validators.required(fields.FungsiygDikunjungi.caption) : null], fields.FungsiygDikunjungi.isInvalid],
+            ["MaksudKunjungan", [fields.MaksudKunjungan.visible && fields.MaksudKunjungan.required ? ew.Validators.required(fields.MaksudKunjungan.caption) : null], fields.MaksudKunjungan.isInvalid],
+            ["TandaPengenal", [fields.TandaPengenal.visible && fields.TandaPengenal.required ? ew.Validators.required(fields.TandaPengenal.caption) : null], fields.TandaPengenal.isInvalid],
+            ["TandaTangan", [fields.TandaTangan.visible && fields.TandaTangan.required ? ew.Validators.required(fields.TandaTangan.caption) : null], fields.TandaTangan.isInvalid],
+            ["TandaTanganDownload", [fields.TandaTanganDownload.visible && fields.TandaTanganDownload.required ? ew.Validators.required(fields.TandaTanganDownload.caption) : null], fields.TandaTanganDownload.isInvalid],
+            ["Keterangan", [fields.Keterangan.visible && fields.Keterangan.required ? ew.Validators.required(fields.Keterangan.caption) : null], fields.Keterangan.isInvalid],
+            ["PintuUtamaId", [fields.PintuUtamaId.visible && fields.PintuUtamaId.required ? ew.Validators.required(fields.PintuUtamaId.caption) : null, ew.Validators.integer], fields.PintuUtamaId.isInvalid],
+            ["PintuUtamaInTanggal", [fields.PintuUtamaInTanggal.visible && fields.PintuUtamaInTanggal.required ? ew.Validators.required(fields.PintuUtamaInTanggal.caption) : null, ew.Validators.datetime(fields.PintuUtamaInTanggal.clientFormatPattern)], fields.PintuUtamaInTanggal.isInvalid],
+            ["PintuUtamaInFoto", [fields.PintuUtamaInFoto.visible && fields.PintuUtamaInFoto.required ? ew.Validators.required(fields.PintuUtamaInFoto.caption) : null], fields.PintuUtamaInFoto.isInvalid],
+            ["PintuUtamaInFotoDownload", [fields.PintuUtamaInFotoDownload.visible && fields.PintuUtamaInFotoDownload.required ? ew.Validators.required(fields.PintuUtamaInFotoDownload.caption) : null], fields.PintuUtamaInFotoDownload.isInvalid],
+            ["PintuUtamaInUser", [fields.PintuUtamaInUser.visible && fields.PintuUtamaInUser.required ? ew.Validators.required(fields.PintuUtamaInUser.caption) : null], fields.PintuUtamaInUser.isInvalid],
+            ["CustomPilihPintu", [fields.CustomPilihPintu.visible && fields.CustomPilihPintu.required ? ew.Validators.required(fields.CustomPilihPintu.caption) : null], fields.CustomPilihPintu.isInvalid],
+            ["PintuUtamaOutTanggal", [fields.PintuUtamaOutTanggal.visible && fields.PintuUtamaOutTanggal.required ? ew.Validators.required(fields.PintuUtamaOutTanggal.caption) : null, ew.Validators.datetime(fields.PintuUtamaOutTanggal.clientFormatPattern)], fields.PintuUtamaOutTanggal.isInvalid],
+            ["PintuUtamaOutFoto", [fields.PintuUtamaOutFoto.visible && fields.PintuUtamaOutFoto.required ? ew.Validators.required(fields.PintuUtamaOutFoto.caption) : null], fields.PintuUtamaOutFoto.isInvalid],
+            ["PintuUtamaOutFotoDownload", [fields.PintuUtamaOutFotoDownload.visible && fields.PintuUtamaOutFotoDownload.required ? ew.Validators.required(fields.PintuUtamaOutFotoDownload.caption) : null], fields.PintuUtamaOutFotoDownload.isInvalid],
+            ["PintuUtamaOutUser", [fields.PintuUtamaOutUser.visible && fields.PintuUtamaOutUser.required ? ew.Validators.required(fields.PintuUtamaOutUser.caption) : null], fields.PintuUtamaOutUser.isInvalid],
+            ["LobbyUtamaId", [fields.LobbyUtamaId.visible && fields.LobbyUtamaId.required ? ew.Validators.required(fields.LobbyUtamaId.caption) : null, ew.Validators.integer], fields.LobbyUtamaId.isInvalid],
+            ["LobbyUtamaInTanggal", [fields.LobbyUtamaInTanggal.visible && fields.LobbyUtamaInTanggal.required ? ew.Validators.required(fields.LobbyUtamaInTanggal.caption) : null, ew.Validators.datetime(fields.LobbyUtamaInTanggal.clientFormatPattern)], fields.LobbyUtamaInTanggal.isInvalid],
+            ["LobbyUtamaInFoto", [fields.LobbyUtamaInFoto.visible && fields.LobbyUtamaInFoto.required ? ew.Validators.required(fields.LobbyUtamaInFoto.caption) : null], fields.LobbyUtamaInFoto.isInvalid],
+            ["LobbyUtamaInFotoDownload", [fields.LobbyUtamaInFotoDownload.visible && fields.LobbyUtamaInFotoDownload.required ? ew.Validators.required(fields.LobbyUtamaInFotoDownload.caption) : null], fields.LobbyUtamaInFotoDownload.isInvalid],
+            ["LobbyUtamaInUser", [fields.LobbyUtamaInUser.visible && fields.LobbyUtamaInUser.required ? ew.Validators.required(fields.LobbyUtamaInUser.caption) : null], fields.LobbyUtamaInUser.isInvalid],
+            ["LobbyUtamaOutTanggal", [fields.LobbyUtamaOutTanggal.visible && fields.LobbyUtamaOutTanggal.required ? ew.Validators.required(fields.LobbyUtamaOutTanggal.caption) : null, ew.Validators.datetime(fields.LobbyUtamaOutTanggal.clientFormatPattern)], fields.LobbyUtamaOutTanggal.isInvalid],
+            ["LobbyUtamaOutFoto", [fields.LobbyUtamaOutFoto.visible && fields.LobbyUtamaOutFoto.required ? ew.Validators.required(fields.LobbyUtamaOutFoto.caption) : null], fields.LobbyUtamaOutFoto.isInvalid],
+            ["LobbyUtamaOutFotoDownload", [fields.LobbyUtamaOutFotoDownload.visible && fields.LobbyUtamaOutFotoDownload.required ? ew.Validators.required(fields.LobbyUtamaOutFotoDownload.caption) : null], fields.LobbyUtamaOutFotoDownload.isInvalid],
+            ["LobbyUtamaOutUser", [fields.LobbyUtamaOutUser.visible && fields.LobbyUtamaOutUser.required ? ew.Validators.required(fields.LobbyUtamaOutUser.caption) : null], fields.LobbyUtamaOutUser.isInvalid],
+            ["AreaTerlarangId", [fields.AreaTerlarangId.visible && fields.AreaTerlarangId.required ? ew.Validators.required(fields.AreaTerlarangId.caption) : null, ew.Validators.integer], fields.AreaTerlarangId.isInvalid],
+            ["AreaTerlarangInTanggal", [fields.AreaTerlarangInTanggal.visible && fields.AreaTerlarangInTanggal.required ? ew.Validators.required(fields.AreaTerlarangInTanggal.caption) : null, ew.Validators.datetime(fields.AreaTerlarangInTanggal.clientFormatPattern)], fields.AreaTerlarangInTanggal.isInvalid],
+            ["AreaTerlarangInFoto", [fields.AreaTerlarangInFoto.visible && fields.AreaTerlarangInFoto.required ? ew.Validators.required(fields.AreaTerlarangInFoto.caption) : null], fields.AreaTerlarangInFoto.isInvalid],
+            ["AreaTerlarangInFotoDownload", [fields.AreaTerlarangInFotoDownload.visible && fields.AreaTerlarangInFotoDownload.required ? ew.Validators.required(fields.AreaTerlarangInFotoDownload.caption) : null], fields.AreaTerlarangInFotoDownload.isInvalid],
+            ["AreaTerlarangInUser", [fields.AreaTerlarangInUser.visible && fields.AreaTerlarangInUser.required ? ew.Validators.required(fields.AreaTerlarangInUser.caption) : null], fields.AreaTerlarangInUser.isInvalid],
+            ["AreaTerlarangOutTanggal", [fields.AreaTerlarangOutTanggal.visible && fields.AreaTerlarangOutTanggal.required ? ew.Validators.required(fields.AreaTerlarangOutTanggal.caption) : null, ew.Validators.datetime(fields.AreaTerlarangOutTanggal.clientFormatPattern)], fields.AreaTerlarangOutTanggal.isInvalid],
+            ["AreaTerlarangOutFoto", [fields.AreaTerlarangOutFoto.visible && fields.AreaTerlarangOutFoto.required ? ew.Validators.required(fields.AreaTerlarangOutFoto.caption) : null], fields.AreaTerlarangOutFoto.isInvalid],
+            ["AreaTerlarangOutFotoDownload", [fields.AreaTerlarangOutFotoDownload.visible && fields.AreaTerlarangOutFotoDownload.required ? ew.Validators.required(fields.AreaTerlarangOutFotoDownload.caption) : null], fields.AreaTerlarangOutFotoDownload.isInvalid],
+            ["AreaTerlarangOutUser", [fields.AreaTerlarangOutUser.visible && fields.AreaTerlarangOutUser.required ? ew.Validators.required(fields.AreaTerlarangOutUser.caption) : null], fields.AreaTerlarangOutUser.isInvalid],
+            ["etlDate", [fields.etlDate.visible && fields.etlDate.required ? ew.Validators.required(fields.etlDate.caption) : null], fields.etlDate.isInvalid],
+            ["LastUpdatedBy", [fields.LastUpdatedBy.visible && fields.LastUpdatedBy.required ? ew.Validators.required(fields.LastUpdatedBy.caption) : null], fields.LastUpdatedBy.isInvalid],
+            ["lastUpdatedDate", [fields.lastUpdatedDate.visible && fields.lastUpdatedDate.required ? ew.Validators.required(fields.lastUpdatedDate.caption) : null], fields.lastUpdatedDate.isInvalid],
+            ["StatusZonaPrev", [fields.StatusZonaPrev.visible && fields.StatusZonaPrev.required ? ew.Validators.required(fields.StatusZonaPrev.caption) : null], fields.StatusZonaPrev.isInvalid]
+        ])
+
+        // Form_CustomValidate
+        .setCustomValidate(
+            function(fobj) { // DO NOT CHANGE THIS LINE!
+                    // Your custom validation code here, return false if invalid.
+                    return true;
+                }
+        )
+
+        // Use JavaScript validation or not
+        .setValidateRequired(ew.CLIENT_VALIDATE)
+
+        // Dynamic selection lists
+        .setLists({
+        })
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Write your client script here, no need to add script tags.
+});
+</script>
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+<input type="hidden" name="action" id="action" value="update">
+<input type="hidden" name="modal" value="@ConvertToInt(bukuTamuEdit.IsModal)">
+@if (IsJsonResponse()) {
+<input type="hidden" name="json" value="1">
+}
+<input type="hidden" name="@(bukuTamuEdit.OldKeyName)" value="@Html.Raw(bukuTamuEdit.OldKey)">
+<div class="ew-edit-div d-none"><!-- page* -->
+@if (bukuTamuEdit.id.Visible) { // bukuTamuEdit.id.Visible (begin)
+    <div id="r_id" @Html.Raw(bukuTamuEdit.id.RowAttributes)>
+        <label id="elh_BukuTamu_id" class="@(bukuTamuEdit.LeftColumnClass)"><template id="tpc_BukuTamu_id">@Html.Raw(bukuTamuEdit.id.Caption)@Html.Raw(bukuTamuEdit.id.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(bukuTamuEdit.RightColumnClass)"><div @Html.Raw(bukuTamuEdit.id.CellAttributes)>
+<template id="tpx_BukuTamu_id"><span id="el_BukuTamu_id">
+<span @Html.Raw(bukuTamuEdit.id.ViewAttributes)>
+<input type="text" readonly class="form-control-plaintext" value="@Html.Raw(RemoveHtml(ConvertToString(bukuTamuEdit.id.EditValue)))"></span>
+<input type="hidden" data-table="BukuTamu" data-field="x_id" data-hidden="1" name="x_id" id="x_id" value="@Html.Raw(HtmlEncode(bukuTamuEdit.id.CurrentValue))">
+</span></template>
+</div></div>
+    </div>
+} @* bukuTamuEdit.id.Visible (end) *@
+@if (bukuTamuEdit.NomorBukuTamu.Visible) { // bukuTamuEdit.NomorBukuTamu.Visible (begin)
+    <div id="r_NomorBukuTamu" @Html.Raw(bukuTamuEdit.NomorBukuTamu.RowAttributes)>
+        <label id="elh_BukuTamu_NomorBukuTamu" for="x_NomorBukuTamu" class="@(bukuTamuEdit.LeftColumnClass)"><template id="tpc_BukuTamu_NomorBukuTamu">@Html.Raw(bukuTamuEdit.NomorBukuTamu.Caption)@Html.Raw(bukuTamuEdit.NomorBukuTamu.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(bukuTamuEdit.RightColumnClass)"><div @Html.Raw(bukuTamuEdit.NomorBukuTamu.CellAttributes)>
+<template id="tpx_BukuTamu_NomorBukuTamu"><span id="el_BukuTamu_NomorBukuTamu">
+<span @Html.Raw(bukuTamuEdit.NomorBukuTamu.ViewAttributes)>
+<input type="text" readonly class="form-control-plaintext" value="@Html.Raw(RemoveHtml(ConvertToString(bukuTamuEdit.NomorBukuTamu.EditValue)))"></span>
+<input type="hidden" data-table="BukuTamu" data-field="x_NomorBukuTamu" data-hidden="1" name="x_NomorBukuTamu" id="x_NomorBukuTamu" value="@Html.Raw(HtmlEncode(bukuTamuEdit.NomorBukuTamu.CurrentValue))">
+</span></template>
+</div></div>
+    </div>
+} @* bukuTamuEdit.NomorBukuTamu.Visible (end) *@
+@if (bukuTamuEdit.LinkRedirect.Visible) { // bukuTamuEdit.LinkRedirect.Visible (begin)
+    <div id="r_LinkRedirect" @Html.Raw(bukuTamuEdit.LinkRedirect.RowAttributes)>
+        <label id="elh_BukuTamu_LinkRedirect" for="x_LinkRedirect" class="@(bukuTamuEdit.LeftColumnClass)"><template id="tpc_BukuTamu_LinkRedirect">@Html.Raw(bukuTamuEdit.LinkRedirect.Caption)@Html.Raw(bukuTamuEdit.LinkRedirect.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(bukuTamuEdit.RightColumnClass)"><div @Html.Raw(bukuTamuEdit.LinkRedirect.CellAttributes)>
+<template id="tpx_BukuTamu_LinkRedirect"><span id="el_BukuTamu_LinkRedirect">
+<span @Html.Raw(bukuTamuEdit.LinkRedirect.ViewAttributes)>
+<input type="text" readonly class="form-control-plaintext" value="@Html.Raw(RemoveHtml(ConvertToString(bukuTamuEdit.LinkRedirect.EditValue)))"></span>
+<input type="hidden" data-table="BukuTamu" data-field="x_LinkRedirect" data-hidden="1" name="x_LinkRedirect" id="x_LinkRedirect" value="@Html.Raw(HtmlEncode(bukuTamuEdit.LinkRedirect.CurrentValue))">
+</span></template>
+</div></div>
+    </div>
+} @* bukuTamuEdit.LinkRedirect.Visible (end) *@
+@if (bukuTamuEdit.Plant.Visible) { // bukuTamuEdit.Plant.Visible (begin)
+    <div id="r_Plant" @Html.Raw(bukuTamuEdit.Plant.RowAttributes)>
+        <label id="elh_BukuTamu_Plant" class="@(bukuTamuEdit.LeftColumnClass)"><template id="tpc_BukuTamu_Plant">@Html.Raw(bukuTamuEdit.Plant.Caption)@Html.Raw(bukuTamuEdit.Plant.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(bukuTamuEdit.RightColumnClass)"><div @Html.Raw(bukuTamuEdit.Plant.CellAttributes)>
+<template id="tpx_BukuTamu_Plant"><span id="el_BukuTamu_Plant">
+<span @Html.Raw(bukuTamuEdit.Plant.ViewAttributes)>
+<span class="form-control-plaintext">@Html.Raw(bukuTamuEdit.Plant.DisplayValue(bukuTamuEdit.Plant.EditValue))</span></span>
+<input type="hidden" data-table="BukuTamu" data-field="x_Plant" data-hidden="1" name="x_Plant" id="x_Plant" value="@Html.Raw(HtmlEncode(bukuTamuEdit.Plant.CurrentValue))">
+</span></template>
+</div></div>
+    </div>
+} @* bukuTamuEdit.Plant.Visible (end) *@
+@if (bukuTamuEdit.Tanggal.Visible) { // bukuTamuEdit.Tanggal.Visible (begin)
+    <div id="r_Tanggal" @Html.Raw(bukuTamuEdit.Tanggal.RowAttributes)>
+        <label id="elh_BukuTamu_Tanggal" for="x_Tanggal" class="@(bukuTamuEdit.LeftColumnClass)"><template id="tpc_BukuTamu_Tanggal">@Html.Raw(bukuTamuEdit.Tanggal.Caption)@Html.Raw(bukuTamuEdit.Tanggal.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(bukuTamuEdit.RightColumnClass)"><div @Html.Raw(bukuTamuEdit.Tanggal.CellAttributes)>
+<template id="tpx_BukuTamu_Tanggal"><span id="el_BukuTamu_Tanggal">
+<span @Html.Raw(bukuTamuEdit.Tanggal.ViewAttributes)>
+<input type="text" readonly class="form-control-plaintext" value="@Html.Raw(RemoveHtml(ConvertToString(bukuTamuEdit.Tanggal.EditValue)))"></span>
+<input type="hidden" data-table="BukuTamu" data-field="x_Tanggal" data-hidden="1" name="x_Tanggal" id="x_Tanggal" value="@Html.Raw(HtmlEncode(bukuTamuEdit.Tanggal.CurrentValue))">
+</span></template>
+</div></div>
+    </div>
+} @* bukuTamuEdit.Tanggal.Visible (end) *@
+@if (bukuTamuEdit.StatusZona.Visible) { // bukuTamuEdit.StatusZona.Visible (begin)
+    <div id="r_StatusZona" @Html.Raw(bukuTamuEdit.StatusZona.RowAttributes)>
+        <label id="elh_BukuTamu_StatusZona" for="x_StatusZona" class="@(bukuTamuEdit.LeftColumnClass)"><template id="tpc_BukuTamu_StatusZona">@Html.Raw(bukuTamuEdit.StatusZona.Caption)@Html.Raw(bukuTamuEdit.StatusZona.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(bukuTamuEdit.RightColumnClass)"><div @Html.Raw(bukuTamuEdit.StatusZona.CellAttributes)>
+<template id="tpx_BukuTamu_StatusZona"><span id="el_BukuTamu_StatusZona">
+<span @Html.Raw(bukuTamuEdit.StatusZona.ViewAttributes)>
+<input type="text" readonly class="form-control-plaintext" value="@Html.Raw(RemoveHtml(ConvertToString(bukuTamuEdit.StatusZona.EditValue)))"></span>
+<input type="hidden" data-table="BukuTamu" data-field="x_StatusZona" data-hidden="1" name="x_StatusZona" id="x_StatusZona" value="@Html.Raw(HtmlEncode(bukuTamuEdit.StatusZona.CurrentValue))">
+</span></template>
+</div></div>
+    </div>
+} @* bukuTamuEdit.StatusZona.Visible (end) *@
+@if (bukuTamuEdit.Nama.Visible) { // bukuTamuEdit.Nama.Visible (begin)
+    <div id="r_Nama" @Html.Raw(bukuTamuEdit.Nama.RowAttributes)>
+        <label id="elh_BukuTamu_Nama" for="x_Nama" class="@(bukuTamuEdit.LeftColumnClass)"><template id="tpc_BukuTamu_Nama">@Html.Raw(bukuTamuEdit.Nama.Caption)@Html.Raw(bukuTamuEdit.Nama.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(bukuTamuEdit.RightColumnClass)"><div @Html.Raw(bukuTamuEdit.Nama.CellAttributes)>
+<template id="tpx_BukuTamu_Nama"><span id="el_BukuTamu_Nama">
+<span @Html.Raw(bukuTamuEdit.Nama.ViewAttributes)>
+<input type="text" readonly class="form-control-plaintext" value="@Html.Raw(RemoveHtml(ConvertToString(bukuTamuEdit.Nama.EditValue)))"></span>
+<input type="hidden" data-table="BukuTamu" data-field="x_Nama" data-hidden="1" name="x_Nama" id="x_Nama" value="@Html.Raw(HtmlEncode(bukuTamuEdit.Nama.CurrentValue))">
+</span></template>
+</div></div>
+    </div>
+} @* bukuTamuEdit.Nama.Visible (end) *@
+@if (bukuTamuEdit.AsalPerusahaan.Visible) { // bukuTamuEdit.AsalPerusahaan.Visible (begin)
+    <div id="r_AsalPerusahaan" @Html.Raw(bukuTamuEdit.AsalPerusahaan.RowAttributes)>
+        <label id="elh_BukuTamu_AsalPerusahaan" for="x_AsalPerusahaan" class="@(bukuTamuEdit.LeftColumnClass)"><template id="tpc_BukuTamu_AsalPerusahaan">@Html.Raw(bukuTamuEdit.AsalPerusahaan.Caption)@Html.Raw(bukuTamuEdit.AsalPerusahaan.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(bukuTamuEdit.RightColumnClass)"><div @Html.Raw(bukuTamuEdit.AsalPerusahaan.CellAttributes)>
+<template id="tpx_BukuTamu_AsalPerusahaan"><span id="el_BukuTamu_AsalPerusahaan">
+<span @Html.Raw(bukuTamuEdit.AsalPerusahaan.ViewAttributes)>
+<input type="text" readonly class="form-control-plaintext" value="@Html.Raw(RemoveHtml(ConvertToString(bukuTamuEdit.AsalPerusahaan.EditValue)))"></span>
+<input type="hidden" data-table="BukuTamu" data-field="x_AsalPerusahaan" data-hidden="1" name="x_AsalPerusahaan" id="x_AsalPerusahaan" value="@Html.Raw(HtmlEncode(bukuTamuEdit.AsalPerusahaan.CurrentValue))">
+</span></template>
+</div></div>
+    </div>
+} @* bukuTamuEdit.AsalPerusahaan.Visible (end) *@
+@if (bukuTamuEdit.Jabatan.Visible) { // bukuTamuEdit.Jabatan.Visible (begin)
+    <div id="r_Jabatan" @Html.Raw(bukuTamuEdit.Jabatan.RowAttributes)>
+        <label id="elh_BukuTamu_Jabatan" for="x_Jabatan" class="@(bukuTamuEdit.LeftColumnClass)"><template id="tpc_BukuTamu_Jabatan">@Html.Raw(bukuTamuEdit.Jabatan.Caption)@Html.Raw(bukuTamuEdit.Jabatan.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(bukuTamuEdit.RightColumnClass)"><div @Html.Raw(bukuTamuEdit.Jabatan.CellAttributes)>
+<template id="tpx_BukuTamu_Jabatan"><span id="el_BukuTamu_Jabatan">
+<span @Html.Raw(bukuTamuEdit.Jabatan.ViewAttributes)>
+<input type="text" readonly class="form-control-plaintext" value="@Html.Raw(RemoveHtml(ConvertToString(bukuTamuEdit.Jabatan.EditValue)))"></span>
+<input type="hidden" data-table="BukuTamu" data-field="x_Jabatan" data-hidden="1" name="x_Jabatan" id="x_Jabatan" value="@Html.Raw(HtmlEncode(bukuTamuEdit.Jabatan.CurrentValue))">
+</span></template>
+</div></div>
+    </div>
+} @* bukuTamuEdit.Jabatan.Visible (end) *@
+@if (bukuTamuEdit.FungsiygDikunjungi.Visible) { // bukuTamuEdit.FungsiygDikunjungi.Visible (begin)
+    <div id="r_FungsiygDikunjungi" @Html.Raw(bukuTamuEdit.FungsiygDikunjungi.RowAttributes)>
+        <label id="elh_BukuTamu_FungsiygDikunjungi" for="x_FungsiygDikunjungi" class="@(bukuTamuEdit.LeftColumnClass)"><template id="tpc_BukuTamu_FungsiygDikunjungi">@Html.Raw(bukuTamuEdit.FungsiygDikunjungi.Caption)@Html.Raw(bukuTamuEdit.FungsiygDikunjungi.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(bukuTamuEdit.RightColumnClass)"><div @Html.Raw(bukuTamuEdit.FungsiygDikunjungi.CellAttributes)>
+<template id="tpx_BukuTamu_FungsiygDikunjungi"><span id="el_BukuTamu_FungsiygDikunjungi">
+<span @Html.Raw(bukuTamuEdit.FungsiygDikunjungi.ViewAttributes)>
+<span class="form-control-plaintext">@Html.Raw(bukuTamuEdit.FungsiygDikunjungi.DisplayValue(bukuTamuEdit.FungsiygDikunjungi.EditValue))</span></span>
+<input type="hidden" data-table="BukuTamu" data-field="x_FungsiygDikunjungi" data-hidden="1" name="x_FungsiygDikunjungi" id="x_FungsiygDikunjungi" value="@Html.Raw(HtmlEncode(bukuTamuEdit.FungsiygDikunjungi.CurrentValue))">
+</span></template>
+</div></div>
+    </div>
+} @* bukuTamuEdit.FungsiygDikunjungi.Visible (end) *@
+@if (bukuTamuEdit.MaksudKunjungan.Visible) { // bukuTamuEdit.MaksudKunjungan.Visible (begin)
+    <div id="r_MaksudKunjungan" @Html.Raw(bukuTamuEdit.MaksudKunjungan.RowAttributes)>
+        <label id="elh_BukuTamu_MaksudKunjungan" for="x_MaksudKunjungan" class="@(bukuTamuEdit.LeftColumnClass)"><template id="tpc_BukuTamu_MaksudKunjungan">@Html.Raw(bukuTamuEdit.MaksudKunjungan.Caption)@Html.Raw(bukuTamuEdit.MaksudKunjungan.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(bukuTamuEdit.RightColumnClass)"><div @Html.Raw(bukuTamuEdit.MaksudKunjungan.CellAttributes)>
+<template id="tpx_BukuTamu_MaksudKunjungan"><span id="el_BukuTamu_MaksudKunjungan">
+<span @Html.Raw(bukuTamuEdit.MaksudKunjungan.ViewAttributes)>
+<input type="text" readonly class="form-control-plaintext" value="@Html.Raw(RemoveHtml(ConvertToString(bukuTamuEdit.MaksudKunjungan.EditValue)))"></span>
+<input type="hidden" data-table="BukuTamu" data-field="x_MaksudKunjungan" data-hidden="1" name="x_MaksudKunjungan" id="x_MaksudKunjungan" value="@Html.Raw(HtmlEncode(bukuTamuEdit.MaksudKunjungan.CurrentValue))">
+</span></template>
+</div></div>
+    </div>
+} @* bukuTamuEdit.MaksudKunjungan.Visible (end) *@
+@if (bukuTamuEdit.TandaPengenal.Visible) { // bukuTamuEdit.TandaPengenal.Visible (begin)
+    <div id="r_TandaPengenal" @Html.Raw(bukuTamuEdit.TandaPengenal.RowAttributes)>
+        <label id="elh_BukuTamu_TandaPengenal" for="x_TandaPengenal" class="@(bukuTamuEdit.LeftColumnClass)"><template id="tpc_BukuTamu_TandaPengenal">@Html.Raw(bukuTamuEdit.TandaPengenal.Caption)@Html.Raw(bukuTamuEdit.TandaPengenal.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(bukuTamuEdit.RightColumnClass)"><div @Html.Raw(bukuTamuEdit.TandaPengenal.CellAttributes)>
+<template id="tpx_BukuTamu_TandaPengenal"><span id="el_BukuTamu_TandaPengenal">
+<span @Html.Raw(bukuTamuEdit.TandaPengenal.ViewAttributes)>
+<span class="form-control-plaintext">@Html.Raw(bukuTamuEdit.TandaPengenal.DisplayValue(bukuTamuEdit.TandaPengenal.EditValue))</span></span>
+<input type="hidden" data-table="BukuTamu" data-field="x_TandaPengenal" data-hidden="1" name="x_TandaPengenal" id="x_TandaPengenal" value="@Html.Raw(HtmlEncode(bukuTamuEdit.TandaPengenal.CurrentValue))">
+</span></template>
+</div></div>
+    </div>
+} @* bukuTamuEdit.TandaPengenal.Visible (end) *@
+@if (bukuTamuEdit.TandaTangan.Visible) { // bukuTamuEdit.TandaTangan.Visible (begin)
+    <div id="r_TandaTangan" @Html.Raw(bukuTamuEdit.TandaTangan.RowAttributes)>
+        <label id="elh_BukuTamu_TandaTangan" for="x_TandaTangan" class="@(bukuTamuEdit.LeftColumnClass)"><template id="tpc_BukuTamu_TandaTangan">@Html.Raw(bukuTamuEdit.TandaTangan.Caption)@Html.Raw(bukuTamuEdit.TandaTangan.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(bukuTamuEdit.RightColumnClass)"><div @Html.Raw(bukuTamuEdit.TandaTangan.CellAttributes)>
+<template id="tpx_BukuTamu_TandaTangan"><span id="el_BukuTamu_TandaTangan">
+<textarea data-table="BukuTamu" data-field="x_TandaTangan" name="x_TandaTangan" id="x_TandaTangan" cols="35" rows="4" placeholder="@Html.Raw(HtmlEncode(bukuTamuEdit.TandaTangan.PlaceHolder))"@Html.Raw(bukuTamuEdit.TandaTangan.EditAttributes) aria-describedby="x_TandaTangan_help">@(bukuTamuEdit.TandaTangan.EditValue)</textarea>
+@Html.Raw(bukuTamuEdit.TandaTangan.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(bukuTamuEdit.TandaTangan.GetErrorMessage())</div>
+</span></template>
+</div></div>
+    </div>
+} @* bukuTamuEdit.TandaTangan.Visible (end) *@
+@if (bukuTamuEdit.TandaTanganDownload.Visible) { // bukuTamuEdit.TandaTanganDownload.Visible (begin)
+    <div id="r_TandaTanganDownload" @Html.Raw(bukuTamuEdit.TandaTanganDownload.RowAttributes)>
+        <label id="elh_BukuTamu_TandaTanganDownload" for="x_TandaTanganDownload" class="@(bukuTamuEdit.LeftColumnClass)"><template id="tpc_BukuTamu_TandaTanganDownload">@Html.Raw(bukuTamuEdit.TandaTanganDownload.Caption)@Html.Raw(bukuTamuEdit.TandaTanganDownload.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(bukuTamuEdit.RightColumnClass)"><div @Html.Raw(bukuTamuEdit.TandaTanganDownload.CellAttributes)>
+<template id="tpx_BukuTamu_TandaTanganDownload"><span id="el_BukuTamu_TandaTanganDownload">
+<textarea data-table="BukuTamu" data-field="x_TandaTanganDownload" name="x_TandaTanganDownload" id="x_TandaTanganDownload" cols="35" rows="4" placeholder="@Html.Raw(HtmlEncode(bukuTamuEdit.TandaTanganDownload.PlaceHolder))"@Html.Raw(bukuTamuEdit.TandaTanganDownload.EditAttributes) aria-describedby="x_TandaTanganDownload_help">@(bukuTamuEdit.TandaTanganDownload.EditValue)</textarea>
+@Html.Raw(bukuTamuEdit.TandaTanganDownload.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(bukuTamuEdit.TandaTanganDownload.GetErrorMessage())</div>
+</span></template>
+</div></div>
+    </div>
+} @* bukuTamuEdit.TandaTanganDownload.Visible (end) *@
+@if (bukuTamuEdit.Keterangan.Visible) { // bukuTamuEdit.Keterangan.Visible (begin)
+    <div id="r_Keterangan" @Html.Raw(bukuTamuEdit.Keterangan.RowAttributes)>
+        <label id="elh_BukuTamu_Keterangan" for="x_Keterangan" class="@(bukuTamuEdit.LeftColumnClass)"><template id="tpc_BukuTamu_Keterangan">@Html.Raw(bukuTamuEdit.Keterangan.Caption)@Html.Raw(bukuTamuEdit.Keterangan.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(bukuTamuEdit.RightColumnClass)"><div @Html.Raw(bukuTamuEdit.Keterangan.CellAttributes)>
+<template id="tpx_BukuTamu_Keterangan"><span id="el_BukuTamu_Keterangan">
+<textarea data-table="BukuTamu" data-field="x_Keterangan" name="x_Keterangan" id="x_Keterangan" cols="35" rows="4" placeholder="@Html.Raw(HtmlEncode(bukuTamuEdit.Keterangan.PlaceHolder))"@Html.Raw(bukuTamuEdit.Keterangan.EditAttributes) aria-describedby="x_Keterangan_help">@(bukuTamuEdit.Keterangan.EditValue)</textarea>
+@Html.Raw(bukuTamuEdit.Keterangan.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(bukuTamuEdit.Keterangan.GetErrorMessage())</div>
+</span></template>
+</div></div>
+    </div>
+} @* bukuTamuEdit.Keterangan.Visible (end) *@
+@if (bukuTamuEdit.PintuUtamaId.Visible) { // bukuTamuEdit.PintuUtamaId.Visible (begin)
+    <div id="r_PintuUtamaId" @Html.Raw(bukuTamuEdit.PintuUtamaId.RowAttributes)>
+        <label id="elh_BukuTamu_PintuUtamaId" for="x_PintuUtamaId" class="@(bukuTamuEdit.LeftColumnClass)"><template id="tpc_BukuTamu_PintuUtamaId">@Html.Raw(bukuTamuEdit.PintuUtamaId.Caption)@Html.Raw(bukuTamuEdit.PintuUtamaId.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(bukuTamuEdit.RightColumnClass)"><div @Html.Raw(bukuTamuEdit.PintuUtamaId.CellAttributes)>
+<template id="tpx_BukuTamu_PintuUtamaId"><span id="el_BukuTamu_PintuUtamaId">
+<input type="@(bukuTamuEdit.PintuUtamaId.InputTextType)" name="x_PintuUtamaId" id="x_PintuUtamaId" data-table="BukuTamu" data-field="x_PintuUtamaId" value="@Html.Raw(bukuTamuEdit.PintuUtamaId.EditValue)" size="30" maxlength="100" placeholder="@Html.Raw(HtmlEncode(bukuTamuEdit.PintuUtamaId.PlaceHolder))" data-format-pattern="@(bukuTamuEdit.PintuUtamaId.FormatPattern)"@Html.Raw(bukuTamuEdit.PintuUtamaId.EditAttributes) aria-describedby="x_PintuUtamaId_help">
+@Html.Raw(bukuTamuEdit.PintuUtamaId.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(bukuTamuEdit.PintuUtamaId.GetErrorMessage())</div>
+</span></template>
+</div></div>
+    </div>
+} @* bukuTamuEdit.PintuUtamaId.Visible (end) *@
+@if (bukuTamuEdit.PintuUtamaInTanggal.Visible) { // bukuTamuEdit.PintuUtamaInTanggal.Visible (begin)
+    <div id="r_PintuUtamaInTanggal" @Html.Raw(bukuTamuEdit.PintuUtamaInTanggal.RowAttributes)>
+        <label id="elh_BukuTamu_PintuUtamaInTanggal" for="x_PintuUtamaInTanggal" class="@(bukuTamuEdit.LeftColumnClass)"><template id="tpc_BukuTamu_PintuUtamaInTanggal">@Html.Raw(bukuTamuEdit.PintuUtamaInTanggal.Caption)@Html.Raw(bukuTamuEdit.PintuUtamaInTanggal.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(bukuTamuEdit.RightColumnClass)"><div @Html.Raw(bukuTamuEdit.PintuUtamaInTanggal.CellAttributes)>
+<template id="tpx_BukuTamu_PintuUtamaInTanggal"><span id="el_BukuTamu_PintuUtamaInTanggal">
+<input type="@(bukuTamuEdit.PintuUtamaInTanggal.InputTextType)" name="x_PintuUtamaInTanggal" id="x_PintuUtamaInTanggal" data-table="BukuTamu" data-field="x_PintuUtamaInTanggal" value="@Html.Raw(bukuTamuEdit.PintuUtamaInTanggal.EditValue)" placeholder="@Html.Raw(HtmlEncode(bukuTamuEdit.PintuUtamaInTanggal.PlaceHolder))" data-format-pattern="@(bukuTamuEdit.PintuUtamaInTanggal.FormatPattern)"@Html.Raw(bukuTamuEdit.PintuUtamaInTanggal.EditAttributes) aria-describedby="x_PintuUtamaInTanggal_help">
+@Html.Raw(bukuTamuEdit.PintuUtamaInTanggal.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(bukuTamuEdit.PintuUtamaInTanggal.GetErrorMessage())</div>
+@if (!bukuTamuEdit.PintuUtamaInTanggal.ReadOnly && !bukuTamuEdit.PintuUtamaInTanggal.Disabled && !bukuTamuEdit.PintuUtamaInTanggal.EditAttrs.Is("readonly") && !bukuTamuEdit.PintuUtamaInTanggal.EditAttrs.Is("disabled")) {
+<script>
+loadjs.ready(["fBukuTamuedit", "datetimepicker"], function () {
+    let format = "@Html.Raw(DateFormat(9))", // DN
+        options = {
+                localization: {
+                    locale: ew.LANGUAGE_ID + "-u-nu-" + ew.getNumberingSystem(),
+                    hourCycle: format.match(/H/) ? "h24" : "h12",
+                    format,
+                    ...ew.language.phrase("datetimepicker")
+                },
+                display: {
+                    icons: {
+                        previous: ew.IS_RTL ? "fa-solid fa-chevron-right" : "fa-solid fa-chevron-left",
+                        next: ew.IS_RTL ? "fa-solid fa-chevron-left" : "fa-solid fa-chevron-right"
+                    },
+                    components: {
+                        clock: !!format.match(/h/i) || !!format.match(/m/) || !!format.match(/s/i),
+                        hours: !!format.match(/h/i),
+                        minutes: !!format.match(/m/),
+                        seconds: !!format.match(/s/i)
+                    },
+                theme: ew.getPreferredTheme()
+                }
+            };
+    ew.createDateTimePicker("fBukuTamuedit", "x_PintuUtamaInTanggal", ew.deepAssign({"useCurrent":false,"display":{"sideBySide":false}}, options));
+});
+</script>
+}
+</span></template>
+</div></div>
+    </div>
+} @* bukuTamuEdit.PintuUtamaInTanggal.Visible (end) *@
+@if (bukuTamuEdit.PintuUtamaInFoto.Visible) { // bukuTamuEdit.PintuUtamaInFoto.Visible (begin)
+    <div id="r_PintuUtamaInFoto" @Html.Raw(bukuTamuEdit.PintuUtamaInFoto.RowAttributes)>
+        <label id="elh_BukuTamu_PintuUtamaInFoto" for="x_PintuUtamaInFoto" class="@(bukuTamuEdit.LeftColumnClass)"><template id="tpc_BukuTamu_PintuUtamaInFoto">@Html.Raw(bukuTamuEdit.PintuUtamaInFoto.Caption)@Html.Raw(bukuTamuEdit.PintuUtamaInFoto.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(bukuTamuEdit.RightColumnClass)"><div @Html.Raw(bukuTamuEdit.PintuUtamaInFoto.CellAttributes)>
+<template id="tpx_BukuTamu_PintuUtamaInFoto"><span id="el_BukuTamu_PintuUtamaInFoto">
+<textarea data-table="BukuTamu" data-field="x_PintuUtamaInFoto" name="x_PintuUtamaInFoto" id="x_PintuUtamaInFoto" cols="35" rows="4" placeholder="@Html.Raw(HtmlEncode(bukuTamuEdit.PintuUtamaInFoto.PlaceHolder))"@Html.Raw(bukuTamuEdit.PintuUtamaInFoto.EditAttributes) aria-describedby="x_PintuUtamaInFoto_help">@(bukuTamuEdit.PintuUtamaInFoto.EditValue)</textarea>
+@Html.Raw(bukuTamuEdit.PintuUtamaInFoto.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(bukuTamuEdit.PintuUtamaInFoto.GetErrorMessage())</div>
+</span></template>
+</div></div>
+    </div>
+} @* bukuTamuEdit.PintuUtamaInFoto.Visible (end) *@
+@if (bukuTamuEdit.PintuUtamaInFotoDownload.Visible) { // bukuTamuEdit.PintuUtamaInFotoDownload.Visible (begin)
+    <div id="r_PintuUtamaInFotoDownload" @Html.Raw(bukuTamuEdit.PintuUtamaInFotoDownload.RowAttributes)>
+        <label id="elh_BukuTamu_PintuUtamaInFotoDownload" for="x_PintuUtamaInFotoDownload" class="@(bukuTamuEdit.LeftColumnClass)"><template id="tpc_BukuTamu_PintuUtamaInFotoDownload">@Html.Raw(bukuTamuEdit.PintuUtamaInFotoDownload.Caption)@Html.Raw(bukuTamuEdit.PintuUtamaInFotoDownload.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(bukuTamuEdit.RightColumnClass)"><div @Html.Raw(bukuTamuEdit.PintuUtamaInFotoDownload.CellAttributes)>
+<template id="tpx_BukuTamu_PintuUtamaInFotoDownload"><span id="el_BukuTamu_PintuUtamaInFotoDownload">
+<textarea data-table="BukuTamu" data-field="x_PintuUtamaInFotoDownload" name="x_PintuUtamaInFotoDownload" id="x_PintuUtamaInFotoDownload" cols="35" rows="4" placeholder="@Html.Raw(HtmlEncode(bukuTamuEdit.PintuUtamaInFotoDownload.PlaceHolder))"@Html.Raw(bukuTamuEdit.PintuUtamaInFotoDownload.EditAttributes) aria-describedby="x_PintuUtamaInFotoDownload_help">@(bukuTamuEdit.PintuUtamaInFotoDownload.EditValue)</textarea>
+@Html.Raw(bukuTamuEdit.PintuUtamaInFotoDownload.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(bukuTamuEdit.PintuUtamaInFotoDownload.GetErrorMessage())</div>
+</span></template>
+</div></div>
+    </div>
+} @* bukuTamuEdit.PintuUtamaInFotoDownload.Visible (end) *@
+@if (bukuTamuEdit.PintuUtamaInUser.Visible) { // bukuTamuEdit.PintuUtamaInUser.Visible (begin)
+    <div id="r_PintuUtamaInUser" @Html.Raw(bukuTamuEdit.PintuUtamaInUser.RowAttributes)>
+        <label id="elh_BukuTamu_PintuUtamaInUser" for="x_PintuUtamaInUser" class="@(bukuTamuEdit.LeftColumnClass)"><template id="tpc_BukuTamu_PintuUtamaInUser">@Html.Raw(bukuTamuEdit.PintuUtamaInUser.Caption)@Html.Raw(bukuTamuEdit.PintuUtamaInUser.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(bukuTamuEdit.RightColumnClass)"><div @Html.Raw(bukuTamuEdit.PintuUtamaInUser.CellAttributes)>
+<template id="tpx_BukuTamu_PintuUtamaInUser"><span id="el_BukuTamu_PintuUtamaInUser">
+<span @Html.Raw(bukuTamuEdit.PintuUtamaInUser.ViewAttributes)>
+<input type="text" readonly class="form-control-plaintext" value="@Html.Raw(RemoveHtml(ConvertToString(bukuTamuEdit.PintuUtamaInUser.EditValue)))"></span>
+<input type="hidden" data-table="BukuTamu" data-field="x_PintuUtamaInUser" data-hidden="1" name="x_PintuUtamaInUser" id="x_PintuUtamaInUser" value="@Html.Raw(HtmlEncode(bukuTamuEdit.PintuUtamaInUser.CurrentValue))">
+</span></template>
+</div></div>
+    </div>
+} @* bukuTamuEdit.PintuUtamaInUser.Visible (end) *@
+@if (bukuTamuEdit.CustomPilihPintu.Visible) { // bukuTamuEdit.CustomPilihPintu.Visible (begin)
+    <div id="r_CustomPilihPintu" @Html.Raw(bukuTamuEdit.CustomPilihPintu.RowAttributes)>
+        <label id="elh_BukuTamu_CustomPilihPintu" for="x_CustomPilihPintu" class="@(bukuTamuEdit.LeftColumnClass)"><template id="tpc_BukuTamu_CustomPilihPintu">@Html.Raw(bukuTamuEdit.CustomPilihPintu.Caption)@Html.Raw(bukuTamuEdit.CustomPilihPintu.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(bukuTamuEdit.RightColumnClass)"><div @Html.Raw(bukuTamuEdit.CustomPilihPintu.CellAttributes)>
+<template id="tpx_BukuTamu_CustomPilihPintu"><span id="el_BukuTamu_CustomPilihPintu">
+<input type="@(bukuTamuEdit.CustomPilihPintu.InputTextType)" name="x_CustomPilihPintu" id="x_CustomPilihPintu" data-table="BukuTamu" data-field="x_CustomPilihPintu" value="@Html.Raw(bukuTamuEdit.CustomPilihPintu.EditValue)" size="30" maxlength="1" placeholder="@Html.Raw(HtmlEncode(bukuTamuEdit.CustomPilihPintu.PlaceHolder))" data-format-pattern="@(bukuTamuEdit.CustomPilihPintu.FormatPattern)"@Html.Raw(bukuTamuEdit.CustomPilihPintu.EditAttributes) aria-describedby="x_CustomPilihPintu_help">
+@Html.Raw(bukuTamuEdit.CustomPilihPintu.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(bukuTamuEdit.CustomPilihPintu.GetErrorMessage())</div>
+</span></template>
+</div></div>
+    </div>
+} @* bukuTamuEdit.CustomPilihPintu.Visible (end) *@
+@if (bukuTamuEdit.PintuUtamaOutTanggal.Visible) { // bukuTamuEdit.PintuUtamaOutTanggal.Visible (begin)
+    <div id="r_PintuUtamaOutTanggal" @Html.Raw(bukuTamuEdit.PintuUtamaOutTanggal.RowAttributes)>
+        <label id="elh_BukuTamu_PintuUtamaOutTanggal" for="x_PintuUtamaOutTanggal" class="@(bukuTamuEdit.LeftColumnClass)"><template id="tpc_BukuTamu_PintuUtamaOutTanggal">@Html.Raw(bukuTamuEdit.PintuUtamaOutTanggal.Caption)@Html.Raw(bukuTamuEdit.PintuUtamaOutTanggal.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(bukuTamuEdit.RightColumnClass)"><div @Html.Raw(bukuTamuEdit.PintuUtamaOutTanggal.CellAttributes)>
+<template id="tpx_BukuTamu_PintuUtamaOutTanggal"><span id="el_BukuTamu_PintuUtamaOutTanggal">
+<input type="@(bukuTamuEdit.PintuUtamaOutTanggal.InputTextType)" name="x_PintuUtamaOutTanggal" id="x_PintuUtamaOutTanggal" data-table="BukuTamu" data-field="x_PintuUtamaOutTanggal" value="@Html.Raw(bukuTamuEdit.PintuUtamaOutTanggal.EditValue)" placeholder="@Html.Raw(HtmlEncode(bukuTamuEdit.PintuUtamaOutTanggal.PlaceHolder))" data-format-pattern="@(bukuTamuEdit.PintuUtamaOutTanggal.FormatPattern)"@Html.Raw(bukuTamuEdit.PintuUtamaOutTanggal.EditAttributes) aria-describedby="x_PintuUtamaOutTanggal_help">
+@Html.Raw(bukuTamuEdit.PintuUtamaOutTanggal.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(bukuTamuEdit.PintuUtamaOutTanggal.GetErrorMessage())</div>
+@if (!bukuTamuEdit.PintuUtamaOutTanggal.ReadOnly && !bukuTamuEdit.PintuUtamaOutTanggal.Disabled && !bukuTamuEdit.PintuUtamaOutTanggal.EditAttrs.Is("readonly") && !bukuTamuEdit.PintuUtamaOutTanggal.EditAttrs.Is("disabled")) {
+<script>
+loadjs.ready(["fBukuTamuedit", "datetimepicker"], function () {
+    let format = "@Html.Raw(DateFormat(9))", // DN
+        options = {
+                localization: {
+                    locale: ew.LANGUAGE_ID + "-u-nu-" + ew.getNumberingSystem(),
+                    hourCycle: format.match(/H/) ? "h24" : "h12",
+                    format,
+                    ...ew.language.phrase("datetimepicker")
+                },
+                display: {
+                    icons: {
+                        previous: ew.IS_RTL ? "fa-solid fa-chevron-right" : "fa-solid fa-chevron-left",
+                        next: ew.IS_RTL ? "fa-solid fa-chevron-left" : "fa-solid fa-chevron-right"
+                    },
+                    components: {
+                        clock: !!format.match(/h/i) || !!format.match(/m/) || !!format.match(/s/i),
+                        hours: !!format.match(/h/i),
+                        minutes: !!format.match(/m/),
+                        seconds: !!format.match(/s/i)
+                    },
+                theme: ew.getPreferredTheme()
+                }
+            };
+    ew.createDateTimePicker("fBukuTamuedit", "x_PintuUtamaOutTanggal", ew.deepAssign({"useCurrent":false,"display":{"sideBySide":false}}, options));
+});
+</script>
+}
+</span></template>
+</div></div>
+    </div>
+} @* bukuTamuEdit.PintuUtamaOutTanggal.Visible (end) *@
+@if (bukuTamuEdit.PintuUtamaOutFoto.Visible) { // bukuTamuEdit.PintuUtamaOutFoto.Visible (begin)
+    <div id="r_PintuUtamaOutFoto" @Html.Raw(bukuTamuEdit.PintuUtamaOutFoto.RowAttributes)>
+        <label id="elh_BukuTamu_PintuUtamaOutFoto" for="x_PintuUtamaOutFoto" class="@(bukuTamuEdit.LeftColumnClass)"><template id="tpc_BukuTamu_PintuUtamaOutFoto">@Html.Raw(bukuTamuEdit.PintuUtamaOutFoto.Caption)@Html.Raw(bukuTamuEdit.PintuUtamaOutFoto.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(bukuTamuEdit.RightColumnClass)"><div @Html.Raw(bukuTamuEdit.PintuUtamaOutFoto.CellAttributes)>
+<template id="tpx_BukuTamu_PintuUtamaOutFoto"><span id="el_BukuTamu_PintuUtamaOutFoto">
+<textarea data-table="BukuTamu" data-field="x_PintuUtamaOutFoto" name="x_PintuUtamaOutFoto" id="x_PintuUtamaOutFoto" cols="35" rows="4" placeholder="@Html.Raw(HtmlEncode(bukuTamuEdit.PintuUtamaOutFoto.PlaceHolder))"@Html.Raw(bukuTamuEdit.PintuUtamaOutFoto.EditAttributes) aria-describedby="x_PintuUtamaOutFoto_help">@(bukuTamuEdit.PintuUtamaOutFoto.EditValue)</textarea>
+@Html.Raw(bukuTamuEdit.PintuUtamaOutFoto.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(bukuTamuEdit.PintuUtamaOutFoto.GetErrorMessage())</div>
+</span></template>
+</div></div>
+    </div>
+} @* bukuTamuEdit.PintuUtamaOutFoto.Visible (end) *@
+@if (bukuTamuEdit.PintuUtamaOutFotoDownload.Visible) { // bukuTamuEdit.PintuUtamaOutFotoDownload.Visible (begin)
+    <div id="r_PintuUtamaOutFotoDownload" @Html.Raw(bukuTamuEdit.PintuUtamaOutFotoDownload.RowAttributes)>
+        <label id="elh_BukuTamu_PintuUtamaOutFotoDownload" for="x_PintuUtamaOutFotoDownload" class="@(bukuTamuEdit.LeftColumnClass)"><template id="tpc_BukuTamu_PintuUtamaOutFotoDownload">@Html.Raw(bukuTamuEdit.PintuUtamaOutFotoDownload.Caption)@Html.Raw(bukuTamuEdit.PintuUtamaOutFotoDownload.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(bukuTamuEdit.RightColumnClass)"><div @Html.Raw(bukuTamuEdit.PintuUtamaOutFotoDownload.CellAttributes)>
+<template id="tpx_BukuTamu_PintuUtamaOutFotoDownload"><span id="el_BukuTamu_PintuUtamaOutFotoDownload">
+<textarea data-table="BukuTamu" data-field="x_PintuUtamaOutFotoDownload" name="x_PintuUtamaOutFotoDownload" id="x_PintuUtamaOutFotoDownload" cols="35" rows="4" placeholder="@Html.Raw(HtmlEncode(bukuTamuEdit.PintuUtamaOutFotoDownload.PlaceHolder))"@Html.Raw(bukuTamuEdit.PintuUtamaOutFotoDownload.EditAttributes) aria-describedby="x_PintuUtamaOutFotoDownload_help">@(bukuTamuEdit.PintuUtamaOutFotoDownload.EditValue)</textarea>
+@Html.Raw(bukuTamuEdit.PintuUtamaOutFotoDownload.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(bukuTamuEdit.PintuUtamaOutFotoDownload.GetErrorMessage())</div>
+</span></template>
+</div></div>
+    </div>
+} @* bukuTamuEdit.PintuUtamaOutFotoDownload.Visible (end) *@
+@if (bukuTamuEdit.PintuUtamaOutUser.Visible) { // bukuTamuEdit.PintuUtamaOutUser.Visible (begin)
+    <div id="r_PintuUtamaOutUser" @Html.Raw(bukuTamuEdit.PintuUtamaOutUser.RowAttributes)>
+        <label id="elh_BukuTamu_PintuUtamaOutUser" for="x_PintuUtamaOutUser" class="@(bukuTamuEdit.LeftColumnClass)"><template id="tpc_BukuTamu_PintuUtamaOutUser">@Html.Raw(bukuTamuEdit.PintuUtamaOutUser.Caption)@Html.Raw(bukuTamuEdit.PintuUtamaOutUser.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(bukuTamuEdit.RightColumnClass)"><div @Html.Raw(bukuTamuEdit.PintuUtamaOutUser.CellAttributes)>
+<template id="tpx_BukuTamu_PintuUtamaOutUser"><span id="el_BukuTamu_PintuUtamaOutUser">
+<span @Html.Raw(bukuTamuEdit.PintuUtamaOutUser.ViewAttributes)>
+<input type="text" readonly class="form-control-plaintext" value="@Html.Raw(RemoveHtml(ConvertToString(bukuTamuEdit.PintuUtamaOutUser.EditValue)))"></span>
+<input type="hidden" data-table="BukuTamu" data-field="x_PintuUtamaOutUser" data-hidden="1" name="x_PintuUtamaOutUser" id="x_PintuUtamaOutUser" value="@Html.Raw(HtmlEncode(bukuTamuEdit.PintuUtamaOutUser.CurrentValue))">
+</span></template>
+</div></div>
+    </div>
+} @* bukuTamuEdit.PintuUtamaOutUser.Visible (end) *@
+@if (bukuTamuEdit.LobbyUtamaId.Visible) { // bukuTamuEdit.LobbyUtamaId.Visible (begin)
+    <div id="r_LobbyUtamaId" @Html.Raw(bukuTamuEdit.LobbyUtamaId.RowAttributes)>
+        <label id="elh_BukuTamu_LobbyUtamaId" for="x_LobbyUtamaId" class="@(bukuTamuEdit.LeftColumnClass)"><template id="tpc_BukuTamu_LobbyUtamaId">@Html.Raw(bukuTamuEdit.LobbyUtamaId.Caption)@Html.Raw(bukuTamuEdit.LobbyUtamaId.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(bukuTamuEdit.RightColumnClass)"><div @Html.Raw(bukuTamuEdit.LobbyUtamaId.CellAttributes)>
+<template id="tpx_BukuTamu_LobbyUtamaId"><span id="el_BukuTamu_LobbyUtamaId">
+<input type="@(bukuTamuEdit.LobbyUtamaId.InputTextType)" name="x_LobbyUtamaId" id="x_LobbyUtamaId" data-table="BukuTamu" data-field="x_LobbyUtamaId" value="@Html.Raw(bukuTamuEdit.LobbyUtamaId.EditValue)" size="30" maxlength="100" placeholder="@Html.Raw(HtmlEncode(bukuTamuEdit.LobbyUtamaId.PlaceHolder))" data-format-pattern="@(bukuTamuEdit.LobbyUtamaId.FormatPattern)"@Html.Raw(bukuTamuEdit.LobbyUtamaId.EditAttributes) aria-describedby="x_LobbyUtamaId_help">
+@Html.Raw(bukuTamuEdit.LobbyUtamaId.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(bukuTamuEdit.LobbyUtamaId.GetErrorMessage())</div>
+</span></template>
+</div></div>
+    </div>
+} @* bukuTamuEdit.LobbyUtamaId.Visible (end) *@
+@if (bukuTamuEdit.LobbyUtamaInTanggal.Visible) { // bukuTamuEdit.LobbyUtamaInTanggal.Visible (begin)
+    <div id="r_LobbyUtamaInTanggal" @Html.Raw(bukuTamuEdit.LobbyUtamaInTanggal.RowAttributes)>
+        <label id="elh_BukuTamu_LobbyUtamaInTanggal" for="x_LobbyUtamaInTanggal" class="@(bukuTamuEdit.LeftColumnClass)"><template id="tpc_BukuTamu_LobbyUtamaInTanggal">@Html.Raw(bukuTamuEdit.LobbyUtamaInTanggal.Caption)@Html.Raw(bukuTamuEdit.LobbyUtamaInTanggal.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(bukuTamuEdit.RightColumnClass)"><div @Html.Raw(bukuTamuEdit.LobbyUtamaInTanggal.CellAttributes)>
+<template id="tpx_BukuTamu_LobbyUtamaInTanggal"><span id="el_BukuTamu_LobbyUtamaInTanggal">
+<input type="@(bukuTamuEdit.LobbyUtamaInTanggal.InputTextType)" name="x_LobbyUtamaInTanggal" id="x_LobbyUtamaInTanggal" data-table="BukuTamu" data-field="x_LobbyUtamaInTanggal" value="@Html.Raw(bukuTamuEdit.LobbyUtamaInTanggal.EditValue)" placeholder="@Html.Raw(HtmlEncode(bukuTamuEdit.LobbyUtamaInTanggal.PlaceHolder))" data-format-pattern="@(bukuTamuEdit.LobbyUtamaInTanggal.FormatPattern)"@Html.Raw(bukuTamuEdit.LobbyUtamaInTanggal.EditAttributes) aria-describedby="x_LobbyUtamaInTanggal_help">
+@Html.Raw(bukuTamuEdit.LobbyUtamaInTanggal.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(bukuTamuEdit.LobbyUtamaInTanggal.GetErrorMessage())</div>
+@if (!bukuTamuEdit.LobbyUtamaInTanggal.ReadOnly && !bukuTamuEdit.LobbyUtamaInTanggal.Disabled && !bukuTamuEdit.LobbyUtamaInTanggal.EditAttrs.Is("readonly") && !bukuTamuEdit.LobbyUtamaInTanggal.EditAttrs.Is("disabled")) {
+<script>
+loadjs.ready(["fBukuTamuedit", "datetimepicker"], function () {
+    let format = "@Html.Raw(DateFormat(9))", // DN
+        options = {
+                localization: {
+                    locale: ew.LANGUAGE_ID + "-u-nu-" + ew.getNumberingSystem(),
+                    hourCycle: format.match(/H/) ? "h24" : "h12",
+                    format,
+                    ...ew.language.phrase("datetimepicker")
+                },
+                display: {
+                    icons: {
+                        previous: ew.IS_RTL ? "fa-solid fa-chevron-right" : "fa-solid fa-chevron-left",
+                        next: ew.IS_RTL ? "fa-solid fa-chevron-left" : "fa-solid fa-chevron-right"
+                    },
+                    components: {
+                        clock: !!format.match(/h/i) || !!format.match(/m/) || !!format.match(/s/i),
+                        hours: !!format.match(/h/i),
+                        minutes: !!format.match(/m/),
+                        seconds: !!format.match(/s/i)
+                    },
+                theme: ew.getPreferredTheme()
+                }
+            };
+    ew.createDateTimePicker("fBukuTamuedit", "x_LobbyUtamaInTanggal", ew.deepAssign({"useCurrent":false,"display":{"sideBySide":false}}, options));
+});
+</script>
+}
+</span></template>
+</div></div>
+    </div>
+} @* bukuTamuEdit.LobbyUtamaInTanggal.Visible (end) *@
+@if (bukuTamuEdit.LobbyUtamaInFoto.Visible) { // bukuTamuEdit.LobbyUtamaInFoto.Visible (begin)
+    <div id="r_LobbyUtamaInFoto" @Html.Raw(bukuTamuEdit.LobbyUtamaInFoto.RowAttributes)>
+        <label id="elh_BukuTamu_LobbyUtamaInFoto" for="x_LobbyUtamaInFoto" class="@(bukuTamuEdit.LeftColumnClass)"><template id="tpc_BukuTamu_LobbyUtamaInFoto">@Html.Raw(bukuTamuEdit.LobbyUtamaInFoto.Caption)@Html.Raw(bukuTamuEdit.LobbyUtamaInFoto.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(bukuTamuEdit.RightColumnClass)"><div @Html.Raw(bukuTamuEdit.LobbyUtamaInFoto.CellAttributes)>
+<template id="tpx_BukuTamu_LobbyUtamaInFoto"><span id="el_BukuTamu_LobbyUtamaInFoto">
+<textarea data-table="BukuTamu" data-field="x_LobbyUtamaInFoto" name="x_LobbyUtamaInFoto" id="x_LobbyUtamaInFoto" cols="35" rows="4" placeholder="@Html.Raw(HtmlEncode(bukuTamuEdit.LobbyUtamaInFoto.PlaceHolder))"@Html.Raw(bukuTamuEdit.LobbyUtamaInFoto.EditAttributes) aria-describedby="x_LobbyUtamaInFoto_help">@(bukuTamuEdit.LobbyUtamaInFoto.EditValue)</textarea>
+@Html.Raw(bukuTamuEdit.LobbyUtamaInFoto.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(bukuTamuEdit.LobbyUtamaInFoto.GetErrorMessage())</div>
+</span></template>
+</div></div>
+    </div>
+} @* bukuTamuEdit.LobbyUtamaInFoto.Visible (end) *@
+@if (bukuTamuEdit.LobbyUtamaInFotoDownload.Visible) { // bukuTamuEdit.LobbyUtamaInFotoDownload.Visible (begin)
+    <div id="r_LobbyUtamaInFotoDownload" @Html.Raw(bukuTamuEdit.LobbyUtamaInFotoDownload.RowAttributes)>
+        <label id="elh_BukuTamu_LobbyUtamaInFotoDownload" for="x_LobbyUtamaInFotoDownload" class="@(bukuTamuEdit.LeftColumnClass)"><template id="tpc_BukuTamu_LobbyUtamaInFotoDownload">@Html.Raw(bukuTamuEdit.LobbyUtamaInFotoDownload.Caption)@Html.Raw(bukuTamuEdit.LobbyUtamaInFotoDownload.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(bukuTamuEdit.RightColumnClass)"><div @Html.Raw(bukuTamuEdit.LobbyUtamaInFotoDownload.CellAttributes)>
+<template id="tpx_BukuTamu_LobbyUtamaInFotoDownload"><span id="el_BukuTamu_LobbyUtamaInFotoDownload">
+<textarea data-table="BukuTamu" data-field="x_LobbyUtamaInFotoDownload" name="x_LobbyUtamaInFotoDownload" id="x_LobbyUtamaInFotoDownload" cols="35" rows="4" placeholder="@Html.Raw(HtmlEncode(bukuTamuEdit.LobbyUtamaInFotoDownload.PlaceHolder))"@Html.Raw(bukuTamuEdit.LobbyUtamaInFotoDownload.EditAttributes) aria-describedby="x_LobbyUtamaInFotoDownload_help">@(bukuTamuEdit.LobbyUtamaInFotoDownload.EditValue)</textarea>
+@Html.Raw(bukuTamuEdit.LobbyUtamaInFotoDownload.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(bukuTamuEdit.LobbyUtamaInFotoDownload.GetErrorMessage())</div>
+</span></template>
+</div></div>
+    </div>
+} @* bukuTamuEdit.LobbyUtamaInFotoDownload.Visible (end) *@
+@if (bukuTamuEdit.LobbyUtamaInUser.Visible) { // bukuTamuEdit.LobbyUtamaInUser.Visible (begin)
+    <div id="r_LobbyUtamaInUser" @Html.Raw(bukuTamuEdit.LobbyUtamaInUser.RowAttributes)>
+        <label id="elh_BukuTamu_LobbyUtamaInUser" for="x_LobbyUtamaInUser" class="@(bukuTamuEdit.LeftColumnClass)"><template id="tpc_BukuTamu_LobbyUtamaInUser">@Html.Raw(bukuTamuEdit.LobbyUtamaInUser.Caption)@Html.Raw(bukuTamuEdit.LobbyUtamaInUser.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(bukuTamuEdit.RightColumnClass)"><div @Html.Raw(bukuTamuEdit.LobbyUtamaInUser.CellAttributes)>
+<template id="tpx_BukuTamu_LobbyUtamaInUser"><span id="el_BukuTamu_LobbyUtamaInUser">
+<span @Html.Raw(bukuTamuEdit.LobbyUtamaInUser.ViewAttributes)>
+<input type="text" readonly class="form-control-plaintext" value="@Html.Raw(RemoveHtml(ConvertToString(bukuTamuEdit.LobbyUtamaInUser.EditValue)))"></span>
+<input type="hidden" data-table="BukuTamu" data-field="x_LobbyUtamaInUser" data-hidden="1" name="x_LobbyUtamaInUser" id="x_LobbyUtamaInUser" value="@Html.Raw(HtmlEncode(bukuTamuEdit.LobbyUtamaInUser.CurrentValue))">
+</span></template>
+</div></div>
+    </div>
+} @* bukuTamuEdit.LobbyUtamaInUser.Visible (end) *@
+@if (bukuTamuEdit.LobbyUtamaOutTanggal.Visible) { // bukuTamuEdit.LobbyUtamaOutTanggal.Visible (begin)
+    <div id="r_LobbyUtamaOutTanggal" @Html.Raw(bukuTamuEdit.LobbyUtamaOutTanggal.RowAttributes)>
+        <label id="elh_BukuTamu_LobbyUtamaOutTanggal" for="x_LobbyUtamaOutTanggal" class="@(bukuTamuEdit.LeftColumnClass)"><template id="tpc_BukuTamu_LobbyUtamaOutTanggal">@Html.Raw(bukuTamuEdit.LobbyUtamaOutTanggal.Caption)@Html.Raw(bukuTamuEdit.LobbyUtamaOutTanggal.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(bukuTamuEdit.RightColumnClass)"><div @Html.Raw(bukuTamuEdit.LobbyUtamaOutTanggal.CellAttributes)>
+<template id="tpx_BukuTamu_LobbyUtamaOutTanggal"><span id="el_BukuTamu_LobbyUtamaOutTanggal">
+<input type="@(bukuTamuEdit.LobbyUtamaOutTanggal.InputTextType)" name="x_LobbyUtamaOutTanggal" id="x_LobbyUtamaOutTanggal" data-table="BukuTamu" data-field="x_LobbyUtamaOutTanggal" value="@Html.Raw(bukuTamuEdit.LobbyUtamaOutTanggal.EditValue)" placeholder="@Html.Raw(HtmlEncode(bukuTamuEdit.LobbyUtamaOutTanggal.PlaceHolder))" data-format-pattern="@(bukuTamuEdit.LobbyUtamaOutTanggal.FormatPattern)"@Html.Raw(bukuTamuEdit.LobbyUtamaOutTanggal.EditAttributes) aria-describedby="x_LobbyUtamaOutTanggal_help">
+@Html.Raw(bukuTamuEdit.LobbyUtamaOutTanggal.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(bukuTamuEdit.LobbyUtamaOutTanggal.GetErrorMessage())</div>
+@if (!bukuTamuEdit.LobbyUtamaOutTanggal.ReadOnly && !bukuTamuEdit.LobbyUtamaOutTanggal.Disabled && !bukuTamuEdit.LobbyUtamaOutTanggal.EditAttrs.Is("readonly") && !bukuTamuEdit.LobbyUtamaOutTanggal.EditAttrs.Is("disabled")) {
+<script>
+loadjs.ready(["fBukuTamuedit", "datetimepicker"], function () {
+    let format = "@Html.Raw(DateFormat(9))", // DN
+        options = {
+                localization: {
+                    locale: ew.LANGUAGE_ID + "-u-nu-" + ew.getNumberingSystem(),
+                    hourCycle: format.match(/H/) ? "h24" : "h12",
+                    format,
+                    ...ew.language.phrase("datetimepicker")
+                },
+                display: {
+                    icons: {
+                        previous: ew.IS_RTL ? "fa-solid fa-chevron-right" : "fa-solid fa-chevron-left",
+                        next: ew.IS_RTL ? "fa-solid fa-chevron-left" : "fa-solid fa-chevron-right"
+                    },
+                    components: {
+                        clock: !!format.match(/h/i) || !!format.match(/m/) || !!format.match(/s/i),
+                        hours: !!format.match(/h/i),
+                        minutes: !!format.match(/m/),
+                        seconds: !!format.match(/s/i)
+                    },
+                theme: ew.getPreferredTheme()
+                }
+            };
+    ew.createDateTimePicker("fBukuTamuedit", "x_LobbyUtamaOutTanggal", ew.deepAssign({"useCurrent":false,"display":{"sideBySide":false}}, options));
+});
+</script>
+}
+</span></template>
+</div></div>
+    </div>
+} @* bukuTamuEdit.LobbyUtamaOutTanggal.Visible (end) *@
+@if (bukuTamuEdit.LobbyUtamaOutFoto.Visible) { // bukuTamuEdit.LobbyUtamaOutFoto.Visible (begin)
+    <div id="r_LobbyUtamaOutFoto" @Html.Raw(bukuTamuEdit.LobbyUtamaOutFoto.RowAttributes)>
+        <label id="elh_BukuTamu_LobbyUtamaOutFoto" for="x_LobbyUtamaOutFoto" class="@(bukuTamuEdit.LeftColumnClass)"><template id="tpc_BukuTamu_LobbyUtamaOutFoto">@Html.Raw(bukuTamuEdit.LobbyUtamaOutFoto.Caption)@Html.Raw(bukuTamuEdit.LobbyUtamaOutFoto.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(bukuTamuEdit.RightColumnClass)"><div @Html.Raw(bukuTamuEdit.LobbyUtamaOutFoto.CellAttributes)>
+<template id="tpx_BukuTamu_LobbyUtamaOutFoto"><span id="el_BukuTamu_LobbyUtamaOutFoto">
+<textarea data-table="BukuTamu" data-field="x_LobbyUtamaOutFoto" name="x_LobbyUtamaOutFoto" id="x_LobbyUtamaOutFoto" cols="35" rows="4" placeholder="@Html.Raw(HtmlEncode(bukuTamuEdit.LobbyUtamaOutFoto.PlaceHolder))"@Html.Raw(bukuTamuEdit.LobbyUtamaOutFoto.EditAttributes) aria-describedby="x_LobbyUtamaOutFoto_help">@(bukuTamuEdit.LobbyUtamaOutFoto.EditValue)</textarea>
+@Html.Raw(bukuTamuEdit.LobbyUtamaOutFoto.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(bukuTamuEdit.LobbyUtamaOutFoto.GetErrorMessage())</div>
+</span></template>
+</div></div>
+    </div>
+} @* bukuTamuEdit.LobbyUtamaOutFoto.Visible (end) *@
+@if (bukuTamuEdit.LobbyUtamaOutFotoDownload.Visible) { // bukuTamuEdit.LobbyUtamaOutFotoDownload.Visible (begin)
+    <div id="r_LobbyUtamaOutFotoDownload" @Html.Raw(bukuTamuEdit.LobbyUtamaOutFotoDownload.RowAttributes)>
+        <label id="elh_BukuTamu_LobbyUtamaOutFotoDownload" for="x_LobbyUtamaOutFotoDownload" class="@(bukuTamuEdit.LeftColumnClass)"><template id="tpc_BukuTamu_LobbyUtamaOutFotoDownload">@Html.Raw(bukuTamuEdit.LobbyUtamaOutFotoDownload.Caption)@Html.Raw(bukuTamuEdit.LobbyUtamaOutFotoDownload.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(bukuTamuEdit.RightColumnClass)"><div @Html.Raw(bukuTamuEdit.LobbyUtamaOutFotoDownload.CellAttributes)>
+<template id="tpx_BukuTamu_LobbyUtamaOutFotoDownload"><span id="el_BukuTamu_LobbyUtamaOutFotoDownload">
+<textarea data-table="BukuTamu" data-field="x_LobbyUtamaOutFotoDownload" name="x_LobbyUtamaOutFotoDownload" id="x_LobbyUtamaOutFotoDownload" cols="35" rows="4" placeholder="@Html.Raw(HtmlEncode(bukuTamuEdit.LobbyUtamaOutFotoDownload.PlaceHolder))"@Html.Raw(bukuTamuEdit.LobbyUtamaOutFotoDownload.EditAttributes) aria-describedby="x_LobbyUtamaOutFotoDownload_help">@(bukuTamuEdit.LobbyUtamaOutFotoDownload.EditValue)</textarea>
+@Html.Raw(bukuTamuEdit.LobbyUtamaOutFotoDownload.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(bukuTamuEdit.LobbyUtamaOutFotoDownload.GetErrorMessage())</div>
+</span></template>
+</div></div>
+    </div>
+} @* bukuTamuEdit.LobbyUtamaOutFotoDownload.Visible (end) *@
+@if (bukuTamuEdit.LobbyUtamaOutUser.Visible) { // bukuTamuEdit.LobbyUtamaOutUser.Visible (begin)
+    <div id="r_LobbyUtamaOutUser" @Html.Raw(bukuTamuEdit.LobbyUtamaOutUser.RowAttributes)>
+        <label id="elh_BukuTamu_LobbyUtamaOutUser" for="x_LobbyUtamaOutUser" class="@(bukuTamuEdit.LeftColumnClass)"><template id="tpc_BukuTamu_LobbyUtamaOutUser">@Html.Raw(bukuTamuEdit.LobbyUtamaOutUser.Caption)@Html.Raw(bukuTamuEdit.LobbyUtamaOutUser.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(bukuTamuEdit.RightColumnClass)"><div @Html.Raw(bukuTamuEdit.LobbyUtamaOutUser.CellAttributes)>
+<template id="tpx_BukuTamu_LobbyUtamaOutUser"><span id="el_BukuTamu_LobbyUtamaOutUser">
+<span @Html.Raw(bukuTamuEdit.LobbyUtamaOutUser.ViewAttributes)>
+<input type="text" readonly class="form-control-plaintext" value="@Html.Raw(RemoveHtml(ConvertToString(bukuTamuEdit.LobbyUtamaOutUser.EditValue)))"></span>
+<input type="hidden" data-table="BukuTamu" data-field="x_LobbyUtamaOutUser" data-hidden="1" name="x_LobbyUtamaOutUser" id="x_LobbyUtamaOutUser" value="@Html.Raw(HtmlEncode(bukuTamuEdit.LobbyUtamaOutUser.CurrentValue))">
+</span></template>
+</div></div>
+    </div>
+} @* bukuTamuEdit.LobbyUtamaOutUser.Visible (end) *@
+@if (bukuTamuEdit.AreaTerlarangId.Visible) { // bukuTamuEdit.AreaTerlarangId.Visible (begin)
+    <div id="r_AreaTerlarangId" @Html.Raw(bukuTamuEdit.AreaTerlarangId.RowAttributes)>
+        <label id="elh_BukuTamu_AreaTerlarangId" for="x_AreaTerlarangId" class="@(bukuTamuEdit.LeftColumnClass)"><template id="tpc_BukuTamu_AreaTerlarangId">@Html.Raw(bukuTamuEdit.AreaTerlarangId.Caption)@Html.Raw(bukuTamuEdit.AreaTerlarangId.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(bukuTamuEdit.RightColumnClass)"><div @Html.Raw(bukuTamuEdit.AreaTerlarangId.CellAttributes)>
+<template id="tpx_BukuTamu_AreaTerlarangId"><span id="el_BukuTamu_AreaTerlarangId">
+<input type="@(bukuTamuEdit.AreaTerlarangId.InputTextType)" name="x_AreaTerlarangId" id="x_AreaTerlarangId" data-table="BukuTamu" data-field="x_AreaTerlarangId" value="@Html.Raw(bukuTamuEdit.AreaTerlarangId.EditValue)" size="30" maxlength="100" placeholder="@Html.Raw(HtmlEncode(bukuTamuEdit.AreaTerlarangId.PlaceHolder))" data-format-pattern="@(bukuTamuEdit.AreaTerlarangId.FormatPattern)"@Html.Raw(bukuTamuEdit.AreaTerlarangId.EditAttributes) aria-describedby="x_AreaTerlarangId_help">
+@Html.Raw(bukuTamuEdit.AreaTerlarangId.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(bukuTamuEdit.AreaTerlarangId.GetErrorMessage())</div>
+</span></template>
+</div></div>
+    </div>
+} @* bukuTamuEdit.AreaTerlarangId.Visible (end) *@
+@if (bukuTamuEdit.AreaTerlarangInTanggal.Visible) { // bukuTamuEdit.AreaTerlarangInTanggal.Visible (begin)
+    <div id="r_AreaTerlarangInTanggal" @Html.Raw(bukuTamuEdit.AreaTerlarangInTanggal.RowAttributes)>
+        <label id="elh_BukuTamu_AreaTerlarangInTanggal" for="x_AreaTerlarangInTanggal" class="@(bukuTamuEdit.LeftColumnClass)"><template id="tpc_BukuTamu_AreaTerlarangInTanggal">@Html.Raw(bukuTamuEdit.AreaTerlarangInTanggal.Caption)@Html.Raw(bukuTamuEdit.AreaTerlarangInTanggal.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(bukuTamuEdit.RightColumnClass)"><div @Html.Raw(bukuTamuEdit.AreaTerlarangInTanggal.CellAttributes)>
+<template id="tpx_BukuTamu_AreaTerlarangInTanggal"><span id="el_BukuTamu_AreaTerlarangInTanggal">
+<input type="@(bukuTamuEdit.AreaTerlarangInTanggal.InputTextType)" name="x_AreaTerlarangInTanggal" id="x_AreaTerlarangInTanggal" data-table="BukuTamu" data-field="x_AreaTerlarangInTanggal" value="@Html.Raw(bukuTamuEdit.AreaTerlarangInTanggal.EditValue)" placeholder="@Html.Raw(HtmlEncode(bukuTamuEdit.AreaTerlarangInTanggal.PlaceHolder))" data-format-pattern="@(bukuTamuEdit.AreaTerlarangInTanggal.FormatPattern)"@Html.Raw(bukuTamuEdit.AreaTerlarangInTanggal.EditAttributes) aria-describedby="x_AreaTerlarangInTanggal_help">
+@Html.Raw(bukuTamuEdit.AreaTerlarangInTanggal.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(bukuTamuEdit.AreaTerlarangInTanggal.GetErrorMessage())</div>
+@if (!bukuTamuEdit.AreaTerlarangInTanggal.ReadOnly && !bukuTamuEdit.AreaTerlarangInTanggal.Disabled && !bukuTamuEdit.AreaTerlarangInTanggal.EditAttrs.Is("readonly") && !bukuTamuEdit.AreaTerlarangInTanggal.EditAttrs.Is("disabled")) {
+<script>
+loadjs.ready(["fBukuTamuedit", "datetimepicker"], function () {
+    let format = "@Html.Raw(DateFormat(9))", // DN
+        options = {
+                localization: {
+                    locale: ew.LANGUAGE_ID + "-u-nu-" + ew.getNumberingSystem(),
+                    hourCycle: format.match(/H/) ? "h24" : "h12",
+                    format,
+                    ...ew.language.phrase("datetimepicker")
+                },
+                display: {
+                    icons: {
+                        previous: ew.IS_RTL ? "fa-solid fa-chevron-right" : "fa-solid fa-chevron-left",
+                        next: ew.IS_RTL ? "fa-solid fa-chevron-left" : "fa-solid fa-chevron-right"
+                    },
+                    components: {
+                        clock: !!format.match(/h/i) || !!format.match(/m/) || !!format.match(/s/i),
+                        hours: !!format.match(/h/i),
+                        minutes: !!format.match(/m/),
+                        seconds: !!format.match(/s/i)
+                    },
+                theme: ew.getPreferredTheme()
+                }
+            };
+    ew.createDateTimePicker("fBukuTamuedit", "x_AreaTerlarangInTanggal", ew.deepAssign({"useCurrent":false,"display":{"sideBySide":false}}, options));
+});
+</script>
+}
+</span></template>
+</div></div>
+    </div>
+} @* bukuTamuEdit.AreaTerlarangInTanggal.Visible (end) *@
+@if (bukuTamuEdit.AreaTerlarangInFoto.Visible) { // bukuTamuEdit.AreaTerlarangInFoto.Visible (begin)
+    <div id="r_AreaTerlarangInFoto" @Html.Raw(bukuTamuEdit.AreaTerlarangInFoto.RowAttributes)>
+        <label id="elh_BukuTamu_AreaTerlarangInFoto" for="x_AreaTerlarangInFoto" class="@(bukuTamuEdit.LeftColumnClass)"><template id="tpc_BukuTamu_AreaTerlarangInFoto">@Html.Raw(bukuTamuEdit.AreaTerlarangInFoto.Caption)@Html.Raw(bukuTamuEdit.AreaTerlarangInFoto.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(bukuTamuEdit.RightColumnClass)"><div @Html.Raw(bukuTamuEdit.AreaTerlarangInFoto.CellAttributes)>
+<template id="tpx_BukuTamu_AreaTerlarangInFoto"><span id="el_BukuTamu_AreaTerlarangInFoto">
+<textarea data-table="BukuTamu" data-field="x_AreaTerlarangInFoto" name="x_AreaTerlarangInFoto" id="x_AreaTerlarangInFoto" cols="35" rows="4" placeholder="@Html.Raw(HtmlEncode(bukuTamuEdit.AreaTerlarangInFoto.PlaceHolder))"@Html.Raw(bukuTamuEdit.AreaTerlarangInFoto.EditAttributes) aria-describedby="x_AreaTerlarangInFoto_help">@(bukuTamuEdit.AreaTerlarangInFoto.EditValue)</textarea>
+@Html.Raw(bukuTamuEdit.AreaTerlarangInFoto.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(bukuTamuEdit.AreaTerlarangInFoto.GetErrorMessage())</div>
+</span></template>
+</div></div>
+    </div>
+} @* bukuTamuEdit.AreaTerlarangInFoto.Visible (end) *@
+@if (bukuTamuEdit.AreaTerlarangInFotoDownload.Visible) { // bukuTamuEdit.AreaTerlarangInFotoDownload.Visible (begin)
+    <div id="r_AreaTerlarangInFotoDownload" @Html.Raw(bukuTamuEdit.AreaTerlarangInFotoDownload.RowAttributes)>
+        <label id="elh_BukuTamu_AreaTerlarangInFotoDownload" for="x_AreaTerlarangInFotoDownload" class="@(bukuTamuEdit.LeftColumnClass)"><template id="tpc_BukuTamu_AreaTerlarangInFotoDownload">@Html.Raw(bukuTamuEdit.AreaTerlarangInFotoDownload.Caption)@Html.Raw(bukuTamuEdit.AreaTerlarangInFotoDownload.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(bukuTamuEdit.RightColumnClass)"><div @Html.Raw(bukuTamuEdit.AreaTerlarangInFotoDownload.CellAttributes)>
+<template id="tpx_BukuTamu_AreaTerlarangInFotoDownload"><span id="el_BukuTamu_AreaTerlarangInFotoDownload">
+<textarea data-table="BukuTamu" data-field="x_AreaTerlarangInFotoDownload" name="x_AreaTerlarangInFotoDownload" id="x_AreaTerlarangInFotoDownload" cols="35" rows="4" placeholder="@Html.Raw(HtmlEncode(bukuTamuEdit.AreaTerlarangInFotoDownload.PlaceHolder))"@Html.Raw(bukuTamuEdit.AreaTerlarangInFotoDownload.EditAttributes) aria-describedby="x_AreaTerlarangInFotoDownload_help">@(bukuTamuEdit.AreaTerlarangInFotoDownload.EditValue)</textarea>
+@Html.Raw(bukuTamuEdit.AreaTerlarangInFotoDownload.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(bukuTamuEdit.AreaTerlarangInFotoDownload.GetErrorMessage())</div>
+</span></template>
+</div></div>
+    </div>
+} @* bukuTamuEdit.AreaTerlarangInFotoDownload.Visible (end) *@
+@if (bukuTamuEdit.AreaTerlarangInUser.Visible) { // bukuTamuEdit.AreaTerlarangInUser.Visible (begin)
+    <div id="r_AreaTerlarangInUser" @Html.Raw(bukuTamuEdit.AreaTerlarangInUser.RowAttributes)>
+        <label id="elh_BukuTamu_AreaTerlarangInUser" for="x_AreaTerlarangInUser" class="@(bukuTamuEdit.LeftColumnClass)"><template id="tpc_BukuTamu_AreaTerlarangInUser">@Html.Raw(bukuTamuEdit.AreaTerlarangInUser.Caption)@Html.Raw(bukuTamuEdit.AreaTerlarangInUser.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(bukuTamuEdit.RightColumnClass)"><div @Html.Raw(bukuTamuEdit.AreaTerlarangInUser.CellAttributes)>
+<template id="tpx_BukuTamu_AreaTerlarangInUser"><span id="el_BukuTamu_AreaTerlarangInUser">
+<span @Html.Raw(bukuTamuEdit.AreaTerlarangInUser.ViewAttributes)>
+<input type="text" readonly class="form-control-plaintext" value="@Html.Raw(RemoveHtml(ConvertToString(bukuTamuEdit.AreaTerlarangInUser.EditValue)))"></span>
+<input type="hidden" data-table="BukuTamu" data-field="x_AreaTerlarangInUser" data-hidden="1" name="x_AreaTerlarangInUser" id="x_AreaTerlarangInUser" value="@Html.Raw(HtmlEncode(bukuTamuEdit.AreaTerlarangInUser.CurrentValue))">
+</span></template>
+</div></div>
+    </div>
+} @* bukuTamuEdit.AreaTerlarangInUser.Visible (end) *@
+@if (bukuTamuEdit.AreaTerlarangOutTanggal.Visible) { // bukuTamuEdit.AreaTerlarangOutTanggal.Visible (begin)
+    <div id="r_AreaTerlarangOutTanggal" @Html.Raw(bukuTamuEdit.AreaTerlarangOutTanggal.RowAttributes)>
+        <label id="elh_BukuTamu_AreaTerlarangOutTanggal" for="x_AreaTerlarangOutTanggal" class="@(bukuTamuEdit.LeftColumnClass)"><template id="tpc_BukuTamu_AreaTerlarangOutTanggal">@Html.Raw(bukuTamuEdit.AreaTerlarangOutTanggal.Caption)@Html.Raw(bukuTamuEdit.AreaTerlarangOutTanggal.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(bukuTamuEdit.RightColumnClass)"><div @Html.Raw(bukuTamuEdit.AreaTerlarangOutTanggal.CellAttributes)>
+<template id="tpx_BukuTamu_AreaTerlarangOutTanggal"><span id="el_BukuTamu_AreaTerlarangOutTanggal">
+<input type="@(bukuTamuEdit.AreaTerlarangOutTanggal.InputTextType)" name="x_AreaTerlarangOutTanggal" id="x_AreaTerlarangOutTanggal" data-table="BukuTamu" data-field="x_AreaTerlarangOutTanggal" value="@Html.Raw(bukuTamuEdit.AreaTerlarangOutTanggal.EditValue)" placeholder="@Html.Raw(HtmlEncode(bukuTamuEdit.AreaTerlarangOutTanggal.PlaceHolder))" data-format-pattern="@(bukuTamuEdit.AreaTerlarangOutTanggal.FormatPattern)"@Html.Raw(bukuTamuEdit.AreaTerlarangOutTanggal.EditAttributes) aria-describedby="x_AreaTerlarangOutTanggal_help">
+@Html.Raw(bukuTamuEdit.AreaTerlarangOutTanggal.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(bukuTamuEdit.AreaTerlarangOutTanggal.GetErrorMessage())</div>
+@if (!bukuTamuEdit.AreaTerlarangOutTanggal.ReadOnly && !bukuTamuEdit.AreaTerlarangOutTanggal.Disabled && !bukuTamuEdit.AreaTerlarangOutTanggal.EditAttrs.Is("readonly") && !bukuTamuEdit.AreaTerlarangOutTanggal.EditAttrs.Is("disabled")) {
+<script>
+loadjs.ready(["fBukuTamuedit", "datetimepicker"], function () {
+    let format = "@Html.Raw(DateFormat(9))", // DN
+        options = {
+                localization: {
+                    locale: ew.LANGUAGE_ID + "-u-nu-" + ew.getNumberingSystem(),
+                    hourCycle: format.match(/H/) ? "h24" : "h12",
+                    format,
+                    ...ew.language.phrase("datetimepicker")
+                },
+                display: {
+                    icons: {
+                        previous: ew.IS_RTL ? "fa-solid fa-chevron-right" : "fa-solid fa-chevron-left",
+                        next: ew.IS_RTL ? "fa-solid fa-chevron-left" : "fa-solid fa-chevron-right"
+                    },
+                    components: {
+                        clock: !!format.match(/h/i) || !!format.match(/m/) || !!format.match(/s/i),
+                        hours: !!format.match(/h/i),
+                        minutes: !!format.match(/m/),
+                        seconds: !!format.match(/s/i)
+                    },
+                theme: ew.getPreferredTheme()
+                }
+            };
+    ew.createDateTimePicker("fBukuTamuedit", "x_AreaTerlarangOutTanggal", ew.deepAssign({"useCurrent":false,"display":{"sideBySide":false}}, options));
+});
+</script>
+}
+</span></template>
+</div></div>
+    </div>
+} @* bukuTamuEdit.AreaTerlarangOutTanggal.Visible (end) *@
+@if (bukuTamuEdit.AreaTerlarangOutFoto.Visible) { // bukuTamuEdit.AreaTerlarangOutFoto.Visible (begin)
+    <div id="r_AreaTerlarangOutFoto" @Html.Raw(bukuTamuEdit.AreaTerlarangOutFoto.RowAttributes)>
+        <label id="elh_BukuTamu_AreaTerlarangOutFoto" for="x_AreaTerlarangOutFoto" class="@(bukuTamuEdit.LeftColumnClass)"><template id="tpc_BukuTamu_AreaTerlarangOutFoto">@Html.Raw(bukuTamuEdit.AreaTerlarangOutFoto.Caption)@Html.Raw(bukuTamuEdit.AreaTerlarangOutFoto.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(bukuTamuEdit.RightColumnClass)"><div @Html.Raw(bukuTamuEdit.AreaTerlarangOutFoto.CellAttributes)>
+<template id="tpx_BukuTamu_AreaTerlarangOutFoto"><span id="el_BukuTamu_AreaTerlarangOutFoto">
+<textarea data-table="BukuTamu" data-field="x_AreaTerlarangOutFoto" name="x_AreaTerlarangOutFoto" id="x_AreaTerlarangOutFoto" cols="35" rows="4" placeholder="@Html.Raw(HtmlEncode(bukuTamuEdit.AreaTerlarangOutFoto.PlaceHolder))"@Html.Raw(bukuTamuEdit.AreaTerlarangOutFoto.EditAttributes) aria-describedby="x_AreaTerlarangOutFoto_help">@(bukuTamuEdit.AreaTerlarangOutFoto.EditValue)</textarea>
+@Html.Raw(bukuTamuEdit.AreaTerlarangOutFoto.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(bukuTamuEdit.AreaTerlarangOutFoto.GetErrorMessage())</div>
+</span></template>
+</div></div>
+    </div>
+} @* bukuTamuEdit.AreaTerlarangOutFoto.Visible (end) *@
+@if (bukuTamuEdit.AreaTerlarangOutFotoDownload.Visible) { // bukuTamuEdit.AreaTerlarangOutFotoDownload.Visible (begin)
+    <div id="r_AreaTerlarangOutFotoDownload" @Html.Raw(bukuTamuEdit.AreaTerlarangOutFotoDownload.RowAttributes)>
+        <label id="elh_BukuTamu_AreaTerlarangOutFotoDownload" for="x_AreaTerlarangOutFotoDownload" class="@(bukuTamuEdit.LeftColumnClass)"><template id="tpc_BukuTamu_AreaTerlarangOutFotoDownload">@Html.Raw(bukuTamuEdit.AreaTerlarangOutFotoDownload.Caption)@Html.Raw(bukuTamuEdit.AreaTerlarangOutFotoDownload.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(bukuTamuEdit.RightColumnClass)"><div @Html.Raw(bukuTamuEdit.AreaTerlarangOutFotoDownload.CellAttributes)>
+<template id="tpx_BukuTamu_AreaTerlarangOutFotoDownload"><span id="el_BukuTamu_AreaTerlarangOutFotoDownload">
+<textarea data-table="BukuTamu" data-field="x_AreaTerlarangOutFotoDownload" name="x_AreaTerlarangOutFotoDownload" id="x_AreaTerlarangOutFotoDownload" cols="35" rows="4" placeholder="@Html.Raw(HtmlEncode(bukuTamuEdit.AreaTerlarangOutFotoDownload.PlaceHolder))"@Html.Raw(bukuTamuEdit.AreaTerlarangOutFotoDownload.EditAttributes) aria-describedby="x_AreaTerlarangOutFotoDownload_help">@(bukuTamuEdit.AreaTerlarangOutFotoDownload.EditValue)</textarea>
+@Html.Raw(bukuTamuEdit.AreaTerlarangOutFotoDownload.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(bukuTamuEdit.AreaTerlarangOutFotoDownload.GetErrorMessage())</div>
+</span></template>
+</div></div>
+    </div>
+} @* bukuTamuEdit.AreaTerlarangOutFotoDownload.Visible (end) *@
+@if (bukuTamuEdit.AreaTerlarangOutUser.Visible) { // bukuTamuEdit.AreaTerlarangOutUser.Visible (begin)
+    <div id="r_AreaTerlarangOutUser" @Html.Raw(bukuTamuEdit.AreaTerlarangOutUser.RowAttributes)>
+        <label id="elh_BukuTamu_AreaTerlarangOutUser" for="x_AreaTerlarangOutUser" class="@(bukuTamuEdit.LeftColumnClass)"><template id="tpc_BukuTamu_AreaTerlarangOutUser">@Html.Raw(bukuTamuEdit.AreaTerlarangOutUser.Caption)@Html.Raw(bukuTamuEdit.AreaTerlarangOutUser.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(bukuTamuEdit.RightColumnClass)"><div @Html.Raw(bukuTamuEdit.AreaTerlarangOutUser.CellAttributes)>
+<template id="tpx_BukuTamu_AreaTerlarangOutUser"><span id="el_BukuTamu_AreaTerlarangOutUser">
+<span @Html.Raw(bukuTamuEdit.AreaTerlarangOutUser.ViewAttributes)>
+<input type="text" readonly class="form-control-plaintext" value="@Html.Raw(RemoveHtml(ConvertToString(bukuTamuEdit.AreaTerlarangOutUser.EditValue)))"></span>
+<input type="hidden" data-table="BukuTamu" data-field="x_AreaTerlarangOutUser" data-hidden="1" name="x_AreaTerlarangOutUser" id="x_AreaTerlarangOutUser" value="@Html.Raw(HtmlEncode(bukuTamuEdit.AreaTerlarangOutUser.CurrentValue))">
+</span></template>
+</div></div>
+    </div>
+} @* bukuTamuEdit.AreaTerlarangOutUser.Visible (end) *@
+@if (bukuTamuEdit.etlDate.Visible) { // bukuTamuEdit.etlDate.Visible (begin)
+    <div id="r_etlDate" @Html.Raw(bukuTamuEdit.etlDate.RowAttributes)>
+        <label id="elh_BukuTamu_etlDate" for="x_etlDate" class="@(bukuTamuEdit.LeftColumnClass)"><template id="tpc_BukuTamu_etlDate">@Html.Raw(bukuTamuEdit.etlDate.Caption)@Html.Raw(bukuTamuEdit.etlDate.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(bukuTamuEdit.RightColumnClass)"><div @Html.Raw(bukuTamuEdit.etlDate.CellAttributes)>
+<template id="tpx_BukuTamu_etlDate"><span id="el_BukuTamu_etlDate">
+<span @Html.Raw(bukuTamuEdit.etlDate.ViewAttributes)>
+<input type="text" readonly class="form-control-plaintext" value="@Html.Raw(RemoveHtml(ConvertToString(bukuTamuEdit.etlDate.EditValue)))"></span>
+<input type="hidden" data-table="BukuTamu" data-field="x_etlDate" data-hidden="1" name="x_etlDate" id="x_etlDate" value="@Html.Raw(HtmlEncode(bukuTamuEdit.etlDate.CurrentValue))">
+</span></template>
+</div></div>
+    </div>
+} @* bukuTamuEdit.etlDate.Visible (end) *@
+@if (bukuTamuEdit.LastUpdatedBy.Visible) { // bukuTamuEdit.LastUpdatedBy.Visible (begin)
+    <div id="r_LastUpdatedBy" @Html.Raw(bukuTamuEdit.LastUpdatedBy.RowAttributes)>
+        <label id="elh_BukuTamu_LastUpdatedBy" for="x_LastUpdatedBy" class="@(bukuTamuEdit.LeftColumnClass)"><template id="tpc_BukuTamu_LastUpdatedBy">@Html.Raw(bukuTamuEdit.LastUpdatedBy.Caption)@Html.Raw(bukuTamuEdit.LastUpdatedBy.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(bukuTamuEdit.RightColumnClass)"><div @Html.Raw(bukuTamuEdit.LastUpdatedBy.CellAttributes)>
+<template id="tpx_BukuTamu_LastUpdatedBy"><span id="el_BukuTamu_LastUpdatedBy">
+<span @Html.Raw(bukuTamuEdit.LastUpdatedBy.ViewAttributes)>
+<input type="text" readonly class="form-control-plaintext" value="@Html.Raw(RemoveHtml(ConvertToString(bukuTamuEdit.LastUpdatedBy.EditValue)))"></span>
+<input type="hidden" data-table="BukuTamu" data-field="x_LastUpdatedBy" data-hidden="1" name="x_LastUpdatedBy" id="x_LastUpdatedBy" value="@Html.Raw(HtmlEncode(bukuTamuEdit.LastUpdatedBy.CurrentValue))">
+</span></template>
+</div></div>
+    </div>
+} @* bukuTamuEdit.LastUpdatedBy.Visible (end) *@
+@if (bukuTamuEdit.lastUpdatedDate.Visible) { // bukuTamuEdit.lastUpdatedDate.Visible (begin)
+    <div id="r_lastUpdatedDate" @Html.Raw(bukuTamuEdit.lastUpdatedDate.RowAttributes)>
+        <label id="elh_BukuTamu_lastUpdatedDate" for="x_lastUpdatedDate" class="@(bukuTamuEdit.LeftColumnClass)"><template id="tpc_BukuTamu_lastUpdatedDate">@Html.Raw(bukuTamuEdit.lastUpdatedDate.Caption)@Html.Raw(bukuTamuEdit.lastUpdatedDate.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(bukuTamuEdit.RightColumnClass)"><div @Html.Raw(bukuTamuEdit.lastUpdatedDate.CellAttributes)>
+<template id="tpx_BukuTamu_lastUpdatedDate"><span id="el_BukuTamu_lastUpdatedDate">
+<span @Html.Raw(bukuTamuEdit.lastUpdatedDate.ViewAttributes)>
+<input type="text" readonly class="form-control-plaintext" value="@Html.Raw(RemoveHtml(ConvertToString(bukuTamuEdit.lastUpdatedDate.EditValue)))"></span>
+<input type="hidden" data-table="BukuTamu" data-field="x_lastUpdatedDate" data-hidden="1" name="x_lastUpdatedDate" id="x_lastUpdatedDate" value="@Html.Raw(HtmlEncode(bukuTamuEdit.lastUpdatedDate.CurrentValue))">
+</span></template>
+</div></div>
+    </div>
+} @* bukuTamuEdit.lastUpdatedDate.Visible (end) *@
+@if (bukuTamuEdit.StatusZonaPrev.Visible) { // bukuTamuEdit.StatusZonaPrev.Visible (begin)
+    <div id="r_StatusZonaPrev" @Html.Raw(bukuTamuEdit.StatusZonaPrev.RowAttributes)>
+        <label id="elh_BukuTamu_StatusZonaPrev" for="x_StatusZonaPrev" class="@(bukuTamuEdit.LeftColumnClass)"><template id="tpc_BukuTamu_StatusZonaPrev">@Html.Raw(bukuTamuEdit.StatusZonaPrev.Caption)@Html.Raw(bukuTamuEdit.StatusZonaPrev.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(bukuTamuEdit.RightColumnClass)"><div @Html.Raw(bukuTamuEdit.StatusZonaPrev.CellAttributes)>
+<template id="tpx_BukuTamu_StatusZonaPrev"><span id="el_BukuTamu_StatusZonaPrev">
+<input type="@(bukuTamuEdit.StatusZonaPrev.InputTextType)" name="x_StatusZonaPrev" id="x_StatusZonaPrev" data-table="BukuTamu" data-field="x_StatusZonaPrev" value="@Html.Raw(bukuTamuEdit.StatusZonaPrev.EditValue)" size="30" maxlength="100" placeholder="@Html.Raw(HtmlEncode(bukuTamuEdit.StatusZonaPrev.PlaceHolder))" data-format-pattern="@(bukuTamuEdit.StatusZonaPrev.FormatPattern)"@Html.Raw(bukuTamuEdit.StatusZonaPrev.EditAttributes) aria-describedby="x_StatusZonaPrev_help">
+@Html.Raw(bukuTamuEdit.StatusZonaPrev.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(bukuTamuEdit.StatusZonaPrev.GetErrorMessage())</div>
+</span></template>
+</div></div>
+    </div>
+} @* bukuTamuEdit.StatusZonaPrev.Visible (end) *@
+</div><!-- /page* -->
+<div id="tpd_BukuTamuedit" class="ew-custom-template"></div>
+<template id="tpm_BukuTamuedit">
+<div id="ct_bukuTamuEdit"><style>
+    .ew-buttons {
+        display: none;
+    }
+    .view-page-table td {
+        white-space: normal !important;
+        word-wrap: break-word;
+    }
+    .view-page-table th {
+        background-color: #006BB7;
+    }
+    .body-table {
+        background-color: #fff;
+    }
+    .header-table {
+        background-color: #006BB7 !important;
+        color: #fff !important;
+    }
+    .view-page-table {
+        table-layout: fixed;
+    }
+    .btn {
+        white-space: nowrap;
+    }
+    .file-input-wrapper {
+        border: 1px solid #ced4da;
+        border-radius: .375rem;
+        overflow: hidden;
+        transition: border-color .15s, box-shadow .15s;
+    }
+    .file-input-wrapper:focus-within {
+        border-color: #86b7fe;
+        box-shadow: 0 0 0 .25rem rgba(13,110,253,.25);
+    }
+    .file-input-wrapper .btn {
+        border-radius: 0;
+    }
+    .file-input-wrapper .form-control {
+        border: none;
+        box-shadow: none !important;
+    }
+</style>
+<form id="CustomFormBukuTamu" autocomplete="off">
+    <div class="row mb-3">
+        <div class="col-2 fw-bold d-flex align-items-center gap-2">
+            @Html.Raw(bukuTamuEdit.Plant.Caption)
+        </div>
+        <div class="col-10">
+            <slot class="ew-slot" name="tpx_BukuTamu_Plant"></slot>
+        </div>
+    </div>
+    <div class="row mb-3">
+        <div class="col-2 fw-bold d-flex align-items-center gap-2">
+            @Html.Raw(bukuTamuEdit.Nama.Caption)
+        </div>
+        <div class="col-10">
+            <slot class="ew-slot" name="tpx_BukuTamu_Nama"></slot>
+        </div>
+    </div>
+    <div class="row mb-3">
+        <div class="col-2 fw-bold d-flex align-items-center gap-2">
+            @Html.Raw(bukuTamuEdit.AsalPerusahaan.Caption)
+        </div>
+        <div class="col-10">
+            <slot class="ew-slot" name="tpx_BukuTamu_AsalPerusahaan"></slot>
+        </div>
+    </div>
+    <div class="row mb-3">
+        <div class="col-2 fw-bold d-flex align-items-center gap-2">
+            @Html.Raw(bukuTamuEdit.FungsiygDikunjungi.Caption)
+        </div>
+        <div class="col-10">
+            <slot class="ew-slot" name="tpx_BukuTamu_FungsiygDikunjungi"></slot>
+        </div>
+    </div>
+    <div class="row mb-3">
+        <div class="col-2 fw-bold d-flex align-items-center gap-2">
+            @Html.Raw(bukuTamuEdit.MaksudKunjungan.Caption)
+        </div>
+        <div class="col-10">
+            <slot class="ew-slot" name="tpx_BukuTamu_MaksudKunjungan"></slot>
+        </div>
+    </div>
+    <div class="row mb-3">
+        <div class="col-2 fw-bold d-flex align-items-center gap-2">
+            @Html.Raw(bukuTamuEdit.StatusZona.Caption)
+        </div>
+        <div class="col-10">
+            <slot class="ew-slot" name="tpx_BukuTamu_StatusZona"></slot>
+        </div>
+    </div>
+    <!-- LastUpdatedBy Field with Log History Button -->
+    <div class="row mb-3">
+        <div class="col-2 fw-bold d-flex align-items-center gap-2">
+            Diperbarui Oleh
+        </div>
+        <div class="col-10 d-flex align-items-center">
+            <span class="me-3">@Html.Raw(RemoveHtml(ConvertToString(bukuTamuEdit.LastUpdatedBy.EditValue)))</span>
+            <button type="button" class="btn btn-primary ew-btn ps-2" id="bt-log-toggle" expand-log="false">
+                <i class="fa-solid fa-caret-right fa-2xl me-2 caret-icon rotate-right"></i>
+                Log History
+                <i class="fa-solid fa-clock-rotate-left ms-1"></i>
+            </button>
+        </div>
+    </div>
+    <!-- Log History Pane - Tepat di bawah button -->
+    <div id="bt-log-row" class="row mb-3" style="display: none;">
+        <div class="col-2"></div>
+        <div class="col-10">
+            <div id="bt-log-pane" style="overflow: hidden; transition: all 0.6s ease; max-height: 0;">
+                <div id="btGrid" class="ag-theme-quartz w-100 my-3" style="height: 300px;"></div>
+                <div id="btLogEmpty" class="alert alert-info d-none my-2">
+                    <i class="fa-solid fa-info-circle me-2"></i>
+                    Belum ada log pergerakan untuk visitor ini.
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- LastUpdatedDate Field -->
+    <div class="row mb-3">
+        <div class="col-2 fw-bold d-flex align-items-center gap-2">
+            Tanggal Diperbarui
+        </div>
+        <div class="col-10">
+            <input type="text" class="form-control-plaintext" value="@Html.Raw(RemoveHtml(ConvertToString(bukuTamuEdit.lastUpdatedDate.EditValue)))" readonly>
+        </div>
+    </div>
+    <div class="row mb-3">
+        <div class="col-2 fw-bold d-flex align-items-center gap-2">
+            Pilih Pintu
+        </div>
+        <div class="col-10">
+            <select id="PilihPintu" name="PilihPintu" class="form-select w-25" required>
+                <option></option>
+            </select>
+        </div>
+    </div>
+    <div id="PintuUtamaInFields">
+        <div class="row mb-3">
+            <div class="col-2 fw-bold d-flex align-items-center gap-2">
+                @Html.Raw(bukuTamuEdit.PintuUtamaId.Caption)
+            </div>
+            <div class="col-10">
+                <slot class="ew-slot" name="tpx_BukuTamu_PintuUtamaId"></slot>
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col-2 fw-bold d-flex align-items-center gap-2">
+                @Html.Raw(bukuTamuEdit.PintuUtamaInTanggal.Caption)
+            </div>
+            <div class="col-10">
+                <slot class="ew-slot" name="tpx_BukuTamu_PintuUtamaInTanggal"></slot>
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col-2 fw-bold d-flex gap-2">
+                @Html.Raw(bukuTamuEdit.PintuUtamaInFoto.Caption)
+            </div>
+            <div class="col-10">
+                <div class="input-group file-input-wrapper">
+                    <label class="btn btn-primary mb-0">
+                        Add Images <input type="file" id="PintuUtamaIn" hidden multiple>
+                    </label>
+                    <input type="text" class="form-control" id="PintuUtamaIn-Name" style="cursor: pointer;" value="Add Images" readonly>
+                </div>
+                <small class="text-muted">Maximum file size: 20 MB</small>
+            </div>
+        </div>
+    </div>
+    <div id="LobbyUtamaInFields">
+        <div class="row mb-3">
+            <div class="col-2 fw-bold d-flex align-items-center gap-2">
+                @Html.Raw(bukuTamuEdit.LobbyUtamaId.Caption)
+            </div>
+            <div class="col-10">
+                <slot class="ew-slot" name="tpx_BukuTamu_LobbyUtamaId"></slot>
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col-2 fw-bold d-flex align-items-center gap-2">
+                @Html.Raw(bukuTamuEdit.LobbyUtamaInTanggal.Caption)
+            </div>
+            <div class="col-10">
+                <slot class="ew-slot" name="tpx_BukuTamu_LobbyUtamaInTanggal"></slot>
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col-2 fw-bold d-flex gap-2">
+                @Html.Raw(bukuTamuEdit.LobbyUtamaInFoto.Caption)
+            </div>
+            <div class="col-10">
+                <div class="input-group file-input-wrapper">
+                    <label class="btn btn-primary mb-0">
+                        Add Images <input type="file" id="LobbyUtamaIn" hidden multiple>
+                    </label>
+                    <input type="text" class="form-control" id="LobbyUtamaIn-Name" style="cursor: pointer;" value="Add Images" readonly>
+                </div>
+                <small class="text-muted">Maximum file size: 20 MB</small>
+            </div>
+        </div>
+    </div>
+    <div id="AreaTerlarangInFields">
+        <div class="row mb-3">
+            <div class="col-2 fw-bold d-flex align-items-center gap-2">
+                @Html.Raw(bukuTamuEdit.AreaTerlarangId.Caption)
+            </div>
+            <div class="col-10">
+                <slot class="ew-slot" name="tpx_BukuTamu_AreaTerlarangId"></slot>
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col-2 fw-bold d-flex align-items-center gap-2">
+                @Html.Raw(bukuTamuEdit.AreaTerlarangInTanggal.Caption)
+            </div>
+            <div class="col-10">
+                <slot class="ew-slot" name="tpx_BukuTamu_AreaTerlarangInTanggal"></slot>
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col-2 fw-bold d-flex gap-2">
+                @Html.Raw(bukuTamuEdit.AreaTerlarangInFoto.Caption)
+            </div>
+            <div class="col-10">
+                <div class="input-group file-input-wrapper">
+                    <label class="btn btn-primary mb-0">
+                        Add Images <input type="file" id="AreaTerlarangIn" hidden multiple>
+                    </label>
+                    <input type="text" class="form-control" id="AreaTerlarangIn-Name" style="cursor: pointer;" value="Add Images" readonly>
+                </div>
+                <small class="text-muted">Maximum file size: 20 MB</small>
+            </div>
+        </div>
+    </div>
+    <div id="PintuUtamaOutFields">
+        <div class="row mb-3">
+            <div class="col-2 fw-bold d-flex align-items-center gap-2">
+                @Html.Raw(bukuTamuEdit.PintuUtamaOutTanggal.Caption)
+            </div>
+            <div class="col-10">
+                <slot class="ew-slot" name="tpx_BukuTamu_PintuUtamaOutTanggal"></slot>
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col-2 fw-bold d-flex gap-2">
+                @Html.Raw(bukuTamuEdit.PintuUtamaOutFoto.Caption)
+            </div>
+            <div class="col-10">
+                <div class="input-group file-input-wrapper">
+                    <label class="btn btn-primary mb-0">
+                        Add Images <input type="file" id="PintuUtamaOut" hidden multiple>
+                    </label>
+                    <input type="text" class="form-control" id="PintuUtamaOut-Name" style="cursor: pointer;" value="Add Images" readonly>
+                </div>
+                <small class="text-muted">Maximum file size: 20 MB</small>
+            </div>
+        </div>
+    </div>
+    <div id="LobbyUtamaOutFields">
+        <div class="row mb-3">
+            <div class="col-2 fw-bold d-flex align-items-center gap-2">
+                @Html.Raw(bukuTamuEdit.LobbyUtamaOutTanggal.Caption)
+            </div>
+            <div class="col-10">
+                <slot class="ew-slot" name="tpx_BukuTamu_LobbyUtamaOutTanggal"></slot>
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col-2 fw-bold d-flex gap-2">
+                @Html.Raw(bukuTamuEdit.LobbyUtamaOutFoto.Caption)
+            </div>
+            <div class="col-10">
+                <div class="input-group file-input-wrapper">
+                    <label class="btn btn-primary mb-0">
+                        Add Images <input type="file" id="LobbyUtamaOut" hidden multiple>
+                    </label>
+                    <input type="text" class="form-control" id="LobbyUtamaOut-Name" style="cursor: pointer;" value="Add Images" readonly>
+                </div>
+                <small class="text-muted">Maximum file size: 20 MB</small>
+            </div>
+        </div>
+    </div>
+    <div id="AreaTerlarangOutFields">
+        <div class="row mb-3">
+            <div class="col-2 fw-bold d-flex align-items-center gap-2">
+                @Html.Raw(bukuTamuEdit.AreaTerlarangOutTanggal.Caption)
+            </div>
+            <div class="col-10">
+                <slot class="ew-slot" name="tpx_BukuTamu_AreaTerlarangOutTanggal"></slot>
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col-2 fw-bold d-flex gap-2">
+                @Html.Raw(bukuTamuEdit.AreaTerlarangOutFoto.Caption)
+            </div>
+            <div class="col-10">
+                <div class="input-group file-input-wrapper">
+                    <label class="btn btn-primary mb-0">
+                        Add Images <input type="file" id="AreaTerlarangOut" hidden multiple>
+                    </label>
+                    <input type="text" class="form-control" id="AreaTerlarangOut-Name" style="cursor: pointer;" value="Add Images" readonly>
+                </div>
+                <small class="text-muted">Maximum file size: 20 MB</small>
+            </div>
+        </div>
+    </div>
+    <div class="row mb-3">
+        <div class="col-2 fw-bold d-flex align-items-center">
+        </div>
+        <div class="col-10">
+            <button id="btn-submit-custom" class="btn btn-primary ew-btn" type="button">
+                <i class="fas fa-save me-2"></i>Save
+            </button>
+            <button id="btn-cancel-custom" class="btn btn-default ew-btn" type="button">
+                <i class="fas fa-ban me-2"></i>cancel
+            </button>
+        </div>
+    </div>
+</form></div>
+</template>
+@{ bukuTamuEdit.CloseRecordset(); }
+@Html.Raw(bukuTamuEdit.IsModal ? "<template class=\"ew-modal-buttons\">" : "<div class=\"row ew-buttons\">")<!-- buttons .row -->
+    <div class="@(bukuTamuEdit.OffsetColumnClass)"><!-- buttons offset -->
+    <button class="btn btn-primary ew-btn" name="btn-action" id="btn-action" type="submit" form="fBukuTamuedit">@Html.Raw(Language.Phrase("SaveBtn"))</button>
+@if (IsJsonResponse()) {
+    <button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" data-bs-dismiss="modal">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+} else {
+    <button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" form="fBukuTamuedit" data-href="@AppPath(bukuTamuEdit.ReturnUrl)">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+}
+    </div><!-- /buttons offset -->
+@Html.Raw(bukuTamuEdit.IsModal ? "</template>" : "</div>")<!-- /buttons .row -->
+</form>
+<script class="ew-apply-template">
+loadjs.ready(ew.applyTemplateId, function() {
+    var $ = jQuery;
+    ew.templateData = { rows: @Html.Raw(ConvertToJson(bukuTamuEdit.Rows)) };
+    ew.applyTemplate("tpd_BukuTamuedit", "tpm_BukuTamuedit", "BukuTamuedit", "@(bukuTamuEdit.Export)", "BukuTamu", ew.templateData.rows[0], @(bukuTamuEdit.IsModal ? "true" : "false"));
+    loadjs.done("customtemplate");
+});
+</script>
+</main>
+@bukuTamuEdit.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("BukuTamu");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Startup script
+    // startup script
+    const parent_url = ew.PATH_BASE;
+    $(document).ready(function() {
+        $('#PintuUtamaInFields').hide();
+        $('#PintuUtamaOutFields').hide();
+        $('#LobbyUtamaInFields').hide();
+        $('#LobbyUtamaOutFields').hide();
+        $('#AreaTerlarangInFields').hide();
+        $('#AreaTerlarangOutFields').hide();
+        $('#PilihPintuPilihPintu').select2({
+            placeholder: '-- Pilih Pintu --',
+            allowClear: true
+        });
+        var StatusZona = $('#x_StatusZona').val()?.trim() || '';
+        var tLobbyOut = $('#x_LobbyUtamaId').val()?.trim();
+        var tAreaOut = $('#x_AreaTerlarangId').val()?.trim();
+        var $select = $('#PilihPintu');
+        $select.empty().append('<option></option>');
+        if (StatusZona === "Pintu Utama") {
+            // if (!tLobbyOut) $select.append('<option value="LobbyUtamaIn">Lobby Utama In</option>');
+            // if (!tAreaOut) $select.append('<option value="AreaTerlarangIn">Area Terlarang In</option>');
+            $select.append('<option value="LobbyUtamaIn">Lobby Utama In</option>');
+            $select.append('<option value="AreaTerlarangIn">Area Terlarang In</option>');
+            $select.append('<option value="PintuUtamaOut">Pintu Utama Out</option>');
+        }
+        else if (StatusZona === "Lobby Utama") {
+            // if (!tAreaOut) $select.append('<option value="AreaTerlarangIn">Area Terlarang In</option>');
+            $select.append('<option value="AreaTerlarangIn">Area Terlarang In</option>');
+            $select.append('<option value="LobbyUtamaOut">Lobby Utama Out</option>');
+        }
+        else if (StatusZona === "Area Terlarang") {
+            $select.append('<option value="AreaTerlarangOut">Area Terlarang Out</option>');
+        }
+        else if (StatusZona === "Keluar") {
+            $('#PilihPintu').closest('.row').hide();
+            $('#btn-submit-custom').hide();
+        }
+        $select.trigger('change.select2');
+        $select.trigger('change');
+        function showFields(val) {
+            const all = ['#PintuUtamaInFields','#PintuUtamaOutFields','#LobbyUtamaInFields',
+                            '#LobbyUtamaOutFields','#AreaTerlarangInFields','#AreaTerlarangOutFields'];
+            $(all.join(',')).hide();
+            if (val) $('#' + val + 'Fields').show();
+        }
+        const fileInputs = [
+            'PintuUtamaIn', 'PintuUtamaOut', 'LobbyUtamaIn', 
+            'LobbyUtamaOut', 'AreaTerlarangIn', 'AreaTerlarangOut'
+        ];
+        fileInputs.forEach(function(inputId) {
+            $("#" + inputId + "-Name").on("click", function(e) {
+                $("#" + inputId).trigger("click");
+            });
+            $("#" + inputId).on("change", function(e) {
+                const file = $(this)[0].files[0];
+                if (file) $("#" + inputId + "-Name").val(file.name);
+            });
+        });
+        $("#PilihPintu").on("change", function(){ showFields(this.value); });
+        $(document).on("click", "#btn-cancel-custom", function(){
+            window.location.href = `${parent_url}BukuTamuList`;
+        });
+        $(document).on("click", "#btn-submit-custom", function(){
+            let formData = new FormData();
+            const id = "@Html.Raw(HtmlEncode(bukuTamuEdit.id.CurrentValue))";
+            const pintu = $('#PilihPintu').val();
+            if (!pintu) return ew.alert("Pintu belum dipilih!");
+            formData.append("Pintu", pintu);
+            formData.append("Id", id);
+            if (pintu == 'LobbyUtamaIn') {
+                let LobbyUtamaId = $('#x_LobbyUtamaId').val();
+                if (!LobbyUtamaId) return ew.alert("Lobby Utama Id tidak boleh kosong!");
+                formData.append("Tanggal", $('#x_LobbyUtamaInTanggal').val());
+                formData.append("PintuId", LobbyUtamaId);
+                const file = $("#LobbyUtamaIn")[0].files[0];
+                if (file) formData.append("File", file);
+            } else if (pintu == 'LobbyUtamaOut') {
+                formData.append("Tanggal", $('#x_LobbyUtamaOutTanggal').val());
+                const file = $("#LobbyUtamaOut")[0].files[0];
+                if (file) formData.append("File", file);
+            } else if (pintu == 'PintuUtamaOut') {
+                formData.append("Tanggal", $('#x_PintuUtamaOutTanggal').val());
+                const file = $("#PintuUtamaOut")[0].files[0];
+                if (file) formData.append("File", file);
+            } else if (pintu == 'AreaTerlarangIn') {
+                let AreaTerlarangId = $('#x_AreaTerlarangId').val();
+                if (!AreaTerlarangId) return ew.alert("Area Terlarang Id tidak boleh kosong!");
+                formData.append("Tanggal", $('#x_AreaTerlarangInTanggal').val());
+                formData.append("PintuId", AreaTerlarangId);
+                const file = $("#AreaTerlarangIn")[0].files[0];
+                if (file) formData.append("File", file);
+            } else if (pintu == 'AreaTerlarangOut') {
+                formData.append("Tanggal", $('#x_AreaTerlarangOutTanggal').val());
+                const file = $("#AreaTerlarangOut")[0].files[0];
+                if (file) formData.append("File", file);
+            }
+            showLoading();
+            $.ajax({
+                url: parent_url + "api/LookUpList/UpdateBukuTamu",
+                type: "POST",
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(rs) {
+                    hideLoading();
+                    if (rs.success) {
+                        ew.alert(rs.message, function() {
+                            window.location.href = parent_url + "BukuTamuList";
+                        });
+                    } else {
+                        ew.alert(rs.message || "Update gagal");
+                    }
+                },
+                error: function(xhr) {
+                    hideLoading();
+                    console.error("Update error:", xhr);
+                    ew.alert("Upload gagal: " + (xhr.responseText || xhr.statusText));
+                }
+            });
+        });
+    });
+
+    // Set tanggal ke semua field
+    function setTanggal() {
+        const today = new Date();
+        const formattedDate =
+            today.getFullYear() + "/" +
+            String(today.getMonth() + 1).padStart(2, '0') + "/" +
+            String(today.getDate()).padStart(2, '0') + " " +
+            String(today.getHours()).padStart(2, '0') + ":" +
+            String(today.getMinutes()).padStart(2, '0') + ":" +
+            String(today.getSeconds()).padStart(2, '0');
+        const tanggalFields = [
+            'x_PintuUtamaInTanggal', 'x_PintuUtamaOutTanggal',
+            'x_LobbyUtamaInTanggal', 'x_LobbyUtamaOutTanggal',
+            'x_AreaTerlarangInTanggal', 'x_AreaTerlarangOutTanggal'
+        ];
+        tanggalFields.forEach(function(fieldId) {
+            const el = document.getElementById(fieldId);
+            if (el) el.value = formattedDate;
+        });
+    }
+
+    // log history
+    var idBukuTamu = "";
+    try {
+        idBukuTamu = "@Html.Raw(HtmlEncode(bukuTamuEdit.id.CurrentValue))";
+    } catch(e) {
+        console.log("ID dari Razor tidak tersedia, coba dari URL");
+    }
+    if (!idBukuTamu || idBukuTamu.trim() === "") {
+        var m = (location.pathname || "").match(/bukutamuedit\/(\d+)/i);
+        idBukuTamu = m ? m[1] : "";
+    }
+    var base = (typeof parent_url !== "undefined" && parent_url) ? parent_url : (ew.PATH_BASE || "/");
+    $(function() {
+        if (!$('link[href*="ag-grid-community"]').length) {
+            $('head').append(
+                $('<link>', { 
+                    rel: 'stylesheet', 
+                    href: 'https://cdn.jsdelivr.net/npm/ag-grid-community@31/styles/ag-grid.css' 
+                }),
+                $('<link>', { 
+                    rel: 'stylesheet', 
+                    href: 'https://cdn.jsdelivr.net/npm/ag-grid-community@31/styles/ag-theme-quartz.css' 
+                })
+            );
+        }
+        if (!$("#bt-log-style").length) {
+            $("<style id='bt-log-style'>").html(`
+                .rotate-down {
+                    transform: rotate(90deg);
+                    transition: transform 0.3s ease;
+                }
+                .rotate-right {
+                    transform: rotate(0deg);
+                    transition: transform 0.3s ease;
+                }
+                #bt-log-row {
+                    display: none;
+                    margin-top: 0 !important;
+                    padding-top: 0 !important;
+                    border-top: none !important;
+                }
+                #bt-log-row.d-none {
+                    display: none !important;
+                }
+                .ag-theme-quartz .ag-header {
+                    background-color: #3c6dbd !important;
+                }
+                .ag-theme-quartz .ag-header-cell-label {
+                    color: #ffffff !important;
+                }
+                .ag-theme-quartz .ag-icon-filter {
+                    color: #ffffff !important;
+                }
+                #btGrid {
+                    width: 100% !important;
+                    min-width: 600px !important;
+                    max-width: 100% !important;
+                }
+                .ag-theme-quartz {
+                    width: 100% !important;
+                    font-size: 14px !important;
+                }
+                .ag-center-cols-container {
+                    width: 100% !important;
+                }
+                #bt-log-pane {
+                    overflow-x: auto;
+                    padding: 0 10px;
+                }
+                .ag-theme-quartz .ag-cell {
+                    padding: 8px 12px !important;
+                    line-height: 1.4 !important;
+                }
+                .ag-theme-quartz .ag-header-cell {
+                    padding: 10px 12px !important;
+                    font-weight: 600 !important;
+                }
+                .ag-theme-quartz .ag-row {
+                    border-bottom: 1px solid #e9ecef !important;
+                }
+                .ag-theme-quartz .ag-row:hover {
+                    background-color: #f8f9fa !important;
+                }
+                .download-document {
+                    font-size: 12px !important;
+                    padding: 4px 8px !important;
+                    border-radius: 4px !important;
+                }
+                @@media (max-width: 768px) {
+                    #btGrid {
+                        min-width: 500px !important;
+                    }
+                    .ag-theme-quartz .ag-cell {
+                        padding: 6px 8px !important;
+                        font-size: 12px !important;
+                    }
+                    .ag-theme-quartz .ag-header-cell {
+                        padding: 8px 8px !important;
+                        font-size: 12px !important;
+                    }
+                }
+                @@media (max-width: 576px) {
+                    #btGrid {
+                        min-width: 400px !important;
+                    }
+                    .ag-theme-quartz .ag-cell {
+                        padding: 4px 6px !important;
+                        font-size: 11px !important;
+                    }
+                    .ag-theme-quartz .ag-header-cell {
+                        padding: 6px 6px !important;
+                        font-size: 11px !important;
+                    }
+                    .download-document {
+                        font-size: 10px !important;
+                        padding: 2px 6px !important;
+                    }
+                }
+            `).appendTo("head");
+        }
+        var $btn = $("#bt-log-toggle");
+        var opened = false, gridInited = false, gridApi = null;
+        $("#bt-log-toggle").on('click', function () {
+            if (!idBukuTamu || idBukuTamu.trim() === "") {
+                ew.alert("ID BukuTamu tidak ditemukan. Tidak dapat memuat log history.");
+                return;
+            }
+            const $btn = $(this);
+            const isExpanded = $btn.attr('expand-log') === 'true';
+            const $row = $('#bt-log-row');
+            const $wrapper = $('#bt-log-pane');
+            const $caret = $btn.find('.caret-icon');
+            if (!isExpanded) {
+                $btn.attr('expand-log', 'true');
+                $row.removeClass('d-none').show();
+                setTimeout(() => {
+                    $wrapper.css({
+                        maxHeight: '500px'
+                    });
+                }, 10);
+                $caret.removeClass('rotate-right').addClass('rotate-down');
+                if (!gridInited) {
+                    ensureGrid();
+                }
+            } else {
+                $btn.attr('expand-log', 'false');
+                $wrapper.css({
+                    maxHeight: '0'
+                });
+                setTimeout(() => {
+                    $row.addClass('d-none').hide();
+                }, 600);
+                $caret.removeClass('rotate-down').addClass('rotate-right');
+            }
+        });
+        function ensureGrid() {
+            function buildGrid(rows) {
+                if (!rows || rows.length === 0) {
+                    $("#btGrid").hide();
+                    $("#btLogEmpty").removeClass("d-none");
+                    gridInited = true;
+                    return;
+                }
+                $("#btGrid").show();
+                $("#btLogEmpty").addClass("d-none");
+                var columnDefs = [
+                    { 
+                        headerName: "No.", 
+                        valueGetter: "node.rowIndex + 1", 
+                        width: 60, 
+                        minWidth: 50,
+                        maxWidth: 80,
+                        filter: false, 
+                        sortable: false,
+                        pinned: 'left',
+                        cellClass: 'text-center'
+                    },
+                    { 
+                        headerName: "Area", 
+                        field: "Area", 
+                        flex: 1,
+                        minWidth: 150,
+                        maxWidth: 250,
+                        filter: 'agTextColumnFilter',
+                        cellStyle: { 'white-space': 'nowrap', 'overflow': 'hidden', 'text-overflow': 'ellipsis' }
+                    },
+                    { 
+                        headerName: "Area ID", 
+                        field: "AreaId", 
+                        width: 100,
+                        minWidth: 80,
+                        maxWidth: 120,
+                        filter: 'agTextColumnFilter',
+                        cellClass: 'text-center'
+                    },
+                    { 
+                        headerName: "Tanggal", 
+                        field: "Tanggal", 
+                        width: 160,
+                        minWidth: 140,
+                        maxWidth: 200,
+                        filter: 'agTextColumnFilter',
+                        cellStyle: { 'white-space': 'nowrap', 'overflow': 'hidden', 'text-overflow': 'ellipsis' }
+                    },
+                    {
+                        headerName: "Foto", 
+                        field: "Foto", 
+                        width: 120, 
+                        minWidth: 100,
+                        maxWidth: 140,
+                        filter: false, 
+                        sortable: false,
+                        cellClass: 'text-center',
+                        cellRenderer: function(params) {
+                            if (!params.data || !params.data.Foto) {
+                                return '<span class="text-muted">-</span>';
+                            }
+                            return '<button type="button" class="btn btn-sm btn-primary download-document" ' +
+                                    'data-id="' + params.data.Id + '" ' +
+                                    'data-field="Foto" ' +
+                                    'title="Download Foto">' +
+                                    '<i class="fa-solid fa-download me-1"></i>Download' +
+                                    '</button>';
+                        }
+                    },
+                    { 
+                        headerName: "User Input", 
+                        field: "UserInput", 
+                        width: 130,
+                        minWidth: 100,
+                        maxWidth: 160,
+                        filter: 'agTextColumnFilter'
+                    }
+                ];
+                var gridOptions = {
+                    rowData: rows,
+                    columnDefs: columnDefs,
+                    defaultColDef: {
+                        sortable: false,
+                        suppressMovable: true,
+                        filter: true,
+                        resizable: true,
+                        wrapText: false,
+                        autoHeight: false
+                    },
+                    rowSelection: 'multiple',
+                    suppressRowClickSelection: true,
+                    pagination: true,
+                    paginationPageSize: 10,
+                    suppressHorizontalScroll: false,
+                    suppressColumnVirtualisation: true,
+                    suppressRowVirtualisation: true,
+                    animateRows: true,
+                    rowHeight: 40,
+                    headerHeight: 45
+                };
+                var gridEl = document.querySelector("#btGrid");
+                if (gridEl && !gridEl._gridCreated) {
+                    gridApi = agGrid.createGrid(gridEl, gridOptions);
+                    gridEl._gridCreated = true;
+                }
+                gridInited = true;
+            }
+            function loadRows(callback) {
+                $.ajax({
+                    url: base + "api/LookUpList/GetBukuTamuDetail",
+                    method: "GET",
+                    data: { id: idBukuTamu },
+                    dataType: "json",
+                    success: function(resp) {
+                        var list = [];
+                        if (resp && resp.success && resp.data) {
+                            list = resp.data;
+                        } else if (resp && Array.isArray(resp)) {
+                            list = resp;
+                        } else if (resp && resp.result) {
+                            list = resp.result;
+                        }
+                        var rows = list.map(function(x) {
+                            return {
+                                Id: x.Id || x.id || 0,
+                                Area: x.Area || x.area || "",
+                                AreaId: x.AreaId || x.areaId || "",
+                                Tanggal: x.Tanggal || x.tanggal || "",
+                                Foto: x.Foto || x.foto || "",
+                                UserInput: x.UserInput || x.userInput || ""
+                            };
+                        });
+                        callback(rows);
+                    },
+                    error: function(xhr, status, error) {
+                        callback([]);
+                    }
+                });
+            }
+            if (window.agGrid && window.agGrid.createGrid) {
+                loadRows(buildGrid);
+            } else {
+                $.getScript("https://cdn.jsdelivr.net/npm/ag-grid-community@31/dist/ag-grid-community.min.js", function() {
+                    loadRows(buildGrid);
+                }).fail(function(jqxhr, settings, exception) {
+                    console.error("Failed to load AG-Grid:", exception);
+                    $("#btLogEmpty").removeClass("d-none").html(
+                        '<i class="fa-solid fa-exclamation-triangle me-2"></i>' +
+                        'Gagal memuat library AG-Grid'
+                    );
+                });
+            }
+        }
+    });
+    $(document).on('click', '.download-document', function (e) {
+        e.preventDefault();
+        const id = $(this).data('id');
+        const field = $(this).data('field');
+        if (!id) {
+            ew.alert("ID dokumen tidak ditemukan.");
+            return;
+        }
+        $.ajax({
+            url: parent_url + 'api/LookUpList/DownloadBukuTamuDetailFoto',
+            type: 'GET',
+            data: { 
+                id: id
+            },
+            xhrFields: {
+                responseType: 'blob'
+            },
+            beforeSend: function () {
+                showLoading();
+            },
+            success: function (response, status, xhr) {
+                const disposition = xhr.getResponseHeader('Content-Disposition');
+                let fileName = "download_file";
+                if (disposition) {
+                    const fileNameMatch = disposition.match(/filename="?([^";]+)"?/);
+                    if (fileNameMatch && fileNameMatch[1]) {
+                        fileName = decodeURIComponent(fileNameMatch[1]);
+                    }
+                    const utf8FileNameMatch = disposition.match(/filename\*\s*=\s*UTF-8''([^;]+)/);
+                    if (utf8FileNameMatch && utf8FileNameMatch[1]) {
+                        fileName = decodeURIComponent(utf8FileNameMatch[1]);
+                    }
+                }
+                const blobUrl = window.URL.createObjectURL(response);
+                const a = document.createElement('a');
+                a.href = blobUrl;
+                a.download = fileName;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(blobUrl);
+                ew.alert("Download berhasil!");
+            },
+            error: function (xhr, status, error) {
+                if (xhr.status === 404) {
+                    ew.alert("File tidak ditemukan di server.");
+                } else if (xhr.status === 500) {
+                    ew.alert("Terjadi kesalahan server. Coba lagi nanti.");
+                } else {
+                    ew.alert("Gagal mendownload file. Error: " + xhr.responseText);
+                }
+            },
+            complete: function () {
+                hideLoading();
+            }
+        });
+    });
+    window.onload = function() {
+        setTanggal();
+    };
+});
+</script>

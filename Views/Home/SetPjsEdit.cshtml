@@ -1,0 +1,1306 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (setPjsEdit.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = setPjsEdit.UseLayout ? "_Layout" : "";
+}
+@setPjsEdit.ShowPageHeader()
+@setPjsEdit.ShowMessages()
+<main class="edit">
+<form name="fSetPjsedit" id="fSetPjsedit" class="@(setPjsEdit.FormClassName)" action="@AppPath(CurrentPageName())" method="post" novalidate autocomplete="off">
+<script>
+var currentTable = @Html.Raw(ConvertToJson(setPjsEdit.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { SetPjs: currentTable } });
+var currentPageID = ew.PAGE_ID = "edit";
+var currentForm;
+var fSetPjsedit;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("fSetPjsedit")
+        .setPageId("edit")
+
+        // Add fields
+        .setFields([
+
+            ["Id", [fields.Id.visible && fields.Id.required ? ew.Validators.required(fields.Id.caption) : null], fields.Id.isInvalid],
+            ["NomorPjs", [fields.NomorPjs.visible && fields.NomorPjs.required ? ew.Validators.required(fields.NomorPjs.caption) : null], fields.NomorPjs.isInvalid],
+            ["RedirectLink", [fields.RedirectLink.visible && fields.RedirectLink.required ? ew.Validators.required(fields.RedirectLink.caption) : null], fields.RedirectLink.isInvalid],
+            ["Nama", [fields.Nama.visible && fields.Nama.required ? ew.Validators.required(fields.Nama.caption) : null], fields.Nama.isInvalid],
+            ["OrganizationLevel", [fields.OrganizationLevel.visible && fields.OrganizationLevel.required ? ew.Validators.required(fields.OrganizationLevel.caption) : null], fields.OrganizationLevel.isInvalid],
+            ["Region", [fields.Region.visible && fields.Region.required ? ew.Validators.required(fields.Region.caption) : null], fields.Region.isInvalid],
+            ["Plant", [fields.Plant.visible && fields.Plant.required ? ew.Validators.required(fields.Plant.caption) : null], fields.Plant.isInvalid],
+            ["PosisiAwal", [fields.PosisiAwal.visible && fields.PosisiAwal.required ? ew.Validators.required(fields.PosisiAwal.caption) : null], fields.PosisiAwal.isInvalid],
+            ["PosisiPJS", [fields.PosisiPJS.visible && fields.PosisiPJS.required ? ew.Validators.required(fields.PosisiPJS.caption) : null], fields.PosisiPJS.isInvalid],
+            ["LookupPosition", [fields.LookupPosition.visible && fields.LookupPosition.required ? ew.Validators.required(fields.LookupPosition.caption) : null], fields.LookupPosition.isInvalid],
+            ["TanggalMulai", [fields.TanggalMulai.visible && fields.TanggalMulai.required ? ew.Validators.required(fields.TanggalMulai.caption) : null, ew.Validators.datetime(fields.TanggalMulai.clientFormatPattern)], fields.TanggalMulai.isInvalid],
+            ["TanggalSelesai", [fields.TanggalSelesai.visible && fields.TanggalSelesai.required ? ew.Validators.required(fields.TanggalSelesai.caption) : null, ew.Validators.datetime(fields.TanggalSelesai.clientFormatPattern)], fields.TanggalSelesai.isInvalid],
+            ["Status", [fields.Status.visible && fields.Status.required ? ew.Validators.required(fields.Status.caption) : null], fields.Status.isInvalid],
+            ["DownloadSuratTugas", [fields.DownloadSuratTugas.visible && fields.DownloadSuratTugas.required ? ew.Validators.required(fields.DownloadSuratTugas.caption) : null], fields.DownloadSuratTugas.isInvalid],
+            ["SuratTugas", [fields.SuratTugas.visible && fields.SuratTugas.required ? ew.Validators.required(fields.SuratTugas.caption) : null], fields.SuratTugas.isInvalid],
+            ["Keterangan", [fields.Keterangan.visible && fields.Keterangan.required ? ew.Validators.required(fields.Keterangan.caption) : null], fields.Keterangan.isInvalid],
+            ["Remaks", [fields.Remaks.visible && fields.Remaks.required ? ew.Validators.required(fields.Remaks.caption) : null], fields.Remaks.isInvalid],
+            ["DibuatOleh", [fields.DibuatOleh.visible && fields.DibuatOleh.required ? ew.Validators.required(fields.DibuatOleh.caption) : null], fields.DibuatOleh.isInvalid],
+            ["TanggalDibuat", [fields.TanggalDibuat.visible && fields.TanggalDibuat.required ? ew.Validators.required(fields.TanggalDibuat.caption) : null, ew.Validators.datetime(fields.TanggalDibuat.clientFormatPattern)], fields.TanggalDibuat.isInvalid],
+            ["DiperbaharuiOleh", [fields.DiperbaharuiOleh.visible && fields.DiperbaharuiOleh.required ? ew.Validators.required(fields.DiperbaharuiOleh.caption) : null], fields.DiperbaharuiOleh.isInvalid],
+            ["DiperbaharuiTanggal", [fields.DiperbaharuiTanggal.visible && fields.DiperbaharuiTanggal.required ? ew.Validators.required(fields.DiperbaharuiTanggal.caption) : null], fields.DiperbaharuiTanggal.isInvalid],
+            ["PlantAwal", [fields.PlantAwal.visible && fields.PlantAwal.required ? ew.Validators.required(fields.PlantAwal.caption) : null], fields.PlantAwal.isInvalid],
+            ["RegionAwal", [fields.RegionAwal.visible && fields.RegionAwal.required ? ew.Validators.required(fields.RegionAwal.caption) : null, ew.Validators.integer], fields.RegionAwal.isInvalid]
+        ])
+
+        // Form_CustomValidate
+        .setCustomValidate(
+            function(fobj) { // DO NOT CHANGE THIS LINE!
+                    // Your custom validation code here, return false if invalid.
+                    return true;
+                }
+        )
+
+        // Use JavaScript validation or not
+        .setValidateRequired(ew.CLIENT_VALIDATE)
+
+        // Dynamic selection lists
+        .setLists({
+            "OrganizationLevel": @Html.Raw(setPjsEdit.OrganizationLevel.ToClientList(setPjsEdit)),
+            "Region": @Html.Raw(setPjsEdit.Region.ToClientList(setPjsEdit)),
+            "Plant": @Html.Raw(setPjsEdit.Plant.ToClientList(setPjsEdit)),
+            "PosisiAwal": @Html.Raw(setPjsEdit.PosisiAwal.ToClientList(setPjsEdit)),
+            "PosisiPJS": @Html.Raw(setPjsEdit.PosisiPJS.ToClientList(setPjsEdit)),
+            "LookupPosition": @Html.Raw(setPjsEdit.LookupPosition.ToClientList(setPjsEdit)),
+            "DibuatOleh": @Html.Raw(setPjsEdit.DibuatOleh.ToClientList(setPjsEdit)),
+        })
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Client script
+    var parent_url = ew.PATH_BASE;
+    $("#SuratTugas-Name").on("click", function (e) {
+        $("#SuratTugas").trigger("click");
+    });
+    $("#SuratTugas").on("change", function(e) {
+        const file = $(this)[0].files[0];
+        $("#SuratTugas-Name").val(file.name);
+    });
+    $("#btn-back").on("click", function (e) {
+        window.location.href = `${parent_url}SetPjsList`;
+    });
+    $("#x_OrganizationLevel, #x_Region, #x_Plant").on("change", function(e) {
+        const value = $('#x_OrganizationLevel').val();
+        const ddl = $("#x_LookupPosition");
+        const rRegion = $("#rRegion");
+        const rPlant = $("#rPlant");
+        const elRegion = $("#x_Region");
+        const elPlant = $("#x_Plant");
+        const idRegion = elRegion.val();
+        const idPlant = elPlant.val();
+        ddl.empty();
+        if (!value) {
+            return;
+        }
+        ddl.append('<option value="">Loading...</option>');
+        let urlApi = `${parent_url}api/LookUpList/get-dropdown/pjs-position?OrganizationLevel=${value}`;
+        if (value === 'REGION') {
+            rRegion.show();
+            rPlant.hide();
+            if (idRegion) {
+                urlApi += `&IdRegion=${idRegion}`;
+                fillIdPosition(urlApi);
+            }
+        } else if (value === 'PLANT') {
+            rRegion.show();
+            rPlant.show();
+            if (idRegion && idPlant) {
+                urlApi += `&IdRegion=${idRegion}&IdPlant=${idPlant}`;
+                fillIdPosition(urlApi);
+            }
+        } else {
+            rRegion.hide();
+            rPlant.hide();
+            fillIdPosition(urlApi);
+        }
+    });
+    function fillIdPosition(urlApi) {
+        const ddl = $("#x_LookupPosition");
+        $.ajax({
+            url: urlApi,
+            method: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                ddl.empty(); 
+                $.each(data, function (index, item) {
+                    ddl.append(`<option value="${item.Value}">${item.Label}</option>`);
+                });
+            },
+            error: function (xhr, status, error) {
+                console.error("Gagal ambil data dropdown:", error);
+                ddl.empty();
+            }
+        });
+    }
+    $(document).on("click", "#btn-submit-custom", function(){
+        const OrganizationLevel = $('#x_OrganizationLevel').val();
+        const Position = $('#x_LookupPosition').val();
+        const TanggalMulai = $('#x_TanggalMulai').val();
+        const TanggalSelesai = $('#x_TanggalSelesai').val();
+        const Keterangan = $('#x_Keterangan').val();
+        const Plant = $('#x_Plant').val();
+        const Region = $('#x_Region').val();
+        if (!OrganizationLevel) return ew.alert("Organization Level baru tidak boleh kosong!");
+        if (!Position) return ew.alert("Position baru tidak boleh kosong!");
+        if (!TanggalMulai) return ew.alert("Tanggal Mulai tidak boleh kosong!");
+        if (!TanggalSelesai) return ew.alert("Tanggal Selesai tidak boleh kosong!");
+        let formData = new FormData();
+        formData.append("Id", "@setPjsEdit.Id.CurrentValue");
+        formData.append("OrganizationLevel", OrganizationLevel);
+        formData.append("PosisiPJS", Position);
+        formData.append("TanggalMulai", TanggalMulai);
+        formData.append("TanggalSelesai", TanggalSelesai);
+        formData.append("Keterangan", Keterangan);
+        const file = $("#SuratTugas")[0].files[0];
+        if (file) {
+            formData.append("SuratTugas", file);
+        }
+        showLoading();
+        $.ajax({
+            url: parent_url + "api/LookUpList/UpdatePjs",
+            type: "POST",
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(rs) {
+                hideLoading();
+                if (rs.success) {
+                    ew.alert(rs.message);
+                    setTimeout(function() {
+                        window.location.href = `${parent_url}SetPjsList`;
+                    }, 2000);
+                } else {
+                    ew.alert(rs.message);
+                }
+            },
+            error: function(xhr) {
+                hideLoading();
+                ew.alert("Error: " + xhr.responseText);
+            }
+        });
+    });
+    $(document).on('click', '.btn-download', function (e) {
+        e.preventDefault();
+        const id = $(this).data('id');
+        if (!id) {
+            ew.alert("ID dokumen tidak ditemukan.");
+            return;
+        }
+        $.ajax({
+            url: parent_url + 'api/LookUpList/DownloadSingleDocument',
+            type: 'GET',
+            data: { 
+                id: id,
+                menu: 'PJS'
+            },
+            xhrFields: {
+                responseType: 'blob'
+            },
+            beforeSend: function () {
+                showLoading();
+            },
+            success: function (response, status, xhr) {
+                const disposition = xhr.getResponseHeader('Content-Disposition');
+                let fileName = "download_file";
+                if (disposition) {
+                    const fileNameMatch = disposition.match(/filename="?([^";]+)"?/);
+                    if (fileNameMatch && fileNameMatch[1]) {
+                        fileName = decodeURIComponent(fileNameMatch[1]);
+                    }
+                    const utf8FileNameMatch = disposition.match(/filename\*\s*=\s*UTF-8''([^;]+)/);
+                    if (utf8FileNameMatch && utf8FileNameMatch[1]) {
+                        fileName = decodeURIComponent(utf8FileNameMatch[1]);
+                    }
+                }
+                const blobUrl = window.URL.createObjectURL(response);
+                const a = document.createElement('a');
+                a.href = blobUrl;
+                a.download = fileName;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(blobUrl);
+                ew.alert("Download berhasil!");
+            },
+            error: function (xhr, status, error) {
+                if (xhr.status === 404) {
+                    ew.alert("File tidak ditemukan di server.");
+                } else if (xhr.status === 500) {
+                    ew.alert("Terjadi kesalahan server. Coba lagi nanti.");
+                } else {
+                    ew.alert("Gagal mendownload file. Error: " + xhr.responseText);
+                }
+            },
+            complete: function () {
+                hideLoading();
+            }
+        });
+    });
+    $(document).ready(function() {
+        $("#x_OrganizationLevel").trigger("change");
+        $('#x_OrganizationLevel').prop('disabled', true);
+        $('#x_Region').prop('disabled', true);
+        $('#x_Plant').prop('disabled', true);
+    });
+    $(document).on('click', 'button[expand-log]', function () {
+        const $btn = $(this);
+        const isExpanded = $btn.attr('expand-log') === 'true';
+        const $row = $('#log-table-row');
+        const $wrapper = $('#log-table-wrapper');
+        const $caret = $btn.find('.caret-icon');
+        if (!isExpanded) {
+            $btn.attr('expand-log', 'true');
+            $row.removeClass('d-none');
+            setTimeout(() => {
+                $wrapper.css({
+                    maxHeight: '500px'
+                });
+            }, 10);
+            $caret.removeClass('rotate-right').addClass('rotate-down');
+        } else {
+            $btn.attr('expand-log', 'false');
+            $wrapper.css({
+                maxHeight: '0'
+            });
+            setTimeout(() => {
+                $row.addClass('d-none');
+            }, 600);
+            $caret.removeClass('rotate-down').addClass('rotate-right');
+        }
+    });
+});
+</script>
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+<input type="hidden" name="action" id="action" value="update">
+<input type="hidden" name="modal" value="@ConvertToInt(setPjsEdit.IsModal)">
+@if (IsJsonResponse()) {
+<input type="hidden" name="json" value="1">
+}
+<input type="hidden" name="@(setPjsEdit.OldKeyName)" value="@Html.Raw(setPjsEdit.OldKey)">
+<div class="ew-edit-div d-none"><!-- page* -->
+@if (setPjsEdit.Id.Visible) { // setPjsEdit.Id.Visible (begin)
+    <div id="r_Id" @Html.Raw(setPjsEdit.Id.RowAttributes)>
+        <label id="elh_SetPjs_Id" class="@(setPjsEdit.LeftColumnClass)"><template id="tpc_SetPjs_Id">@Html.Raw(setPjsEdit.Id.Caption)@Html.Raw(setPjsEdit.Id.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(setPjsEdit.RightColumnClass)"><div @Html.Raw(setPjsEdit.Id.CellAttributes)>
+<template id="tpx_SetPjs_Id"><span id="el_SetPjs_Id">
+<span @Html.Raw(setPjsEdit.Id.ViewAttributes)>
+<input type="text" readonly class="form-control-plaintext" value="@Html.Raw(RemoveHtml(ConvertToString(setPjsEdit.Id.EditValue)))"></span>
+<input type="hidden" data-table="SetPjs" data-field="x_Id" data-hidden="1" name="x_Id" id="x_Id" value="@Html.Raw(HtmlEncode(setPjsEdit.Id.CurrentValue))">
+</span></template>
+</div></div>
+    </div>
+} @* setPjsEdit.Id.Visible (end) *@
+@if (setPjsEdit.NomorPjs.Visible) { // setPjsEdit.NomorPjs.Visible (begin)
+    <div id="r_NomorPjs" @Html.Raw(setPjsEdit.NomorPjs.RowAttributes)>
+        <label id="elh_SetPjs_NomorPjs" for="x_NomorPjs" class="@(setPjsEdit.LeftColumnClass)"><template id="tpc_SetPjs_NomorPjs">@Html.Raw(setPjsEdit.NomorPjs.Caption)@Html.Raw(setPjsEdit.NomorPjs.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(setPjsEdit.RightColumnClass)"><div @Html.Raw(setPjsEdit.NomorPjs.CellAttributes)>
+<template id="tpx_SetPjs_NomorPjs"><span id="el_SetPjs_NomorPjs">
+<span @Html.Raw(setPjsEdit.NomorPjs.ViewAttributes)>
+<input type="text" readonly class="form-control-plaintext" value="@Html.Raw(RemoveHtml(ConvertToString(setPjsEdit.NomorPjs.EditValue)))"></span>
+<input type="hidden" data-table="SetPjs" data-field="x_NomorPjs" data-hidden="1" name="x_NomorPjs" id="x_NomorPjs" value="@Html.Raw(HtmlEncode(setPjsEdit.NomorPjs.CurrentValue))">
+</span></template>
+</div></div>
+    </div>
+} @* setPjsEdit.NomorPjs.Visible (end) *@
+@if (setPjsEdit.RedirectLink.Visible) { // setPjsEdit.RedirectLink.Visible (begin)
+    <div id="r_RedirectLink" @Html.Raw(setPjsEdit.RedirectLink.RowAttributes)>
+        <label id="elh_SetPjs_RedirectLink" for="x_RedirectLink" class="@(setPjsEdit.LeftColumnClass)"><template id="tpc_SetPjs_RedirectLink">@Html.Raw(setPjsEdit.RedirectLink.Caption)@Html.Raw(setPjsEdit.RedirectLink.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(setPjsEdit.RightColumnClass)"><div @Html.Raw(setPjsEdit.RedirectLink.CellAttributes)>
+<template id="tpx_SetPjs_RedirectLink"><span id="el_SetPjs_RedirectLink">
+<input type="@(setPjsEdit.RedirectLink.InputTextType)" name="x_RedirectLink" id="x_RedirectLink" data-table="SetPjs" data-field="x_RedirectLink" value="@Html.Raw(setPjsEdit.RedirectLink.EditValue)" size="30" maxlength="174" placeholder="@Html.Raw(HtmlEncode(setPjsEdit.RedirectLink.PlaceHolder))" data-format-pattern="@(setPjsEdit.RedirectLink.FormatPattern)"@Html.Raw(setPjsEdit.RedirectLink.EditAttributes) aria-describedby="x_RedirectLink_help">
+@Html.Raw(setPjsEdit.RedirectLink.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(setPjsEdit.RedirectLink.GetErrorMessage())</div>
+</span></template>
+</div></div>
+    </div>
+} @* setPjsEdit.RedirectLink.Visible (end) *@
+@if (setPjsEdit.Nama.Visible) { // setPjsEdit.Nama.Visible (begin)
+    <div id="r_Nama" @Html.Raw(setPjsEdit.Nama.RowAttributes)>
+        <label id="elh_SetPjs_Nama" for="x_Nama" class="@(setPjsEdit.LeftColumnClass)"><template id="tpc_SetPjs_Nama">@Html.Raw(setPjsEdit.Nama.Caption)@Html.Raw(setPjsEdit.Nama.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(setPjsEdit.RightColumnClass)"><div @Html.Raw(setPjsEdit.Nama.CellAttributes)>
+<template id="tpx_SetPjs_Nama"><span id="el_SetPjs_Nama">
+<input type="@(setPjsEdit.Nama.InputTextType)" name="x_Nama" id="x_Nama" data-table="SetPjs" data-field="x_Nama" value="@Html.Raw(setPjsEdit.Nama.EditValue)" size="30" maxlength="255" placeholder="@Html.Raw(HtmlEncode(setPjsEdit.Nama.PlaceHolder))" data-format-pattern="@(setPjsEdit.Nama.FormatPattern)"@Html.Raw(setPjsEdit.Nama.EditAttributes) aria-describedby="x_Nama_help">
+@Html.Raw(setPjsEdit.Nama.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(setPjsEdit.Nama.GetErrorMessage())</div>
+</span></template>
+</div></div>
+    </div>
+} @* setPjsEdit.Nama.Visible (end) *@
+@if (setPjsEdit.OrganizationLevel.Visible) { // setPjsEdit.OrganizationLevel.Visible (begin)
+    <div id="r_OrganizationLevel" @Html.Raw(setPjsEdit.OrganizationLevel.RowAttributes)>
+        <label id="elh_SetPjs_OrganizationLevel" for="x_OrganizationLevel" class="@(setPjsEdit.LeftColumnClass)"><template id="tpc_SetPjs_OrganizationLevel">@Html.Raw(setPjsEdit.OrganizationLevel.Caption)@Html.Raw(setPjsEdit.OrganizationLevel.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(setPjsEdit.RightColumnClass)"><div @Html.Raw(setPjsEdit.OrganizationLevel.CellAttributes)>
+<template id="tpx_SetPjs_OrganizationLevel"><span id="el_SetPjs_OrganizationLevel">
+    <select
+        id="x_OrganizationLevel"
+        name="x_OrganizationLevel"
+        class="form-select ew-select@(setPjsEdit.OrganizationLevel.IsInvalidClass)"
+        data-select2-id="fSetPjsedit_x_OrganizationLevel"
+        data-table="SetPjs"
+        data-field="x_OrganizationLevel"
+        data-value-separator="@(setPjsEdit.OrganizationLevel.DisplayValueSeparatorAttribute)"
+        data-placeholder="@(HtmlEncode(setPjsEdit.OrganizationLevel.PlaceHolder))"
+        @Html.Raw(setPjsEdit.OrganizationLevel.EditAttributes)>
+        @(setPjsEdit.OrganizationLevel.SelectOptionListHtml("x_OrganizationLevel"))
+    </select>
+    @Html.Raw(setPjsEdit.OrganizationLevel.GetCustomMessage)
+    <div class="invalid-feedback">@Html.Raw(setPjsEdit.OrganizationLevel.GetErrorMessage())</div>
+<script>
+loadjs.ready("fSetPjsedit", function() {
+    var options = { name: "x_OrganizationLevel", selectId: "fSetPjsedit_x_OrganizationLevel" },
+        el = document.querySelector("select[data-select2-id='" + options.selectId + "']");
+    if (!el)
+        return;
+    options.closeOnSelect = !options.multiple;
+    options.dropdownParent = el.closest("#ew-modal-dialog, #ew-add-opt-dialog");
+    if (fSetPjsedit.lists.OrganizationLevel?.lookupOptions.length) {
+        options.data = { id: "x_OrganizationLevel", form: "fSetPjsedit" };
+    } else {
+        options.ajax = { id: "x_OrganizationLevel", form: "fSetPjsedit", limit: ew.LOOKUP_PAGE_SIZE };
+    }
+    options.minimumResultsForSearch = Infinity;
+    options = Object.assign({}, ew.selectOptions, options, ew.vars.tables.SetPjs.fields.OrganizationLevel.selectOptions);
+    ew.createSelect(options);
+});
+</script>
+</span></template>
+</div></div>
+    </div>
+} @* setPjsEdit.OrganizationLevel.Visible (end) *@
+@if (setPjsEdit.Region.Visible) { // setPjsEdit.Region.Visible (begin)
+    <div id="r_Region" @Html.Raw(setPjsEdit.Region.RowAttributes)>
+        <label id="elh_SetPjs_Region" for="x_Region" class="@(setPjsEdit.LeftColumnClass)"><template id="tpc_SetPjs_Region">@Html.Raw(setPjsEdit.Region.Caption)@Html.Raw(setPjsEdit.Region.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(setPjsEdit.RightColumnClass)"><div @Html.Raw(setPjsEdit.Region.CellAttributes)>
+<template id="tpx_SetPjs_Region"><span id="el_SetPjs_Region">
+    <select
+        id="x_Region"
+        name="x_Region"
+        class="form-select ew-select@(setPjsEdit.Region.IsInvalidClass)"
+        data-select2-id="fSetPjsedit_x_Region"
+        data-table="SetPjs"
+        data-field="x_Region"
+        data-value-separator="@(setPjsEdit.Region.DisplayValueSeparatorAttribute)"
+        data-placeholder="@(HtmlEncode(setPjsEdit.Region.PlaceHolder))"
+        data-ew-action="update-options"
+        @Html.Raw(setPjsEdit.Region.EditAttributes)>
+        @(setPjsEdit.Region.SelectOptionListHtml("x_Region"))
+    </select>
+    @Html.Raw(setPjsEdit.Region.GetCustomMessage)
+    <div class="invalid-feedback">@Html.Raw(setPjsEdit.Region.GetErrorMessage())</div>
+@Html.Raw(setPjsEdit.Region.Lookup.GetParamTag(setPjsEdit, "p_x_Region"))
+<script>
+loadjs.ready("fSetPjsedit", function() {
+    var options = { name: "x_Region", selectId: "fSetPjsedit_x_Region" },
+        el = document.querySelector("select[data-select2-id='" + options.selectId + "']");
+    if (!el)
+        return;
+    options.closeOnSelect = !options.multiple;
+    options.dropdownParent = el.closest("#ew-modal-dialog, #ew-add-opt-dialog");
+    if (fSetPjsedit.lists.Region?.lookupOptions.length) {
+        options.data = { id: "x_Region", form: "fSetPjsedit" };
+    } else {
+        options.ajax = { id: "x_Region", form: "fSetPjsedit", limit: ew.LOOKUP_PAGE_SIZE };
+    }
+    options.minimumInputLength = ew.selectMinimumInputLength;
+    options = Object.assign({}, ew.selectOptions, options, ew.vars.tables.SetPjs.fields.Region.selectOptions);
+    ew.createSelect(options);
+});
+</script>
+</span></template>
+</div></div>
+    </div>
+} @* setPjsEdit.Region.Visible (end) *@
+@if (setPjsEdit.Plant.Visible) { // setPjsEdit.Plant.Visible (begin)
+    <div id="r_Plant" @Html.Raw(setPjsEdit.Plant.RowAttributes)>
+        <label id="elh_SetPjs_Plant" for="x_Plant" class="@(setPjsEdit.LeftColumnClass)"><template id="tpc_SetPjs_Plant">@Html.Raw(setPjsEdit.Plant.Caption)@Html.Raw(setPjsEdit.Plant.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(setPjsEdit.RightColumnClass)"><div @Html.Raw(setPjsEdit.Plant.CellAttributes)>
+<template id="tpx_SetPjs_Plant"><span id="el_SetPjs_Plant">
+    <select
+        id="x_Plant"
+        name="x_Plant"
+        class="form-select ew-select@(setPjsEdit.Plant.IsInvalidClass)"
+        data-select2-id="fSetPjsedit_x_Plant"
+        data-table="SetPjs"
+        data-field="x_Plant"
+        data-value-separator="@(setPjsEdit.Plant.DisplayValueSeparatorAttribute)"
+        data-placeholder="@(HtmlEncode(setPjsEdit.Plant.PlaceHolder))"
+        @Html.Raw(setPjsEdit.Plant.EditAttributes)>
+        @(setPjsEdit.Plant.SelectOptionListHtml("x_Plant"))
+    </select>
+    @Html.Raw(setPjsEdit.Plant.GetCustomMessage)
+    <div class="invalid-feedback">@Html.Raw(setPjsEdit.Plant.GetErrorMessage())</div>
+@Html.Raw(setPjsEdit.Plant.Lookup.GetParamTag(setPjsEdit, "p_x_Plant"))
+<script>
+loadjs.ready("fSetPjsedit", function() {
+    var options = { name: "x_Plant", selectId: "fSetPjsedit_x_Plant" },
+        el = document.querySelector("select[data-select2-id='" + options.selectId + "']");
+    if (!el)
+        return;
+    options.closeOnSelect = !options.multiple;
+    options.dropdownParent = el.closest("#ew-modal-dialog, #ew-add-opt-dialog");
+    if (fSetPjsedit.lists.Plant?.lookupOptions.length) {
+        options.data = { id: "x_Plant", form: "fSetPjsedit" };
+    } else {
+        options.ajax = { id: "x_Plant", form: "fSetPjsedit", limit: ew.LOOKUP_PAGE_SIZE };
+    }
+    options.minimumInputLength = ew.selectMinimumInputLength;
+    options = Object.assign({}, ew.selectOptions, options, ew.vars.tables.SetPjs.fields.Plant.selectOptions);
+    ew.createSelect(options);
+});
+</script>
+</span></template>
+</div></div>
+    </div>
+} @* setPjsEdit.Plant.Visible (end) *@
+@if (setPjsEdit.PosisiAwal.Visible) { // setPjsEdit.PosisiAwal.Visible (begin)
+    <div id="r_PosisiAwal" @Html.Raw(setPjsEdit.PosisiAwal.RowAttributes)>
+        <label id="elh_SetPjs_PosisiAwal" class="@(setPjsEdit.LeftColumnClass)"><template id="tpc_SetPjs_PosisiAwal">@Html.Raw(setPjsEdit.PosisiAwal.Caption)@Html.Raw(setPjsEdit.PosisiAwal.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(setPjsEdit.RightColumnClass)"><div @Html.Raw(setPjsEdit.PosisiAwal.CellAttributes)>
+<template id="tpx_SetPjs_PosisiAwal"><span id="el_SetPjs_PosisiAwal">
+<span>@{
+    if (IsRTL) {
+        setPjsEdit.PosisiAwal.EditAttrs["dir"] = "rtl";
+    }
+}</span>
+<span id="as_x_PosisiAwal" class="ew-auto-suggest">
+    <input type="text" class="form-control" name="sv_x_PosisiAwal" id="sv_x_PosisiAwal" value="@(RemoveHtml(ConvertToString(setPjsEdit.PosisiAwal.EditValue)))" autocomplete="off" size="30" placeholder="@Html.Raw(HtmlEncode(setPjsEdit.PosisiAwal.PlaceHolder))" data-placeholder="@Html.Raw(HtmlEncode(setPjsEdit.PosisiAwal.PlaceHolder))" data-format-pattern="@(setPjsEdit.PosisiAwal.FormatPattern)" @Html.Raw(setPjsEdit.PosisiAwal.EditAttributes) aria-describedby="x_PosisiAwal_help">
+</span>
+<selection-list hidden class="form-control" data-table="SetPjs" data-field="x_PosisiAwal" data-input="sv_x_PosisiAwal" data-value-separator="@(setPjsEdit.PosisiAwal.DisplayValueSeparatorAttribute)" name="x_PosisiAwal" id="x_PosisiAwal" value="@(HtmlEncode(setPjsEdit.PosisiAwal.CurrentValue))"></selection-list>
+@Html.Raw(setPjsEdit.PosisiAwal.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(setPjsEdit.PosisiAwal.GetErrorMessage())</div>
+<script>
+loadjs.ready(["fSetPjsedit"], function() {
+    fSetPjsedit.createAutoSuggest(Object.assign({"id":"x_PosisiAwal","forceSelect":false}, { lookupAllDisplayFields: @(setPjsEdit.PosisiAwal.Lookup.LookupAllDisplayFields ? "true" : "false") }, ew.vars.tables.SetPjs.fields.PosisiAwal.autoSuggestOptions));
+});
+</script>
+@Html.Raw(setPjsEdit.PosisiAwal.Lookup.GetParamTag(setPjsEdit, "p_x_PosisiAwal"))
+</span></template>
+</div></div>
+    </div>
+} @* setPjsEdit.PosisiAwal.Visible (end) *@
+@if (setPjsEdit.PosisiPJS.Visible) { // setPjsEdit.PosisiPJS.Visible (begin)
+    <div id="r_PosisiPJS" @Html.Raw(setPjsEdit.PosisiPJS.RowAttributes)>
+        <label id="elh_SetPjs_PosisiPJS" class="@(setPjsEdit.LeftColumnClass)"><template id="tpc_SetPjs_PosisiPJS">@Html.Raw(setPjsEdit.PosisiPJS.Caption)@Html.Raw(setPjsEdit.PosisiPJS.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(setPjsEdit.RightColumnClass)"><div @Html.Raw(setPjsEdit.PosisiPJS.CellAttributes)>
+<template id="tpx_SetPjs_PosisiPJS"><span id="el_SetPjs_PosisiPJS">
+<span>@{
+    if (IsRTL) {
+        setPjsEdit.PosisiPJS.EditAttrs["dir"] = "rtl";
+    }
+}</span>
+<span id="as_x_PosisiPJS" class="ew-auto-suggest">
+    <input type="text" class="form-control" name="sv_x_PosisiPJS" id="sv_x_PosisiPJS" value="@(RemoveHtml(ConvertToString(setPjsEdit.PosisiPJS.EditValue)))" autocomplete="off" size="30" placeholder="@Html.Raw(HtmlEncode(setPjsEdit.PosisiPJS.PlaceHolder))" data-placeholder="@Html.Raw(HtmlEncode(setPjsEdit.PosisiPJS.PlaceHolder))" data-format-pattern="@(setPjsEdit.PosisiPJS.FormatPattern)" @Html.Raw(setPjsEdit.PosisiPJS.EditAttributes) aria-describedby="x_PosisiPJS_help">
+</span>
+<selection-list hidden class="form-control" data-table="SetPjs" data-field="x_PosisiPJS" data-input="sv_x_PosisiPJS" data-value-separator="@(setPjsEdit.PosisiPJS.DisplayValueSeparatorAttribute)" name="x_PosisiPJS" id="x_PosisiPJS" value="@(HtmlEncode(setPjsEdit.PosisiPJS.CurrentValue))"></selection-list>
+@Html.Raw(setPjsEdit.PosisiPJS.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(setPjsEdit.PosisiPJS.GetErrorMessage())</div>
+<script>
+loadjs.ready(["fSetPjsedit"], function() {
+    fSetPjsedit.createAutoSuggest(Object.assign({"id":"x_PosisiPJS","forceSelect":false}, { lookupAllDisplayFields: @(setPjsEdit.PosisiPJS.Lookup.LookupAllDisplayFields ? "true" : "false") }, ew.vars.tables.SetPjs.fields.PosisiPJS.autoSuggestOptions));
+});
+</script>
+@Html.Raw(setPjsEdit.PosisiPJS.Lookup.GetParamTag(setPjsEdit, "p_x_PosisiPJS"))
+</span></template>
+</div></div>
+    </div>
+} @* setPjsEdit.PosisiPJS.Visible (end) *@
+@if (setPjsEdit.LookupPosition.Visible) { // setPjsEdit.LookupPosition.Visible (begin)
+    <div id="r_LookupPosition" @Html.Raw(setPjsEdit.LookupPosition.RowAttributes)>
+        <label id="elh_SetPjs_LookupPosition" for="x_LookupPosition" class="@(setPjsEdit.LeftColumnClass)"><template id="tpc_SetPjs_LookupPosition">@Html.Raw(setPjsEdit.LookupPosition.Caption)@Html.Raw(setPjsEdit.LookupPosition.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(setPjsEdit.RightColumnClass)"><div @Html.Raw(setPjsEdit.LookupPosition.CellAttributes)>
+<template id="tpx_SetPjs_LookupPosition"><span id="el_SetPjs_LookupPosition">
+    <select
+        id="x_LookupPosition"
+        name="x_LookupPosition"
+        class="form-select ew-select@(setPjsEdit.LookupPosition.IsInvalidClass)"
+        data-select2-id="fSetPjsedit_x_LookupPosition"
+        data-table="SetPjs"
+        data-field="x_LookupPosition"
+        data-value-separator="@(setPjsEdit.LookupPosition.DisplayValueSeparatorAttribute)"
+        data-placeholder="@(HtmlEncode(setPjsEdit.LookupPosition.PlaceHolder))"
+        @Html.Raw(setPjsEdit.LookupPosition.EditAttributes)>
+        @(setPjsEdit.LookupPosition.SelectOptionListHtml("x_LookupPosition"))
+    </select>
+    @Html.Raw(setPjsEdit.LookupPosition.GetCustomMessage)
+    <div class="invalid-feedback">@Html.Raw(setPjsEdit.LookupPosition.GetErrorMessage())</div>
+<script>
+loadjs.ready("fSetPjsedit", function() {
+    var options = { name: "x_LookupPosition", selectId: "fSetPjsedit_x_LookupPosition" },
+        el = document.querySelector("select[data-select2-id='" + options.selectId + "']");
+    if (!el)
+        return;
+    options.closeOnSelect = !options.multiple;
+    options.dropdownParent = el.closest("#ew-modal-dialog, #ew-add-opt-dialog");
+    if (fSetPjsedit.lists.LookupPosition?.lookupOptions.length) {
+        options.data = { id: "x_LookupPosition", form: "fSetPjsedit" };
+    } else {
+        options.ajax = { id: "x_LookupPosition", form: "fSetPjsedit", limit: ew.LOOKUP_PAGE_SIZE };
+    }
+    options.minimumInputLength = ew.selectMinimumInputLength;
+    options = Object.assign({}, ew.selectOptions, options, ew.vars.tables.SetPjs.fields.LookupPosition.selectOptions);
+    ew.createSelect(options);
+});
+</script>
+</span></template>
+</div></div>
+    </div>
+} @* setPjsEdit.LookupPosition.Visible (end) *@
+@if (setPjsEdit.TanggalMulai.Visible) { // setPjsEdit.TanggalMulai.Visible (begin)
+    <div id="r_TanggalMulai" @Html.Raw(setPjsEdit.TanggalMulai.RowAttributes)>
+        <label id="elh_SetPjs_TanggalMulai" for="x_TanggalMulai" class="@(setPjsEdit.LeftColumnClass)"><template id="tpc_SetPjs_TanggalMulai">@Html.Raw(setPjsEdit.TanggalMulai.Caption)@Html.Raw(setPjsEdit.TanggalMulai.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(setPjsEdit.RightColumnClass)"><div @Html.Raw(setPjsEdit.TanggalMulai.CellAttributes)>
+<template id="tpx_SetPjs_TanggalMulai"><span id="el_SetPjs_TanggalMulai">
+<input type="@(setPjsEdit.TanggalMulai.InputTextType)" name="x_TanggalMulai" id="x_TanggalMulai" data-table="SetPjs" data-field="x_TanggalMulai" value="@Html.Raw(setPjsEdit.TanggalMulai.EditValue)" placeholder="@Html.Raw(HtmlEncode(setPjsEdit.TanggalMulai.PlaceHolder))" data-format-pattern="@(setPjsEdit.TanggalMulai.FormatPattern)"@Html.Raw(setPjsEdit.TanggalMulai.EditAttributes) aria-describedby="x_TanggalMulai_help">
+@Html.Raw(setPjsEdit.TanggalMulai.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(setPjsEdit.TanggalMulai.GetErrorMessage())</div>
+@if (!setPjsEdit.TanggalMulai.ReadOnly && !setPjsEdit.TanggalMulai.Disabled && !setPjsEdit.TanggalMulai.EditAttrs.Is("readonly") && !setPjsEdit.TanggalMulai.EditAttrs.Is("disabled")) {
+<script>
+loadjs.ready(["fSetPjsedit", "datetimepicker"], function () {
+    let format = "@Html.Raw(DateFormat(5))", // DN
+        options = {
+                localization: {
+                    locale: ew.LANGUAGE_ID + "-u-nu-" + ew.getNumberingSystem(),
+                    hourCycle: format.match(/H/) ? "h24" : "h12",
+                    format,
+                    ...ew.language.phrase("datetimepicker")
+                },
+                display: {
+                    icons: {
+                        previous: ew.IS_RTL ? "fa-solid fa-chevron-right" : "fa-solid fa-chevron-left",
+                        next: ew.IS_RTL ? "fa-solid fa-chevron-left" : "fa-solid fa-chevron-right"
+                    },
+                    components: {
+                        clock: !!format.match(/h/i) || !!format.match(/m/) || !!format.match(/s/i),
+                        hours: !!format.match(/h/i),
+                        minutes: !!format.match(/m/),
+                        seconds: !!format.match(/s/i)
+                    },
+                theme: ew.getPreferredTheme()
+                }
+            };
+    ew.createDateTimePicker("fSetPjsedit", "x_TanggalMulai", ew.deepAssign({"useCurrent":false,"display":{"sideBySide":false}}, options));
+});
+</script>
+}
+</span></template>
+</div></div>
+    </div>
+} @* setPjsEdit.TanggalMulai.Visible (end) *@
+@if (setPjsEdit.TanggalSelesai.Visible) { // setPjsEdit.TanggalSelesai.Visible (begin)
+    <div id="r_TanggalSelesai" @Html.Raw(setPjsEdit.TanggalSelesai.RowAttributes)>
+        <label id="elh_SetPjs_TanggalSelesai" for="x_TanggalSelesai" class="@(setPjsEdit.LeftColumnClass)"><template id="tpc_SetPjs_TanggalSelesai">@Html.Raw(setPjsEdit.TanggalSelesai.Caption)@Html.Raw(setPjsEdit.TanggalSelesai.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(setPjsEdit.RightColumnClass)"><div @Html.Raw(setPjsEdit.TanggalSelesai.CellAttributes)>
+<template id="tpx_SetPjs_TanggalSelesai"><span id="el_SetPjs_TanggalSelesai">
+<input type="@(setPjsEdit.TanggalSelesai.InputTextType)" name="x_TanggalSelesai" id="x_TanggalSelesai" data-table="SetPjs" data-field="x_TanggalSelesai" value="@Html.Raw(setPjsEdit.TanggalSelesai.EditValue)" placeholder="@Html.Raw(HtmlEncode(setPjsEdit.TanggalSelesai.PlaceHolder))" data-format-pattern="@(setPjsEdit.TanggalSelesai.FormatPattern)"@Html.Raw(setPjsEdit.TanggalSelesai.EditAttributes) aria-describedby="x_TanggalSelesai_help">
+@Html.Raw(setPjsEdit.TanggalSelesai.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(setPjsEdit.TanggalSelesai.GetErrorMessage())</div>
+@if (!setPjsEdit.TanggalSelesai.ReadOnly && !setPjsEdit.TanggalSelesai.Disabled && !setPjsEdit.TanggalSelesai.EditAttrs.Is("readonly") && !setPjsEdit.TanggalSelesai.EditAttrs.Is("disabled")) {
+<script>
+loadjs.ready(["fSetPjsedit", "datetimepicker"], function () {
+    let format = "@Html.Raw(DateFormat(5))", // DN
+        options = {
+                localization: {
+                    locale: ew.LANGUAGE_ID + "-u-nu-" + ew.getNumberingSystem(),
+                    hourCycle: format.match(/H/) ? "h24" : "h12",
+                    format,
+                    ...ew.language.phrase("datetimepicker")
+                },
+                display: {
+                    icons: {
+                        previous: ew.IS_RTL ? "fa-solid fa-chevron-right" : "fa-solid fa-chevron-left",
+                        next: ew.IS_RTL ? "fa-solid fa-chevron-left" : "fa-solid fa-chevron-right"
+                    },
+                    components: {
+                        clock: !!format.match(/h/i) || !!format.match(/m/) || !!format.match(/s/i),
+                        hours: !!format.match(/h/i),
+                        minutes: !!format.match(/m/),
+                        seconds: !!format.match(/s/i)
+                    },
+                theme: ew.getPreferredTheme()
+                }
+            };
+    ew.createDateTimePicker("fSetPjsedit", "x_TanggalSelesai", ew.deepAssign({"useCurrent":false,"display":{"sideBySide":false}}, options));
+});
+</script>
+}
+</span></template>
+</div></div>
+    </div>
+} @* setPjsEdit.TanggalSelesai.Visible (end) *@
+@if (setPjsEdit.Status.Visible) { // setPjsEdit.Status.Visible (begin)
+    <div id="r_Status" @Html.Raw(setPjsEdit.Status.RowAttributes)>
+        <label id="elh_SetPjs_Status" for="x_Status" class="@(setPjsEdit.LeftColumnClass)"><template id="tpc_SetPjs_Status">@Html.Raw(setPjsEdit.Status.Caption)@Html.Raw(setPjsEdit.Status.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(setPjsEdit.RightColumnClass)"><div @Html.Raw(setPjsEdit.Status.CellAttributes)>
+<template id="tpx_SetPjs_Status"><span id="el_SetPjs_Status">
+<span @Html.Raw(setPjsEdit.Status.ViewAttributes)>
+<input type="text" readonly class="form-control-plaintext" value="@Html.Raw(RemoveHtml(ConvertToString(setPjsEdit.Status.EditValue)))"></span>
+<input type="hidden" data-table="SetPjs" data-field="x_Status" data-hidden="1" name="x_Status" id="x_Status" value="@Html.Raw(HtmlEncode(setPjsEdit.Status.CurrentValue))">
+</span></template>
+</div></div>
+    </div>
+} @* setPjsEdit.Status.Visible (end) *@
+@if (setPjsEdit.DownloadSuratTugas.Visible) { // setPjsEdit.DownloadSuratTugas.Visible (begin)
+    <div id="r_DownloadSuratTugas" @Html.Raw(setPjsEdit.DownloadSuratTugas.RowAttributes)>
+        <label id="elh_SetPjs_DownloadSuratTugas" for="x_DownloadSuratTugas" class="@(setPjsEdit.LeftColumnClass)"><template id="tpc_SetPjs_DownloadSuratTugas">@Html.Raw(setPjsEdit.DownloadSuratTugas.Caption)@Html.Raw(setPjsEdit.DownloadSuratTugas.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(setPjsEdit.RightColumnClass)"><div @Html.Raw(setPjsEdit.DownloadSuratTugas.CellAttributes)>
+<template id="tpx_SetPjs_DownloadSuratTugas"><span id="el_SetPjs_DownloadSuratTugas">
+<span @Html.Raw(setPjsEdit.DownloadSuratTugas.ViewAttributes)>
+<input type="text" readonly class="form-control-plaintext" value="@Html.Raw(RemoveHtml(ConvertToString(setPjsEdit.DownloadSuratTugas.EditValue)))"></span>
+<input type="hidden" data-table="SetPjs" data-field="x_DownloadSuratTugas" data-hidden="1" name="x_DownloadSuratTugas" id="x_DownloadSuratTugas" value="@Html.Raw(HtmlEncode(setPjsEdit.DownloadSuratTugas.CurrentValue))">
+</span></template>
+</div></div>
+    </div>
+} @* setPjsEdit.DownloadSuratTugas.Visible (end) *@
+@if (setPjsEdit.SuratTugas.Visible) { // setPjsEdit.SuratTugas.Visible (begin)
+    <div id="r_SuratTugas" @Html.Raw(setPjsEdit.SuratTugas.RowAttributes)>
+        <label id="elh_SetPjs_SuratTugas" for="x_SuratTugas" class="@(setPjsEdit.LeftColumnClass)"><template id="tpc_SetPjs_SuratTugas">@Html.Raw(setPjsEdit.SuratTugas.Caption)@Html.Raw(setPjsEdit.SuratTugas.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(setPjsEdit.RightColumnClass)"><div @Html.Raw(setPjsEdit.SuratTugas.CellAttributes)>
+<template id="tpx_SetPjs_SuratTugas"><span id="el_SetPjs_SuratTugas">
+<input type="@(setPjsEdit.SuratTugas.InputTextType)" name="x_SuratTugas" id="x_SuratTugas" data-table="SetPjs" data-field="x_SuratTugas" value="@Html.Raw(setPjsEdit.SuratTugas.EditValue)" size="30" maxlength="255" placeholder="@Html.Raw(HtmlEncode(setPjsEdit.SuratTugas.PlaceHolder))" data-format-pattern="@(setPjsEdit.SuratTugas.FormatPattern)"@Html.Raw(setPjsEdit.SuratTugas.EditAttributes) aria-describedby="x_SuratTugas_help">
+@Html.Raw(setPjsEdit.SuratTugas.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(setPjsEdit.SuratTugas.GetErrorMessage())</div>
+</span></template>
+</div></div>
+    </div>
+} @* setPjsEdit.SuratTugas.Visible (end) *@
+@if (setPjsEdit.Keterangan.Visible) { // setPjsEdit.Keterangan.Visible (begin)
+    <div id="r_Keterangan" @Html.Raw(setPjsEdit.Keterangan.RowAttributes)>
+        <label id="elh_SetPjs_Keterangan" for="x_Keterangan" class="@(setPjsEdit.LeftColumnClass)"><template id="tpc_SetPjs_Keterangan">@Html.Raw(setPjsEdit.Keterangan.Caption)@Html.Raw(setPjsEdit.Keterangan.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(setPjsEdit.RightColumnClass)"><div @Html.Raw(setPjsEdit.Keterangan.CellAttributes)>
+<template id="tpx_SetPjs_Keterangan"><span id="el_SetPjs_Keterangan">
+<textarea data-table="SetPjs" data-field="x_Keterangan" name="x_Keterangan" id="x_Keterangan" cols="35" rows="4" placeholder="@Html.Raw(HtmlEncode(setPjsEdit.Keterangan.PlaceHolder))"@Html.Raw(setPjsEdit.Keterangan.EditAttributes) aria-describedby="x_Keterangan_help">@(setPjsEdit.Keterangan.EditValue)</textarea>
+@Html.Raw(setPjsEdit.Keterangan.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(setPjsEdit.Keterangan.GetErrorMessage())</div>
+</span></template>
+</div></div>
+    </div>
+} @* setPjsEdit.Keterangan.Visible (end) *@
+@if (setPjsEdit.Remaks.Visible) { // setPjsEdit.Remaks.Visible (begin)
+    <div id="r_Remaks" @Html.Raw(setPjsEdit.Remaks.RowAttributes)>
+        <label id="elh_SetPjs_Remaks" for="x_Remaks" class="@(setPjsEdit.LeftColumnClass)"><template id="tpc_SetPjs_Remaks">@Html.Raw(setPjsEdit.Remaks.Caption)@Html.Raw(setPjsEdit.Remaks.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(setPjsEdit.RightColumnClass)"><div @Html.Raw(setPjsEdit.Remaks.CellAttributes)>
+<template id="tpx_SetPjs_Remaks"><span id="el_SetPjs_Remaks">
+<textarea data-table="SetPjs" data-field="x_Remaks" name="x_Remaks" id="x_Remaks" cols="35" rows="4" placeholder="@Html.Raw(HtmlEncode(setPjsEdit.Remaks.PlaceHolder))"@Html.Raw(setPjsEdit.Remaks.EditAttributes) aria-describedby="x_Remaks_help">@(setPjsEdit.Remaks.EditValue)</textarea>
+@Html.Raw(setPjsEdit.Remaks.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(setPjsEdit.Remaks.GetErrorMessage())</div>
+</span></template>
+</div></div>
+    </div>
+} @* setPjsEdit.Remaks.Visible (end) *@
+@if (setPjsEdit.DibuatOleh.Visible) { // setPjsEdit.DibuatOleh.Visible (begin)
+    <div id="r_DibuatOleh" @Html.Raw(setPjsEdit.DibuatOleh.RowAttributes)>
+        <label id="elh_SetPjs_DibuatOleh" class="@(setPjsEdit.LeftColumnClass)"><template id="tpc_SetPjs_DibuatOleh">@Html.Raw(setPjsEdit.DibuatOleh.Caption)@Html.Raw(setPjsEdit.DibuatOleh.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(setPjsEdit.RightColumnClass)"><div @Html.Raw(setPjsEdit.DibuatOleh.CellAttributes)>
+<template id="tpx_SetPjs_DibuatOleh"><span id="el_SetPjs_DibuatOleh">
+<span>@{
+    if (IsRTL) {
+        setPjsEdit.DibuatOleh.EditAttrs["dir"] = "rtl";
+    }
+}</span>
+<span id="as_x_DibuatOleh" class="ew-auto-suggest">
+    <input type="text" class="form-control" name="sv_x_DibuatOleh" id="sv_x_DibuatOleh" value="@(RemoveHtml(ConvertToString(setPjsEdit.DibuatOleh.EditValue)))" autocomplete="off" size="30" placeholder="@Html.Raw(HtmlEncode(setPjsEdit.DibuatOleh.PlaceHolder))" data-placeholder="@Html.Raw(HtmlEncode(setPjsEdit.DibuatOleh.PlaceHolder))" data-format-pattern="@(setPjsEdit.DibuatOleh.FormatPattern)" @Html.Raw(setPjsEdit.DibuatOleh.EditAttributes) aria-describedby="x_DibuatOleh_help">
+</span>
+<selection-list hidden class="form-control" data-table="SetPjs" data-field="x_DibuatOleh" data-input="sv_x_DibuatOleh" data-value-separator="@(setPjsEdit.DibuatOleh.DisplayValueSeparatorAttribute)" name="x_DibuatOleh" id="x_DibuatOleh" value="@(HtmlEncode(setPjsEdit.DibuatOleh.CurrentValue))"></selection-list>
+@Html.Raw(setPjsEdit.DibuatOleh.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(setPjsEdit.DibuatOleh.GetErrorMessage())</div>
+<script>
+loadjs.ready(["fSetPjsedit"], function() {
+    fSetPjsedit.createAutoSuggest(Object.assign({"id":"x_DibuatOleh","forceSelect":false}, { lookupAllDisplayFields: @(setPjsEdit.DibuatOleh.Lookup.LookupAllDisplayFields ? "true" : "false") }, ew.vars.tables.SetPjs.fields.DibuatOleh.autoSuggestOptions));
+});
+</script>
+@Html.Raw(setPjsEdit.DibuatOleh.Lookup.GetParamTag(setPjsEdit, "p_x_DibuatOleh"))
+</span></template>
+</div></div>
+    </div>
+} @* setPjsEdit.DibuatOleh.Visible (end) *@
+@if (setPjsEdit.TanggalDibuat.Visible) { // setPjsEdit.TanggalDibuat.Visible (begin)
+    <div id="r_TanggalDibuat" @Html.Raw(setPjsEdit.TanggalDibuat.RowAttributes)>
+        <label id="elh_SetPjs_TanggalDibuat" for="x_TanggalDibuat" class="@(setPjsEdit.LeftColumnClass)"><template id="tpc_SetPjs_TanggalDibuat">@Html.Raw(setPjsEdit.TanggalDibuat.Caption)@Html.Raw(setPjsEdit.TanggalDibuat.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(setPjsEdit.RightColumnClass)"><div @Html.Raw(setPjsEdit.TanggalDibuat.CellAttributes)>
+<template id="tpx_SetPjs_TanggalDibuat"><span id="el_SetPjs_TanggalDibuat">
+<input type="@(setPjsEdit.TanggalDibuat.InputTextType)" name="x_TanggalDibuat" id="x_TanggalDibuat" data-table="SetPjs" data-field="x_TanggalDibuat" value="@Html.Raw(setPjsEdit.TanggalDibuat.EditValue)" placeholder="@Html.Raw(HtmlEncode(setPjsEdit.TanggalDibuat.PlaceHolder))" data-format-pattern="@(setPjsEdit.TanggalDibuat.FormatPattern)"@Html.Raw(setPjsEdit.TanggalDibuat.EditAttributes) aria-describedby="x_TanggalDibuat_help">
+@Html.Raw(setPjsEdit.TanggalDibuat.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(setPjsEdit.TanggalDibuat.GetErrorMessage())</div>
+@if (!setPjsEdit.TanggalDibuat.ReadOnly && !setPjsEdit.TanggalDibuat.Disabled && !setPjsEdit.TanggalDibuat.EditAttrs.Is("readonly") && !setPjsEdit.TanggalDibuat.EditAttrs.Is("disabled")) {
+<script>
+loadjs.ready(["fSetPjsedit", "datetimepicker"], function () {
+    let format = "@Html.Raw(DateFormat(9))", // DN
+        options = {
+                localization: {
+                    locale: ew.LANGUAGE_ID + "-u-nu-" + ew.getNumberingSystem(),
+                    hourCycle: format.match(/H/) ? "h24" : "h12",
+                    format,
+                    ...ew.language.phrase("datetimepicker")
+                },
+                display: {
+                    icons: {
+                        previous: ew.IS_RTL ? "fa-solid fa-chevron-right" : "fa-solid fa-chevron-left",
+                        next: ew.IS_RTL ? "fa-solid fa-chevron-left" : "fa-solid fa-chevron-right"
+                    },
+                    components: {
+                        clock: !!format.match(/h/i) || !!format.match(/m/) || !!format.match(/s/i),
+                        hours: !!format.match(/h/i),
+                        minutes: !!format.match(/m/),
+                        seconds: !!format.match(/s/i)
+                    },
+                theme: ew.getPreferredTheme()
+                }
+            };
+    ew.createDateTimePicker("fSetPjsedit", "x_TanggalDibuat", ew.deepAssign({"useCurrent":false,"display":{"sideBySide":false}}, options));
+});
+</script>
+}
+</span></template>
+</div></div>
+    </div>
+} @* setPjsEdit.TanggalDibuat.Visible (end) *@
+@if (setPjsEdit.DiperbaharuiOleh.Visible) { // setPjsEdit.DiperbaharuiOleh.Visible (begin)
+    <div id="r_DiperbaharuiOleh" @Html.Raw(setPjsEdit.DiperbaharuiOleh.RowAttributes)>
+        <label id="elh_SetPjs_DiperbaharuiOleh" class="@(setPjsEdit.LeftColumnClass)"><template id="tpc_SetPjs_DiperbaharuiOleh">@Html.Raw(setPjsEdit.DiperbaharuiOleh.Caption)@Html.Raw(setPjsEdit.DiperbaharuiOleh.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(setPjsEdit.RightColumnClass)"><div @Html.Raw(setPjsEdit.DiperbaharuiOleh.CellAttributes)>
+<template id="tpx_SetPjs_DiperbaharuiOleh"><span id="el_SetPjs_DiperbaharuiOleh">
+<span @Html.Raw(setPjsEdit.DiperbaharuiOleh.ViewAttributes)>
+<span class="form-control-plaintext">@Html.Raw(setPjsEdit.DiperbaharuiOleh.DisplayValue(setPjsEdit.DiperbaharuiOleh.EditValue))</span></span>
+<input type="hidden" data-table="SetPjs" data-field="x_DiperbaharuiOleh" data-hidden="1" name="x_DiperbaharuiOleh" id="x_DiperbaharuiOleh" value="@Html.Raw(HtmlEncode(setPjsEdit.DiperbaharuiOleh.CurrentValue))">
+</span></template>
+</div></div>
+    </div>
+} @* setPjsEdit.DiperbaharuiOleh.Visible (end) *@
+@if (setPjsEdit.DiperbaharuiTanggal.Visible) { // setPjsEdit.DiperbaharuiTanggal.Visible (begin)
+    <div id="r_DiperbaharuiTanggal" @Html.Raw(setPjsEdit.DiperbaharuiTanggal.RowAttributes)>
+        <label id="elh_SetPjs_DiperbaharuiTanggal" for="x_DiperbaharuiTanggal" class="@(setPjsEdit.LeftColumnClass)"><template id="tpc_SetPjs_DiperbaharuiTanggal">@Html.Raw(setPjsEdit.DiperbaharuiTanggal.Caption)@Html.Raw(setPjsEdit.DiperbaharuiTanggal.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(setPjsEdit.RightColumnClass)"><div @Html.Raw(setPjsEdit.DiperbaharuiTanggal.CellAttributes)>
+<template id="tpx_SetPjs_DiperbaharuiTanggal"><span id="el_SetPjs_DiperbaharuiTanggal">
+<span @Html.Raw(setPjsEdit.DiperbaharuiTanggal.ViewAttributes)>
+<input type="text" readonly class="form-control-plaintext" value="@Html.Raw(RemoveHtml(ConvertToString(setPjsEdit.DiperbaharuiTanggal.EditValue)))"></span>
+<input type="hidden" data-table="SetPjs" data-field="x_DiperbaharuiTanggal" data-hidden="1" name="x_DiperbaharuiTanggal" id="x_DiperbaharuiTanggal" value="@Html.Raw(HtmlEncode(setPjsEdit.DiperbaharuiTanggal.CurrentValue))">
+</span></template>
+</div></div>
+    </div>
+} @* setPjsEdit.DiperbaharuiTanggal.Visible (end) *@
+@if (setPjsEdit.PlantAwal.Visible) { // setPjsEdit.PlantAwal.Visible (begin)
+    <div id="r_PlantAwal" @Html.Raw(setPjsEdit.PlantAwal.RowAttributes)>
+        <label id="elh_SetPjs_PlantAwal" for="x_PlantAwal" class="@(setPjsEdit.LeftColumnClass)"><template id="tpc_SetPjs_PlantAwal">@Html.Raw(setPjsEdit.PlantAwal.Caption)@Html.Raw(setPjsEdit.PlantAwal.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(setPjsEdit.RightColumnClass)"><div @Html.Raw(setPjsEdit.PlantAwal.CellAttributes)>
+<template id="tpx_SetPjs_PlantAwal"><span id="el_SetPjs_PlantAwal">
+<input type="@(setPjsEdit.PlantAwal.InputTextType)" name="x_PlantAwal" id="x_PlantAwal" data-table="SetPjs" data-field="x_PlantAwal" value="@Html.Raw(setPjsEdit.PlantAwal.EditValue)" size="30" placeholder="@Html.Raw(HtmlEncode(setPjsEdit.PlantAwal.PlaceHolder))" data-format-pattern="@(setPjsEdit.PlantAwal.FormatPattern)"@Html.Raw(setPjsEdit.PlantAwal.EditAttributes) aria-describedby="x_PlantAwal_help">
+@Html.Raw(setPjsEdit.PlantAwal.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(setPjsEdit.PlantAwal.GetErrorMessage())</div>
+</span></template>
+</div></div>
+    </div>
+} @* setPjsEdit.PlantAwal.Visible (end) *@
+@if (setPjsEdit.RegionAwal.Visible) { // setPjsEdit.RegionAwal.Visible (begin)
+    <div id="r_RegionAwal" @Html.Raw(setPjsEdit.RegionAwal.RowAttributes)>
+        <label id="elh_SetPjs_RegionAwal" for="x_RegionAwal" class="@(setPjsEdit.LeftColumnClass)"><template id="tpc_SetPjs_RegionAwal">@Html.Raw(setPjsEdit.RegionAwal.Caption)@Html.Raw(setPjsEdit.RegionAwal.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(setPjsEdit.RightColumnClass)"><div @Html.Raw(setPjsEdit.RegionAwal.CellAttributes)>
+<template id="tpx_SetPjs_RegionAwal"><span id="el_SetPjs_RegionAwal">
+<input type="@(setPjsEdit.RegionAwal.InputTextType)" name="x_RegionAwal" id="x_RegionAwal" data-table="SetPjs" data-field="x_RegionAwal" value="@Html.Raw(setPjsEdit.RegionAwal.EditValue)" size="30" placeholder="@Html.Raw(HtmlEncode(setPjsEdit.RegionAwal.PlaceHolder))" data-format-pattern="@(setPjsEdit.RegionAwal.FormatPattern)"@Html.Raw(setPjsEdit.RegionAwal.EditAttributes) aria-describedby="x_RegionAwal_help">
+@Html.Raw(setPjsEdit.RegionAwal.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(setPjsEdit.RegionAwal.GetErrorMessage())</div>
+</span></template>
+</div></div>
+    </div>
+} @* setPjsEdit.RegionAwal.Visible (end) *@
+</div><!-- /page* -->
+<div id="tpd_SetPjsedit" class="ew-custom-template"></div>
+<template id="tpm_SetPjsedit">
+<div id="ct_setPjsEdit">@{
+    int CurrentPositionId = Convert.ToInt32(setPjsEdit.PosisiAwal.CurrentValue);
+    string CurrentPosition = "";
+    string status = setPjsEdit.Status.CurrentValue.ToString();
+    string idUserPjs = setPjsEdit.DibuatOleh.CurrentValue.ToString();
+    string idUser = CurrentUserInfo("IdUser").ToString();
+    using (SqlConnection sqlConnection = GetConnection("Db").OpenConnection()) {
+        using (SqlCommand sqlCommand = sqlConnection.CreateCommand()) {
+            sqlCommand.CommandType = CommandType.Text;
+            sqlCommand.CommandText = "SELECT CONCAT(IdPosition, ' - ', NamaPosition) as Position FROM MasterPosition WHERE IdPosition = @CurrentPositionId";
+            sqlCommand.Parameters.AddWithValue("@CurrentPositionId", CurrentPositionId);
+            CurrentPosition = ConvertToString(sqlCommand.ExecuteScalar());
+        }
+    }
+}
+<style>
+    .stepper {
+        display: flex;
+        counter-reset: step;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 8px;
+    }
+    .stepper::-webkit-scrollbar {
+        height: 6px; /* tipis */
+    }
+    .stepper::-webkit-scrollbar-thumb {
+        background-color: #ccc;
+        border-radius: 3px;
+    }
+    .step {
+        width: 150px;
+        text-align: center;
+        position: relative;
+    }
+    .step:not(:last-child)::after {
+        content: '';
+        position: absolute;
+        top: 20px;
+        right: -50%;
+        width: 100%;
+        height: 4px;
+        background-color: #ccc;
+        z-index: 0;
+    }
+    .step.completed:not(:last-child)::after {
+        background-color: #3c6dbd;
+    }
+    .step-icon {
+        width: 36px;
+        height: 36px;
+        line-height: 36px;
+        border-radius: 50%;
+        background: #ccc;
+        display: inline-block;
+        z-index: 1;
+        position: relative;
+        color: white;
+        font-weight: bold;
+    }
+    .step.active .step-icon {
+        background: #3c6dbd;
+    }
+    .step-label {
+        margin-top: 8px;
+        font-size: 14px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 6px;
+        color: #333;
+    }
+    .step-label {
+        color: #3c6dbd !important;
+        text-decoration: none;
+        margin: 0;
+        padding: 0;
+    }
+    .step-label-not-active {
+        color: #CCCCCC !important;
+    }
+    .ew-buttons {
+        display: none;
+    }
+    .view-page-table td {
+        white-space: normal !important;
+        word-wrap: break-word;
+    }
+    .view-page-table th {
+        background-color: #006BB7;
+    }
+    .body-table {
+        background-color: #fff;
+    }
+    .header-table {
+        background-color: #006BB7 !important;
+        color: #fff !important;
+    }
+    .view-page-table {
+        table-layout: fixed;
+    }
+    .btn {
+        white-space: nowrap;
+    }
+    .file-input-wrapper {
+        border: 1px solid #ced4da;
+        border-radius: .375rem;
+        overflow: hidden;
+        transition: border-color .15s, box-shadow .15s;
+    }
+    .file-input-wrapper:focus-within {
+        border-color: #86b7fe;
+        box-shadow: 0 0 0 .25rem rgba(13,110,253,.25);
+    }
+    .file-input-wrapper .btn {
+        border-radius: 0;
+    }
+    .file-input-wrapper .form-control {
+        border: none;
+        box-shadow: none !important;
+    }
+    #el_SetPjs_OrganizationLevel,
+    #el_SetPjs_Region,
+    #el_SetPjs_Plant,
+    #el_SetPjs_LookupPosition,
+    #el_SetPjs_TanggalMulai,
+    #el_SetPjs_TanggalSelesai,
+    #el_SetPjs_Keterangan {
+        width: 100%;
+    }
+    .status-approved {
+        background-color: #baffc9 !important;
+        color: #155724;
+    }
+    .status-requested {
+        background-color: #a3e0f7 !important;
+        color: #0c5460;
+    }
+    .status-canceled {
+        background-color: #e2e3e5 !important;
+        color: #41464b;
+    }
+    .ag-theme-quartz .ag-header {
+        background-color: #006BB7 !important;
+    }
+    .ag-theme-quartz .ag-header-cell-label {
+        color: #ffffff !important;
+    }
+    .ag-theme-quartz .ag-icon-filter {
+        color: #ffffff !important;
+    }
+    .rotate-down {
+        transform: rotate(90deg);
+        transition: transform 0.3s ease;
+    }
+    .rotate-right {
+        transform: rotate(0deg);
+        transition: transform 0.3s ease;
+    }
+</style>
+<form id="CustomFormPJS" autocomplete="off">
+    <div class="row pb-3 border-bottom">
+        <div class="col-2 fw-bold d-flex align-items-center">
+            Nomor PJS
+        </div>
+        <div class="col-10 d-flex gap-3">
+            @setPjsEdit.NomorPjs.CurrentValue
+        </div>
+    </div>
+    <div class="row pb-3 border-bottom mb-0">
+        <div class="col-2 fw-bold d-flex align-items-center">
+            Nama
+        </div>
+        <div class="col-10 d-flex gap-3">
+            @setPjsEdit.Nama.CurrentValue
+        </div>
+    </div>
+    <div class="row border-bottom">
+        <div class="col-2 fw-bold d-flex align-items-center py-3">
+            Status PJS
+        </div>
+        @if (status.ToLower() == "approved") {
+            <div class="col-10 py-3 fw-bold status-approved">
+                @status
+            </div>
+        } else if (status.ToLower() == "requested") {
+            <div class="col-10 py-3 fw-bold status-requested">
+                @status
+            </div>
+        } else if (status.ToLower() == "rejected") {
+            <div class="col-10 py-3 fw-bold bg-danger text-white">
+                @status
+            </div>
+        } else {
+            <div class="col-10 py-3 fw-bold status-canceled">
+                @status
+            </div>
+        }
+    </div>
+    <div class="row pb-3 border-bottom">
+        <div class="col-2 fw-bold d-flex align-items-center">
+            Diperbaharui Oleh
+        </div>
+        <div class="col-10">
+            <div class="d-flex gap-3 align-items-center">
+                <slot class="ew-slot" name="tpx_SetPjs_DiperbaharuiOleh"></slot>
+                <button type="button" class="btn btn-primary ew-btn ps-2" expand-log="false">
+                    <i class="fa-solid fa-caret-right fa-2xl me-2 caret-icon rotate-right"></i>
+                    Log History
+                    <i class="fa-solid fa-clock-rotate-left ms-1"></i> 
+                </button>
+            </div>
+            <div id="log-table-row" class="d-none row m-0">
+                <div class="p-0">
+                    <div id="log-table-wrapper" style="overflow: hidden; transition: all 0.6s ease; max-height: 0;">
+                        <div id="myGrid" class="ag-theme-quartz w-75 my-3" style="height: 300px;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row pb-3 border-bottom">
+        <div class="col-2 fw-bold d-flex align-items-center">
+            Tanggal Diperbaharui
+        </div>
+        <div class="col-10 d-flex gap-3">
+            <slot class="ew-slot" name="tpx_SetPjs_DiperbaharuiTanggal"></slot>
+        </div>
+    </div>
+    <div class="row pb-3 border-bottom">
+        <div class="col-2 fw-bold d-flex align-items-center">
+            Posisi Awal
+        </div>
+        <div class="col-10 d-flex gap-3">
+            @(CurrentPosition)
+        </div>
+    </div>
+    <div class="row pb-3 border-bottom">
+        <div class="col-2 fw-bold d-flex align-items-center">
+            Organization Level
+        </div>
+        <div class="col-10 d-flex gap-3">
+            <slot class="ew-slot" name="tpx_SetPjs_OrganizationLevel"></slot>
+        </div>
+    </div>
+    <div class="row pb-3 border-bottom" id="rRegion" style="display: none;">
+        <div class="col-2 fw-bold d-flex align-items-center">
+            Region
+        </div>
+        <div class="col-10 d-flex gap-3">
+            <slot class="ew-slot" name="tpx_SetPjs_Region"></slot>
+        </div>
+    </div>
+    <div class="row pb-3 border-bottom" id="rPlant" style="display: none;">
+        <div class="col-2 fw-bold d-flex align-items-center">
+            Plant
+        </div>
+        <div class="col-10 d-flex gap-3">
+            <slot class="ew-slot" name="tpx_SetPjs_Plant"></slot>
+        </div>
+    </div>
+    <div class="row pb-3 border-bottom">
+        <div class="col-2 fw-bold d-flex align-items-center">
+            Posisi PJS
+        </div>
+        <div class="col-10 d-flex gap-3">
+            <slot class="ew-slot" name="tpx_SetPjs_LookupPosition"></slot>
+        </div>
+    </div>
+    <div class="row pb-3 border-bottom">
+        <div class="col-2 fw-bold d-flex align-items-center">
+            Tanggal Mulai
+        </div>
+        <div class="col-10 d-flex gap-3">
+            <slot class="ew-slot" name="tpx_SetPjs_TanggalMulai"></slot>
+        </div>
+    </div>
+    <div class="row pb-3 border-bottom">
+        <div class="col-2 fw-bold d-flex align-items-center">
+            Tanggal Selesai
+        </div>
+        <div class="col-10 d-flex gap-3">
+            <slot class="ew-slot" name="tpx_SetPjs_TanggalSelesai"></slot>
+        </div>
+    </div>
+    <div class="row pb-3 border-bottom">
+        <div class="col-2 fw-bold d-flex align-items-center">
+            Surat Tugas
+        </div>
+        <div class="col-10">
+            <div class="d-flex gap-2">
+                <div class="input-group file-input-wrapper">
+                    <label class="btn btn-primary mb-0">
+                        Add File <input type="file" id="SuratTugas" hidden multiple>
+                    </label>
+                    <input type="text" class="form-control" id="SuratTugas-Name" style="cursor: pointer;" value="Add File" readonly>
+                </div>
+                <button type="button" class="btn btn-primary btn-download" data-id="@setPjsEdit.Id.CurrentValue">
+                    <i class="fa-solid fa-download me-2"></i> 
+                    Download Surat Tugas
+                </button>
+            </div>
+            <small class="text-muted">Maximum file size: 20 MB</small>
+        </div>
+    </div>
+    <div class="row pb-3 border-bottom">
+        <div class="col-2 fw-bold d-flex align-items-center">
+            Keterangan
+        </div>
+        <div class="col-10 d-flex gap-3">
+            <slot class="ew-slot" name="tpx_SetPjs_Keterangan"></slot>
+        </div>
+    </div>
+    @if (status.ToLower() == "rejected") {
+        <div class="row pb-3 border-bottom">
+            <div class="col-2 fw-bold d-flex align-items-center">
+                Remarks
+            </div>
+            <div class="col-10 d-flex gap-3">
+                @setPjsEdit.Remaks.CurrentValue
+            </div>
+        </div>
+    } 
+    <div class="row pb-3 border-bottom">
+        <div class="col-2">
+        </div>
+        <div class="col-10 d-flex gap-3">
+            <button id="btn-back" class="btn btn-default ew-btn" type="button">
+                <i class="fas fa-circle-chevron-left me-2"></i>Back
+            </button>
+            @if (status.ToLower() == "requested" && idUserPjs == idUser) {
+                <button id="btn-submit-custom" class="btn btn-primary ew-btn" type="button">
+                    <i class="fas fa-pen-to-square me-2"></i>Edit
+                </button>
+            }
+        </div>
+    </div>
+</form>
+<script>
+    const idUserPjs = "@idUserPjs";
+    const idUser = "@idUser";
+    if (idUserPjs != idUser) {
+        $('input, select, textarea').prop('disabled', true);
+    }
+</script></div>
+</template>
+@{ setPjsEdit.CloseRecordset(); }
+@Html.Raw(setPjsEdit.IsModal ? "<template class=\"ew-modal-buttons\">" : "<div class=\"row ew-buttons\">")<!-- buttons .row -->
+    <div class="@(setPjsEdit.OffsetColumnClass)"><!-- buttons offset -->
+    <button class="btn btn-primary ew-btn" name="btn-action" id="btn-action" type="submit" form="fSetPjsedit">@Html.Raw(Language.Phrase("SaveBtn"))</button>
+@if (IsJsonResponse()) {
+    <button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" data-bs-dismiss="modal">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+} else {
+    <button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" form="fSetPjsedit" data-href="@AppPath(setPjsEdit.ReturnUrl)">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+}
+    </div><!-- /buttons offset -->
+@Html.Raw(setPjsEdit.IsModal ? "</template>" : "</div>")<!-- /buttons .row -->
+</form>
+<script class="ew-apply-template">
+loadjs.ready(ew.applyTemplateId, function() {
+    var $ = jQuery;
+    ew.templateData = { rows: @Html.Raw(ConvertToJson(setPjsEdit.Rows)) };
+    ew.applyTemplate("tpd_SetPjsedit", "tpm_SetPjsedit", "SetPjsedit", "@(setPjsEdit.Export)", "SetPjs", ew.templateData.rows[0], @(setPjsEdit.IsModal ? "true" : "false"));
+    loadjs.done("customtemplate");
+});
+</script>
+</main>
+@setPjsEdit.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("SetPjs");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Startup script
+    const parent_url = ew.PATH_BASE;
+    const steps = [
+        { number: 1, label: "Set User PJS", url: `${parent_url}SetPjsList`, icon: "fa-user-clock" },
+        { number: 2, label: "Edit PJS", url: "", icon: "fa-pen" }
+    ];
+    var currentStep = 2;
+    var $stepperWrapper = $('<div class="d-flex border-bottom border-2 pb-2"><div class="stepper"></div></div>');
+    var $stepper = $stepperWrapper.find(".stepper");
+    steps.forEach(function (step, i) {
+        var isActive = step.number === currentStep;
+        var isCompleted = step.number < currentStep;
+        var stepClass = isActive ? "active" : isCompleted ? "completed" : "";
+        var icon, labelContent, html;
+        if (isActive) {
+            icon = `<div class="step-icon bg-success">${step.number}</div>`;
+            labelContent = `<div class="step-label"><p class="text-success mb-1"><i class="fa-solid ${step.icon} me-1 text-success"></i> ${step.label}</p></div>`;
+            html = `<div class="step ${stepClass} text-success">${icon}${labelContent}</div>`;
+        } else if (isCompleted) {
+            icon = `<div class="step-icon" style="background: #3c6dbd;">${step.number}</div>`;
+            labelContent = `<div class="step-label"><a href="${step.url}" class="text-primary"><i class="fa-solid ${step.icon} me-1"></i>${step.label}</a></div>`;
+            html = `<div class="step ${stepClass}">${icon}${labelContent}</div>`;
+        } else {
+            icon = `<div class="step-icon">${step.number}</div>`;
+            labelContent = `<div class="step-label-not-active"><p style="margin: 0;"><i class="fa-solid ${step.icon} me-1"></i>${step.label}</p></div>`;
+            html = `<div class="step ${stepClass} text-secondary">${icon}${labelContent}</div>`;
+        }
+        $stepper.append(html);
+    });
+    $(".content-header .container-fluid .row").append($stepperWrapper);
+    const NomorPjs = "@setPjsEdit.NomorPjs.CurrentValue.ToString()";
+    $.ajax({
+        url: parent_url + `api/LookUpList/GetLogPjs?NomorPjs=${NomorPjs}`,
+        type: 'GET',
+        success: function(response) {
+            const mappedData = response.result.map(item => ({
+                Username: item.Username,
+                Status: item.Status,
+                EtlDate: item.EtlDate,
+                Catatan: item.Catatan
+            }));
+            $.getScript('https://cdn.jsdelivr.net/npm/ag-grid-community/dist/ag-grid-community.min.js', function () {
+                const gridOptions = {
+                    rowData: mappedData,
+                    columnDefs: [
+                        {
+                            headerName: 'No.',
+                            valueGetter: 'node.rowIndex + 1',
+                            width: 80,
+                            filter: false
+                        },
+                        {
+                            headerName: 'Username',
+                            field: 'Username',
+                            flex: 1
+                        },
+                        {
+                            headerName: 'Status PJS',
+                            field: 'Status',
+                            flex: 1
+                        },
+                        {
+                            headerName: 'Tanggal',
+                            field: 'EtlDate',
+                            flex: 1
+                        },
+                        {
+                            headerName: 'Catatan',
+                            field: 'Catatan',
+                            flex: 1
+                        }
+                    ],
+                    defaultColDef: {
+                        sortable: false,
+                        suppressMovable: true,
+                        filter: true,
+                        resizable: false,
+                        cellClassRules: {
+                            'status-approved': params => params.colDef.field === 'Status' && params.data.Status.toLowerCase() === 'approved',
+                            'status-requested': params => params.colDef.field === 'Status' && params.data.Status.toLowerCase() === 'requested',
+                            'status-canceled': params => params.colDef.field === 'Status' && params.data.Status.toLowerCase() === 'canceled',
+                            'bg-danger text-white': params => params.colDef.field === 'Status' && params.data.Status.toLowerCase() === 'rejected'
+                        }
+                    },
+                    rowSelection: 'multiple',
+                    suppressRowClickSelection: true,
+                    pagination: true,
+                    paginationPageSize: 10
+                };
+                const myGridElement = document.querySelector('#myGrid');
+                agGrid.createGrid(myGridElement, gridOptions);
+            });
+        },
+        error: function(xhr, status, error) {
+            ew.alert(xhr.responseJSON.message ?? "Terjadi kesalahan dalam memuat data");
+        }
+    });
+});
+</script>

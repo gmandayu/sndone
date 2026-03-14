@@ -1,0 +1,1074 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (masterPlantList.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = masterPlantList.UseLayout ? "_Layout" : "";
+}
+@if (!masterPlantList.IsExport()) {
+<script>
+var currentTable = @Html.Raw(ConvertToJson(masterPlantList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { MasterPlant: currentTable } });
+var currentPageID = ew.PAGE_ID = "list";
+var currentForm;
+var @(masterPlantList.FormName);
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("@(masterPlantList.FormName)")
+        .setPageId("list")
+        .setSubmitWithFetch(@(masterPlantList.UseAjaxActions ? "true" : "false"))
+        .setFormKeyCountName("@(masterPlantList.FormKeyCountName)")
+
+        // Dynamic selection lists
+        .setLists({
+            "Terminal_Manager": @Html.Raw(masterPlantList.Terminal_Manager.ToClientList(masterPlantList)),
+            "PRL": @Html.Raw(masterPlantList.PRL.ToClientList(masterPlantList)),
+            "Status": @Html.Raw(masterPlantList.Status.ToClientList(masterPlantList)),
+            "Terminal_Induk": @Html.Raw(masterPlantList.Terminal_Induk.ToClientList(masterPlantList)),
+            "Nama_Terminal": @Html.Raw(masterPlantList.Nama_Terminal.ToClientList(masterPlantList)),
+            "Region": @Html.Raw(masterPlantList.Region.ToClientList(masterPlantList)),
+            "Fungsi": @Html.Raw(masterPlantList.Fungsi.ToClientList(masterPlantList)),
+            "Cost_Center": @Html.Raw(masterPlantList.Cost_Center.ToClientList(masterPlantList)),
+            "Jenis": @Html.Raw(masterPlantList.Jenis.ToClientList(masterPlantList)),
+            "Plant": @Html.Raw(masterPlantList.Plant.ToClientList(masterPlantList)),
+            "UTC": @Html.Raw(masterPlantList.UTC.ToClientList(masterPlantList)),
+            "TipeProduk": @Html.Raw(masterPlantList.TipeProduk.ToClientList(masterPlantList)),
+            "JenisPlant": @Html.Raw(masterPlantList.JenisPlant.ToClientList(masterPlantList)),
+            "DibuatOleh": @Html.Raw(masterPlantList.DibuatOleh.ToClientList(masterPlantList)),
+            "TanggalDibuat": @Html.Raw(masterPlantList.TanggalDibuat.ToClientList(masterPlantList)),
+            "DiperbaruiOleh": @Html.Raw(masterPlantList.DiperbaruiOleh.ToClientList(masterPlantList)),
+            "TanggalDiperbarui": @Html.Raw(masterPlantList.TanggalDiperbarui.ToClientList(masterPlantList)),
+        })
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Write your client script here, no need to add script tags.
+});
+</script>
+}
+@if (!masterPlantList.IsExport()) {
+<div class="btn-toolbar ew-toolbar">
+@if (masterPlantList.TotalRecords > 0 && masterPlantList.ExportOptions.Visible) {
+    masterPlantList.ExportOptions.Render("body");
+}
+@if (masterPlantList.ImportOptions.Visible) {
+    masterPlantList.ImportOptions.Render("body");
+}
+@if (masterPlantList.SearchOptions.Visible) {
+    masterPlantList.SearchOptions.Render("body");
+}
+@if (masterPlantList.FilterOptions.Visible) {
+    masterPlantList.FilterOptions.Render("body");
+}
+</div>
+}
+@if (masterPlantList.ShowCurrentFilter) {
+    masterPlantList.ShowFilterList();
+}
+@if (!masterPlantList.IsModal) {
+<form name="fMasterPlantsrch" id="fMasterPlantsrch" class="ew-form ew-ext-search-form" action="@AppPath(CurrentPageName())" novalidate autocomplete="off">
+<div id="fMasterPlantsrch_search_panel" class="mb-2 mb-sm-0 @(masterPlantList.SearchPanelClass)"><!-- .ew-search-panel -->
+<script>
+var currentTable = @Html.Raw(ConvertToJson(masterPlantList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { MasterPlant: currentTable } });
+var currentForm;
+var fMasterPlantsrch, currentSearchForm, currentAdvancedSearchForm;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery,
+        fields = currentTable.fields;
+
+    // Form object for search
+    let form = new ew.FormBuilder()
+        .setId("fMasterPlantsrch")
+        .setPageId("list")
+@if (masterPlantList.UseAjaxActions) {
+        <text>.setSubmitWithFetch(true)</text>
+}
+
+        // Add fields
+        .setFields([
+        ])
+        // Validate form
+        .setValidate(
+            async function () {
+                if (!this.validateRequired)
+                    return true; // Ignore validation
+                let fobj = this.getForm();
+
+                // Validate fields
+                if (!this.validateFields())
+                    return false;
+
+                // Call Form_CustomValidate event
+                if (!(await this.customValidate?.(fobj) ?? true)) {
+                    this.focus();
+                    return false;
+                }
+                return true;
+            }
+        )
+
+        // Form_CustomValidate
+        .setCustomValidate(
+            function(fobj) { // DO NOT CHANGE THIS LINE!
+                    // Your custom validation code here, return false if invalid.
+                    return true;
+                }
+        )
+
+        // Use JavaScript validation or not
+        .setValidateRequired(ew.CLIENT_VALIDATE)
+
+        // Dynamic selection lists
+        .setLists({
+            "Terminal_Manager": @Html.Raw(masterPlantList.Terminal_Manager.ToClientList(masterPlantList)),
+            "PRL": @Html.Raw(masterPlantList.PRL.ToClientList(masterPlantList)),
+            "Status": @Html.Raw(masterPlantList.Status.ToClientList(masterPlantList)),
+            "Terminal_Induk": @Html.Raw(masterPlantList.Terminal_Induk.ToClientList(masterPlantList)),
+            "Nama_Terminal": @Html.Raw(masterPlantList.Nama_Terminal.ToClientList(masterPlantList)),
+            "Region": @Html.Raw(masterPlantList.Region.ToClientList(masterPlantList)),
+            "Fungsi": @Html.Raw(masterPlantList.Fungsi.ToClientList(masterPlantList)),
+            "Cost_Center": @Html.Raw(masterPlantList.Cost_Center.ToClientList(masterPlantList)),
+            "Jenis": @Html.Raw(masterPlantList.Jenis.ToClientList(masterPlantList)),
+            "Plant": @Html.Raw(masterPlantList.Plant.ToClientList(masterPlantList)),
+            "UTC": @Html.Raw(masterPlantList.UTC.ToClientList(masterPlantList)),
+            "TipeProduk": @Html.Raw(masterPlantList.TipeProduk.ToClientList(masterPlantList)),
+            "DibuatOleh": @Html.Raw(masterPlantList.DibuatOleh.ToClientList(masterPlantList)),
+            "TanggalDibuat": @Html.Raw(masterPlantList.TanggalDibuat.ToClientList(masterPlantList)),
+            "DiperbaruiOleh": @Html.Raw(masterPlantList.DiperbaruiOleh.ToClientList(masterPlantList)),
+            "TanggalDiperbarui": @Html.Raw(masterPlantList.TanggalDiperbarui.ToClientList(masterPlantList)),
+        })
+
+        // Filters
+        .setFilterList(@Html.Raw(masterPlantList.GetFilterList()))
+        .build();
+    window[form.id] = form;
+    currentSearchForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<input type="hidden" name="cmd" value="search">
+@if (Security.CanSearch) {
+if (!masterPlantList.IsExport() && Empty(masterPlantList.CurrentAction) && masterPlantList.HasSearchFields()) { @* Show search form (begin) *@
+<div class="ew-extended-search container-fluid ps-2">
+<div class="row mb-0@(masterPlantList.SearchFieldsPerRow > 0 ? " row-cols-sm-" + masterPlantList.SearchFieldsPerRow : "")">
+@{
+    // Render search row
+    masterPlantList.RowType = RowType.Search;
+    masterPlantList.ResetAttributes();
+    await masterPlantList.RenderRow();
+}
+@if (masterPlantList.Terminal_Manager.Visible) { // masterPlantList.Terminal_Manager.Visible (begin)
+    if (!masterPlantList.Terminal_Manager.UseFilter) {
+        masterPlantList.SearchColumnCount++;
+    }
+    <div id="xs_Terminal_Manager" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(masterPlantList.Terminal_Manager.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_Terminal_Manager"
+            name="x_Terminal_Manager[]"
+            class="form-control ew-select@(masterPlantList.Terminal_Manager.IsInvalidClass)"
+            data-select2-id="fMasterPlantsrch_x_Terminal_Manager"
+            data-table="MasterPlant"
+            data-field="x_Terminal_Manager"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(masterPlantList.Terminal_Manager.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(masterPlantList.Terminal_Manager.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(masterPlantList.Terminal_Manager.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(masterPlantList.Terminal_Manager.EditAttributes)>
+            @(masterPlantList.Terminal_Manager.SelectOptionListHtml("x_Terminal_Manager", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(masterPlantList.Terminal_Manager.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMasterPlantsrch", function() {
+            var options = {
+                name: "x_Terminal_Manager",
+                selectId: "fMasterPlantsrch_x_Terminal_Manager",
+                ajax: { id: "x_Terminal_Manager", form: "fMasterPlantsrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MasterPlant.fields.Terminal_Manager.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* masterPlantList.Terminal_Manager.Visible (end) *@
+@if (masterPlantList.PRL.Visible) { // masterPlantList.PRL.Visible (begin)
+    if (!masterPlantList.PRL.UseFilter) {
+        masterPlantList.SearchColumnCount++;
+    }
+    <div id="xs_PRL" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(masterPlantList.PRL.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_PRL"
+            name="x_PRL[]"
+            class="form-control ew-select@(masterPlantList.PRL.IsInvalidClass)"
+            data-select2-id="fMasterPlantsrch_x_PRL"
+            data-table="MasterPlant"
+            data-field="x_PRL"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(masterPlantList.PRL.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(masterPlantList.PRL.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(masterPlantList.PRL.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(masterPlantList.PRL.EditAttributes)>
+            @(masterPlantList.PRL.SelectOptionListHtml("x_PRL", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(masterPlantList.PRL.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMasterPlantsrch", function() {
+            var options = {
+                name: "x_PRL",
+                selectId: "fMasterPlantsrch_x_PRL",
+                ajax: { id: "x_PRL", form: "fMasterPlantsrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MasterPlant.fields.PRL.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* masterPlantList.PRL.Visible (end) *@
+@if (masterPlantList.Status.Visible) { // masterPlantList.Status.Visible (begin)
+    if (!masterPlantList.Status.UseFilter) {
+        masterPlantList.SearchColumnCount++;
+    }
+    <div id="xs_Status" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(masterPlantList.Status.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_Status"
+            name="x_Status[]"
+            class="form-control ew-select@(masterPlantList.Status.IsInvalidClass)"
+            data-select2-id="fMasterPlantsrch_x_Status"
+            data-table="MasterPlant"
+            data-field="x_Status"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(masterPlantList.Status.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(masterPlantList.Status.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(masterPlantList.Status.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(masterPlantList.Status.EditAttributes)>
+            @(masterPlantList.Status.SelectOptionListHtml("x_Status", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(masterPlantList.Status.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMasterPlantsrch", function() {
+            var options = {
+                name: "x_Status",
+                selectId: "fMasterPlantsrch_x_Status",
+                ajax: { id: "x_Status", form: "fMasterPlantsrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MasterPlant.fields.Status.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* masterPlantList.Status.Visible (end) *@
+@if (masterPlantList.Terminal_Induk.Visible) { // masterPlantList.Terminal_Induk.Visible (begin)
+    if (!masterPlantList.Terminal_Induk.UseFilter) {
+        masterPlantList.SearchColumnCount++;
+    }
+    <div id="xs_Terminal_Induk" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(masterPlantList.Terminal_Induk.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_Terminal_Induk"
+            name="x_Terminal_Induk[]"
+            class="form-control ew-select@(masterPlantList.Terminal_Induk.IsInvalidClass)"
+            data-select2-id="fMasterPlantsrch_x_Terminal_Induk"
+            data-table="MasterPlant"
+            data-field="x_Terminal_Induk"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(masterPlantList.Terminal_Induk.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(masterPlantList.Terminal_Induk.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(masterPlantList.Terminal_Induk.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(masterPlantList.Terminal_Induk.EditAttributes)>
+            @(masterPlantList.Terminal_Induk.SelectOptionListHtml("x_Terminal_Induk", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(masterPlantList.Terminal_Induk.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMasterPlantsrch", function() {
+            var options = {
+                name: "x_Terminal_Induk",
+                selectId: "fMasterPlantsrch_x_Terminal_Induk",
+                ajax: { id: "x_Terminal_Induk", form: "fMasterPlantsrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MasterPlant.fields.Terminal_Induk.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* masterPlantList.Terminal_Induk.Visible (end) *@
+@if (masterPlantList.Nama_Terminal.Visible) { // masterPlantList.Nama_Terminal.Visible (begin)
+    if (!masterPlantList.Nama_Terminal.UseFilter) {
+        masterPlantList.SearchColumnCount++;
+    }
+    <div id="xs_Nama_Terminal" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(masterPlantList.Nama_Terminal.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_Nama_Terminal"
+            name="x_Nama_Terminal[]"
+            class="form-control ew-select@(masterPlantList.Nama_Terminal.IsInvalidClass)"
+            data-select2-id="fMasterPlantsrch_x_Nama_Terminal"
+            data-table="MasterPlant"
+            data-field="x_Nama_Terminal"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(masterPlantList.Nama_Terminal.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(masterPlantList.Nama_Terminal.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(masterPlantList.Nama_Terminal.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(masterPlantList.Nama_Terminal.EditAttributes)>
+            @(masterPlantList.Nama_Terminal.SelectOptionListHtml("x_Nama_Terminal", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(masterPlantList.Nama_Terminal.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMasterPlantsrch", function() {
+            var options = {
+                name: "x_Nama_Terminal",
+                selectId: "fMasterPlantsrch_x_Nama_Terminal",
+                ajax: { id: "x_Nama_Terminal", form: "fMasterPlantsrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MasterPlant.fields.Nama_Terminal.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* masterPlantList.Nama_Terminal.Visible (end) *@
+@if (masterPlantList.Region.Visible) { // masterPlantList.Region.Visible (begin)
+    if (!masterPlantList.Region.UseFilter) {
+        masterPlantList.SearchColumnCount++;
+    }
+    <div id="xs_Region" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(masterPlantList.Region.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_Region"
+            name="x_Region[]"
+            class="form-control ew-select@(masterPlantList.Region.IsInvalidClass)"
+            data-select2-id="fMasterPlantsrch_x_Region"
+            data-table="MasterPlant"
+            data-field="x_Region"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(masterPlantList.Region.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(masterPlantList.Region.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(masterPlantList.Region.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(masterPlantList.Region.EditAttributes)>
+            @(masterPlantList.Region.SelectOptionListHtml("x_Region", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(masterPlantList.Region.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMasterPlantsrch", function() {
+            var options = {
+                name: "x_Region",
+                selectId: "fMasterPlantsrch_x_Region",
+                ajax: { id: "x_Region", form: "fMasterPlantsrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MasterPlant.fields.Region.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* masterPlantList.Region.Visible (end) *@
+@if (masterPlantList.Fungsi.Visible) { // masterPlantList.Fungsi.Visible (begin)
+    if (!masterPlantList.Fungsi.UseFilter) {
+        masterPlantList.SearchColumnCount++;
+    }
+    <div id="xs_Fungsi" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(masterPlantList.Fungsi.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_Fungsi"
+            name="x_Fungsi[]"
+            class="form-control ew-select@(masterPlantList.Fungsi.IsInvalidClass)"
+            data-select2-id="fMasterPlantsrch_x_Fungsi"
+            data-table="MasterPlant"
+            data-field="x_Fungsi"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(masterPlantList.Fungsi.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(masterPlantList.Fungsi.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(masterPlantList.Fungsi.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(masterPlantList.Fungsi.EditAttributes)>
+            @(masterPlantList.Fungsi.SelectOptionListHtml("x_Fungsi", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(masterPlantList.Fungsi.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMasterPlantsrch", function() {
+            var options = {
+                name: "x_Fungsi",
+                selectId: "fMasterPlantsrch_x_Fungsi",
+                ajax: { id: "x_Fungsi", form: "fMasterPlantsrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MasterPlant.fields.Fungsi.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* masterPlantList.Fungsi.Visible (end) *@
+@if (masterPlantList.Cost_Center.Visible) { // masterPlantList.Cost_Center.Visible (begin)
+    if (!masterPlantList.Cost_Center.UseFilter) {
+        masterPlantList.SearchColumnCount++;
+    }
+    <div id="xs_Cost_Center" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(masterPlantList.Cost_Center.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_Cost_Center"
+            name="x_Cost_Center[]"
+            class="form-control ew-select@(masterPlantList.Cost_Center.IsInvalidClass)"
+            data-select2-id="fMasterPlantsrch_x_Cost_Center"
+            data-table="MasterPlant"
+            data-field="x_Cost_Center"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(masterPlantList.Cost_Center.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(masterPlantList.Cost_Center.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(masterPlantList.Cost_Center.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(masterPlantList.Cost_Center.EditAttributes)>
+            @(masterPlantList.Cost_Center.SelectOptionListHtml("x_Cost_Center", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(masterPlantList.Cost_Center.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMasterPlantsrch", function() {
+            var options = {
+                name: "x_Cost_Center",
+                selectId: "fMasterPlantsrch_x_Cost_Center",
+                ajax: { id: "x_Cost_Center", form: "fMasterPlantsrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MasterPlant.fields.Cost_Center.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* masterPlantList.Cost_Center.Visible (end) *@
+@if (masterPlantList.Jenis.Visible) { // masterPlantList.Jenis.Visible (begin)
+    if (!masterPlantList.Jenis.UseFilter) {
+        masterPlantList.SearchColumnCount++;
+    }
+    <div id="xs_Jenis" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(masterPlantList.Jenis.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_Jenis"
+            name="x_Jenis[]"
+            class="form-control ew-select@(masterPlantList.Jenis.IsInvalidClass)"
+            data-select2-id="fMasterPlantsrch_x_Jenis"
+            data-table="MasterPlant"
+            data-field="x_Jenis"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(masterPlantList.Jenis.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(masterPlantList.Jenis.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(masterPlantList.Jenis.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(masterPlantList.Jenis.EditAttributes)>
+            @(masterPlantList.Jenis.SelectOptionListHtml("x_Jenis", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(masterPlantList.Jenis.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMasterPlantsrch", function() {
+            var options = {
+                name: "x_Jenis",
+                selectId: "fMasterPlantsrch_x_Jenis",
+                ajax: { id: "x_Jenis", form: "fMasterPlantsrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MasterPlant.fields.Jenis.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* masterPlantList.Jenis.Visible (end) *@
+@if (masterPlantList.Plant.Visible) { // masterPlantList.Plant.Visible (begin)
+    if (!masterPlantList.Plant.UseFilter) {
+        masterPlantList.SearchColumnCount++;
+    }
+    <div id="xs_Plant" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(masterPlantList.Plant.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_Plant"
+            name="x_Plant[]"
+            class="form-control ew-select@(masterPlantList.Plant.IsInvalidClass)"
+            data-select2-id="fMasterPlantsrch_x_Plant"
+            data-table="MasterPlant"
+            data-field="x_Plant"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(masterPlantList.Plant.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(masterPlantList.Plant.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(masterPlantList.Plant.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(masterPlantList.Plant.EditAttributes)>
+            @(masterPlantList.Plant.SelectOptionListHtml("x_Plant", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(masterPlantList.Plant.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMasterPlantsrch", function() {
+            var options = {
+                name: "x_Plant",
+                selectId: "fMasterPlantsrch_x_Plant",
+                ajax: { id: "x_Plant", form: "fMasterPlantsrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MasterPlant.fields.Plant.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* masterPlantList.Plant.Visible (end) *@
+@if (masterPlantList.UTC.Visible) { // masterPlantList.UTC.Visible (begin)
+    if (!masterPlantList.UTC.UseFilter) {
+        masterPlantList.SearchColumnCount++;
+    }
+    <div id="xs_UTC" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(masterPlantList.UTC.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_UTC"
+            name="x_UTC[]"
+            class="form-control ew-select@(masterPlantList.UTC.IsInvalidClass)"
+            data-select2-id="fMasterPlantsrch_x_UTC"
+            data-table="MasterPlant"
+            data-field="x_UTC"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(masterPlantList.UTC.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(masterPlantList.UTC.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(masterPlantList.UTC.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(masterPlantList.UTC.EditAttributes)>
+            @(masterPlantList.UTC.SelectOptionListHtml("x_UTC", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(masterPlantList.UTC.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMasterPlantsrch", function() {
+            var options = {
+                name: "x_UTC",
+                selectId: "fMasterPlantsrch_x_UTC",
+                ajax: { id: "x_UTC", form: "fMasterPlantsrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MasterPlant.fields.UTC.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* masterPlantList.UTC.Visible (end) *@
+@if (masterPlantList.TipeProduk.Visible) { // masterPlantList.TipeProduk.Visible (begin)
+    if (!masterPlantList.TipeProduk.UseFilter) {
+        masterPlantList.SearchColumnCount++;
+    }
+    <div id="xs_TipeProduk" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(masterPlantList.TipeProduk.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_TipeProduk"
+            name="x_TipeProduk[]"
+            class="form-control ew-select@(masterPlantList.TipeProduk.IsInvalidClass)"
+            data-select2-id="fMasterPlantsrch_x_TipeProduk"
+            data-table="MasterPlant"
+            data-field="x_TipeProduk"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(masterPlantList.TipeProduk.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(masterPlantList.TipeProduk.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(masterPlantList.TipeProduk.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(masterPlantList.TipeProduk.EditAttributes)>
+            @(masterPlantList.TipeProduk.SelectOptionListHtml("x_TipeProduk", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(masterPlantList.TipeProduk.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMasterPlantsrch", function() {
+            var options = {
+                name: "x_TipeProduk",
+                selectId: "fMasterPlantsrch_x_TipeProduk",
+                ajax: { id: "x_TipeProduk", form: "fMasterPlantsrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MasterPlant.fields.TipeProduk.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* masterPlantList.TipeProduk.Visible (end) *@
+@if (masterPlantList.DibuatOleh.Visible) { // masterPlantList.DibuatOleh.Visible (begin)
+    if (!masterPlantList.DibuatOleh.UseFilter) {
+        masterPlantList.SearchColumnCount++;
+    }
+    <div id="xs_DibuatOleh" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(masterPlantList.DibuatOleh.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_DibuatOleh"
+            name="x_DibuatOleh[]"
+            class="form-control ew-select@(masterPlantList.DibuatOleh.IsInvalidClass)"
+            data-select2-id="fMasterPlantsrch_x_DibuatOleh"
+            data-table="MasterPlant"
+            data-field="x_DibuatOleh"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(masterPlantList.DibuatOleh.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(masterPlantList.DibuatOleh.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(masterPlantList.DibuatOleh.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(masterPlantList.DibuatOleh.EditAttributes)>
+            @(masterPlantList.DibuatOleh.SelectOptionListHtml("x_DibuatOleh", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(masterPlantList.DibuatOleh.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMasterPlantsrch", function() {
+            var options = {
+                name: "x_DibuatOleh",
+                selectId: "fMasterPlantsrch_x_DibuatOleh",
+                ajax: { id: "x_DibuatOleh", form: "fMasterPlantsrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MasterPlant.fields.DibuatOleh.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* masterPlantList.DibuatOleh.Visible (end) *@
+@if (masterPlantList.TanggalDibuat.Visible) { // masterPlantList.TanggalDibuat.Visible (begin)
+    if (!masterPlantList.TanggalDibuat.UseFilter) {
+        masterPlantList.SearchColumnCount++;
+    }
+    <div id="xs_TanggalDibuat" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(masterPlantList.TanggalDibuat.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_TanggalDibuat"
+            name="x_TanggalDibuat[]"
+            class="form-control ew-select@(masterPlantList.TanggalDibuat.IsInvalidClass)"
+            data-select2-id="fMasterPlantsrch_x_TanggalDibuat"
+            data-table="MasterPlant"
+            data-field="x_TanggalDibuat"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(masterPlantList.TanggalDibuat.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(masterPlantList.TanggalDibuat.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(masterPlantList.TanggalDibuat.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(masterPlantList.TanggalDibuat.EditAttributes)>
+            @(masterPlantList.TanggalDibuat.SelectOptionListHtml("x_TanggalDibuat", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(masterPlantList.TanggalDibuat.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMasterPlantsrch", function() {
+            var options = {
+                name: "x_TanggalDibuat",
+                selectId: "fMasterPlantsrch_x_TanggalDibuat",
+                ajax: { id: "x_TanggalDibuat", form: "fMasterPlantsrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MasterPlant.fields.TanggalDibuat.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* masterPlantList.TanggalDibuat.Visible (end) *@
+@if (masterPlantList.DiperbaruiOleh.Visible) { // masterPlantList.DiperbaruiOleh.Visible (begin)
+    if (!masterPlantList.DiperbaruiOleh.UseFilter) {
+        masterPlantList.SearchColumnCount++;
+    }
+    <div id="xs_DiperbaruiOleh" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(masterPlantList.DiperbaruiOleh.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_DiperbaruiOleh"
+            name="x_DiperbaruiOleh[]"
+            class="form-control ew-select@(masterPlantList.DiperbaruiOleh.IsInvalidClass)"
+            data-select2-id="fMasterPlantsrch_x_DiperbaruiOleh"
+            data-table="MasterPlant"
+            data-field="x_DiperbaruiOleh"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(masterPlantList.DiperbaruiOleh.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(masterPlantList.DiperbaruiOleh.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(masterPlantList.DiperbaruiOleh.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(masterPlantList.DiperbaruiOleh.EditAttributes)>
+            @(masterPlantList.DiperbaruiOleh.SelectOptionListHtml("x_DiperbaruiOleh", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(masterPlantList.DiperbaruiOleh.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMasterPlantsrch", function() {
+            var options = {
+                name: "x_DiperbaruiOleh",
+                selectId: "fMasterPlantsrch_x_DiperbaruiOleh",
+                ajax: { id: "x_DiperbaruiOleh", form: "fMasterPlantsrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MasterPlant.fields.DiperbaruiOleh.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* masterPlantList.DiperbaruiOleh.Visible (end) *@
+@if (masterPlantList.TanggalDiperbarui.Visible) { // masterPlantList.TanggalDiperbarui.Visible (begin)
+    if (!masterPlantList.TanggalDiperbarui.UseFilter) {
+        masterPlantList.SearchColumnCount++;
+    }
+    <div id="xs_TanggalDiperbarui" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(masterPlantList.TanggalDiperbarui.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_TanggalDiperbarui"
+            name="x_TanggalDiperbarui[]"
+            class="form-control ew-select@(masterPlantList.TanggalDiperbarui.IsInvalidClass)"
+            data-select2-id="fMasterPlantsrch_x_TanggalDiperbarui"
+            data-table="MasterPlant"
+            data-field="x_TanggalDiperbarui"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(masterPlantList.TanggalDiperbarui.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(masterPlantList.TanggalDiperbarui.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(masterPlantList.TanggalDiperbarui.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(masterPlantList.TanggalDiperbarui.EditAttributes)>
+            @(masterPlantList.TanggalDiperbarui.SelectOptionListHtml("x_TanggalDiperbarui", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(masterPlantList.TanggalDiperbarui.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMasterPlantsrch", function() {
+            var options = {
+                name: "x_TanggalDiperbarui",
+                selectId: "fMasterPlantsrch_x_TanggalDiperbarui",
+                ajax: { id: "x_TanggalDiperbarui", form: "fMasterPlantsrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MasterPlant.fields.TanggalDiperbarui.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* masterPlantList.TanggalDiperbarui.Visible (end) *@
+</div><!-- /.row -->
+<div class="row mb-0">
+    <div class="col-sm-auto px-0 pe-sm-2">
+        <div class="ew-basic-search input-group">
+            <input type="search" name="@(Config.TableBasicSearch)" id="@(Config.TableBasicSearch)" class="form-control ew-basic-search-keyword" value="@Html.Raw(HtmlEncode(masterPlantList.BasicSearch.SessionKeyword))" placeholder="@(HtmlEncode(Language.Phrase("Search")))" aria-label="@(HtmlEncode(Language.Phrase("Search")))">
+            <input type="hidden" name="@(Config.TableBasicSearchType)" id="@(Config.TableBasicSearchType)" class="ew-basic-search-type" value="@(HtmlEncode(masterPlantList.BasicSearch.SessionType))">
+            <button type="button" data-bs-toggle="dropdown" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split" aria-haspopup="true" aria-expanded="false">
+                <span id="searchtype">@Html.Raw(masterPlantList.BasicSearch.TypeNameShort)</span>
+            </button>
+            <div class="dropdown-menu dropdown-menu-end">
+                <button type="button" class="dropdown-item@(masterPlantList.BasicSearch.SessionType == "" ? " active" : "")" form="fMasterPlantsrch" data-ew-action="search-type">@Html.Raw(Language.Phrase("QuickSearchAuto"))</button>
+                <button type="button" class="dropdown-item@(masterPlantList.BasicSearch.SessionType == "=" ? " active" : "")" form="fMasterPlantsrch" data-ew-action="search-type" data-search-type="=">@Html.Raw(Language.Phrase("QuickSearchExact"))</button>
+                <button type="button" class="dropdown-item@(masterPlantList.BasicSearch.SessionType == "AND" ? " active" : "")" form="fMasterPlantsrch" data-ew-action="search-type" data-search-type="AND">@Html.Raw(Language.Phrase("QuickSearchAll"))</button>
+                <button type="button" class="dropdown-item@(masterPlantList.BasicSearch.SessionType == "OR" ? " active" : "")" form="fMasterPlantsrch" data-ew-action="search-type" data-search-type="OR">@Html.Raw(Language.Phrase("QuickSearchAny"))</button>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-auto mb-3">
+        <button class="btn btn-primary" name="btn-submit" id="btn-submit" type="submit">@Html.Raw(Language.Phrase("SearchBtn"))</button>
+    </div>
+</div>
+</div><!-- /.ew-extended-search -->
+} @* Show search form (end) *@
+}
+</div><!-- /.ew-search-panel -->
+</form>
+}
+@masterPlantList.ShowPageHeader()
+@masterPlantList.ShowMessages()
+<main class="list @(masterPlantList.TotalRecords == 0 && !masterPlantList.IsAdd ? " ew-no-record" : "")">
+<div id="ew-header-options">
+    @masterPlantList.HeaderOptions.RenderBody()
+</div>
+<div id="ew-list">
+@if (masterPlantList.TotalRecords > 0 || !Empty(masterPlantList.CurrentAction)) {
+<div class="card ew-card ew-grid@(masterPlantList.IsAddOrEdit ? " ew-grid-add-edit" : "") @(masterPlantList.TableGridClass)">
+<form name="@(masterPlantList.FormName)" id="@(masterPlantList.FormName)" class="ew-form ew-list-form" action="@AppPath(masterPlantList.PageName)" method="post" novalidate autocomplete="off">
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+@if (masterPlantList.IsModal) {
+<input type="hidden" name="modal" value="1">
+}
+<div id="gmp_MasterPlant" class="card-body ew-grid-middle-panel @(masterPlantList.TableContainerClass)" style="@(masterPlantList.TableContainerStyle)">
+@if (masterPlantList.TotalRecords > 0 || masterPlantList.IsGridEdit || masterPlantList.IsMultiEdit) {
+<table id="tbl_MasterPlantlist" class="@(masterPlantList.TableClass)"><!-- .ew-table -->
+<thead>
+    <tr class="ew-table-header">
+@{
+    // Header row
+    masterPlantList.RowType = RowType.Header;
+
+    // Render list options
+    await masterPlantList.RenderListOptions();
+}
+@* Render list options (header, left) *@
+@masterPlantList.ListOptions.RenderHeader("left")
+@if (masterPlantList.Terminal_Manager.Visible) { // masterPlantList.Terminal_Manager.Visible (begin)
+        <th data-name="Terminal_Manager" class="@(masterPlantList.Terminal_Manager.HeaderCellClass)"><div id="elh_MasterPlant_Terminal_Manager" class="MasterPlant_Terminal_Manager">@Html.Raw(masterPlantList.RenderFieldHeader(masterPlantList.Terminal_Manager))</div></th>
+} @* masterPlantList.Terminal_Manager.Visible (end) *@
+@if (masterPlantList.PRL.Visible) { // masterPlantList.PRL.Visible (begin)
+        <th data-name="PRL" class="@(masterPlantList.PRL.HeaderCellClass)"><div id="elh_MasterPlant_PRL" class="MasterPlant_PRL">@Html.Raw(masterPlantList.RenderFieldHeader(masterPlantList.PRL))</div></th>
+} @* masterPlantList.PRL.Visible (end) *@
+@if (masterPlantList.Status.Visible) { // masterPlantList.Status.Visible (begin)
+        <th data-name="Status" class="@(masterPlantList.Status.HeaderCellClass)"><div id="elh_MasterPlant_Status" class="MasterPlant_Status">@Html.Raw(masterPlantList.RenderFieldHeader(masterPlantList.Status))</div></th>
+} @* masterPlantList.Status.Visible (end) *@
+@if (masterPlantList.Terminal_Induk.Visible) { // masterPlantList.Terminal_Induk.Visible (begin)
+        <th data-name="Terminal_Induk" class="@(masterPlantList.Terminal_Induk.HeaderCellClass)"><div id="elh_MasterPlant_Terminal_Induk" class="MasterPlant_Terminal_Induk">@Html.Raw(masterPlantList.RenderFieldHeader(masterPlantList.Terminal_Induk))</div></th>
+} @* masterPlantList.Terminal_Induk.Visible (end) *@
+@if (masterPlantList.Nama_Terminal.Visible) { // masterPlantList.Nama_Terminal.Visible (begin)
+        <th data-name="Nama_Terminal" class="@(masterPlantList.Nama_Terminal.HeaderCellClass)"><div id="elh_MasterPlant_Nama_Terminal" class="MasterPlant_Nama_Terminal">@Html.Raw(masterPlantList.RenderFieldHeader(masterPlantList.Nama_Terminal))</div></th>
+} @* masterPlantList.Nama_Terminal.Visible (end) *@
+@if (masterPlantList.Region.Visible) { // masterPlantList.Region.Visible (begin)
+        <th data-name="Region" class="@(masterPlantList.Region.HeaderCellClass)"><div id="elh_MasterPlant_Region" class="MasterPlant_Region">@Html.Raw(masterPlantList.RenderFieldHeader(masterPlantList.Region))</div></th>
+} @* masterPlantList.Region.Visible (end) *@
+@if (masterPlantList.Fungsi.Visible) { // masterPlantList.Fungsi.Visible (begin)
+        <th data-name="Fungsi" class="@(masterPlantList.Fungsi.HeaderCellClass)"><div id="elh_MasterPlant_Fungsi" class="MasterPlant_Fungsi">@Html.Raw(masterPlantList.RenderFieldHeader(masterPlantList.Fungsi))</div></th>
+} @* masterPlantList.Fungsi.Visible (end) *@
+@if (masterPlantList.Cost_Center.Visible) { // masterPlantList.Cost_Center.Visible (begin)
+        <th data-name="Cost_Center" class="@(masterPlantList.Cost_Center.HeaderCellClass)"><div id="elh_MasterPlant_Cost_Center" class="MasterPlant_Cost_Center">@Html.Raw(masterPlantList.RenderFieldHeader(masterPlantList.Cost_Center))</div></th>
+} @* masterPlantList.Cost_Center.Visible (end) *@
+@if (masterPlantList.Jenis.Visible) { // masterPlantList.Jenis.Visible (begin)
+        <th data-name="Jenis" class="@(masterPlantList.Jenis.HeaderCellClass)"><div id="elh_MasterPlant_Jenis" class="MasterPlant_Jenis">@Html.Raw(masterPlantList.RenderFieldHeader(masterPlantList.Jenis))</div></th>
+} @* masterPlantList.Jenis.Visible (end) *@
+@if (masterPlantList.Plant.Visible) { // masterPlantList.Plant.Visible (begin)
+        <th data-name="Plant" class="@(masterPlantList.Plant.HeaderCellClass)"><div id="elh_MasterPlant_Plant" class="MasterPlant_Plant">@Html.Raw(masterPlantList.RenderFieldHeader(masterPlantList.Plant))</div></th>
+} @* masterPlantList.Plant.Visible (end) *@
+@if (masterPlantList.UTC.Visible) { // masterPlantList.UTC.Visible (begin)
+        <th data-name="UTC" class="@(masterPlantList.UTC.HeaderCellClass)"><div id="elh_MasterPlant_UTC" class="MasterPlant_UTC">@Html.Raw(masterPlantList.RenderFieldHeader(masterPlantList.UTC))</div></th>
+} @* masterPlantList.UTC.Visible (end) *@
+@if (masterPlantList.TipeProduk.Visible) { // masterPlantList.TipeProduk.Visible (begin)
+        <th data-name="TipeProduk" class="@(masterPlantList.TipeProduk.HeaderCellClass)"><div id="elh_MasterPlant_TipeProduk" class="MasterPlant_TipeProduk">@Html.Raw(masterPlantList.RenderFieldHeader(masterPlantList.TipeProduk))</div></th>
+} @* masterPlantList.TipeProduk.Visible (end) *@
+@if (masterPlantList.JenisPlant.Visible) { // masterPlantList.JenisPlant.Visible (begin)
+        <th data-name="JenisPlant" class="@(masterPlantList.JenisPlant.HeaderCellClass)"><div id="elh_MasterPlant_JenisPlant" class="MasterPlant_JenisPlant">@Html.Raw(masterPlantList.RenderFieldHeader(masterPlantList.JenisPlant))</div></th>
+} @* masterPlantList.JenisPlant.Visible (end) *@
+@if (masterPlantList.DibuatOleh.Visible) { // masterPlantList.DibuatOleh.Visible (begin)
+        <th data-name="DibuatOleh" class="@(masterPlantList.DibuatOleh.HeaderCellClass)"><div id="elh_MasterPlant_DibuatOleh" class="MasterPlant_DibuatOleh">@Html.Raw(masterPlantList.RenderFieldHeader(masterPlantList.DibuatOleh))</div></th>
+} @* masterPlantList.DibuatOleh.Visible (end) *@
+@if (masterPlantList.TanggalDibuat.Visible) { // masterPlantList.TanggalDibuat.Visible (begin)
+        <th data-name="TanggalDibuat" class="@(masterPlantList.TanggalDibuat.HeaderCellClass)"><div id="elh_MasterPlant_TanggalDibuat" class="MasterPlant_TanggalDibuat">@Html.Raw(masterPlantList.RenderFieldHeader(masterPlantList.TanggalDibuat))</div></th>
+} @* masterPlantList.TanggalDibuat.Visible (end) *@
+@if (masterPlantList.DiperbaruiOleh.Visible) { // masterPlantList.DiperbaruiOleh.Visible (begin)
+        <th data-name="DiperbaruiOleh" class="@(masterPlantList.DiperbaruiOleh.HeaderCellClass)"><div id="elh_MasterPlant_DiperbaruiOleh" class="MasterPlant_DiperbaruiOleh">@Html.Raw(masterPlantList.RenderFieldHeader(masterPlantList.DiperbaruiOleh))</div></th>
+} @* masterPlantList.DiperbaruiOleh.Visible (end) *@
+@if (masterPlantList.TanggalDiperbarui.Visible) { // masterPlantList.TanggalDiperbarui.Visible (begin)
+        <th data-name="TanggalDiperbarui" class="@(masterPlantList.TanggalDiperbarui.HeaderCellClass)"><div id="elh_MasterPlant_TanggalDiperbarui" class="MasterPlant_TanggalDiperbarui">@Html.Raw(masterPlantList.RenderFieldHeader(masterPlantList.TanggalDiperbarui))</div></th>
+} @* masterPlantList.TanggalDiperbarui.Visible (end) *@
+@* Render list options (header, right) *@
+@masterPlantList.ListOptions.RenderHeader("right")
+    </tr>
+</thead>
+<tbody data-page="@(masterPlantList.PageNumber)">
+@{
+    await masterPlantList.SetupGrid();
+    bool eof = masterPlantList.Recordset == null; // DN
+}
+@while (masterPlantList.RecordCount < masterPlantList.StopRecord || SameString(masterPlantList.RowIndex, "$rowindex$")) { // Begin While
+    if (!eof && !SameString(masterPlantList.RowIndex, "$rowindex$") &&
+        (!masterPlantList.IsGridAdd || masterPlantList.CurrentMode == "copy") &&
+        (!((masterPlantList.IsCopy || masterPlantList.IsAdd) && masterPlantList.RowIndex is int rowIndex && rowIndex == 0))) // DN
+        eof = !await masterPlantList.Recordset.ReadAsync();
+    masterPlantList.RecordCount++;
+    if (masterPlantList.RecordCount >= masterPlantList.StartRecord) {
+        await masterPlantList.SetupRow();
+    <tr @Html.Raw(masterPlantList.RowAttributes)>
+    @* Render list options (body, left) *@
+    @masterPlantList.ListOptions.RenderBody("left", masterPlantList.RowCount)
+    @if (masterPlantList.Terminal_Manager.Visible) { // masterPlantList.Terminal_Manager.Visible (begin)
+        <td data-name="Terminal_Manager" @Html.Raw(masterPlantList.Terminal_Manager.CellAttributes)>
+<span id="el@(masterPlantList.RowIndex == "$rowindex$" ? "$rowindex$" : masterPlantList.RowCount)_MasterPlant_Terminal_Manager" class="el_MasterPlant_Terminal_Manager">
+<span @Html.Raw(masterPlantList.Terminal_Manager.ViewAttributes)>
+@Html.Raw(masterPlantList.Terminal_Manager.GetViewValue())</span>
+</span>
+</td>
+    } @* masterPlantList.Terminal_Manager.Visible (end) *@
+    @if (masterPlantList.PRL.Visible) { // masterPlantList.PRL.Visible (begin)
+        <td data-name="PRL" @Html.Raw(masterPlantList.PRL.CellAttributes)>
+<span id="el@(masterPlantList.RowIndex == "$rowindex$" ? "$rowindex$" : masterPlantList.RowCount)_MasterPlant_PRL" class="el_MasterPlant_PRL">
+<span @Html.Raw(masterPlantList.PRL.ViewAttributes)>
+@Html.Raw(masterPlantList.PRL.GetViewValue())</span>
+</span>
+</td>
+    } @* masterPlantList.PRL.Visible (end) *@
+    @if (masterPlantList.Status.Visible) { // masterPlantList.Status.Visible (begin)
+        <td data-name="Status" @Html.Raw(masterPlantList.Status.CellAttributes)>
+<span id="el@(masterPlantList.RowIndex == "$rowindex$" ? "$rowindex$" : masterPlantList.RowCount)_MasterPlant_Status" class="el_MasterPlant_Status">
+<span @Html.Raw(masterPlantList.Status.ViewAttributes)>
+@Html.Raw(masterPlantList.Status.GetViewValue())</span>
+</span>
+</td>
+    } @* masterPlantList.Status.Visible (end) *@
+    @if (masterPlantList.Terminal_Induk.Visible) { // masterPlantList.Terminal_Induk.Visible (begin)
+        <td data-name="Terminal_Induk" @Html.Raw(masterPlantList.Terminal_Induk.CellAttributes)>
+<span id="el@(masterPlantList.RowIndex == "$rowindex$" ? "$rowindex$" : masterPlantList.RowCount)_MasterPlant_Terminal_Induk" class="el_MasterPlant_Terminal_Induk">
+<span @Html.Raw(masterPlantList.Terminal_Induk.ViewAttributes)>
+@Html.Raw(masterPlantList.Terminal_Induk.GetViewValue())</span>
+</span>
+</td>
+    } @* masterPlantList.Terminal_Induk.Visible (end) *@
+    @if (masterPlantList.Nama_Terminal.Visible) { // masterPlantList.Nama_Terminal.Visible (begin)
+        <td data-name="Nama_Terminal" @Html.Raw(masterPlantList.Nama_Terminal.CellAttributes)>
+<span id="el@(masterPlantList.RowIndex == "$rowindex$" ? "$rowindex$" : masterPlantList.RowCount)_MasterPlant_Nama_Terminal" class="el_MasterPlant_Nama_Terminal">
+<span @Html.Raw(masterPlantList.Nama_Terminal.ViewAttributes)>
+@Html.Raw(masterPlantList.Nama_Terminal.GetViewValue())</span>
+</span>
+</td>
+    } @* masterPlantList.Nama_Terminal.Visible (end) *@
+    @if (masterPlantList.Region.Visible) { // masterPlantList.Region.Visible (begin)
+        <td data-name="Region" @Html.Raw(masterPlantList.Region.CellAttributes)>
+<span id="el@(masterPlantList.RowIndex == "$rowindex$" ? "$rowindex$" : masterPlantList.RowCount)_MasterPlant_Region" class="el_MasterPlant_Region">
+<span @Html.Raw(masterPlantList.Region.ViewAttributes)>
+@Html.Raw(masterPlantList.Region.GetViewValue())</span>
+</span>
+</td>
+    } @* masterPlantList.Region.Visible (end) *@
+    @if (masterPlantList.Fungsi.Visible) { // masterPlantList.Fungsi.Visible (begin)
+        <td data-name="Fungsi" @Html.Raw(masterPlantList.Fungsi.CellAttributes)>
+<span id="el@(masterPlantList.RowIndex == "$rowindex$" ? "$rowindex$" : masterPlantList.RowCount)_MasterPlant_Fungsi" class="el_MasterPlant_Fungsi">
+<span @Html.Raw(masterPlantList.Fungsi.ViewAttributes)>
+@Html.Raw(masterPlantList.Fungsi.GetViewValue())</span>
+</span>
+</td>
+    } @* masterPlantList.Fungsi.Visible (end) *@
+    @if (masterPlantList.Cost_Center.Visible) { // masterPlantList.Cost_Center.Visible (begin)
+        <td data-name="Cost_Center" @Html.Raw(masterPlantList.Cost_Center.CellAttributes)>
+<span id="el@(masterPlantList.RowIndex == "$rowindex$" ? "$rowindex$" : masterPlantList.RowCount)_MasterPlant_Cost_Center" class="el_MasterPlant_Cost_Center">
+<span @Html.Raw(masterPlantList.Cost_Center.ViewAttributes)>
+@Html.Raw(masterPlantList.Cost_Center.GetViewValue())</span>
+</span>
+</td>
+    } @* masterPlantList.Cost_Center.Visible (end) *@
+    @if (masterPlantList.Jenis.Visible) { // masterPlantList.Jenis.Visible (begin)
+        <td data-name="Jenis" @Html.Raw(masterPlantList.Jenis.CellAttributes)>
+<span id="el@(masterPlantList.RowIndex == "$rowindex$" ? "$rowindex$" : masterPlantList.RowCount)_MasterPlant_Jenis" class="el_MasterPlant_Jenis">
+<span @Html.Raw(masterPlantList.Jenis.ViewAttributes)>
+@Html.Raw(masterPlantList.Jenis.GetViewValue())</span>
+</span>
+</td>
+    } @* masterPlantList.Jenis.Visible (end) *@
+    @if (masterPlantList.Plant.Visible) { // masterPlantList.Plant.Visible (begin)
+        <td data-name="Plant" @Html.Raw(masterPlantList.Plant.CellAttributes)>
+<span id="el@(masterPlantList.RowIndex == "$rowindex$" ? "$rowindex$" : masterPlantList.RowCount)_MasterPlant_Plant" class="el_MasterPlant_Plant">
+<span @Html.Raw(masterPlantList.Plant.ViewAttributes)>
+@Html.Raw(masterPlantList.Plant.GetViewValue())</span>
+</span>
+</td>
+    } @* masterPlantList.Plant.Visible (end) *@
+    @if (masterPlantList.UTC.Visible) { // masterPlantList.UTC.Visible (begin)
+        <td data-name="UTC" @Html.Raw(masterPlantList.UTC.CellAttributes)>
+<span id="el@(masterPlantList.RowIndex == "$rowindex$" ? "$rowindex$" : masterPlantList.RowCount)_MasterPlant_UTC" class="el_MasterPlant_UTC">
+<span @Html.Raw(masterPlantList.UTC.ViewAttributes)>
+@Html.Raw(masterPlantList.UTC.GetViewValue())</span>
+</span>
+</td>
+    } @* masterPlantList.UTC.Visible (end) *@
+    @if (masterPlantList.TipeProduk.Visible) { // masterPlantList.TipeProduk.Visible (begin)
+        <td data-name="TipeProduk" @Html.Raw(masterPlantList.TipeProduk.CellAttributes)>
+<span id="el@(masterPlantList.RowIndex == "$rowindex$" ? "$rowindex$" : masterPlantList.RowCount)_MasterPlant_TipeProduk" class="el_MasterPlant_TipeProduk">
+<span @Html.Raw(masterPlantList.TipeProduk.ViewAttributes)>
+@Html.Raw(masterPlantList.TipeProduk.GetViewValue())</span>
+</span>
+</td>
+    } @* masterPlantList.TipeProduk.Visible (end) *@
+    @if (masterPlantList.JenisPlant.Visible) { // masterPlantList.JenisPlant.Visible (begin)
+        <td data-name="JenisPlant" @Html.Raw(masterPlantList.JenisPlant.CellAttributes)>
+<span id="el@(masterPlantList.RowIndex == "$rowindex$" ? "$rowindex$" : masterPlantList.RowCount)_MasterPlant_JenisPlant" class="el_MasterPlant_JenisPlant">
+<span @Html.Raw(masterPlantList.JenisPlant.ViewAttributes)>
+@Html.Raw(masterPlantList.JenisPlant.GetViewValue())</span>
+</span>
+</td>
+    } @* masterPlantList.JenisPlant.Visible (end) *@
+    @if (masterPlantList.DibuatOleh.Visible) { // masterPlantList.DibuatOleh.Visible (begin)
+        <td data-name="DibuatOleh" @Html.Raw(masterPlantList.DibuatOleh.CellAttributes)>
+<span id="el@(masterPlantList.RowIndex == "$rowindex$" ? "$rowindex$" : masterPlantList.RowCount)_MasterPlant_DibuatOleh" class="el_MasterPlant_DibuatOleh">
+<span @Html.Raw(masterPlantList.DibuatOleh.ViewAttributes)>
+@Html.Raw(masterPlantList.DibuatOleh.GetViewValue())</span>
+</span>
+</td>
+    } @* masterPlantList.DibuatOleh.Visible (end) *@
+    @if (masterPlantList.TanggalDibuat.Visible) { // masterPlantList.TanggalDibuat.Visible (begin)
+        <td data-name="TanggalDibuat" @Html.Raw(masterPlantList.TanggalDibuat.CellAttributes)>
+<span id="el@(masterPlantList.RowIndex == "$rowindex$" ? "$rowindex$" : masterPlantList.RowCount)_MasterPlant_TanggalDibuat" class="el_MasterPlant_TanggalDibuat">
+<span @Html.Raw(masterPlantList.TanggalDibuat.ViewAttributes)>
+@Html.Raw(masterPlantList.TanggalDibuat.GetViewValue())</span>
+</span>
+</td>
+    } @* masterPlantList.TanggalDibuat.Visible (end) *@
+    @if (masterPlantList.DiperbaruiOleh.Visible) { // masterPlantList.DiperbaruiOleh.Visible (begin)
+        <td data-name="DiperbaruiOleh" @Html.Raw(masterPlantList.DiperbaruiOleh.CellAttributes)>
+<span id="el@(masterPlantList.RowIndex == "$rowindex$" ? "$rowindex$" : masterPlantList.RowCount)_MasterPlant_DiperbaruiOleh" class="el_MasterPlant_DiperbaruiOleh">
+<span @Html.Raw(masterPlantList.DiperbaruiOleh.ViewAttributes)>
+@Html.Raw(masterPlantList.DiperbaruiOleh.GetViewValue())</span>
+</span>
+</td>
+    } @* masterPlantList.DiperbaruiOleh.Visible (end) *@
+    @if (masterPlantList.TanggalDiperbarui.Visible) { // masterPlantList.TanggalDiperbarui.Visible (begin)
+        <td data-name="TanggalDiperbarui" @Html.Raw(masterPlantList.TanggalDiperbarui.CellAttributes)>
+<span id="el@(masterPlantList.RowIndex == "$rowindex$" ? "$rowindex$" : masterPlantList.RowCount)_MasterPlant_TanggalDiperbarui" class="el_MasterPlant_TanggalDiperbarui">
+<span @Html.Raw(masterPlantList.TanggalDiperbarui.ViewAttributes)>
+@Html.Raw(masterPlantList.TanggalDiperbarui.GetViewValue())</span>
+</span>
+</td>
+    } @* masterPlantList.TanggalDiperbarui.Visible (end) *@
+    @* Render list options (body, right) *@
+    @masterPlantList.ListOptions.RenderBody("right", masterPlantList.RowCount)
+    </tr>
+    } @* End if *@
+
+    // Reset for template row
+    if (SameString(masterPlantList.RowIndex, "$rowindex$"))
+        masterPlantList.RowIndex = 0;
+
+    // Reset inline add/copy row
+    if ((masterPlantList.IsCopy || masterPlantList.IsAdd) && masterPlantList.RowIndex is int rowIndex2 && rowIndex2 == 0)
+        masterPlantList.RowIndex = 1;
+} @* End While *@
+</tbody>
+</table><!-- /.ew-table -->
+} @* End If TotalRecords > 0 *@
+</div><!-- /.ew-grid-middle-panel -->
+@if (Empty(masterPlantList.CurrentAction) && !masterPlantList.UseAjaxActions) {
+<input type="hidden" name="action" id="action" value="">
+}
+</form><!-- /.ew-list-form -->
+@{ masterPlantList.CloseRecordset(); }
+@if (!masterPlantList.IsExport()) {
+<div class="card-footer ew-grid-lower-panel">
+@if (!masterPlantList.IsGridAdd && !(masterPlantList.IsGridEdit && masterPlantList.ModalGridEdit) && !masterPlantList.IsMultiEdit) {
+@Html.Raw(masterPlantList.Pager.Render())
+}
+<div class="ew-list-other-options">
+@masterPlantList.OtherOptions.RenderBody("bottom")
+</div>
+</div>
+}
+</div><!-- /.ew-grid -->
+} else { // Show other options
+<div class="ew-list-other-options">
+@masterPlantList.OtherOptions.ForEach(opt => opt.ButtonClass = "").RenderBody()
+</div>
+}
+</div>
+<div id="ew-footer-options">
+    @masterPlantList.FooterOptions.RenderBody()
+</div>
+</main>
+@masterPlantList.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+@if (!masterPlantList.IsExport()) {
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("MasterPlant");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Write your table-specific startup script here
+    // document.write("page loaded");
+});
+</script>
+}

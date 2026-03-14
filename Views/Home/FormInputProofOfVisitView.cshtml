@@ -1,0 +1,239 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (formInputProofOfVisitView.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = formInputProofOfVisitView.UseLayout ? "_Layout" : "";
+}
+@if (!formInputProofOfVisitView.IsExport()) {
+<div class="btn-toolbar ew-toolbar">
+    @formInputProofOfVisitView.ExportOptions.RenderBody()
+    @formInputProofOfVisitView.OtherOptions.RenderBody()
+</div>
+}
+@formInputProofOfVisitView.ShowPageHeader()
+@formInputProofOfVisitView.ShowMessages()
+<main class="view">
+<form name="fFormInputProofOfVisitview" id="fFormInputProofOfVisitview" class="ew-form ew-view-form overlay-wrapper" action="@AppPath(CurrentPageName())" method="post" novalidate autocomplete="off">
+@if (!formInputProofOfVisitView.IsExport()) {
+<script>
+var currentTable = @Html.Raw(ConvertToJson(formInputProofOfVisitView.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { FormInputProofOfVisit: currentTable } });
+var currentPageID = ew.PAGE_ID = "view";
+var currentForm;
+var fFormInputProofOfVisitview;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("fFormInputProofOfVisitview")
+        .setPageId("view")
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Client script
+    const parent_url = ew.PATH_BASE;
+    $(document).on('click', '.download-document', function (e) {
+        e.preventDefault();
+        const idPOV = $(this).data('id');
+        if (!idPOV) {
+            ew.alert("ID dokumen tidak ditemukan.");
+            return;
+        }
+        $.ajax({
+            url: parent_url + 'api/LookUpList/DownloadDocumentZip',
+            type: 'GET',
+            data: { 
+                idRef: idPOV,
+                table: 'DetailUploadPOV',
+                colRef: 'idPOV',
+                path: 'POVDocument'
+            },
+            xhrFields: {
+                responseType: 'blob'
+            },
+            beforeSend: function () {
+                showLoading();
+            },
+            success: function (response, status, xhr) {
+                const disposition = xhr.getResponseHeader('Content-Disposition');
+                let fileName = "download_file";
+                if (disposition) {
+                    const fileNameMatch = disposition.match(/filename="?([^";]+)"?/);
+                    if (fileNameMatch && fileNameMatch[1]) {
+                        fileName = decodeURIComponent(fileNameMatch[1]);
+                    }
+                    const utf8FileNameMatch = disposition.match(/filename\*\s*=\s*UTF-8''([^;]+)/);
+                    if (utf8FileNameMatch && utf8FileNameMatch[1]) {
+                        fileName = decodeURIComponent(utf8FileNameMatch[1]);
+                    }
+                }
+                const blobUrl = window.URL.createObjectURL(response);
+                const a = document.createElement('a');
+                a.href = blobUrl;
+                a.download = fileName;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(blobUrl);
+                ew.alert("Download berhasil!");
+            },
+            error: function (xhr, status, error) {
+                if (xhr.status === 404) {
+                    ew.alert("File tidak ditemukan di server.");
+                } else if (xhr.status === 500) {
+                    ew.alert("Terjadi kesalahan server. Coba lagi nanti.");
+                } else {
+                    ew.alert("Gagal mendownload file. Error: " + xhr.responseText);
+                }
+            },
+            complete: function () {
+                hideLoading();
+            }
+        });
+    });
+});
+</script>
+}
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+<input type="hidden" name="modal" value="@ConvertToInt(formInputProofOfVisitView.IsModal)">
+<table class="@(formInputProofOfVisitView.TableClass)">
+@if (formInputProofOfVisitView.NoReferensi.Visible) { // formInputProofOfVisitView.NoReferensi.Visible (begin)
+    <tr id="r_NoReferensi" @Html.Raw(formInputProofOfVisitView.NoReferensi.RowAttributes)>
+        <td class="@(formInputProofOfVisitView.TableLeftColumnClass)"><span id="elh_FormInputProofOfVisit_NoReferensi">@Html.Raw(formInputProofOfVisitView.NoReferensi.Caption)</span></td>
+        <td data-name="NoReferensi" @Html.Raw(formInputProofOfVisitView.NoReferensi.CellAttributes)>
+<span id="el_FormInputProofOfVisit_NoReferensi">
+<span @Html.Raw(formInputProofOfVisitView.NoReferensi.ViewAttributes)>
+@Html.Raw(formInputProofOfVisitView.NoReferensi.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* formInputProofOfVisitView.NoReferensi.Visible (end) *@
+@if (formInputProofOfVisitView.Tanggal.Visible) { // formInputProofOfVisitView.Tanggal.Visible (begin)
+    <tr id="r_Tanggal" @Html.Raw(formInputProofOfVisitView.Tanggal.RowAttributes)>
+        <td class="@(formInputProofOfVisitView.TableLeftColumnClass)"><span id="elh_FormInputProofOfVisit_Tanggal">@Html.Raw(formInputProofOfVisitView.Tanggal.Caption)</span></td>
+        <td data-name="Tanggal" @Html.Raw(formInputProofOfVisitView.Tanggal.CellAttributes)>
+<span id="el_FormInputProofOfVisit_Tanggal">
+<span @Html.Raw(formInputProofOfVisitView.Tanggal.ViewAttributes)>
+@Html.Raw(formInputProofOfVisitView.Tanggal.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* formInputProofOfVisitView.Tanggal.Visible (end) *@
+@if (formInputProofOfVisitView.Lokasi.Visible) { // formInputProofOfVisitView.Lokasi.Visible (begin)
+    <tr id="r_Lokasi" @Html.Raw(formInputProofOfVisitView.Lokasi.RowAttributes)>
+        <td class="@(formInputProofOfVisitView.TableLeftColumnClass)"><span id="elh_FormInputProofOfVisit_Lokasi">@Html.Raw(formInputProofOfVisitView.Lokasi.Caption)</span></td>
+        <td data-name="Lokasi" @Html.Raw(formInputProofOfVisitView.Lokasi.CellAttributes)>
+<span id="el_FormInputProofOfVisit_Lokasi">
+<span @Html.Raw(formInputProofOfVisitView.Lokasi.ViewAttributes)>
+@Html.Raw(formInputProofOfVisitView.Lokasi.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* formInputProofOfVisitView.Lokasi.Visible (end) *@
+@if (formInputProofOfVisitView.DownloadDokumen.Visible) { // formInputProofOfVisitView.DownloadDokumen.Visible (begin)
+    <tr id="r_DownloadDokumen" @Html.Raw(formInputProofOfVisitView.DownloadDokumen.RowAttributes)>
+        <td class="@(formInputProofOfVisitView.TableLeftColumnClass)"><span id="elh_FormInputProofOfVisit_DownloadDokumen">@Html.Raw(formInputProofOfVisitView.DownloadDokumen.Caption)</span></td>
+        <td data-name="DownloadDokumen" @Html.Raw(formInputProofOfVisitView.DownloadDokumen.CellAttributes)>
+<span id="el_FormInputProofOfVisit_DownloadDokumen">
+<span @Html.Raw(formInputProofOfVisitView.DownloadDokumen.ViewAttributes)>
+@Html.Raw(formInputProofOfVisitView.DownloadDokumen.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* formInputProofOfVisitView.DownloadDokumen.Visible (end) *@
+@if (formInputProofOfVisitView.Ketidaksesuaiaan.Visible) { // formInputProofOfVisitView.Ketidaksesuaiaan.Visible (begin)
+    <tr id="r_Ketidaksesuaiaan" @Html.Raw(formInputProofOfVisitView.Ketidaksesuaiaan.RowAttributes)>
+        <td class="@(formInputProofOfVisitView.TableLeftColumnClass)"><span id="elh_FormInputProofOfVisit_Ketidaksesuaiaan">@Html.Raw(formInputProofOfVisitView.Ketidaksesuaiaan.Caption)</span></td>
+        <td data-name="Ketidaksesuaiaan" @Html.Raw(formInputProofOfVisitView.Ketidaksesuaiaan.CellAttributes)>
+<span id="el_FormInputProofOfVisit_Ketidaksesuaiaan">
+<span @Html.Raw(formInputProofOfVisitView.Ketidaksesuaiaan.ViewAttributes)>
+@Html.Raw(formInputProofOfVisitView.Ketidaksesuaiaan.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* formInputProofOfVisitView.Ketidaksesuaiaan.Visible (end) *@
+@if (formInputProofOfVisitView.Keterangan.Visible) { // formInputProofOfVisitView.Keterangan.Visible (begin)
+    <tr id="r_Keterangan" @Html.Raw(formInputProofOfVisitView.Keterangan.RowAttributes)>
+        <td class="@(formInputProofOfVisitView.TableLeftColumnClass)"><span id="elh_FormInputProofOfVisit_Keterangan">@Html.Raw(formInputProofOfVisitView.Keterangan.Caption)</span></td>
+        <td data-name="Keterangan" @Html.Raw(formInputProofOfVisitView.Keterangan.CellAttributes)>
+<span id="el_FormInputProofOfVisit_Keterangan">
+<span @Html.Raw(formInputProofOfVisitView.Keterangan.ViewAttributes)>
+@Html.Raw(formInputProofOfVisitView.Keterangan.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* formInputProofOfVisitView.Keterangan.Visible (end) *@
+@if (formInputProofOfVisitView.IdPosition.Visible) { // formInputProofOfVisitView.IdPosition.Visible (begin)
+    <tr id="r_IdPosition" @Html.Raw(formInputProofOfVisitView.IdPosition.RowAttributes)>
+        <td class="@(formInputProofOfVisitView.TableLeftColumnClass)"><span id="elh_FormInputProofOfVisit_IdPosition">@Html.Raw(formInputProofOfVisitView.IdPosition.Caption)</span></td>
+        <td data-name="IdPosition" @Html.Raw(formInputProofOfVisitView.IdPosition.CellAttributes)>
+<span id="el_FormInputProofOfVisit_IdPosition">
+<span @Html.Raw(formInputProofOfVisitView.IdPosition.ViewAttributes)>
+@Html.Raw(formInputProofOfVisitView.IdPosition.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* formInputProofOfVisitView.IdPosition.Visible (end) *@
+@if (formInputProofOfVisitView.userInput.Visible) { // formInputProofOfVisitView.userInput.Visible (begin)
+    <tr id="r_userInput" @Html.Raw(formInputProofOfVisitView.userInput.RowAttributes)>
+        <td class="@(formInputProofOfVisitView.TableLeftColumnClass)"><span id="elh_FormInputProofOfVisit_userInput">@Html.Raw(formInputProofOfVisitView.userInput.Caption)</span></td>
+        <td data-name="userInput" @Html.Raw(formInputProofOfVisitView.userInput.CellAttributes)>
+<span id="el_FormInputProofOfVisit_userInput">
+<span @Html.Raw(formInputProofOfVisitView.userInput.ViewAttributes)>
+@Html.Raw(formInputProofOfVisitView.userInput.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* formInputProofOfVisitView.userInput.Visible (end) *@
+@if (formInputProofOfVisitView.etlDate.Visible) { // formInputProofOfVisitView.etlDate.Visible (begin)
+    <tr id="r_etlDate" @Html.Raw(formInputProofOfVisitView.etlDate.RowAttributes)>
+        <td class="@(formInputProofOfVisitView.TableLeftColumnClass)"><span id="elh_FormInputProofOfVisit_etlDate">@Html.Raw(formInputProofOfVisitView.etlDate.Caption)</span></td>
+        <td data-name="etlDate" @Html.Raw(formInputProofOfVisitView.etlDate.CellAttributes)>
+<span id="el_FormInputProofOfVisit_etlDate">
+<span @Html.Raw(formInputProofOfVisitView.etlDate.ViewAttributes)>
+@Html.Raw(formInputProofOfVisitView.etlDate.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* formInputProofOfVisitView.etlDate.Visible (end) *@
+@if (formInputProofOfVisitView.lastUpdatedBy.Visible) { // formInputProofOfVisitView.lastUpdatedBy.Visible (begin)
+    <tr id="r_lastUpdatedBy" @Html.Raw(formInputProofOfVisitView.lastUpdatedBy.RowAttributes)>
+        <td class="@(formInputProofOfVisitView.TableLeftColumnClass)"><span id="elh_FormInputProofOfVisit_lastUpdatedBy">@Html.Raw(formInputProofOfVisitView.lastUpdatedBy.Caption)</span></td>
+        <td data-name="lastUpdatedBy" @Html.Raw(formInputProofOfVisitView.lastUpdatedBy.CellAttributes)>
+<span id="el_FormInputProofOfVisit_lastUpdatedBy">
+<span @Html.Raw(formInputProofOfVisitView.lastUpdatedBy.ViewAttributes)>
+@Html.Raw(formInputProofOfVisitView.lastUpdatedBy.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* formInputProofOfVisitView.lastUpdatedBy.Visible (end) *@
+@if (formInputProofOfVisitView.lastUpdatedDate.Visible) { // formInputProofOfVisitView.lastUpdatedDate.Visible (begin)
+    <tr id="r_lastUpdatedDate" @Html.Raw(formInputProofOfVisitView.lastUpdatedDate.RowAttributes)>
+        <td class="@(formInputProofOfVisitView.TableLeftColumnClass)"><span id="elh_FormInputProofOfVisit_lastUpdatedDate">@Html.Raw(formInputProofOfVisitView.lastUpdatedDate.Caption)</span></td>
+        <td data-name="lastUpdatedDate" @Html.Raw(formInputProofOfVisitView.lastUpdatedDate.CellAttributes)>
+<span id="el_FormInputProofOfVisit_lastUpdatedDate">
+<span @Html.Raw(formInputProofOfVisitView.lastUpdatedDate.ViewAttributes)>
+@Html.Raw(formInputProofOfVisitView.lastUpdatedDate.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* formInputProofOfVisitView.lastUpdatedDate.Visible (end) *@
+</table>
+@{ formInputProofOfVisitView.CloseRecordset(); }
+</form>
+</main>
+@formInputProofOfVisitView.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+@if (!formInputProofOfVisitView.IsExport()) {
+<script>
+loadjs.ready("load", function() {
+    // Write your table-specific startup script here
+    // document.write("page loaded");
+});
+</script>
+}

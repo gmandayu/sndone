@@ -1,0 +1,244 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (closingStockDelete.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = closingStockDelete.UseLayout ? "_Layout" : "";
+}
+<script>
+var currentTable = @Html.Raw(ConvertToJson(closingStockDelete.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { ClosingStock: currentTable } });
+var currentPageID = ew.PAGE_ID = "delete";
+var currentForm;
+var fClosingStockdelete;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("fClosingStockdelete")
+        .setPageId("delete")
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Client script
+    $('#fClosingStockdelete button[type=submit]').on('click', function(e) {
+        e.preventDefault();
+        const data = $('#fClosingStockdelete').serializeArray();
+        const parent_url = ew.PATH_BASE;
+        const submitData = data
+            .filter(field => field.name === "key_m[]")
+            .map(field => field.value);
+        showLoading();
+        $.ajax({
+            url: parent_url + 'api/LookUpList/CheckDeletableReferensi',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({
+                Referensi: 'ClosingStock',
+                IdReferensi: submitData
+            }),
+            success: function (res) {
+                if (res.success) {
+                    $('#fClosingStockdelete').submit();
+                } else {
+                    hideLoading();
+                    ew.alert(res.message);
+                    return false;
+                }
+            },
+            error: function (err) {
+                hideLoading();
+                ew.alert('An error occured on the server.');
+                console.error(err);
+                return false;
+            },
+        });
+    });
+});
+</script>
+@closingStockDelete.ShowPageHeader()
+@closingStockDelete.ShowMessages()
+<form name="fClosingStockdelete" id="fClosingStockdelete" class="ew-form ew-delete-form" action="@AppPath(CurrentPageName())" method="post" novalidate autocomplete="off">
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+<input type="hidden" name="action" id="action" value="delete">
+@foreach (string key in closingStockDelete.RecordKeys) {
+<input type="hidden" name="key_m[]" value="@key">
+}
+<div class="card ew-card ew-grid @(closingStockDelete.TableGridClass)">
+<div class="card-body ew-grid-middle-panel @(closingStockDelete.TableContainerClass)" style="@(closingStockDelete.TableContainerStyle)">
+<table class="@(closingStockDelete.TableClass)">
+    <thead>
+    <tr class="ew-table-header">
+@if (closingStockDelete.Proses2.Visible) { // closingStockDelete.Proses2.Visible (begin)
+        <th class="@Html.Raw(closingStockDelete.Proses2.HeaderCellClass)"><span id="elh_ClosingStock_Proses2" class="ClosingStock_Proses2">@Html.Raw(closingStockDelete.Proses2.Caption)</span></th>
+} @* closingStockDelete.Proses2.Visible (end) *@
+@if (closingStockDelete.Plant.Visible) { // closingStockDelete.Plant.Visible (begin)
+        <th class="@Html.Raw(closingStockDelete.Plant.HeaderCellClass)"><span id="elh_ClosingStock_Plant" class="ClosingStock_Plant">@Html.Raw(closingStockDelete.Plant.Caption)</span></th>
+} @* closingStockDelete.Plant.Visible (end) *@
+@if (closingStockDelete.TipeProdukSTS.Visible) { // closingStockDelete.TipeProdukSTS.Visible (begin)
+        <th class="@Html.Raw(closingStockDelete.TipeProdukSTS.HeaderCellClass)"><span id="elh_ClosingStock_TipeProdukSTS" class="ClosingStock_TipeProdukSTS">@Html.Raw(closingStockDelete.TipeProdukSTS.Caption)</span></th>
+} @* closingStockDelete.TipeProdukSTS.Visible (end) *@
+@if (closingStockDelete.IdTangki.Visible) { // closingStockDelete.IdTangki.Visible (begin)
+        <th class="@Html.Raw(closingStockDelete.IdTangki.HeaderCellClass)"><span id="elh_ClosingStock_IdTangki" class="ClosingStock_IdTangki">@Html.Raw(closingStockDelete.IdTangki.Caption)</span></th>
+} @* closingStockDelete.IdTangki.Visible (end) *@
+@if (closingStockDelete.TanggalClosingStock.Visible) { // closingStockDelete.TanggalClosingStock.Visible (begin)
+        <th class="@Html.Raw(closingStockDelete.TanggalClosingStock.HeaderCellClass)"><span id="elh_ClosingStock_TanggalClosingStock" class="ClosingStock_TanggalClosingStock">@Html.Raw(closingStockDelete.TanggalClosingStock.Caption)</span></th>
+} @* closingStockDelete.TanggalClosingStock.Visible (end) *@
+@if (closingStockDelete.Produk.Visible) { // closingStockDelete.Produk.Visible (begin)
+        <th class="@Html.Raw(closingStockDelete.Produk.HeaderCellClass)"><span id="elh_ClosingStock_Produk" class="ClosingStock_Produk">@Html.Raw(closingStockDelete.Produk.Caption)</span></th>
+} @* closingStockDelete.Produk.Visible (end) *@
+@if (closingStockDelete.StatusProses.Visible) { // closingStockDelete.StatusProses.Visible (begin)
+        <th class="@Html.Raw(closingStockDelete.StatusProses.HeaderCellClass)"><span id="elh_ClosingStock_StatusProses" class="ClosingStock_StatusProses">@Html.Raw(closingStockDelete.StatusProses.Caption)</span></th>
+} @* closingStockDelete.StatusProses.Visible (end) *@
+@if (closingStockDelete.PersentaseProgress.Visible) { // closingStockDelete.PersentaseProgress.Visible (begin)
+        <th class="@Html.Raw(closingStockDelete.PersentaseProgress.HeaderCellClass)"><span id="elh_ClosingStock_PersentaseProgress" class="ClosingStock_PersentaseProgress">@Html.Raw(closingStockDelete.PersentaseProgress.Caption)</span></th>
+} @* closingStockDelete.PersentaseProgress.Visible (end) *@
+@if (closingStockDelete.DibuatOleh.Visible) { // closingStockDelete.DibuatOleh.Visible (begin)
+        <th class="@Html.Raw(closingStockDelete.DibuatOleh.HeaderCellClass)"><span id="elh_ClosingStock_DibuatOleh" class="ClosingStock_DibuatOleh">@Html.Raw(closingStockDelete.DibuatOleh.Caption)</span></th>
+} @* closingStockDelete.DibuatOleh.Visible (end) *@
+@if (closingStockDelete.TanggalDibuat.Visible) { // closingStockDelete.TanggalDibuat.Visible (begin)
+        <th class="@Html.Raw(closingStockDelete.TanggalDibuat.HeaderCellClass)"><span id="elh_ClosingStock_TanggalDibuat" class="ClosingStock_TanggalDibuat">@Html.Raw(closingStockDelete.TanggalDibuat.Caption)</span></th>
+} @* closingStockDelete.TanggalDibuat.Visible (end) *@
+@if (closingStockDelete.DiperbaruiOleh.Visible) { // closingStockDelete.DiperbaruiOleh.Visible (begin)
+        <th class="@Html.Raw(closingStockDelete.DiperbaruiOleh.HeaderCellClass)"><span id="elh_ClosingStock_DiperbaruiOleh" class="ClosingStock_DiperbaruiOleh">@Html.Raw(closingStockDelete.DiperbaruiOleh.Caption)</span></th>
+} @* closingStockDelete.DiperbaruiOleh.Visible (end) *@
+@if (closingStockDelete.TanggalDiperbarui.Visible) { // closingStockDelete.TanggalDiperbarui.Visible (begin)
+        <th class="@Html.Raw(closingStockDelete.TanggalDiperbarui.HeaderCellClass)"><span id="elh_ClosingStock_TanggalDiperbarui" class="ClosingStock_TanggalDiperbarui">@Html.Raw(closingStockDelete.TanggalDiperbarui.Caption)</span></th>
+} @* closingStockDelete.TanggalDiperbarui.Visible (end) *@
+    </tr>
+    </thead>
+    <tbody>
+@{ closingStockDelete.RecordCount = 0; }
+@while (closingStockDelete.Recordset != null && await closingStockDelete.Recordset.ReadAsync()) { // DN
+    closingStockDelete.RecordCount++;
+    closingStockDelete.RowCount++;
+
+    // Set row properties
+    closingStockDelete.ResetAttributes();
+    closingStockDelete.RowType = RowType.View; // View
+
+    // Get the field contents
+    await closingStockDelete.LoadRowValues(closingStockDelete.Recordset);
+
+    // Render row
+    await closingStockDelete.RenderRow();
+    <tr @Html.Raw(closingStockDelete.RowAttributes)>
+@if (closingStockDelete.Proses2.Visible) { // closingStockDelete.Proses2.Visible (begin)
+        <td @Html.Raw(closingStockDelete.Proses2.CellAttributes)>
+<span id="">
+<span @Html.Raw(closingStockDelete.Proses2.ViewAttributes)>
+@Html.Raw(closingStockDelete.Proses2.GetViewValue())</span>
+</span></td>
+} @* closingStockDelete.Proses2.Visible (end) *@
+@if (closingStockDelete.Plant.Visible) { // closingStockDelete.Plant.Visible (begin)
+        <td @Html.Raw(closingStockDelete.Plant.CellAttributes)>
+<span id="">
+<span @Html.Raw(closingStockDelete.Plant.ViewAttributes)>
+@Html.Raw(closingStockDelete.Plant.GetViewValue())</span>
+</span></td>
+} @* closingStockDelete.Plant.Visible (end) *@
+@if (closingStockDelete.TipeProdukSTS.Visible) { // closingStockDelete.TipeProdukSTS.Visible (begin)
+        <td @Html.Raw(closingStockDelete.TipeProdukSTS.CellAttributes)>
+<span id="">
+<span @Html.Raw(closingStockDelete.TipeProdukSTS.ViewAttributes)>
+@Html.Raw(closingStockDelete.TipeProdukSTS.GetViewValue())</span>
+</span></td>
+} @* closingStockDelete.TipeProdukSTS.Visible (end) *@
+@if (closingStockDelete.IdTangki.Visible) { // closingStockDelete.IdTangki.Visible (begin)
+        <td @Html.Raw(closingStockDelete.IdTangki.CellAttributes)>
+<span id="">
+<span @Html.Raw(closingStockDelete.IdTangki.ViewAttributes)>
+@Html.Raw(closingStockDelete.IdTangki.GetViewValue())</span>
+</span></td>
+} @* closingStockDelete.IdTangki.Visible (end) *@
+@if (closingStockDelete.TanggalClosingStock.Visible) { // closingStockDelete.TanggalClosingStock.Visible (begin)
+        <td @Html.Raw(closingStockDelete.TanggalClosingStock.CellAttributes)>
+<span id="">
+<span @Html.Raw(closingStockDelete.TanggalClosingStock.ViewAttributes)>
+@Html.Raw(closingStockDelete.TanggalClosingStock.GetViewValue())</span>
+</span></td>
+} @* closingStockDelete.TanggalClosingStock.Visible (end) *@
+@if (closingStockDelete.Produk.Visible) { // closingStockDelete.Produk.Visible (begin)
+        <td @Html.Raw(closingStockDelete.Produk.CellAttributes)>
+<span id="">
+<span @Html.Raw(closingStockDelete.Produk.ViewAttributes)>
+@Html.Raw(closingStockDelete.Produk.GetViewValue())</span>
+</span></td>
+} @* closingStockDelete.Produk.Visible (end) *@
+@if (closingStockDelete.StatusProses.Visible) { // closingStockDelete.StatusProses.Visible (begin)
+        <td @Html.Raw(closingStockDelete.StatusProses.CellAttributes)>
+<span id="">
+<span @Html.Raw(closingStockDelete.StatusProses.ViewAttributes)>
+@Html.Raw(closingStockDelete.StatusProses.GetViewValue())</span>
+</span></td>
+} @* closingStockDelete.StatusProses.Visible (end) *@
+@if (closingStockDelete.PersentaseProgress.Visible) { // closingStockDelete.PersentaseProgress.Visible (begin)
+        <td @Html.Raw(closingStockDelete.PersentaseProgress.CellAttributes)>
+<span id="">
+<span @Html.Raw(closingStockDelete.PersentaseProgress.ViewAttributes)>
+@Html.Raw(closingStockDelete.PersentaseProgress.GetViewValue())</span>
+</span></td>
+} @* closingStockDelete.PersentaseProgress.Visible (end) *@
+@if (closingStockDelete.DibuatOleh.Visible) { // closingStockDelete.DibuatOleh.Visible (begin)
+        <td @Html.Raw(closingStockDelete.DibuatOleh.CellAttributes)>
+<span id="">
+<span @Html.Raw(closingStockDelete.DibuatOleh.ViewAttributes)>
+@Html.Raw(closingStockDelete.DibuatOleh.GetViewValue())</span>
+</span></td>
+} @* closingStockDelete.DibuatOleh.Visible (end) *@
+@if (closingStockDelete.TanggalDibuat.Visible) { // closingStockDelete.TanggalDibuat.Visible (begin)
+        <td @Html.Raw(closingStockDelete.TanggalDibuat.CellAttributes)>
+<span id="">
+<span @Html.Raw(closingStockDelete.TanggalDibuat.ViewAttributes)>
+@Html.Raw(closingStockDelete.TanggalDibuat.GetViewValue())</span>
+</span></td>
+} @* closingStockDelete.TanggalDibuat.Visible (end) *@
+@if (closingStockDelete.DiperbaruiOleh.Visible) { // closingStockDelete.DiperbaruiOleh.Visible (begin)
+        <td @Html.Raw(closingStockDelete.DiperbaruiOleh.CellAttributes)>
+<span id="">
+<span @Html.Raw(closingStockDelete.DiperbaruiOleh.ViewAttributes)>
+@Html.Raw(closingStockDelete.DiperbaruiOleh.GetViewValue())</span>
+</span></td>
+} @* closingStockDelete.DiperbaruiOleh.Visible (end) *@
+@if (closingStockDelete.TanggalDiperbarui.Visible) { // closingStockDelete.TanggalDiperbarui.Visible (begin)
+        <td @Html.Raw(closingStockDelete.TanggalDiperbarui.CellAttributes)>
+<span id="">
+<span @Html.Raw(closingStockDelete.TanggalDiperbarui.ViewAttributes)>
+@Html.Raw(closingStockDelete.TanggalDiperbarui.GetViewValue())</span>
+</span></td>
+} @* closingStockDelete.TanggalDiperbarui.Visible (end) *@
+    </tr>
+}
+@{ closingStockDelete.CloseRecordset(); }
+</tbody>
+</table>
+</div>
+</div>
+<div class="ew-buttons ew-desktop-buttons">
+<button class="btn btn-primary ew-btn" name="btn-action" id="btn-action" type="submit">@Html.Raw(Language.Phrase("DeleteBtn"))</button>
+<button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" data-href="@AppPath(closingStockDelete.ReturnUrl)">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+</div>
+</form>
+@closingStockDelete.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+<script>
+loadjs.ready("load", function() {
+    // Write your table-specific startup script here
+    // document.write("page loaded");
+});
+</script>

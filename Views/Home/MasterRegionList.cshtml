@@ -1,0 +1,387 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (masterRegionList.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = masterRegionList.UseLayout ? "_Layout" : "";
+}
+@if (!masterRegionList.IsExport()) {
+<script>
+var currentTable = @Html.Raw(ConvertToJson(masterRegionList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { MasterRegion: currentTable } });
+var currentPageID = ew.PAGE_ID = "list";
+var currentForm;
+var @(masterRegionList.FormName);
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("@(masterRegionList.FormName)")
+        .setPageId("list")
+        .setSubmitWithFetch(@(masterRegionList.UseAjaxActions ? "true" : "false"))
+        .setFormKeyCountName("@(masterRegionList.FormKeyCountName)")
+
+        // Dynamic selection lists
+        .setLists({
+            "IdRegion": @Html.Raw(masterRegionList.IdRegion.ToClientList(masterRegionList)),
+            "Region": @Html.Raw(masterRegionList.Region.ToClientList(masterRegionList)),
+        })
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Write your client script here, no need to add script tags.
+});
+</script>
+}
+@if (!masterRegionList.IsExport()) {
+<div class="btn-toolbar ew-toolbar">
+@if (masterRegionList.TotalRecords > 0 && masterRegionList.ExportOptions.Visible) {
+    masterRegionList.ExportOptions.Render("body");
+}
+@if (masterRegionList.ImportOptions.Visible) {
+    masterRegionList.ImportOptions.Render("body");
+}
+@if (masterRegionList.SearchOptions.Visible) {
+    masterRegionList.SearchOptions.Render("body");
+}
+@if (masterRegionList.FilterOptions.Visible) {
+    masterRegionList.FilterOptions.Render("body");
+}
+</div>
+}
+@if (masterRegionList.ShowCurrentFilter) {
+    masterRegionList.ShowFilterList();
+}
+@if (!masterRegionList.IsModal) {
+<form name="fMasterRegionsrch" id="fMasterRegionsrch" class="ew-form ew-ext-search-form" action="@AppPath(CurrentPageName())" novalidate autocomplete="off">
+<div id="fMasterRegionsrch_search_panel" class="mb-2 mb-sm-0 @(masterRegionList.SearchPanelClass)"><!-- .ew-search-panel -->
+<script>
+var currentTable = @Html.Raw(ConvertToJson(masterRegionList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { MasterRegion: currentTable } });
+var currentForm;
+var fMasterRegionsrch, currentSearchForm, currentAdvancedSearchForm;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery,
+        fields = currentTable.fields;
+
+    // Form object for search
+    let form = new ew.FormBuilder()
+        .setId("fMasterRegionsrch")
+        .setPageId("list")
+@if (masterRegionList.UseAjaxActions) {
+        <text>.setSubmitWithFetch(true)</text>
+}
+
+        // Add fields
+        .setFields([
+        ])
+        // Validate form
+        .setValidate(
+            async function () {
+                if (!this.validateRequired)
+                    return true; // Ignore validation
+                let fobj = this.getForm();
+
+                // Validate fields
+                if (!this.validateFields())
+                    return false;
+
+                // Call Form_CustomValidate event
+                if (!(await this.customValidate?.(fobj) ?? true)) {
+                    this.focus();
+                    return false;
+                }
+                return true;
+            }
+        )
+
+        // Form_CustomValidate
+        .setCustomValidate(
+            function(fobj) { // DO NOT CHANGE THIS LINE!
+                    // Your custom validation code here, return false if invalid.
+                    return true;
+                }
+        )
+
+        // Use JavaScript validation or not
+        .setValidateRequired(ew.CLIENT_VALIDATE)
+
+        // Dynamic selection lists
+        .setLists({
+            "IdRegion": @Html.Raw(masterRegionList.IdRegion.ToClientList(masterRegionList)),
+            "Region": @Html.Raw(masterRegionList.Region.ToClientList(masterRegionList)),
+        })
+
+        // Filters
+        .setFilterList(@Html.Raw(masterRegionList.GetFilterList()))
+        .build();
+    window[form.id] = form;
+    currentSearchForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<input type="hidden" name="cmd" value="search">
+@if (Security.CanSearch) {
+if (!masterRegionList.IsExport() && Empty(masterRegionList.CurrentAction) && masterRegionList.HasSearchFields()) { @* Show search form (begin) *@
+<div class="ew-extended-search container-fluid ps-2">
+<div class="row mb-0@(masterRegionList.SearchFieldsPerRow > 0 ? " row-cols-sm-" + masterRegionList.SearchFieldsPerRow : "")">
+@{
+    // Render search row
+    masterRegionList.RowType = RowType.Search;
+    masterRegionList.ResetAttributes();
+    await masterRegionList.RenderRow();
+}
+@if (masterRegionList.IdRegion.Visible) { // masterRegionList.IdRegion.Visible (begin)
+    if (!masterRegionList.IdRegion.UseFilter) {
+        masterRegionList.SearchColumnCount++;
+    }
+    <div id="xs_IdRegion" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(masterRegionList.IdRegion.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_IdRegion"
+            name="x_IdRegion[]"
+            class="form-control ew-select@(masterRegionList.IdRegion.IsInvalidClass)"
+            data-select2-id="fMasterRegionsrch_x_IdRegion"
+            data-table="MasterRegion"
+            data-field="x_IdRegion"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(masterRegionList.IdRegion.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(masterRegionList.IdRegion.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(masterRegionList.IdRegion.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(masterRegionList.IdRegion.EditAttributes)>
+            @(masterRegionList.IdRegion.SelectOptionListHtml("x_IdRegion", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(masterRegionList.IdRegion.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMasterRegionsrch", function() {
+            var options = {
+                name: "x_IdRegion",
+                selectId: "fMasterRegionsrch_x_IdRegion",
+                ajax: { id: "x_IdRegion", form: "fMasterRegionsrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MasterRegion.fields.IdRegion.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* masterRegionList.IdRegion.Visible (end) *@
+@if (masterRegionList.Region.Visible) { // masterRegionList.Region.Visible (begin)
+    if (!masterRegionList.Region.UseFilter) {
+        masterRegionList.SearchColumnCount++;
+    }
+    <div id="xs_Region" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(masterRegionList.Region.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_Region"
+            name="x_Region[]"
+            class="form-control ew-select@(masterRegionList.Region.IsInvalidClass)"
+            data-select2-id="fMasterRegionsrch_x_Region"
+            data-table="MasterRegion"
+            data-field="x_Region"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(masterRegionList.Region.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(masterRegionList.Region.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(masterRegionList.Region.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(masterRegionList.Region.EditAttributes)>
+            @(masterRegionList.Region.SelectOptionListHtml("x_Region", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(masterRegionList.Region.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMasterRegionsrch", function() {
+            var options = {
+                name: "x_Region",
+                selectId: "fMasterRegionsrch_x_Region",
+                ajax: { id: "x_Region", form: "fMasterRegionsrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MasterRegion.fields.Region.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* masterRegionList.Region.Visible (end) *@
+</div><!-- /.row -->
+<div class="row mb-0">
+    <div class="col-sm-auto px-0 pe-sm-2">
+        <div class="ew-basic-search input-group">
+            <input type="search" name="@(Config.TableBasicSearch)" id="@(Config.TableBasicSearch)" class="form-control ew-basic-search-keyword" value="@Html.Raw(HtmlEncode(masterRegionList.BasicSearch.SessionKeyword))" placeholder="@(HtmlEncode(Language.Phrase("Search")))" aria-label="@(HtmlEncode(Language.Phrase("Search")))">
+            <input type="hidden" name="@(Config.TableBasicSearchType)" id="@(Config.TableBasicSearchType)" class="ew-basic-search-type" value="@(HtmlEncode(masterRegionList.BasicSearch.SessionType))">
+            <button type="button" data-bs-toggle="dropdown" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split" aria-haspopup="true" aria-expanded="false">
+                <span id="searchtype">@Html.Raw(masterRegionList.BasicSearch.TypeNameShort)</span>
+            </button>
+            <div class="dropdown-menu dropdown-menu-end">
+                <button type="button" class="dropdown-item@(masterRegionList.BasicSearch.SessionType == "" ? " active" : "")" form="fMasterRegionsrch" data-ew-action="search-type">@Html.Raw(Language.Phrase("QuickSearchAuto"))</button>
+                <button type="button" class="dropdown-item@(masterRegionList.BasicSearch.SessionType == "=" ? " active" : "")" form="fMasterRegionsrch" data-ew-action="search-type" data-search-type="=">@Html.Raw(Language.Phrase("QuickSearchExact"))</button>
+                <button type="button" class="dropdown-item@(masterRegionList.BasicSearch.SessionType == "AND" ? " active" : "")" form="fMasterRegionsrch" data-ew-action="search-type" data-search-type="AND">@Html.Raw(Language.Phrase("QuickSearchAll"))</button>
+                <button type="button" class="dropdown-item@(masterRegionList.BasicSearch.SessionType == "OR" ? " active" : "")" form="fMasterRegionsrch" data-ew-action="search-type" data-search-type="OR">@Html.Raw(Language.Phrase("QuickSearchAny"))</button>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-auto mb-3">
+        <button class="btn btn-primary" name="btn-submit" id="btn-submit" type="submit">@Html.Raw(Language.Phrase("SearchBtn"))</button>
+    </div>
+</div>
+</div><!-- /.ew-extended-search -->
+} @* Show search form (end) *@
+}
+</div><!-- /.ew-search-panel -->
+</form>
+}
+@masterRegionList.ShowPageHeader()
+@masterRegionList.ShowMessages()
+<main class="list @(masterRegionList.TotalRecords == 0 && !masterRegionList.IsAdd ? " ew-no-record" : "")">
+<div id="ew-header-options">
+    @masterRegionList.HeaderOptions.RenderBody()
+</div>
+<div id="ew-list">
+@if (masterRegionList.TotalRecords > 0 || !Empty(masterRegionList.CurrentAction)) {
+<div class="card ew-card ew-grid@(masterRegionList.IsAddOrEdit ? " ew-grid-add-edit" : "") @(masterRegionList.TableGridClass)">
+<form name="@(masterRegionList.FormName)" id="@(masterRegionList.FormName)" class="ew-form ew-list-form" action="@AppPath(masterRegionList.PageName)" method="post" novalidate autocomplete="off">
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+@if (masterRegionList.IsModal) {
+<input type="hidden" name="modal" value="1">
+}
+<div id="gmp_MasterRegion" class="card-body ew-grid-middle-panel @(masterRegionList.TableContainerClass)" style="@(masterRegionList.TableContainerStyle)">
+@if (masterRegionList.TotalRecords > 0 || masterRegionList.IsGridEdit || masterRegionList.IsMultiEdit) {
+<table id="tbl_MasterRegionlist" class="@(masterRegionList.TableClass)"><!-- .ew-table -->
+<thead>
+    <tr class="ew-table-header">
+@{
+    // Header row
+    masterRegionList.RowType = RowType.Header;
+
+    // Render list options
+    await masterRegionList.RenderListOptions();
+}
+@* Render list options (header, left) *@
+@masterRegionList.ListOptions.RenderHeader("left")
+@if (masterRegionList.IdRegion.Visible) { // masterRegionList.IdRegion.Visible (begin)
+        <th data-name="IdRegion" class="@(masterRegionList.IdRegion.HeaderCellClass)"><div id="elh_MasterRegion_IdRegion" class="MasterRegion_IdRegion">@Html.Raw(masterRegionList.RenderFieldHeader(masterRegionList.IdRegion))</div></th>
+} @* masterRegionList.IdRegion.Visible (end) *@
+@if (masterRegionList.Region.Visible) { // masterRegionList.Region.Visible (begin)
+        <th data-name="Region" class="@(masterRegionList.Region.HeaderCellClass)"><div id="elh_MasterRegion_Region" class="MasterRegion_Region">@Html.Raw(masterRegionList.RenderFieldHeader(masterRegionList.Region))</div></th>
+} @* masterRegionList.Region.Visible (end) *@
+@if (masterRegionList.RegionCode.Visible) { // masterRegionList.RegionCode.Visible (begin)
+        <th data-name="RegionCode" class="@(masterRegionList.RegionCode.HeaderCellClass)"><div id="elh_MasterRegion_RegionCode" class="MasterRegion_RegionCode">@Html.Raw(masterRegionList.RenderFieldHeader(masterRegionList.RegionCode))</div></th>
+} @* masterRegionList.RegionCode.Visible (end) *@
+@* Render list options (header, right) *@
+@masterRegionList.ListOptions.RenderHeader("right")
+    </tr>
+</thead>
+<tbody data-page="@(masterRegionList.PageNumber)">
+@{
+    await masterRegionList.SetupGrid();
+    bool eof = masterRegionList.Recordset == null; // DN
+}
+@while (masterRegionList.RecordCount < masterRegionList.StopRecord || SameString(masterRegionList.RowIndex, "$rowindex$")) { // Begin While
+    if (!eof && !SameString(masterRegionList.RowIndex, "$rowindex$") &&
+        (!masterRegionList.IsGridAdd || masterRegionList.CurrentMode == "copy") &&
+        (!((masterRegionList.IsCopy || masterRegionList.IsAdd) && masterRegionList.RowIndex is int rowIndex && rowIndex == 0))) // DN
+        eof = !await masterRegionList.Recordset.ReadAsync();
+    masterRegionList.RecordCount++;
+    if (masterRegionList.RecordCount >= masterRegionList.StartRecord) {
+        await masterRegionList.SetupRow();
+    <tr @Html.Raw(masterRegionList.RowAttributes)>
+    @* Render list options (body, left) *@
+    @masterRegionList.ListOptions.RenderBody("left", masterRegionList.RowCount)
+    @if (masterRegionList.IdRegion.Visible) { // masterRegionList.IdRegion.Visible (begin)
+        <td data-name="IdRegion" @Html.Raw(masterRegionList.IdRegion.CellAttributes)>
+<span id="el@(masterRegionList.RowIndex == "$rowindex$" ? "$rowindex$" : masterRegionList.RowCount)_MasterRegion_IdRegion" class="el_MasterRegion_IdRegion">
+<span @Html.Raw(masterRegionList.IdRegion.ViewAttributes)>
+@Html.Raw(masterRegionList.IdRegion.GetViewValue())</span>
+</span>
+</td>
+    } @* masterRegionList.IdRegion.Visible (end) *@
+    @if (masterRegionList.Region.Visible) { // masterRegionList.Region.Visible (begin)
+        <td data-name="Region" @Html.Raw(masterRegionList.Region.CellAttributes)>
+<span id="el@(masterRegionList.RowIndex == "$rowindex$" ? "$rowindex$" : masterRegionList.RowCount)_MasterRegion_Region" class="el_MasterRegion_Region">
+<span @Html.Raw(masterRegionList.Region.ViewAttributes)>
+@Html.Raw(masterRegionList.Region.GetViewValue())</span>
+</span>
+</td>
+    } @* masterRegionList.Region.Visible (end) *@
+    @if (masterRegionList.RegionCode.Visible) { // masterRegionList.RegionCode.Visible (begin)
+        <td data-name="RegionCode" @Html.Raw(masterRegionList.RegionCode.CellAttributes)>
+<span id="el@(masterRegionList.RowIndex == "$rowindex$" ? "$rowindex$" : masterRegionList.RowCount)_MasterRegion_RegionCode" class="el_MasterRegion_RegionCode">
+<span @Html.Raw(masterRegionList.RegionCode.ViewAttributes)>
+@Html.Raw(masterRegionList.RegionCode.GetViewValue())</span>
+</span>
+</td>
+    } @* masterRegionList.RegionCode.Visible (end) *@
+    @* Render list options (body, right) *@
+    @masterRegionList.ListOptions.RenderBody("right", masterRegionList.RowCount)
+    </tr>
+    } @* End if *@
+
+    // Reset for template row
+    if (SameString(masterRegionList.RowIndex, "$rowindex$"))
+        masterRegionList.RowIndex = 0;
+
+    // Reset inline add/copy row
+    if ((masterRegionList.IsCopy || masterRegionList.IsAdd) && masterRegionList.RowIndex is int rowIndex2 && rowIndex2 == 0)
+        masterRegionList.RowIndex = 1;
+} @* End While *@
+</tbody>
+</table><!-- /.ew-table -->
+} @* End If TotalRecords > 0 *@
+</div><!-- /.ew-grid-middle-panel -->
+@if (Empty(masterRegionList.CurrentAction) && !masterRegionList.UseAjaxActions) {
+<input type="hidden" name="action" id="action" value="">
+}
+</form><!-- /.ew-list-form -->
+@{ masterRegionList.CloseRecordset(); }
+@if (!masterRegionList.IsExport()) {
+<div class="card-footer ew-grid-lower-panel">
+@if (!masterRegionList.IsGridAdd && !(masterRegionList.IsGridEdit && masterRegionList.ModalGridEdit) && !masterRegionList.IsMultiEdit) {
+@Html.Raw(masterRegionList.Pager.Render())
+}
+<div class="ew-list-other-options">
+@masterRegionList.OtherOptions.RenderBody("bottom")
+</div>
+</div>
+}
+</div><!-- /.ew-grid -->
+} else { // Show other options
+<div class="ew-list-other-options">
+@masterRegionList.OtherOptions.ForEach(opt => opt.ButtonClass = "").RenderBody()
+</div>
+}
+</div>
+<div id="ew-footer-options">
+    @masterRegionList.FooterOptions.RenderBody()
+</div>
+</main>
+@masterRegionList.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+@if (!masterRegionList.IsExport()) {
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("MasterRegion");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Write your table-specific startup script here
+    // document.write("page loaded");
+});
+</script>
+}

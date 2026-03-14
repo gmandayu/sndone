@@ -1,0 +1,241 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (formInputGoodHouseKeepingDelete.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = formInputGoodHouseKeepingDelete.UseLayout ? "_Layout" : "";
+}
+<script>
+var currentTable = @Html.Raw(ConvertToJson(formInputGoodHouseKeepingDelete.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { FormInputGoodHouseKeeping: currentTable } });
+var currentPageID = ew.PAGE_ID = "delete";
+var currentForm;
+var fFormInputGoodHouseKeepingdelete;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("fFormInputGoodHouseKeepingdelete")
+        .setPageId("delete")
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Client script
+    const parent_url = ew.PATH_BASE;
+    $(document).on('click', '.download-document', function (e) {
+        e.preventDefault();
+        const idGHK = $(this).data('id');
+        if (!idGHK) {
+            ew.alert("ID dokumen tidak ditemukan.");
+            return;
+        }
+        $.ajax({
+            url: parent_url + 'api/LookUpList/DownloadDocumentZip',
+            type: 'GET',
+            data: { 
+                idRef: idGHK,
+                table: 'DetailUploadGHK',
+                colRef: 'idGHK',
+                path: 'GHKDocument'
+            },
+            xhrFields: {
+                responseType: 'blob'
+            },
+            beforeSend: function () {
+                showLoading();
+            },
+            success: function (response, status, xhr) {
+                const disposition = xhr.getResponseHeader('Content-Disposition');
+                let fileName = "download_file";
+                if (disposition) {
+                    const fileNameMatch = disposition.match(/filename="?([^";]+)"?/);
+                    if (fileNameMatch && fileNameMatch[1]) {
+                        fileName = decodeURIComponent(fileNameMatch[1]);
+                    }
+                    const utf8FileNameMatch = disposition.match(/filename\*\s*=\s*UTF-8''([^;]+)/);
+                    if (utf8FileNameMatch && utf8FileNameMatch[1]) {
+                        fileName = decodeURIComponent(utf8FileNameMatch[1]);
+                    }
+                }
+                const blobUrl = window.URL.createObjectURL(response);
+                const a = document.createElement('a');
+                a.href = blobUrl;
+                a.download = fileName;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(blobUrl);
+                ew.alert("Download berhasil!");
+            },
+            error: function (xhr, status, error) {
+                if (xhr.status === 404) {
+                    ew.alert("File tidak ditemukan di server.");
+                } else if (xhr.status === 500) {
+                    ew.alert("Terjadi kesalahan server. Coba lagi nanti.");
+                } else {
+                    ew.alert("Gagal mendownload file. Error: " + xhr.responseText);
+                }
+            },
+            complete: function () {
+                hideLoading();
+            }
+        });
+    });
+});
+</script>
+@formInputGoodHouseKeepingDelete.ShowPageHeader()
+@formInputGoodHouseKeepingDelete.ShowMessages()
+<form name="fFormInputGoodHouseKeepingdelete" id="fFormInputGoodHouseKeepingdelete" class="ew-form ew-delete-form" action="@AppPath(CurrentPageName())" method="post" novalidate autocomplete="off">
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+<input type="hidden" name="action" id="action" value="delete">
+@foreach (string key in formInputGoodHouseKeepingDelete.RecordKeys) {
+<input type="hidden" name="key_m[]" value="@key">
+}
+<div class="card ew-card ew-grid @(formInputGoodHouseKeepingDelete.TableGridClass)">
+<div class="card-body ew-grid-middle-panel @(formInputGoodHouseKeepingDelete.TableContainerClass)" style="@(formInputGoodHouseKeepingDelete.TableContainerStyle)">
+<table class="@(formInputGoodHouseKeepingDelete.TableClass)">
+    <thead>
+    <tr class="ew-table-header">
+@if (formInputGoodHouseKeepingDelete.NoReferensi.Visible) { // formInputGoodHouseKeepingDelete.NoReferensi.Visible (begin)
+        <th class="@Html.Raw(formInputGoodHouseKeepingDelete.NoReferensi.HeaderCellClass)"><span id="elh_FormInputGoodHouseKeeping_NoReferensi" class="FormInputGoodHouseKeeping_NoReferensi">@Html.Raw(formInputGoodHouseKeepingDelete.NoReferensi.Caption)</span></th>
+} @* formInputGoodHouseKeepingDelete.NoReferensi.Visible (end) *@
+@if (formInputGoodHouseKeepingDelete.tgltiba.Visible) { // formInputGoodHouseKeepingDelete.tgltiba.Visible (begin)
+        <th class="@Html.Raw(formInputGoodHouseKeepingDelete.tgltiba.HeaderCellClass)"><span id="elh_FormInputGoodHouseKeeping_tgltiba" class="FormInputGoodHouseKeeping_tgltiba">@Html.Raw(formInputGoodHouseKeepingDelete.tgltiba.Caption)</span></th>
+} @* formInputGoodHouseKeepingDelete.tgltiba.Visible (end) *@
+@if (formInputGoodHouseKeepingDelete.Lokasi.Visible) { // formInputGoodHouseKeepingDelete.Lokasi.Visible (begin)
+        <th class="@Html.Raw(formInputGoodHouseKeepingDelete.Lokasi.HeaderCellClass)"><span id="elh_FormInputGoodHouseKeeping_Lokasi" class="FormInputGoodHouseKeeping_Lokasi">@Html.Raw(formInputGoodHouseKeepingDelete.Lokasi.Caption)</span></th>
+} @* formInputGoodHouseKeepingDelete.Lokasi.Visible (end) *@
+@if (formInputGoodHouseKeepingDelete.DownloadDokumen.Visible) { // formInputGoodHouseKeepingDelete.DownloadDokumen.Visible (begin)
+        <th class="@Html.Raw(formInputGoodHouseKeepingDelete.DownloadDokumen.HeaderCellClass)"><span id="elh_FormInputGoodHouseKeeping_DownloadDokumen" class="FormInputGoodHouseKeeping_DownloadDokumen">@Html.Raw(formInputGoodHouseKeepingDelete.DownloadDokumen.Caption)</span></th>
+} @* formInputGoodHouseKeepingDelete.DownloadDokumen.Visible (end) *@
+@if (formInputGoodHouseKeepingDelete.Keterangan.Visible) { // formInputGoodHouseKeepingDelete.Keterangan.Visible (begin)
+        <th class="@Html.Raw(formInputGoodHouseKeepingDelete.Keterangan.HeaderCellClass)"><span id="elh_FormInputGoodHouseKeeping_Keterangan" class="FormInputGoodHouseKeeping_Keterangan">@Html.Raw(formInputGoodHouseKeepingDelete.Keterangan.Caption)</span></th>
+} @* formInputGoodHouseKeepingDelete.Keterangan.Visible (end) *@
+@if (formInputGoodHouseKeepingDelete.userInput.Visible) { // formInputGoodHouseKeepingDelete.userInput.Visible (begin)
+        <th class="@Html.Raw(formInputGoodHouseKeepingDelete.userInput.HeaderCellClass)"><span id="elh_FormInputGoodHouseKeeping_userInput" class="FormInputGoodHouseKeeping_userInput">@Html.Raw(formInputGoodHouseKeepingDelete.userInput.Caption)</span></th>
+} @* formInputGoodHouseKeepingDelete.userInput.Visible (end) *@
+@if (formInputGoodHouseKeepingDelete.etlDate.Visible) { // formInputGoodHouseKeepingDelete.etlDate.Visible (begin)
+        <th class="@Html.Raw(formInputGoodHouseKeepingDelete.etlDate.HeaderCellClass)"><span id="elh_FormInputGoodHouseKeeping_etlDate" class="FormInputGoodHouseKeeping_etlDate">@Html.Raw(formInputGoodHouseKeepingDelete.etlDate.Caption)</span></th>
+} @* formInputGoodHouseKeepingDelete.etlDate.Visible (end) *@
+@if (formInputGoodHouseKeepingDelete.lastUpdatedBy.Visible) { // formInputGoodHouseKeepingDelete.lastUpdatedBy.Visible (begin)
+        <th class="@Html.Raw(formInputGoodHouseKeepingDelete.lastUpdatedBy.HeaderCellClass)"><span id="elh_FormInputGoodHouseKeeping_lastUpdatedBy" class="FormInputGoodHouseKeeping_lastUpdatedBy">@Html.Raw(formInputGoodHouseKeepingDelete.lastUpdatedBy.Caption)</span></th>
+} @* formInputGoodHouseKeepingDelete.lastUpdatedBy.Visible (end) *@
+@if (formInputGoodHouseKeepingDelete.lastUpdatedDate.Visible) { // formInputGoodHouseKeepingDelete.lastUpdatedDate.Visible (begin)
+        <th class="@Html.Raw(formInputGoodHouseKeepingDelete.lastUpdatedDate.HeaderCellClass)"><span id="elh_FormInputGoodHouseKeeping_lastUpdatedDate" class="FormInputGoodHouseKeeping_lastUpdatedDate">@Html.Raw(formInputGoodHouseKeepingDelete.lastUpdatedDate.Caption)</span></th>
+} @* formInputGoodHouseKeepingDelete.lastUpdatedDate.Visible (end) *@
+    </tr>
+    </thead>
+    <tbody>
+@{ formInputGoodHouseKeepingDelete.RecordCount = 0; }
+@while (formInputGoodHouseKeepingDelete.Recordset != null && await formInputGoodHouseKeepingDelete.Recordset.ReadAsync()) { // DN
+    formInputGoodHouseKeepingDelete.RecordCount++;
+    formInputGoodHouseKeepingDelete.RowCount++;
+
+    // Set row properties
+    formInputGoodHouseKeepingDelete.ResetAttributes();
+    formInputGoodHouseKeepingDelete.RowType = RowType.View; // View
+
+    // Get the field contents
+    await formInputGoodHouseKeepingDelete.LoadRowValues(formInputGoodHouseKeepingDelete.Recordset);
+
+    // Render row
+    await formInputGoodHouseKeepingDelete.RenderRow();
+    <tr @Html.Raw(formInputGoodHouseKeepingDelete.RowAttributes)>
+@if (formInputGoodHouseKeepingDelete.NoReferensi.Visible) { // formInputGoodHouseKeepingDelete.NoReferensi.Visible (begin)
+        <td @Html.Raw(formInputGoodHouseKeepingDelete.NoReferensi.CellAttributes)>
+<span id="">
+<span @Html.Raw(formInputGoodHouseKeepingDelete.NoReferensi.ViewAttributes)>
+@Html.Raw(formInputGoodHouseKeepingDelete.NoReferensi.GetViewValue())</span>
+</span></td>
+} @* formInputGoodHouseKeepingDelete.NoReferensi.Visible (end) *@
+@if (formInputGoodHouseKeepingDelete.tgltiba.Visible) { // formInputGoodHouseKeepingDelete.tgltiba.Visible (begin)
+        <td @Html.Raw(formInputGoodHouseKeepingDelete.tgltiba.CellAttributes)>
+<span id="">
+<span @Html.Raw(formInputGoodHouseKeepingDelete.tgltiba.ViewAttributes)>
+@Html.Raw(formInputGoodHouseKeepingDelete.tgltiba.GetViewValue())</span>
+</span></td>
+} @* formInputGoodHouseKeepingDelete.tgltiba.Visible (end) *@
+@if (formInputGoodHouseKeepingDelete.Lokasi.Visible) { // formInputGoodHouseKeepingDelete.Lokasi.Visible (begin)
+        <td @Html.Raw(formInputGoodHouseKeepingDelete.Lokasi.CellAttributes)>
+<span id="">
+<span @Html.Raw(formInputGoodHouseKeepingDelete.Lokasi.ViewAttributes)>
+@Html.Raw(formInputGoodHouseKeepingDelete.Lokasi.GetViewValue())</span>
+</span></td>
+} @* formInputGoodHouseKeepingDelete.Lokasi.Visible (end) *@
+@if (formInputGoodHouseKeepingDelete.DownloadDokumen.Visible) { // formInputGoodHouseKeepingDelete.DownloadDokumen.Visible (begin)
+        <td @Html.Raw(formInputGoodHouseKeepingDelete.DownloadDokumen.CellAttributes)>
+<span id="">
+<span @Html.Raw(formInputGoodHouseKeepingDelete.DownloadDokumen.ViewAttributes)>
+@Html.Raw(formInputGoodHouseKeepingDelete.DownloadDokumen.GetViewValue())</span>
+</span></td>
+} @* formInputGoodHouseKeepingDelete.DownloadDokumen.Visible (end) *@
+@if (formInputGoodHouseKeepingDelete.Keterangan.Visible) { // formInputGoodHouseKeepingDelete.Keterangan.Visible (begin)
+        <td @Html.Raw(formInputGoodHouseKeepingDelete.Keterangan.CellAttributes)>
+<span id="">
+<span @Html.Raw(formInputGoodHouseKeepingDelete.Keterangan.ViewAttributes)>
+@Html.Raw(formInputGoodHouseKeepingDelete.Keterangan.GetViewValue())</span>
+</span></td>
+} @* formInputGoodHouseKeepingDelete.Keterangan.Visible (end) *@
+@if (formInputGoodHouseKeepingDelete.userInput.Visible) { // formInputGoodHouseKeepingDelete.userInput.Visible (begin)
+        <td @Html.Raw(formInputGoodHouseKeepingDelete.userInput.CellAttributes)>
+<span id="">
+<span @Html.Raw(formInputGoodHouseKeepingDelete.userInput.ViewAttributes)>
+@Html.Raw(formInputGoodHouseKeepingDelete.userInput.GetViewValue())</span>
+</span></td>
+} @* formInputGoodHouseKeepingDelete.userInput.Visible (end) *@
+@if (formInputGoodHouseKeepingDelete.etlDate.Visible) { // formInputGoodHouseKeepingDelete.etlDate.Visible (begin)
+        <td @Html.Raw(formInputGoodHouseKeepingDelete.etlDate.CellAttributes)>
+<span id="">
+<span @Html.Raw(formInputGoodHouseKeepingDelete.etlDate.ViewAttributes)>
+@Html.Raw(formInputGoodHouseKeepingDelete.etlDate.GetViewValue())</span>
+</span></td>
+} @* formInputGoodHouseKeepingDelete.etlDate.Visible (end) *@
+@if (formInputGoodHouseKeepingDelete.lastUpdatedBy.Visible) { // formInputGoodHouseKeepingDelete.lastUpdatedBy.Visible (begin)
+        <td @Html.Raw(formInputGoodHouseKeepingDelete.lastUpdatedBy.CellAttributes)>
+<span id="">
+<span @Html.Raw(formInputGoodHouseKeepingDelete.lastUpdatedBy.ViewAttributes)>
+@Html.Raw(formInputGoodHouseKeepingDelete.lastUpdatedBy.GetViewValue())</span>
+</span></td>
+} @* formInputGoodHouseKeepingDelete.lastUpdatedBy.Visible (end) *@
+@if (formInputGoodHouseKeepingDelete.lastUpdatedDate.Visible) { // formInputGoodHouseKeepingDelete.lastUpdatedDate.Visible (begin)
+        <td @Html.Raw(formInputGoodHouseKeepingDelete.lastUpdatedDate.CellAttributes)>
+<span id="">
+<span @Html.Raw(formInputGoodHouseKeepingDelete.lastUpdatedDate.ViewAttributes)>
+@Html.Raw(formInputGoodHouseKeepingDelete.lastUpdatedDate.GetViewValue())</span>
+</span></td>
+} @* formInputGoodHouseKeepingDelete.lastUpdatedDate.Visible (end) *@
+    </tr>
+}
+@{ formInputGoodHouseKeepingDelete.CloseRecordset(); }
+</tbody>
+</table>
+</div>
+</div>
+<div class="ew-buttons ew-desktop-buttons">
+<button class="btn btn-primary ew-btn" name="btn-action" id="btn-action" type="submit">@Html.Raw(Language.Phrase("DeleteBtn"))</button>
+<button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" data-href="@AppPath(formInputGoodHouseKeepingDelete.ReturnUrl)">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+</div>
+</form>
+@formInputGoodHouseKeepingDelete.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+<script>
+loadjs.ready("load", function() {
+    // Write your table-specific startup script here
+    // document.write("page loaded");
+});
+</script>

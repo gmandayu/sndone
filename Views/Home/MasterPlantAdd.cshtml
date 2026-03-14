@@ -1,0 +1,365 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (masterPlantAdd.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = masterPlantAdd.UseLayout ? "_Layout" : "";
+}
+<script>
+var currentTable = @Html.Raw(ConvertToJson(masterPlantAdd.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { MasterPlant: currentTable } });
+var currentPageID = ew.PAGE_ID = "add";
+var currentForm;
+var fMasterPlantadd;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("fMasterPlantadd")
+        .setPageId("add")
+
+        // Add fields
+        .setFields([
+
+            ["Terminal_Manager", [fields.Terminal_Manager.visible && fields.Terminal_Manager.required ? ew.Validators.required(fields.Terminal_Manager.caption) : null], fields.Terminal_Manager.isInvalid],
+            ["PRL", [fields.PRL.visible && fields.PRL.required ? ew.Validators.required(fields.PRL.caption) : null], fields.PRL.isInvalid],
+            ["Status", [fields.Status.visible && fields.Status.required ? ew.Validators.required(fields.Status.caption) : null], fields.Status.isInvalid],
+            ["Terminal_Induk", [fields.Terminal_Induk.visible && fields.Terminal_Induk.required ? ew.Validators.required(fields.Terminal_Induk.caption) : null], fields.Terminal_Induk.isInvalid],
+            ["Nama_Terminal", [fields.Nama_Terminal.visible && fields.Nama_Terminal.required ? ew.Validators.required(fields.Nama_Terminal.caption) : null], fields.Nama_Terminal.isInvalid],
+            ["Region", [fields.Region.visible && fields.Region.required ? ew.Validators.required(fields.Region.caption) : null], fields.Region.isInvalid],
+            ["Fungsi", [fields.Fungsi.visible && fields.Fungsi.required ? ew.Validators.required(fields.Fungsi.caption) : null], fields.Fungsi.isInvalid],
+            ["Cost_Center", [fields.Cost_Center.visible && fields.Cost_Center.required ? ew.Validators.required(fields.Cost_Center.caption) : null], fields.Cost_Center.isInvalid],
+            ["Jenis", [fields.Jenis.visible && fields.Jenis.required ? ew.Validators.required(fields.Jenis.caption) : null], fields.Jenis.isInvalid],
+            ["Plant", [fields.Plant.visible && fields.Plant.required ? ew.Validators.required(fields.Plant.caption) : null], fields.Plant.isInvalid],
+            ["UTC", [fields.UTC.visible && fields.UTC.required ? ew.Validators.required(fields.UTC.caption) : null], fields.UTC.isInvalid],
+            ["TipeProduk", [fields.TipeProduk.visible && fields.TipeProduk.required ? ew.Validators.required(fields.TipeProduk.caption) : null], fields.TipeProduk.isInvalid],
+            ["JenisPlant", [fields.JenisPlant.visible && fields.JenisPlant.required ? ew.Validators.required(fields.JenisPlant.caption) : null], fields.JenisPlant.isInvalid]
+        ])
+
+        // Form_CustomValidate
+        .setCustomValidate(
+            function(fobj) { // DO NOT CHANGE THIS LINE!
+                    // Your custom validation code here, return false if invalid.
+                    return true;
+                }
+        )
+
+        // Use JavaScript validation or not
+        .setValidateRequired(ew.CLIENT_VALIDATE)
+
+        // Dynamic selection lists
+        .setLists({
+            "UTC": @Html.Raw(masterPlantAdd.UTC.ToClientList(masterPlantAdd)),
+            "TipeProduk": @Html.Raw(masterPlantAdd.TipeProduk.ToClientList(masterPlantAdd)),
+            "JenisPlant": @Html.Raw(masterPlantAdd.JenisPlant.ToClientList(masterPlantAdd)),
+        })
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Client script
+    $('#fMasterPlanadd').on('submit', function (e) {
+        e.preventDefault();
+        showLoading();
+        setTimeout(() => {
+            hideLoading();
+        }, 3000);
+        this.requestSubmit();
+    });
+});
+</script>
+@masterPlantAdd.ShowPageHeader()
+@masterPlantAdd.ShowMessages()
+<form name="fMasterPlantadd" id="fMasterPlantadd" class="@(masterPlantAdd.FormClassName)" action="@AppPath(CurrentPageName())" method="post" novalidate autocomplete="off">
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+<input type="hidden" name="action" id="action" value="insert">
+<input type="hidden" name="modal" value="@ConvertToInt(masterPlantAdd.IsModal)">
+@if (IsJsonResponse()) {
+<input type="hidden" name="json" value="1">
+}
+<input type="hidden" name="@(masterPlantAdd.OldKeyName)" value="@Html.Raw(masterPlantAdd.OldKey)">
+<div class="ew-add-div"><!-- page* -->
+@if (masterPlantAdd.Terminal_Manager.Visible) { // masterPlantAdd.Terminal_Manager.Visible (begin)
+    <div id="r_Terminal_Manager" @Html.Raw(masterPlantAdd.Terminal_Manager.RowAttributes)>
+        <label id="elh_MasterPlant_Terminal_Manager" for="x_Terminal_Manager" class="@(masterPlantAdd.LeftColumnClass)">@Html.Raw(masterPlantAdd.Terminal_Manager.Caption)@Html.Raw(masterPlantAdd.Terminal_Manager.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(masterPlantAdd.RightColumnClass)"><div @Html.Raw(masterPlantAdd.Terminal_Manager.CellAttributes)>
+<span id="el_MasterPlant_Terminal_Manager">
+<input type="@(masterPlantAdd.Terminal_Manager.InputTextType)" name="x_Terminal_Manager" id="x_Terminal_Manager" data-table="MasterPlant" data-field="x_Terminal_Manager" value="@Html.Raw(masterPlantAdd.Terminal_Manager.EditValue)" size="30" maxlength="100" placeholder="@Html.Raw(HtmlEncode(masterPlantAdd.Terminal_Manager.PlaceHolder))" data-format-pattern="@(masterPlantAdd.Terminal_Manager.FormatPattern)"@Html.Raw(masterPlantAdd.Terminal_Manager.EditAttributes) aria-describedby="x_Terminal_Manager_help">
+@Html.Raw(masterPlantAdd.Terminal_Manager.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(masterPlantAdd.Terminal_Manager.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* masterPlantAdd.Terminal_Manager.Visible (end) *@
+@if (masterPlantAdd.PRL.Visible) { // masterPlantAdd.PRL.Visible (begin)
+    <div id="r_PRL" @Html.Raw(masterPlantAdd.PRL.RowAttributes)>
+        <label id="elh_MasterPlant_PRL" for="x_PRL" class="@(masterPlantAdd.LeftColumnClass)">@Html.Raw(masterPlantAdd.PRL.Caption)@Html.Raw(masterPlantAdd.PRL.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(masterPlantAdd.RightColumnClass)"><div @Html.Raw(masterPlantAdd.PRL.CellAttributes)>
+<span id="el_MasterPlant_PRL">
+<input type="@(masterPlantAdd.PRL.InputTextType)" name="x_PRL" id="x_PRL" data-table="MasterPlant" data-field="x_PRL" value="@Html.Raw(masterPlantAdd.PRL.EditValue)" size="30" maxlength="100" placeholder="@Html.Raw(HtmlEncode(masterPlantAdd.PRL.PlaceHolder))" data-format-pattern="@(masterPlantAdd.PRL.FormatPattern)"@Html.Raw(masterPlantAdd.PRL.EditAttributes) aria-describedby="x_PRL_help">
+@Html.Raw(masterPlantAdd.PRL.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(masterPlantAdd.PRL.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* masterPlantAdd.PRL.Visible (end) *@
+@if (masterPlantAdd.Status.Visible) { // masterPlantAdd.Status.Visible (begin)
+    <div id="r_Status" @Html.Raw(masterPlantAdd.Status.RowAttributes)>
+        <label id="elh_MasterPlant_Status" for="x_Status" class="@(masterPlantAdd.LeftColumnClass)">@Html.Raw(masterPlantAdd.Status.Caption)@Html.Raw(masterPlantAdd.Status.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(masterPlantAdd.RightColumnClass)"><div @Html.Raw(masterPlantAdd.Status.CellAttributes)>
+<span id="el_MasterPlant_Status">
+<input type="@(masterPlantAdd.Status.InputTextType)" name="x_Status" id="x_Status" data-table="MasterPlant" data-field="x_Status" value="@Html.Raw(masterPlantAdd.Status.EditValue)" size="30" maxlength="100" placeholder="@Html.Raw(HtmlEncode(masterPlantAdd.Status.PlaceHolder))" data-format-pattern="@(masterPlantAdd.Status.FormatPattern)"@Html.Raw(masterPlantAdd.Status.EditAttributes) aria-describedby="x_Status_help">
+@Html.Raw(masterPlantAdd.Status.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(masterPlantAdd.Status.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* masterPlantAdd.Status.Visible (end) *@
+@if (masterPlantAdd.Terminal_Induk.Visible) { // masterPlantAdd.Terminal_Induk.Visible (begin)
+    <div id="r_Terminal_Induk" @Html.Raw(masterPlantAdd.Terminal_Induk.RowAttributes)>
+        <label id="elh_MasterPlant_Terminal_Induk" for="x_Terminal_Induk" class="@(masterPlantAdd.LeftColumnClass)">@Html.Raw(masterPlantAdd.Terminal_Induk.Caption)@Html.Raw(masterPlantAdd.Terminal_Induk.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(masterPlantAdd.RightColumnClass)"><div @Html.Raw(masterPlantAdd.Terminal_Induk.CellAttributes)>
+<span id="el_MasterPlant_Terminal_Induk">
+<input type="@(masterPlantAdd.Terminal_Induk.InputTextType)" name="x_Terminal_Induk" id="x_Terminal_Induk" data-table="MasterPlant" data-field="x_Terminal_Induk" value="@Html.Raw(masterPlantAdd.Terminal_Induk.EditValue)" size="30" maxlength="255" placeholder="@Html.Raw(HtmlEncode(masterPlantAdd.Terminal_Induk.PlaceHolder))" data-format-pattern="@(masterPlantAdd.Terminal_Induk.FormatPattern)"@Html.Raw(masterPlantAdd.Terminal_Induk.EditAttributes) aria-describedby="x_Terminal_Induk_help">
+@Html.Raw(masterPlantAdd.Terminal_Induk.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(masterPlantAdd.Terminal_Induk.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* masterPlantAdd.Terminal_Induk.Visible (end) *@
+@if (masterPlantAdd.Nama_Terminal.Visible) { // masterPlantAdd.Nama_Terminal.Visible (begin)
+    <div id="r_Nama_Terminal" @Html.Raw(masterPlantAdd.Nama_Terminal.RowAttributes)>
+        <label id="elh_MasterPlant_Nama_Terminal" for="x_Nama_Terminal" class="@(masterPlantAdd.LeftColumnClass)">@Html.Raw(masterPlantAdd.Nama_Terminal.Caption)@Html.Raw(masterPlantAdd.Nama_Terminal.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(masterPlantAdd.RightColumnClass)"><div @Html.Raw(masterPlantAdd.Nama_Terminal.CellAttributes)>
+<span id="el_MasterPlant_Nama_Terminal">
+<input type="@(masterPlantAdd.Nama_Terminal.InputTextType)" name="x_Nama_Terminal" id="x_Nama_Terminal" data-table="MasterPlant" data-field="x_Nama_Terminal" value="@Html.Raw(masterPlantAdd.Nama_Terminal.EditValue)" size="30" maxlength="255" placeholder="@Html.Raw(HtmlEncode(masterPlantAdd.Nama_Terminal.PlaceHolder))" data-format-pattern="@(masterPlantAdd.Nama_Terminal.FormatPattern)"@Html.Raw(masterPlantAdd.Nama_Terminal.EditAttributes) aria-describedby="x_Nama_Terminal_help">
+@Html.Raw(masterPlantAdd.Nama_Terminal.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(masterPlantAdd.Nama_Terminal.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* masterPlantAdd.Nama_Terminal.Visible (end) *@
+@if (masterPlantAdd.Region.Visible) { // masterPlantAdd.Region.Visible (begin)
+    <div id="r_Region" @Html.Raw(masterPlantAdd.Region.RowAttributes)>
+        <label id="elh_MasterPlant_Region" for="x_Region" class="@(masterPlantAdd.LeftColumnClass)">@Html.Raw(masterPlantAdd.Region.Caption)@Html.Raw(masterPlantAdd.Region.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(masterPlantAdd.RightColumnClass)"><div @Html.Raw(masterPlantAdd.Region.CellAttributes)>
+<span id="el_MasterPlant_Region">
+<input type="@(masterPlantAdd.Region.InputTextType)" name="x_Region" id="x_Region" data-table="MasterPlant" data-field="x_Region" value="@Html.Raw(masterPlantAdd.Region.EditValue)" size="30" maxlength="100" placeholder="@Html.Raw(HtmlEncode(masterPlantAdd.Region.PlaceHolder))" data-format-pattern="@(masterPlantAdd.Region.FormatPattern)"@Html.Raw(masterPlantAdd.Region.EditAttributes) aria-describedby="x_Region_help">
+@Html.Raw(masterPlantAdd.Region.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(masterPlantAdd.Region.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* masterPlantAdd.Region.Visible (end) *@
+@if (masterPlantAdd.Fungsi.Visible) { // masterPlantAdd.Fungsi.Visible (begin)
+    <div id="r_Fungsi" @Html.Raw(masterPlantAdd.Fungsi.RowAttributes)>
+        <label id="elh_MasterPlant_Fungsi" for="x_Fungsi" class="@(masterPlantAdd.LeftColumnClass)">@Html.Raw(masterPlantAdd.Fungsi.Caption)@Html.Raw(masterPlantAdd.Fungsi.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(masterPlantAdd.RightColumnClass)"><div @Html.Raw(masterPlantAdd.Fungsi.CellAttributes)>
+<span id="el_MasterPlant_Fungsi">
+<input type="@(masterPlantAdd.Fungsi.InputTextType)" name="x_Fungsi" id="x_Fungsi" data-table="MasterPlant" data-field="x_Fungsi" value="@Html.Raw(masterPlantAdd.Fungsi.EditValue)" size="30" maxlength="100" placeholder="@Html.Raw(HtmlEncode(masterPlantAdd.Fungsi.PlaceHolder))" data-format-pattern="@(masterPlantAdd.Fungsi.FormatPattern)"@Html.Raw(masterPlantAdd.Fungsi.EditAttributes) aria-describedby="x_Fungsi_help">
+@Html.Raw(masterPlantAdd.Fungsi.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(masterPlantAdd.Fungsi.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* masterPlantAdd.Fungsi.Visible (end) *@
+@if (masterPlantAdd.Cost_Center.Visible) { // masterPlantAdd.Cost_Center.Visible (begin)
+    <div id="r_Cost_Center" @Html.Raw(masterPlantAdd.Cost_Center.RowAttributes)>
+        <label id="elh_MasterPlant_Cost_Center" for="x_Cost_Center" class="@(masterPlantAdd.LeftColumnClass)">@Html.Raw(masterPlantAdd.Cost_Center.Caption)@Html.Raw(masterPlantAdd.Cost_Center.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(masterPlantAdd.RightColumnClass)"><div @Html.Raw(masterPlantAdd.Cost_Center.CellAttributes)>
+<span id="el_MasterPlant_Cost_Center">
+<input type="@(masterPlantAdd.Cost_Center.InputTextType)" name="x_Cost_Center" id="x_Cost_Center" data-table="MasterPlant" data-field="x_Cost_Center" value="@Html.Raw(masterPlantAdd.Cost_Center.EditValue)" size="30" maxlength="100" placeholder="@Html.Raw(HtmlEncode(masterPlantAdd.Cost_Center.PlaceHolder))" data-format-pattern="@(masterPlantAdd.Cost_Center.FormatPattern)"@Html.Raw(masterPlantAdd.Cost_Center.EditAttributes) aria-describedby="x_Cost_Center_help">
+@Html.Raw(masterPlantAdd.Cost_Center.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(masterPlantAdd.Cost_Center.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* masterPlantAdd.Cost_Center.Visible (end) *@
+@if (masterPlantAdd.Jenis.Visible) { // masterPlantAdd.Jenis.Visible (begin)
+    <div id="r_Jenis" @Html.Raw(masterPlantAdd.Jenis.RowAttributes)>
+        <label id="elh_MasterPlant_Jenis" for="x_Jenis" class="@(masterPlantAdd.LeftColumnClass)">@Html.Raw(masterPlantAdd.Jenis.Caption)@Html.Raw(masterPlantAdd.Jenis.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(masterPlantAdd.RightColumnClass)"><div @Html.Raw(masterPlantAdd.Jenis.CellAttributes)>
+<span id="el_MasterPlant_Jenis">
+<input type="@(masterPlantAdd.Jenis.InputTextType)" name="x_Jenis" id="x_Jenis" data-table="MasterPlant" data-field="x_Jenis" value="@Html.Raw(masterPlantAdd.Jenis.EditValue)" size="30" maxlength="100" placeholder="@Html.Raw(HtmlEncode(masterPlantAdd.Jenis.PlaceHolder))" data-format-pattern="@(masterPlantAdd.Jenis.FormatPattern)"@Html.Raw(masterPlantAdd.Jenis.EditAttributes) aria-describedby="x_Jenis_help">
+@Html.Raw(masterPlantAdd.Jenis.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(masterPlantAdd.Jenis.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* masterPlantAdd.Jenis.Visible (end) *@
+@if (masterPlantAdd.Plant.Visible) { // masterPlantAdd.Plant.Visible (begin)
+    <div id="r_Plant" @Html.Raw(masterPlantAdd.Plant.RowAttributes)>
+        <label id="elh_MasterPlant_Plant" for="x_Plant" class="@(masterPlantAdd.LeftColumnClass)">@Html.Raw(masterPlantAdd.Plant.Caption)@Html.Raw(masterPlantAdd.Plant.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(masterPlantAdd.RightColumnClass)"><div @Html.Raw(masterPlantAdd.Plant.CellAttributes)>
+<span id="el_MasterPlant_Plant">
+<input type="@(masterPlantAdd.Plant.InputTextType)" name="x_Plant" id="x_Plant" data-table="MasterPlant" data-field="x_Plant" value="@Html.Raw(masterPlantAdd.Plant.EditValue)" size="30" maxlength="100" placeholder="@Html.Raw(HtmlEncode(masterPlantAdd.Plant.PlaceHolder))" data-format-pattern="@(masterPlantAdd.Plant.FormatPattern)"@Html.Raw(masterPlantAdd.Plant.EditAttributes) aria-describedby="x_Plant_help">
+@Html.Raw(masterPlantAdd.Plant.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(masterPlantAdd.Plant.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* masterPlantAdd.Plant.Visible (end) *@
+@if (masterPlantAdd.UTC.Visible) { // masterPlantAdd.UTC.Visible (begin)
+    <div id="r_UTC" @Html.Raw(masterPlantAdd.UTC.RowAttributes)>
+        <label id="elh_MasterPlant_UTC" for="x_UTC" class="@(masterPlantAdd.LeftColumnClass)">@Html.Raw(masterPlantAdd.UTC.Caption)@Html.Raw(masterPlantAdd.UTC.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(masterPlantAdd.RightColumnClass)"><div @Html.Raw(masterPlantAdd.UTC.CellAttributes)>
+<span id="el_MasterPlant_UTC">
+    <select
+        id="x_UTC"
+        name="x_UTC"
+        class="form-select ew-select@(masterPlantAdd.UTC.IsInvalidClass)"
+        data-select2-id="fMasterPlantadd_x_UTC"
+        data-table="MasterPlant"
+        data-field="x_UTC"
+        data-value-separator="@(masterPlantAdd.UTC.DisplayValueSeparatorAttribute)"
+        data-placeholder="@(HtmlEncode(masterPlantAdd.UTC.PlaceHolder))"
+        @Html.Raw(masterPlantAdd.UTC.EditAttributes)>
+        @(masterPlantAdd.UTC.SelectOptionListHtml("x_UTC"))
+    </select>
+    @Html.Raw(masterPlantAdd.UTC.GetCustomMessage)
+    <div class="invalid-feedback">@Html.Raw(masterPlantAdd.UTC.GetErrorMessage())</div>
+<script>
+loadjs.ready("fMasterPlantadd", function() {
+    var options = { name: "x_UTC", selectId: "fMasterPlantadd_x_UTC" },
+        el = document.querySelector("select[data-select2-id='" + options.selectId + "']");
+    if (!el)
+        return;
+    options.closeOnSelect = !options.multiple;
+    options.dropdownParent = el.closest("#ew-modal-dialog, #ew-add-opt-dialog");
+    if (fMasterPlantadd.lists.UTC?.lookupOptions.length) {
+        options.data = { id: "x_UTC", form: "fMasterPlantadd" };
+    } else {
+        options.ajax = { id: "x_UTC", form: "fMasterPlantadd", limit: ew.LOOKUP_PAGE_SIZE };
+    }
+    options.minimumResultsForSearch = Infinity;
+    options = Object.assign({}, ew.selectOptions, options, ew.vars.tables.MasterPlant.fields.UTC.selectOptions);
+    ew.createSelect(options);
+});
+</script>
+</span>
+</div></div>
+    </div>
+} @* masterPlantAdd.UTC.Visible (end) *@
+@if (masterPlantAdd.TipeProduk.Visible) { // masterPlantAdd.TipeProduk.Visible (begin)
+    <div id="r_TipeProduk" @Html.Raw(masterPlantAdd.TipeProduk.RowAttributes)>
+        <label id="elh_MasterPlant_TipeProduk" for="x_TipeProduk" class="@(masterPlantAdd.LeftColumnClass)">@Html.Raw(masterPlantAdd.TipeProduk.Caption)@Html.Raw(masterPlantAdd.TipeProduk.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(masterPlantAdd.RightColumnClass)"><div @Html.Raw(masterPlantAdd.TipeProduk.CellAttributes)>
+<span id="el_MasterPlant_TipeProduk">
+    <select
+        id="x_TipeProduk"
+        name="x_TipeProduk"
+        class="form-select ew-select@(masterPlantAdd.TipeProduk.IsInvalidClass)"
+        data-select2-id="fMasterPlantadd_x_TipeProduk"
+        data-table="MasterPlant"
+        data-field="x_TipeProduk"
+        data-value-separator="@(masterPlantAdd.TipeProduk.DisplayValueSeparatorAttribute)"
+        data-placeholder="@(HtmlEncode(masterPlantAdd.TipeProduk.PlaceHolder))"
+        @Html.Raw(masterPlantAdd.TipeProduk.EditAttributes)>
+        @(masterPlantAdd.TipeProduk.SelectOptionListHtml("x_TipeProduk"))
+    </select>
+    @Html.Raw(masterPlantAdd.TipeProduk.GetCustomMessage)
+    <div class="invalid-feedback">@Html.Raw(masterPlantAdd.TipeProduk.GetErrorMessage())</div>
+<script>
+loadjs.ready("fMasterPlantadd", function() {
+    var options = { name: "x_TipeProduk", selectId: "fMasterPlantadd_x_TipeProduk" },
+        el = document.querySelector("select[data-select2-id='" + options.selectId + "']");
+    if (!el)
+        return;
+    options.closeOnSelect = !options.multiple;
+    options.dropdownParent = el.closest("#ew-modal-dialog, #ew-add-opt-dialog");
+    if (fMasterPlantadd.lists.TipeProduk?.lookupOptions.length) {
+        options.data = { id: "x_TipeProduk", form: "fMasterPlantadd" };
+    } else {
+        options.ajax = { id: "x_TipeProduk", form: "fMasterPlantadd", limit: ew.LOOKUP_PAGE_SIZE };
+    }
+    options.minimumResultsForSearch = Infinity;
+    options = Object.assign({}, ew.selectOptions, options, ew.vars.tables.MasterPlant.fields.TipeProduk.selectOptions);
+    ew.createSelect(options);
+});
+</script>
+</span>
+</div></div>
+    </div>
+} @* masterPlantAdd.TipeProduk.Visible (end) *@
+@if (masterPlantAdd.JenisPlant.Visible) { // masterPlantAdd.JenisPlant.Visible (begin)
+    <div id="r_JenisPlant" @Html.Raw(masterPlantAdd.JenisPlant.RowAttributes)>
+        <label id="elh_MasterPlant_JenisPlant" for="x_JenisPlant" class="@(masterPlantAdd.LeftColumnClass)">@Html.Raw(masterPlantAdd.JenisPlant.Caption)@Html.Raw(masterPlantAdd.JenisPlant.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(masterPlantAdd.RightColumnClass)"><div @Html.Raw(masterPlantAdd.JenisPlant.CellAttributes)>
+<span id="el_MasterPlant_JenisPlant">
+    <select
+        id="x_JenisPlant"
+        name="x_JenisPlant"
+        class="form-select ew-select@(masterPlantAdd.JenisPlant.IsInvalidClass)"
+        data-select2-id="fMasterPlantadd_x_JenisPlant"
+        data-table="MasterPlant"
+        data-field="x_JenisPlant"
+        data-value-separator="@(masterPlantAdd.JenisPlant.DisplayValueSeparatorAttribute)"
+        data-placeholder="@(HtmlEncode(masterPlantAdd.JenisPlant.PlaceHolder))"
+        @Html.Raw(masterPlantAdd.JenisPlant.EditAttributes)>
+        @(masterPlantAdd.JenisPlant.SelectOptionListHtml("x_JenisPlant"))
+    </select>
+    @Html.Raw(masterPlantAdd.JenisPlant.GetCustomMessage)
+    <div class="invalid-feedback">@Html.Raw(masterPlantAdd.JenisPlant.GetErrorMessage())</div>
+<script>
+loadjs.ready("fMasterPlantadd", function() {
+    var options = { name: "x_JenisPlant", selectId: "fMasterPlantadd_x_JenisPlant" },
+        el = document.querySelector("select[data-select2-id='" + options.selectId + "']");
+    if (!el)
+        return;
+    options.closeOnSelect = !options.multiple;
+    options.dropdownParent = el.closest("#ew-modal-dialog, #ew-add-opt-dialog");
+    if (fMasterPlantadd.lists.JenisPlant?.lookupOptions.length) {
+        options.data = { id: "x_JenisPlant", form: "fMasterPlantadd" };
+    } else {
+        options.ajax = { id: "x_JenisPlant", form: "fMasterPlantadd", limit: ew.LOOKUP_PAGE_SIZE };
+    }
+    options.minimumResultsForSearch = Infinity;
+    options = Object.assign({}, ew.selectOptions, options, ew.vars.tables.MasterPlant.fields.JenisPlant.selectOptions);
+    ew.createSelect(options);
+});
+</script>
+</span>
+</div></div>
+    </div>
+} @* masterPlantAdd.JenisPlant.Visible (end) *@
+</div><!-- /page* -->
+@{ masterPlantAdd.CloseRecordset(); }
+@Html.Raw(masterPlantAdd.IsModal ? "<template class=\"ew-modal-buttons\">" : "<div class=\"row ew-buttons\">")<!-- buttons .row -->
+    <div class="@(masterPlantAdd.OffsetColumnClass)"><!-- buttons offset -->
+    <button class="btn btn-primary ew-btn" name="btn-action" id="btn-action" type="submit" form="fMasterPlantadd">@Html.Raw(Language.Phrase("AddBtn"))</button>
+@if (IsJsonResponse()) {
+    <button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" data-bs-dismiss="modal">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+} else {
+    <button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" form="fMasterPlantadd" data-href="@AppPath(masterPlantAdd.ReturnUrl)">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+}
+    </div><!-- /buttons offset -->
+@Html.Raw(masterPlantAdd.IsModal ? "</template>" : "</div>")<!-- /buttons .row -->
+</form>
+@masterPlantAdd.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("MasterPlant");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Write your table-specific startup script here
+    // document.write("page loaded");
+});
+</script>

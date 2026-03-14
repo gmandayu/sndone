@@ -1,0 +1,703 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (subAktivitasLogbookPenerimaanPenyaluranEdit.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = subAktivitasLogbookPenerimaanPenyaluranEdit.UseLayout ? "_Layout" : "";
+}
+@subAktivitasLogbookPenerimaanPenyaluranEdit.ShowPageHeader()
+@subAktivitasLogbookPenerimaanPenyaluranEdit.ShowMessages()
+<main class="edit">
+<form name="fSubAktivitasLogbookPenerimaanPenyaluranedit" id="fSubAktivitasLogbookPenerimaanPenyaluranedit" class="@(subAktivitasLogbookPenerimaanPenyaluranEdit.FormClassName)" action="@AppPath(CurrentPageName())" method="post" novalidate autocomplete="off">
+<script>
+var currentTable = @Html.Raw(ConvertToJson(subAktivitasLogbookPenerimaanPenyaluranEdit.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { SubAktivitasLogbookPenerimaanPenyaluran: currentTable } });
+var currentPageID = ew.PAGE_ID = "edit";
+var currentForm;
+var fSubAktivitasLogbookPenerimaanPenyaluranedit;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("fSubAktivitasLogbookPenerimaanPenyaluranedit")
+        .setPageId("edit")
+
+        // Add fields
+        .setFields([
+
+            ["NoReferensi", [fields.NoReferensi.visible && fields.NoReferensi.required ? ew.Validators.required(fields.NoReferensi.caption) : null], fields.NoReferensi.isInvalid],
+            ["idProses", [fields.idProses.visible && fields.idProses.required ? ew.Validators.required(fields.idProses.caption) : null], fields.idProses.isInvalid],
+            ["idAktifitas", [fields.idAktifitas.visible && fields.idAktifitas.required ? ew.Validators.required(fields.idAktifitas.caption) : null], fields.idAktifitas.isInvalid],
+            ["Produk", [fields.Produk.visible && fields.Produk.required ? ew.Validators.required(fields.Produk.caption) : null], fields.Produk.isInvalid],
+            ["StatusAktivitas", [fields.StatusAktivitas.visible && fields.StatusAktivitas.required ? ew.Validators.required(fields.StatusAktivitas.caption) : null], fields.StatusAktivitas.isInvalid],
+            ["LastUpdatedBy", [fields.LastUpdatedBy.visible && fields.LastUpdatedBy.required ? ew.Validators.required(fields.LastUpdatedBy.caption) : null], fields.LastUpdatedBy.isInvalid],
+            ["lastUpdatedDate", [fields.lastUpdatedDate.visible && fields.lastUpdatedDate.required ? ew.Validators.required(fields.lastUpdatedDate.caption) : null], fields.lastUpdatedDate.isInvalid],
+            ["LO", [fields.LO.visible && fields.LO.required ? ew.Validators.required(fields.LO.caption) : null], fields.LO.isInvalid],
+            ["NomorTangki", [fields.NomorTangki.visible && fields.NomorTangki.required ? ew.Validators.required(fields.NomorTangki.caption) : null], fields.NomorTangki.isInvalid],
+            ["MeterAwal", [fields.MeterAwal.visible && fields.MeterAwal.required ? ew.Validators.required(fields.MeterAwal.caption) : null], fields.MeterAwal.isInvalid],
+            ["MeterAkhir", [fields.MeterAkhir.visible && fields.MeterAkhir.required ? ew.Validators.required(fields.MeterAkhir.caption) : null], fields.MeterAkhir.isInvalid],
+            ["Volume", [fields.Volume.visible && fields.Volume.required ? ew.Validators.required(fields.Volume.caption) : null], fields.Volume.isInvalid],
+            ["BayNumber", [fields.BayNumber.visible && fields.BayNumber.required ? ew.Validators.required(fields.BayNumber.caption) : null], fields.BayNumber.isInvalid],
+            ["NomorKompartment", [fields.NomorKompartment.visible && fields.NomorKompartment.required ? ew.Validators.required(fields.NomorKompartment.caption) : null], fields.NomorKompartment.isInvalid],
+            ["InLineBlending", [fields.InLineBlending.visible && fields.InLineBlending.required ? ew.Validators.required(fields.InLineBlending.caption) : null], fields.InLineBlending.isInvalid],
+            ["NomorTangki2", [fields.NomorTangki2.visible && fields.NomorTangki2.required ? ew.Validators.required(fields.NomorTangki2.caption) : null], fields.NomorTangki2.isInvalid],
+            ["NoMeter", [fields.NoMeter.visible && fields.NoMeter.required ? ew.Validators.required(fields.NoMeter.caption) : null], fields.NoMeter.isInvalid]
+        ])
+
+        // Form_CustomValidate
+        .setCustomValidate(
+            function(fobj) { // DO NOT CHANGE THIS LINE!
+                    // Your custom validation code here, return false if invalid.
+                    return true;
+                }
+        )
+
+        // Use JavaScript validation or not
+        .setValidateRequired(ew.CLIENT_VALIDATE)
+
+        // Dynamic selection lists
+        .setLists({
+            "InLineBlending": @Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.InLineBlending.ToClientList(subAktivitasLogbookPenerimaanPenyaluranEdit)),
+        })
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Client script
+    var parent_url = ew.PATH_BASE;
+    function handleCustomSubmit(status) {
+        let idAktivitas = $("#x_idAktifitas").val();
+        let form = $("#fSubAktivitasLogbookPenerimaanPenyaluranedit");
+        $.ajax({
+            url: form.attr("action"),
+            type: form.attr("method"),
+            data: form.serialize(),
+            success: function (response) {
+                // Setelah form sukses tersimpan, update status
+                if (status === "Completed" || status === "Completed Edit") {
+                    $.ajax({
+                        url: parent_url + `api/LookUpList/SetRedirectSession`,
+                        type: 'GET',
+                        success: function () {
+                                updateStatus(idAktivitas, status);
+                        },
+                        error: function (xhr, s, err) {
+                            console.error("SetRedirectSession gagal:", err);
+                        }
+                    });
+                } else {
+                    updateStatus(idAktivitas, status);
+                }
+            },
+            error: function (xhr, status, error) {
+                ew.alert("Gagal menyimpan data.");
+                console.error("Form submit gagal:", error);
+            }
+        });  
+    }
+    function updateStatus(idAktivitas, status) {
+        $.ajax({
+            url: parent_url + `api/LookUpList/update_status_aktivitas?idAktivitas=${idAktivitas}&statusAktivitas=${status}`,
+            type: 'POST',
+            success: function () {
+                // generateEtc();
+                location.reload();
+            },
+            error: function (xhr, status, error) {
+                ew.alert("Status gagal diperbarui.");
+                console.error("Update status gagal:", error);
+            }
+        });
+    }
+    $(document).on("click", "#btn-draft", function () {
+        handleCustomSubmit("Draft");
+    });
+    $(document).on("click", "#btn-completed", function () {
+        handleCustomSubmit("Completed");
+    });
+    $(document).on("click", "#btn-editing", function () {
+        handleCustomSubmit("Editing");
+    });
+    $(document).on("click", "#btn-completedEdit", function () {
+        handleCustomSubmit("Completed Edit");
+    });
+});
+</script>
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+<input type="hidden" name="action" id="action" value="update">
+<input type="hidden" name="modal" value="@ConvertToInt(subAktivitasLogbookPenerimaanPenyaluranEdit.IsModal)">
+@if (IsJsonResponse()) {
+<input type="hidden" name="json" value="1">
+}
+<input type="hidden" name="@(subAktivitasLogbookPenerimaanPenyaluranEdit.OldKeyName)" value="@Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.OldKey)">
+<div class="ew-edit-div"><!-- page* -->
+@if (subAktivitasLogbookPenerimaanPenyaluranEdit.NoReferensi.Visible) { // subAktivitasLogbookPenerimaanPenyaluranEdit.NoReferensi.Visible (begin)
+    <div id="r_NoReferensi" @Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.NoReferensi.RowAttributes)>
+        <label id="elh_SubAktivitasLogbookPenerimaanPenyaluran_NoReferensi" for="x_NoReferensi" class="@(subAktivitasLogbookPenerimaanPenyaluranEdit.LeftColumnClass)">@Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.NoReferensi.Caption)@Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.NoReferensi.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(subAktivitasLogbookPenerimaanPenyaluranEdit.RightColumnClass)"><div @Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.NoReferensi.CellAttributes)>
+<span id="el_SubAktivitasLogbookPenerimaanPenyaluran_NoReferensi">
+<span @Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.NoReferensi.ViewAttributes)>
+<input type="text" readonly class="form-control-plaintext" value="@Html.Raw(RemoveHtml(ConvertToString(subAktivitasLogbookPenerimaanPenyaluranEdit.NoReferensi.EditValue)))"></span>
+<input type="hidden" data-table="SubAktivitasLogbookPenerimaanPenyaluran" data-field="x_NoReferensi" data-hidden="1" name="x_NoReferensi" id="x_NoReferensi" value="@Html.Raw(HtmlEncode(subAktivitasLogbookPenerimaanPenyaluranEdit.NoReferensi.CurrentValue))">
+</span>
+</div></div>
+    </div>
+} @* subAktivitasLogbookPenerimaanPenyaluranEdit.NoReferensi.Visible (end) *@
+@if (subAktivitasLogbookPenerimaanPenyaluranEdit.idProses.Visible) { // subAktivitasLogbookPenerimaanPenyaluranEdit.idProses.Visible (begin)
+    <div id="r_idProses" @Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.idProses.RowAttributes)>
+        <label id="elh_SubAktivitasLogbookPenerimaanPenyaluran_idProses" class="@(subAktivitasLogbookPenerimaanPenyaluranEdit.LeftColumnClass)">@Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.idProses.Caption)@Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.idProses.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(subAktivitasLogbookPenerimaanPenyaluranEdit.RightColumnClass)"><div @Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.idProses.CellAttributes)>
+<span id="el_SubAktivitasLogbookPenerimaanPenyaluran_idProses">
+<span @Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.idProses.ViewAttributes)>
+<span class="form-control-plaintext">@Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.idProses.DisplayValue(subAktivitasLogbookPenerimaanPenyaluranEdit.idProses.EditValue))</span></span>
+<input type="hidden" data-table="SubAktivitasLogbookPenerimaanPenyaluran" data-field="x_idProses" data-hidden="1" name="x_idProses" id="x_idProses" value="@Html.Raw(HtmlEncode(subAktivitasLogbookPenerimaanPenyaluranEdit.idProses.CurrentValue))">
+</span>
+</div></div>
+    </div>
+} @* subAktivitasLogbookPenerimaanPenyaluranEdit.idProses.Visible (end) *@
+@if (subAktivitasLogbookPenerimaanPenyaluranEdit.idAktifitas.Visible) { // subAktivitasLogbookPenerimaanPenyaluranEdit.idAktifitas.Visible (begin)
+    <div id="r_idAktifitas" @Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.idAktifitas.RowAttributes)>
+        <label id="elh_SubAktivitasLogbookPenerimaanPenyaluran_idAktifitas" class="@(subAktivitasLogbookPenerimaanPenyaluranEdit.LeftColumnClass)">@Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.idAktifitas.Caption)@Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.idAktifitas.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(subAktivitasLogbookPenerimaanPenyaluranEdit.RightColumnClass)"><div @Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.idAktifitas.CellAttributes)>
+<span id="el_SubAktivitasLogbookPenerimaanPenyaluran_idAktifitas">
+<span @Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.idAktifitas.ViewAttributes)>
+<span class="form-control-plaintext">@Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.idAktifitas.DisplayValue(subAktivitasLogbookPenerimaanPenyaluranEdit.idAktifitas.EditValue))</span></span>
+<input type="hidden" data-table="SubAktivitasLogbookPenerimaanPenyaluran" data-field="x_idAktifitas" data-hidden="1" name="x_idAktifitas" id="x_idAktifitas" value="@Html.Raw(HtmlEncode(subAktivitasLogbookPenerimaanPenyaluranEdit.idAktifitas.CurrentValue))">
+</span>
+</div></div>
+    </div>
+} @* subAktivitasLogbookPenerimaanPenyaluranEdit.idAktifitas.Visible (end) *@
+@if (subAktivitasLogbookPenerimaanPenyaluranEdit.Produk.Visible) { // subAktivitasLogbookPenerimaanPenyaluranEdit.Produk.Visible (begin)
+    <div id="r_Produk" @Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.Produk.RowAttributes)>
+        <label id="elh_SubAktivitasLogbookPenerimaanPenyaluran_Produk" for="x_Produk" class="@(subAktivitasLogbookPenerimaanPenyaluranEdit.LeftColumnClass)">@Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.Produk.Caption)@Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.Produk.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(subAktivitasLogbookPenerimaanPenyaluranEdit.RightColumnClass)"><div @Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.Produk.CellAttributes)>
+<span id="el_SubAktivitasLogbookPenerimaanPenyaluran_Produk">
+<span @Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.Produk.ViewAttributes)>
+<input type="text" readonly class="form-control-plaintext" value="@Html.Raw(RemoveHtml(ConvertToString(subAktivitasLogbookPenerimaanPenyaluranEdit.Produk.EditValue)))"></span>
+<input type="hidden" data-table="SubAktivitasLogbookPenerimaanPenyaluran" data-field="x_Produk" data-hidden="1" name="x_Produk" id="x_Produk" value="@Html.Raw(HtmlEncode(subAktivitasLogbookPenerimaanPenyaluranEdit.Produk.CurrentValue))">
+</span>
+</div></div>
+    </div>
+} @* subAktivitasLogbookPenerimaanPenyaluranEdit.Produk.Visible (end) *@
+@if (subAktivitasLogbookPenerimaanPenyaluranEdit.StatusAktivitas.Visible) { // subAktivitasLogbookPenerimaanPenyaluranEdit.StatusAktivitas.Visible (begin)
+    <div id="r_StatusAktivitas" @Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.StatusAktivitas.RowAttributes)>
+        <label id="elh_SubAktivitasLogbookPenerimaanPenyaluran_StatusAktivitas" class="@(subAktivitasLogbookPenerimaanPenyaluranEdit.LeftColumnClass)">@Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.StatusAktivitas.Caption)@Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.StatusAktivitas.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(subAktivitasLogbookPenerimaanPenyaluranEdit.RightColumnClass)"><div @Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.StatusAktivitas.CellAttributes)>
+<span id="el_SubAktivitasLogbookPenerimaanPenyaluran_StatusAktivitas">
+<span @Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.StatusAktivitas.ViewAttributes)>
+<span class="form-control-plaintext">@Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.StatusAktivitas.DisplayValue(subAktivitasLogbookPenerimaanPenyaluranEdit.StatusAktivitas.EditValue))</span></span>
+<input type="hidden" data-table="SubAktivitasLogbookPenerimaanPenyaluran" data-field="x_StatusAktivitas" data-hidden="1" name="x_StatusAktivitas" id="x_StatusAktivitas" value="@Html.Raw(HtmlEncode(subAktivitasLogbookPenerimaanPenyaluranEdit.StatusAktivitas.CurrentValue))">
+</span>
+</div></div>
+    </div>
+} @* subAktivitasLogbookPenerimaanPenyaluranEdit.StatusAktivitas.Visible (end) *@
+@if (subAktivitasLogbookPenerimaanPenyaluranEdit.LastUpdatedBy.Visible) { // subAktivitasLogbookPenerimaanPenyaluranEdit.LastUpdatedBy.Visible (begin)
+    <div id="r_LastUpdatedBy" @Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.LastUpdatedBy.RowAttributes)>
+        <label id="elh_SubAktivitasLogbookPenerimaanPenyaluran_LastUpdatedBy" for="x_LastUpdatedBy" class="@(subAktivitasLogbookPenerimaanPenyaluranEdit.LeftColumnClass)">@Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.LastUpdatedBy.Caption)@Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.LastUpdatedBy.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(subAktivitasLogbookPenerimaanPenyaluranEdit.RightColumnClass)"><div @Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.LastUpdatedBy.CellAttributes)>
+<span id="el_SubAktivitasLogbookPenerimaanPenyaluran_LastUpdatedBy">
+<span @Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.LastUpdatedBy.ViewAttributes)>
+<input type="text" readonly class="form-control-plaintext" value="@Html.Raw(RemoveHtml(ConvertToString(subAktivitasLogbookPenerimaanPenyaluranEdit.LastUpdatedBy.EditValue)))"></span>
+<input type="hidden" data-table="SubAktivitasLogbookPenerimaanPenyaluran" data-field="x_LastUpdatedBy" data-hidden="1" name="x_LastUpdatedBy" id="x_LastUpdatedBy" value="@Html.Raw(HtmlEncode(subAktivitasLogbookPenerimaanPenyaluranEdit.LastUpdatedBy.CurrentValue))">
+</span>
+</div></div>
+    </div>
+} @* subAktivitasLogbookPenerimaanPenyaluranEdit.LastUpdatedBy.Visible (end) *@
+@if (subAktivitasLogbookPenerimaanPenyaluranEdit.lastUpdatedDate.Visible) { // subAktivitasLogbookPenerimaanPenyaluranEdit.lastUpdatedDate.Visible (begin)
+    <div id="r_lastUpdatedDate" @Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.lastUpdatedDate.RowAttributes)>
+        <label id="elh_SubAktivitasLogbookPenerimaanPenyaluran_lastUpdatedDate" for="x_lastUpdatedDate" class="@(subAktivitasLogbookPenerimaanPenyaluranEdit.LeftColumnClass)">@Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.lastUpdatedDate.Caption)@Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.lastUpdatedDate.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(subAktivitasLogbookPenerimaanPenyaluranEdit.RightColumnClass)"><div @Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.lastUpdatedDate.CellAttributes)>
+<span id="el_SubAktivitasLogbookPenerimaanPenyaluran_lastUpdatedDate">
+<span @Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.lastUpdatedDate.ViewAttributes)>
+<input type="text" readonly class="form-control-plaintext" value="@Html.Raw(RemoveHtml(ConvertToString(subAktivitasLogbookPenerimaanPenyaluranEdit.lastUpdatedDate.EditValue)))"></span>
+<input type="hidden" data-table="SubAktivitasLogbookPenerimaanPenyaluran" data-field="x_lastUpdatedDate" data-hidden="1" name="x_lastUpdatedDate" id="x_lastUpdatedDate" value="@Html.Raw(HtmlEncode(subAktivitasLogbookPenerimaanPenyaluranEdit.lastUpdatedDate.CurrentValue))">
+</span>
+</div></div>
+    </div>
+} @* subAktivitasLogbookPenerimaanPenyaluranEdit.lastUpdatedDate.Visible (end) *@
+@if (subAktivitasLogbookPenerimaanPenyaluranEdit.LO.Visible) { // subAktivitasLogbookPenerimaanPenyaluranEdit.LO.Visible (begin)
+    <div id="r_LO" @Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.LO.RowAttributes)>
+        <label id="elh_SubAktivitasLogbookPenerimaanPenyaluran_LO" for="x_LO" class="@(subAktivitasLogbookPenerimaanPenyaluranEdit.LeftColumnClass)">@Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.LO.Caption)@Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.LO.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(subAktivitasLogbookPenerimaanPenyaluranEdit.RightColumnClass)"><div @Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.LO.CellAttributes)>
+<span id="el_SubAktivitasLogbookPenerimaanPenyaluran_LO">
+<input type="@(subAktivitasLogbookPenerimaanPenyaluranEdit.LO.InputTextType)" name="x_LO" id="x_LO" data-table="SubAktivitasLogbookPenerimaanPenyaluran" data-field="x_LO" value="@Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.LO.EditValue)" size="30" maxlength="100" placeholder="@Html.Raw(HtmlEncode(subAktivitasLogbookPenerimaanPenyaluranEdit.LO.PlaceHolder))" data-format-pattern="@(subAktivitasLogbookPenerimaanPenyaluranEdit.LO.FormatPattern)"@Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.LO.EditAttributes) aria-describedby="x_LO_help">
+@Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.LO.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.LO.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* subAktivitasLogbookPenerimaanPenyaluranEdit.LO.Visible (end) *@
+@if (subAktivitasLogbookPenerimaanPenyaluranEdit.NomorTangki.Visible) { // subAktivitasLogbookPenerimaanPenyaluranEdit.NomorTangki.Visible (begin)
+    <div id="r_NomorTangki" @Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.NomorTangki.RowAttributes)>
+        <label id="elh_SubAktivitasLogbookPenerimaanPenyaluran_NomorTangki" for="x_NomorTangki" class="@(subAktivitasLogbookPenerimaanPenyaluranEdit.LeftColumnClass)">@Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.NomorTangki.Caption)@Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.NomorTangki.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(subAktivitasLogbookPenerimaanPenyaluranEdit.RightColumnClass)"><div @Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.NomorTangki.CellAttributes)>
+<span id="el_SubAktivitasLogbookPenerimaanPenyaluran_NomorTangki">
+<input type="@(subAktivitasLogbookPenerimaanPenyaluranEdit.NomorTangki.InputTextType)" name="x_NomorTangki" id="x_NomorTangki" data-table="SubAktivitasLogbookPenerimaanPenyaluran" data-field="x_NomorTangki" value="@Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.NomorTangki.EditValue)" size="30" maxlength="100" placeholder="@Html.Raw(HtmlEncode(subAktivitasLogbookPenerimaanPenyaluranEdit.NomorTangki.PlaceHolder))" data-format-pattern="@(subAktivitasLogbookPenerimaanPenyaluranEdit.NomorTangki.FormatPattern)"@Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.NomorTangki.EditAttributes) aria-describedby="x_NomorTangki_help">
+@Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.NomorTangki.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.NomorTangki.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* subAktivitasLogbookPenerimaanPenyaluranEdit.NomorTangki.Visible (end) *@
+@if (subAktivitasLogbookPenerimaanPenyaluranEdit.MeterAwal.Visible) { // subAktivitasLogbookPenerimaanPenyaluranEdit.MeterAwal.Visible (begin)
+    <div id="r_MeterAwal" @Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.MeterAwal.RowAttributes)>
+        <label id="elh_SubAktivitasLogbookPenerimaanPenyaluran_MeterAwal" for="x_MeterAwal" class="@(subAktivitasLogbookPenerimaanPenyaluranEdit.LeftColumnClass)">@Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.MeterAwal.Caption)@Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.MeterAwal.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(subAktivitasLogbookPenerimaanPenyaluranEdit.RightColumnClass)"><div @Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.MeterAwal.CellAttributes)>
+<span id="el_SubAktivitasLogbookPenerimaanPenyaluran_MeterAwal">
+<input type="@(subAktivitasLogbookPenerimaanPenyaluranEdit.MeterAwal.InputTextType)" name="x_MeterAwal" id="x_MeterAwal" data-table="SubAktivitasLogbookPenerimaanPenyaluran" data-field="x_MeterAwal" value="@Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.MeterAwal.EditValue)" size="30" maxlength="50" placeholder="@Html.Raw(HtmlEncode(subAktivitasLogbookPenerimaanPenyaluranEdit.MeterAwal.PlaceHolder))" data-format-pattern="@(subAktivitasLogbookPenerimaanPenyaluranEdit.MeterAwal.FormatPattern)"@Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.MeterAwal.EditAttributes) aria-describedby="x_MeterAwal_help">
+@Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.MeterAwal.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.MeterAwal.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* subAktivitasLogbookPenerimaanPenyaluranEdit.MeterAwal.Visible (end) *@
+@if (subAktivitasLogbookPenerimaanPenyaluranEdit.MeterAkhir.Visible) { // subAktivitasLogbookPenerimaanPenyaluranEdit.MeterAkhir.Visible (begin)
+    <div id="r_MeterAkhir" @Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.MeterAkhir.RowAttributes)>
+        <label id="elh_SubAktivitasLogbookPenerimaanPenyaluran_MeterAkhir" for="x_MeterAkhir" class="@(subAktivitasLogbookPenerimaanPenyaluranEdit.LeftColumnClass)">@Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.MeterAkhir.Caption)@Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.MeterAkhir.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(subAktivitasLogbookPenerimaanPenyaluranEdit.RightColumnClass)"><div @Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.MeterAkhir.CellAttributes)>
+<span id="el_SubAktivitasLogbookPenerimaanPenyaluran_MeterAkhir">
+<input type="@(subAktivitasLogbookPenerimaanPenyaluranEdit.MeterAkhir.InputTextType)" name="x_MeterAkhir" id="x_MeterAkhir" data-table="SubAktivitasLogbookPenerimaanPenyaluran" data-field="x_MeterAkhir" value="@Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.MeterAkhir.EditValue)" size="30" maxlength="50" placeholder="@Html.Raw(HtmlEncode(subAktivitasLogbookPenerimaanPenyaluranEdit.MeterAkhir.PlaceHolder))" data-format-pattern="@(subAktivitasLogbookPenerimaanPenyaluranEdit.MeterAkhir.FormatPattern)"@Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.MeterAkhir.EditAttributes) aria-describedby="x_MeterAkhir_help">
+@Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.MeterAkhir.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.MeterAkhir.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* subAktivitasLogbookPenerimaanPenyaluranEdit.MeterAkhir.Visible (end) *@
+@if (subAktivitasLogbookPenerimaanPenyaluranEdit.Volume.Visible) { // subAktivitasLogbookPenerimaanPenyaluranEdit.Volume.Visible (begin)
+    <div id="r_Volume" @Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.Volume.RowAttributes)>
+        <label id="elh_SubAktivitasLogbookPenerimaanPenyaluran_Volume" for="x_Volume" class="@(subAktivitasLogbookPenerimaanPenyaluranEdit.LeftColumnClass)">@Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.Volume.Caption)@Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.Volume.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(subAktivitasLogbookPenerimaanPenyaluranEdit.RightColumnClass)"><div @Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.Volume.CellAttributes)>
+<span id="el_SubAktivitasLogbookPenerimaanPenyaluran_Volume">
+<input type="@(subAktivitasLogbookPenerimaanPenyaluranEdit.Volume.InputTextType)" name="x_Volume" id="x_Volume" data-table="SubAktivitasLogbookPenerimaanPenyaluran" data-field="x_Volume" value="@Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.Volume.EditValue)" size="30" maxlength="50" placeholder="@Html.Raw(HtmlEncode(subAktivitasLogbookPenerimaanPenyaluranEdit.Volume.PlaceHolder))" data-format-pattern="@(subAktivitasLogbookPenerimaanPenyaluranEdit.Volume.FormatPattern)"@Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.Volume.EditAttributes) aria-describedby="x_Volume_help">
+@Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.Volume.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.Volume.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* subAktivitasLogbookPenerimaanPenyaluranEdit.Volume.Visible (end) *@
+@if (subAktivitasLogbookPenerimaanPenyaluranEdit.BayNumber.Visible) { // subAktivitasLogbookPenerimaanPenyaluranEdit.BayNumber.Visible (begin)
+    <div id="r_BayNumber" @Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.BayNumber.RowAttributes)>
+        <label id="elh_SubAktivitasLogbookPenerimaanPenyaluran_BayNumber" for="x_BayNumber" class="@(subAktivitasLogbookPenerimaanPenyaluranEdit.LeftColumnClass)">@Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.BayNumber.Caption)@Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.BayNumber.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(subAktivitasLogbookPenerimaanPenyaluranEdit.RightColumnClass)"><div @Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.BayNumber.CellAttributes)>
+<span id="el_SubAktivitasLogbookPenerimaanPenyaluran_BayNumber">
+<input type="@(subAktivitasLogbookPenerimaanPenyaluranEdit.BayNumber.InputTextType)" name="x_BayNumber" id="x_BayNumber" data-table="SubAktivitasLogbookPenerimaanPenyaluran" data-field="x_BayNumber" value="@Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.BayNumber.EditValue)" size="30" maxlength="50" placeholder="@Html.Raw(HtmlEncode(subAktivitasLogbookPenerimaanPenyaluranEdit.BayNumber.PlaceHolder))" data-format-pattern="@(subAktivitasLogbookPenerimaanPenyaluranEdit.BayNumber.FormatPattern)"@Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.BayNumber.EditAttributes) aria-describedby="x_BayNumber_help">
+@Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.BayNumber.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.BayNumber.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* subAktivitasLogbookPenerimaanPenyaluranEdit.BayNumber.Visible (end) *@
+@if (subAktivitasLogbookPenerimaanPenyaluranEdit.NomorKompartment.Visible) { // subAktivitasLogbookPenerimaanPenyaluranEdit.NomorKompartment.Visible (begin)
+    <div id="r_NomorKompartment" @Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.NomorKompartment.RowAttributes)>
+        <label id="elh_SubAktivitasLogbookPenerimaanPenyaluran_NomorKompartment" for="x_NomorKompartment" class="@(subAktivitasLogbookPenerimaanPenyaluranEdit.LeftColumnClass)">@Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.NomorKompartment.Caption)@Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.NomorKompartment.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(subAktivitasLogbookPenerimaanPenyaluranEdit.RightColumnClass)"><div @Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.NomorKompartment.CellAttributes)>
+<span id="el_SubAktivitasLogbookPenerimaanPenyaluran_NomorKompartment">
+<input type="@(subAktivitasLogbookPenerimaanPenyaluranEdit.NomorKompartment.InputTextType)" name="x_NomorKompartment" id="x_NomorKompartment" data-table="SubAktivitasLogbookPenerimaanPenyaluran" data-field="x_NomorKompartment" value="@Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.NomorKompartment.EditValue)" size="30" maxlength="100" placeholder="@Html.Raw(HtmlEncode(subAktivitasLogbookPenerimaanPenyaluranEdit.NomorKompartment.PlaceHolder))" data-format-pattern="@(subAktivitasLogbookPenerimaanPenyaluranEdit.NomorKompartment.FormatPattern)"@Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.NomorKompartment.EditAttributes) aria-describedby="x_NomorKompartment_help">
+@Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.NomorKompartment.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.NomorKompartment.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* subAktivitasLogbookPenerimaanPenyaluranEdit.NomorKompartment.Visible (end) *@
+@if (subAktivitasLogbookPenerimaanPenyaluranEdit.InLineBlending.Visible) { // subAktivitasLogbookPenerimaanPenyaluranEdit.InLineBlending.Visible (begin)
+    <div id="r_InLineBlending" @Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.InLineBlending.RowAttributes)>
+        <label id="elh_SubAktivitasLogbookPenerimaanPenyaluran_InLineBlending" class="@(subAktivitasLogbookPenerimaanPenyaluranEdit.LeftColumnClass)">@Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.InLineBlending.Caption)@Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.InLineBlending.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(subAktivitasLogbookPenerimaanPenyaluranEdit.RightColumnClass)"><div @Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.InLineBlending.CellAttributes)>
+<span id="el_SubAktivitasLogbookPenerimaanPenyaluran_InLineBlending">
+<div class="form-check d-inline-block">
+    <input type="checkbox" class="form-check-input@(subAktivitasLogbookPenerimaanPenyaluranEdit.InLineBlending.IsInvalidClass)" data-table="SubAktivitasLogbookPenerimaanPenyaluran" data-field="x_InLineBlending" data-boolean name="x_InLineBlending" id="x_InLineBlending" value="1" checked="@ConvertToBool(subAktivitasLogbookPenerimaanPenyaluranEdit.InLineBlending.CurrentValue)" @Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.InLineBlending.EditAttributes) aria-describedby="x_InLineBlending_help">
+    <div class="invalid-feedback">@Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.InLineBlending.GetErrorMessage())</div>
+</div>
+@Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.InLineBlending.GetCustomMessage)
+</span>
+</div></div>
+    </div>
+} @* subAktivitasLogbookPenerimaanPenyaluranEdit.InLineBlending.Visible (end) *@
+@if (subAktivitasLogbookPenerimaanPenyaluranEdit.NomorTangki2.Visible) { // subAktivitasLogbookPenerimaanPenyaluranEdit.NomorTangki2.Visible (begin)
+    <div id="r_NomorTangki2" @Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.NomorTangki2.RowAttributes)>
+        <label id="elh_SubAktivitasLogbookPenerimaanPenyaluran_NomorTangki2" for="x_NomorTangki2" class="@(subAktivitasLogbookPenerimaanPenyaluranEdit.LeftColumnClass)">@Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.NomorTangki2.Caption)@Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.NomorTangki2.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(subAktivitasLogbookPenerimaanPenyaluranEdit.RightColumnClass)"><div @Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.NomorTangki2.CellAttributes)>
+<span id="el_SubAktivitasLogbookPenerimaanPenyaluran_NomorTangki2">
+<input type="@(subAktivitasLogbookPenerimaanPenyaluranEdit.NomorTangki2.InputTextType)" name="x_NomorTangki2" id="x_NomorTangki2" data-table="SubAktivitasLogbookPenerimaanPenyaluran" data-field="x_NomorTangki2" value="@Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.NomorTangki2.EditValue)" size="30" maxlength="100" placeholder="@Html.Raw(HtmlEncode(subAktivitasLogbookPenerimaanPenyaluranEdit.NomorTangki2.PlaceHolder))" data-format-pattern="@(subAktivitasLogbookPenerimaanPenyaluranEdit.NomorTangki2.FormatPattern)"@Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.NomorTangki2.EditAttributes) aria-describedby="x_NomorTangki2_help">
+@Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.NomorTangki2.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.NomorTangki2.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* subAktivitasLogbookPenerimaanPenyaluranEdit.NomorTangki2.Visible (end) *@
+@if (subAktivitasLogbookPenerimaanPenyaluranEdit.NoMeter.Visible) { // subAktivitasLogbookPenerimaanPenyaluranEdit.NoMeter.Visible (begin)
+    <div id="r_NoMeter" @Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.NoMeter.RowAttributes)>
+        <label id="elh_SubAktivitasLogbookPenerimaanPenyaluran_NoMeter" for="x_NoMeter" class="@(subAktivitasLogbookPenerimaanPenyaluranEdit.LeftColumnClass)">@Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.NoMeter.Caption)@Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.NoMeter.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(subAktivitasLogbookPenerimaanPenyaluranEdit.RightColumnClass)"><div @Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.NoMeter.CellAttributes)>
+<span id="el_SubAktivitasLogbookPenerimaanPenyaluran_NoMeter">
+<input type="@(subAktivitasLogbookPenerimaanPenyaluranEdit.NoMeter.InputTextType)" name="x_NoMeter" id="x_NoMeter" data-table="SubAktivitasLogbookPenerimaanPenyaluran" data-field="x_NoMeter" value="@Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.NoMeter.EditValue)" size="30" maxlength="100" placeholder="@Html.Raw(HtmlEncode(subAktivitasLogbookPenerimaanPenyaluranEdit.NoMeter.PlaceHolder))" data-format-pattern="@(subAktivitasLogbookPenerimaanPenyaluranEdit.NoMeter.FormatPattern)"@Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.NoMeter.EditAttributes) aria-describedby="x_NoMeter_help">
+@Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.NoMeter.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.NoMeter.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* subAktivitasLogbookPenerimaanPenyaluranEdit.NoMeter.Visible (end) *@
+</div><!-- /page* -->
+    <input type="hidden" data-table="SubAktivitasLogbookPenerimaanPenyaluran" data-field="x_id" data-hidden="1" name="x_id" id="x_id" value="@Html.Raw(HtmlEncode(subAktivitasLogbookPenerimaanPenyaluranEdit.id.CurrentValue))">
+@{ subAktivitasLogbookPenerimaanPenyaluranEdit.CloseRecordset(); }
+@Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.IsModal ? "<template class=\"ew-modal-buttons\">" : "<div class=\"row ew-buttons\">")<!-- buttons .row -->
+    <div class="@(subAktivitasLogbookPenerimaanPenyaluranEdit.OffsetColumnClass)"><!-- buttons offset -->
+    <button class="btn btn-primary ew-btn" name="btn-action" id="btn-action" type="submit" form="fSubAktivitasLogbookPenerimaanPenyaluranedit">@Html.Raw(Language.Phrase("SaveBtn"))</button>
+@if (IsJsonResponse()) {
+    <button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" data-bs-dismiss="modal">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+} else {
+    <button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" form="fSubAktivitasLogbookPenerimaanPenyaluranedit" data-href="@AppPath(subAktivitasLogbookPenerimaanPenyaluranEdit.ReturnUrl)">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+}
+    </div><!-- /buttons offset -->
+@Html.Raw(subAktivitasLogbookPenerimaanPenyaluranEdit.IsModal ? "</template>" : "</div>")<!-- /buttons .row -->
+</form>
+</main>
+@subAktivitasLogbookPenerimaanPenyaluranEdit.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("SubAktivitasLogbookPenerimaanPenyaluran");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Startup script
+    var IdReferensi = "@subAktivitasLogbookPenerimaanPenyaluranEdit.NoReferensi.CurrentValue";
+    var IdProses = "@subAktivitasLogbookPenerimaanPenyaluranEdit.idProses.CurrentValue";
+    var idAktivitas = "@subAktivitasLogbookPenerimaanPenyaluranEdit.idAktifitas.CurrentValue";
+    var NamaAktivitas = $('#el_SubAktivitasLogbookPenerimaanPenyaluran_idAktifitas').text();
+    let StatusAktivitas = $('#el_SubAktivitasLogbookPenerimaanPenyaluran_StatusAktivitas').text().trim();
+    var parent_url = ew.PATH_BASE;
+    var steps = [
+        { number: 1, label: "Proses Penyaluran", url: `${parent_url}PenyaluranList`, icon: "fa-truck-fast" },
+        { number: 2, label: "Proses", url: `${parent_url}ProsesList?cmd=search&x_IdReferensi%5B%5D=${IdReferensi}&search=&searchtype=`, icon: "fa-gears" },
+        { number: 3, label: "Aktivitas", url: `${parent_url}AktivitasList?cmd=search&x_IdProses%5B%5D=${IdProses}&search=&searchtype=`, icon: "fa-list-check" },
+        { number: 4, label: NamaAktivitas, url: '', icon: "fa-file-circle-check" }
+    ];
+    var currentStep = 4;
+    $("<style>")
+        .prop("type", "text/css")
+        .html(`
+            .stepper {
+                display: flex;
+                counter-reset: step;
+                flex-wrap: nowrap;        /* jangan pecah ke bawah */
+                overflow-x: auto;         /* scroll horizontal */
+                -webkit-overflow-scrolling: touch; /* smooth scroll di mobile */
+                padding-bottom: 8px;      /* space biar scroll bar gak nempel */
+            }
+            .stepper::-webkit-scrollbar {
+            height: 6px; /* tipis */
+            }
+            .stepper::-webkit-scrollbar-thumb {
+                background-color: #ccc;
+                border-radius: 3px;
+            }
+            .step {
+                width: 150px;
+                text-align: center;
+                position: relative;
+            }
+            .step:not(:last-child)::after {
+                content: '';
+                position: absolute;
+                top: 20px;
+                right: -50%;
+                width: 100%;
+                height: 4px;
+                background-color: #ccc;
+                z-index: 0;
+            }
+            .step.completed:not(:last-child)::after {
+                background-color: #3c6dbd;
+            }
+            .step-icon {
+                width: 36px;
+                height: 36px;
+                line-height: 36px;
+                border-radius: 50%;
+                background: #ccc;
+                display: inline-block;
+                z-index: 1;
+                position: relative;
+                color: white;
+                font-weight: bold;
+            }
+            .step.active .step-icon {
+                background: #3c6dbd;
+            }
+            .step-label {
+                margin-top: 8px;
+                font-size: 14px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                gap: 6px;
+                color: #333;
+            }
+            .step-label {
+                color: #3c6dbd !important;
+                text-decoration: none;
+                margin: 0;
+                padding: 0;
+            }
+            .step-label-not-active {
+                color: #CCCCCC !important;
+            }
+            .ag-theme-quartz .ag-header {
+                background-color: #3c6dbd !important;
+            }
+            .ag-theme-quartz .ag-header-cell-label {
+                color: #ffffff !important;
+            }
+            .ag-theme-quartz .ag-icon-filter {
+                color: #ffffff !important;
+            }
+            .rotate-down {
+                transform: rotate(90deg);
+                transition: transform 0.3s ease;
+            }
+            .rotate-right {
+                transform: rotate(0deg);
+                transition: transform 0.3s ease;
+            }
+        `)
+        .appendTo("head");
+    var $stepperWrapper = $('<div class="d-flex border-bottom border-2 pb-2"><div class="stepper"></div></div>');
+    var $stepper = $stepperWrapper.find(".stepper");
+    steps.forEach(function (step, i) {
+        var isActive = step.number === currentStep;
+        var isCompleted = step.number < currentStep;
+        var stepClass = isActive ? "active" : isCompleted ? "completed" : "";
+        var icon, labelContent, html;
+        if (isActive) {
+            icon = `<div class="step-icon bg-success">${step.number}</div>`;
+            labelContent = `<div class="step-label"><p class="text-success mb-1"><i class="fa-solid ${step.icon} me-1 text-success"></i> ${step.label}</p></div>`;
+            html = `<div class="step ${stepClass} text-success">${icon}${labelContent}</div>`;
+        } else if (isCompleted) {
+            icon = `<div class="step-icon" style="background: #3c6dbd;">${step.number}</div>`;
+            labelContent = `<div><a href="${step.url}" class="step-label"><i class="fa-solid ${step.icon} me-1"></i>${step.label}</a></div>`;
+            html = `<div class="step ${stepClass}">${icon}${labelContent}</div>`;
+        } else {
+            icon = `<div class="step-icon">${step.number}</div>`;
+            labelContent = `<div class="step-label-not-active"><p style="margin: 0;"><i class="fa-solid ${step.icon} me-1"></i>${step.label}</p></div>`;
+            html = `<div class="step ${stepClass} text-secondary">${icon}${labelContent}</div>`;
+        }
+        $stepper.append(html);
+    });
+    $(".content-header .container-fluid .row").append($stepperWrapper);
+    $("#btn-action").hide();
+    $("#btn-cancel").html('<i class="fa-solid fa-ban"></i></i> Cancel');
+    const $cancelButton = $("#btn-cancel");
+    const idAktifitas = $("#x_idAktifitas").val();
+    if ($cancelButton.length) {
+        $.ajax({
+            url: parent_url + `api/LookUpList/get_status_aktivitas?idAktivitas=${idAktifitas}`,
+            type: 'GET',
+            success: function(response) {
+                let status = response.statusAktivitas;
+                let $customButtons = ``;
+                switch (status) {
+                case "Waiting":
+                    $customButtons = `
+                        <button type="button" class="btn btn-primary ew-btn ml-2" id="btn-draft">
+                            <i class="fas fa-save"></i> Save
+                        </button>
+                    `;
+                    break;
+                case "Draft":
+                    $customButtons = `
+                        <button type="button" class="btn btn-primary ew-btn ml-2" id="btn-draft">
+                            <i class="fas fa-save"></i> Save
+                        </button>
+                        <button type="button" class="btn btn-success ew-btn ml-2" id="btn-completed">
+                            <i class="fas fa-paper-plane"></i> Submit
+                        </button>
+                    `
+                    break;
+                case "Completed":
+                    $customButtons = `
+                        <button type="button" class="btn btn-primary ew-btn ml-2" id="btn-editing">
+                            <i class="fa-solid fa-pen-to-square"></i> Edit
+                        </button>
+                        <button type="button" class="btn btn-success ew-btn ml-2" id="btn-completedEdit">
+                            <i class="fas fa-paper-plane"></i> Submit
+                        </button>
+                    `;
+                    break;
+                case "Editing":
+                    $customButtons = `
+                        <button type="button" class="btn btn-primary ew-btn ml-2" id="btn-editing">
+                            <i class="fa-solid fa-pen-to-square"></i> Edit
+                        </button>
+                        <button type="button" class="btn btn-success ew-btn ml-2" id="btn-completedEdit">
+                            <i class="fas fa-paper-plane"></i> Submit
+                        </button>
+                    `;
+                    break;
+                }
+                    $cancelButton.before($customButtons);
+                    // checkIsEditable();
+            },
+            error: function(xhr, status, error) {
+                console.error('API call failed:', status, error);
+            }
+        });
+    }
+
+    // if (StatusAktivitas == "Completed" || StatusAktivitas == "Completed Edit") {
+    //     $.ajax({
+    //         url: parent_url + 'api/LookUpList/GetRedirectSession',
+    //         type: 'GET',
+    //         success: function(rs) {
+    //             if (rs.redirect) {
+    //                 window.location.href = `${parent_url}AktivitasList?cmd=search&x_IdProses%5B%5D=${IdProses}&search=&searchtype=`;
+    //             }
+    //         },
+    //         error: function(xhr, status, error) {
+    //             console.error('API call failed:', status, error);
+    //         }
+    //     });
+    // }
+    function checkIsEditable() {
+        $.ajax({
+            url: parent_url + `api/LookUpList/check_iseditable_aktivitas_form?idAktivitas=${idAktifitas}`,
+            type: 'GET',
+            success: function(response) {
+                if(!response.isEditable){
+                    $("#btn-draft").hide();
+                    $("#btn-editing").hide();
+                    $("#btn-completed").hide();
+                    $("#btn-completedEdit").hide();
+                    $('input, select, textarea').prop('disabled', true);
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('API call failed:', status, error);
+            }
+        });
+    }
+
+    // --- log aktivitas start ---
+    $('#el_SubAktivitasLogbookPenerimaanPenyaluran_LastUpdatedBy').addClass('d-flex gap-3');
+    $('#el_SubAktivitasLogbookPenerimaanPenyaluran_LastUpdatedBy').append(`
+        <button type="button" class="btn btn-primary ew-btn ps-2" expand-log="false">
+            <i class="fa-solid fa-caret-right fa-2xl me-2 caret-icon rotate-right"></i>
+            Log History
+            <i class="fa-solid fa-clock-rotate-left ms-1"></i> 
+        </button>
+    `);
+    $(document).on('click', 'button[expand-log]', function () {
+        const $btn = $(this);
+        const isExpanded = $btn.attr('expand-log') === 'true';
+        const $row = $('#log-table-row');
+        const $wrapper = $('#log-table-wrapper');
+        const $caret = $btn.find('.caret-icon');
+        if (!isExpanded) {
+            $btn.attr('expand-log', 'true');
+            $row.removeClass('d-none');
+            setTimeout(() => {
+                $wrapper.css({
+                    maxHeight: '500px'
+                });
+            }, 10);
+            $caret.removeClass('rotate-right').addClass('rotate-down');
+        } else {
+            $btn.attr('expand-log', 'false');
+            $wrapper.css({
+                maxHeight: '0'
+            });
+            setTimeout(() => {
+                $row.addClass('d-none');
+            }, 600);
+            $caret.removeClass('rotate-down').addClass('rotate-right');
+        }
+    });
+    $.ajax({
+        url: parent_url + `api/LookUpList/GetLogValueByIdAktivitas?IdAktivitas=${idAktivitas}`,
+        method: 'GET',
+        success: function (response) {
+            const mappedData = response.result.map(item => ({
+                Aktivitas: item.Aktivitas,
+                Username: item.Username,
+                StatusAktivitas: item.StatusAktivitas,
+                Tanggal: item.Tanggal
+            }));
+            $.getScript('https://cdn.jsdelivr.net/npm/ag-grid-community/dist/ag-grid-community.min.js', function () {
+                $('#r_LastUpdatedBy').after(`
+                    <div id="log-table-row" class="d-none row m-0">
+                        <div class="p-0 col-2"></div>
+                        <div class="p-0 col-10">
+                            <div id="log-table-wrapper" style="overflow: hidden; transition: all 0.6s ease; max-height: 0;">
+                                <div id="myGrid" class="ag-theme-quartz w-100 my-3" style="height: 300px;"></div>
+                            </div>
+                        </div>
+                    </div>
+                `);
+                const gridOptions = {
+                    rowData: mappedData,
+                    columnDefs: [
+                        {
+                            headerName: 'No.',
+                            valueGetter: 'node.rowIndex + 1',
+                            width: 80,
+                            filter: false
+                        },
+                        {
+                            headerName: 'Aktivitas',
+                            field: 'Aktivitas',
+                            flex: 1
+                        },
+                        {
+                            headerName: 'Username',
+                            field: 'Username',
+                            flex: 1
+                        },
+                        {
+                            headerName: 'Status Aktivitas',
+                            field: 'StatusAktivitas',
+                            flex: 1
+                        },
+                        {
+                            headerName: 'Tanggal',
+                            field: 'Tanggal',
+                            flex: 1
+                        }
+                    ],
+                    defaultColDef: {
+                        sortable: false,
+                        suppressMovable: true,
+                        filter: true,
+                        resizable: false
+                    },
+                    rowSelection: 'multiple',
+                    suppressRowClickSelection: true,
+                    pagination: true,
+                    paginationPageSize: 10
+                };
+                const myGridElement = document.querySelector('#myGrid');
+                agGrid.createGrid(myGridElement, gridOptions);
+            });
+        },
+        error: function(xhr, status, error) {
+            console.error('API call failed:', status, error);
+        }
+    });
+    // --- log aktivitas end ---
+});
+</script>

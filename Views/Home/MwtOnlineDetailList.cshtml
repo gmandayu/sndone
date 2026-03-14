@@ -1,0 +1,350 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (mwtOnlineDetailList.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = mwtOnlineDetailList.UseLayout ? "_Layout" : "";
+}
+@if (!mwtOnlineDetailList.IsExport()) {
+<script>
+var currentTable = @Html.Raw(ConvertToJson(mwtOnlineDetailList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { MWTOnlineDetail: currentTable } });
+var currentPageID = ew.PAGE_ID = "list";
+var currentForm;
+var @(mwtOnlineDetailList.FormName);
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("@(mwtOnlineDetailList.FormName)")
+        .setPageId("list")
+        .setSubmitWithFetch(@(mwtOnlineDetailList.UseAjaxActions ? "true" : "false"))
+        .setFormKeyCountName("@(mwtOnlineDetailList.FormKeyCountName)")
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Write your client script here, no need to add script tags.
+});
+</script>
+}
+@if (!mwtOnlineDetailList.IsExport()) {
+<div class="btn-toolbar ew-toolbar">
+@if (mwtOnlineDetailList.TotalRecords > 0 && mwtOnlineDetailList.ExportOptions.Visible) {
+    mwtOnlineDetailList.ExportOptions.Render("body");
+}
+@if (mwtOnlineDetailList.ImportOptions.Visible) {
+    mwtOnlineDetailList.ImportOptions.Render("body");
+}
+@if (mwtOnlineDetailList.SearchOptions.Visible) {
+    mwtOnlineDetailList.SearchOptions.Render("body");
+}
+@if (mwtOnlineDetailList.FilterOptions.Visible) {
+    mwtOnlineDetailList.FilterOptions.Render("body");
+}
+</div>
+}
+@if (!mwtOnlineDetailList.IsModal) {
+<form name="fMWTOnlineDetailsrch" id="fMWTOnlineDetailsrch" class="ew-form ew-ext-search-form" action="@AppPath(CurrentPageName())" novalidate autocomplete="off">
+<div id="fMWTOnlineDetailsrch_search_panel" class="mb-2 mb-sm-0 @(mwtOnlineDetailList.SearchPanelClass)"><!-- .ew-search-panel -->
+<script>
+var currentTable = @Html.Raw(ConvertToJson(mwtOnlineDetailList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { MWTOnlineDetail: currentTable } });
+var currentForm;
+var fMWTOnlineDetailsrch, currentSearchForm, currentAdvancedSearchForm;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery,
+        fields = currentTable.fields;
+
+    // Form object for search
+    let form = new ew.FormBuilder()
+        .setId("fMWTOnlineDetailsrch")
+        .setPageId("list")
+@if (mwtOnlineDetailList.UseAjaxActions) {
+        <text>.setSubmitWithFetch(true)</text>
+}
+
+        // Dynamic selection lists
+        .setLists({
+        })
+
+        // Filters
+        .setFilterList(@Html.Raw(mwtOnlineDetailList.GetFilterList()))
+        .build();
+    window[form.id] = form;
+    currentSearchForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<input type="hidden" name="cmd" value="search">
+@if (Security.CanSearch) {
+if (!mwtOnlineDetailList.IsExport() && Empty(mwtOnlineDetailList.CurrentAction) && mwtOnlineDetailList.HasSearchFields()) { @* Show search form (begin) *@
+<div class="ew-extended-search container-fluid ps-2">
+<div class="row mb-0">
+    <div class="col-sm-auto px-0 pe-sm-2">
+        <div class="ew-basic-search input-group">
+            <input type="search" name="@(Config.TableBasicSearch)" id="@(Config.TableBasicSearch)" class="form-control ew-basic-search-keyword" value="@Html.Raw(HtmlEncode(mwtOnlineDetailList.BasicSearch.SessionKeyword))" placeholder="@(HtmlEncode(Language.Phrase("Search")))" aria-label="@(HtmlEncode(Language.Phrase("Search")))">
+            <input type="hidden" name="@(Config.TableBasicSearchType)" id="@(Config.TableBasicSearchType)" class="ew-basic-search-type" value="@(HtmlEncode(mwtOnlineDetailList.BasicSearch.SessionType))">
+            <button type="button" data-bs-toggle="dropdown" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split" aria-haspopup="true" aria-expanded="false">
+                <span id="searchtype">@Html.Raw(mwtOnlineDetailList.BasicSearch.TypeNameShort)</span>
+            </button>
+            <div class="dropdown-menu dropdown-menu-end">
+                <button type="button" class="dropdown-item@(mwtOnlineDetailList.BasicSearch.SessionType == "" ? " active" : "")" form="fMWTOnlineDetailsrch" data-ew-action="search-type">@Html.Raw(Language.Phrase("QuickSearchAuto"))</button>
+                <button type="button" class="dropdown-item@(mwtOnlineDetailList.BasicSearch.SessionType == "=" ? " active" : "")" form="fMWTOnlineDetailsrch" data-ew-action="search-type" data-search-type="=">@Html.Raw(Language.Phrase("QuickSearchExact"))</button>
+                <button type="button" class="dropdown-item@(mwtOnlineDetailList.BasicSearch.SessionType == "AND" ? " active" : "")" form="fMWTOnlineDetailsrch" data-ew-action="search-type" data-search-type="AND">@Html.Raw(Language.Phrase("QuickSearchAll"))</button>
+                <button type="button" class="dropdown-item@(mwtOnlineDetailList.BasicSearch.SessionType == "OR" ? " active" : "")" form="fMWTOnlineDetailsrch" data-ew-action="search-type" data-search-type="OR">@Html.Raw(Language.Phrase("QuickSearchAny"))</button>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-auto mb-3">
+        <button class="btn btn-primary" name="btn-submit" id="btn-submit" type="submit">@Html.Raw(Language.Phrase("SearchBtn"))</button>
+    </div>
+</div>
+</div><!-- /.ew-extended-search -->
+} @* Show search form (end) *@
+}
+</div><!-- /.ew-search-panel -->
+</form>
+}
+@mwtOnlineDetailList.ShowPageHeader()
+@mwtOnlineDetailList.ShowMessages()
+<main class="list @(mwtOnlineDetailList.TotalRecords == 0 && !mwtOnlineDetailList.IsAdd ? " ew-no-record" : "")">
+<div id="ew-header-options">
+    @mwtOnlineDetailList.HeaderOptions.RenderBody()
+</div>
+<div id="ew-list">
+@if (mwtOnlineDetailList.TotalRecords > 0 || !Empty(mwtOnlineDetailList.CurrentAction)) {
+<div class="card ew-card ew-grid@(mwtOnlineDetailList.IsAddOrEdit ? " ew-grid-add-edit" : "") @(mwtOnlineDetailList.TableGridClass)">
+<form name="@(mwtOnlineDetailList.FormName)" id="@(mwtOnlineDetailList.FormName)" class="ew-form ew-list-form" action="@AppPath(mwtOnlineDetailList.PageName)" method="post" novalidate autocomplete="off">
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+@if (mwtOnlineDetailList.IsModal) {
+<input type="hidden" name="modal" value="1">
+}
+<div id="gmp_MWTOnlineDetail" class="card-body ew-grid-middle-panel @(mwtOnlineDetailList.TableContainerClass)" style="@(mwtOnlineDetailList.TableContainerStyle)">
+@if (mwtOnlineDetailList.TotalRecords > 0 || mwtOnlineDetailList.IsGridEdit || mwtOnlineDetailList.IsMultiEdit) {
+<table id="tbl_MWTOnlineDetaillist" class="@(mwtOnlineDetailList.TableClass)"><!-- .ew-table -->
+<thead>
+    <tr class="ew-table-header">
+@{
+    // Header row
+    mwtOnlineDetailList.RowType = RowType.Header;
+
+    // Render list options
+    await mwtOnlineDetailList.RenderListOptions();
+}
+@* Render list options (header, left) *@
+@mwtOnlineDetailList.ListOptions.RenderHeader("left")
+@if (mwtOnlineDetailList.Id.Visible) { // mwtOnlineDetailList.Id.Visible (begin)
+        <th data-name="Id" class="@(mwtOnlineDetailList.Id.HeaderCellClass)"><div id="elh_MWTOnlineDetail_Id" class="MWTOnlineDetail_Id">@Html.Raw(mwtOnlineDetailList.RenderFieldHeader(mwtOnlineDetailList.Id))</div></th>
+} @* mwtOnlineDetailList.Id.Visible (end) *@
+@if (mwtOnlineDetailList.NoReferensi.Visible) { // mwtOnlineDetailList.NoReferensi.Visible (begin)
+        <th data-name="NoReferensi" class="@(mwtOnlineDetailList.NoReferensi.HeaderCellClass)"><div id="elh_MWTOnlineDetail_NoReferensi" class="MWTOnlineDetail_NoReferensi">@Html.Raw(mwtOnlineDetailList.RenderFieldHeader(mwtOnlineDetailList.NoReferensi))</div></th>
+} @* mwtOnlineDetailList.NoReferensi.Visible (end) *@
+@if (mwtOnlineDetailList.UploadEvidence.Visible) { // mwtOnlineDetailList.UploadEvidence.Visible (begin)
+        <th data-name="UploadEvidence" class="@(mwtOnlineDetailList.UploadEvidence.HeaderCellClass)"><div id="elh_MWTOnlineDetail_UploadEvidence" class="MWTOnlineDetail_UploadEvidence">@Html.Raw(mwtOnlineDetailList.RenderFieldHeader(mwtOnlineDetailList.UploadEvidence))</div></th>
+} @* mwtOnlineDetailList.UploadEvidence.Visible (end) *@
+@if (mwtOnlineDetailList.CreatedDate.Visible) { // mwtOnlineDetailList.CreatedDate.Visible (begin)
+        <th data-name="CreatedDate" class="@(mwtOnlineDetailList.CreatedDate.HeaderCellClass)"><div id="elh_MWTOnlineDetail_CreatedDate" class="MWTOnlineDetail_CreatedDate">@Html.Raw(mwtOnlineDetailList.RenderFieldHeader(mwtOnlineDetailList.CreatedDate))</div></th>
+} @* mwtOnlineDetailList.CreatedDate.Visible (end) *@
+@if (mwtOnlineDetailList.CreatedBy.Visible) { // mwtOnlineDetailList.CreatedBy.Visible (begin)
+        <th data-name="CreatedBy" class="@(mwtOnlineDetailList.CreatedBy.HeaderCellClass)"><div id="elh_MWTOnlineDetail_CreatedBy" class="MWTOnlineDetail_CreatedBy">@Html.Raw(mwtOnlineDetailList.RenderFieldHeader(mwtOnlineDetailList.CreatedBy))</div></th>
+} @* mwtOnlineDetailList.CreatedBy.Visible (end) *@
+@if (mwtOnlineDetailList.LastUpdatedBy.Visible) { // mwtOnlineDetailList.LastUpdatedBy.Visible (begin)
+        <th data-name="LastUpdatedBy" class="@(mwtOnlineDetailList.LastUpdatedBy.HeaderCellClass)"><div id="elh_MWTOnlineDetail_LastUpdatedBy" class="MWTOnlineDetail_LastUpdatedBy">@Html.Raw(mwtOnlineDetailList.RenderFieldHeader(mwtOnlineDetailList.LastUpdatedBy))</div></th>
+} @* mwtOnlineDetailList.LastUpdatedBy.Visible (end) *@
+@if (mwtOnlineDetailList.LastUpdatedDate.Visible) { // mwtOnlineDetailList.LastUpdatedDate.Visible (begin)
+        <th data-name="LastUpdatedDate" class="@(mwtOnlineDetailList.LastUpdatedDate.HeaderCellClass)"><div id="elh_MWTOnlineDetail_LastUpdatedDate" class="MWTOnlineDetail_LastUpdatedDate">@Html.Raw(mwtOnlineDetailList.RenderFieldHeader(mwtOnlineDetailList.LastUpdatedDate))</div></th>
+} @* mwtOnlineDetailList.LastUpdatedDate.Visible (end) *@
+@if (mwtOnlineDetailList.StatusEmail.Visible) { // mwtOnlineDetailList.StatusEmail.Visible (begin)
+        <th data-name="StatusEmail" class="@(mwtOnlineDetailList.StatusEmail.HeaderCellClass)"><div id="elh_MWTOnlineDetail_StatusEmail" class="MWTOnlineDetail_StatusEmail">@Html.Raw(mwtOnlineDetailList.RenderFieldHeader(mwtOnlineDetailList.StatusEmail))</div></th>
+} @* mwtOnlineDetailList.StatusEmail.Visible (end) *@
+@if (mwtOnlineDetailList.FileType.Visible) { // mwtOnlineDetailList.FileType.Visible (begin)
+        <th data-name="FileType" class="@(mwtOnlineDetailList.FileType.HeaderCellClass)"><div id="elh_MWTOnlineDetail_FileType" class="MWTOnlineDetail_FileType">@Html.Raw(mwtOnlineDetailList.RenderFieldHeader(mwtOnlineDetailList.FileType))</div></th>
+} @* mwtOnlineDetailList.FileType.Visible (end) *@
+@if (mwtOnlineDetailList.OriginalFileName.Visible) { // mwtOnlineDetailList.OriginalFileName.Visible (begin)
+        <th data-name="OriginalFileName" class="@(mwtOnlineDetailList.OriginalFileName.HeaderCellClass)"><div id="elh_MWTOnlineDetail_OriginalFileName" class="MWTOnlineDetail_OriginalFileName">@Html.Raw(mwtOnlineDetailList.RenderFieldHeader(mwtOnlineDetailList.OriginalFileName))</div></th>
+} @* mwtOnlineDetailList.OriginalFileName.Visible (end) *@
+@if (mwtOnlineDetailList.Flag.Visible) { // mwtOnlineDetailList.Flag.Visible (begin)
+        <th data-name="Flag" class="@(mwtOnlineDetailList.Flag.HeaderCellClass)"><div id="elh_MWTOnlineDetail_Flag" class="MWTOnlineDetail_Flag">@Html.Raw(mwtOnlineDetailList.RenderFieldHeader(mwtOnlineDetailList.Flag))</div></th>
+} @* mwtOnlineDetailList.Flag.Visible (end) *@
+@* Render list options (header, right) *@
+@mwtOnlineDetailList.ListOptions.RenderHeader("right")
+    </tr>
+</thead>
+<tbody data-page="@(mwtOnlineDetailList.PageNumber)">
+@{
+    await mwtOnlineDetailList.SetupGrid();
+    bool eof = mwtOnlineDetailList.Recordset == null; // DN
+}
+@while (mwtOnlineDetailList.RecordCount < mwtOnlineDetailList.StopRecord || SameString(mwtOnlineDetailList.RowIndex, "$rowindex$")) { // Begin While
+    if (!eof && !SameString(mwtOnlineDetailList.RowIndex, "$rowindex$") &&
+        (!mwtOnlineDetailList.IsGridAdd || mwtOnlineDetailList.CurrentMode == "copy") &&
+        (!((mwtOnlineDetailList.IsCopy || mwtOnlineDetailList.IsAdd) && mwtOnlineDetailList.RowIndex is int rowIndex && rowIndex == 0))) // DN
+        eof = !await mwtOnlineDetailList.Recordset.ReadAsync();
+    mwtOnlineDetailList.RecordCount++;
+    if (mwtOnlineDetailList.RecordCount >= mwtOnlineDetailList.StartRecord) {
+        await mwtOnlineDetailList.SetupRow();
+    <tr @Html.Raw(mwtOnlineDetailList.RowAttributes)>
+    @* Render list options (body, left) *@
+    @mwtOnlineDetailList.ListOptions.RenderBody("left", mwtOnlineDetailList.RowCount)
+    @if (mwtOnlineDetailList.Id.Visible) { // mwtOnlineDetailList.Id.Visible (begin)
+        <td data-name="Id" @Html.Raw(mwtOnlineDetailList.Id.CellAttributes)>
+<span id="el@(mwtOnlineDetailList.RowIndex == "$rowindex$" ? "$rowindex$" : mwtOnlineDetailList.RowCount)_MWTOnlineDetail_Id" class="el_MWTOnlineDetail_Id">
+<span @Html.Raw(mwtOnlineDetailList.Id.ViewAttributes)>
+@Html.Raw(mwtOnlineDetailList.Id.GetViewValue())</span>
+</span>
+</td>
+    } @* mwtOnlineDetailList.Id.Visible (end) *@
+    @if (mwtOnlineDetailList.NoReferensi.Visible) { // mwtOnlineDetailList.NoReferensi.Visible (begin)
+        <td data-name="NoReferensi" @Html.Raw(mwtOnlineDetailList.NoReferensi.CellAttributes)>
+<span id="el@(mwtOnlineDetailList.RowIndex == "$rowindex$" ? "$rowindex$" : mwtOnlineDetailList.RowCount)_MWTOnlineDetail_NoReferensi" class="el_MWTOnlineDetail_NoReferensi">
+<span @Html.Raw(mwtOnlineDetailList.NoReferensi.ViewAttributes)>
+@Html.Raw(mwtOnlineDetailList.NoReferensi.GetViewValue())</span>
+</span>
+</td>
+    } @* mwtOnlineDetailList.NoReferensi.Visible (end) *@
+    @if (mwtOnlineDetailList.UploadEvidence.Visible) { // mwtOnlineDetailList.UploadEvidence.Visible (begin)
+        <td data-name="UploadEvidence" @Html.Raw(mwtOnlineDetailList.UploadEvidence.CellAttributes)>
+<span id="el@(mwtOnlineDetailList.RowIndex == "$rowindex$" ? "$rowindex$" : mwtOnlineDetailList.RowCount)_MWTOnlineDetail_UploadEvidence" class="el_MWTOnlineDetail_UploadEvidence">
+<span @Html.Raw(mwtOnlineDetailList.UploadEvidence.ViewAttributes)>
+@Html.Raw(mwtOnlineDetailList.UploadEvidence.GetViewValue())</span>
+</span>
+</td>
+    } @* mwtOnlineDetailList.UploadEvidence.Visible (end) *@
+    @if (mwtOnlineDetailList.CreatedDate.Visible) { // mwtOnlineDetailList.CreatedDate.Visible (begin)
+        <td data-name="CreatedDate" @Html.Raw(mwtOnlineDetailList.CreatedDate.CellAttributes)>
+<span id="el@(mwtOnlineDetailList.RowIndex == "$rowindex$" ? "$rowindex$" : mwtOnlineDetailList.RowCount)_MWTOnlineDetail_CreatedDate" class="el_MWTOnlineDetail_CreatedDate">
+<span @Html.Raw(mwtOnlineDetailList.CreatedDate.ViewAttributes)>
+@Html.Raw(mwtOnlineDetailList.CreatedDate.GetViewValue())</span>
+</span>
+</td>
+    } @* mwtOnlineDetailList.CreatedDate.Visible (end) *@
+    @if (mwtOnlineDetailList.CreatedBy.Visible) { // mwtOnlineDetailList.CreatedBy.Visible (begin)
+        <td data-name="CreatedBy" @Html.Raw(mwtOnlineDetailList.CreatedBy.CellAttributes)>
+<span id="el@(mwtOnlineDetailList.RowIndex == "$rowindex$" ? "$rowindex$" : mwtOnlineDetailList.RowCount)_MWTOnlineDetail_CreatedBy" class="el_MWTOnlineDetail_CreatedBy">
+<span @Html.Raw(mwtOnlineDetailList.CreatedBy.ViewAttributes)>
+@Html.Raw(mwtOnlineDetailList.CreatedBy.GetViewValue())</span>
+</span>
+</td>
+    } @* mwtOnlineDetailList.CreatedBy.Visible (end) *@
+    @if (mwtOnlineDetailList.LastUpdatedBy.Visible) { // mwtOnlineDetailList.LastUpdatedBy.Visible (begin)
+        <td data-name="LastUpdatedBy" @Html.Raw(mwtOnlineDetailList.LastUpdatedBy.CellAttributes)>
+<span id="el@(mwtOnlineDetailList.RowIndex == "$rowindex$" ? "$rowindex$" : mwtOnlineDetailList.RowCount)_MWTOnlineDetail_LastUpdatedBy" class="el_MWTOnlineDetail_LastUpdatedBy">
+<span @Html.Raw(mwtOnlineDetailList.LastUpdatedBy.ViewAttributes)>
+@Html.Raw(mwtOnlineDetailList.LastUpdatedBy.GetViewValue())</span>
+</span>
+</td>
+    } @* mwtOnlineDetailList.LastUpdatedBy.Visible (end) *@
+    @if (mwtOnlineDetailList.LastUpdatedDate.Visible) { // mwtOnlineDetailList.LastUpdatedDate.Visible (begin)
+        <td data-name="LastUpdatedDate" @Html.Raw(mwtOnlineDetailList.LastUpdatedDate.CellAttributes)>
+<span id="el@(mwtOnlineDetailList.RowIndex == "$rowindex$" ? "$rowindex$" : mwtOnlineDetailList.RowCount)_MWTOnlineDetail_LastUpdatedDate" class="el_MWTOnlineDetail_LastUpdatedDate">
+<span @Html.Raw(mwtOnlineDetailList.LastUpdatedDate.ViewAttributes)>
+@Html.Raw(mwtOnlineDetailList.LastUpdatedDate.GetViewValue())</span>
+</span>
+</td>
+    } @* mwtOnlineDetailList.LastUpdatedDate.Visible (end) *@
+    @if (mwtOnlineDetailList.StatusEmail.Visible) { // mwtOnlineDetailList.StatusEmail.Visible (begin)
+        <td data-name="StatusEmail" @Html.Raw(mwtOnlineDetailList.StatusEmail.CellAttributes)>
+<span id="el@(mwtOnlineDetailList.RowIndex == "$rowindex$" ? "$rowindex$" : mwtOnlineDetailList.RowCount)_MWTOnlineDetail_StatusEmail" class="el_MWTOnlineDetail_StatusEmail">
+<span @Html.Raw(mwtOnlineDetailList.StatusEmail.ViewAttributes)>
+@Html.Raw(mwtOnlineDetailList.StatusEmail.GetViewValue())</span>
+</span>
+</td>
+    } @* mwtOnlineDetailList.StatusEmail.Visible (end) *@
+    @if (mwtOnlineDetailList.FileType.Visible) { // mwtOnlineDetailList.FileType.Visible (begin)
+        <td data-name="FileType" @Html.Raw(mwtOnlineDetailList.FileType.CellAttributes)>
+<span id="el@(mwtOnlineDetailList.RowIndex == "$rowindex$" ? "$rowindex$" : mwtOnlineDetailList.RowCount)_MWTOnlineDetail_FileType" class="el_MWTOnlineDetail_FileType">
+<span @Html.Raw(mwtOnlineDetailList.FileType.ViewAttributes)>
+@Html.Raw(mwtOnlineDetailList.FileType.GetViewValue())</span>
+</span>
+</td>
+    } @* mwtOnlineDetailList.FileType.Visible (end) *@
+    @if (mwtOnlineDetailList.OriginalFileName.Visible) { // mwtOnlineDetailList.OriginalFileName.Visible (begin)
+        <td data-name="OriginalFileName" @Html.Raw(mwtOnlineDetailList.OriginalFileName.CellAttributes)>
+<span id="el@(mwtOnlineDetailList.RowIndex == "$rowindex$" ? "$rowindex$" : mwtOnlineDetailList.RowCount)_MWTOnlineDetail_OriginalFileName" class="el_MWTOnlineDetail_OriginalFileName">
+<span @Html.Raw(mwtOnlineDetailList.OriginalFileName.ViewAttributes)>
+@Html.Raw(mwtOnlineDetailList.OriginalFileName.GetViewValue())</span>
+</span>
+</td>
+    } @* mwtOnlineDetailList.OriginalFileName.Visible (end) *@
+    @if (mwtOnlineDetailList.Flag.Visible) { // mwtOnlineDetailList.Flag.Visible (begin)
+        <td data-name="Flag" @Html.Raw(mwtOnlineDetailList.Flag.CellAttributes)>
+<span id="el@(mwtOnlineDetailList.RowIndex == "$rowindex$" ? "$rowindex$" : mwtOnlineDetailList.RowCount)_MWTOnlineDetail_Flag" class="el_MWTOnlineDetail_Flag">
+<span @Html.Raw(mwtOnlineDetailList.Flag.ViewAttributes)>
+@Html.Raw(mwtOnlineDetailList.Flag.GetViewValue())</span>
+</span>
+</td>
+    } @* mwtOnlineDetailList.Flag.Visible (end) *@
+    @* Render list options (body, right) *@
+    @mwtOnlineDetailList.ListOptions.RenderBody("right", mwtOnlineDetailList.RowCount)
+    </tr>
+    } @* End if *@
+
+    // Reset for template row
+    if (SameString(mwtOnlineDetailList.RowIndex, "$rowindex$"))
+        mwtOnlineDetailList.RowIndex = 0;
+
+    // Reset inline add/copy row
+    if ((mwtOnlineDetailList.IsCopy || mwtOnlineDetailList.IsAdd) && mwtOnlineDetailList.RowIndex is int rowIndex2 && rowIndex2 == 0)
+        mwtOnlineDetailList.RowIndex = 1;
+} @* End While *@
+</tbody>
+</table><!-- /.ew-table -->
+} @* End If TotalRecords > 0 *@
+</div><!-- /.ew-grid-middle-panel -->
+@if (Empty(mwtOnlineDetailList.CurrentAction) && !mwtOnlineDetailList.UseAjaxActions) {
+<input type="hidden" name="action" id="action" value="">
+}
+</form><!-- /.ew-list-form -->
+@{ mwtOnlineDetailList.CloseRecordset(); }
+@if (!mwtOnlineDetailList.IsExport()) {
+<div class="card-footer ew-grid-lower-panel">
+@if (!mwtOnlineDetailList.IsGridAdd && !(mwtOnlineDetailList.IsGridEdit && mwtOnlineDetailList.ModalGridEdit) && !mwtOnlineDetailList.IsMultiEdit) {
+@Html.Raw(mwtOnlineDetailList.Pager.Render())
+}
+<div class="ew-list-other-options">
+@mwtOnlineDetailList.OtherOptions.RenderBody("bottom")
+</div>
+</div>
+}
+</div><!-- /.ew-grid -->
+} else { // Show other options
+<div class="ew-list-other-options">
+@mwtOnlineDetailList.OtherOptions.ForEach(opt => opt.ButtonClass = "").RenderBody()
+</div>
+}
+</div>
+<div id="ew-footer-options">
+    @mwtOnlineDetailList.FooterOptions.RenderBody()
+</div>
+</main>
+@mwtOnlineDetailList.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+@if (!mwtOnlineDetailList.IsExport()) {
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("MWTOnlineDetail");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Write your table-specific startup script here
+    // document.write("page loaded");
+});
+</script>
+}

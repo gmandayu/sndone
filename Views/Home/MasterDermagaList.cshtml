@@ -1,0 +1,1050 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (masterDermagaList.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = masterDermagaList.UseLayout ? "_Layout" : "";
+}
+@if (!masterDermagaList.IsExport()) {
+<script>
+var currentTable = @Html.Raw(ConvertToJson(masterDermagaList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { MasterDermaga: currentTable } });
+var currentPageID = ew.PAGE_ID = "list";
+var currentForm;
+var @(masterDermagaList.FormName);
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("@(masterDermagaList.FormName)")
+        .setPageId("list")
+        .setSubmitWithFetch(@(masterDermagaList.UseAjaxActions ? "true" : "false"))
+        .setFormKeyCountName("@(masterDermagaList.FormKeyCountName)")
+
+        // Dynamic selection lists
+        .setLists({
+            "Region": @Html.Raw(masterDermagaList.Region.ToClientList(masterDermagaList)),
+            "Id_Plant": @Html.Raw(masterDermagaList.Id_Plant.ToClientList(masterDermagaList)),
+            "TBBM": @Html.Raw(masterDermagaList.TBBM.ToClientList(masterDermagaList)),
+            "Equipment_ID": @Html.Raw(masterDermagaList.Equipment_ID.ToClientList(masterDermagaList)),
+            "Fungsi": @Html.Raw(masterDermagaList.Fungsi.ToClientList(masterDermagaList)),
+            "Kapasitas_DWT": @Html.Raw(masterDermagaList.Kapasitas_DWT.ToClientList(masterDermagaList)),
+            "Kategori_Kapasitas": @Html.Raw(masterDermagaList.Kategori_Kapasitas.ToClientList(masterDermagaList)),
+            "Jenis_Sartam": @Html.Raw(masterDermagaList.Jenis_Sartam.ToClientList(masterDermagaList)),
+            "Type_Sartam": @Html.Raw(masterDermagaList.Type_Sartam.ToClientList(masterDermagaList)),
+            "Tahun_Pembuatan": @Html.Raw(masterDermagaList.Tahun_Pembuatan.ToClientList(masterDermagaList)),
+            "Kategori_Port": @Html.Raw(masterDermagaList.Kategori_Port.ToClientList(masterDermagaList)),
+            "DibuatOleh": @Html.Raw(masterDermagaList.DibuatOleh.ToClientList(masterDermagaList)),
+            "TanggalDibuat": @Html.Raw(masterDermagaList.TanggalDibuat.ToClientList(masterDermagaList)),
+            "DiperbaruiOleh": @Html.Raw(masterDermagaList.DiperbaruiOleh.ToClientList(masterDermagaList)),
+            "TanggalDiperbarui": @Html.Raw(masterDermagaList.TanggalDiperbarui.ToClientList(masterDermagaList)),
+        })
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Write your client script here, no need to add script tags.
+});
+</script>
+}
+@if (!masterDermagaList.IsExport()) {
+<div class="btn-toolbar ew-toolbar">
+@if (masterDermagaList.TotalRecords > 0 && masterDermagaList.ExportOptions.Visible) {
+    masterDermagaList.ExportOptions.Render("body");
+}
+@if (masterDermagaList.ImportOptions.Visible) {
+    masterDermagaList.ImportOptions.Render("body");
+}
+@if (masterDermagaList.SearchOptions.Visible) {
+    masterDermagaList.SearchOptions.Render("body");
+}
+@if (masterDermagaList.FilterOptions.Visible) {
+    masterDermagaList.FilterOptions.Render("body");
+}
+</div>
+}
+@if (masterDermagaList.ShowCurrentFilter) {
+    masterDermagaList.ShowFilterList();
+}
+@if (!masterDermagaList.IsModal) {
+<form name="fMasterDermagasrch" id="fMasterDermagasrch" class="ew-form ew-ext-search-form" action="@AppPath(CurrentPageName())" novalidate autocomplete="off">
+<div id="fMasterDermagasrch_search_panel" class="mb-2 mb-sm-0 @(masterDermagaList.SearchPanelClass)"><!-- .ew-search-panel -->
+<script>
+var currentTable = @Html.Raw(ConvertToJson(masterDermagaList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { MasterDermaga: currentTable } });
+var currentForm;
+var fMasterDermagasrch, currentSearchForm, currentAdvancedSearchForm;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery,
+        fields = currentTable.fields;
+
+    // Form object for search
+    let form = new ew.FormBuilder()
+        .setId("fMasterDermagasrch")
+        .setPageId("list")
+@if (masterDermagaList.UseAjaxActions) {
+        <text>.setSubmitWithFetch(true)</text>
+}
+
+        // Add fields
+        .setFields([
+        ])
+        // Validate form
+        .setValidate(
+            async function () {
+                if (!this.validateRequired)
+                    return true; // Ignore validation
+                let fobj = this.getForm();
+
+                // Validate fields
+                if (!this.validateFields())
+                    return false;
+
+                // Call Form_CustomValidate event
+                if (!(await this.customValidate?.(fobj) ?? true)) {
+                    this.focus();
+                    return false;
+                }
+                return true;
+            }
+        )
+
+        // Form_CustomValidate
+        .setCustomValidate(
+            function(fobj) { // DO NOT CHANGE THIS LINE!
+                    // Your custom validation code here, return false if invalid.
+                    return true;
+                }
+        )
+
+        // Use JavaScript validation or not
+        .setValidateRequired(ew.CLIENT_VALIDATE)
+
+        // Dynamic selection lists
+        .setLists({
+            "Region": @Html.Raw(masterDermagaList.Region.ToClientList(masterDermagaList)),
+            "Id_Plant": @Html.Raw(masterDermagaList.Id_Plant.ToClientList(masterDermagaList)),
+            "Plant": @Html.Raw(masterDermagaList.Plant.ToClientList(masterDermagaList)),
+            "TBBM": @Html.Raw(masterDermagaList.TBBM.ToClientList(masterDermagaList)),
+            "Equipment_ID": @Html.Raw(masterDermagaList.Equipment_ID.ToClientList(masterDermagaList)),
+            "Fungsi": @Html.Raw(masterDermagaList.Fungsi.ToClientList(masterDermagaList)),
+            "Kapasitas_DWT": @Html.Raw(masterDermagaList.Kapasitas_DWT.ToClientList(masterDermagaList)),
+            "Kategori_Kapasitas": @Html.Raw(masterDermagaList.Kategori_Kapasitas.ToClientList(masterDermagaList)),
+            "Jenis_Sartam": @Html.Raw(masterDermagaList.Jenis_Sartam.ToClientList(masterDermagaList)),
+            "Type_Sartam": @Html.Raw(masterDermagaList.Type_Sartam.ToClientList(masterDermagaList)),
+            "Tahun_Pembuatan": @Html.Raw(masterDermagaList.Tahun_Pembuatan.ToClientList(masterDermagaList)),
+            "Kategori_Port": @Html.Raw(masterDermagaList.Kategori_Port.ToClientList(masterDermagaList)),
+            "DibuatOleh": @Html.Raw(masterDermagaList.DibuatOleh.ToClientList(masterDermagaList)),
+            "TanggalDibuat": @Html.Raw(masterDermagaList.TanggalDibuat.ToClientList(masterDermagaList)),
+            "DiperbaruiOleh": @Html.Raw(masterDermagaList.DiperbaruiOleh.ToClientList(masterDermagaList)),
+            "TanggalDiperbarui": @Html.Raw(masterDermagaList.TanggalDiperbarui.ToClientList(masterDermagaList)),
+        })
+
+        // Filters
+        .setFilterList(@Html.Raw(masterDermagaList.GetFilterList()))
+        .build();
+    window[form.id] = form;
+    currentSearchForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<input type="hidden" name="cmd" value="search">
+@if (Security.CanSearch) {
+if (!masterDermagaList.IsExport() && Empty(masterDermagaList.CurrentAction) && masterDermagaList.HasSearchFields()) { @* Show search form (begin) *@
+<div class="ew-extended-search container-fluid ps-2">
+<div class="row mb-0@(masterDermagaList.SearchFieldsPerRow > 0 ? " row-cols-sm-" + masterDermagaList.SearchFieldsPerRow : "")">
+@{
+    // Render search row
+    masterDermagaList.RowType = RowType.Search;
+    masterDermagaList.ResetAttributes();
+    await masterDermagaList.RenderRow();
+}
+@if (masterDermagaList.Region.Visible) { // masterDermagaList.Region.Visible (begin)
+    if (!masterDermagaList.Region.UseFilter) {
+        masterDermagaList.SearchColumnCount++;
+    }
+    <div id="xs_Region" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(masterDermagaList.Region.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_Region"
+            name="x_Region[]"
+            class="form-control ew-select@(masterDermagaList.Region.IsInvalidClass)"
+            data-select2-id="fMasterDermagasrch_x_Region"
+            data-table="MasterDermaga"
+            data-field="x_Region"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(masterDermagaList.Region.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(masterDermagaList.Region.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(masterDermagaList.Region.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(masterDermagaList.Region.EditAttributes)>
+            @(masterDermagaList.Region.SelectOptionListHtml("x_Region", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(masterDermagaList.Region.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMasterDermagasrch", function() {
+            var options = {
+                name: "x_Region",
+                selectId: "fMasterDermagasrch_x_Region",
+                ajax: { id: "x_Region", form: "fMasterDermagasrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MasterDermaga.fields.Region.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* masterDermagaList.Region.Visible (end) *@
+@if (masterDermagaList.Id_Plant.Visible) { // masterDermagaList.Id_Plant.Visible (begin)
+    if (!masterDermagaList.Id_Plant.UseFilter) {
+        masterDermagaList.SearchColumnCount++;
+    }
+    <div id="xs_Id_Plant" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(masterDermagaList.Id_Plant.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_Id_Plant"
+            name="x_Id_Plant[]"
+            class="form-control ew-select@(masterDermagaList.Id_Plant.IsInvalidClass)"
+            data-select2-id="fMasterDermagasrch_x_Id_Plant"
+            data-table="MasterDermaga"
+            data-field="x_Id_Plant"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(masterDermagaList.Id_Plant.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(masterDermagaList.Id_Plant.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(masterDermagaList.Id_Plant.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(masterDermagaList.Id_Plant.EditAttributes)>
+            @(masterDermagaList.Id_Plant.SelectOptionListHtml("x_Id_Plant", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(masterDermagaList.Id_Plant.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMasterDermagasrch", function() {
+            var options = {
+                name: "x_Id_Plant",
+                selectId: "fMasterDermagasrch_x_Id_Plant",
+                ajax: { id: "x_Id_Plant", form: "fMasterDermagasrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MasterDermaga.fields.Id_Plant.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* masterDermagaList.Id_Plant.Visible (end) *@
+@if (masterDermagaList.Plant.Visible) { // masterDermagaList.Plant.Visible (begin)
+    if (!masterDermagaList.Plant.UseFilter) {
+        masterDermagaList.SearchColumnCount++;
+    }
+    <div id="xs_Plant" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(masterDermagaList.Plant.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_Plant"
+            name="x_Plant[]"
+            class="form-control ew-select@(masterDermagaList.Plant.IsInvalidClass)"
+            data-select2-id="fMasterDermagasrch_x_Plant"
+            data-table="MasterDermaga"
+            data-field="x_Plant"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(masterDermagaList.Plant.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(masterDermagaList.Plant.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(masterDermagaList.Plant.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(masterDermagaList.Plant.EditAttributes)>
+            @(masterDermagaList.Plant.SelectOptionListHtml("x_Plant", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(masterDermagaList.Plant.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMasterDermagasrch", function() {
+            var options = {
+                name: "x_Plant",
+                selectId: "fMasterDermagasrch_x_Plant",
+                ajax: { id: "x_Plant", form: "fMasterDermagasrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MasterDermaga.fields.Plant.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* masterDermagaList.Plant.Visible (end) *@
+@if (masterDermagaList.TBBM.Visible) { // masterDermagaList.TBBM.Visible (begin)
+    if (!masterDermagaList.TBBM.UseFilter) {
+        masterDermagaList.SearchColumnCount++;
+    }
+    <div id="xs_TBBM" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(masterDermagaList.TBBM.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_TBBM"
+            name="x_TBBM[]"
+            class="form-control ew-select@(masterDermagaList.TBBM.IsInvalidClass)"
+            data-select2-id="fMasterDermagasrch_x_TBBM"
+            data-table="MasterDermaga"
+            data-field="x_TBBM"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(masterDermagaList.TBBM.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(masterDermagaList.TBBM.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(masterDermagaList.TBBM.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(masterDermagaList.TBBM.EditAttributes)>
+            @(masterDermagaList.TBBM.SelectOptionListHtml("x_TBBM", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(masterDermagaList.TBBM.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMasterDermagasrch", function() {
+            var options = {
+                name: "x_TBBM",
+                selectId: "fMasterDermagasrch_x_TBBM",
+                ajax: { id: "x_TBBM", form: "fMasterDermagasrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MasterDermaga.fields.TBBM.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* masterDermagaList.TBBM.Visible (end) *@
+@if (masterDermagaList.Equipment_ID.Visible) { // masterDermagaList.Equipment_ID.Visible (begin)
+    if (!masterDermagaList.Equipment_ID.UseFilter) {
+        masterDermagaList.SearchColumnCount++;
+    }
+    <div id="xs_Equipment_ID" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(masterDermagaList.Equipment_ID.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_Equipment_ID"
+            name="x_Equipment_ID[]"
+            class="form-control ew-select@(masterDermagaList.Equipment_ID.IsInvalidClass)"
+            data-select2-id="fMasterDermagasrch_x_Equipment_ID"
+            data-table="MasterDermaga"
+            data-field="x_Equipment_ID"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(masterDermagaList.Equipment_ID.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(masterDermagaList.Equipment_ID.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(masterDermagaList.Equipment_ID.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(masterDermagaList.Equipment_ID.EditAttributes)>
+            @(masterDermagaList.Equipment_ID.SelectOptionListHtml("x_Equipment_ID", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(masterDermagaList.Equipment_ID.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMasterDermagasrch", function() {
+            var options = {
+                name: "x_Equipment_ID",
+                selectId: "fMasterDermagasrch_x_Equipment_ID",
+                ajax: { id: "x_Equipment_ID", form: "fMasterDermagasrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MasterDermaga.fields.Equipment_ID.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* masterDermagaList.Equipment_ID.Visible (end) *@
+@if (masterDermagaList.Fungsi.Visible) { // masterDermagaList.Fungsi.Visible (begin)
+    if (!masterDermagaList.Fungsi.UseFilter) {
+        masterDermagaList.SearchColumnCount++;
+    }
+    <div id="xs_Fungsi" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(masterDermagaList.Fungsi.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_Fungsi"
+            name="x_Fungsi[]"
+            class="form-control ew-select@(masterDermagaList.Fungsi.IsInvalidClass)"
+            data-select2-id="fMasterDermagasrch_x_Fungsi"
+            data-table="MasterDermaga"
+            data-field="x_Fungsi"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(masterDermagaList.Fungsi.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(masterDermagaList.Fungsi.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(masterDermagaList.Fungsi.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(masterDermagaList.Fungsi.EditAttributes)>
+            @(masterDermagaList.Fungsi.SelectOptionListHtml("x_Fungsi", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(masterDermagaList.Fungsi.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMasterDermagasrch", function() {
+            var options = {
+                name: "x_Fungsi",
+                selectId: "fMasterDermagasrch_x_Fungsi",
+                ajax: { id: "x_Fungsi", form: "fMasterDermagasrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MasterDermaga.fields.Fungsi.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* masterDermagaList.Fungsi.Visible (end) *@
+@if (masterDermagaList.Kapasitas_DWT.Visible) { // masterDermagaList.Kapasitas_DWT.Visible (begin)
+    if (!masterDermagaList.Kapasitas_DWT.UseFilter) {
+        masterDermagaList.SearchColumnCount++;
+    }
+    <div id="xs_Kapasitas_DWT" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(masterDermagaList.Kapasitas_DWT.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_Kapasitas_DWT"
+            name="x_Kapasitas_DWT[]"
+            class="form-control ew-select@(masterDermagaList.Kapasitas_DWT.IsInvalidClass)"
+            data-select2-id="fMasterDermagasrch_x_Kapasitas_DWT"
+            data-table="MasterDermaga"
+            data-field="x_Kapasitas_DWT"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(masterDermagaList.Kapasitas_DWT.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(masterDermagaList.Kapasitas_DWT.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(masterDermagaList.Kapasitas_DWT.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(masterDermagaList.Kapasitas_DWT.EditAttributes)>
+            @(masterDermagaList.Kapasitas_DWT.SelectOptionListHtml("x_Kapasitas_DWT", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(masterDermagaList.Kapasitas_DWT.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMasterDermagasrch", function() {
+            var options = {
+                name: "x_Kapasitas_DWT",
+                selectId: "fMasterDermagasrch_x_Kapasitas_DWT",
+                ajax: { id: "x_Kapasitas_DWT", form: "fMasterDermagasrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MasterDermaga.fields.Kapasitas_DWT.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* masterDermagaList.Kapasitas_DWT.Visible (end) *@
+@if (masterDermagaList.Kategori_Kapasitas.Visible) { // masterDermagaList.Kategori_Kapasitas.Visible (begin)
+    if (!masterDermagaList.Kategori_Kapasitas.UseFilter) {
+        masterDermagaList.SearchColumnCount++;
+    }
+    <div id="xs_Kategori_Kapasitas" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(masterDermagaList.Kategori_Kapasitas.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_Kategori_Kapasitas"
+            name="x_Kategori_Kapasitas[]"
+            class="form-control ew-select@(masterDermagaList.Kategori_Kapasitas.IsInvalidClass)"
+            data-select2-id="fMasterDermagasrch_x_Kategori_Kapasitas"
+            data-table="MasterDermaga"
+            data-field="x_Kategori_Kapasitas"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(masterDermagaList.Kategori_Kapasitas.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(masterDermagaList.Kategori_Kapasitas.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(masterDermagaList.Kategori_Kapasitas.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(masterDermagaList.Kategori_Kapasitas.EditAttributes)>
+            @(masterDermagaList.Kategori_Kapasitas.SelectOptionListHtml("x_Kategori_Kapasitas", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(masterDermagaList.Kategori_Kapasitas.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMasterDermagasrch", function() {
+            var options = {
+                name: "x_Kategori_Kapasitas",
+                selectId: "fMasterDermagasrch_x_Kategori_Kapasitas",
+                ajax: { id: "x_Kategori_Kapasitas", form: "fMasterDermagasrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MasterDermaga.fields.Kategori_Kapasitas.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* masterDermagaList.Kategori_Kapasitas.Visible (end) *@
+@if (masterDermagaList.Jenis_Sartam.Visible) { // masterDermagaList.Jenis_Sartam.Visible (begin)
+    if (!masterDermagaList.Jenis_Sartam.UseFilter) {
+        masterDermagaList.SearchColumnCount++;
+    }
+    <div id="xs_Jenis_Sartam" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(masterDermagaList.Jenis_Sartam.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_Jenis_Sartam"
+            name="x_Jenis_Sartam[]"
+            class="form-control ew-select@(masterDermagaList.Jenis_Sartam.IsInvalidClass)"
+            data-select2-id="fMasterDermagasrch_x_Jenis_Sartam"
+            data-table="MasterDermaga"
+            data-field="x_Jenis_Sartam"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(masterDermagaList.Jenis_Sartam.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(masterDermagaList.Jenis_Sartam.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(masterDermagaList.Jenis_Sartam.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(masterDermagaList.Jenis_Sartam.EditAttributes)>
+            @(masterDermagaList.Jenis_Sartam.SelectOptionListHtml("x_Jenis_Sartam", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(masterDermagaList.Jenis_Sartam.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMasterDermagasrch", function() {
+            var options = {
+                name: "x_Jenis_Sartam",
+                selectId: "fMasterDermagasrch_x_Jenis_Sartam",
+                ajax: { id: "x_Jenis_Sartam", form: "fMasterDermagasrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MasterDermaga.fields.Jenis_Sartam.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* masterDermagaList.Jenis_Sartam.Visible (end) *@
+@if (masterDermagaList.Type_Sartam.Visible) { // masterDermagaList.Type_Sartam.Visible (begin)
+    if (!masterDermagaList.Type_Sartam.UseFilter) {
+        masterDermagaList.SearchColumnCount++;
+    }
+    <div id="xs_Type_Sartam" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(masterDermagaList.Type_Sartam.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_Type_Sartam"
+            name="x_Type_Sartam[]"
+            class="form-control ew-select@(masterDermagaList.Type_Sartam.IsInvalidClass)"
+            data-select2-id="fMasterDermagasrch_x_Type_Sartam"
+            data-table="MasterDermaga"
+            data-field="x_Type_Sartam"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(masterDermagaList.Type_Sartam.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(masterDermagaList.Type_Sartam.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(masterDermagaList.Type_Sartam.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(masterDermagaList.Type_Sartam.EditAttributes)>
+            @(masterDermagaList.Type_Sartam.SelectOptionListHtml("x_Type_Sartam", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(masterDermagaList.Type_Sartam.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMasterDermagasrch", function() {
+            var options = {
+                name: "x_Type_Sartam",
+                selectId: "fMasterDermagasrch_x_Type_Sartam",
+                ajax: { id: "x_Type_Sartam", form: "fMasterDermagasrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MasterDermaga.fields.Type_Sartam.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* masterDermagaList.Type_Sartam.Visible (end) *@
+@if (masterDermagaList.Tahun_Pembuatan.Visible) { // masterDermagaList.Tahun_Pembuatan.Visible (begin)
+    if (!masterDermagaList.Tahun_Pembuatan.UseFilter) {
+        masterDermagaList.SearchColumnCount++;
+    }
+    <div id="xs_Tahun_Pembuatan" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(masterDermagaList.Tahun_Pembuatan.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_Tahun_Pembuatan"
+            name="x_Tahun_Pembuatan[]"
+            class="form-control ew-select@(masterDermagaList.Tahun_Pembuatan.IsInvalidClass)"
+            data-select2-id="fMasterDermagasrch_x_Tahun_Pembuatan"
+            data-table="MasterDermaga"
+            data-field="x_Tahun_Pembuatan"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(masterDermagaList.Tahun_Pembuatan.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(masterDermagaList.Tahun_Pembuatan.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(masterDermagaList.Tahun_Pembuatan.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(masterDermagaList.Tahun_Pembuatan.EditAttributes)>
+            @(masterDermagaList.Tahun_Pembuatan.SelectOptionListHtml("x_Tahun_Pembuatan", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(masterDermagaList.Tahun_Pembuatan.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMasterDermagasrch", function() {
+            var options = {
+                name: "x_Tahun_Pembuatan",
+                selectId: "fMasterDermagasrch_x_Tahun_Pembuatan",
+                ajax: { id: "x_Tahun_Pembuatan", form: "fMasterDermagasrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MasterDermaga.fields.Tahun_Pembuatan.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* masterDermagaList.Tahun_Pembuatan.Visible (end) *@
+@if (masterDermagaList.Kategori_Port.Visible) { // masterDermagaList.Kategori_Port.Visible (begin)
+    if (!masterDermagaList.Kategori_Port.UseFilter) {
+        masterDermagaList.SearchColumnCount++;
+    }
+    <div id="xs_Kategori_Port" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(masterDermagaList.Kategori_Port.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_Kategori_Port"
+            name="x_Kategori_Port[]"
+            class="form-control ew-select@(masterDermagaList.Kategori_Port.IsInvalidClass)"
+            data-select2-id="fMasterDermagasrch_x_Kategori_Port"
+            data-table="MasterDermaga"
+            data-field="x_Kategori_Port"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(masterDermagaList.Kategori_Port.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(masterDermagaList.Kategori_Port.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(masterDermagaList.Kategori_Port.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(masterDermagaList.Kategori_Port.EditAttributes)>
+            @(masterDermagaList.Kategori_Port.SelectOptionListHtml("x_Kategori_Port", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(masterDermagaList.Kategori_Port.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMasterDermagasrch", function() {
+            var options = {
+                name: "x_Kategori_Port",
+                selectId: "fMasterDermagasrch_x_Kategori_Port",
+                ajax: { id: "x_Kategori_Port", form: "fMasterDermagasrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MasterDermaga.fields.Kategori_Port.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* masterDermagaList.Kategori_Port.Visible (end) *@
+@if (masterDermagaList.DibuatOleh.Visible) { // masterDermagaList.DibuatOleh.Visible (begin)
+    if (!masterDermagaList.DibuatOleh.UseFilter) {
+        masterDermagaList.SearchColumnCount++;
+    }
+    <div id="xs_DibuatOleh" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(masterDermagaList.DibuatOleh.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_DibuatOleh"
+            name="x_DibuatOleh[]"
+            class="form-control ew-select@(masterDermagaList.DibuatOleh.IsInvalidClass)"
+            data-select2-id="fMasterDermagasrch_x_DibuatOleh"
+            data-table="MasterDermaga"
+            data-field="x_DibuatOleh"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(masterDermagaList.DibuatOleh.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(masterDermagaList.DibuatOleh.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(masterDermagaList.DibuatOleh.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(masterDermagaList.DibuatOleh.EditAttributes)>
+            @(masterDermagaList.DibuatOleh.SelectOptionListHtml("x_DibuatOleh", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(masterDermagaList.DibuatOleh.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMasterDermagasrch", function() {
+            var options = {
+                name: "x_DibuatOleh",
+                selectId: "fMasterDermagasrch_x_DibuatOleh",
+                ajax: { id: "x_DibuatOleh", form: "fMasterDermagasrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MasterDermaga.fields.DibuatOleh.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* masterDermagaList.DibuatOleh.Visible (end) *@
+@if (masterDermagaList.TanggalDibuat.Visible) { // masterDermagaList.TanggalDibuat.Visible (begin)
+    if (!masterDermagaList.TanggalDibuat.UseFilter) {
+        masterDermagaList.SearchColumnCount++;
+    }
+    <div id="xs_TanggalDibuat" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(masterDermagaList.TanggalDibuat.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_TanggalDibuat"
+            name="x_TanggalDibuat[]"
+            class="form-control ew-select@(masterDermagaList.TanggalDibuat.IsInvalidClass)"
+            data-select2-id="fMasterDermagasrch_x_TanggalDibuat"
+            data-table="MasterDermaga"
+            data-field="x_TanggalDibuat"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(masterDermagaList.TanggalDibuat.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(masterDermagaList.TanggalDibuat.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(masterDermagaList.TanggalDibuat.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(masterDermagaList.TanggalDibuat.EditAttributes)>
+            @(masterDermagaList.TanggalDibuat.SelectOptionListHtml("x_TanggalDibuat", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(masterDermagaList.TanggalDibuat.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMasterDermagasrch", function() {
+            var options = {
+                name: "x_TanggalDibuat",
+                selectId: "fMasterDermagasrch_x_TanggalDibuat",
+                ajax: { id: "x_TanggalDibuat", form: "fMasterDermagasrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MasterDermaga.fields.TanggalDibuat.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* masterDermagaList.TanggalDibuat.Visible (end) *@
+@if (masterDermagaList.DiperbaruiOleh.Visible) { // masterDermagaList.DiperbaruiOleh.Visible (begin)
+    if (!masterDermagaList.DiperbaruiOleh.UseFilter) {
+        masterDermagaList.SearchColumnCount++;
+    }
+    <div id="xs_DiperbaruiOleh" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(masterDermagaList.DiperbaruiOleh.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_DiperbaruiOleh"
+            name="x_DiperbaruiOleh[]"
+            class="form-control ew-select@(masterDermagaList.DiperbaruiOleh.IsInvalidClass)"
+            data-select2-id="fMasterDermagasrch_x_DiperbaruiOleh"
+            data-table="MasterDermaga"
+            data-field="x_DiperbaruiOleh"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(masterDermagaList.DiperbaruiOleh.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(masterDermagaList.DiperbaruiOleh.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(masterDermagaList.DiperbaruiOleh.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(masterDermagaList.DiperbaruiOleh.EditAttributes)>
+            @(masterDermagaList.DiperbaruiOleh.SelectOptionListHtml("x_DiperbaruiOleh", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(masterDermagaList.DiperbaruiOleh.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMasterDermagasrch", function() {
+            var options = {
+                name: "x_DiperbaruiOleh",
+                selectId: "fMasterDermagasrch_x_DiperbaruiOleh",
+                ajax: { id: "x_DiperbaruiOleh", form: "fMasterDermagasrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MasterDermaga.fields.DiperbaruiOleh.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* masterDermagaList.DiperbaruiOleh.Visible (end) *@
+@if (masterDermagaList.TanggalDiperbarui.Visible) { // masterDermagaList.TanggalDiperbarui.Visible (begin)
+    if (!masterDermagaList.TanggalDiperbarui.UseFilter) {
+        masterDermagaList.SearchColumnCount++;
+    }
+    <div id="xs_TanggalDiperbarui" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(masterDermagaList.TanggalDiperbarui.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_TanggalDiperbarui"
+            name="x_TanggalDiperbarui[]"
+            class="form-control ew-select@(masterDermagaList.TanggalDiperbarui.IsInvalidClass)"
+            data-select2-id="fMasterDermagasrch_x_TanggalDiperbarui"
+            data-table="MasterDermaga"
+            data-field="x_TanggalDiperbarui"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(masterDermagaList.TanggalDiperbarui.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(masterDermagaList.TanggalDiperbarui.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(masterDermagaList.TanggalDiperbarui.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(masterDermagaList.TanggalDiperbarui.EditAttributes)>
+            @(masterDermagaList.TanggalDiperbarui.SelectOptionListHtml("x_TanggalDiperbarui", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(masterDermagaList.TanggalDiperbarui.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMasterDermagasrch", function() {
+            var options = {
+                name: "x_TanggalDiperbarui",
+                selectId: "fMasterDermagasrch_x_TanggalDiperbarui",
+                ajax: { id: "x_TanggalDiperbarui", form: "fMasterDermagasrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MasterDermaga.fields.TanggalDiperbarui.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* masterDermagaList.TanggalDiperbarui.Visible (end) *@
+</div><!-- /.row -->
+<div class="row mb-0">
+    <div class="col-sm-auto px-0 pe-sm-2">
+        <div class="ew-basic-search input-group">
+            <input type="search" name="@(Config.TableBasicSearch)" id="@(Config.TableBasicSearch)" class="form-control ew-basic-search-keyword" value="@Html.Raw(HtmlEncode(masterDermagaList.BasicSearch.SessionKeyword))" placeholder="@(HtmlEncode(Language.Phrase("Search")))" aria-label="@(HtmlEncode(Language.Phrase("Search")))">
+            <input type="hidden" name="@(Config.TableBasicSearchType)" id="@(Config.TableBasicSearchType)" class="ew-basic-search-type" value="@(HtmlEncode(masterDermagaList.BasicSearch.SessionType))">
+            <button type="button" data-bs-toggle="dropdown" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split" aria-haspopup="true" aria-expanded="false">
+                <span id="searchtype">@Html.Raw(masterDermagaList.BasicSearch.TypeNameShort)</span>
+            </button>
+            <div class="dropdown-menu dropdown-menu-end">
+                <button type="button" class="dropdown-item@(masterDermagaList.BasicSearch.SessionType == "" ? " active" : "")" form="fMasterDermagasrch" data-ew-action="search-type">@Html.Raw(Language.Phrase("QuickSearchAuto"))</button>
+                <button type="button" class="dropdown-item@(masterDermagaList.BasicSearch.SessionType == "=" ? " active" : "")" form="fMasterDermagasrch" data-ew-action="search-type" data-search-type="=">@Html.Raw(Language.Phrase("QuickSearchExact"))</button>
+                <button type="button" class="dropdown-item@(masterDermagaList.BasicSearch.SessionType == "AND" ? " active" : "")" form="fMasterDermagasrch" data-ew-action="search-type" data-search-type="AND">@Html.Raw(Language.Phrase("QuickSearchAll"))</button>
+                <button type="button" class="dropdown-item@(masterDermagaList.BasicSearch.SessionType == "OR" ? " active" : "")" form="fMasterDermagasrch" data-ew-action="search-type" data-search-type="OR">@Html.Raw(Language.Phrase("QuickSearchAny"))</button>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-auto mb-3">
+        <button class="btn btn-primary" name="btn-submit" id="btn-submit" type="submit">@Html.Raw(Language.Phrase("SearchBtn"))</button>
+    </div>
+</div>
+</div><!-- /.ew-extended-search -->
+} @* Show search form (end) *@
+}
+</div><!-- /.ew-search-panel -->
+</form>
+}
+@masterDermagaList.ShowPageHeader()
+@masterDermagaList.ShowMessages()
+<main class="list @(masterDermagaList.TotalRecords == 0 && !masterDermagaList.IsAdd ? " ew-no-record" : "")">
+<div id="ew-header-options">
+    @masterDermagaList.HeaderOptions.RenderBody()
+</div>
+<div id="ew-list">
+@if (masterDermagaList.TotalRecords > 0 || !Empty(masterDermagaList.CurrentAction)) {
+<div class="card ew-card ew-grid@(masterDermagaList.IsAddOrEdit ? " ew-grid-add-edit" : "") @(masterDermagaList.TableGridClass)">
+<form name="@(masterDermagaList.FormName)" id="@(masterDermagaList.FormName)" class="ew-form ew-list-form" action="@AppPath(masterDermagaList.PageName)" method="post" novalidate autocomplete="off">
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+@if (masterDermagaList.IsModal) {
+<input type="hidden" name="modal" value="1">
+}
+<div id="gmp_MasterDermaga" class="card-body ew-grid-middle-panel @(masterDermagaList.TableContainerClass)" style="@(masterDermagaList.TableContainerStyle)">
+@if (masterDermagaList.TotalRecords > 0 || masterDermagaList.IsGridEdit || masterDermagaList.IsMultiEdit) {
+<table id="tbl_MasterDermagalist" class="@(masterDermagaList.TableClass)"><!-- .ew-table -->
+<thead>
+    <tr class="ew-table-header">
+@{
+    // Header row
+    masterDermagaList.RowType = RowType.Header;
+
+    // Render list options
+    await masterDermagaList.RenderListOptions();
+}
+@* Render list options (header, left) *@
+@masterDermagaList.ListOptions.RenderHeader("left")
+@if (masterDermagaList.Region.Visible) { // masterDermagaList.Region.Visible (begin)
+        <th data-name="Region" class="@(masterDermagaList.Region.HeaderCellClass)"><div id="elh_MasterDermaga_Region" class="MasterDermaga_Region">@Html.Raw(masterDermagaList.RenderFieldHeader(masterDermagaList.Region))</div></th>
+} @* masterDermagaList.Region.Visible (end) *@
+@if (masterDermagaList.Id_Plant.Visible) { // masterDermagaList.Id_Plant.Visible (begin)
+        <th data-name="Id_Plant" class="@(masterDermagaList.Id_Plant.HeaderCellClass)"><div id="elh_MasterDermaga_Id_Plant" class="MasterDermaga_Id_Plant">@Html.Raw(masterDermagaList.RenderFieldHeader(masterDermagaList.Id_Plant))</div></th>
+} @* masterDermagaList.Id_Plant.Visible (end) *@
+@if (masterDermagaList.TBBM.Visible) { // masterDermagaList.TBBM.Visible (begin)
+        <th data-name="TBBM" class="@(masterDermagaList.TBBM.HeaderCellClass)"><div id="elh_MasterDermaga_TBBM" class="MasterDermaga_TBBM">@Html.Raw(masterDermagaList.RenderFieldHeader(masterDermagaList.TBBM))</div></th>
+} @* masterDermagaList.TBBM.Visible (end) *@
+@if (masterDermagaList.Equipment_ID.Visible) { // masterDermagaList.Equipment_ID.Visible (begin)
+        <th data-name="Equipment_ID" class="@(masterDermagaList.Equipment_ID.HeaderCellClass)"><div id="elh_MasterDermaga_Equipment_ID" class="MasterDermaga_Equipment_ID">@Html.Raw(masterDermagaList.RenderFieldHeader(masterDermagaList.Equipment_ID))</div></th>
+} @* masterDermagaList.Equipment_ID.Visible (end) *@
+@if (masterDermagaList.Fungsi.Visible) { // masterDermagaList.Fungsi.Visible (begin)
+        <th data-name="Fungsi" class="@(masterDermagaList.Fungsi.HeaderCellClass)"><div id="elh_MasterDermaga_Fungsi" class="MasterDermaga_Fungsi">@Html.Raw(masterDermagaList.RenderFieldHeader(masterDermagaList.Fungsi))</div></th>
+} @* masterDermagaList.Fungsi.Visible (end) *@
+@if (masterDermagaList.Kapasitas_DWT.Visible) { // masterDermagaList.Kapasitas_DWT.Visible (begin)
+        <th data-name="Kapasitas_DWT" class="@(masterDermagaList.Kapasitas_DWT.HeaderCellClass)"><div id="elh_MasterDermaga_Kapasitas_DWT" class="MasterDermaga_Kapasitas_DWT">@Html.Raw(masterDermagaList.RenderFieldHeader(masterDermagaList.Kapasitas_DWT))</div></th>
+} @* masterDermagaList.Kapasitas_DWT.Visible (end) *@
+@if (masterDermagaList.Kategori_Kapasitas.Visible) { // masterDermagaList.Kategori_Kapasitas.Visible (begin)
+        <th data-name="Kategori_Kapasitas" class="@(masterDermagaList.Kategori_Kapasitas.HeaderCellClass)"><div id="elh_MasterDermaga_Kategori_Kapasitas" class="MasterDermaga_Kategori_Kapasitas">@Html.Raw(masterDermagaList.RenderFieldHeader(masterDermagaList.Kategori_Kapasitas))</div></th>
+} @* masterDermagaList.Kategori_Kapasitas.Visible (end) *@
+@if (masterDermagaList.Jenis_Sartam.Visible) { // masterDermagaList.Jenis_Sartam.Visible (begin)
+        <th data-name="Jenis_Sartam" class="@(masterDermagaList.Jenis_Sartam.HeaderCellClass)"><div id="elh_MasterDermaga_Jenis_Sartam" class="MasterDermaga_Jenis_Sartam">@Html.Raw(masterDermagaList.RenderFieldHeader(masterDermagaList.Jenis_Sartam))</div></th>
+} @* masterDermagaList.Jenis_Sartam.Visible (end) *@
+@if (masterDermagaList.Type_Sartam.Visible) { // masterDermagaList.Type_Sartam.Visible (begin)
+        <th data-name="Type_Sartam" class="@(masterDermagaList.Type_Sartam.HeaderCellClass)"><div id="elh_MasterDermaga_Type_Sartam" class="MasterDermaga_Type_Sartam">@Html.Raw(masterDermagaList.RenderFieldHeader(masterDermagaList.Type_Sartam))</div></th>
+} @* masterDermagaList.Type_Sartam.Visible (end) *@
+@if (masterDermagaList.Tahun_Pembuatan.Visible) { // masterDermagaList.Tahun_Pembuatan.Visible (begin)
+        <th data-name="Tahun_Pembuatan" class="@(masterDermagaList.Tahun_Pembuatan.HeaderCellClass)"><div id="elh_MasterDermaga_Tahun_Pembuatan" class="MasterDermaga_Tahun_Pembuatan">@Html.Raw(masterDermagaList.RenderFieldHeader(masterDermagaList.Tahun_Pembuatan))</div></th>
+} @* masterDermagaList.Tahun_Pembuatan.Visible (end) *@
+@if (masterDermagaList.Kategori_Port.Visible) { // masterDermagaList.Kategori_Port.Visible (begin)
+        <th data-name="Kategori_Port" class="@(masterDermagaList.Kategori_Port.HeaderCellClass)"><div id="elh_MasterDermaga_Kategori_Port" class="MasterDermaga_Kategori_Port">@Html.Raw(masterDermagaList.RenderFieldHeader(masterDermagaList.Kategori_Port))</div></th>
+} @* masterDermagaList.Kategori_Port.Visible (end) *@
+@if (masterDermagaList.DibuatOleh.Visible) { // masterDermagaList.DibuatOleh.Visible (begin)
+        <th data-name="DibuatOleh" class="@(masterDermagaList.DibuatOleh.HeaderCellClass)"><div id="elh_MasterDermaga_DibuatOleh" class="MasterDermaga_DibuatOleh">@Html.Raw(masterDermagaList.RenderFieldHeader(masterDermagaList.DibuatOleh))</div></th>
+} @* masterDermagaList.DibuatOleh.Visible (end) *@
+@if (masterDermagaList.TanggalDibuat.Visible) { // masterDermagaList.TanggalDibuat.Visible (begin)
+        <th data-name="TanggalDibuat" class="@(masterDermagaList.TanggalDibuat.HeaderCellClass)"><div id="elh_MasterDermaga_TanggalDibuat" class="MasterDermaga_TanggalDibuat">@Html.Raw(masterDermagaList.RenderFieldHeader(masterDermagaList.TanggalDibuat))</div></th>
+} @* masterDermagaList.TanggalDibuat.Visible (end) *@
+@if (masterDermagaList.DiperbaruiOleh.Visible) { // masterDermagaList.DiperbaruiOleh.Visible (begin)
+        <th data-name="DiperbaruiOleh" class="@(masterDermagaList.DiperbaruiOleh.HeaderCellClass)"><div id="elh_MasterDermaga_DiperbaruiOleh" class="MasterDermaga_DiperbaruiOleh">@Html.Raw(masterDermagaList.RenderFieldHeader(masterDermagaList.DiperbaruiOleh))</div></th>
+} @* masterDermagaList.DiperbaruiOleh.Visible (end) *@
+@if (masterDermagaList.TanggalDiperbarui.Visible) { // masterDermagaList.TanggalDiperbarui.Visible (begin)
+        <th data-name="TanggalDiperbarui" class="@(masterDermagaList.TanggalDiperbarui.HeaderCellClass)"><div id="elh_MasterDermaga_TanggalDiperbarui" class="MasterDermaga_TanggalDiperbarui">@Html.Raw(masterDermagaList.RenderFieldHeader(masterDermagaList.TanggalDiperbarui))</div></th>
+} @* masterDermagaList.TanggalDiperbarui.Visible (end) *@
+@* Render list options (header, right) *@
+@masterDermagaList.ListOptions.RenderHeader("right")
+    </tr>
+</thead>
+<tbody data-page="@(masterDermagaList.PageNumber)">
+@{
+    await masterDermagaList.SetupGrid();
+    bool eof = masterDermagaList.Recordset == null; // DN
+}
+@while (masterDermagaList.RecordCount < masterDermagaList.StopRecord || SameString(masterDermagaList.RowIndex, "$rowindex$")) { // Begin While
+    if (!eof && !SameString(masterDermagaList.RowIndex, "$rowindex$") &&
+        (!masterDermagaList.IsGridAdd || masterDermagaList.CurrentMode == "copy") &&
+        (!((masterDermagaList.IsCopy || masterDermagaList.IsAdd) && masterDermagaList.RowIndex is int rowIndex && rowIndex == 0))) // DN
+        eof = !await masterDermagaList.Recordset.ReadAsync();
+    masterDermagaList.RecordCount++;
+    if (masterDermagaList.RecordCount >= masterDermagaList.StartRecord) {
+        await masterDermagaList.SetupRow();
+    <tr @Html.Raw(masterDermagaList.RowAttributes)>
+    @* Render list options (body, left) *@
+    @masterDermagaList.ListOptions.RenderBody("left", masterDermagaList.RowCount)
+    @if (masterDermagaList.Region.Visible) { // masterDermagaList.Region.Visible (begin)
+        <td data-name="Region" @Html.Raw(masterDermagaList.Region.CellAttributes)>
+<span id="el@(masterDermagaList.RowIndex == "$rowindex$" ? "$rowindex$" : masterDermagaList.RowCount)_MasterDermaga_Region" class="el_MasterDermaga_Region">
+<span @Html.Raw(masterDermagaList.Region.ViewAttributes)>
+@Html.Raw(masterDermagaList.Region.GetViewValue())</span>
+</span>
+</td>
+    } @* masterDermagaList.Region.Visible (end) *@
+    @if (masterDermagaList.Id_Plant.Visible) { // masterDermagaList.Id_Plant.Visible (begin)
+        <td data-name="Id_Plant" @Html.Raw(masterDermagaList.Id_Plant.CellAttributes)>
+<span id="el@(masterDermagaList.RowIndex == "$rowindex$" ? "$rowindex$" : masterDermagaList.RowCount)_MasterDermaga_Id_Plant" class="el_MasterDermaga_Id_Plant">
+<span @Html.Raw(masterDermagaList.Id_Plant.ViewAttributes)>
+@Html.Raw(masterDermagaList.Id_Plant.GetViewValue())</span>
+</span>
+</td>
+    } @* masterDermagaList.Id_Plant.Visible (end) *@
+    @if (masterDermagaList.TBBM.Visible) { // masterDermagaList.TBBM.Visible (begin)
+        <td data-name="TBBM" @Html.Raw(masterDermagaList.TBBM.CellAttributes)>
+<span id="el@(masterDermagaList.RowIndex == "$rowindex$" ? "$rowindex$" : masterDermagaList.RowCount)_MasterDermaga_TBBM" class="el_MasterDermaga_TBBM">
+<span @Html.Raw(masterDermagaList.TBBM.ViewAttributes)>
+@Html.Raw(masterDermagaList.TBBM.GetViewValue())</span>
+</span>
+</td>
+    } @* masterDermagaList.TBBM.Visible (end) *@
+    @if (masterDermagaList.Equipment_ID.Visible) { // masterDermagaList.Equipment_ID.Visible (begin)
+        <td data-name="Equipment_ID" @Html.Raw(masterDermagaList.Equipment_ID.CellAttributes)>
+<span id="el@(masterDermagaList.RowIndex == "$rowindex$" ? "$rowindex$" : masterDermagaList.RowCount)_MasterDermaga_Equipment_ID" class="el_MasterDermaga_Equipment_ID">
+<span @Html.Raw(masterDermagaList.Equipment_ID.ViewAttributes)>
+@Html.Raw(masterDermagaList.Equipment_ID.GetViewValue())</span>
+</span>
+</td>
+    } @* masterDermagaList.Equipment_ID.Visible (end) *@
+    @if (masterDermagaList.Fungsi.Visible) { // masterDermagaList.Fungsi.Visible (begin)
+        <td data-name="Fungsi" @Html.Raw(masterDermagaList.Fungsi.CellAttributes)>
+<span id="el@(masterDermagaList.RowIndex == "$rowindex$" ? "$rowindex$" : masterDermagaList.RowCount)_MasterDermaga_Fungsi" class="el_MasterDermaga_Fungsi">
+<span @Html.Raw(masterDermagaList.Fungsi.ViewAttributes)>
+@Html.Raw(masterDermagaList.Fungsi.GetViewValue())</span>
+</span>
+</td>
+    } @* masterDermagaList.Fungsi.Visible (end) *@
+    @if (masterDermagaList.Kapasitas_DWT.Visible) { // masterDermagaList.Kapasitas_DWT.Visible (begin)
+        <td data-name="Kapasitas_DWT" @Html.Raw(masterDermagaList.Kapasitas_DWT.CellAttributes)>
+<span id="el@(masterDermagaList.RowIndex == "$rowindex$" ? "$rowindex$" : masterDermagaList.RowCount)_MasterDermaga_Kapasitas_DWT" class="el_MasterDermaga_Kapasitas_DWT">
+<span @Html.Raw(masterDermagaList.Kapasitas_DWT.ViewAttributes)>
+@Html.Raw(masterDermagaList.Kapasitas_DWT.GetViewValue())</span>
+</span>
+</td>
+    } @* masterDermagaList.Kapasitas_DWT.Visible (end) *@
+    @if (masterDermagaList.Kategori_Kapasitas.Visible) { // masterDermagaList.Kategori_Kapasitas.Visible (begin)
+        <td data-name="Kategori_Kapasitas" @Html.Raw(masterDermagaList.Kategori_Kapasitas.CellAttributes)>
+<span id="el@(masterDermagaList.RowIndex == "$rowindex$" ? "$rowindex$" : masterDermagaList.RowCount)_MasterDermaga_Kategori_Kapasitas" class="el_MasterDermaga_Kategori_Kapasitas">
+<span @Html.Raw(masterDermagaList.Kategori_Kapasitas.ViewAttributes)>
+@Html.Raw(masterDermagaList.Kategori_Kapasitas.GetViewValue())</span>
+</span>
+</td>
+    } @* masterDermagaList.Kategori_Kapasitas.Visible (end) *@
+    @if (masterDermagaList.Jenis_Sartam.Visible) { // masterDermagaList.Jenis_Sartam.Visible (begin)
+        <td data-name="Jenis_Sartam" @Html.Raw(masterDermagaList.Jenis_Sartam.CellAttributes)>
+<span id="el@(masterDermagaList.RowIndex == "$rowindex$" ? "$rowindex$" : masterDermagaList.RowCount)_MasterDermaga_Jenis_Sartam" class="el_MasterDermaga_Jenis_Sartam">
+<span @Html.Raw(masterDermagaList.Jenis_Sartam.ViewAttributes)>
+@Html.Raw(masterDermagaList.Jenis_Sartam.GetViewValue())</span>
+</span>
+</td>
+    } @* masterDermagaList.Jenis_Sartam.Visible (end) *@
+    @if (masterDermagaList.Type_Sartam.Visible) { // masterDermagaList.Type_Sartam.Visible (begin)
+        <td data-name="Type_Sartam" @Html.Raw(masterDermagaList.Type_Sartam.CellAttributes)>
+<span id="el@(masterDermagaList.RowIndex == "$rowindex$" ? "$rowindex$" : masterDermagaList.RowCount)_MasterDermaga_Type_Sartam" class="el_MasterDermaga_Type_Sartam">
+<span @Html.Raw(masterDermagaList.Type_Sartam.ViewAttributes)>
+@Html.Raw(masterDermagaList.Type_Sartam.GetViewValue())</span>
+</span>
+</td>
+    } @* masterDermagaList.Type_Sartam.Visible (end) *@
+    @if (masterDermagaList.Tahun_Pembuatan.Visible) { // masterDermagaList.Tahun_Pembuatan.Visible (begin)
+        <td data-name="Tahun_Pembuatan" @Html.Raw(masterDermagaList.Tahun_Pembuatan.CellAttributes)>
+<span id="el@(masterDermagaList.RowIndex == "$rowindex$" ? "$rowindex$" : masterDermagaList.RowCount)_MasterDermaga_Tahun_Pembuatan" class="el_MasterDermaga_Tahun_Pembuatan">
+<span @Html.Raw(masterDermagaList.Tahun_Pembuatan.ViewAttributes)>
+@Html.Raw(masterDermagaList.Tahun_Pembuatan.GetViewValue())</span>
+</span>
+</td>
+    } @* masterDermagaList.Tahun_Pembuatan.Visible (end) *@
+    @if (masterDermagaList.Kategori_Port.Visible) { // masterDermagaList.Kategori_Port.Visible (begin)
+        <td data-name="Kategori_Port" @Html.Raw(masterDermagaList.Kategori_Port.CellAttributes)>
+<span id="el@(masterDermagaList.RowIndex == "$rowindex$" ? "$rowindex$" : masterDermagaList.RowCount)_MasterDermaga_Kategori_Port" class="el_MasterDermaga_Kategori_Port">
+<span @Html.Raw(masterDermagaList.Kategori_Port.ViewAttributes)>
+@Html.Raw(masterDermagaList.Kategori_Port.GetViewValue())</span>
+</span>
+</td>
+    } @* masterDermagaList.Kategori_Port.Visible (end) *@
+    @if (masterDermagaList.DibuatOleh.Visible) { // masterDermagaList.DibuatOleh.Visible (begin)
+        <td data-name="DibuatOleh" @Html.Raw(masterDermagaList.DibuatOleh.CellAttributes)>
+<span id="el@(masterDermagaList.RowIndex == "$rowindex$" ? "$rowindex$" : masterDermagaList.RowCount)_MasterDermaga_DibuatOleh" class="el_MasterDermaga_DibuatOleh">
+<span @Html.Raw(masterDermagaList.DibuatOleh.ViewAttributes)>
+@Html.Raw(masterDermagaList.DibuatOleh.GetViewValue())</span>
+</span>
+</td>
+    } @* masterDermagaList.DibuatOleh.Visible (end) *@
+    @if (masterDermagaList.TanggalDibuat.Visible) { // masterDermagaList.TanggalDibuat.Visible (begin)
+        <td data-name="TanggalDibuat" @Html.Raw(masterDermagaList.TanggalDibuat.CellAttributes)>
+<span id="el@(masterDermagaList.RowIndex == "$rowindex$" ? "$rowindex$" : masterDermagaList.RowCount)_MasterDermaga_TanggalDibuat" class="el_MasterDermaga_TanggalDibuat">
+<span @Html.Raw(masterDermagaList.TanggalDibuat.ViewAttributes)>
+@Html.Raw(masterDermagaList.TanggalDibuat.GetViewValue())</span>
+</span>
+</td>
+    } @* masterDermagaList.TanggalDibuat.Visible (end) *@
+    @if (masterDermagaList.DiperbaruiOleh.Visible) { // masterDermagaList.DiperbaruiOleh.Visible (begin)
+        <td data-name="DiperbaruiOleh" @Html.Raw(masterDermagaList.DiperbaruiOleh.CellAttributes)>
+<span id="el@(masterDermagaList.RowIndex == "$rowindex$" ? "$rowindex$" : masterDermagaList.RowCount)_MasterDermaga_DiperbaruiOleh" class="el_MasterDermaga_DiperbaruiOleh">
+<span @Html.Raw(masterDermagaList.DiperbaruiOleh.ViewAttributes)>
+@Html.Raw(masterDermagaList.DiperbaruiOleh.GetViewValue())</span>
+</span>
+</td>
+    } @* masterDermagaList.DiperbaruiOleh.Visible (end) *@
+    @if (masterDermagaList.TanggalDiperbarui.Visible) { // masterDermagaList.TanggalDiperbarui.Visible (begin)
+        <td data-name="TanggalDiperbarui" @Html.Raw(masterDermagaList.TanggalDiperbarui.CellAttributes)>
+<span id="el@(masterDermagaList.RowIndex == "$rowindex$" ? "$rowindex$" : masterDermagaList.RowCount)_MasterDermaga_TanggalDiperbarui" class="el_MasterDermaga_TanggalDiperbarui">
+<span @Html.Raw(masterDermagaList.TanggalDiperbarui.ViewAttributes)>
+@Html.Raw(masterDermagaList.TanggalDiperbarui.GetViewValue())</span>
+</span>
+</td>
+    } @* masterDermagaList.TanggalDiperbarui.Visible (end) *@
+    @* Render list options (body, right) *@
+    @masterDermagaList.ListOptions.RenderBody("right", masterDermagaList.RowCount)
+    </tr>
+    } @* End if *@
+
+    // Reset for template row
+    if (SameString(masterDermagaList.RowIndex, "$rowindex$"))
+        masterDermagaList.RowIndex = 0;
+
+    // Reset inline add/copy row
+    if ((masterDermagaList.IsCopy || masterDermagaList.IsAdd) && masterDermagaList.RowIndex is int rowIndex2 && rowIndex2 == 0)
+        masterDermagaList.RowIndex = 1;
+} @* End While *@
+</tbody>
+</table><!-- /.ew-table -->
+} @* End If TotalRecords > 0 *@
+</div><!-- /.ew-grid-middle-panel -->
+@if (Empty(masterDermagaList.CurrentAction) && !masterDermagaList.UseAjaxActions) {
+<input type="hidden" name="action" id="action" value="">
+}
+</form><!-- /.ew-list-form -->
+@{ masterDermagaList.CloseRecordset(); }
+@if (!masterDermagaList.IsExport()) {
+<div class="card-footer ew-grid-lower-panel">
+@if (!masterDermagaList.IsGridAdd && !(masterDermagaList.IsGridEdit && masterDermagaList.ModalGridEdit) && !masterDermagaList.IsMultiEdit) {
+@Html.Raw(masterDermagaList.Pager.Render())
+}
+<div class="ew-list-other-options">
+@masterDermagaList.OtherOptions.RenderBody("bottom")
+</div>
+</div>
+}
+</div><!-- /.ew-grid -->
+} else { // Show other options
+<div class="ew-list-other-options">
+@masterDermagaList.OtherOptions.ForEach(opt => opt.ButtonClass = "").RenderBody()
+</div>
+}
+</div>
+<div id="ew-footer-options">
+    @masterDermagaList.FooterOptions.RenderBody()
+</div>
+</main>
+@masterDermagaList.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+@if (!masterDermagaList.IsExport()) {
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("MasterDermaga");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Write your table-specific startup script here
+    // document.write("page loaded");
+});
+</script>
+}

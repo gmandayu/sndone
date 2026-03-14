@@ -1,0 +1,383 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (subAktivitasDataKapalLpgList.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = subAktivitasDataKapalLpgList.UseLayout ? "_Layout" : "";
+}
+@if (!subAktivitasDataKapalLpgList.IsExport()) {
+<script>
+var currentTable = @Html.Raw(ConvertToJson(subAktivitasDataKapalLpgList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { SubAktivitasDataKapalLPG: currentTable } });
+var currentPageID = ew.PAGE_ID = "list";
+var currentForm;
+var @(subAktivitasDataKapalLpgList.FormName);
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("@(subAktivitasDataKapalLpgList.FormName)")
+        .setPageId("list")
+        .setSubmitWithFetch(@(subAktivitasDataKapalLpgList.UseAjaxActions ? "true" : "false"))
+        .setFormKeyCountName("@(subAktivitasDataKapalLpgList.FormKeyCountName)")
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Write your client script here, no need to add script tags.
+});
+</script>
+}
+@if (!subAktivitasDataKapalLpgList.IsExport()) {
+<div class="btn-toolbar ew-toolbar">
+@if (subAktivitasDataKapalLpgList.TotalRecords > 0 && subAktivitasDataKapalLpgList.ExportOptions.Visible) {
+    subAktivitasDataKapalLpgList.ExportOptions.Render("body");
+}
+@if (subAktivitasDataKapalLpgList.ImportOptions.Visible) {
+    subAktivitasDataKapalLpgList.ImportOptions.Render("body");
+}
+@if (subAktivitasDataKapalLpgList.SearchOptions.Visible) {
+    subAktivitasDataKapalLpgList.SearchOptions.Render("body");
+}
+@if (subAktivitasDataKapalLpgList.FilterOptions.Visible) {
+    subAktivitasDataKapalLpgList.FilterOptions.Render("body");
+}
+</div>
+}
+@if (!subAktivitasDataKapalLpgList.IsModal) {
+<form name="fSubAktivitasDataKapalLPGsrch" id="fSubAktivitasDataKapalLPGsrch" class="ew-form ew-ext-search-form" action="@AppPath(CurrentPageName())" novalidate autocomplete="off">
+<div id="fSubAktivitasDataKapalLPGsrch_search_panel" class="mb-2 mb-sm-0 @(subAktivitasDataKapalLpgList.SearchPanelClass)"><!-- .ew-search-panel -->
+<script>
+var currentTable = @Html.Raw(ConvertToJson(subAktivitasDataKapalLpgList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { SubAktivitasDataKapalLPG: currentTable } });
+var currentForm;
+var fSubAktivitasDataKapalLPGsrch, currentSearchForm, currentAdvancedSearchForm;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery,
+        fields = currentTable.fields;
+
+    // Form object for search
+    let form = new ew.FormBuilder()
+        .setId("fSubAktivitasDataKapalLPGsrch")
+        .setPageId("list")
+@if (subAktivitasDataKapalLpgList.UseAjaxActions) {
+        <text>.setSubmitWithFetch(true)</text>
+}
+
+        // Dynamic selection lists
+        .setLists({
+        })
+
+        // Filters
+        .setFilterList(@Html.Raw(subAktivitasDataKapalLpgList.GetFilterList()))
+        .build();
+    window[form.id] = form;
+    currentSearchForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<input type="hidden" name="cmd" value="search">
+@if (Security.CanSearch) {
+if (!subAktivitasDataKapalLpgList.IsExport() && Empty(subAktivitasDataKapalLpgList.CurrentAction) && subAktivitasDataKapalLpgList.HasSearchFields()) { @* Show search form (begin) *@
+<div class="ew-extended-search container-fluid ps-2">
+<div class="row mb-0">
+    <div class="col-sm-auto px-0 pe-sm-2">
+        <div class="ew-basic-search input-group">
+            <input type="search" name="@(Config.TableBasicSearch)" id="@(Config.TableBasicSearch)" class="form-control ew-basic-search-keyword" value="@Html.Raw(HtmlEncode(subAktivitasDataKapalLpgList.BasicSearch.SessionKeyword))" placeholder="@(HtmlEncode(Language.Phrase("Search")))" aria-label="@(HtmlEncode(Language.Phrase("Search")))">
+            <input type="hidden" name="@(Config.TableBasicSearchType)" id="@(Config.TableBasicSearchType)" class="ew-basic-search-type" value="@(HtmlEncode(subAktivitasDataKapalLpgList.BasicSearch.SessionType))">
+            <button type="button" data-bs-toggle="dropdown" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split" aria-haspopup="true" aria-expanded="false">
+                <span id="searchtype">@Html.Raw(subAktivitasDataKapalLpgList.BasicSearch.TypeNameShort)</span>
+            </button>
+            <div class="dropdown-menu dropdown-menu-end">
+                <button type="button" class="dropdown-item@(subAktivitasDataKapalLpgList.BasicSearch.SessionType == "" ? " active" : "")" form="fSubAktivitasDataKapalLPGsrch" data-ew-action="search-type">@Html.Raw(Language.Phrase("QuickSearchAuto"))</button>
+                <button type="button" class="dropdown-item@(subAktivitasDataKapalLpgList.BasicSearch.SessionType == "=" ? " active" : "")" form="fSubAktivitasDataKapalLPGsrch" data-ew-action="search-type" data-search-type="=">@Html.Raw(Language.Phrase("QuickSearchExact"))</button>
+                <button type="button" class="dropdown-item@(subAktivitasDataKapalLpgList.BasicSearch.SessionType == "AND" ? " active" : "")" form="fSubAktivitasDataKapalLPGsrch" data-ew-action="search-type" data-search-type="AND">@Html.Raw(Language.Phrase("QuickSearchAll"))</button>
+                <button type="button" class="dropdown-item@(subAktivitasDataKapalLpgList.BasicSearch.SessionType == "OR" ? " active" : "")" form="fSubAktivitasDataKapalLPGsrch" data-ew-action="search-type" data-search-type="OR">@Html.Raw(Language.Phrase("QuickSearchAny"))</button>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-auto mb-3">
+        <button class="btn btn-primary" name="btn-submit" id="btn-submit" type="submit">@Html.Raw(Language.Phrase("SearchBtn"))</button>
+    </div>
+</div>
+</div><!-- /.ew-extended-search -->
+} @* Show search form (end) *@
+}
+</div><!-- /.ew-search-panel -->
+</form>
+}
+@subAktivitasDataKapalLpgList.ShowPageHeader()
+@subAktivitasDataKapalLpgList.ShowMessages()
+<main class="list @(subAktivitasDataKapalLpgList.TotalRecords == 0 && !subAktivitasDataKapalLpgList.IsAdd ? " ew-no-record" : "")">
+<div id="ew-header-options">
+    @subAktivitasDataKapalLpgList.HeaderOptions.RenderBody()
+</div>
+<div id="ew-list">
+@if (subAktivitasDataKapalLpgList.TotalRecords > 0 || !Empty(subAktivitasDataKapalLpgList.CurrentAction)) {
+<div class="card ew-card ew-grid@(subAktivitasDataKapalLpgList.IsAddOrEdit ? " ew-grid-add-edit" : "") @(subAktivitasDataKapalLpgList.TableGridClass)">
+<form name="@(subAktivitasDataKapalLpgList.FormName)" id="@(subAktivitasDataKapalLpgList.FormName)" class="ew-form ew-list-form" action="@AppPath(subAktivitasDataKapalLpgList.PageName)" method="post" novalidate autocomplete="off">
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+@if (subAktivitasDataKapalLpgList.IsModal) {
+<input type="hidden" name="modal" value="1">
+}
+<div id="gmp_SubAktivitasDataKapalLPG" class="card-body ew-grid-middle-panel @(subAktivitasDataKapalLpgList.TableContainerClass)" style="@(subAktivitasDataKapalLpgList.TableContainerStyle)">
+@if (subAktivitasDataKapalLpgList.TotalRecords > 0 || subAktivitasDataKapalLpgList.IsGridEdit || subAktivitasDataKapalLpgList.IsMultiEdit) {
+<table id="tbl_SubAktivitasDataKapalLPGlist" class="@(subAktivitasDataKapalLpgList.TableClass)"><!-- .ew-table -->
+<thead>
+    <tr class="ew-table-header">
+@{
+    // Header row
+    subAktivitasDataKapalLpgList.RowType = RowType.Header;
+
+    // Render list options
+    await subAktivitasDataKapalLpgList.RenderListOptions();
+}
+@* Render list options (header, left) *@
+@subAktivitasDataKapalLpgList.ListOptions.RenderHeader("left")
+@if (subAktivitasDataKapalLpgList.id.Visible) { // subAktivitasDataKapalLpgList.id.Visible (begin)
+        <th data-name="id" class="@(subAktivitasDataKapalLpgList.id.HeaderCellClass)"><div id="elh_SubAktivitasDataKapalLPG_id" class="SubAktivitasDataKapalLPG_id">@Html.Raw(subAktivitasDataKapalLpgList.RenderFieldHeader(subAktivitasDataKapalLpgList.id))</div></th>
+} @* subAktivitasDataKapalLpgList.id.Visible (end) *@
+@if (subAktivitasDataKapalLpgList.NoReferensi.Visible) { // subAktivitasDataKapalLpgList.NoReferensi.Visible (begin)
+        <th data-name="NoReferensi" class="@(subAktivitasDataKapalLpgList.NoReferensi.HeaderCellClass)"><div id="elh_SubAktivitasDataKapalLPG_NoReferensi" class="SubAktivitasDataKapalLPG_NoReferensi">@Html.Raw(subAktivitasDataKapalLpgList.RenderFieldHeader(subAktivitasDataKapalLpgList.NoReferensi))</div></th>
+} @* subAktivitasDataKapalLpgList.NoReferensi.Visible (end) *@
+@if (subAktivitasDataKapalLpgList.idProses.Visible) { // subAktivitasDataKapalLpgList.idProses.Visible (begin)
+        <th data-name="idProses" class="@(subAktivitasDataKapalLpgList.idProses.HeaderCellClass)"><div id="elh_SubAktivitasDataKapalLPG_idProses" class="SubAktivitasDataKapalLPG_idProses">@Html.Raw(subAktivitasDataKapalLpgList.RenderFieldHeader(subAktivitasDataKapalLpgList.idProses))</div></th>
+} @* subAktivitasDataKapalLpgList.idProses.Visible (end) *@
+@if (subAktivitasDataKapalLpgList.idAktifitas.Visible) { // subAktivitasDataKapalLpgList.idAktifitas.Visible (begin)
+        <th data-name="idAktifitas" class="@(subAktivitasDataKapalLpgList.idAktifitas.HeaderCellClass)"><div id="elh_SubAktivitasDataKapalLPG_idAktifitas" class="SubAktivitasDataKapalLPG_idAktifitas">@Html.Raw(subAktivitasDataKapalLpgList.RenderFieldHeader(subAktivitasDataKapalLpgList.idAktifitas))</div></th>
+} @* subAktivitasDataKapalLpgList.idAktifitas.Visible (end) *@
+@if (subAktivitasDataKapalLpgList.shipment.Visible) { // subAktivitasDataKapalLpgList.shipment.Visible (begin)
+        <th data-name="shipment" class="@(subAktivitasDataKapalLpgList.shipment.HeaderCellClass)"><div id="elh_SubAktivitasDataKapalLPG_shipment" class="SubAktivitasDataKapalLPG_shipment">@Html.Raw(subAktivitasDataKapalLpgList.RenderFieldHeader(subAktivitasDataKapalLpgList.shipment))</div></th>
+} @* subAktivitasDataKapalLpgList.shipment.Visible (end) *@
+@if (subAktivitasDataKapalLpgList.produk.Visible) { // subAktivitasDataKapalLpgList.produk.Visible (begin)
+        <th data-name="produk" class="@(subAktivitasDataKapalLpgList.produk.HeaderCellClass)"><div id="elh_SubAktivitasDataKapalLPG_produk" class="SubAktivitasDataKapalLPG_produk">@Html.Raw(subAktivitasDataKapalLpgList.RenderFieldHeader(subAktivitasDataKapalLpgList.produk))</div></th>
+} @* subAktivitasDataKapalLpgList.produk.Visible (end) *@
+@if (subAktivitasDataKapalLpgList.StatusAktivitas.Visible) { // subAktivitasDataKapalLpgList.StatusAktivitas.Visible (begin)
+        <th data-name="StatusAktivitas" class="@(subAktivitasDataKapalLpgList.StatusAktivitas.HeaderCellClass)"><div id="elh_SubAktivitasDataKapalLPG_StatusAktivitas" class="SubAktivitasDataKapalLPG_StatusAktivitas">@Html.Raw(subAktivitasDataKapalLpgList.RenderFieldHeader(subAktivitasDataKapalLpgList.StatusAktivitas))</div></th>
+} @* subAktivitasDataKapalLpgList.StatusAktivitas.Visible (end) *@
+@if (subAktivitasDataKapalLpgList.lastUpdatedBy.Visible) { // subAktivitasDataKapalLpgList.lastUpdatedBy.Visible (begin)
+        <th data-name="lastUpdatedBy" class="@(subAktivitasDataKapalLpgList.lastUpdatedBy.HeaderCellClass)"><div id="elh_SubAktivitasDataKapalLPG_lastUpdatedBy" class="SubAktivitasDataKapalLPG_lastUpdatedBy">@Html.Raw(subAktivitasDataKapalLpgList.RenderFieldHeader(subAktivitasDataKapalLpgList.lastUpdatedBy))</div></th>
+} @* subAktivitasDataKapalLpgList.lastUpdatedBy.Visible (end) *@
+@if (subAktivitasDataKapalLpgList.lastUpdatedDate.Visible) { // subAktivitasDataKapalLpgList.lastUpdatedDate.Visible (begin)
+        <th data-name="lastUpdatedDate" class="@(subAktivitasDataKapalLpgList.lastUpdatedDate.HeaderCellClass)"><div id="elh_SubAktivitasDataKapalLPG_lastUpdatedDate" class="SubAktivitasDataKapalLPG_lastUpdatedDate">@Html.Raw(subAktivitasDataKapalLpgList.RenderFieldHeader(subAktivitasDataKapalLpgList.lastUpdatedDate))</div></th>
+} @* subAktivitasDataKapalLpgList.lastUpdatedDate.Visible (end) *@
+@if (subAktivitasDataKapalLpgList.namakapal.Visible) { // subAktivitasDataKapalLpgList.namakapal.Visible (begin)
+        <th data-name="namakapal" class="@(subAktivitasDataKapalLpgList.namakapal.HeaderCellClass)"><div id="elh_SubAktivitasDataKapalLPG_namakapal" class="SubAktivitasDataKapalLPG_namakapal">@Html.Raw(subAktivitasDataKapalLpgList.RenderFieldHeader(subAktivitasDataKapalLpgList.namakapal))</div></th>
+} @* subAktivitasDataKapalLpgList.namakapal.Visible (end) *@
+@if (subAktivitasDataKapalLpgList.tgltiba.Visible) { // subAktivitasDataKapalLpgList.tgltiba.Visible (begin)
+        <th data-name="tgltiba" class="@(subAktivitasDataKapalLpgList.tgltiba.HeaderCellClass)"><div id="elh_SubAktivitasDataKapalLPG_tgltiba" class="SubAktivitasDataKapalLPG_tgltiba">@Html.Raw(subAktivitasDataKapalLpgList.RenderFieldHeader(subAktivitasDataKapalLpgList.tgltiba))</div></th>
+} @* subAktivitasDataKapalLpgList.tgltiba.Visible (end) *@
+@if (subAktivitasDataKapalLpgList.nominasi.Visible) { // subAktivitasDataKapalLpgList.nominasi.Visible (begin)
+        <th data-name="nominasi" class="@(subAktivitasDataKapalLpgList.nominasi.HeaderCellClass)"><div id="elh_SubAktivitasDataKapalLPG_nominasi" class="SubAktivitasDataKapalLPG_nominasi">@Html.Raw(subAktivitasDataKapalLpgList.RenderFieldHeader(subAktivitasDataKapalLpgList.nominasi))</div></th>
+} @* subAktivitasDataKapalLpgList.nominasi.Visible (end) *@
+@if (subAktivitasDataKapalLpgList.etlDate.Visible) { // subAktivitasDataKapalLpgList.etlDate.Visible (begin)
+        <th data-name="etlDate" class="@(subAktivitasDataKapalLpgList.etlDate.HeaderCellClass)"><div id="elh_SubAktivitasDataKapalLPG_etlDate" class="SubAktivitasDataKapalLPG_etlDate">@Html.Raw(subAktivitasDataKapalLpgList.RenderFieldHeader(subAktivitasDataKapalLpgList.etlDate))</div></th>
+} @* subAktivitasDataKapalLpgList.etlDate.Visible (end) *@
+@if (subAktivitasDataKapalLpgList.userInput.Visible) { // subAktivitasDataKapalLpgList.userInput.Visible (begin)
+        <th data-name="userInput" class="@(subAktivitasDataKapalLpgList.userInput.HeaderCellClass)"><div id="elh_SubAktivitasDataKapalLPG_userInput" class="SubAktivitasDataKapalLPG_userInput">@Html.Raw(subAktivitasDataKapalLpgList.RenderFieldHeader(subAktivitasDataKapalLpgList.userInput))</div></th>
+} @* subAktivitasDataKapalLpgList.userInput.Visible (end) *@
+@* Render list options (header, right) *@
+@subAktivitasDataKapalLpgList.ListOptions.RenderHeader("right")
+    </tr>
+</thead>
+<tbody data-page="@(subAktivitasDataKapalLpgList.PageNumber)">
+@{
+    await subAktivitasDataKapalLpgList.SetupGrid();
+    bool eof = subAktivitasDataKapalLpgList.Recordset == null; // DN
+}
+@while (subAktivitasDataKapalLpgList.RecordCount < subAktivitasDataKapalLpgList.StopRecord || SameString(subAktivitasDataKapalLpgList.RowIndex, "$rowindex$")) { // Begin While
+    if (!eof && !SameString(subAktivitasDataKapalLpgList.RowIndex, "$rowindex$") &&
+        (!subAktivitasDataKapalLpgList.IsGridAdd || subAktivitasDataKapalLpgList.CurrentMode == "copy") &&
+        (!((subAktivitasDataKapalLpgList.IsCopy || subAktivitasDataKapalLpgList.IsAdd) && subAktivitasDataKapalLpgList.RowIndex is int rowIndex && rowIndex == 0))) // DN
+        eof = !await subAktivitasDataKapalLpgList.Recordset.ReadAsync();
+    subAktivitasDataKapalLpgList.RecordCount++;
+    if (subAktivitasDataKapalLpgList.RecordCount >= subAktivitasDataKapalLpgList.StartRecord) {
+        await subAktivitasDataKapalLpgList.SetupRow();
+    <tr @Html.Raw(subAktivitasDataKapalLpgList.RowAttributes)>
+    @* Render list options (body, left) *@
+    @subAktivitasDataKapalLpgList.ListOptions.RenderBody("left", subAktivitasDataKapalLpgList.RowCount)
+    @if (subAktivitasDataKapalLpgList.id.Visible) { // subAktivitasDataKapalLpgList.id.Visible (begin)
+        <td data-name="id" @Html.Raw(subAktivitasDataKapalLpgList.id.CellAttributes)>
+<span id="el@(subAktivitasDataKapalLpgList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasDataKapalLpgList.RowCount)_SubAktivitasDataKapalLPG_id" class="el_SubAktivitasDataKapalLPG_id">
+<span @Html.Raw(subAktivitasDataKapalLpgList.id.ViewAttributes)>
+@Html.Raw(subAktivitasDataKapalLpgList.id.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasDataKapalLpgList.id.Visible (end) *@
+    @if (subAktivitasDataKapalLpgList.NoReferensi.Visible) { // subAktivitasDataKapalLpgList.NoReferensi.Visible (begin)
+        <td data-name="NoReferensi" @Html.Raw(subAktivitasDataKapalLpgList.NoReferensi.CellAttributes)>
+<span id="el@(subAktivitasDataKapalLpgList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasDataKapalLpgList.RowCount)_SubAktivitasDataKapalLPG_NoReferensi" class="el_SubAktivitasDataKapalLPG_NoReferensi">
+<span @Html.Raw(subAktivitasDataKapalLpgList.NoReferensi.ViewAttributes)>
+@Html.Raw(subAktivitasDataKapalLpgList.NoReferensi.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasDataKapalLpgList.NoReferensi.Visible (end) *@
+    @if (subAktivitasDataKapalLpgList.idProses.Visible) { // subAktivitasDataKapalLpgList.idProses.Visible (begin)
+        <td data-name="idProses" @Html.Raw(subAktivitasDataKapalLpgList.idProses.CellAttributes)>
+<span id="el@(subAktivitasDataKapalLpgList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasDataKapalLpgList.RowCount)_SubAktivitasDataKapalLPG_idProses" class="el_SubAktivitasDataKapalLPG_idProses">
+<span @Html.Raw(subAktivitasDataKapalLpgList.idProses.ViewAttributes)>
+@Html.Raw(subAktivitasDataKapalLpgList.idProses.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasDataKapalLpgList.idProses.Visible (end) *@
+    @if (subAktivitasDataKapalLpgList.idAktifitas.Visible) { // subAktivitasDataKapalLpgList.idAktifitas.Visible (begin)
+        <td data-name="idAktifitas" @Html.Raw(subAktivitasDataKapalLpgList.idAktifitas.CellAttributes)>
+<span id="el@(subAktivitasDataKapalLpgList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasDataKapalLpgList.RowCount)_SubAktivitasDataKapalLPG_idAktifitas" class="el_SubAktivitasDataKapalLPG_idAktifitas">
+<span @Html.Raw(subAktivitasDataKapalLpgList.idAktifitas.ViewAttributes)>
+@Html.Raw(subAktivitasDataKapalLpgList.idAktifitas.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasDataKapalLpgList.idAktifitas.Visible (end) *@
+    @if (subAktivitasDataKapalLpgList.shipment.Visible) { // subAktivitasDataKapalLpgList.shipment.Visible (begin)
+        <td data-name="shipment" @Html.Raw(subAktivitasDataKapalLpgList.shipment.CellAttributes)>
+<span id="el@(subAktivitasDataKapalLpgList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasDataKapalLpgList.RowCount)_SubAktivitasDataKapalLPG_shipment" class="el_SubAktivitasDataKapalLPG_shipment">
+<span @Html.Raw(subAktivitasDataKapalLpgList.shipment.ViewAttributes)>
+@Html.Raw(subAktivitasDataKapalLpgList.shipment.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasDataKapalLpgList.shipment.Visible (end) *@
+    @if (subAktivitasDataKapalLpgList.produk.Visible) { // subAktivitasDataKapalLpgList.produk.Visible (begin)
+        <td data-name="produk" @Html.Raw(subAktivitasDataKapalLpgList.produk.CellAttributes)>
+<span id="el@(subAktivitasDataKapalLpgList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasDataKapalLpgList.RowCount)_SubAktivitasDataKapalLPG_produk" class="el_SubAktivitasDataKapalLPG_produk">
+<span @Html.Raw(subAktivitasDataKapalLpgList.produk.ViewAttributes)>
+@Html.Raw(subAktivitasDataKapalLpgList.produk.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasDataKapalLpgList.produk.Visible (end) *@
+    @if (subAktivitasDataKapalLpgList.StatusAktivitas.Visible) { // subAktivitasDataKapalLpgList.StatusAktivitas.Visible (begin)
+        <td data-name="StatusAktivitas" @Html.Raw(subAktivitasDataKapalLpgList.StatusAktivitas.CellAttributes)>
+<span id="el@(subAktivitasDataKapalLpgList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasDataKapalLpgList.RowCount)_SubAktivitasDataKapalLPG_StatusAktivitas" class="el_SubAktivitasDataKapalLPG_StatusAktivitas">
+<span @Html.Raw(subAktivitasDataKapalLpgList.StatusAktivitas.ViewAttributes)>
+@Html.Raw(subAktivitasDataKapalLpgList.StatusAktivitas.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasDataKapalLpgList.StatusAktivitas.Visible (end) *@
+    @if (subAktivitasDataKapalLpgList.lastUpdatedBy.Visible) { // subAktivitasDataKapalLpgList.lastUpdatedBy.Visible (begin)
+        <td data-name="lastUpdatedBy" @Html.Raw(subAktivitasDataKapalLpgList.lastUpdatedBy.CellAttributes)>
+<span id="el@(subAktivitasDataKapalLpgList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasDataKapalLpgList.RowCount)_SubAktivitasDataKapalLPG_lastUpdatedBy" class="el_SubAktivitasDataKapalLPG_lastUpdatedBy">
+<span @Html.Raw(subAktivitasDataKapalLpgList.lastUpdatedBy.ViewAttributes)>
+@Html.Raw(subAktivitasDataKapalLpgList.lastUpdatedBy.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasDataKapalLpgList.lastUpdatedBy.Visible (end) *@
+    @if (subAktivitasDataKapalLpgList.lastUpdatedDate.Visible) { // subAktivitasDataKapalLpgList.lastUpdatedDate.Visible (begin)
+        <td data-name="lastUpdatedDate" @Html.Raw(subAktivitasDataKapalLpgList.lastUpdatedDate.CellAttributes)>
+<span id="el@(subAktivitasDataKapalLpgList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasDataKapalLpgList.RowCount)_SubAktivitasDataKapalLPG_lastUpdatedDate" class="el_SubAktivitasDataKapalLPG_lastUpdatedDate">
+<span @Html.Raw(subAktivitasDataKapalLpgList.lastUpdatedDate.ViewAttributes)>
+@Html.Raw(subAktivitasDataKapalLpgList.lastUpdatedDate.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasDataKapalLpgList.lastUpdatedDate.Visible (end) *@
+    @if (subAktivitasDataKapalLpgList.namakapal.Visible) { // subAktivitasDataKapalLpgList.namakapal.Visible (begin)
+        <td data-name="namakapal" @Html.Raw(subAktivitasDataKapalLpgList.namakapal.CellAttributes)>
+<span id="el@(subAktivitasDataKapalLpgList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasDataKapalLpgList.RowCount)_SubAktivitasDataKapalLPG_namakapal" class="el_SubAktivitasDataKapalLPG_namakapal">
+<span @Html.Raw(subAktivitasDataKapalLpgList.namakapal.ViewAttributes)>
+@Html.Raw(subAktivitasDataKapalLpgList.namakapal.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasDataKapalLpgList.namakapal.Visible (end) *@
+    @if (subAktivitasDataKapalLpgList.tgltiba.Visible) { // subAktivitasDataKapalLpgList.tgltiba.Visible (begin)
+        <td data-name="tgltiba" @Html.Raw(subAktivitasDataKapalLpgList.tgltiba.CellAttributes)>
+<span id="el@(subAktivitasDataKapalLpgList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasDataKapalLpgList.RowCount)_SubAktivitasDataKapalLPG_tgltiba" class="el_SubAktivitasDataKapalLPG_tgltiba">
+<span @Html.Raw(subAktivitasDataKapalLpgList.tgltiba.ViewAttributes)>
+@Html.Raw(subAktivitasDataKapalLpgList.tgltiba.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasDataKapalLpgList.tgltiba.Visible (end) *@
+    @if (subAktivitasDataKapalLpgList.nominasi.Visible) { // subAktivitasDataKapalLpgList.nominasi.Visible (begin)
+        <td data-name="nominasi" @Html.Raw(subAktivitasDataKapalLpgList.nominasi.CellAttributes)>
+<span id="el@(subAktivitasDataKapalLpgList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasDataKapalLpgList.RowCount)_SubAktivitasDataKapalLPG_nominasi" class="el_SubAktivitasDataKapalLPG_nominasi">
+<span @Html.Raw(subAktivitasDataKapalLpgList.nominasi.ViewAttributes)>
+@Html.Raw(subAktivitasDataKapalLpgList.nominasi.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasDataKapalLpgList.nominasi.Visible (end) *@
+    @if (subAktivitasDataKapalLpgList.etlDate.Visible) { // subAktivitasDataKapalLpgList.etlDate.Visible (begin)
+        <td data-name="etlDate" @Html.Raw(subAktivitasDataKapalLpgList.etlDate.CellAttributes)>
+<span id="el@(subAktivitasDataKapalLpgList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasDataKapalLpgList.RowCount)_SubAktivitasDataKapalLPG_etlDate" class="el_SubAktivitasDataKapalLPG_etlDate">
+<span @Html.Raw(subAktivitasDataKapalLpgList.etlDate.ViewAttributes)>
+@Html.Raw(subAktivitasDataKapalLpgList.etlDate.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasDataKapalLpgList.etlDate.Visible (end) *@
+    @if (subAktivitasDataKapalLpgList.userInput.Visible) { // subAktivitasDataKapalLpgList.userInput.Visible (begin)
+        <td data-name="userInput" @Html.Raw(subAktivitasDataKapalLpgList.userInput.CellAttributes)>
+<span id="el@(subAktivitasDataKapalLpgList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasDataKapalLpgList.RowCount)_SubAktivitasDataKapalLPG_userInput" class="el_SubAktivitasDataKapalLPG_userInput">
+<span @Html.Raw(subAktivitasDataKapalLpgList.userInput.ViewAttributes)>
+@Html.Raw(subAktivitasDataKapalLpgList.userInput.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasDataKapalLpgList.userInput.Visible (end) *@
+    @* Render list options (body, right) *@
+    @subAktivitasDataKapalLpgList.ListOptions.RenderBody("right", subAktivitasDataKapalLpgList.RowCount)
+    </tr>
+    } @* End if *@
+
+    // Reset for template row
+    if (SameString(subAktivitasDataKapalLpgList.RowIndex, "$rowindex$"))
+        subAktivitasDataKapalLpgList.RowIndex = 0;
+
+    // Reset inline add/copy row
+    if ((subAktivitasDataKapalLpgList.IsCopy || subAktivitasDataKapalLpgList.IsAdd) && subAktivitasDataKapalLpgList.RowIndex is int rowIndex2 && rowIndex2 == 0)
+        subAktivitasDataKapalLpgList.RowIndex = 1;
+} @* End While *@
+</tbody>
+</table><!-- /.ew-table -->
+} @* End If TotalRecords > 0 *@
+</div><!-- /.ew-grid-middle-panel -->
+@if (Empty(subAktivitasDataKapalLpgList.CurrentAction) && !subAktivitasDataKapalLpgList.UseAjaxActions) {
+<input type="hidden" name="action" id="action" value="">
+}
+</form><!-- /.ew-list-form -->
+@{ subAktivitasDataKapalLpgList.CloseRecordset(); }
+@if (!subAktivitasDataKapalLpgList.IsExport()) {
+<div class="card-footer ew-grid-lower-panel">
+@if (!subAktivitasDataKapalLpgList.IsGridAdd && !(subAktivitasDataKapalLpgList.IsGridEdit && subAktivitasDataKapalLpgList.ModalGridEdit) && !subAktivitasDataKapalLpgList.IsMultiEdit) {
+@Html.Raw(subAktivitasDataKapalLpgList.Pager.Render())
+}
+<div class="ew-list-other-options">
+@subAktivitasDataKapalLpgList.OtherOptions.RenderBody("bottom")
+</div>
+</div>
+}
+</div><!-- /.ew-grid -->
+} else { // Show other options
+<div class="ew-list-other-options">
+@subAktivitasDataKapalLpgList.OtherOptions.ForEach(opt => opt.ButtonClass = "").RenderBody()
+</div>
+}
+</div>
+<div id="ew-footer-options">
+    @subAktivitasDataKapalLpgList.FooterOptions.RenderBody()
+</div>
+</main>
+@subAktivitasDataKapalLpgList.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+@if (!subAktivitasDataKapalLpgList.IsExport()) {
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("SubAktivitasDataKapalLPG");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Write your table-specific startup script here
+    // document.write("page loaded");
+});
+</script>
+}

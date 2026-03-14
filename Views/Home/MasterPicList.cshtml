@@ -1,0 +1,376 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (masterPicList.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = masterPicList.UseLayout ? "_Layout" : "";
+}
+@if (!masterPicList.IsExport()) {
+<script>
+var currentTable = @Html.Raw(ConvertToJson(masterPicList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { MasterPIC: currentTable } });
+var currentPageID = ew.PAGE_ID = "list";
+var currentForm;
+var @(masterPicList.FormName);
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("@(masterPicList.FormName)")
+        .setPageId("list")
+        .setSubmitWithFetch(@(masterPicList.UseAjaxActions ? "true" : "false"))
+        .setFormKeyCountName("@(masterPicList.FormKeyCountName)")
+
+        // Dynamic selection lists
+        .setLists({
+            "IdPIC": @Html.Raw(masterPicList.IdPIC.ToClientList(masterPicList)),
+            "NamaPIC": @Html.Raw(masterPicList.NamaPIC.ToClientList(masterPicList)),
+        })
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Write your client script here, no need to add script tags.
+});
+</script>
+}
+@if (!masterPicList.IsExport()) {
+<div class="btn-toolbar ew-toolbar">
+@if (masterPicList.TotalRecords > 0 && masterPicList.ExportOptions.Visible) {
+    masterPicList.ExportOptions.Render("body");
+}
+@if (masterPicList.ImportOptions.Visible) {
+    masterPicList.ImportOptions.Render("body");
+}
+@if (masterPicList.SearchOptions.Visible) {
+    masterPicList.SearchOptions.Render("body");
+}
+@if (masterPicList.FilterOptions.Visible) {
+    masterPicList.FilterOptions.Render("body");
+}
+</div>
+}
+@if (masterPicList.ShowCurrentFilter) {
+    masterPicList.ShowFilterList();
+}
+@if (!masterPicList.IsModal) {
+<form name="fMasterPICsrch" id="fMasterPICsrch" class="ew-form ew-ext-search-form" action="@AppPath(CurrentPageName())" novalidate autocomplete="off">
+<div id="fMasterPICsrch_search_panel" class="mb-2 mb-sm-0 @(masterPicList.SearchPanelClass)"><!-- .ew-search-panel -->
+<script>
+var currentTable = @Html.Raw(ConvertToJson(masterPicList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { MasterPIC: currentTable } });
+var currentForm;
+var fMasterPICsrch, currentSearchForm, currentAdvancedSearchForm;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery,
+        fields = currentTable.fields;
+
+    // Form object for search
+    let form = new ew.FormBuilder()
+        .setId("fMasterPICsrch")
+        .setPageId("list")
+@if (masterPicList.UseAjaxActions) {
+        <text>.setSubmitWithFetch(true)</text>
+}
+
+        // Add fields
+        .setFields([
+        ])
+        // Validate form
+        .setValidate(
+            async function () {
+                if (!this.validateRequired)
+                    return true; // Ignore validation
+                let fobj = this.getForm();
+
+                // Validate fields
+                if (!this.validateFields())
+                    return false;
+
+                // Call Form_CustomValidate event
+                if (!(await this.customValidate?.(fobj) ?? true)) {
+                    this.focus();
+                    return false;
+                }
+                return true;
+            }
+        )
+
+        // Form_CustomValidate
+        .setCustomValidate(
+            function(fobj) { // DO NOT CHANGE THIS LINE!
+                    // Your custom validation code here, return false if invalid.
+                    return true;
+                }
+        )
+
+        // Use JavaScript validation or not
+        .setValidateRequired(ew.CLIENT_VALIDATE)
+
+        // Dynamic selection lists
+        .setLists({
+            "IdPIC": @Html.Raw(masterPicList.IdPIC.ToClientList(masterPicList)),
+            "NamaPIC": @Html.Raw(masterPicList.NamaPIC.ToClientList(masterPicList)),
+        })
+
+        // Filters
+        .setFilterList(@Html.Raw(masterPicList.GetFilterList()))
+        .build();
+    window[form.id] = form;
+    currentSearchForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<input type="hidden" name="cmd" value="search">
+@if (Security.CanSearch) {
+if (!masterPicList.IsExport() && Empty(masterPicList.CurrentAction) && masterPicList.HasSearchFields()) { @* Show search form (begin) *@
+<div class="ew-extended-search container-fluid ps-2">
+<div class="row mb-0@(masterPicList.SearchFieldsPerRow > 0 ? " row-cols-sm-" + masterPicList.SearchFieldsPerRow : "")">
+@{
+    // Render search row
+    masterPicList.RowType = RowType.Search;
+    masterPicList.ResetAttributes();
+    await masterPicList.RenderRow();
+}
+@if (masterPicList.IdPIC.Visible) { // masterPicList.IdPIC.Visible (begin)
+    if (!masterPicList.IdPIC.UseFilter) {
+        masterPicList.SearchColumnCount++;
+    }
+    <div id="xs_IdPIC" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(masterPicList.IdPIC.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_IdPIC"
+            name="x_IdPIC[]"
+            class="form-control ew-select@(masterPicList.IdPIC.IsInvalidClass)"
+            data-select2-id="fMasterPICsrch_x_IdPIC"
+            data-table="MasterPIC"
+            data-field="x_IdPIC"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(masterPicList.IdPIC.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(masterPicList.IdPIC.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(masterPicList.IdPIC.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(masterPicList.IdPIC.EditAttributes)>
+            @(masterPicList.IdPIC.SelectOptionListHtml("x_IdPIC", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(masterPicList.IdPIC.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMasterPICsrch", function() {
+            var options = {
+                name: "x_IdPIC",
+                selectId: "fMasterPICsrch_x_IdPIC",
+                ajax: { id: "x_IdPIC", form: "fMasterPICsrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MasterPIC.fields.IdPIC.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* masterPicList.IdPIC.Visible (end) *@
+@if (masterPicList.NamaPIC.Visible) { // masterPicList.NamaPIC.Visible (begin)
+    if (!masterPicList.NamaPIC.UseFilter) {
+        masterPicList.SearchColumnCount++;
+    }
+    <div id="xs_NamaPIC" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(masterPicList.NamaPIC.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_NamaPIC"
+            name="x_NamaPIC[]"
+            class="form-control ew-select@(masterPicList.NamaPIC.IsInvalidClass)"
+            data-select2-id="fMasterPICsrch_x_NamaPIC"
+            data-table="MasterPIC"
+            data-field="x_NamaPIC"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(masterPicList.NamaPIC.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(masterPicList.NamaPIC.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(masterPicList.NamaPIC.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(masterPicList.NamaPIC.EditAttributes)>
+            @(masterPicList.NamaPIC.SelectOptionListHtml("x_NamaPIC", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(masterPicList.NamaPIC.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMasterPICsrch", function() {
+            var options = {
+                name: "x_NamaPIC",
+                selectId: "fMasterPICsrch_x_NamaPIC",
+                ajax: { id: "x_NamaPIC", form: "fMasterPICsrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MasterPIC.fields.NamaPIC.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* masterPicList.NamaPIC.Visible (end) *@
+</div><!-- /.row -->
+<div class="row mb-0">
+    <div class="col-sm-auto px-0 pe-sm-2">
+        <div class="ew-basic-search input-group">
+            <input type="search" name="@(Config.TableBasicSearch)" id="@(Config.TableBasicSearch)" class="form-control ew-basic-search-keyword" value="@Html.Raw(HtmlEncode(masterPicList.BasicSearch.SessionKeyword))" placeholder="@(HtmlEncode(Language.Phrase("Search")))" aria-label="@(HtmlEncode(Language.Phrase("Search")))">
+            <input type="hidden" name="@(Config.TableBasicSearchType)" id="@(Config.TableBasicSearchType)" class="ew-basic-search-type" value="@(HtmlEncode(masterPicList.BasicSearch.SessionType))">
+            <button type="button" data-bs-toggle="dropdown" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split" aria-haspopup="true" aria-expanded="false">
+                <span id="searchtype">@Html.Raw(masterPicList.BasicSearch.TypeNameShort)</span>
+            </button>
+            <div class="dropdown-menu dropdown-menu-end">
+                <button type="button" class="dropdown-item@(masterPicList.BasicSearch.SessionType == "" ? " active" : "")" form="fMasterPICsrch" data-ew-action="search-type">@Html.Raw(Language.Phrase("QuickSearchAuto"))</button>
+                <button type="button" class="dropdown-item@(masterPicList.BasicSearch.SessionType == "=" ? " active" : "")" form="fMasterPICsrch" data-ew-action="search-type" data-search-type="=">@Html.Raw(Language.Phrase("QuickSearchExact"))</button>
+                <button type="button" class="dropdown-item@(masterPicList.BasicSearch.SessionType == "AND" ? " active" : "")" form="fMasterPICsrch" data-ew-action="search-type" data-search-type="AND">@Html.Raw(Language.Phrase("QuickSearchAll"))</button>
+                <button type="button" class="dropdown-item@(masterPicList.BasicSearch.SessionType == "OR" ? " active" : "")" form="fMasterPICsrch" data-ew-action="search-type" data-search-type="OR">@Html.Raw(Language.Phrase("QuickSearchAny"))</button>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-auto mb-3">
+        <button class="btn btn-primary" name="btn-submit" id="btn-submit" type="submit">@Html.Raw(Language.Phrase("SearchBtn"))</button>
+    </div>
+</div>
+</div><!-- /.ew-extended-search -->
+} @* Show search form (end) *@
+}
+</div><!-- /.ew-search-panel -->
+</form>
+}
+@masterPicList.ShowPageHeader()
+@masterPicList.ShowMessages()
+<main class="list @(masterPicList.TotalRecords == 0 && !masterPicList.IsAdd ? " ew-no-record" : "")">
+<div id="ew-header-options">
+    @masterPicList.HeaderOptions.RenderBody()
+</div>
+<div id="ew-list">
+@if (masterPicList.TotalRecords > 0 || !Empty(masterPicList.CurrentAction)) {
+<div class="card ew-card ew-grid@(masterPicList.IsAddOrEdit ? " ew-grid-add-edit" : "") @(masterPicList.TableGridClass)">
+<form name="@(masterPicList.FormName)" id="@(masterPicList.FormName)" class="ew-form ew-list-form" action="@AppPath(masterPicList.PageName)" method="post" novalidate autocomplete="off">
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+@if (masterPicList.IsModal) {
+<input type="hidden" name="modal" value="1">
+}
+<div id="gmp_MasterPIC" class="card-body ew-grid-middle-panel @(masterPicList.TableContainerClass)" style="@(masterPicList.TableContainerStyle)">
+@if (masterPicList.TotalRecords > 0 || masterPicList.IsGridEdit || masterPicList.IsMultiEdit) {
+<table id="tbl_MasterPIClist" class="@(masterPicList.TableClass)"><!-- .ew-table -->
+<thead>
+    <tr class="ew-table-header">
+@{
+    // Header row
+    masterPicList.RowType = RowType.Header;
+
+    // Render list options
+    await masterPicList.RenderListOptions();
+}
+@* Render list options (header, left) *@
+@masterPicList.ListOptions.RenderHeader("left")
+@if (masterPicList.IdPIC.Visible) { // masterPicList.IdPIC.Visible (begin)
+        <th data-name="IdPIC" class="@(masterPicList.IdPIC.HeaderCellClass)"><div id="elh_MasterPIC_IdPIC" class="MasterPIC_IdPIC">@Html.Raw(masterPicList.RenderFieldHeader(masterPicList.IdPIC))</div></th>
+} @* masterPicList.IdPIC.Visible (end) *@
+@if (masterPicList.NamaPIC.Visible) { // masterPicList.NamaPIC.Visible (begin)
+        <th data-name="NamaPIC" class="@(masterPicList.NamaPIC.HeaderCellClass)"><div id="elh_MasterPIC_NamaPIC" class="MasterPIC_NamaPIC">@Html.Raw(masterPicList.RenderFieldHeader(masterPicList.NamaPIC))</div></th>
+} @* masterPicList.NamaPIC.Visible (end) *@
+@* Render list options (header, right) *@
+@masterPicList.ListOptions.RenderHeader("right")
+    </tr>
+</thead>
+<tbody data-page="@(masterPicList.PageNumber)">
+@{
+    await masterPicList.SetupGrid();
+    bool eof = masterPicList.Recordset == null; // DN
+}
+@while (masterPicList.RecordCount < masterPicList.StopRecord || SameString(masterPicList.RowIndex, "$rowindex$")) { // Begin While
+    if (!eof && !SameString(masterPicList.RowIndex, "$rowindex$") &&
+        (!masterPicList.IsGridAdd || masterPicList.CurrentMode == "copy") &&
+        (!((masterPicList.IsCopy || masterPicList.IsAdd) && masterPicList.RowIndex is int rowIndex && rowIndex == 0))) // DN
+        eof = !await masterPicList.Recordset.ReadAsync();
+    masterPicList.RecordCount++;
+    if (masterPicList.RecordCount >= masterPicList.StartRecord) {
+        await masterPicList.SetupRow();
+    <tr @Html.Raw(masterPicList.RowAttributes)>
+    @* Render list options (body, left) *@
+    @masterPicList.ListOptions.RenderBody("left", masterPicList.RowCount)
+    @if (masterPicList.IdPIC.Visible) { // masterPicList.IdPIC.Visible (begin)
+        <td data-name="IdPIC" @Html.Raw(masterPicList.IdPIC.CellAttributes)>
+<span id="el@(masterPicList.RowIndex == "$rowindex$" ? "$rowindex$" : masterPicList.RowCount)_MasterPIC_IdPIC" class="el_MasterPIC_IdPIC">
+<span @Html.Raw(masterPicList.IdPIC.ViewAttributes)>
+@Html.Raw(masterPicList.IdPIC.GetViewValue())</span>
+</span>
+</td>
+    } @* masterPicList.IdPIC.Visible (end) *@
+    @if (masterPicList.NamaPIC.Visible) { // masterPicList.NamaPIC.Visible (begin)
+        <td data-name="NamaPIC" @Html.Raw(masterPicList.NamaPIC.CellAttributes)>
+<span id="el@(masterPicList.RowIndex == "$rowindex$" ? "$rowindex$" : masterPicList.RowCount)_MasterPIC_NamaPIC" class="el_MasterPIC_NamaPIC">
+<span @Html.Raw(masterPicList.NamaPIC.ViewAttributes)>
+@Html.Raw(masterPicList.NamaPIC.GetViewValue())</span>
+</span>
+</td>
+    } @* masterPicList.NamaPIC.Visible (end) *@
+    @* Render list options (body, right) *@
+    @masterPicList.ListOptions.RenderBody("right", masterPicList.RowCount)
+    </tr>
+    } @* End if *@
+
+    // Reset for template row
+    if (SameString(masterPicList.RowIndex, "$rowindex$"))
+        masterPicList.RowIndex = 0;
+
+    // Reset inline add/copy row
+    if ((masterPicList.IsCopy || masterPicList.IsAdd) && masterPicList.RowIndex is int rowIndex2 && rowIndex2 == 0)
+        masterPicList.RowIndex = 1;
+} @* End While *@
+</tbody>
+</table><!-- /.ew-table -->
+} @* End If TotalRecords > 0 *@
+</div><!-- /.ew-grid-middle-panel -->
+@if (Empty(masterPicList.CurrentAction) && !masterPicList.UseAjaxActions) {
+<input type="hidden" name="action" id="action" value="">
+}
+</form><!-- /.ew-list-form -->
+@{ masterPicList.CloseRecordset(); }
+@if (!masterPicList.IsExport()) {
+<div class="card-footer ew-grid-lower-panel">
+@if (!masterPicList.IsGridAdd && !(masterPicList.IsGridEdit && masterPicList.ModalGridEdit) && !masterPicList.IsMultiEdit) {
+@Html.Raw(masterPicList.Pager.Render())
+}
+<div class="ew-list-other-options">
+@masterPicList.OtherOptions.RenderBody("bottom")
+</div>
+</div>
+}
+</div><!-- /.ew-grid -->
+} else { // Show other options
+<div class="ew-list-other-options">
+@masterPicList.OtherOptions.ForEach(opt => opt.ButtonClass = "").RenderBody()
+</div>
+}
+</div>
+<div id="ew-footer-options">
+    @masterPicList.FooterOptions.RenderBody()
+</div>
+</main>
+@masterPicList.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+@if (!masterPicList.IsExport()) {
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("MasterPIC");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Write your table-specific startup script here
+    // document.write("page loaded");
+});
+</script>
+}

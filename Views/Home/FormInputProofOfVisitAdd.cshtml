@@ -1,0 +1,797 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (formInputProofOfVisitAdd.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = formInputProofOfVisitAdd.UseLayout ? "_Layout" : "";
+}
+<script>
+var currentTable = @Html.Raw(ConvertToJson(formInputProofOfVisitAdd.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { FormInputProofOfVisit: currentTable } });
+var currentPageID = ew.PAGE_ID = "add";
+var currentForm;
+var fFormInputProofOfVisitadd;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("fFormInputProofOfVisitadd")
+        .setPageId("add")
+
+        // Add fields
+        .setFields([
+
+            ["NoReferensi", [fields.NoReferensi.visible && fields.NoReferensi.required ? ew.Validators.required(fields.NoReferensi.caption) : null], fields.NoReferensi.isInvalid],
+            ["Tanggal", [fields.Tanggal.visible && fields.Tanggal.required ? ew.Validators.required(fields.Tanggal.caption) : null, ew.Validators.datetime(fields.Tanggal.clientFormatPattern)], fields.Tanggal.isInvalid],
+            ["Lokasi", [fields.Lokasi.visible && fields.Lokasi.required ? ew.Validators.required(fields.Lokasi.caption) : null], fields.Lokasi.isInvalid],
+            ["Ketidaksesuaiaan", [fields.Ketidaksesuaiaan.visible && fields.Ketidaksesuaiaan.required ? ew.Validators.required(fields.Ketidaksesuaiaan.caption) : null], fields.Ketidaksesuaiaan.isInvalid],
+            ["Keterangan", [fields.Keterangan.visible && fields.Keterangan.required ? ew.Validators.required(fields.Keterangan.caption) : null], fields.Keterangan.isInvalid],
+            ["IdPosition", [fields.IdPosition.visible && fields.IdPosition.required ? ew.Validators.required(fields.IdPosition.caption) : null], fields.IdPosition.isInvalid],
+            ["VerifikasiMOD", [fields.VerifikasiMOD.visible && fields.VerifikasiMOD.required ? ew.Validators.required(fields.VerifikasiMOD.caption) : null], fields.VerifikasiMOD.isInvalid]
+        ])
+
+        // Form_CustomValidate
+        .setCustomValidate(
+            function(fobj) { // DO NOT CHANGE THIS LINE!
+                    // Your custom validation code here, return false if invalid.
+                    return true;
+                }
+        )
+
+        // Use JavaScript validation or not
+        .setValidateRequired(ew.CLIENT_VALIDATE)
+
+        // Dynamic selection lists
+        .setLists({
+            "Lokasi": @Html.Raw(formInputProofOfVisitAdd.Lokasi.ToClientList(formInputProofOfVisitAdd)),
+            "Ketidaksesuaiaan": @Html.Raw(formInputProofOfVisitAdd.Ketidaksesuaiaan.ToClientList(formInputProofOfVisitAdd)),
+        })
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Client script
+    const parent_url = ew.PATH_BASE;
+    const NoReferensi = "@HttpContext.Request.Query["NoReferensi"]";
+    //const currentUserName = '@CurrentUserInfo("NamaLengkap")';
+    const currentUserName = '@CurrentUserName()';
+    if (!NoReferensi) {
+        ew.alert('URL Tidak Valid');
+        setTimeout(function() {
+            history.back();
+        }, 1000);
+    }
+    const selfieTrigger = $("#selfie-trigger");
+    const selfiePreview = $("#selfie-preview");
+    const cameraView = $("#camera-view");
+    const selfieVideo = document.getElementById("selfie-video");
+    const captureButton = $("#capture-button");
+    const cancelCaptureButton = $("#cancel-capture-button");
+
+    // Get references to other form elements that need to be disabled
+    const formInputsToDisable = $(`
+        #x_Tanggal, 
+        #x_Lokasi, 
+        #x_Keterangan,
+        #x_Ketidaksesuaiaan, 
+        #fileInput, 
+        #fileName, 
+        #btn-submit-custom
+    `);
+    let selfieBlob = null;
+    let stream = null;
+    formInputsToDisable.prop("disabled", true).css("background-color", "#e9ecef");
+    $("#fileName").parent().css("cursor", "not-allowed").off("click");
+    selfieTrigger.on("click", async function() {
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+            try {
+                // Request front camera
+                stream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: 'user' }
+                });
+                cameraView.show();
+                selfieVideo.srcObject = stream;
+                selfieTrigger.hide(); // Hide the initial button
+            } catch (error) {
+                console.error("Error accessing camera:", error);
+                ew.alert("Could not access the camera. Please ensure you are on HTTPS and have granted camera permissions.");
+            }
+        } else {
+            ew.alert("Your browser does not support camera access.");
+        }
+    });
+    captureButton.on("click", function() {
+        const canvas = document.createElement("canvas");
+        canvas.width = selfieVideo.videoWidth;
+        canvas.height = selfieVideo.videoHeight;
+        const context = canvas.getContext("2d");
+        context.drawImage(selfieVideo, 0, 0, canvas.width, canvas.height);
+        canvas.toBlob(function(blob) {
+            selfieBlob = blob;
+            const previewUrl = URL.createObjectURL(blob);
+            selfiePreview.attr("src", previewUrl).show();
+            stopCamera();
+            formInputsToDisable.prop("disabled", false).css("background-color", "");
+            $("#fileName").parent().css("cursor", "pointer").on("click", function() {
+                $("#fileInput").trigger("click");
+            });
+            ew.alert("Selfie captured. You can now fill out the rest of the form.");
+        }, "image/jpeg", 0.9);
+    });
+    cancelCaptureButton.on("click", function() {
+        stopCamera();
+    });
+    function stopCamera() {
+        if (stream) {
+            stream.getTracks().forEach(track => track.stop());
+        }
+        cameraView.hide();
+        selfieTrigger.show();
+    }
+    let filesArr = [];
+    $("#fileName").on("click", function () {
+        $("#fileInput").trigger("click");
+    });
+    $("#fileInput").on("change", function(e) {
+        let newFiles = Array.from(e.target.files);
+        filesArr = filesArr.concat(newFiles);
+        $(this).val('');
+        renderTable();
+    });
+    function renderTable(){
+        let $table = $("#fileTable");
+        let $tbody = $table.find("tbody");
+        $tbody.empty();
+        if(filesArr.length === 0){
+            $('#row-table').hide();
+            return;
+        }
+        $('#row-table').show();
+        filesArr.forEach((file, index) => {
+            let sizeKB = (file.size / 1024).toFixed(2);
+            let row = `
+                <tr>
+                    <td>${index+1}</td>
+                    <td>${file.name}</td>
+                    <td>
+                        <button class="btn text-danger btn-delete" type="button" data-index="${index}"><i class="fa-solid fa-times"></i></button>
+                    </td>
+                </tr>
+            `;
+            $tbody.append(row);
+        });
+    }
+    $(document).on("click", ".btn-delete", function(){
+        let index = $(this).data("index");
+        filesArr.splice(index, 1);
+        renderTable();
+    });
+    $(document).on("click", "#btn-cancel-custom", function(){
+        window.location.href = `${parent_url}FormInputProofOfVisitList?cmd=search&x_NoReferensi%5B%5D=${NoReferensi}&search=&searchtype=`;
+    });
+    $("#btn-submit-custom").on("click", function(){
+        if (!selfieBlob) {
+            ew.alert("Selfie for verification is required!");
+            return;
+        }
+        if(filesArr.length === 0){
+            ew.alert("File tidak boleh kosong!");
+            return;
+        }
+        if($('#NoReferensi-custom').val() === ''){
+            ew.alert("Nomor Proof of Visit tidak boleh kosong!");
+            return;
+        }
+        if($('#x_Tanggal').val() === ''){
+            ew.alert("Tanggal tidak boleh kosong!");
+            return;
+        }
+        if($('#x_Lokasi').val() === ''){
+            ew.alert("Lokasi tidak boleh kosong!");
+            return;
+        }
+        if ($('#x_Lokasi').val() === '7' && $('#x_Keterangan').val().trim() === '') {
+            ew.alert("Keterangan is required when Lokasi is 'Others'.");
+            return;
+        }
+        let recognitionFormData = new FormData();
+        recognitionFormData.append("Face", selfieBlob, "verify_selfie.jpg");
+        recognitionFormData.append("IdUser", "0");
+        recognitionFormData.append("Username", currentUserName);
+        $.ajax({
+            url: parent_url + "api/LookUpList/TestFace",
+            type: "POST",
+            data: recognitionFormData,
+            processData: false,
+            contentType: false,
+            success: function(rs) {
+                if (rs.success && rs.confidence >= 0.5 && rs.recognizedAs === currentUserName) {
+                    submitMainForm();
+                } else {
+                    let failureReason = "Wajah tidak dikenali atau tidak cocok.";
+                    if (!rs.success) failureReason = rs.message || failureReason;
+                    else if (rs.recognizedAs !== currentUserName) failureReason = `Wajah dikenali sebagai ${rs.recognizedAs}, bukan ${currentUserName}.`;
+                    else if (rs.confidence < 0.5) failureReason = `Tingkat keyakinan (${rs.confidence.toFixed(3)}) terlalu rendah.`;
+                    ew.alert(`Verifikasi Wajah Gagal: ${failureReason} Silakan coba lagi.`);
+                }
+            },
+            error: function(xhr) {
+                ew.alert("Gagal melakukan verifikasi wajah: " + (xhr.responseJSON?.message || xhr.responseText));
+            }
+        });
+    });
+        @* showLoading(); *@
+    function submitMainForm() {
+        let formData = new FormData();
+        formData.append("NoReferensi", $('#NoReferensi-custom').val());
+        formData.append("Tanggal", $('#x_Tanggal').val()); 
+        formData.append("Lokasi", $('#x_Lokasi').val());
+        formData.append("Keterangan", $('#x_Keterangan').val());
+        formData.append("Ketidaksesuaiaan", $('#x_Ketidaksesuaiaan').val());
+        formData.append("Menu", "POV");
+        formData.append("VerifikasiMOD", selfieBlob, "selfie-verification.jpg");
+        filesArr.forEach((file) => {
+            formData.append("files", file);
+        });
+        $.ajax({
+            url: parent_url + "api/LookUpList/UploadDocumentGHKandPOV",
+            type: "POST",
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(rs){
+                @* hideLoading(); *@
+                if (rs.success) {
+                    ew.alert(rs.message);
+                    setTimeout(function() {
+                        window.location.href = `${parent_url}FormInputProofOfVisitList?cmd=search&x_NoReferensi%5B%5D=${NoReferensi}&search=&searchtype=`;
+                    }, 2000);
+                } else {
+                    ew.alert(rs.message);
+                }
+            },
+            error: function(xhr){
+                @* hideLoading(); *@
+                ew.alert("Upload gagal: " + xhr.responseText);
+            }
+        });
+    };
+    const $lokasiSelect = $("#x_Lokasi");
+    const $keteranganLabelDiv = $('#x_Keterangan').closest('.row').find('.col-2.fw-bold');
+    function toggleKeteranganMandatory() {
+        const isOthersSelected = $lokasiSelect.val() === '7'; 
+        const $asterisk = $keteranganLabelDiv.find("span.keterangan-required");
+        if (isOthersSelected) {
+            if ($asterisk.length === 0) {
+                $keteranganLabelDiv.append('<span class="text-danger keterangan-required ms-1">*</span>');
+            }
+        } else {
+            $asterisk.remove();
+        }
+    }
+    $lokasiSelect.on("change", toggleKeteranganMandatory);
+    toggleKeteranganMandatory();
+});
+</script>
+@formInputProofOfVisitAdd.ShowPageHeader()
+@formInputProofOfVisitAdd.ShowMessages()
+<form name="fFormInputProofOfVisitadd" id="fFormInputProofOfVisitadd" class="@(formInputProofOfVisitAdd.FormClassName)" action="@AppPath(CurrentPageName())" method="post" novalidate autocomplete="off">
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+<input type="hidden" name="action" id="action" value="insert">
+<input type="hidden" name="modal" value="@ConvertToInt(formInputProofOfVisitAdd.IsModal)">
+@if (IsJsonResponse()) {
+<input type="hidden" name="json" value="1">
+}
+<input type="hidden" name="@(formInputProofOfVisitAdd.OldKeyName)" value="@Html.Raw(formInputProofOfVisitAdd.OldKey)">
+<div class="ew-add-div d-none"><!-- page* -->
+@if (formInputProofOfVisitAdd.NoReferensi.Visible) { // formInputProofOfVisitAdd.NoReferensi.Visible (begin)
+    <div id="r_NoReferensi" @Html.Raw(formInputProofOfVisitAdd.NoReferensi.RowAttributes)>
+        <label id="elh_FormInputProofOfVisit_NoReferensi" for="x_NoReferensi" class="@(formInputProofOfVisitAdd.LeftColumnClass)"><template id="tpc_FormInputProofOfVisit_NoReferensi">@Html.Raw(formInputProofOfVisitAdd.NoReferensi.Caption)@Html.Raw(formInputProofOfVisitAdd.NoReferensi.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(formInputProofOfVisitAdd.RightColumnClass)"><div @Html.Raw(formInputProofOfVisitAdd.NoReferensi.CellAttributes)>
+<template id="tpx_FormInputProofOfVisit_NoReferensi"><span id="el_FormInputProofOfVisit_NoReferensi">
+<input type="@(formInputProofOfVisitAdd.NoReferensi.InputTextType)" name="x_NoReferensi" id="x_NoReferensi" data-table="FormInputProofOfVisit" data-field="x_NoReferensi" value="@Html.Raw(formInputProofOfVisitAdd.NoReferensi.EditValue)" size="30" maxlength="255" placeholder="@Html.Raw(HtmlEncode(formInputProofOfVisitAdd.NoReferensi.PlaceHolder))" data-format-pattern="@(formInputProofOfVisitAdd.NoReferensi.FormatPattern)"@Html.Raw(formInputProofOfVisitAdd.NoReferensi.EditAttributes) aria-describedby="x_NoReferensi_help">
+@Html.Raw(formInputProofOfVisitAdd.NoReferensi.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(formInputProofOfVisitAdd.NoReferensi.GetErrorMessage())</div>
+</span></template>
+</div></div>
+    </div>
+} @* formInputProofOfVisitAdd.NoReferensi.Visible (end) *@
+@if (formInputProofOfVisitAdd.Tanggal.Visible) { // formInputProofOfVisitAdd.Tanggal.Visible (begin)
+    <div id="r_Tanggal" @Html.Raw(formInputProofOfVisitAdd.Tanggal.RowAttributes)>
+        <label id="elh_FormInputProofOfVisit_Tanggal" for="x_Tanggal" class="@(formInputProofOfVisitAdd.LeftColumnClass)"><template id="tpc_FormInputProofOfVisit_Tanggal">@Html.Raw(formInputProofOfVisitAdd.Tanggal.Caption)@Html.Raw(formInputProofOfVisitAdd.Tanggal.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(formInputProofOfVisitAdd.RightColumnClass)"><div @Html.Raw(formInputProofOfVisitAdd.Tanggal.CellAttributes)>
+<template id="tpx_FormInputProofOfVisit_Tanggal"><span id="el_FormInputProofOfVisit_Tanggal">
+<input type="@(formInputProofOfVisitAdd.Tanggal.InputTextType)" name="x_Tanggal" id="x_Tanggal" data-table="FormInputProofOfVisit" data-field="x_Tanggal" value="@Html.Raw(formInputProofOfVisitAdd.Tanggal.EditValue)" placeholder="@Html.Raw(HtmlEncode(formInputProofOfVisitAdd.Tanggal.PlaceHolder))" data-format-pattern="@(formInputProofOfVisitAdd.Tanggal.FormatPattern)"@Html.Raw(formInputProofOfVisitAdd.Tanggal.EditAttributes) aria-describedby="x_Tanggal_help">
+@Html.Raw(formInputProofOfVisitAdd.Tanggal.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(formInputProofOfVisitAdd.Tanggal.GetErrorMessage())</div>
+@if (!formInputProofOfVisitAdd.Tanggal.ReadOnly && !formInputProofOfVisitAdd.Tanggal.Disabled && !formInputProofOfVisitAdd.Tanggal.EditAttrs.Is("readonly") && !formInputProofOfVisitAdd.Tanggal.EditAttrs.Is("disabled")) {
+<script>
+loadjs.ready(["fFormInputProofOfVisitadd", "datetimepicker"], function () {
+    let format = "@Html.Raw(DateFormat(109))", // DN
+        options = {
+                localization: {
+                    locale: ew.LANGUAGE_ID + "-u-nu-" + ew.getNumberingSystem(),
+                    hourCycle: format.match(/H/) ? "h24" : "h12",
+                    format,
+                    ...ew.language.phrase("datetimepicker")
+                },
+                display: {
+                    icons: {
+                        previous: ew.IS_RTL ? "fa-solid fa-chevron-right" : "fa-solid fa-chevron-left",
+                        next: ew.IS_RTL ? "fa-solid fa-chevron-left" : "fa-solid fa-chevron-right"
+                    },
+                    components: {
+                        clock: !!format.match(/h/i) || !!format.match(/m/) || !!format.match(/s/i),
+                        hours: !!format.match(/h/i),
+                        minutes: !!format.match(/m/),
+                        seconds: !!format.match(/s/i)
+                    },
+                theme: ew.getPreferredTheme()
+                }
+            };
+    ew.createDateTimePicker("fFormInputProofOfVisitadd", "x_Tanggal", ew.deepAssign({"useCurrent":false,"display":{"sideBySide":false}}, options));
+});
+</script>
+}
+</span></template>
+</div></div>
+    </div>
+} @* formInputProofOfVisitAdd.Tanggal.Visible (end) *@
+@if (formInputProofOfVisitAdd.Lokasi.Visible) { // formInputProofOfVisitAdd.Lokasi.Visible (begin)
+    <div id="r_Lokasi" @Html.Raw(formInputProofOfVisitAdd.Lokasi.RowAttributes)>
+        <label id="elh_FormInputProofOfVisit_Lokasi" for="x_Lokasi" class="@(formInputProofOfVisitAdd.LeftColumnClass)"><template id="tpc_FormInputProofOfVisit_Lokasi">@Html.Raw(formInputProofOfVisitAdd.Lokasi.Caption)@Html.Raw(formInputProofOfVisitAdd.Lokasi.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(formInputProofOfVisitAdd.RightColumnClass)"><div @Html.Raw(formInputProofOfVisitAdd.Lokasi.CellAttributes)>
+<template id="tpx_FormInputProofOfVisit_Lokasi"><span id="el_FormInputProofOfVisit_Lokasi">
+    <select
+        id="x_Lokasi"
+        name="x_Lokasi"
+        class="form-select ew-select@(formInputProofOfVisitAdd.Lokasi.IsInvalidClass)"
+        data-select2-id="fFormInputProofOfVisitadd_x_Lokasi"
+        data-table="FormInputProofOfVisit"
+        data-field="x_Lokasi"
+        data-value-separator="@(formInputProofOfVisitAdd.Lokasi.DisplayValueSeparatorAttribute)"
+        data-placeholder="@(HtmlEncode(formInputProofOfVisitAdd.Lokasi.PlaceHolder))"
+        @Html.Raw(formInputProofOfVisitAdd.Lokasi.EditAttributes)>
+        @(formInputProofOfVisitAdd.Lokasi.SelectOptionListHtml("x_Lokasi"))
+    </select>
+    @Html.Raw(formInputProofOfVisitAdd.Lokasi.GetCustomMessage)
+    <div class="invalid-feedback">@Html.Raw(formInputProofOfVisitAdd.Lokasi.GetErrorMessage())</div>
+@Html.Raw(formInputProofOfVisitAdd.Lokasi.Lookup.GetParamTag(formInputProofOfVisitAdd, "p_x_Lokasi"))
+<script>
+loadjs.ready("fFormInputProofOfVisitadd", function() {
+    var options = { name: "x_Lokasi", selectId: "fFormInputProofOfVisitadd_x_Lokasi" },
+        el = document.querySelector("select[data-select2-id='" + options.selectId + "']");
+    if (!el)
+        return;
+    options.closeOnSelect = !options.multiple;
+    options.dropdownParent = el.closest("#ew-modal-dialog, #ew-add-opt-dialog");
+    if (fFormInputProofOfVisitadd.lists.Lokasi?.lookupOptions.length) {
+        options.data = { id: "x_Lokasi", form: "fFormInputProofOfVisitadd" };
+    } else {
+        options.ajax = { id: "x_Lokasi", form: "fFormInputProofOfVisitadd", limit: ew.LOOKUP_PAGE_SIZE };
+    }
+    options.minimumResultsForSearch = Infinity;
+    options = Object.assign({}, ew.selectOptions, options, ew.vars.tables.FormInputProofOfVisit.fields.Lokasi.selectOptions);
+    ew.createSelect(options);
+});
+</script>
+</span></template>
+</div></div>
+    </div>
+} @* formInputProofOfVisitAdd.Lokasi.Visible (end) *@
+@if (formInputProofOfVisitAdd.Ketidaksesuaiaan.Visible) { // formInputProofOfVisitAdd.Ketidaksesuaiaan.Visible (begin)
+    <div id="r_Ketidaksesuaiaan" @Html.Raw(formInputProofOfVisitAdd.Ketidaksesuaiaan.RowAttributes)>
+        <label id="elh_FormInputProofOfVisit_Ketidaksesuaiaan" for="x_Ketidaksesuaiaan" class="@(formInputProofOfVisitAdd.LeftColumnClass)"><template id="tpc_FormInputProofOfVisit_Ketidaksesuaiaan">@Html.Raw(formInputProofOfVisitAdd.Ketidaksesuaiaan.Caption)@Html.Raw(formInputProofOfVisitAdd.Ketidaksesuaiaan.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(formInputProofOfVisitAdd.RightColumnClass)"><div @Html.Raw(formInputProofOfVisitAdd.Ketidaksesuaiaan.CellAttributes)>
+<template id="tpx_FormInputProofOfVisit_Ketidaksesuaiaan"><span id="el_FormInputProofOfVisit_Ketidaksesuaiaan">
+    <select
+        id="x_Ketidaksesuaiaan"
+        name="x_Ketidaksesuaiaan"
+        class="form-select ew-select@(formInputProofOfVisitAdd.Ketidaksesuaiaan.IsInvalidClass)"
+        data-select2-id="fFormInputProofOfVisitadd_x_Ketidaksesuaiaan"
+        data-table="FormInputProofOfVisit"
+        data-field="x_Ketidaksesuaiaan"
+        data-value-separator="@(formInputProofOfVisitAdd.Ketidaksesuaiaan.DisplayValueSeparatorAttribute)"
+        data-placeholder="@(HtmlEncode(formInputProofOfVisitAdd.Ketidaksesuaiaan.PlaceHolder))"
+        @Html.Raw(formInputProofOfVisitAdd.Ketidaksesuaiaan.EditAttributes)>
+        @(formInputProofOfVisitAdd.Ketidaksesuaiaan.SelectOptionListHtml("x_Ketidaksesuaiaan"))
+    </select>
+    @Html.Raw(formInputProofOfVisitAdd.Ketidaksesuaiaan.GetCustomMessage)
+    <div class="invalid-feedback">@Html.Raw(formInputProofOfVisitAdd.Ketidaksesuaiaan.GetErrorMessage())</div>
+<script>
+loadjs.ready("fFormInputProofOfVisitadd", function() {
+    var options = { name: "x_Ketidaksesuaiaan", selectId: "fFormInputProofOfVisitadd_x_Ketidaksesuaiaan" },
+        el = document.querySelector("select[data-select2-id='" + options.selectId + "']");
+    if (!el)
+        return;
+    options.closeOnSelect = !options.multiple;
+    options.dropdownParent = el.closest("#ew-modal-dialog, #ew-add-opt-dialog");
+    if (fFormInputProofOfVisitadd.lists.Ketidaksesuaiaan?.lookupOptions.length) {
+        options.data = { id: "x_Ketidaksesuaiaan", form: "fFormInputProofOfVisitadd" };
+    } else {
+        options.ajax = { id: "x_Ketidaksesuaiaan", form: "fFormInputProofOfVisitadd", limit: ew.LOOKUP_PAGE_SIZE };
+    }
+    options.minimumResultsForSearch = Infinity;
+    options = Object.assign({}, ew.selectOptions, options, ew.vars.tables.FormInputProofOfVisit.fields.Ketidaksesuaiaan.selectOptions);
+    ew.createSelect(options);
+});
+</script>
+</span></template>
+</div></div>
+    </div>
+} @* formInputProofOfVisitAdd.Ketidaksesuaiaan.Visible (end) *@
+@if (formInputProofOfVisitAdd.Keterangan.Visible) { // formInputProofOfVisitAdd.Keterangan.Visible (begin)
+    <div id="r_Keterangan" @Html.Raw(formInputProofOfVisitAdd.Keterangan.RowAttributes)>
+        <label id="elh_FormInputProofOfVisit_Keterangan" for="x_Keterangan" class="@(formInputProofOfVisitAdd.LeftColumnClass)"><template id="tpc_FormInputProofOfVisit_Keterangan">@Html.Raw(formInputProofOfVisitAdd.Keterangan.Caption)@Html.Raw(formInputProofOfVisitAdd.Keterangan.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(formInputProofOfVisitAdd.RightColumnClass)"><div @Html.Raw(formInputProofOfVisitAdd.Keterangan.CellAttributes)>
+<template id="tpx_FormInputProofOfVisit_Keterangan"><span id="el_FormInputProofOfVisit_Keterangan">
+<textarea data-table="FormInputProofOfVisit" data-field="x_Keterangan" name="x_Keterangan" id="x_Keterangan" cols="35" rows="4" placeholder="@Html.Raw(HtmlEncode(formInputProofOfVisitAdd.Keterangan.PlaceHolder))"@Html.Raw(formInputProofOfVisitAdd.Keterangan.EditAttributes) aria-describedby="x_Keterangan_help">@(formInputProofOfVisitAdd.Keterangan.EditValue)</textarea>
+@Html.Raw(formInputProofOfVisitAdd.Keterangan.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(formInputProofOfVisitAdd.Keterangan.GetErrorMessage())</div>
+</span></template>
+</div></div>
+    </div>
+} @* formInputProofOfVisitAdd.Keterangan.Visible (end) *@
+@if (formInputProofOfVisitAdd.IdPosition.Visible) { // formInputProofOfVisitAdd.IdPosition.Visible (begin)
+    <div id="r_IdPosition" @Html.Raw(formInputProofOfVisitAdd.IdPosition.RowAttributes)>
+        <label id="elh_FormInputProofOfVisit_IdPosition" for="x_IdPosition" class="@(formInputProofOfVisitAdd.LeftColumnClass)"><template id="tpc_FormInputProofOfVisit_IdPosition">@Html.Raw(formInputProofOfVisitAdd.IdPosition.Caption)@Html.Raw(formInputProofOfVisitAdd.IdPosition.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(formInputProofOfVisitAdd.RightColumnClass)"><div @Html.Raw(formInputProofOfVisitAdd.IdPosition.CellAttributes)>
+<template id="tpx_FormInputProofOfVisit_IdPosition"><span id="el_FormInputProofOfVisit_IdPosition">
+<input type="@(formInputProofOfVisitAdd.IdPosition.InputTextType)" name="x_IdPosition" id="x_IdPosition" data-table="FormInputProofOfVisit" data-field="x_IdPosition" value="@Html.Raw(formInputProofOfVisitAdd.IdPosition.EditValue)" size="30" placeholder="@Html.Raw(HtmlEncode(formInputProofOfVisitAdd.IdPosition.PlaceHolder))" data-format-pattern="@(formInputProofOfVisitAdd.IdPosition.FormatPattern)"@Html.Raw(formInputProofOfVisitAdd.IdPosition.EditAttributes) aria-describedby="x_IdPosition_help">
+@Html.Raw(formInputProofOfVisitAdd.IdPosition.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(formInputProofOfVisitAdd.IdPosition.GetErrorMessage())</div>
+</span></template>
+</div></div>
+    </div>
+} @* formInputProofOfVisitAdd.IdPosition.Visible (end) *@
+@if (formInputProofOfVisitAdd.VerifikasiMOD.Visible) { // formInputProofOfVisitAdd.VerifikasiMOD.Visible (begin)
+    <div id="r_VerifikasiMOD" @Html.Raw(formInputProofOfVisitAdd.VerifikasiMOD.RowAttributes)>
+        <label id="elh_FormInputProofOfVisit_VerifikasiMOD" for="x_VerifikasiMOD" class="@(formInputProofOfVisitAdd.LeftColumnClass)"><template id="tpc_FormInputProofOfVisit_VerifikasiMOD">@Html.Raw(formInputProofOfVisitAdd.VerifikasiMOD.Caption)@Html.Raw(formInputProofOfVisitAdd.VerifikasiMOD.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(formInputProofOfVisitAdd.RightColumnClass)"><div @Html.Raw(formInputProofOfVisitAdd.VerifikasiMOD.CellAttributes)>
+<template id="tpx_FormInputProofOfVisit_VerifikasiMOD"><span id="el_FormInputProofOfVisit_VerifikasiMOD">
+<input type="@(formInputProofOfVisitAdd.VerifikasiMOD.InputTextType)" name="x_VerifikasiMOD" id="x_VerifikasiMOD" data-table="FormInputProofOfVisit" data-field="x_VerifikasiMOD" value="@Html.Raw(formInputProofOfVisitAdd.VerifikasiMOD.EditValue)" size="30" maxlength="255" placeholder="@Html.Raw(HtmlEncode(formInputProofOfVisitAdd.VerifikasiMOD.PlaceHolder))" data-format-pattern="@(formInputProofOfVisitAdd.VerifikasiMOD.FormatPattern)"@Html.Raw(formInputProofOfVisitAdd.VerifikasiMOD.EditAttributes) aria-describedby="x_VerifikasiMOD_help">
+@Html.Raw(formInputProofOfVisitAdd.VerifikasiMOD.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(formInputProofOfVisitAdd.VerifikasiMOD.GetErrorMessage())</div>
+</span></template>
+</div></div>
+    </div>
+} @* formInputProofOfVisitAdd.VerifikasiMOD.Visible (end) *@
+</div><!-- /page* -->
+<div id="tpd_FormInputProofOfVisitadd" class="ew-custom-template"></div>
+<template id="tpm_FormInputProofOfVisitadd">
+<div id="ct_formInputProofOfVisitAdd">@{
+    string NoReferensi = HttpContext.Request.Query["NoReferensi"];
+}
+<style>
+    .ew-buttons {
+        display: none;
+    }
+    .view-page-table td {
+        white-space: normal !important;
+        word-wrap: break-word;
+    }
+    .view-page-table th {
+        background-color: #006BB7;
+    }
+    .body-table {
+        background-color: #fff;
+    }
+    .header-table {
+        background-color: #006BB7 !important;
+        color: #fff !important;
+    }
+    .view-page-table {
+        table-layout: fixed;
+    }
+    .btn {
+        white-space: nowrap;
+    }
+    .file-input-wrapper {
+        border: 1px solid #ced4da;
+        border-radius: .375rem;
+        overflow: hidden;
+        transition: border-color .15s, box-shadow .15s;
+    }
+    .file-input-wrapper:focus-within {
+        border-color: #86b7fe;
+        box-shadow: 0 0 0 .25rem rgba(13,110,253,.25);
+    }
+    .file-input-wrapper .btn {
+        border-radius: 0;
+    }
+    .file-input-wrapper .form-control {
+        border: none;
+        box-shadow: none !important;
+    }
+</style>
+<form id="CustomFormPOV" autocomplete="off">
+    <div class="row mb-3">
+        <div class="col-2 fw-bold d-flex align-items-center gap-2">
+            @Html.Raw(formInputProofOfVisitAdd.NoReferensi.Caption)
+            <span class="text-danger">*</span>
+        </div>
+        <div class="col-10">
+            <input type="text" class="form-control-plaintext" id="NoReferensi-custom" name="NoReferensi-custom" readonly value="@(NoReferensi)">
+        </div>
+    </div>
+    <div class="row mb-3">
+        <div class="col-2 fw-bold d-flex align-items-center gap-2">
+            @Html.Raw(formInputProofOfVisitAdd.VerifikasiMOD.Caption)
+            <span class="text-danger">*</span>
+        </div>
+        <div class="col-10">
+            <div id="selfie-container">
+                <button type="button" id="selfie-trigger" class="btn btn-info">
+                    <i class="fa-solid fa-camera me-2"></i>Take Selfie for Verification
+                </button>
+                <img id="selfie-preview" src="" alt="Selfie Preview" class="img-thumbnail ms-3" style="display: none; max-width: 150px;"/>
+            </div>
+            <div id="camera-view" style="display: none; margin-top: 15px; border: 1px solid #ddd; padding: 10px; border-radius: 5px; background-color: #f8f9fa;">
+                <video id="selfie-video" width="100%" autoplay playsinline></video>
+                <button type="button" id="capture-button" class="btn btn-success mt-2">
+                    <i class="fa-solid fa-circle-check me-2"></i>Capture Photo
+                </button>
+                <button type="button" id="cancel-capture-button" class="btn btn-secondary mt-2">
+                    <i class="fa-solid fa-times me-2"></i>Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="row mb-3">
+        <div class="col-2 fw-bold d-flex align-items-center gap-2">
+            @Html.Raw(formInputProofOfVisitAdd.Tanggal.Caption)
+            <span class="text-danger">*</span>
+        </div>
+        <div class="col-10">
+            <slot class="ew-slot" name="tpx_FormInputProofOfVisit_Tanggal"></slot>
+        </div>
+    </div>
+    <div class="row mb-3">
+        <div class="col-2 fw-bold d-flex align-items-center gap-2">
+            @Html.Raw(formInputProofOfVisitAdd.Lokasi.Caption)
+            <span class="text-danger">*</span>
+        </div>
+        <div class="col-10">
+            <slot class="ew-slot" name="tpx_FormInputProofOfVisit_Lokasi"></slot>
+        </div>
+    </div>
+    <div class="row mb-3">
+        <div class="col-2 fw-bold d-flex gap-2">
+            @Html.Raw(formInputProofOfVisitAdd.UploadFoto.Caption)
+            <span class="text-danger">*</span>
+        </div>
+        <div class="col-10">
+            <div class="input-group file-input-wrapper">
+                <label class="btn btn-primary mb-0">
+                    Add Images <input type="file" id="fileInput" hidden multiple>
+                </label>
+                <input type="text" class="form-control" style="cursor: pointer;" id="fileName" value="Add Images" readonly>
+            </div>
+            <small class="text-muted">Maximum file size: 20 MB</small>
+            <div class="border rounded p-0 mt-2" id="row-table" style="display: none;">
+                <table aria-hidden="true" class="table table-hover view-page-table w-100 m-0" id="fileTable">
+                    <thead>
+                        <tr>
+                            <th width="5%" class="fw-bold header-table">No</th>
+                            <th class="fw-bold header-table">Nama File</th>
+                            <th width="10%" class="fw-bold header-table"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- js render -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="row mb-3">
+        <div class="col-2 fw-bold d-flex align-items-center gap-2">
+            @Html.Raw(formInputProofOfVisitAdd.Ketidaksesuaiaan.Caption)
+            <span class="text-danger">*</span>
+        </div>
+        <div class="col-10">
+            <slot class="ew-slot" name="tpx_FormInputProofOfVisit_Ketidaksesuaiaan"></slot>
+        </div>
+    </div>
+    <div class="row mb-3">
+        <div class="col-2 fw-bold d-flex">
+            @Html.Raw(formInputProofOfVisitAdd.Keterangan.Caption)
+        </div>
+        <div class="col-10">
+            <slot class="ew-slot" name="tpx_FormInputProofOfVisit_Keterangan"></slot>
+        </div>
+    </div>
+    <div class="row mb-3">
+        <div class="col-2 fw-bold d-flex align-items-center">
+        </div>
+        <div class="col-10">
+            <button id="btn-submit-custom" class="btn btn-primary ew-btn" type="button">
+                <i class="fas fa-upload me-2"></i>Add
+            </button>
+            <button id="btn-cancel-custom" class="btn btn-default ew-btn" type="button">
+                <i class="fas fa-ban me-2"></i>cancel
+            </button>
+        </div>
+    </div>
+</form></div>
+</template>
+@{ formInputProofOfVisitAdd.CloseRecordset(); }
+@Html.Raw(formInputProofOfVisitAdd.IsModal ? "<template class=\"ew-modal-buttons\">" : "<div class=\"row ew-buttons\">")<!-- buttons .row -->
+    <div class="@(formInputProofOfVisitAdd.OffsetColumnClass)"><!-- buttons offset -->
+    <button class="btn btn-primary ew-btn" name="btn-action" id="btn-action" type="submit" form="fFormInputProofOfVisitadd">@Html.Raw(Language.Phrase("AddBtn"))</button>
+@if (IsJsonResponse()) {
+    <button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" data-bs-dismiss="modal">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+} else {
+    <button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" form="fFormInputProofOfVisitadd" data-href="@AppPath(formInputProofOfVisitAdd.ReturnUrl)">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+}
+    </div><!-- /buttons offset -->
+@Html.Raw(formInputProofOfVisitAdd.IsModal ? "</template>" : "</div>")<!-- /buttons .row -->
+</form>
+<script class="ew-apply-template">
+loadjs.ready(ew.applyTemplateId, function() {
+    var $ = jQuery;
+    ew.templateData = { rows: @Html.Raw(ConvertToJson(formInputProofOfVisitAdd.Rows)) };
+    ew.applyTemplate("tpd_FormInputProofOfVisitadd", "tpm_FormInputProofOfVisitadd", "FormInputProofOfVisitadd", "@(formInputProofOfVisitAdd.Export)", "FormInputProofOfVisit", ew.templateData.rows[0], @(formInputProofOfVisitAdd.IsModal ? "true" : "false"));
+    loadjs.done("customtemplate");
+});
+</script>
+@formInputProofOfVisitAdd.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("FormInputProofOfVisit");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Startup script
+    // Write your table-specific startup script here
+    /* === Set otomatis Tanggal (yyyy/mm/dd hh:mm:ss) === */
+    function setTanggal() {
+      const today = new Date();
+      const formattedDate =
+        today.getFullYear() + "/" +
+        String(today.getMonth() + 1).padStart(2, "0") + "/" +
+        String(today.getDate()).padStart(2, "0") + " " +
+        String(today.getHours()).padStart(2, "0") + ":" +
+        String(today.getMinutes()).padStart(2, "0") + ":" +
+        String(today.getSeconds()).padStart(2, "0");
+      const el = document.getElementById("x_Tanggal");
+      if (el) el.value = formattedDate;
+    }
+    window.onload = function () { setTanggal(); };
+    const parent_url = ew.PATH_BASE;
+
+    /* ==== Ambil NoReferensi dari URL / form ==== */
+    function resolveNoRef() {
+      const qs = new URLSearchParams(location.search);
+      let v = (qs.getAll("NoReferensi")[0] || qs.getAll("x_NoReferensi[]")[0] || "").trim();
+      if (!v) v = (qs.get("x_NoReferensi") || "").trim();
+      if (!v) v = ($('input[name="x_NoReferensi[]"]').val() || $('input[name="x_NoReferensi"]').val() || "").trim();
+      return v;
+    }
+    const NoReferensi = resolveNoRef();
+
+    /* ==== Guard akses: OH (Rule 10) bebas; lainnya harus MOD (API GetMODForPOV) ==== */
+    (function () {
+      const role = parseInt('@CurrentUserInfo("Rule")') || 0; // jaga agar null tidak auto-lolos
+      if (role === 0 || role === 10) return;
+      const noRef = NoReferensi;
+      if (!noRef) return; // tanpa NoRef, biarkan default
+
+      // KUNCI UI jika ditolak + AKTIFKAN CANCEL + ALERT container
+      const denyAccess = (msg) => {
+        const $form = $("#fFormInputProofOfVisitadd");
+        const backUrl = `${parent_url}FormInputProofOfVisitList?cmd=search&x_NoReferensi%5B%5D=${encodeURIComponent(noRef)}`;
+
+        // Kandidat tombol cancel (termasuk custom)
+        const $cancelCandidates = $(
+          '#btn-cancel-custom, a[data-ew-action="cancel"], button[name="btn-cancel"], a.btn-secondary, a.btn-default'
+        );
+        if ($form.length) {
+          // 1) Disable semua kontrol KECUALI kandidat cancel
+          $form
+            .find("input,select,textarea,button")
+            .not($cancelCandidates) // <-- jangan matikan tombol cancel
+            .prop("disabled", true);
+
+          // 2) Sembunyikan tombol aksi utama (save/submit)
+          $form.find('button[name="btn-action"], button[name="btn-submit"], .ew-btn[data-ew-action]').hide();
+
+          // 3) AKTIFKAN tombol Cancel & pasang handler ke List
+          const enableCancel = ($el) => {
+            if (!$el || !$el.length) return;
+
+            // Jika anchor set href; jika button pasang click handler
+            if ($el.is("a")) {
+              $el.attr("href", backUrl);
+            } else {
+              $el.off("click").on("click", function (e) {
+                e.preventDefault();
+                window.location.href = backUrl;
+              });
+            }
+            $el
+              .prop("disabled", false)
+              .removeAttr("disabled")
+              .removeClass("disabled")
+              .css("pointer-events", "auto")
+              .show();
+          };
+
+          // Aktifkan semua kandidat cancel
+          $cancelCandidates.each(function () { enableCancel($(this)); });
+
+          // 4) Jika tak ada tombol cancel sama sekali buat fallback
+          if (!$cancelCandidates.length && !$("#btn-cancel-fallback").length) {
+            const $fallback = $(`
+              <a class="btn btn-secondary ms-2" id="btn-cancel-fallback" href="${backUrl}">
+                <i class="fa-solid fa-xmark"></i> Cancel
+              </a>
+            `);
+            const $btnWrap = $form.find('button[name="btn-submit"]').first().parent();
+            ($btnWrap.length ? $btnWrap : $(".ew-toolbar").first()).append($fallback);
+          }
+        }
+
+        // 5) Tampilkan ALERT container (seperti SetUserMOD)
+        const $container = $(".content .container-fluid").first();
+        const $alert = $(`
+          <div class="alert alert-warning d-flex align-items-start mt-3" role="alert" id="no-access-alert">
+            <i class="fa-solid fa-triangle-exclamation me-2 mt-1"></i>
+            <div>
+              <div class="fw-bold">Tidak ada akses untuk mengisi Form Input Proof of Visit.</div>
+              <div class="small">
+                ${msg || "Akses dibatasi: hanya User MOD / OH / Admin yang dapat menambah data."}
+                <br>Solusi: <em>Ganti Akun</em> atau <em>minta diberikan akses oleh OH</em>.
+              </div>
+              <div class="mt-2">
+                <a href="${parent_url}logout" class="btn btn-outline-secondary btn-sm me-2">
+                  <i class="fa-solid fa-right-from-bracket"></i> Ganti Akun
+                </a>
+                <a href="${backUrl}" class="btn btn-primary btn-sm">
+                  <i class="fa-solid fa-list"></i> Kembali ke List
+                </a>
+              </div>
+            </div>
+          </div>
+        `);
+        if ($container.length) $container.prepend($alert); else $("body").prepend($alert);
+
+        // 6) Pastikan tombol Cancel custom tetap aktif meski ada script lain yang disable ulang
+        setTimeout(() => {
+          $("#btn-cancel-custom").prop("disabled", false).removeAttr("disabled").removeClass("disabled");
+        }, 0);
+
+        // 7) Scroll ke atas agar alert terlihat
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      };
+
+      // Panggil API checker MOD
+      $.get(ew.PATH_BASE + "api/LookUpList/GetMODForPOV", { noRef })
+        .done(function (res) {
+          if (!res || res.success !== true || res.isCurrentUserMOD !== true) {
+            denyAccess("Anda bukan User MOD untuk plant & tanggal ini. Minta akses ke OH atau gunakan akun yang tepat.");
+          }
+        })
+        .fail(function () {
+          denyAccess("Gagal memverifikasi MOD. Hubungi Administrator / OH.");
+        });
+    })();
+});
+</script>

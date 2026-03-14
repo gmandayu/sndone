@@ -1,0 +1,665 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (samplingLabTestAdd.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = samplingLabTestAdd.UseLayout ? "_Layout" : "";
+}
+<script>
+var currentTable = @Html.Raw(ConvertToJson(samplingLabTestAdd.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { SamplingLabTest: currentTable } });
+var currentPageID = ew.PAGE_ID = "add";
+var currentForm;
+var fSamplingLabTestadd;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("fSamplingLabTestadd")
+        .setPageId("add")
+
+        // Add fields
+        .setFields([
+
+            ["NomorSamplingLabTest", [fields.NomorSamplingLabTest.visible && fields.NomorSamplingLabTest.required ? ew.Validators.required(fields.NomorSamplingLabTest.caption) : null], fields.NomorSamplingLabTest.isInvalid],
+            ["LookupPlant", [fields.LookupPlant.visible && fields.LookupPlant.required ? ew.Validators.required(fields.LookupPlant.caption) : null], fields.LookupPlant.isInvalid],
+            ["IdPlant", [fields.IdPlant.visible && fields.IdPlant.required ? ew.Validators.required(fields.IdPlant.caption) : null, ew.Validators.integer], fields.IdPlant.isInvalid],
+            ["LookupIdReferensi", [fields.LookupIdReferensi.visible && fields.LookupIdReferensi.required ? ew.Validators.required(fields.LookupIdReferensi.caption) : null], fields.LookupIdReferensi.isInvalid],
+            ["IdTemplate", [fields.IdTemplate.visible && fields.IdTemplate.required ? ew.Validators.required(fields.IdTemplate.caption) : null], fields.IdTemplate.isInvalid],
+            ["StatusProses", [fields.StatusProses.visible && fields.StatusProses.required ? ew.Validators.required(fields.StatusProses.caption) : null], fields.StatusProses.isInvalid],
+            ["IdModa", [fields.IdModa.visible && fields.IdModa.required ? ew.Validators.required(fields.IdModa.caption) : null], fields.IdModa.isInvalid],
+            ["TipePenyaluran", [fields.TipePenyaluran.visible && fields.TipePenyaluran.required ? ew.Validators.required(fields.TipePenyaluran.caption) : null], fields.TipePenyaluran.isInvalid],
+            ["KategoriPenyaluran", [fields.KategoriPenyaluran.visible && fields.KategoriPenyaluran.required ? ew.Validators.required(fields.KategoriPenyaluran.caption) : null], fields.KategoriPenyaluran.isInvalid],
+            ["NomorPolisi", [fields.NomorPolisi.visible && fields.NomorPolisi.required ? ew.Validators.required(fields.NomorPolisi.caption) : null], fields.NomorPolisi.isInvalid],
+            ["TipeProdukSTS", [fields.TipeProdukSTS.visible && fields.TipeProdukSTS.required ? ew.Validators.required(fields.TipeProdukSTS.caption) : null], fields.TipeProdukSTS.isInvalid],
+            ["KodeProduk", [fields.KodeProduk.visible && fields.KodeProduk.required ? ew.Validators.required(fields.KodeProduk.caption) : null], fields.KodeProduk.isInvalid],
+            ["Tujuan", [fields.Tujuan.visible && fields.Tujuan.required ? ew.Validators.required(fields.Tujuan.caption) : null], fields.Tujuan.isInvalid],
+            ["Catatan", [fields.Catatan.visible && fields.Catatan.required ? ew.Validators.required(fields.Catatan.caption) : null], fields.Catatan.isInvalid],
+            ["LookupTipeProduk", [fields.LookupTipeProduk.visible && fields.LookupTipeProduk.required ? ew.Validators.required(fields.LookupTipeProduk.caption) : null], fields.LookupTipeProduk.isInvalid],
+            ["LookupJenisPlant", [fields.LookupJenisPlant.visible && fields.LookupJenisPlant.required ? ew.Validators.required(fields.LookupJenisPlant.caption) : null], fields.LookupJenisPlant.isInvalid]
+        ])
+
+        // Form_CustomValidate
+        .setCustomValidate(
+            function(fobj) { // DO NOT CHANGE THIS LINE!
+                    // Your custom validation code here, return false if invalid.
+                    return true;
+                }
+        )
+
+        // Use JavaScript validation or not
+        .setValidateRequired(ew.CLIENT_VALIDATE)
+
+        // Dynamic selection lists
+        .setLists({
+            "LookupPlant": @Html.Raw(samplingLabTestAdd.LookupPlant.ToClientList(samplingLabTestAdd)),
+            "IdPlant": @Html.Raw(samplingLabTestAdd.IdPlant.ToClientList(samplingLabTestAdd)),
+            "LookupIdReferensi": @Html.Raw(samplingLabTestAdd.LookupIdReferensi.ToClientList(samplingLabTestAdd)),
+            "IdModa": @Html.Raw(samplingLabTestAdd.IdModa.ToClientList(samplingLabTestAdd)),
+            "TipePenyaluran": @Html.Raw(samplingLabTestAdd.TipePenyaluran.ToClientList(samplingLabTestAdd)),
+            "KategoriPenyaluran": @Html.Raw(samplingLabTestAdd.KategoriPenyaluran.ToClientList(samplingLabTestAdd)),
+            "TipeProdukSTS": @Html.Raw(samplingLabTestAdd.TipeProdukSTS.ToClientList(samplingLabTestAdd)),
+            "KodeProduk": @Html.Raw(samplingLabTestAdd.KodeProduk.ToClientList(samplingLabTestAdd)),
+        })
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Client script
+    const parent_url = ew.PATH_BASE;
+    $('#fSamplingLabTestadd').on('submit', function (e) {
+        e.preventDefault();
+        const parent_url = ew.PATH_BASE;
+        const UserLevel = "@CurrentUserLevel()";
+        const idRole = '@CurrentUserInfo("Rule")?.ToString()';
+        if (UserLevel != "2" && UserLevel != "-1" && UserLevel != "4" && idRole != '3') {
+            ew.alert('Anda tidak memiliki akses untuk menambah data Sampling Lab Test.');
+            setTimeOut(() => {
+                window.location.href = parent_url+'SamplingLabTestList';
+            }, 1000);
+            return false;
+        }
+
+        // Ensure hidden Plant value is set before submit
+        const lpVal = $('#x_LookupPlant').val();
+        const hidPlantVal = $('#x_IdPlant').val();
+        if (!hidPlantVal && lpVal) {
+            $('#x_IdPlant').val(lpVal).trigger('change');
+            const $sv = $('#sv_x_IdPlant');
+            if ($sv.length) {
+                const txt = $('#x_LookupPlant option:selected').text();
+                $sv.val(txt || '');
+            }
+        }
+        if (!$('#x_IdPlant').val()) {
+            ew.alert('Pilih Plant terlebih dahulu.');
+            return false;
+        }
+        showLoading();
+        setTimeout(() => {
+            hideLoading();
+        }, 3000);
+        this.requestSubmit();
+    });
+    $('#x_LookupJenisPlant').change(function () {
+        if ($(this).val() == 'STS') {
+            $('#r_TipeProdukSTS').show();
+        } else {
+            $('#r_TipeProdukSTS').hide();
+            $('#x_TipeProdukSTS').val('');
+        }
+    });
+    $('#x_LookupPlant').on("change", function () {
+        const selectedValue = $(this).val();
+        $('#x_IdPlant').val(selectedValue).trigger('change');
+        const $sv = $('#sv_x_IdPlant');
+        if ($sv.length) {
+            const txt = $('#x_LookupPlant option:selected').text();
+            $sv.val(txt);
+        }
+        $('#x_IdReferensi').val(null).trigger('change');
+        const ddlIdReferensi = $("#x_LookupIdReferensi");
+        ddlIdReferensi.empty();
+        ddlIdReferensi.append('<option value="">Loading...</option>');
+        $.ajax({
+            url: `${parent_url}api/LookUpList/get-dropdown/lookup-penyaluran?idPlant=${encodeURIComponent(selectedValue)}&menu=SamplingLabTest`,
+            method: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                ddlIdReferensi.empty(); 
+                $.each(data, function (index, item) {
+                    ddlIdReferensi.append(`<option value="${item.NomorPenyaluran}">${item.NomorPenyaluran}</option>`);
+                });
+                ddlIdReferensi.val(null).trigger('change');
+            },
+            error: function (xhr, status, error) {
+                console.error("Gagal ambil data dropdown:", error);
+                ddlIdReferensi.empty();
+            }
+        });
+    });
+    $(document).on('select2:opening', '#x_IdReferensi', function (e) {
+        let plantVal = $('#x_IdPlant').val();
+        if (!plantVal) {
+            const lp = $('#x_LookupPlant').val();
+            if (lp) {
+                $('#x_IdPlant').val(lp).trigger('change');
+                const $sv = $('#sv_x_IdPlant');
+                if ($sv.length) {
+                    const txt = $('#x_LookupPlant option:selected').text();
+                    $sv.val(txt);
+                }
+                plantVal = lp;
+            }
+        }
+        if (!plantVal) {
+            e.preventDefault();
+            ew.alert('Pilih Plant terlebih dahulu.');
+        }
+    });
+});
+</script>
+@samplingLabTestAdd.ShowPageHeader()
+@samplingLabTestAdd.ShowMessages()
+<form name="fSamplingLabTestadd" id="fSamplingLabTestadd" class="@(samplingLabTestAdd.FormClassName)" action="@AppPath(CurrentPageName())" method="post" novalidate autocomplete="off">
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+<input type="hidden" name="action" id="action" value="insert">
+<input type="hidden" name="modal" value="@ConvertToInt(samplingLabTestAdd.IsModal)">
+@if (IsJsonResponse()) {
+<input type="hidden" name="json" value="1">
+}
+<input type="hidden" name="@(samplingLabTestAdd.OldKeyName)" value="@Html.Raw(samplingLabTestAdd.OldKey)">
+<div class="ew-add-div"><!-- page* -->
+@if (samplingLabTestAdd.NomorSamplingLabTest.Visible) { // samplingLabTestAdd.NomorSamplingLabTest.Visible (begin)
+    <div id="r_NomorSamplingLabTest" @Html.Raw(samplingLabTestAdd.NomorSamplingLabTest.RowAttributes)>
+        <label id="elh_SamplingLabTest_NomorSamplingLabTest" for="x_NomorSamplingLabTest" class="@(samplingLabTestAdd.LeftColumnClass)">@Html.Raw(samplingLabTestAdd.NomorSamplingLabTest.Caption)@Html.Raw(samplingLabTestAdd.NomorSamplingLabTest.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(samplingLabTestAdd.RightColumnClass)"><div @Html.Raw(samplingLabTestAdd.NomorSamplingLabTest.CellAttributes)>
+<span id="el_SamplingLabTest_NomorSamplingLabTest">
+<input type="@(samplingLabTestAdd.NomorSamplingLabTest.InputTextType)" name="x_NomorSamplingLabTest" id="x_NomorSamplingLabTest" data-table="SamplingLabTest" data-field="x_NomorSamplingLabTest" value="@Html.Raw(samplingLabTestAdd.NomorSamplingLabTest.EditValue)" size="30" maxlength="50" placeholder="@Html.Raw(HtmlEncode(samplingLabTestAdd.NomorSamplingLabTest.PlaceHolder))" data-format-pattern="@(samplingLabTestAdd.NomorSamplingLabTest.FormatPattern)"@Html.Raw(samplingLabTestAdd.NomorSamplingLabTest.EditAttributes) aria-describedby="x_NomorSamplingLabTest_help">
+@Html.Raw(samplingLabTestAdd.NomorSamplingLabTest.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(samplingLabTestAdd.NomorSamplingLabTest.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* samplingLabTestAdd.NomorSamplingLabTest.Visible (end) *@
+@if (samplingLabTestAdd.LookupPlant.Visible) { // samplingLabTestAdd.LookupPlant.Visible (begin)
+    <div id="r_LookupPlant" @Html.Raw(samplingLabTestAdd.LookupPlant.RowAttributes)>
+        <label id="elh_SamplingLabTest_LookupPlant" for="x_LookupPlant" class="@(samplingLabTestAdd.LeftColumnClass)">@Html.Raw(samplingLabTestAdd.LookupPlant.Caption)@Html.Raw(samplingLabTestAdd.LookupPlant.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(samplingLabTestAdd.RightColumnClass)"><div @Html.Raw(samplingLabTestAdd.LookupPlant.CellAttributes)>
+<span id="el_SamplingLabTest_LookupPlant">
+    <select
+        id="x_LookupPlant"
+        name="x_LookupPlant"
+        class="form-select ew-select@(samplingLabTestAdd.LookupPlant.IsInvalidClass)"
+        data-select2-id="fSamplingLabTestadd_x_LookupPlant"
+        data-table="SamplingLabTest"
+        data-field="x_LookupPlant"
+        data-value-separator="@(samplingLabTestAdd.LookupPlant.DisplayValueSeparatorAttribute)"
+        data-placeholder="@(HtmlEncode(samplingLabTestAdd.LookupPlant.PlaceHolder))"
+        @Html.Raw(samplingLabTestAdd.LookupPlant.EditAttributes)>
+        @(samplingLabTestAdd.LookupPlant.SelectOptionListHtml("x_LookupPlant"))
+    </select>
+    @Html.Raw(samplingLabTestAdd.LookupPlant.GetCustomMessage)
+    <div class="invalid-feedback">@Html.Raw(samplingLabTestAdd.LookupPlant.GetErrorMessage())</div>
+<script>
+loadjs.ready("fSamplingLabTestadd", function() {
+    var options = { name: "x_LookupPlant", selectId: "fSamplingLabTestadd_x_LookupPlant" },
+        el = document.querySelector("select[data-select2-id='" + options.selectId + "']");
+    if (!el)
+        return;
+    options.closeOnSelect = !options.multiple;
+    options.dropdownParent = el.closest("#ew-modal-dialog, #ew-add-opt-dialog");
+    if (fSamplingLabTestadd.lists.LookupPlant?.lookupOptions.length) {
+        options.data = { id: "x_LookupPlant", form: "fSamplingLabTestadd" };
+    } else {
+        options.ajax = { id: "x_LookupPlant", form: "fSamplingLabTestadd", limit: ew.LOOKUP_PAGE_SIZE };
+    }
+    options.minimumInputLength = ew.selectMinimumInputLength;
+    options = Object.assign({}, ew.selectOptions, options, ew.vars.tables.SamplingLabTest.fields.LookupPlant.selectOptions);
+    ew.createSelect(options);
+});
+</script>
+</span>
+</div></div>
+    </div>
+} @* samplingLabTestAdd.LookupPlant.Visible (end) *@
+@if (samplingLabTestAdd.IdPlant.Visible) { // samplingLabTestAdd.IdPlant.Visible (begin)
+    <div id="r_IdPlant" @Html.Raw(samplingLabTestAdd.IdPlant.RowAttributes)>
+        <label id="elh_SamplingLabTest_IdPlant" class="@(samplingLabTestAdd.LeftColumnClass)">@Html.Raw(samplingLabTestAdd.IdPlant.Caption)@Html.Raw(samplingLabTestAdd.IdPlant.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(samplingLabTestAdd.RightColumnClass)"><div @Html.Raw(samplingLabTestAdd.IdPlant.CellAttributes)>
+<span id="el_SamplingLabTest_IdPlant">
+<span>@{
+    if (IsRTL) {
+        samplingLabTestAdd.IdPlant.EditAttrs["dir"] = "rtl";
+    }
+}</span>
+<span id="as_x_IdPlant" class="ew-auto-suggest">
+    <input type="text" class="form-control" name="sv_x_IdPlant" id="sv_x_IdPlant" value="@(RemoveHtml(ConvertToString(samplingLabTestAdd.IdPlant.EditValue)))" autocomplete="off" size="30" placeholder="@Html.Raw(HtmlEncode(samplingLabTestAdd.IdPlant.PlaceHolder))" data-placeholder="@Html.Raw(HtmlEncode(samplingLabTestAdd.IdPlant.PlaceHolder))" data-format-pattern="@(samplingLabTestAdd.IdPlant.FormatPattern)" @Html.Raw(samplingLabTestAdd.IdPlant.EditAttributes) aria-describedby="x_IdPlant_help">
+</span>
+<selection-list hidden class="form-control" data-table="SamplingLabTest" data-field="x_IdPlant" data-input="sv_x_IdPlant" data-value-separator="@(samplingLabTestAdd.IdPlant.DisplayValueSeparatorAttribute)" name="x_IdPlant" id="x_IdPlant" value="@(HtmlEncode(samplingLabTestAdd.IdPlant.CurrentValue))" data-ew-action="autofill"></selection-list>
+@Html.Raw(samplingLabTestAdd.IdPlant.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(samplingLabTestAdd.IdPlant.GetErrorMessage())</div>
+<script>
+loadjs.ready(["fSamplingLabTestadd"], function() {
+    fSamplingLabTestadd.createAutoSuggest(Object.assign({"id":"x_IdPlant","forceSelect":true}, { lookupAllDisplayFields: @(samplingLabTestAdd.IdPlant.Lookup.LookupAllDisplayFields ? "true" : "false") }, ew.vars.tables.SamplingLabTest.fields.IdPlant.autoSuggestOptions));
+});
+</script>
+@Html.Raw(samplingLabTestAdd.IdPlant.Lookup.GetParamTag(samplingLabTestAdd, "p_x_IdPlant"))
+</span>
+</div></div>
+    </div>
+} @* samplingLabTestAdd.IdPlant.Visible (end) *@
+@if (samplingLabTestAdd.LookupIdReferensi.Visible) { // samplingLabTestAdd.LookupIdReferensi.Visible (begin)
+    <div id="r_LookupIdReferensi" @Html.Raw(samplingLabTestAdd.LookupIdReferensi.RowAttributes)>
+        <label id="elh_SamplingLabTest_LookupIdReferensi" for="x_LookupIdReferensi" class="@(samplingLabTestAdd.LeftColumnClass)">@Html.Raw(samplingLabTestAdd.LookupIdReferensi.Caption)@Html.Raw(samplingLabTestAdd.LookupIdReferensi.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(samplingLabTestAdd.RightColumnClass)"><div @Html.Raw(samplingLabTestAdd.LookupIdReferensi.CellAttributes)>
+<span id="el_SamplingLabTest_LookupIdReferensi">
+    <select
+        id="x_LookupIdReferensi"
+        name="x_LookupIdReferensi"
+        class="form-select ew-select@(samplingLabTestAdd.LookupIdReferensi.IsInvalidClass)"
+        data-select2-id="fSamplingLabTestadd_x_LookupIdReferensi"
+        data-table="SamplingLabTest"
+        data-field="x_LookupIdReferensi"
+        data-value-separator="@(samplingLabTestAdd.LookupIdReferensi.DisplayValueSeparatorAttribute)"
+        data-placeholder="@(HtmlEncode(samplingLabTestAdd.LookupIdReferensi.PlaceHolder))"
+        @Html.Raw(samplingLabTestAdd.LookupIdReferensi.EditAttributes)>
+        @(samplingLabTestAdd.LookupIdReferensi.SelectOptionListHtml("x_LookupIdReferensi"))
+    </select>
+    @Html.Raw(samplingLabTestAdd.LookupIdReferensi.GetCustomMessage)
+    <div class="invalid-feedback">@Html.Raw(samplingLabTestAdd.LookupIdReferensi.GetErrorMessage())</div>
+<script>
+loadjs.ready("fSamplingLabTestadd", function() {
+    var options = { name: "x_LookupIdReferensi", selectId: "fSamplingLabTestadd_x_LookupIdReferensi" },
+        el = document.querySelector("select[data-select2-id='" + options.selectId + "']");
+    if (!el)
+        return;
+    options.closeOnSelect = !options.multiple;
+    options.dropdownParent = el.closest("#ew-modal-dialog, #ew-add-opt-dialog");
+    if (fSamplingLabTestadd.lists.LookupIdReferensi?.lookupOptions.length) {
+        options.data = { id: "x_LookupIdReferensi", form: "fSamplingLabTestadd" };
+    } else {
+        options.ajax = { id: "x_LookupIdReferensi", form: "fSamplingLabTestadd", limit: ew.LOOKUP_PAGE_SIZE };
+    }
+    options.minimumInputLength = ew.selectMinimumInputLength;
+    options = Object.assign({}, ew.selectOptions, options, ew.vars.tables.SamplingLabTest.fields.LookupIdReferensi.selectOptions);
+    ew.createSelect(options);
+});
+</script>
+</span>
+</div></div>
+    </div>
+} @* samplingLabTestAdd.LookupIdReferensi.Visible (end) *@
+    <span id="el_SamplingLabTest_IdTemplate">
+    <input type="hidden" data-table="SamplingLabTest" data-field="x_IdTemplate" data-hidden="1" name="x_IdTemplate" id="x_IdTemplate" value="@Html.Raw(HtmlEncode(samplingLabTestAdd.IdTemplate.CurrentValue))">
+    </span>
+    <span id="el_SamplingLabTest_StatusProses">
+    <input type="hidden" data-table="SamplingLabTest" data-field="x_StatusProses" data-hidden="1" name="x_StatusProses" id="x_StatusProses" value="@Html.Raw(HtmlEncode(samplingLabTestAdd.StatusProses.CurrentValue))">
+    </span>
+@if (samplingLabTestAdd.IdModa.Visible) { // samplingLabTestAdd.IdModa.Visible (begin)
+    <div id="r_IdModa" @Html.Raw(samplingLabTestAdd.IdModa.RowAttributes)>
+        <label id="elh_SamplingLabTest_IdModa" for="x_IdModa" class="@(samplingLabTestAdd.LeftColumnClass)">@Html.Raw(samplingLabTestAdd.IdModa.Caption)@Html.Raw(samplingLabTestAdd.IdModa.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(samplingLabTestAdd.RightColumnClass)"><div @Html.Raw(samplingLabTestAdd.IdModa.CellAttributes)>
+<span id="el_SamplingLabTest_IdModa">
+    <select
+        id="x_IdModa"
+        name="x_IdModa"
+        class="form-select ew-select@(samplingLabTestAdd.IdModa.IsInvalidClass)"
+        data-select2-id="fSamplingLabTestadd_x_IdModa"
+        data-table="SamplingLabTest"
+        data-field="x_IdModa"
+        data-value-separator="@(samplingLabTestAdd.IdModa.DisplayValueSeparatorAttribute)"
+        data-placeholder="@(HtmlEncode(samplingLabTestAdd.IdModa.PlaceHolder))"
+        @Html.Raw(samplingLabTestAdd.IdModa.EditAttributes)>
+        @(samplingLabTestAdd.IdModa.SelectOptionListHtml("x_IdModa"))
+    </select>
+    @Html.Raw(samplingLabTestAdd.IdModa.GetCustomMessage)
+    <div class="invalid-feedback">@Html.Raw(samplingLabTestAdd.IdModa.GetErrorMessage())</div>
+@Html.Raw(samplingLabTestAdd.IdModa.Lookup.GetParamTag(samplingLabTestAdd, "p_x_IdModa"))
+<script>
+loadjs.ready("fSamplingLabTestadd", function() {
+    var options = { name: "x_IdModa", selectId: "fSamplingLabTestadd_x_IdModa" },
+        el = document.querySelector("select[data-select2-id='" + options.selectId + "']");
+    if (!el)
+        return;
+    options.closeOnSelect = !options.multiple;
+    options.dropdownParent = el.closest("#ew-modal-dialog, #ew-add-opt-dialog");
+    if (fSamplingLabTestadd.lists.IdModa?.lookupOptions.length) {
+        options.data = { id: "x_IdModa", form: "fSamplingLabTestadd" };
+    } else {
+        options.ajax = { id: "x_IdModa", form: "fSamplingLabTestadd", limit: ew.LOOKUP_PAGE_SIZE };
+    }
+    options.minimumInputLength = ew.selectMinimumInputLength;
+    options = Object.assign({}, ew.selectOptions, options, ew.vars.tables.SamplingLabTest.fields.IdModa.selectOptions);
+    ew.createSelect(options);
+});
+</script>
+</span>
+</div></div>
+    </div>
+} @* samplingLabTestAdd.IdModa.Visible (end) *@
+@if (samplingLabTestAdd.TipePenyaluran.Visible) { // samplingLabTestAdd.TipePenyaluran.Visible (begin)
+    <div id="r_TipePenyaluran" @Html.Raw(samplingLabTestAdd.TipePenyaluran.RowAttributes)>
+        <label id="elh_SamplingLabTest_TipePenyaluran" for="x_TipePenyaluran" class="@(samplingLabTestAdd.LeftColumnClass)">@Html.Raw(samplingLabTestAdd.TipePenyaluran.Caption)@Html.Raw(samplingLabTestAdd.TipePenyaluran.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(samplingLabTestAdd.RightColumnClass)"><div @Html.Raw(samplingLabTestAdd.TipePenyaluran.CellAttributes)>
+<span id="el_SamplingLabTest_TipePenyaluran">
+    <select
+        id="x_TipePenyaluran"
+        name="x_TipePenyaluran"
+        class="form-select ew-select@(samplingLabTestAdd.TipePenyaluran.IsInvalidClass)"
+        data-select2-id="fSamplingLabTestadd_x_TipePenyaluran"
+        data-table="SamplingLabTest"
+        data-field="x_TipePenyaluran"
+        data-value-separator="@(samplingLabTestAdd.TipePenyaluran.DisplayValueSeparatorAttribute)"
+        data-placeholder="@(HtmlEncode(samplingLabTestAdd.TipePenyaluran.PlaceHolder))"
+        @Html.Raw(samplingLabTestAdd.TipePenyaluran.EditAttributes)>
+        @(samplingLabTestAdd.TipePenyaluran.SelectOptionListHtml("x_TipePenyaluran"))
+    </select>
+    @Html.Raw(samplingLabTestAdd.TipePenyaluran.GetCustomMessage)
+    <div class="invalid-feedback">@Html.Raw(samplingLabTestAdd.TipePenyaluran.GetErrorMessage())</div>
+<script>
+loadjs.ready("fSamplingLabTestadd", function() {
+    var options = { name: "x_TipePenyaluran", selectId: "fSamplingLabTestadd_x_TipePenyaluran" },
+        el = document.querySelector("select[data-select2-id='" + options.selectId + "']");
+    if (!el)
+        return;
+    options.closeOnSelect = !options.multiple;
+    options.dropdownParent = el.closest("#ew-modal-dialog, #ew-add-opt-dialog");
+    if (fSamplingLabTestadd.lists.TipePenyaluran?.lookupOptions.length) {
+        options.data = { id: "x_TipePenyaluran", form: "fSamplingLabTestadd" };
+    } else {
+        options.ajax = { id: "x_TipePenyaluran", form: "fSamplingLabTestadd", limit: ew.LOOKUP_PAGE_SIZE };
+    }
+    options.minimumResultsForSearch = Infinity;
+    options = Object.assign({}, ew.selectOptions, options, ew.vars.tables.SamplingLabTest.fields.TipePenyaluran.selectOptions);
+    ew.createSelect(options);
+});
+</script>
+</span>
+</div></div>
+    </div>
+} @* samplingLabTestAdd.TipePenyaluran.Visible (end) *@
+@if (samplingLabTestAdd.KategoriPenyaluran.Visible) { // samplingLabTestAdd.KategoriPenyaluran.Visible (begin)
+    <div id="r_KategoriPenyaluran" @Html.Raw(samplingLabTestAdd.KategoriPenyaluran.RowAttributes)>
+        <label id="elh_SamplingLabTest_KategoriPenyaluran" for="x_KategoriPenyaluran" class="@(samplingLabTestAdd.LeftColumnClass)">@Html.Raw(samplingLabTestAdd.KategoriPenyaluran.Caption)@Html.Raw(samplingLabTestAdd.KategoriPenyaluran.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(samplingLabTestAdd.RightColumnClass)"><div @Html.Raw(samplingLabTestAdd.KategoriPenyaluran.CellAttributes)>
+<span id="el_SamplingLabTest_KategoriPenyaluran">
+    <select
+        id="x_KategoriPenyaluran"
+        name="x_KategoriPenyaluran"
+        class="form-select ew-select@(samplingLabTestAdd.KategoriPenyaluran.IsInvalidClass)"
+        data-select2-id="fSamplingLabTestadd_x_KategoriPenyaluran"
+        data-table="SamplingLabTest"
+        data-field="x_KategoriPenyaluran"
+        data-value-separator="@(samplingLabTestAdd.KategoriPenyaluran.DisplayValueSeparatorAttribute)"
+        data-placeholder="@(HtmlEncode(samplingLabTestAdd.KategoriPenyaluran.PlaceHolder))"
+        @Html.Raw(samplingLabTestAdd.KategoriPenyaluran.EditAttributes)>
+        @(samplingLabTestAdd.KategoriPenyaluran.SelectOptionListHtml("x_KategoriPenyaluran"))
+    </select>
+    @Html.Raw(samplingLabTestAdd.KategoriPenyaluran.GetCustomMessage)
+    <div class="invalid-feedback">@Html.Raw(samplingLabTestAdd.KategoriPenyaluran.GetErrorMessage())</div>
+<script>
+loadjs.ready("fSamplingLabTestadd", function() {
+    var options = { name: "x_KategoriPenyaluran", selectId: "fSamplingLabTestadd_x_KategoriPenyaluran" },
+        el = document.querySelector("select[data-select2-id='" + options.selectId + "']");
+    if (!el)
+        return;
+    options.closeOnSelect = !options.multiple;
+    options.dropdownParent = el.closest("#ew-modal-dialog, #ew-add-opt-dialog");
+    if (fSamplingLabTestadd.lists.KategoriPenyaluran?.lookupOptions.length) {
+        options.data = { id: "x_KategoriPenyaluran", form: "fSamplingLabTestadd" };
+    } else {
+        options.ajax = { id: "x_KategoriPenyaluran", form: "fSamplingLabTestadd", limit: ew.LOOKUP_PAGE_SIZE };
+    }
+    options.minimumResultsForSearch = Infinity;
+    options = Object.assign({}, ew.selectOptions, options, ew.vars.tables.SamplingLabTest.fields.KategoriPenyaluran.selectOptions);
+    ew.createSelect(options);
+});
+</script>
+</span>
+</div></div>
+    </div>
+} @* samplingLabTestAdd.KategoriPenyaluran.Visible (end) *@
+@if (samplingLabTestAdd.NomorPolisi.Visible) { // samplingLabTestAdd.NomorPolisi.Visible (begin)
+    <div id="r_NomorPolisi" @Html.Raw(samplingLabTestAdd.NomorPolisi.RowAttributes)>
+        <label id="elh_SamplingLabTest_NomorPolisi" for="x_NomorPolisi" class="@(samplingLabTestAdd.LeftColumnClass)">@Html.Raw(samplingLabTestAdd.NomorPolisi.Caption)@Html.Raw(samplingLabTestAdd.NomorPolisi.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(samplingLabTestAdd.RightColumnClass)"><div @Html.Raw(samplingLabTestAdd.NomorPolisi.CellAttributes)>
+<span id="el_SamplingLabTest_NomorPolisi">
+<input type="@(samplingLabTestAdd.NomorPolisi.InputTextType)" name="x_NomorPolisi" id="x_NomorPolisi" data-table="SamplingLabTest" data-field="x_NomorPolisi" value="@Html.Raw(samplingLabTestAdd.NomorPolisi.EditValue)" size="30" maxlength="100" placeholder="@Html.Raw(HtmlEncode(samplingLabTestAdd.NomorPolisi.PlaceHolder))" data-format-pattern="@(samplingLabTestAdd.NomorPolisi.FormatPattern)"@Html.Raw(samplingLabTestAdd.NomorPolisi.EditAttributes) aria-describedby="x_NomorPolisi_help">
+@Html.Raw(samplingLabTestAdd.NomorPolisi.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(samplingLabTestAdd.NomorPolisi.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* samplingLabTestAdd.NomorPolisi.Visible (end) *@
+@if (samplingLabTestAdd.TipeProdukSTS.Visible) { // samplingLabTestAdd.TipeProdukSTS.Visible (begin)
+    <div id="r_TipeProdukSTS" @Html.Raw(samplingLabTestAdd.TipeProdukSTS.RowAttributes)>
+        <label id="elh_SamplingLabTest_TipeProdukSTS" for="x_TipeProdukSTS" class="@(samplingLabTestAdd.LeftColumnClass)">@Html.Raw(samplingLabTestAdd.TipeProdukSTS.Caption)@Html.Raw(samplingLabTestAdd.TipeProdukSTS.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(samplingLabTestAdd.RightColumnClass)"><div @Html.Raw(samplingLabTestAdd.TipeProdukSTS.CellAttributes)>
+<span id="el_SamplingLabTest_TipeProdukSTS">
+    <select
+        id="x_TipeProdukSTS"
+        name="x_TipeProdukSTS"
+        class="form-select ew-select@(samplingLabTestAdd.TipeProdukSTS.IsInvalidClass)"
+        data-select2-id="fSamplingLabTestadd_x_TipeProdukSTS"
+        data-table="SamplingLabTest"
+        data-field="x_TipeProdukSTS"
+        data-value-separator="@(samplingLabTestAdd.TipeProdukSTS.DisplayValueSeparatorAttribute)"
+        data-placeholder="@(HtmlEncode(samplingLabTestAdd.TipeProdukSTS.PlaceHolder))"
+        data-ew-action="autofill"
+        @Html.Raw(samplingLabTestAdd.TipeProdukSTS.EditAttributes)>
+        @(samplingLabTestAdd.TipeProdukSTS.SelectOptionListHtml("x_TipeProdukSTS"))
+    </select>
+    @Html.Raw(samplingLabTestAdd.TipeProdukSTS.GetCustomMessage)
+    <div class="invalid-feedback">@Html.Raw(samplingLabTestAdd.TipeProdukSTS.GetErrorMessage())</div>
+@Html.Raw(samplingLabTestAdd.TipeProdukSTS.Lookup.GetParamTag(samplingLabTestAdd, "p_x_TipeProdukSTS"))
+<script>
+loadjs.ready("fSamplingLabTestadd", function() {
+    var options = { name: "x_TipeProdukSTS", selectId: "fSamplingLabTestadd_x_TipeProdukSTS" },
+        el = document.querySelector("select[data-select2-id='" + options.selectId + "']");
+    if (!el)
+        return;
+    options.closeOnSelect = !options.multiple;
+    options.dropdownParent = el.closest("#ew-modal-dialog, #ew-add-opt-dialog");
+    if (fSamplingLabTestadd.lists.TipeProdukSTS?.lookupOptions.length) {
+        options.data = { id: "x_TipeProdukSTS", form: "fSamplingLabTestadd" };
+    } else {
+        options.ajax = { id: "x_TipeProdukSTS", form: "fSamplingLabTestadd", limit: ew.LOOKUP_PAGE_SIZE };
+    }
+    options.minimumResultsForSearch = Infinity;
+    options = Object.assign({}, ew.selectOptions, options, ew.vars.tables.SamplingLabTest.fields.TipeProdukSTS.selectOptions);
+    ew.createSelect(options);
+});
+</script>
+</span>
+</div></div>
+    </div>
+} @* samplingLabTestAdd.TipeProdukSTS.Visible (end) *@
+@if (samplingLabTestAdd.KodeProduk.Visible) { // samplingLabTestAdd.KodeProduk.Visible (begin)
+    <div id="r_KodeProduk" @Html.Raw(samplingLabTestAdd.KodeProduk.RowAttributes)>
+        <label id="elh_SamplingLabTest_KodeProduk" for="x_KodeProduk" class="@(samplingLabTestAdd.LeftColumnClass)">@Html.Raw(samplingLabTestAdd.KodeProduk.Caption)@Html.Raw(samplingLabTestAdd.KodeProduk.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(samplingLabTestAdd.RightColumnClass)"><div @Html.Raw(samplingLabTestAdd.KodeProduk.CellAttributes)>
+<span id="el_SamplingLabTest_KodeProduk">
+    <select
+        id="x_KodeProduk"
+        name="x_KodeProduk"
+        class="form-select ew-select@(samplingLabTestAdd.KodeProduk.IsInvalidClass)"
+        data-select2-id="fSamplingLabTestadd_x_KodeProduk"
+        data-table="SamplingLabTest"
+        data-field="x_KodeProduk"
+        data-value-separator="@(samplingLabTestAdd.KodeProduk.DisplayValueSeparatorAttribute)"
+        data-placeholder="@(HtmlEncode(samplingLabTestAdd.KodeProduk.PlaceHolder))"
+        @Html.Raw(samplingLabTestAdd.KodeProduk.EditAttributes)>
+        @(samplingLabTestAdd.KodeProduk.SelectOptionListHtml("x_KodeProduk"))
+    </select>
+    @Html.Raw(samplingLabTestAdd.KodeProduk.GetCustomMessage)
+    <div class="invalid-feedback">@Html.Raw(samplingLabTestAdd.KodeProduk.GetErrorMessage())</div>
+@Html.Raw(samplingLabTestAdd.KodeProduk.Lookup.GetParamTag(samplingLabTestAdd, "p_x_KodeProduk"))
+<script>
+loadjs.ready("fSamplingLabTestadd", function() {
+    var options = { name: "x_KodeProduk", selectId: "fSamplingLabTestadd_x_KodeProduk" },
+        el = document.querySelector("select[data-select2-id='" + options.selectId + "']");
+    if (!el)
+        return;
+    options.closeOnSelect = !options.multiple;
+    options.dropdownParent = el.closest("#ew-modal-dialog, #ew-add-opt-dialog");
+    if (fSamplingLabTestadd.lists.KodeProduk?.lookupOptions.length) {
+        options.data = { id: "x_KodeProduk", form: "fSamplingLabTestadd" };
+    } else {
+        options.ajax = { id: "x_KodeProduk", form: "fSamplingLabTestadd", limit: ew.LOOKUP_PAGE_SIZE };
+    }
+    options.minimumInputLength = ew.selectMinimumInputLength;
+    options = Object.assign({}, ew.selectOptions, options, ew.vars.tables.SamplingLabTest.fields.KodeProduk.selectOptions);
+    ew.createSelect(options);
+});
+</script>
+</span>
+</div></div>
+    </div>
+} @* samplingLabTestAdd.KodeProduk.Visible (end) *@
+@if (samplingLabTestAdd.Tujuan.Visible) { // samplingLabTestAdd.Tujuan.Visible (begin)
+    <div id="r_Tujuan" @Html.Raw(samplingLabTestAdd.Tujuan.RowAttributes)>
+        <label id="elh_SamplingLabTest_Tujuan" for="x_Tujuan" class="@(samplingLabTestAdd.LeftColumnClass)">@Html.Raw(samplingLabTestAdd.Tujuan.Caption)@Html.Raw(samplingLabTestAdd.Tujuan.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(samplingLabTestAdd.RightColumnClass)"><div @Html.Raw(samplingLabTestAdd.Tujuan.CellAttributes)>
+<span id="el_SamplingLabTest_Tujuan">
+<input type="@(samplingLabTestAdd.Tujuan.InputTextType)" name="x_Tujuan" id="x_Tujuan" data-table="SamplingLabTest" data-field="x_Tujuan" value="@Html.Raw(samplingLabTestAdd.Tujuan.EditValue)" size="30" maxlength="100" placeholder="@Html.Raw(HtmlEncode(samplingLabTestAdd.Tujuan.PlaceHolder))" data-format-pattern="@(samplingLabTestAdd.Tujuan.FormatPattern)"@Html.Raw(samplingLabTestAdd.Tujuan.EditAttributes) aria-describedby="x_Tujuan_help">
+@Html.Raw(samplingLabTestAdd.Tujuan.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(samplingLabTestAdd.Tujuan.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* samplingLabTestAdd.Tujuan.Visible (end) *@
+@if (samplingLabTestAdd.Catatan.Visible) { // samplingLabTestAdd.Catatan.Visible (begin)
+    <div id="r_Catatan" @Html.Raw(samplingLabTestAdd.Catatan.RowAttributes)>
+        <label id="elh_SamplingLabTest_Catatan" for="x_Catatan" class="@(samplingLabTestAdd.LeftColumnClass)">@Html.Raw(samplingLabTestAdd.Catatan.Caption)@Html.Raw(samplingLabTestAdd.Catatan.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(samplingLabTestAdd.RightColumnClass)"><div @Html.Raw(samplingLabTestAdd.Catatan.CellAttributes)>
+<span id="el_SamplingLabTest_Catatan">
+<textarea data-table="SamplingLabTest" data-field="x_Catatan" name="x_Catatan" id="x_Catatan" cols="35" rows="4" placeholder="@Html.Raw(HtmlEncode(samplingLabTestAdd.Catatan.PlaceHolder))"@Html.Raw(samplingLabTestAdd.Catatan.EditAttributes) aria-describedby="x_Catatan_help">@(samplingLabTestAdd.Catatan.EditValue)</textarea>
+@Html.Raw(samplingLabTestAdd.Catatan.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(samplingLabTestAdd.Catatan.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* samplingLabTestAdd.Catatan.Visible (end) *@
+@if (samplingLabTestAdd.LookupTipeProduk.Visible) { // samplingLabTestAdd.LookupTipeProduk.Visible (begin)
+    <div id="r_LookupTipeProduk" @Html.Raw(samplingLabTestAdd.LookupTipeProduk.RowAttributes)>
+        <label id="elh_SamplingLabTest_LookupTipeProduk" class="@(samplingLabTestAdd.LeftColumnClass)">@Html.Raw(samplingLabTestAdd.LookupTipeProduk.Caption)@Html.Raw(samplingLabTestAdd.LookupTipeProduk.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(samplingLabTestAdd.RightColumnClass)"><div @Html.Raw(samplingLabTestAdd.LookupTipeProduk.CellAttributes)>
+<span id="el_SamplingLabTest_LookupTipeProduk">
+<input type="@(samplingLabTestAdd.LookupTipeProduk.InputTextType)" name="x_LookupTipeProduk" id="x_LookupTipeProduk" data-table="SamplingLabTest" data-field="x_LookupTipeProduk" value="@Html.Raw(samplingLabTestAdd.LookupTipeProduk.EditValue)" size="30" maxlength="1" placeholder="@Html.Raw(HtmlEncode(samplingLabTestAdd.LookupTipeProduk.PlaceHolder))" data-format-pattern="@(samplingLabTestAdd.LookupTipeProduk.FormatPattern)"@Html.Raw(samplingLabTestAdd.LookupTipeProduk.EditAttributes) aria-describedby="x_LookupTipeProduk_help">
+@Html.Raw(samplingLabTestAdd.LookupTipeProduk.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(samplingLabTestAdd.LookupTipeProduk.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* samplingLabTestAdd.LookupTipeProduk.Visible (end) *@
+@if (samplingLabTestAdd.LookupJenisPlant.Visible) { // samplingLabTestAdd.LookupJenisPlant.Visible (begin)
+    <div id="r_LookupJenisPlant" @Html.Raw(samplingLabTestAdd.LookupJenisPlant.RowAttributes)>
+        <label id="elh_SamplingLabTest_LookupJenisPlant" class="@(samplingLabTestAdd.LeftColumnClass)">@Html.Raw(samplingLabTestAdd.LookupJenisPlant.Caption)@Html.Raw(samplingLabTestAdd.LookupJenisPlant.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(samplingLabTestAdd.RightColumnClass)"><div @Html.Raw(samplingLabTestAdd.LookupJenisPlant.CellAttributes)>
+<span id="el_SamplingLabTest_LookupJenisPlant">
+<input type="@(samplingLabTestAdd.LookupJenisPlant.InputTextType)" name="x_LookupJenisPlant" id="x_LookupJenisPlant" data-table="SamplingLabTest" data-field="x_LookupJenisPlant" value="@Html.Raw(samplingLabTestAdd.LookupJenisPlant.EditValue)" size="30" maxlength="1" placeholder="@Html.Raw(HtmlEncode(samplingLabTestAdd.LookupJenisPlant.PlaceHolder))" data-format-pattern="@(samplingLabTestAdd.LookupJenisPlant.FormatPattern)"@Html.Raw(samplingLabTestAdd.LookupJenisPlant.EditAttributes) aria-describedby="x_LookupJenisPlant_help">
+@Html.Raw(samplingLabTestAdd.LookupJenisPlant.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(samplingLabTestAdd.LookupJenisPlant.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* samplingLabTestAdd.LookupJenisPlant.Visible (end) *@
+</div><!-- /page* -->
+@{ samplingLabTestAdd.CloseRecordset(); }
+@Html.Raw(samplingLabTestAdd.IsModal ? "<template class=\"ew-modal-buttons\">" : "<div class=\"row ew-buttons\">")<!-- buttons .row -->
+    <div class="@(samplingLabTestAdd.OffsetColumnClass)"><!-- buttons offset -->
+    <button class="btn btn-primary ew-btn" name="btn-action" id="btn-action" type="submit" form="fSamplingLabTestadd">@Html.Raw(Language.Phrase("AddBtn"))</button>
+@if (IsJsonResponse()) {
+    <button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" data-bs-dismiss="modal">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+} else {
+    <button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" form="fSamplingLabTestadd" data-href="@AppPath(samplingLabTestAdd.ReturnUrl)">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+}
+    </div><!-- /buttons offset -->
+@Html.Raw(samplingLabTestAdd.IsModal ? "</template>" : "</div>")<!-- /buttons .row -->
+</form>
+@samplingLabTestAdd.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("SamplingLabTest");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Startup script
+    var parent_url = ew.PATH_BASE;
+    $("#r_NomorSamplingLabTest").hide();
+    $('#r_LookupTipeProduk').hide();
+    $('#r_LookupJenisPlant').hide();
+    $('#r_TipeProdukSTS').hide();
+    $('#r_IdPlant').hide();
+    $('#r_IdReferensi').hide();
+    $(document).ready(function () {
+        const ddl = $("#x_LookupPlant");
+        ddl.empty();
+        ddl.append('<option value="">Loading...</option>');
+        $.ajax({
+            url: parent_url + 'api/LookUpList/get-dropdown/plant',
+            method: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                ddl.empty(); 
+                var targetPlantId = "@Html.Raw(samplingLabTestAdd.IdPlant.CurrentValue)";
+                $.each(data, function (index, item) {
+                    let isSelected = false;
+                    if (targetPlantId && (item.Value == targetPlantId || item.Value.toString() == targetPlantId.toString())) {
+                        isSelected = true;
+                    } else if (!targetPlantId && index === 0) {
+                        isSelected = true;
+                    }
+                    const selectedAttr = isSelected ? 'selected' : '';
+                    ddl.append(`<option value="${item.Value}" ${selectedAttr}>${item.Label}</option>`);
+                    if (isSelected){
+                        $('#x_IdPlant').val(item.Value).trigger('change');
+                        $('#x_LookupPlant').trigger('change');
+                        const $sv = $('#sv_x_IdPlant');
+                        if ($sv.length) {
+                            $sv.val(item.Label);
+                        }
+                        $('#x_LookupIdReferensi').val(null).trigger('change');
+                    }
+                });
+            },
+            error: function (xhr, status, error) {
+                console.error("Gagal ambil data dropdown:", error);
+                ddl.empty();
+            }
+        });
+        const UserLevel = "@CurrentUserLevel()";
+        const idRole = '@CurrentUserInfo("Rule")?.ToString()';
+        if (UserLevel != "2" && UserLevel != "-1" && UserLevel != "4" && idRole != '3') {
+            ew.alert('Anda tidak memiliki akses untuk menambah data Sampling Lab Test.');
+            setTimeout(() => {
+                window.location.href = parent_url+'SamplingLabTestList';
+            }, 1000);
+        }
+    });
+    const action = "@HttpContext.Request.Query["action"].ToString()";
+    if (action === 'addproduct') {
+        $('#x_KodeProduk').val('').trigger('change');
+        $('#x_IdPlant').trigger('change');
+    }
+    $('#sv_x_IdPlant').prop('readonly', true);
+});
+</script>

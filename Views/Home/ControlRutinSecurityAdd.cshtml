@@ -1,0 +1,235 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (controlRutinSecurityAdd.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = controlRutinSecurityAdd.UseLayout ? "_Layout" : "";
+}
+<script>
+var currentTable = @Html.Raw(ConvertToJson(controlRutinSecurityAdd.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { ControlRutinSecurity: currentTable } });
+var currentPageID = ew.PAGE_ID = "add";
+var currentForm;
+var fControlRutinSecurityadd;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("fControlRutinSecurityadd")
+        .setPageId("add")
+
+        // Add fields
+        .setFields([
+
+            ["NomorCRS", [fields.NomorCRS.visible && fields.NomorCRS.required ? ew.Validators.required(fields.NomorCRS.caption) : null], fields.NomorCRS.isInvalid],
+            ["LookupPlant", [fields.LookupPlant.visible && fields.LookupPlant.required ? ew.Validators.required(fields.LookupPlant.caption) : null], fields.LookupPlant.isInvalid],
+            ["Plant", [fields.Plant.visible && fields.Plant.required ? ew.Validators.required(fields.Plant.caption) : null, ew.Validators.integer], fields.Plant.isInvalid],
+            ["Catatan", [fields.Catatan.visible && fields.Catatan.required ? ew.Validators.required(fields.Catatan.caption) : null], fields.Catatan.isInvalid]
+        ])
+
+        // Form_CustomValidate
+        .setCustomValidate(
+            function(fobj) { // DO NOT CHANGE THIS LINE!
+                    // Your custom validation code here, return false if invalid.
+                    return true;
+                }
+        )
+
+        // Use JavaScript validation or not
+        .setValidateRequired(ew.CLIENT_VALIDATE)
+
+        // Dynamic selection lists
+        .setLists({
+            "LookupPlant": @Html.Raw(controlRutinSecurityAdd.LookupPlant.ToClientList(controlRutinSecurityAdd)),
+            "Plant": @Html.Raw(controlRutinSecurityAdd.Plant.ToClientList(controlRutinSecurityAdd)),
+        })
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Client script
+    // // Write your client script here, no need to add script tags.
+    $('#x_LookupPlant').on("change", function () {
+        const selectedValue = $(this).val();
+        $('#x_Plant').val(selectedValue).trigger('change');
+    });
+});
+</script>
+@controlRutinSecurityAdd.ShowPageHeader()
+@controlRutinSecurityAdd.ShowMessages()
+<form name="fControlRutinSecurityadd" id="fControlRutinSecurityadd" class="@(controlRutinSecurityAdd.FormClassName)" action="@AppPath(CurrentPageName())" method="post" novalidate autocomplete="off">
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+<input type="hidden" name="action" id="action" value="insert">
+<input type="hidden" name="modal" value="@ConvertToInt(controlRutinSecurityAdd.IsModal)">
+@if (IsJsonResponse()) {
+<input type="hidden" name="json" value="1">
+}
+<input type="hidden" name="@(controlRutinSecurityAdd.OldKeyName)" value="@Html.Raw(controlRutinSecurityAdd.OldKey)">
+<div class="ew-add-div"><!-- page* -->
+@if (controlRutinSecurityAdd.NomorCRS.Visible) { // controlRutinSecurityAdd.NomorCRS.Visible (begin)
+    <div id="r_NomorCRS" @Html.Raw(controlRutinSecurityAdd.NomorCRS.RowAttributes)>
+        <label id="elh_ControlRutinSecurity_NomorCRS" for="x_NomorCRS" class="@(controlRutinSecurityAdd.LeftColumnClass)">@Html.Raw(controlRutinSecurityAdd.NomorCRS.Caption)@Html.Raw(controlRutinSecurityAdd.NomorCRS.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(controlRutinSecurityAdd.RightColumnClass)"><div @Html.Raw(controlRutinSecurityAdd.NomorCRS.CellAttributes)>
+<span id="el_ControlRutinSecurity_NomorCRS">
+<input type="@(controlRutinSecurityAdd.NomorCRS.InputTextType)" name="x_NomorCRS" id="x_NomorCRS" data-table="ControlRutinSecurity" data-field="x_NomorCRS" value="@Html.Raw(controlRutinSecurityAdd.NomorCRS.EditValue)" size="30" maxlength="50" placeholder="@Html.Raw(HtmlEncode(controlRutinSecurityAdd.NomorCRS.PlaceHolder))" data-format-pattern="@(controlRutinSecurityAdd.NomorCRS.FormatPattern)"@Html.Raw(controlRutinSecurityAdd.NomorCRS.EditAttributes) aria-describedby="x_NomorCRS_help">
+@Html.Raw(controlRutinSecurityAdd.NomorCRS.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(controlRutinSecurityAdd.NomorCRS.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* controlRutinSecurityAdd.NomorCRS.Visible (end) *@
+@if (controlRutinSecurityAdd.LookupPlant.Visible) { // controlRutinSecurityAdd.LookupPlant.Visible (begin)
+    <div id="r_LookupPlant" @Html.Raw(controlRutinSecurityAdd.LookupPlant.RowAttributes)>
+        <label id="elh_ControlRutinSecurity_LookupPlant" for="x_LookupPlant" class="@(controlRutinSecurityAdd.LeftColumnClass)">@Html.Raw(controlRutinSecurityAdd.LookupPlant.Caption)@Html.Raw(controlRutinSecurityAdd.LookupPlant.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(controlRutinSecurityAdd.RightColumnClass)"><div @Html.Raw(controlRutinSecurityAdd.LookupPlant.CellAttributes)>
+<span id="el_ControlRutinSecurity_LookupPlant">
+    <select
+        id="x_LookupPlant"
+        name="x_LookupPlant"
+        class="form-select ew-select@(controlRutinSecurityAdd.LookupPlant.IsInvalidClass)"
+        data-select2-id="fControlRutinSecurityadd_x_LookupPlant"
+        data-table="ControlRutinSecurity"
+        data-field="x_LookupPlant"
+        data-value-separator="@(controlRutinSecurityAdd.LookupPlant.DisplayValueSeparatorAttribute)"
+        data-placeholder="@(HtmlEncode(controlRutinSecurityAdd.LookupPlant.PlaceHolder))"
+        @Html.Raw(controlRutinSecurityAdd.LookupPlant.EditAttributes)>
+        @(controlRutinSecurityAdd.LookupPlant.SelectOptionListHtml("x_LookupPlant"))
+    </select>
+    @Html.Raw(controlRutinSecurityAdd.LookupPlant.GetCustomMessage)
+    <div class="invalid-feedback">@Html.Raw(controlRutinSecurityAdd.LookupPlant.GetErrorMessage())</div>
+<script>
+loadjs.ready("fControlRutinSecurityadd", function() {
+    var options = { name: "x_LookupPlant", selectId: "fControlRutinSecurityadd_x_LookupPlant" },
+        el = document.querySelector("select[data-select2-id='" + options.selectId + "']");
+    if (!el)
+        return;
+    options.closeOnSelect = !options.multiple;
+    options.dropdownParent = el.closest("#ew-modal-dialog, #ew-add-opt-dialog");
+    if (fControlRutinSecurityadd.lists.LookupPlant?.lookupOptions.length) {
+        options.data = { id: "x_LookupPlant", form: "fControlRutinSecurityadd" };
+    } else {
+        options.ajax = { id: "x_LookupPlant", form: "fControlRutinSecurityadd", limit: ew.LOOKUP_PAGE_SIZE };
+    }
+    options.minimumResultsForSearch = Infinity;
+    options = Object.assign({}, ew.selectOptions, options, ew.vars.tables.ControlRutinSecurity.fields.LookupPlant.selectOptions);
+    ew.createSelect(options);
+});
+</script>
+</span>
+</div></div>
+    </div>
+} @* controlRutinSecurityAdd.LookupPlant.Visible (end) *@
+@if (controlRutinSecurityAdd.Plant.Visible) { // controlRutinSecurityAdd.Plant.Visible (begin)
+    <div id="r_Plant" @Html.Raw(controlRutinSecurityAdd.Plant.RowAttributes)>
+        <label id="elh_ControlRutinSecurity_Plant" class="@(controlRutinSecurityAdd.LeftColumnClass)">@Html.Raw(controlRutinSecurityAdd.Plant.Caption)@Html.Raw(controlRutinSecurityAdd.Plant.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(controlRutinSecurityAdd.RightColumnClass)"><div @Html.Raw(controlRutinSecurityAdd.Plant.CellAttributes)>
+<span id="el_ControlRutinSecurity_Plant">
+<span>@{
+    if (IsRTL) {
+        controlRutinSecurityAdd.Plant.EditAttrs["dir"] = "rtl";
+    }
+}</span>
+<span id="as_x_Plant" class="ew-auto-suggest">
+    <input type="text" class="form-control" name="sv_x_Plant" id="sv_x_Plant" value="@(RemoveHtml(ConvertToString(controlRutinSecurityAdd.Plant.EditValue)))" autocomplete="off" size="30" placeholder="@Html.Raw(HtmlEncode(controlRutinSecurityAdd.Plant.PlaceHolder))" data-placeholder="@Html.Raw(HtmlEncode(controlRutinSecurityAdd.Plant.PlaceHolder))" data-format-pattern="@(controlRutinSecurityAdd.Plant.FormatPattern)" @Html.Raw(controlRutinSecurityAdd.Plant.EditAttributes) aria-describedby="x_Plant_help">
+</span>
+<selection-list hidden class="form-control" data-table="ControlRutinSecurity" data-field="x_Plant" data-input="sv_x_Plant" data-value-separator="@(controlRutinSecurityAdd.Plant.DisplayValueSeparatorAttribute)" name="x_Plant" id="x_Plant" value="@(HtmlEncode(controlRutinSecurityAdd.Plant.CurrentValue))"></selection-list>
+@Html.Raw(controlRutinSecurityAdd.Plant.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(controlRutinSecurityAdd.Plant.GetErrorMessage())</div>
+<script>
+loadjs.ready(["fControlRutinSecurityadd"], function() {
+    fControlRutinSecurityadd.createAutoSuggest(Object.assign({"id":"x_Plant","forceSelect":true}, { lookupAllDisplayFields: @(controlRutinSecurityAdd.Plant.Lookup.LookupAllDisplayFields ? "true" : "false") }, ew.vars.tables.ControlRutinSecurity.fields.Plant.autoSuggestOptions));
+});
+</script>
+@Html.Raw(controlRutinSecurityAdd.Plant.Lookup.GetParamTag(controlRutinSecurityAdd, "p_x_Plant"))
+</span>
+</div></div>
+    </div>
+} @* controlRutinSecurityAdd.Plant.Visible (end) *@
+@if (controlRutinSecurityAdd.Catatan.Visible) { // controlRutinSecurityAdd.Catatan.Visible (begin)
+    <div id="r_Catatan" @Html.Raw(controlRutinSecurityAdd.Catatan.RowAttributes)>
+        <label id="elh_ControlRutinSecurity_Catatan" for="x_Catatan" class="@(controlRutinSecurityAdd.LeftColumnClass)">@Html.Raw(controlRutinSecurityAdd.Catatan.Caption)@Html.Raw(controlRutinSecurityAdd.Catatan.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(controlRutinSecurityAdd.RightColumnClass)"><div @Html.Raw(controlRutinSecurityAdd.Catatan.CellAttributes)>
+<span id="el_ControlRutinSecurity_Catatan">
+<textarea data-table="ControlRutinSecurity" data-field="x_Catatan" name="x_Catatan" id="x_Catatan" cols="35" rows="4" placeholder="@Html.Raw(HtmlEncode(controlRutinSecurityAdd.Catatan.PlaceHolder))"@Html.Raw(controlRutinSecurityAdd.Catatan.EditAttributes) aria-describedby="x_Catatan_help">@(controlRutinSecurityAdd.Catatan.EditValue)</textarea>
+@Html.Raw(controlRutinSecurityAdd.Catatan.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(controlRutinSecurityAdd.Catatan.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* controlRutinSecurityAdd.Catatan.Visible (end) *@
+</div><!-- /page* -->
+@{ controlRutinSecurityAdd.CloseRecordset(); }
+@Html.Raw(controlRutinSecurityAdd.IsModal ? "<template class=\"ew-modal-buttons\">" : "<div class=\"row ew-buttons\">")<!-- buttons .row -->
+    <div class="@(controlRutinSecurityAdd.OffsetColumnClass)"><!-- buttons offset -->
+    <button class="btn btn-primary ew-btn" name="btn-action" id="btn-action" type="submit" form="fControlRutinSecurityadd">@Html.Raw(Language.Phrase("AddBtn"))</button>
+@if (IsJsonResponse()) {
+    <button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" data-bs-dismiss="modal">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+} else {
+    <button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" form="fControlRutinSecurityadd" data-href="@AppPath(controlRutinSecurityAdd.ReturnUrl)">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+}
+    </div><!-- /buttons offset -->
+@Html.Raw(controlRutinSecurityAdd.IsModal ? "</template>" : "</div>")<!-- /buttons .row -->
+</form>
+@controlRutinSecurityAdd.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("ControlRutinSecurity");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Startup script
+    var parent_url = ew.PATH_BASE;
+    $('#r_NomorCRS').hide();
+    $('#r_Plant').hide();
+    $(document).ready(function () {
+        const ddl = $("#x_LookupPlant");
+        const hiddenPlant = $("#x_Plant");
+        ddl.empty();
+        ddl.append('<option value="">Loading...</option>');
+        $.ajax({
+            url: parent_url + 'api/LookUpList/get-dropdown/plant',
+            method: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                ddl.empty(); 
+                // ddl.append('<option value="">-- Pilih Plant --</option>');
+                $.each(data, function (index, item) {
+                    const selected = index === 0 ? 'selected' : '';
+                    ddl.append(`<option value="${item.Value}" ${selected}>${item.Label}</option>`);
+                    if (selected){
+                        $('#x_Plant').val(item.Value).trigger('change');
+                    }
+                });
+            },
+            error: function (xhr, status, error) {
+                console.error("Gagal ambil data dropdown:", error);
+                ddl.empty();
+            }
+        });
+    });
+    $('#x_LookupPlant').on("change", function () {
+        const selectedValue = $(this).val();
+        $('r_Plant').val(selectedValue).trigger('change');
+        if (typeof ew_AutoFill === "function") {
+            ew_AutoFill("r_Plant", selectedValue);
+        }
+    });
+});
+</script>

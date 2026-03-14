@@ -1,0 +1,294 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (templateProsesAdd.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = templateProsesAdd.UseLayout ? "_Layout" : "";
+}
+<script>
+var currentTable = @Html.Raw(ConvertToJson(templateProsesAdd.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { TemplateProses: currentTable } });
+var currentPageID = ew.PAGE_ID = "add";
+var currentForm;
+var fTemplateProsesadd;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("fTemplateProsesadd")
+        .setPageId("add")
+
+        // Add fields
+        .setFields([
+
+            ["IdTemplate", [fields.IdTemplate.visible && fields.IdTemplate.required ? ew.Validators.required(fields.IdTemplate.caption) : null], fields.IdTemplate.isInvalid],
+            ["UrutanProses", [fields.UrutanProses.visible && fields.UrutanProses.required ? ew.Validators.required(fields.UrutanProses.caption) : null, ew.Validators.integer], fields.UrutanProses.isInvalid],
+            ["NamaProses", [fields.NamaProses.visible && fields.NamaProses.required ? ew.Validators.required(fields.NamaProses.caption) : null], fields.NamaProses.isInvalid],
+            ["IdPIC", [fields.IdPIC.visible && fields.IdPIC.required ? ew.Validators.required(fields.IdPIC.caption) : null], fields.IdPIC.isInvalid],
+            ["IdTools", [fields.IdTools.visible && fields.IdTools.required ? ew.Validators.required(fields.IdTools.caption) : null], fields.IdTools.isInvalid],
+            ["Keterangan", [fields.Keterangan.visible && fields.Keterangan.required ? ew.Validators.required(fields.Keterangan.caption) : null], fields.Keterangan.isInvalid]
+        ])
+
+        // Form_CustomValidate
+        .setCustomValidate(
+            function(fobj) { // DO NOT CHANGE THIS LINE!
+                    // Your custom validation code here, return false if invalid.
+                    return true;
+                }
+        )
+
+        // Use JavaScript validation or not
+        .setValidateRequired(ew.CLIENT_VALIDATE)
+
+        // Dynamic selection lists
+        .setLists({
+            "IdTemplate": @Html.Raw(templateProsesAdd.IdTemplate.ToClientList(templateProsesAdd)),
+            "IdPIC": @Html.Raw(templateProsesAdd.IdPIC.ToClientList(templateProsesAdd)),
+            "IdTools": @Html.Raw(templateProsesAdd.IdTools.ToClientList(templateProsesAdd)),
+        })
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Client script
+    $('#fTemplateProsesadd').on('submit', function (e) {
+        e.preventDefault();
+        showLoading();
+        setTimeout(() => {
+            hideLoading();
+        }, 3000);
+        this.requestSubmit();
+    });
+});
+</script>
+@templateProsesAdd.ShowPageHeader()
+@templateProsesAdd.ShowMessages()
+<form name="fTemplateProsesadd" id="fTemplateProsesadd" class="@(templateProsesAdd.FormClassName)" action="@AppPath(CurrentPageName())" method="post" novalidate autocomplete="off">
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+<input type="hidden" name="action" id="action" value="insert">
+<input type="hidden" name="modal" value="@ConvertToInt(templateProsesAdd.IsModal)">
+@if (IsJsonResponse()) {
+<input type="hidden" name="json" value="1">
+}
+<input type="hidden" name="@(templateProsesAdd.OldKeyName)" value="@Html.Raw(templateProsesAdd.OldKey)">
+@if (templateProsesAdd.CurrentMasterTable == "MasterTemplate") {
+<input type="hidden" name="@Config.TableShowMaster" value="MasterTemplate">
+<input type="hidden" name="fk_IdTemplate" value="@(HtmlEncode(templateProsesAdd.IdTemplate.SessionValue))">
+}
+<div class="ew-add-div"><!-- page* -->
+@if (templateProsesAdd.IdTemplate.Visible) { // templateProsesAdd.IdTemplate.Visible (begin)
+    <div id="r_IdTemplate" @Html.Raw(templateProsesAdd.IdTemplate.RowAttributes)>
+        <label id="elh_TemplateProses_IdTemplate" for="x_IdTemplate" class="@(templateProsesAdd.LeftColumnClass)">@Html.Raw(templateProsesAdd.IdTemplate.Caption)@Html.Raw(templateProsesAdd.IdTemplate.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(templateProsesAdd.RightColumnClass)"><div @Html.Raw(templateProsesAdd.IdTemplate.CellAttributes)>
+@if (!Empty(templateProsesAdd.IdTemplate.SessionValue)) {
+<span @Html.Raw(templateProsesAdd.IdTemplate.ViewAttributes)>
+<span class="form-control-plaintext">@Html.Raw(templateProsesAdd.IdTemplate.DisplayValue(templateProsesAdd.IdTemplate.ViewValue))</span></span>
+<input type="hidden" id="x_IdTemplate" name="x_IdTemplate" value="@(HtmlEncode(templateProsesAdd.IdTemplate.CurrentValue))" data-hidden="1">
+} else {
+<span id="el_TemplateProses_IdTemplate">
+    <select
+        id="x_IdTemplate"
+        name="x_IdTemplate"
+        class="form-select ew-select@(templateProsesAdd.IdTemplate.IsInvalidClass)"
+        data-select2-id="fTemplateProsesadd_x_IdTemplate"
+        data-table="TemplateProses"
+        data-field="x_IdTemplate"
+        data-value-separator="@(templateProsesAdd.IdTemplate.DisplayValueSeparatorAttribute)"
+        data-placeholder="@(HtmlEncode(templateProsesAdd.IdTemplate.PlaceHolder))"
+        @Html.Raw(templateProsesAdd.IdTemplate.EditAttributes)>
+        @(templateProsesAdd.IdTemplate.SelectOptionListHtml("x_IdTemplate"))
+    </select>
+    @Html.Raw(templateProsesAdd.IdTemplate.GetCustomMessage)
+    <div class="invalid-feedback">@Html.Raw(templateProsesAdd.IdTemplate.GetErrorMessage())</div>
+@Html.Raw(templateProsesAdd.IdTemplate.Lookup.GetParamTag(templateProsesAdd, "p_x_IdTemplate"))
+<script>
+loadjs.ready("fTemplateProsesadd", function() {
+    var options = { name: "x_IdTemplate", selectId: "fTemplateProsesadd_x_IdTemplate" },
+        el = document.querySelector("select[data-select2-id='" + options.selectId + "']");
+    if (!el)
+        return;
+    options.closeOnSelect = !options.multiple;
+    options.dropdownParent = el.closest("#ew-modal-dialog, #ew-add-opt-dialog");
+    if (fTemplateProsesadd.lists.IdTemplate?.lookupOptions.length) {
+        options.data = { id: "x_IdTemplate", form: "fTemplateProsesadd" };
+    } else {
+        options.ajax = { id: "x_IdTemplate", form: "fTemplateProsesadd", limit: ew.LOOKUP_PAGE_SIZE };
+    }
+    options.minimumInputLength = ew.selectMinimumInputLength;
+    options = Object.assign({}, ew.selectOptions, options, ew.vars.tables.TemplateProses.fields.IdTemplate.selectOptions);
+    ew.createSelect(options);
+});
+</script>
+</span>
+}
+</div></div>
+    </div>
+} @* templateProsesAdd.IdTemplate.Visible (end) *@
+@if (templateProsesAdd.UrutanProses.Visible) { // templateProsesAdd.UrutanProses.Visible (begin)
+    <div id="r_UrutanProses" @Html.Raw(templateProsesAdd.UrutanProses.RowAttributes)>
+        <label id="elh_TemplateProses_UrutanProses" for="x_UrutanProses" class="@(templateProsesAdd.LeftColumnClass)">@Html.Raw(templateProsesAdd.UrutanProses.Caption)@Html.Raw(templateProsesAdd.UrutanProses.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(templateProsesAdd.RightColumnClass)"><div @Html.Raw(templateProsesAdd.UrutanProses.CellAttributes)>
+<span id="el_TemplateProses_UrutanProses">
+<input type="@(templateProsesAdd.UrutanProses.InputTextType)" name="x_UrutanProses" id="x_UrutanProses" data-table="TemplateProses" data-field="x_UrutanProses" value="@Html.Raw(templateProsesAdd.UrutanProses.EditValue)" size="30" placeholder="@Html.Raw(HtmlEncode(templateProsesAdd.UrutanProses.PlaceHolder))" data-format-pattern="@(templateProsesAdd.UrutanProses.FormatPattern)"@Html.Raw(templateProsesAdd.UrutanProses.EditAttributes) aria-describedby="x_UrutanProses_help">
+@Html.Raw(templateProsesAdd.UrutanProses.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(templateProsesAdd.UrutanProses.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* templateProsesAdd.UrutanProses.Visible (end) *@
+@if (templateProsesAdd.NamaProses.Visible) { // templateProsesAdd.NamaProses.Visible (begin)
+    <div id="r_NamaProses" @Html.Raw(templateProsesAdd.NamaProses.RowAttributes)>
+        <label id="elh_TemplateProses_NamaProses" for="x_NamaProses" class="@(templateProsesAdd.LeftColumnClass)">@Html.Raw(templateProsesAdd.NamaProses.Caption)@Html.Raw(templateProsesAdd.NamaProses.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(templateProsesAdd.RightColumnClass)"><div @Html.Raw(templateProsesAdd.NamaProses.CellAttributes)>
+<span id="el_TemplateProses_NamaProses">
+<input type="@(templateProsesAdd.NamaProses.InputTextType)" name="x_NamaProses" id="x_NamaProses" data-table="TemplateProses" data-field="x_NamaProses" value="@Html.Raw(templateProsesAdd.NamaProses.EditValue)" size="30" maxlength="100" placeholder="@Html.Raw(HtmlEncode(templateProsesAdd.NamaProses.PlaceHolder))" data-format-pattern="@(templateProsesAdd.NamaProses.FormatPattern)"@Html.Raw(templateProsesAdd.NamaProses.EditAttributes) aria-describedby="x_NamaProses_help">
+@Html.Raw(templateProsesAdd.NamaProses.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(templateProsesAdd.NamaProses.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* templateProsesAdd.NamaProses.Visible (end) *@
+@if (templateProsesAdd.IdPIC.Visible) { // templateProsesAdd.IdPIC.Visible (begin)
+    <div id="r_IdPIC" @Html.Raw(templateProsesAdd.IdPIC.RowAttributes)>
+        <label id="elh_TemplateProses_IdPIC" for="x_IdPIC" class="@(templateProsesAdd.LeftColumnClass)">@Html.Raw(templateProsesAdd.IdPIC.Caption)@Html.Raw(templateProsesAdd.IdPIC.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(templateProsesAdd.RightColumnClass)"><div @Html.Raw(templateProsesAdd.IdPIC.CellAttributes)>
+<span id="el_TemplateProses_IdPIC">
+    <select
+        id="x_IdPIC"
+        name="x_IdPIC"
+        class="form-select ew-select@(templateProsesAdd.IdPIC.IsInvalidClass)"
+        data-select2-id="fTemplateProsesadd_x_IdPIC"
+        data-table="TemplateProses"
+        data-field="x_IdPIC"
+        data-value-separator="@(templateProsesAdd.IdPIC.DisplayValueSeparatorAttribute)"
+        data-placeholder="@(HtmlEncode(templateProsesAdd.IdPIC.PlaceHolder))"
+        @Html.Raw(templateProsesAdd.IdPIC.EditAttributes)>
+        @(templateProsesAdd.IdPIC.SelectOptionListHtml("x_IdPIC"))
+    </select>
+    @Html.Raw(templateProsesAdd.IdPIC.GetCustomMessage)
+    <div class="invalid-feedback">@Html.Raw(templateProsesAdd.IdPIC.GetErrorMessage())</div>
+@Html.Raw(templateProsesAdd.IdPIC.Lookup.GetParamTag(templateProsesAdd, "p_x_IdPIC"))
+<script>
+loadjs.ready("fTemplateProsesadd", function() {
+    var options = { name: "x_IdPIC", selectId: "fTemplateProsesadd_x_IdPIC" },
+        el = document.querySelector("select[data-select2-id='" + options.selectId + "']");
+    if (!el)
+        return;
+    options.closeOnSelect = !options.multiple;
+    options.dropdownParent = el.closest("#ew-modal-dialog, #ew-add-opt-dialog");
+    if (fTemplateProsesadd.lists.IdPIC?.lookupOptions.length) {
+        options.data = { id: "x_IdPIC", form: "fTemplateProsesadd" };
+    } else {
+        options.ajax = { id: "x_IdPIC", form: "fTemplateProsesadd", limit: ew.LOOKUP_PAGE_SIZE };
+    }
+    options.minimumInputLength = ew.selectMinimumInputLength;
+    options = Object.assign({}, ew.selectOptions, options, ew.vars.tables.TemplateProses.fields.IdPIC.selectOptions);
+    ew.createSelect(options);
+});
+</script>
+</span>
+</div></div>
+    </div>
+} @* templateProsesAdd.IdPIC.Visible (end) *@
+@if (templateProsesAdd.IdTools.Visible) { // templateProsesAdd.IdTools.Visible (begin)
+    <div id="r_IdTools" @Html.Raw(templateProsesAdd.IdTools.RowAttributes)>
+        <label id="elh_TemplateProses_IdTools" for="x_IdTools" class="@(templateProsesAdd.LeftColumnClass)">@Html.Raw(templateProsesAdd.IdTools.Caption)@Html.Raw(templateProsesAdd.IdTools.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(templateProsesAdd.RightColumnClass)"><div @Html.Raw(templateProsesAdd.IdTools.CellAttributes)>
+<span id="el_TemplateProses_IdTools">
+    <select
+        id="x_IdTools"
+        name="x_IdTools"
+        class="form-select ew-select@(templateProsesAdd.IdTools.IsInvalidClass)"
+        data-select2-id="fTemplateProsesadd_x_IdTools"
+        data-table="TemplateProses"
+        data-field="x_IdTools"
+        data-value-separator="@(templateProsesAdd.IdTools.DisplayValueSeparatorAttribute)"
+        data-placeholder="@(HtmlEncode(templateProsesAdd.IdTools.PlaceHolder))"
+        @Html.Raw(templateProsesAdd.IdTools.EditAttributes)>
+        @(templateProsesAdd.IdTools.SelectOptionListHtml("x_IdTools"))
+    </select>
+    @Html.Raw(templateProsesAdd.IdTools.GetCustomMessage)
+    <div class="invalid-feedback">@Html.Raw(templateProsesAdd.IdTools.GetErrorMessage())</div>
+@Html.Raw(templateProsesAdd.IdTools.Lookup.GetParamTag(templateProsesAdd, "p_x_IdTools"))
+<script>
+loadjs.ready("fTemplateProsesadd", function() {
+    var options = { name: "x_IdTools", selectId: "fTemplateProsesadd_x_IdTools" },
+        el = document.querySelector("select[data-select2-id='" + options.selectId + "']");
+    if (!el)
+        return;
+    options.closeOnSelect = !options.multiple;
+    options.dropdownParent = el.closest("#ew-modal-dialog, #ew-add-opt-dialog");
+    if (fTemplateProsesadd.lists.IdTools?.lookupOptions.length) {
+        options.data = { id: "x_IdTools", form: "fTemplateProsesadd" };
+    } else {
+        options.ajax = { id: "x_IdTools", form: "fTemplateProsesadd", limit: ew.LOOKUP_PAGE_SIZE };
+    }
+    options.minimumInputLength = ew.selectMinimumInputLength;
+    options = Object.assign({}, ew.selectOptions, options, ew.vars.tables.TemplateProses.fields.IdTools.selectOptions);
+    ew.createSelect(options);
+});
+</script>
+</span>
+</div></div>
+    </div>
+} @* templateProsesAdd.IdTools.Visible (end) *@
+@if (templateProsesAdd.Keterangan.Visible) { // templateProsesAdd.Keterangan.Visible (begin)
+    <div id="r_Keterangan" @Html.Raw(templateProsesAdd.Keterangan.RowAttributes)>
+        <label id="elh_TemplateProses_Keterangan" for="x_Keterangan" class="@(templateProsesAdd.LeftColumnClass)">@Html.Raw(templateProsesAdd.Keterangan.Caption)@Html.Raw(templateProsesAdd.Keterangan.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(templateProsesAdd.RightColumnClass)"><div @Html.Raw(templateProsesAdd.Keterangan.CellAttributes)>
+<span id="el_TemplateProses_Keterangan">
+<textarea data-table="TemplateProses" data-field="x_Keterangan" name="x_Keterangan" id="x_Keterangan" cols="35" rows="4" placeholder="@Html.Raw(HtmlEncode(templateProsesAdd.Keterangan.PlaceHolder))"@Html.Raw(templateProsesAdd.Keterangan.EditAttributes) aria-describedby="x_Keterangan_help">@(templateProsesAdd.Keterangan.EditValue)</textarea>
+@Html.Raw(templateProsesAdd.Keterangan.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(templateProsesAdd.Keterangan.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* templateProsesAdd.Keterangan.Visible (end) *@
+</div><!-- /page* -->
+@{ templateProsesAdd.CloseRecordset(); }
+@if (templateProsesAdd.CurrentDetailTables.Contains("TemplateAktivitas") && Resolve("TemplateAktivitas").DetailAdd) {
+    if (!Empty(templateProsesAdd.CurrentDetailTable)) {
+<h4 class="ew-detail-caption">@Html.Raw(Language.TablePhrase("TemplateAktivitas", "TblCaption"))</h4>
+    }
+        @await Html.PartialAsync("TemplateAktivitasGrid")
+    View = this;
+}
+@Html.Raw(templateProsesAdd.IsModal ? "<template class=\"ew-modal-buttons\">" : "<div class=\"row ew-buttons\">")<!-- buttons .row -->
+    <div class="@(templateProsesAdd.OffsetColumnClass)"><!-- buttons offset -->
+    <button class="btn btn-primary ew-btn" name="btn-action" id="btn-action" type="submit" form="fTemplateProsesadd">@Html.Raw(Language.Phrase("AddBtn"))</button>
+@if (IsJsonResponse()) {
+    <button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" data-bs-dismiss="modal">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+} else {
+    <button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" form="fTemplateProsesadd" data-href="@AppPath(templateProsesAdd.ReturnUrl)">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+}
+    </div><!-- /buttons offset -->
+@Html.Raw(templateProsesAdd.IsModal ? "</template>" : "</div>")<!-- /buttons .row -->
+</form>
+@templateProsesAdd.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("TemplateProses");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Write your table-specific startup script here
+    // document.write("page loaded");
+});
+</script>

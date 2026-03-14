@@ -1,0 +1,493 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (subAktivitasHasilPemeriksaanPipaList.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = subAktivitasHasilPemeriksaanPipaList.UseLayout ? "_Layout" : "";
+}
+@if (!subAktivitasHasilPemeriksaanPipaList.IsExport()) {
+<script>
+var currentTable = @Html.Raw(ConvertToJson(subAktivitasHasilPemeriksaanPipaList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { SubAktivitasHasilPemeriksaanPipa: currentTable } });
+var currentPageID = ew.PAGE_ID = "list";
+var currentForm;
+var @(subAktivitasHasilPemeriksaanPipaList.FormName);
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("@(subAktivitasHasilPemeriksaanPipaList.FormName)")
+        .setPageId("list")
+        .setSubmitWithFetch(@(subAktivitasHasilPemeriksaanPipaList.UseAjaxActions ? "true" : "false"))
+        .setFormKeyCountName("@(subAktivitasHasilPemeriksaanPipaList.FormKeyCountName)")
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Write your client script here, no need to add script tags.
+});
+</script>
+}
+@if (!subAktivitasHasilPemeriksaanPipaList.IsExport()) {
+<div class="btn-toolbar ew-toolbar">
+@if (subAktivitasHasilPemeriksaanPipaList.TotalRecords > 0 && subAktivitasHasilPemeriksaanPipaList.ExportOptions.Visible) {
+    subAktivitasHasilPemeriksaanPipaList.ExportOptions.Render("body");
+}
+@if (subAktivitasHasilPemeriksaanPipaList.ImportOptions.Visible) {
+    subAktivitasHasilPemeriksaanPipaList.ImportOptions.Render("body");
+}
+@if (subAktivitasHasilPemeriksaanPipaList.SearchOptions.Visible) {
+    subAktivitasHasilPemeriksaanPipaList.SearchOptions.Render("body");
+}
+@if (subAktivitasHasilPemeriksaanPipaList.FilterOptions.Visible) {
+    subAktivitasHasilPemeriksaanPipaList.FilterOptions.Render("body");
+}
+</div>
+}
+@if (!subAktivitasHasilPemeriksaanPipaList.IsModal) {
+<form name="fSubAktivitasHasilPemeriksaanPipasrch" id="fSubAktivitasHasilPemeriksaanPipasrch" class="ew-form ew-ext-search-form" action="@AppPath(CurrentPageName())" novalidate autocomplete="off">
+<div id="fSubAktivitasHasilPemeriksaanPipasrch_search_panel" class="mb-2 mb-sm-0 @(subAktivitasHasilPemeriksaanPipaList.SearchPanelClass)"><!-- .ew-search-panel -->
+<script>
+var currentTable = @Html.Raw(ConvertToJson(subAktivitasHasilPemeriksaanPipaList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { SubAktivitasHasilPemeriksaanPipa: currentTable } });
+var currentForm;
+var fSubAktivitasHasilPemeriksaanPipasrch, currentSearchForm, currentAdvancedSearchForm;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery,
+        fields = currentTable.fields;
+
+    // Form object for search
+    let form = new ew.FormBuilder()
+        .setId("fSubAktivitasHasilPemeriksaanPipasrch")
+        .setPageId("list")
+@if (subAktivitasHasilPemeriksaanPipaList.UseAjaxActions) {
+        <text>.setSubmitWithFetch(true)</text>
+}
+
+        // Dynamic selection lists
+        .setLists({
+        })
+
+        // Filters
+        .setFilterList(@Html.Raw(subAktivitasHasilPemeriksaanPipaList.GetFilterList()))
+        .build();
+    window[form.id] = form;
+    currentSearchForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<input type="hidden" name="cmd" value="search">
+@if (Security.CanSearch) {
+if (!subAktivitasHasilPemeriksaanPipaList.IsExport() && Empty(subAktivitasHasilPemeriksaanPipaList.CurrentAction) && subAktivitasHasilPemeriksaanPipaList.HasSearchFields()) { @* Show search form (begin) *@
+<div class="ew-extended-search container-fluid ps-2">
+<div class="row mb-0">
+    <div class="col-sm-auto px-0 pe-sm-2">
+        <div class="ew-basic-search input-group">
+            <input type="search" name="@(Config.TableBasicSearch)" id="@(Config.TableBasicSearch)" class="form-control ew-basic-search-keyword" value="@Html.Raw(HtmlEncode(subAktivitasHasilPemeriksaanPipaList.BasicSearch.SessionKeyword))" placeholder="@(HtmlEncode(Language.Phrase("Search")))" aria-label="@(HtmlEncode(Language.Phrase("Search")))">
+            <input type="hidden" name="@(Config.TableBasicSearchType)" id="@(Config.TableBasicSearchType)" class="ew-basic-search-type" value="@(HtmlEncode(subAktivitasHasilPemeriksaanPipaList.BasicSearch.SessionType))">
+            <button type="button" data-bs-toggle="dropdown" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split" aria-haspopup="true" aria-expanded="false">
+                <span id="searchtype">@Html.Raw(subAktivitasHasilPemeriksaanPipaList.BasicSearch.TypeNameShort)</span>
+            </button>
+            <div class="dropdown-menu dropdown-menu-end">
+                <button type="button" class="dropdown-item@(subAktivitasHasilPemeriksaanPipaList.BasicSearch.SessionType == "" ? " active" : "")" form="fSubAktivitasHasilPemeriksaanPipasrch" data-ew-action="search-type">@Html.Raw(Language.Phrase("QuickSearchAuto"))</button>
+                <button type="button" class="dropdown-item@(subAktivitasHasilPemeriksaanPipaList.BasicSearch.SessionType == "=" ? " active" : "")" form="fSubAktivitasHasilPemeriksaanPipasrch" data-ew-action="search-type" data-search-type="=">@Html.Raw(Language.Phrase("QuickSearchExact"))</button>
+                <button type="button" class="dropdown-item@(subAktivitasHasilPemeriksaanPipaList.BasicSearch.SessionType == "AND" ? " active" : "")" form="fSubAktivitasHasilPemeriksaanPipasrch" data-ew-action="search-type" data-search-type="AND">@Html.Raw(Language.Phrase("QuickSearchAll"))</button>
+                <button type="button" class="dropdown-item@(subAktivitasHasilPemeriksaanPipaList.BasicSearch.SessionType == "OR" ? " active" : "")" form="fSubAktivitasHasilPemeriksaanPipasrch" data-ew-action="search-type" data-search-type="OR">@Html.Raw(Language.Phrase("QuickSearchAny"))</button>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-auto mb-3">
+        <button class="btn btn-primary" name="btn-submit" id="btn-submit" type="submit">@Html.Raw(Language.Phrase("SearchBtn"))</button>
+    </div>
+</div>
+</div><!-- /.ew-extended-search -->
+} @* Show search form (end) *@
+}
+</div><!-- /.ew-search-panel -->
+</form>
+}
+@subAktivitasHasilPemeriksaanPipaList.ShowPageHeader()
+@subAktivitasHasilPemeriksaanPipaList.ShowMessages()
+<main class="list @(subAktivitasHasilPemeriksaanPipaList.TotalRecords == 0 && !subAktivitasHasilPemeriksaanPipaList.IsAdd ? " ew-no-record" : "")">
+<div id="ew-header-options">
+    @subAktivitasHasilPemeriksaanPipaList.HeaderOptions.RenderBody()
+</div>
+<div id="ew-list">
+@if (subAktivitasHasilPemeriksaanPipaList.TotalRecords > 0 || !Empty(subAktivitasHasilPemeriksaanPipaList.CurrentAction)) {
+<div class="card ew-card ew-grid@(subAktivitasHasilPemeriksaanPipaList.IsAddOrEdit ? " ew-grid-add-edit" : "") @(subAktivitasHasilPemeriksaanPipaList.TableGridClass)">
+<form name="@(subAktivitasHasilPemeriksaanPipaList.FormName)" id="@(subAktivitasHasilPemeriksaanPipaList.FormName)" class="ew-form ew-list-form" action="@AppPath(subAktivitasHasilPemeriksaanPipaList.PageName)" method="post" novalidate autocomplete="off">
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+@if (subAktivitasHasilPemeriksaanPipaList.IsModal) {
+<input type="hidden" name="modal" value="1">
+}
+<div id="gmp_SubAktivitasHasilPemeriksaanPipa" class="card-body ew-grid-middle-panel @(subAktivitasHasilPemeriksaanPipaList.TableContainerClass)" style="@(subAktivitasHasilPemeriksaanPipaList.TableContainerStyle)">
+@if (subAktivitasHasilPemeriksaanPipaList.TotalRecords > 0 || subAktivitasHasilPemeriksaanPipaList.IsGridEdit || subAktivitasHasilPemeriksaanPipaList.IsMultiEdit) {
+<table id="tbl_SubAktivitasHasilPemeriksaanPipalist" class="@(subAktivitasHasilPemeriksaanPipaList.TableClass)"><!-- .ew-table -->
+<thead>
+    <tr class="ew-table-header">
+@{
+    // Header row
+    subAktivitasHasilPemeriksaanPipaList.RowType = RowType.Header;
+
+    // Render list options
+    await subAktivitasHasilPemeriksaanPipaList.RenderListOptions();
+}
+@* Render list options (header, left) *@
+@subAktivitasHasilPemeriksaanPipaList.ListOptions.RenderHeader("left")
+@if (subAktivitasHasilPemeriksaanPipaList.id.Visible) { // subAktivitasHasilPemeriksaanPipaList.id.Visible (begin)
+        <th data-name="id" class="@(subAktivitasHasilPemeriksaanPipaList.id.HeaderCellClass)"><div id="elh_SubAktivitasHasilPemeriksaanPipa_id" class="SubAktivitasHasilPemeriksaanPipa_id">@Html.Raw(subAktivitasHasilPemeriksaanPipaList.RenderFieldHeader(subAktivitasHasilPemeriksaanPipaList.id))</div></th>
+} @* subAktivitasHasilPemeriksaanPipaList.id.Visible (end) *@
+@if (subAktivitasHasilPemeriksaanPipaList.idProses.Visible) { // subAktivitasHasilPemeriksaanPipaList.idProses.Visible (begin)
+        <th data-name="idProses" class="@(subAktivitasHasilPemeriksaanPipaList.idProses.HeaderCellClass)"><div id="elh_SubAktivitasHasilPemeriksaanPipa_idProses" class="SubAktivitasHasilPemeriksaanPipa_idProses">@Html.Raw(subAktivitasHasilPemeriksaanPipaList.RenderFieldHeader(subAktivitasHasilPemeriksaanPipaList.idProses))</div></th>
+} @* subAktivitasHasilPemeriksaanPipaList.idProses.Visible (end) *@
+@if (subAktivitasHasilPemeriksaanPipaList.idAktifitas.Visible) { // subAktivitasHasilPemeriksaanPipaList.idAktifitas.Visible (begin)
+        <th data-name="idAktifitas" class="@(subAktivitasHasilPemeriksaanPipaList.idAktifitas.HeaderCellClass)"><div id="elh_SubAktivitasHasilPemeriksaanPipa_idAktifitas" class="SubAktivitasHasilPemeriksaanPipa_idAktifitas">@Html.Raw(subAktivitasHasilPemeriksaanPipaList.RenderFieldHeader(subAktivitasHasilPemeriksaanPipaList.idAktifitas))</div></th>
+} @* subAktivitasHasilPemeriksaanPipaList.idAktifitas.Visible (end) *@
+@if (subAktivitasHasilPemeriksaanPipaList.NoReferensi.Visible) { // subAktivitasHasilPemeriksaanPipaList.NoReferensi.Visible (begin)
+        <th data-name="NoReferensi" class="@(subAktivitasHasilPemeriksaanPipaList.NoReferensi.HeaderCellClass)"><div id="elh_SubAktivitasHasilPemeriksaanPipa_NoReferensi" class="SubAktivitasHasilPemeriksaanPipa_NoReferensi">@Html.Raw(subAktivitasHasilPemeriksaanPipaList.RenderFieldHeader(subAktivitasHasilPemeriksaanPipaList.NoReferensi))</div></th>
+} @* subAktivitasHasilPemeriksaanPipaList.NoReferensi.Visible (end) *@
+@if (subAktivitasHasilPemeriksaanPipaList.NoBatch.Visible) { // subAktivitasHasilPemeriksaanPipaList.NoBatch.Visible (begin)
+        <th data-name="NoBatch" class="@(subAktivitasHasilPemeriksaanPipaList.NoBatch.HeaderCellClass)"><div id="elh_SubAktivitasHasilPemeriksaanPipa_NoBatch" class="SubAktivitasHasilPemeriksaanPipa_NoBatch">@Html.Raw(subAktivitasHasilPemeriksaanPipaList.RenderFieldHeader(subAktivitasHasilPemeriksaanPipaList.NoBatch))</div></th>
+} @* subAktivitasHasilPemeriksaanPipaList.NoBatch.Visible (end) *@
+@if (subAktivitasHasilPemeriksaanPipaList.Tanggal.Visible) { // subAktivitasHasilPemeriksaanPipaList.Tanggal.Visible (begin)
+        <th data-name="Tanggal" class="@(subAktivitasHasilPemeriksaanPipaList.Tanggal.HeaderCellClass)"><div id="elh_SubAktivitasHasilPemeriksaanPipa_Tanggal" class="SubAktivitasHasilPemeriksaanPipa_Tanggal">@Html.Raw(subAktivitasHasilPemeriksaanPipaList.RenderFieldHeader(subAktivitasHasilPemeriksaanPipaList.Tanggal))</div></th>
+} @* subAktivitasHasilPemeriksaanPipaList.Tanggal.Visible (end) *@
+@if (subAktivitasHasilPemeriksaanPipaList.Nama_Kegiatan.Visible) { // subAktivitasHasilPemeriksaanPipaList.Nama_Kegiatan.Visible (begin)
+        <th data-name="Nama_Kegiatan" class="@(subAktivitasHasilPemeriksaanPipaList.Nama_Kegiatan.HeaderCellClass)"><div id="elh_SubAktivitasHasilPemeriksaanPipa_Nama_Kegiatan" class="SubAktivitasHasilPemeriksaanPipa_Nama_Kegiatan">@Html.Raw(subAktivitasHasilPemeriksaanPipaList.RenderFieldHeader(subAktivitasHasilPemeriksaanPipaList.Nama_Kegiatan))</div></th>
+} @* subAktivitasHasilPemeriksaanPipaList.Nama_Kegiatan.Visible (end) *@
+@if (subAktivitasHasilPemeriksaanPipaList.Produk.Visible) { // subAktivitasHasilPemeriksaanPipaList.Produk.Visible (begin)
+        <th data-name="Produk" class="@(subAktivitasHasilPemeriksaanPipaList.Produk.HeaderCellClass)"><div id="elh_SubAktivitasHasilPemeriksaanPipa_Produk" class="SubAktivitasHasilPemeriksaanPipa_Produk">@Html.Raw(subAktivitasHasilPemeriksaanPipaList.RenderFieldHeader(subAktivitasHasilPemeriksaanPipaList.Produk))</div></th>
+} @* subAktivitasHasilPemeriksaanPipaList.Produk.Visible (end) *@
+@if (subAktivitasHasilPemeriksaanPipaList.Density.Visible) { // subAktivitasHasilPemeriksaanPipaList.Density.Visible (begin)
+        <th data-name="Density" class="@(subAktivitasHasilPemeriksaanPipaList.Density.HeaderCellClass)"><div id="elh_SubAktivitasHasilPemeriksaanPipa_Density" class="SubAktivitasHasilPemeriksaanPipa_Density">@Html.Raw(subAktivitasHasilPemeriksaanPipaList.RenderFieldHeader(subAktivitasHasilPemeriksaanPipaList.Density))</div></th>
+} @* subAktivitasHasilPemeriksaanPipaList.Density.Visible (end) *@
+@if (subAktivitasHasilPemeriksaanPipaList.Temperature.Visible) { // subAktivitasHasilPemeriksaanPipaList.Temperature.Visible (begin)
+        <th data-name="Temperature" class="@(subAktivitasHasilPemeriksaanPipaList.Temperature.HeaderCellClass)"><div id="elh_SubAktivitasHasilPemeriksaanPipa_Temperature" class="SubAktivitasHasilPemeriksaanPipa_Temperature">@Html.Raw(subAktivitasHasilPemeriksaanPipaList.RenderFieldHeader(subAktivitasHasilPemeriksaanPipaList.Temperature))</div></th>
+} @* subAktivitasHasilPemeriksaanPipaList.Temperature.Visible (end) *@
+@if (subAktivitasHasilPemeriksaanPipaList.Pressure.Visible) { // subAktivitasHasilPemeriksaanPipaList.Pressure.Visible (begin)
+        <th data-name="Pressure" class="@(subAktivitasHasilPemeriksaanPipaList.Pressure.HeaderCellClass)"><div id="elh_SubAktivitasHasilPemeriksaanPipa_Pressure" class="SubAktivitasHasilPemeriksaanPipa_Pressure">@Html.Raw(subAktivitasHasilPemeriksaanPipaList.RenderFieldHeader(subAktivitasHasilPemeriksaanPipaList.Pressure))</div></th>
+} @* subAktivitasHasilPemeriksaanPipaList.Pressure.Visible (end) *@
+@if (subAktivitasHasilPemeriksaanPipaList.VolumeDischarge.Visible) { // subAktivitasHasilPemeriksaanPipaList.VolumeDischarge.Visible (begin)
+        <th data-name="VolumeDischarge" class="@(subAktivitasHasilPemeriksaanPipaList.VolumeDischarge.HeaderCellClass)"><div id="elh_SubAktivitasHasilPemeriksaanPipa_VolumeDischarge" class="SubAktivitasHasilPemeriksaanPipa_VolumeDischarge">@Html.Raw(subAktivitasHasilPemeriksaanPipaList.RenderFieldHeader(subAktivitasHasilPemeriksaanPipaList.VolumeDischarge))</div></th>
+} @* subAktivitasHasilPemeriksaanPipaList.VolumeDischarge.Visible (end) *@
+@if (subAktivitasHasilPemeriksaanPipaList.Flowrate.Visible) { // subAktivitasHasilPemeriksaanPipaList.Flowrate.Visible (begin)
+        <th data-name="Flowrate" class="@(subAktivitasHasilPemeriksaanPipaList.Flowrate.HeaderCellClass)"><div id="elh_SubAktivitasHasilPemeriksaanPipa_Flowrate" class="SubAktivitasHasilPemeriksaanPipa_Flowrate">@Html.Raw(subAktivitasHasilPemeriksaanPipaList.RenderFieldHeader(subAktivitasHasilPemeriksaanPipaList.Flowrate))</div></th>
+} @* subAktivitasHasilPemeriksaanPipaList.Flowrate.Visible (end) *@
+@if (subAktivitasHasilPemeriksaanPipaList.Keterangan.Visible) { // subAktivitasHasilPemeriksaanPipaList.Keterangan.Visible (begin)
+        <th data-name="Keterangan" class="@(subAktivitasHasilPemeriksaanPipaList.Keterangan.HeaderCellClass)"><div id="elh_SubAktivitasHasilPemeriksaanPipa_Keterangan" class="SubAktivitasHasilPemeriksaanPipa_Keterangan">@Html.Raw(subAktivitasHasilPemeriksaanPipaList.RenderFieldHeader(subAktivitasHasilPemeriksaanPipaList.Keterangan))</div></th>
+} @* subAktivitasHasilPemeriksaanPipaList.Keterangan.Visible (end) *@
+@if (subAktivitasHasilPemeriksaanPipaList.userInput.Visible) { // subAktivitasHasilPemeriksaanPipaList.userInput.Visible (begin)
+        <th data-name="userInput" class="@(subAktivitasHasilPemeriksaanPipaList.userInput.HeaderCellClass)"><div id="elh_SubAktivitasHasilPemeriksaanPipa_userInput" class="SubAktivitasHasilPemeriksaanPipa_userInput">@Html.Raw(subAktivitasHasilPemeriksaanPipaList.RenderFieldHeader(subAktivitasHasilPemeriksaanPipaList.userInput))</div></th>
+} @* subAktivitasHasilPemeriksaanPipaList.userInput.Visible (end) *@
+@if (subAktivitasHasilPemeriksaanPipaList.etlDate.Visible) { // subAktivitasHasilPemeriksaanPipaList.etlDate.Visible (begin)
+        <th data-name="etlDate" class="@(subAktivitasHasilPemeriksaanPipaList.etlDate.HeaderCellClass)"><div id="elh_SubAktivitasHasilPemeriksaanPipa_etlDate" class="SubAktivitasHasilPemeriksaanPipa_etlDate">@Html.Raw(subAktivitasHasilPemeriksaanPipaList.RenderFieldHeader(subAktivitasHasilPemeriksaanPipaList.etlDate))</div></th>
+} @* subAktivitasHasilPemeriksaanPipaList.etlDate.Visible (end) *@
+@if (subAktivitasHasilPemeriksaanPipaList.LastUpdatedBy.Visible) { // subAktivitasHasilPemeriksaanPipaList.LastUpdatedBy.Visible (begin)
+        <th data-name="LastUpdatedBy" class="@(subAktivitasHasilPemeriksaanPipaList.LastUpdatedBy.HeaderCellClass)"><div id="elh_SubAktivitasHasilPemeriksaanPipa_LastUpdatedBy" class="SubAktivitasHasilPemeriksaanPipa_LastUpdatedBy">@Html.Raw(subAktivitasHasilPemeriksaanPipaList.RenderFieldHeader(subAktivitasHasilPemeriksaanPipaList.LastUpdatedBy))</div></th>
+} @* subAktivitasHasilPemeriksaanPipaList.LastUpdatedBy.Visible (end) *@
+@if (subAktivitasHasilPemeriksaanPipaList.lastUpdatedDate.Visible) { // subAktivitasHasilPemeriksaanPipaList.lastUpdatedDate.Visible (begin)
+        <th data-name="lastUpdatedDate" class="@(subAktivitasHasilPemeriksaanPipaList.lastUpdatedDate.HeaderCellClass)"><div id="elh_SubAktivitasHasilPemeriksaanPipa_lastUpdatedDate" class="SubAktivitasHasilPemeriksaanPipa_lastUpdatedDate">@Html.Raw(subAktivitasHasilPemeriksaanPipaList.RenderFieldHeader(subAktivitasHasilPemeriksaanPipaList.lastUpdatedDate))</div></th>
+} @* subAktivitasHasilPemeriksaanPipaList.lastUpdatedDate.Visible (end) *@
+@if (subAktivitasHasilPemeriksaanPipaList.SubAktivitasHasilPemeriksaanId.Visible) { // subAktivitasHasilPemeriksaanPipaList.SubAktivitasHasilPemeriksaanId.Visible (begin)
+        <th data-name="SubAktivitasHasilPemeriksaanId" class="@(subAktivitasHasilPemeriksaanPipaList.SubAktivitasHasilPemeriksaanId.HeaderCellClass)"><div id="elh_SubAktivitasHasilPemeriksaanPipa_SubAktivitasHasilPemeriksaanId" class="SubAktivitasHasilPemeriksaanPipa_SubAktivitasHasilPemeriksaanId">@Html.Raw(subAktivitasHasilPemeriksaanPipaList.RenderFieldHeader(subAktivitasHasilPemeriksaanPipaList.SubAktivitasHasilPemeriksaanId))</div></th>
+} @* subAktivitasHasilPemeriksaanPipaList.SubAktivitasHasilPemeriksaanId.Visible (end) *@
+@if (subAktivitasHasilPemeriksaanPipaList.TotalTerima.Visible) { // subAktivitasHasilPemeriksaanPipaList.TotalTerima.Visible (begin)
+        <th data-name="TotalTerima" class="@(subAktivitasHasilPemeriksaanPipaList.TotalTerima.HeaderCellClass)"><div id="elh_SubAktivitasHasilPemeriksaanPipa_TotalTerima" class="SubAktivitasHasilPemeriksaanPipa_TotalTerima">@Html.Raw(subAktivitasHasilPemeriksaanPipaList.RenderFieldHeader(subAktivitasHasilPemeriksaanPipaList.TotalTerima))</div></th>
+} @* subAktivitasHasilPemeriksaanPipaList.TotalTerima.Visible (end) *@
+@if (subAktivitasHasilPemeriksaanPipaList.ETC.Visible) { // subAktivitasHasilPemeriksaanPipaList.ETC.Visible (begin)
+        <th data-name="ETC" class="@(subAktivitasHasilPemeriksaanPipaList.ETC.HeaderCellClass)"><div id="elh_SubAktivitasHasilPemeriksaanPipa_ETC" class="SubAktivitasHasilPemeriksaanPipa_ETC">@Html.Raw(subAktivitasHasilPemeriksaanPipaList.RenderFieldHeader(subAktivitasHasilPemeriksaanPipaList.ETC))</div></th>
+} @* subAktivitasHasilPemeriksaanPipaList.ETC.Visible (end) *@
+@if (subAktivitasHasilPemeriksaanPipaList.ETA.Visible) { // subAktivitasHasilPemeriksaanPipaList.ETA.Visible (begin)
+        <th data-name="ETA" class="@(subAktivitasHasilPemeriksaanPipaList.ETA.HeaderCellClass)"><div id="elh_SubAktivitasHasilPemeriksaanPipa_ETA" class="SubAktivitasHasilPemeriksaanPipa_ETA">@Html.Raw(subAktivitasHasilPemeriksaanPipaList.RenderFieldHeader(subAktivitasHasilPemeriksaanPipaList.ETA))</div></th>
+} @* subAktivitasHasilPemeriksaanPipaList.ETA.Visible (end) *@
+@if (subAktivitasHasilPemeriksaanPipaList.ETA2.Visible) { // subAktivitasHasilPemeriksaanPipaList.ETA2.Visible (begin)
+        <th data-name="ETA2" class="@(subAktivitasHasilPemeriksaanPipaList.ETA2.HeaderCellClass)"><div id="elh_SubAktivitasHasilPemeriksaanPipa_ETA2" class="SubAktivitasHasilPemeriksaanPipa_ETA2">@Html.Raw(subAktivitasHasilPemeriksaanPipaList.RenderFieldHeader(subAktivitasHasilPemeriksaanPipaList.ETA2))</div></th>
+} @* subAktivitasHasilPemeriksaanPipaList.ETA2.Visible (end) *@
+@if (subAktivitasHasilPemeriksaanPipaList.ETA3.Visible) { // subAktivitasHasilPemeriksaanPipaList.ETA3.Visible (begin)
+        <th data-name="ETA3" class="@(subAktivitasHasilPemeriksaanPipaList.ETA3.HeaderCellClass)"><div id="elh_SubAktivitasHasilPemeriksaanPipa_ETA3" class="SubAktivitasHasilPemeriksaanPipa_ETA3">@Html.Raw(subAktivitasHasilPemeriksaanPipaList.RenderFieldHeader(subAktivitasHasilPemeriksaanPipaList.ETA3))</div></th>
+} @* subAktivitasHasilPemeriksaanPipaList.ETA3.Visible (end) *@
+@* Render list options (header, right) *@
+@subAktivitasHasilPemeriksaanPipaList.ListOptions.RenderHeader("right")
+    </tr>
+</thead>
+<tbody data-page="@(subAktivitasHasilPemeriksaanPipaList.PageNumber)">
+@{
+    await subAktivitasHasilPemeriksaanPipaList.SetupGrid();
+    bool eof = subAktivitasHasilPemeriksaanPipaList.Recordset == null; // DN
+}
+@while (subAktivitasHasilPemeriksaanPipaList.RecordCount < subAktivitasHasilPemeriksaanPipaList.StopRecord || SameString(subAktivitasHasilPemeriksaanPipaList.RowIndex, "$rowindex$")) { // Begin While
+    if (!eof && !SameString(subAktivitasHasilPemeriksaanPipaList.RowIndex, "$rowindex$") &&
+        (!subAktivitasHasilPemeriksaanPipaList.IsGridAdd || subAktivitasHasilPemeriksaanPipaList.CurrentMode == "copy") &&
+        (!((subAktivitasHasilPemeriksaanPipaList.IsCopy || subAktivitasHasilPemeriksaanPipaList.IsAdd) && subAktivitasHasilPemeriksaanPipaList.RowIndex is int rowIndex && rowIndex == 0))) // DN
+        eof = !await subAktivitasHasilPemeriksaanPipaList.Recordset.ReadAsync();
+    subAktivitasHasilPemeriksaanPipaList.RecordCount++;
+    if (subAktivitasHasilPemeriksaanPipaList.RecordCount >= subAktivitasHasilPemeriksaanPipaList.StartRecord) {
+        await subAktivitasHasilPemeriksaanPipaList.SetupRow();
+    <tr @Html.Raw(subAktivitasHasilPemeriksaanPipaList.RowAttributes)>
+    @* Render list options (body, left) *@
+    @subAktivitasHasilPemeriksaanPipaList.ListOptions.RenderBody("left", subAktivitasHasilPemeriksaanPipaList.RowCount)
+    @if (subAktivitasHasilPemeriksaanPipaList.id.Visible) { // subAktivitasHasilPemeriksaanPipaList.id.Visible (begin)
+        <td data-name="id" @Html.Raw(subAktivitasHasilPemeriksaanPipaList.id.CellAttributes)>
+<span id="el@(subAktivitasHasilPemeriksaanPipaList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasHasilPemeriksaanPipaList.RowCount)_SubAktivitasHasilPemeriksaanPipa_id" class="el_SubAktivitasHasilPemeriksaanPipa_id">
+<span @Html.Raw(subAktivitasHasilPemeriksaanPipaList.id.ViewAttributes)>
+@Html.Raw(subAktivitasHasilPemeriksaanPipaList.id.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasHasilPemeriksaanPipaList.id.Visible (end) *@
+    @if (subAktivitasHasilPemeriksaanPipaList.idProses.Visible) { // subAktivitasHasilPemeriksaanPipaList.idProses.Visible (begin)
+        <td data-name="idProses" @Html.Raw(subAktivitasHasilPemeriksaanPipaList.idProses.CellAttributes)>
+<span id="el@(subAktivitasHasilPemeriksaanPipaList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasHasilPemeriksaanPipaList.RowCount)_SubAktivitasHasilPemeriksaanPipa_idProses" class="el_SubAktivitasHasilPemeriksaanPipa_idProses">
+<span @Html.Raw(subAktivitasHasilPemeriksaanPipaList.idProses.ViewAttributes)>
+@Html.Raw(subAktivitasHasilPemeriksaanPipaList.idProses.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasHasilPemeriksaanPipaList.idProses.Visible (end) *@
+    @if (subAktivitasHasilPemeriksaanPipaList.idAktifitas.Visible) { // subAktivitasHasilPemeriksaanPipaList.idAktifitas.Visible (begin)
+        <td data-name="idAktifitas" @Html.Raw(subAktivitasHasilPemeriksaanPipaList.idAktifitas.CellAttributes)>
+<span id="el@(subAktivitasHasilPemeriksaanPipaList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasHasilPemeriksaanPipaList.RowCount)_SubAktivitasHasilPemeriksaanPipa_idAktifitas" class="el_SubAktivitasHasilPemeriksaanPipa_idAktifitas">
+<span @Html.Raw(subAktivitasHasilPemeriksaanPipaList.idAktifitas.ViewAttributes)>
+@Html.Raw(subAktivitasHasilPemeriksaanPipaList.idAktifitas.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasHasilPemeriksaanPipaList.idAktifitas.Visible (end) *@
+    @if (subAktivitasHasilPemeriksaanPipaList.NoReferensi.Visible) { // subAktivitasHasilPemeriksaanPipaList.NoReferensi.Visible (begin)
+        <td data-name="NoReferensi" @Html.Raw(subAktivitasHasilPemeriksaanPipaList.NoReferensi.CellAttributes)>
+<span id="el@(subAktivitasHasilPemeriksaanPipaList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasHasilPemeriksaanPipaList.RowCount)_SubAktivitasHasilPemeriksaanPipa_NoReferensi" class="el_SubAktivitasHasilPemeriksaanPipa_NoReferensi">
+<span @Html.Raw(subAktivitasHasilPemeriksaanPipaList.NoReferensi.ViewAttributes)>
+@Html.Raw(subAktivitasHasilPemeriksaanPipaList.NoReferensi.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasHasilPemeriksaanPipaList.NoReferensi.Visible (end) *@
+    @if (subAktivitasHasilPemeriksaanPipaList.NoBatch.Visible) { // subAktivitasHasilPemeriksaanPipaList.NoBatch.Visible (begin)
+        <td data-name="NoBatch" @Html.Raw(subAktivitasHasilPemeriksaanPipaList.NoBatch.CellAttributes)>
+<span id="el@(subAktivitasHasilPemeriksaanPipaList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasHasilPemeriksaanPipaList.RowCount)_SubAktivitasHasilPemeriksaanPipa_NoBatch" class="el_SubAktivitasHasilPemeriksaanPipa_NoBatch">
+<span @Html.Raw(subAktivitasHasilPemeriksaanPipaList.NoBatch.ViewAttributes)>
+@Html.Raw(subAktivitasHasilPemeriksaanPipaList.NoBatch.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasHasilPemeriksaanPipaList.NoBatch.Visible (end) *@
+    @if (subAktivitasHasilPemeriksaanPipaList.Tanggal.Visible) { // subAktivitasHasilPemeriksaanPipaList.Tanggal.Visible (begin)
+        <td data-name="Tanggal" @Html.Raw(subAktivitasHasilPemeriksaanPipaList.Tanggal.CellAttributes)>
+<span id="el@(subAktivitasHasilPemeriksaanPipaList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasHasilPemeriksaanPipaList.RowCount)_SubAktivitasHasilPemeriksaanPipa_Tanggal" class="el_SubAktivitasHasilPemeriksaanPipa_Tanggal">
+<span @Html.Raw(subAktivitasHasilPemeriksaanPipaList.Tanggal.ViewAttributes)>
+@Html.Raw(subAktivitasHasilPemeriksaanPipaList.Tanggal.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasHasilPemeriksaanPipaList.Tanggal.Visible (end) *@
+    @if (subAktivitasHasilPemeriksaanPipaList.Nama_Kegiatan.Visible) { // subAktivitasHasilPemeriksaanPipaList.Nama_Kegiatan.Visible (begin)
+        <td data-name="Nama_Kegiatan" @Html.Raw(subAktivitasHasilPemeriksaanPipaList.Nama_Kegiatan.CellAttributes)>
+<span id="el@(subAktivitasHasilPemeriksaanPipaList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasHasilPemeriksaanPipaList.RowCount)_SubAktivitasHasilPemeriksaanPipa_Nama_Kegiatan" class="el_SubAktivitasHasilPemeriksaanPipa_Nama_Kegiatan">
+<span @Html.Raw(subAktivitasHasilPemeriksaanPipaList.Nama_Kegiatan.ViewAttributes)>
+@Html.Raw(subAktivitasHasilPemeriksaanPipaList.Nama_Kegiatan.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasHasilPemeriksaanPipaList.Nama_Kegiatan.Visible (end) *@
+    @if (subAktivitasHasilPemeriksaanPipaList.Produk.Visible) { // subAktivitasHasilPemeriksaanPipaList.Produk.Visible (begin)
+        <td data-name="Produk" @Html.Raw(subAktivitasHasilPemeriksaanPipaList.Produk.CellAttributes)>
+<span id="el@(subAktivitasHasilPemeriksaanPipaList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasHasilPemeriksaanPipaList.RowCount)_SubAktivitasHasilPemeriksaanPipa_Produk" class="el_SubAktivitasHasilPemeriksaanPipa_Produk">
+<span @Html.Raw(subAktivitasHasilPemeriksaanPipaList.Produk.ViewAttributes)>
+@Html.Raw(subAktivitasHasilPemeriksaanPipaList.Produk.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasHasilPemeriksaanPipaList.Produk.Visible (end) *@
+    @if (subAktivitasHasilPemeriksaanPipaList.Density.Visible) { // subAktivitasHasilPemeriksaanPipaList.Density.Visible (begin)
+        <td data-name="Density" @Html.Raw(subAktivitasHasilPemeriksaanPipaList.Density.CellAttributes)>
+<span id="el@(subAktivitasHasilPemeriksaanPipaList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasHasilPemeriksaanPipaList.RowCount)_SubAktivitasHasilPemeriksaanPipa_Density" class="el_SubAktivitasHasilPemeriksaanPipa_Density">
+<span @Html.Raw(subAktivitasHasilPemeriksaanPipaList.Density.ViewAttributes)>
+@Html.Raw(subAktivitasHasilPemeriksaanPipaList.Density.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasHasilPemeriksaanPipaList.Density.Visible (end) *@
+    @if (subAktivitasHasilPemeriksaanPipaList.Temperature.Visible) { // subAktivitasHasilPemeriksaanPipaList.Temperature.Visible (begin)
+        <td data-name="Temperature" @Html.Raw(subAktivitasHasilPemeriksaanPipaList.Temperature.CellAttributes)>
+<span id="el@(subAktivitasHasilPemeriksaanPipaList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasHasilPemeriksaanPipaList.RowCount)_SubAktivitasHasilPemeriksaanPipa_Temperature" class="el_SubAktivitasHasilPemeriksaanPipa_Temperature">
+<span @Html.Raw(subAktivitasHasilPemeriksaanPipaList.Temperature.ViewAttributes)>
+@Html.Raw(subAktivitasHasilPemeriksaanPipaList.Temperature.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasHasilPemeriksaanPipaList.Temperature.Visible (end) *@
+    @if (subAktivitasHasilPemeriksaanPipaList.Pressure.Visible) { // subAktivitasHasilPemeriksaanPipaList.Pressure.Visible (begin)
+        <td data-name="Pressure" @Html.Raw(subAktivitasHasilPemeriksaanPipaList.Pressure.CellAttributes)>
+<span id="el@(subAktivitasHasilPemeriksaanPipaList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasHasilPemeriksaanPipaList.RowCount)_SubAktivitasHasilPemeriksaanPipa_Pressure" class="el_SubAktivitasHasilPemeriksaanPipa_Pressure">
+<span @Html.Raw(subAktivitasHasilPemeriksaanPipaList.Pressure.ViewAttributes)>
+@Html.Raw(subAktivitasHasilPemeriksaanPipaList.Pressure.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasHasilPemeriksaanPipaList.Pressure.Visible (end) *@
+    @if (subAktivitasHasilPemeriksaanPipaList.VolumeDischarge.Visible) { // subAktivitasHasilPemeriksaanPipaList.VolumeDischarge.Visible (begin)
+        <td data-name="VolumeDischarge" @Html.Raw(subAktivitasHasilPemeriksaanPipaList.VolumeDischarge.CellAttributes)>
+<span id="el@(subAktivitasHasilPemeriksaanPipaList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasHasilPemeriksaanPipaList.RowCount)_SubAktivitasHasilPemeriksaanPipa_VolumeDischarge" class="el_SubAktivitasHasilPemeriksaanPipa_VolumeDischarge">
+<span @Html.Raw(subAktivitasHasilPemeriksaanPipaList.VolumeDischarge.ViewAttributes)>
+@Html.Raw(subAktivitasHasilPemeriksaanPipaList.VolumeDischarge.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasHasilPemeriksaanPipaList.VolumeDischarge.Visible (end) *@
+    @if (subAktivitasHasilPemeriksaanPipaList.Flowrate.Visible) { // subAktivitasHasilPemeriksaanPipaList.Flowrate.Visible (begin)
+        <td data-name="Flowrate" @Html.Raw(subAktivitasHasilPemeriksaanPipaList.Flowrate.CellAttributes)>
+<span id="el@(subAktivitasHasilPemeriksaanPipaList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasHasilPemeriksaanPipaList.RowCount)_SubAktivitasHasilPemeriksaanPipa_Flowrate" class="el_SubAktivitasHasilPemeriksaanPipa_Flowrate">
+<span @Html.Raw(subAktivitasHasilPemeriksaanPipaList.Flowrate.ViewAttributes)>
+@Html.Raw(subAktivitasHasilPemeriksaanPipaList.Flowrate.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasHasilPemeriksaanPipaList.Flowrate.Visible (end) *@
+    @if (subAktivitasHasilPemeriksaanPipaList.Keterangan.Visible) { // subAktivitasHasilPemeriksaanPipaList.Keterangan.Visible (begin)
+        <td data-name="Keterangan" @Html.Raw(subAktivitasHasilPemeriksaanPipaList.Keterangan.CellAttributes)>
+<span id="el@(subAktivitasHasilPemeriksaanPipaList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasHasilPemeriksaanPipaList.RowCount)_SubAktivitasHasilPemeriksaanPipa_Keterangan" class="el_SubAktivitasHasilPemeriksaanPipa_Keterangan">
+<span @Html.Raw(subAktivitasHasilPemeriksaanPipaList.Keterangan.ViewAttributes)>
+@Html.Raw(subAktivitasHasilPemeriksaanPipaList.Keterangan.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasHasilPemeriksaanPipaList.Keterangan.Visible (end) *@
+    @if (subAktivitasHasilPemeriksaanPipaList.userInput.Visible) { // subAktivitasHasilPemeriksaanPipaList.userInput.Visible (begin)
+        <td data-name="userInput" @Html.Raw(subAktivitasHasilPemeriksaanPipaList.userInput.CellAttributes)>
+<span id="el@(subAktivitasHasilPemeriksaanPipaList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasHasilPemeriksaanPipaList.RowCount)_SubAktivitasHasilPemeriksaanPipa_userInput" class="el_SubAktivitasHasilPemeriksaanPipa_userInput">
+<span @Html.Raw(subAktivitasHasilPemeriksaanPipaList.userInput.ViewAttributes)>
+@Html.Raw(subAktivitasHasilPemeriksaanPipaList.userInput.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasHasilPemeriksaanPipaList.userInput.Visible (end) *@
+    @if (subAktivitasHasilPemeriksaanPipaList.etlDate.Visible) { // subAktivitasHasilPemeriksaanPipaList.etlDate.Visible (begin)
+        <td data-name="etlDate" @Html.Raw(subAktivitasHasilPemeriksaanPipaList.etlDate.CellAttributes)>
+<span id="el@(subAktivitasHasilPemeriksaanPipaList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasHasilPemeriksaanPipaList.RowCount)_SubAktivitasHasilPemeriksaanPipa_etlDate" class="el_SubAktivitasHasilPemeriksaanPipa_etlDate">
+<span @Html.Raw(subAktivitasHasilPemeriksaanPipaList.etlDate.ViewAttributes)>
+@Html.Raw(subAktivitasHasilPemeriksaanPipaList.etlDate.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasHasilPemeriksaanPipaList.etlDate.Visible (end) *@
+    @if (subAktivitasHasilPemeriksaanPipaList.LastUpdatedBy.Visible) { // subAktivitasHasilPemeriksaanPipaList.LastUpdatedBy.Visible (begin)
+        <td data-name="LastUpdatedBy" @Html.Raw(subAktivitasHasilPemeriksaanPipaList.LastUpdatedBy.CellAttributes)>
+<span id="el@(subAktivitasHasilPemeriksaanPipaList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasHasilPemeriksaanPipaList.RowCount)_SubAktivitasHasilPemeriksaanPipa_LastUpdatedBy" class="el_SubAktivitasHasilPemeriksaanPipa_LastUpdatedBy">
+<span @Html.Raw(subAktivitasHasilPemeriksaanPipaList.LastUpdatedBy.ViewAttributes)>
+@Html.Raw(subAktivitasHasilPemeriksaanPipaList.LastUpdatedBy.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasHasilPemeriksaanPipaList.LastUpdatedBy.Visible (end) *@
+    @if (subAktivitasHasilPemeriksaanPipaList.lastUpdatedDate.Visible) { // subAktivitasHasilPemeriksaanPipaList.lastUpdatedDate.Visible (begin)
+        <td data-name="lastUpdatedDate" @Html.Raw(subAktivitasHasilPemeriksaanPipaList.lastUpdatedDate.CellAttributes)>
+<span id="el@(subAktivitasHasilPemeriksaanPipaList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasHasilPemeriksaanPipaList.RowCount)_SubAktivitasHasilPemeriksaanPipa_lastUpdatedDate" class="el_SubAktivitasHasilPemeriksaanPipa_lastUpdatedDate">
+<span @Html.Raw(subAktivitasHasilPemeriksaanPipaList.lastUpdatedDate.ViewAttributes)>
+@Html.Raw(subAktivitasHasilPemeriksaanPipaList.lastUpdatedDate.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasHasilPemeriksaanPipaList.lastUpdatedDate.Visible (end) *@
+    @if (subAktivitasHasilPemeriksaanPipaList.SubAktivitasHasilPemeriksaanId.Visible) { // subAktivitasHasilPemeriksaanPipaList.SubAktivitasHasilPemeriksaanId.Visible (begin)
+        <td data-name="SubAktivitasHasilPemeriksaanId" @Html.Raw(subAktivitasHasilPemeriksaanPipaList.SubAktivitasHasilPemeriksaanId.CellAttributes)>
+<span id="el@(subAktivitasHasilPemeriksaanPipaList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasHasilPemeriksaanPipaList.RowCount)_SubAktivitasHasilPemeriksaanPipa_SubAktivitasHasilPemeriksaanId" class="el_SubAktivitasHasilPemeriksaanPipa_SubAktivitasHasilPemeriksaanId">
+<span @Html.Raw(subAktivitasHasilPemeriksaanPipaList.SubAktivitasHasilPemeriksaanId.ViewAttributes)>
+@Html.Raw(subAktivitasHasilPemeriksaanPipaList.SubAktivitasHasilPemeriksaanId.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasHasilPemeriksaanPipaList.SubAktivitasHasilPemeriksaanId.Visible (end) *@
+    @if (subAktivitasHasilPemeriksaanPipaList.TotalTerima.Visible) { // subAktivitasHasilPemeriksaanPipaList.TotalTerima.Visible (begin)
+        <td data-name="TotalTerima" @Html.Raw(subAktivitasHasilPemeriksaanPipaList.TotalTerima.CellAttributes)>
+<span id="el@(subAktivitasHasilPemeriksaanPipaList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasHasilPemeriksaanPipaList.RowCount)_SubAktivitasHasilPemeriksaanPipa_TotalTerima" class="el_SubAktivitasHasilPemeriksaanPipa_TotalTerima">
+<span @Html.Raw(subAktivitasHasilPemeriksaanPipaList.TotalTerima.ViewAttributes)>
+@Html.Raw(subAktivitasHasilPemeriksaanPipaList.TotalTerima.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasHasilPemeriksaanPipaList.TotalTerima.Visible (end) *@
+    @if (subAktivitasHasilPemeriksaanPipaList.ETC.Visible) { // subAktivitasHasilPemeriksaanPipaList.ETC.Visible (begin)
+        <td data-name="ETC" @Html.Raw(subAktivitasHasilPemeriksaanPipaList.ETC.CellAttributes)>
+<span id="el@(subAktivitasHasilPemeriksaanPipaList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasHasilPemeriksaanPipaList.RowCount)_SubAktivitasHasilPemeriksaanPipa_ETC" class="el_SubAktivitasHasilPemeriksaanPipa_ETC">
+<span @Html.Raw(subAktivitasHasilPemeriksaanPipaList.ETC.ViewAttributes)>
+@Html.Raw(subAktivitasHasilPemeriksaanPipaList.ETC.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasHasilPemeriksaanPipaList.ETC.Visible (end) *@
+    @if (subAktivitasHasilPemeriksaanPipaList.ETA.Visible) { // subAktivitasHasilPemeriksaanPipaList.ETA.Visible (begin)
+        <td data-name="ETA" @Html.Raw(subAktivitasHasilPemeriksaanPipaList.ETA.CellAttributes)>
+<span id="el@(subAktivitasHasilPemeriksaanPipaList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasHasilPemeriksaanPipaList.RowCount)_SubAktivitasHasilPemeriksaanPipa_ETA" class="el_SubAktivitasHasilPemeriksaanPipa_ETA">
+<span @Html.Raw(subAktivitasHasilPemeriksaanPipaList.ETA.ViewAttributes)>
+@Html.Raw(subAktivitasHasilPemeriksaanPipaList.ETA.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasHasilPemeriksaanPipaList.ETA.Visible (end) *@
+    @if (subAktivitasHasilPemeriksaanPipaList.ETA2.Visible) { // subAktivitasHasilPemeriksaanPipaList.ETA2.Visible (begin)
+        <td data-name="ETA2" @Html.Raw(subAktivitasHasilPemeriksaanPipaList.ETA2.CellAttributes)>
+<span id="el@(subAktivitasHasilPemeriksaanPipaList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasHasilPemeriksaanPipaList.RowCount)_SubAktivitasHasilPemeriksaanPipa_ETA2" class="el_SubAktivitasHasilPemeriksaanPipa_ETA2">
+<span @Html.Raw(subAktivitasHasilPemeriksaanPipaList.ETA2.ViewAttributes)>
+@Html.Raw(subAktivitasHasilPemeriksaanPipaList.ETA2.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasHasilPemeriksaanPipaList.ETA2.Visible (end) *@
+    @if (subAktivitasHasilPemeriksaanPipaList.ETA3.Visible) { // subAktivitasHasilPemeriksaanPipaList.ETA3.Visible (begin)
+        <td data-name="ETA3" @Html.Raw(subAktivitasHasilPemeriksaanPipaList.ETA3.CellAttributes)>
+<span id="el@(subAktivitasHasilPemeriksaanPipaList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasHasilPemeriksaanPipaList.RowCount)_SubAktivitasHasilPemeriksaanPipa_ETA3" class="el_SubAktivitasHasilPemeriksaanPipa_ETA3">
+<span @Html.Raw(subAktivitasHasilPemeriksaanPipaList.ETA3.ViewAttributes)>
+@Html.Raw(subAktivitasHasilPemeriksaanPipaList.ETA3.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasHasilPemeriksaanPipaList.ETA3.Visible (end) *@
+    @* Render list options (body, right) *@
+    @subAktivitasHasilPemeriksaanPipaList.ListOptions.RenderBody("right", subAktivitasHasilPemeriksaanPipaList.RowCount)
+    </tr>
+    } @* End if *@
+
+    // Reset for template row
+    if (SameString(subAktivitasHasilPemeriksaanPipaList.RowIndex, "$rowindex$"))
+        subAktivitasHasilPemeriksaanPipaList.RowIndex = 0;
+
+    // Reset inline add/copy row
+    if ((subAktivitasHasilPemeriksaanPipaList.IsCopy || subAktivitasHasilPemeriksaanPipaList.IsAdd) && subAktivitasHasilPemeriksaanPipaList.RowIndex is int rowIndex2 && rowIndex2 == 0)
+        subAktivitasHasilPemeriksaanPipaList.RowIndex = 1;
+} @* End While *@
+</tbody>
+</table><!-- /.ew-table -->
+} @* End If TotalRecords > 0 *@
+</div><!-- /.ew-grid-middle-panel -->
+@if (Empty(subAktivitasHasilPemeriksaanPipaList.CurrentAction) && !subAktivitasHasilPemeriksaanPipaList.UseAjaxActions) {
+<input type="hidden" name="action" id="action" value="">
+}
+</form><!-- /.ew-list-form -->
+@{ subAktivitasHasilPemeriksaanPipaList.CloseRecordset(); }
+@if (!subAktivitasHasilPemeriksaanPipaList.IsExport()) {
+<div class="card-footer ew-grid-lower-panel">
+@if (!subAktivitasHasilPemeriksaanPipaList.IsGridAdd && !(subAktivitasHasilPemeriksaanPipaList.IsGridEdit && subAktivitasHasilPemeriksaanPipaList.ModalGridEdit) && !subAktivitasHasilPemeriksaanPipaList.IsMultiEdit) {
+@Html.Raw(subAktivitasHasilPemeriksaanPipaList.Pager.Render())
+}
+<div class="ew-list-other-options">
+@subAktivitasHasilPemeriksaanPipaList.OtherOptions.RenderBody("bottom")
+</div>
+</div>
+}
+</div><!-- /.ew-grid -->
+} else { // Show other options
+<div class="ew-list-other-options">
+@subAktivitasHasilPemeriksaanPipaList.OtherOptions.ForEach(opt => opt.ButtonClass = "").RenderBody()
+</div>
+}
+</div>
+<div id="ew-footer-options">
+    @subAktivitasHasilPemeriksaanPipaList.FooterOptions.RenderBody()
+</div>
+</main>
+@subAktivitasHasilPemeriksaanPipaList.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+@if (!subAktivitasHasilPemeriksaanPipaList.IsExport()) {
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("SubAktivitasHasilPemeriksaanPipa");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Write your table-specific startup script here
+    // document.write("page loaded");
+});
+</script>
+}

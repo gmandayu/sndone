@@ -1,0 +1,828 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (templateAktivitasList.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = templateAktivitasList.UseLayout ? "_Layout" : "";
+}
+@if (!templateAktivitasList.IsExport()) {
+<script>
+var currentTable = @Html.Raw(ConvertToJson(templateAktivitasList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { TemplateAktivitas: currentTable } });
+var currentPageID = ew.PAGE_ID = "list";
+var currentForm;
+var @(templateAktivitasList.FormName);
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("@(templateAktivitasList.FormName)")
+        .setPageId("list")
+        .setSubmitWithFetch(@(templateAktivitasList.UseAjaxActions ? "true" : "false"))
+        .setFormKeyCountName("@(templateAktivitasList.FormKeyCountName)")
+
+        // Dynamic selection lists
+        .setLists({
+            "IdTemplateProses": @Html.Raw(templateAktivitasList.IdTemplateProses.ToClientList(templateAktivitasList)),
+            "UrutanAktivitas": @Html.Raw(templateAktivitasList.UrutanAktivitas.ToClientList(templateAktivitasList)),
+            "NamaAktivitas": @Html.Raw(templateAktivitasList.NamaAktivitas.ToClientList(templateAktivitasList)),
+            "IdPIC": @Html.Raw(templateAktivitasList.IdPIC.ToClientList(templateAktivitasList)),
+            "Keterangan": @Html.Raw(templateAktivitasList.Keterangan.ToClientList(templateAktivitasList)),
+            "DibuatOleh": @Html.Raw(templateAktivitasList.DibuatOleh.ToClientList(templateAktivitasList)),
+            "TanggalDibuat": @Html.Raw(templateAktivitasList.TanggalDibuat.ToClientList(templateAktivitasList)),
+            "DiperbaruiOleh": @Html.Raw(templateAktivitasList.DiperbaruiOleh.ToClientList(templateAktivitasList)),
+            "TanggalDiperbarui": @Html.Raw(templateAktivitasList.TanggalDiperbarui.ToClientList(templateAktivitasList)),
+            "TipeAktivitas": @Html.Raw(templateAktivitasList.TipeAktivitas.ToClientList(templateAktivitasList)),
+            "_URL": @Html.Raw(templateAktivitasList._URL.ToClientList(templateAktivitasList)),
+        })
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Write your client script here, no need to add script tags.
+});
+</script>
+}
+@if (!templateAktivitasList.IsExport()) {
+<div class="btn-toolbar ew-toolbar">
+@if (templateAktivitasList.TotalRecords > 0 && templateAktivitasList.ExportOptions.Visible) {
+    templateAktivitasList.ExportOptions.Render("body");
+}
+@if (templateAktivitasList.ImportOptions.Visible) {
+    templateAktivitasList.ImportOptions.Render("body");
+}
+@if (templateAktivitasList.SearchOptions.Visible) {
+    templateAktivitasList.SearchOptions.Render("body");
+}
+@if (templateAktivitasList.FilterOptions.Visible) {
+    templateAktivitasList.FilterOptions.Render("body");
+}
+</div>
+}
+@if (!templateAktivitasList.IsExport() || Config.ExportMasterRecord && templateAktivitasList.IsExport("print")) {
+if (!Empty(templateAktivitasList.DbMasterFilter) && templateAktivitasList.CurrentMasterTable == "TemplateProses") {
+    if (templateAktivitasList.MasterRecordExists) {
+        @await Html.PartialAsync("TemplateProsesMaster.cshtml")
+    }
+}
+}
+@if (templateAktivitasList.ShowCurrentFilter) {
+    templateAktivitasList.ShowFilterList();
+}
+@if (!templateAktivitasList.IsModal) {
+<form name="fTemplateAktivitassrch" id="fTemplateAktivitassrch" class="ew-form ew-ext-search-form" action="@AppPath(CurrentPageName())" novalidate autocomplete="off">
+<div id="fTemplateAktivitassrch_search_panel" class="mb-2 mb-sm-0 @(templateAktivitasList.SearchPanelClass)"><!-- .ew-search-panel -->
+<script>
+var currentTable = @Html.Raw(ConvertToJson(templateAktivitasList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { TemplateAktivitas: currentTable } });
+var currentForm;
+var fTemplateAktivitassrch, currentSearchForm, currentAdvancedSearchForm;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery,
+        fields = currentTable.fields;
+
+    // Form object for search
+    let form = new ew.FormBuilder()
+        .setId("fTemplateAktivitassrch")
+        .setPageId("list")
+@if (templateAktivitasList.UseAjaxActions) {
+        <text>.setSubmitWithFetch(true)</text>
+}
+
+        // Add fields
+        .setFields([
+        ])
+        // Validate form
+        .setValidate(
+            async function () {
+                if (!this.validateRequired)
+                    return true; // Ignore validation
+                let fobj = this.getForm();
+
+                // Validate fields
+                if (!this.validateFields())
+                    return false;
+
+                // Call Form_CustomValidate event
+                if (!(await this.customValidate?.(fobj) ?? true)) {
+                    this.focus();
+                    return false;
+                }
+                return true;
+            }
+        )
+
+        // Form_CustomValidate
+        .setCustomValidate(
+            function(fobj) { // DO NOT CHANGE THIS LINE!
+                    // Your custom validation code here, return false if invalid.
+                    return true;
+                }
+        )
+
+        // Use JavaScript validation or not
+        .setValidateRequired(ew.CLIENT_VALIDATE)
+
+        // Dynamic selection lists
+        .setLists({
+            "IdTemplateProses": @Html.Raw(templateAktivitasList.IdTemplateProses.ToClientList(templateAktivitasList)),
+            "UrutanAktivitas": @Html.Raw(templateAktivitasList.UrutanAktivitas.ToClientList(templateAktivitasList)),
+            "NamaAktivitas": @Html.Raw(templateAktivitasList.NamaAktivitas.ToClientList(templateAktivitasList)),
+            "IdPIC": @Html.Raw(templateAktivitasList.IdPIC.ToClientList(templateAktivitasList)),
+            "Keterangan": @Html.Raw(templateAktivitasList.Keterangan.ToClientList(templateAktivitasList)),
+            "DibuatOleh": @Html.Raw(templateAktivitasList.DibuatOleh.ToClientList(templateAktivitasList)),
+            "TanggalDibuat": @Html.Raw(templateAktivitasList.TanggalDibuat.ToClientList(templateAktivitasList)),
+            "DiperbaruiOleh": @Html.Raw(templateAktivitasList.DiperbaruiOleh.ToClientList(templateAktivitasList)),
+            "TanggalDiperbarui": @Html.Raw(templateAktivitasList.TanggalDiperbarui.ToClientList(templateAktivitasList)),
+            "TipeAktivitas": @Html.Raw(templateAktivitasList.TipeAktivitas.ToClientList(templateAktivitasList)),
+            "_URL": @Html.Raw(templateAktivitasList._URL.ToClientList(templateAktivitasList)),
+        })
+
+        // Filters
+        .setFilterList(@Html.Raw(templateAktivitasList.GetFilterList()))
+        .build();
+    window[form.id] = form;
+    currentSearchForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<input type="hidden" name="cmd" value="search">
+@if (Security.CanSearch) {
+if (!templateAktivitasList.IsExport() && Empty(templateAktivitasList.CurrentAction) && templateAktivitasList.HasSearchFields()) { @* Show search form (begin) *@
+<div class="ew-extended-search container-fluid ps-2">
+<div class="row mb-0@(templateAktivitasList.SearchFieldsPerRow > 0 ? " row-cols-sm-" + templateAktivitasList.SearchFieldsPerRow : "")">
+@{
+    // Render search row
+    templateAktivitasList.RowType = RowType.Search;
+    templateAktivitasList.ResetAttributes();
+    await templateAktivitasList.RenderRow();
+}
+@if (templateAktivitasList.IdTemplateProses.Visible) { // templateAktivitasList.IdTemplateProses.Visible (begin)
+    if (!templateAktivitasList.IdTemplateProses.UseFilter) {
+        templateAktivitasList.SearchColumnCount++;
+    }
+    <div id="xs_IdTemplateProses" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(templateAktivitasList.IdTemplateProses.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_IdTemplateProses"
+            name="x_IdTemplateProses[]"
+            class="form-control ew-select@(templateAktivitasList.IdTemplateProses.IsInvalidClass)"
+            data-select2-id="fTemplateAktivitassrch_x_IdTemplateProses"
+            data-table="TemplateAktivitas"
+            data-field="x_IdTemplateProses"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(templateAktivitasList.IdTemplateProses.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(templateAktivitasList.IdTemplateProses.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(templateAktivitasList.IdTemplateProses.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(templateAktivitasList.IdTemplateProses.EditAttributes)>
+            @(templateAktivitasList.IdTemplateProses.SelectOptionListHtml("x_IdTemplateProses", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(templateAktivitasList.IdTemplateProses.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fTemplateAktivitassrch", function() {
+            var options = {
+                name: "x_IdTemplateProses",
+                selectId: "fTemplateAktivitassrch_x_IdTemplateProses",
+                ajax: { id: "x_IdTemplateProses", form: "fTemplateAktivitassrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.TemplateAktivitas.fields.IdTemplateProses.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* templateAktivitasList.IdTemplateProses.Visible (end) *@
+@if (templateAktivitasList.UrutanAktivitas.Visible) { // templateAktivitasList.UrutanAktivitas.Visible (begin)
+    if (!templateAktivitasList.UrutanAktivitas.UseFilter) {
+        templateAktivitasList.SearchColumnCount++;
+    }
+    <div id="xs_UrutanAktivitas" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(templateAktivitasList.UrutanAktivitas.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_UrutanAktivitas"
+            name="x_UrutanAktivitas[]"
+            class="form-control ew-select@(templateAktivitasList.UrutanAktivitas.IsInvalidClass)"
+            data-select2-id="fTemplateAktivitassrch_x_UrutanAktivitas"
+            data-table="TemplateAktivitas"
+            data-field="x_UrutanAktivitas"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(templateAktivitasList.UrutanAktivitas.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(templateAktivitasList.UrutanAktivitas.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(templateAktivitasList.UrutanAktivitas.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(templateAktivitasList.UrutanAktivitas.EditAttributes)>
+            @(templateAktivitasList.UrutanAktivitas.SelectOptionListHtml("x_UrutanAktivitas", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(templateAktivitasList.UrutanAktivitas.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fTemplateAktivitassrch", function() {
+            var options = {
+                name: "x_UrutanAktivitas",
+                selectId: "fTemplateAktivitassrch_x_UrutanAktivitas",
+                ajax: { id: "x_UrutanAktivitas", form: "fTemplateAktivitassrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.TemplateAktivitas.fields.UrutanAktivitas.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* templateAktivitasList.UrutanAktivitas.Visible (end) *@
+@if (templateAktivitasList.NamaAktivitas.Visible) { // templateAktivitasList.NamaAktivitas.Visible (begin)
+    if (!templateAktivitasList.NamaAktivitas.UseFilter) {
+        templateAktivitasList.SearchColumnCount++;
+    }
+    <div id="xs_NamaAktivitas" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(templateAktivitasList.NamaAktivitas.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_NamaAktivitas"
+            name="x_NamaAktivitas[]"
+            class="form-control ew-select@(templateAktivitasList.NamaAktivitas.IsInvalidClass)"
+            data-select2-id="fTemplateAktivitassrch_x_NamaAktivitas"
+            data-table="TemplateAktivitas"
+            data-field="x_NamaAktivitas"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(templateAktivitasList.NamaAktivitas.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(templateAktivitasList.NamaAktivitas.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(templateAktivitasList.NamaAktivitas.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(templateAktivitasList.NamaAktivitas.EditAttributes)>
+            @(templateAktivitasList.NamaAktivitas.SelectOptionListHtml("x_NamaAktivitas", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(templateAktivitasList.NamaAktivitas.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fTemplateAktivitassrch", function() {
+            var options = {
+                name: "x_NamaAktivitas",
+                selectId: "fTemplateAktivitassrch_x_NamaAktivitas",
+                ajax: { id: "x_NamaAktivitas", form: "fTemplateAktivitassrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.TemplateAktivitas.fields.NamaAktivitas.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* templateAktivitasList.NamaAktivitas.Visible (end) *@
+@if (templateAktivitasList.IdPIC.Visible) { // templateAktivitasList.IdPIC.Visible (begin)
+    if (!templateAktivitasList.IdPIC.UseFilter) {
+        templateAktivitasList.SearchColumnCount++;
+    }
+    <div id="xs_IdPIC" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(templateAktivitasList.IdPIC.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_IdPIC"
+            name="x_IdPIC[]"
+            class="form-control ew-select@(templateAktivitasList.IdPIC.IsInvalidClass)"
+            data-select2-id="fTemplateAktivitassrch_x_IdPIC"
+            data-table="TemplateAktivitas"
+            data-field="x_IdPIC"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(templateAktivitasList.IdPIC.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(templateAktivitasList.IdPIC.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(templateAktivitasList.IdPIC.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(templateAktivitasList.IdPIC.EditAttributes)>
+            @(templateAktivitasList.IdPIC.SelectOptionListHtml("x_IdPIC", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(templateAktivitasList.IdPIC.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fTemplateAktivitassrch", function() {
+            var options = {
+                name: "x_IdPIC",
+                selectId: "fTemplateAktivitassrch_x_IdPIC",
+                ajax: { id: "x_IdPIC", form: "fTemplateAktivitassrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.TemplateAktivitas.fields.IdPIC.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* templateAktivitasList.IdPIC.Visible (end) *@
+@if (templateAktivitasList.Keterangan.Visible) { // templateAktivitasList.Keterangan.Visible (begin)
+    if (!templateAktivitasList.Keterangan.UseFilter) {
+        templateAktivitasList.SearchColumnCount++;
+    }
+    <div id="xs_Keterangan" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(templateAktivitasList.Keterangan.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_Keterangan"
+            name="x_Keterangan[]"
+            class="form-control ew-select@(templateAktivitasList.Keterangan.IsInvalidClass)"
+            data-select2-id="fTemplateAktivitassrch_x_Keterangan"
+            data-table="TemplateAktivitas"
+            data-field="x_Keterangan"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(templateAktivitasList.Keterangan.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(templateAktivitasList.Keterangan.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(templateAktivitasList.Keterangan.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(templateAktivitasList.Keterangan.EditAttributes)>
+            @(templateAktivitasList.Keterangan.SelectOptionListHtml("x_Keterangan", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(templateAktivitasList.Keterangan.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fTemplateAktivitassrch", function() {
+            var options = {
+                name: "x_Keterangan",
+                selectId: "fTemplateAktivitassrch_x_Keterangan",
+                ajax: { id: "x_Keterangan", form: "fTemplateAktivitassrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.TemplateAktivitas.fields.Keterangan.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* templateAktivitasList.Keterangan.Visible (end) *@
+@if (templateAktivitasList.DibuatOleh.Visible) { // templateAktivitasList.DibuatOleh.Visible (begin)
+    if (!templateAktivitasList.DibuatOleh.UseFilter) {
+        templateAktivitasList.SearchColumnCount++;
+    }
+    <div id="xs_DibuatOleh" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(templateAktivitasList.DibuatOleh.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_DibuatOleh"
+            name="x_DibuatOleh[]"
+            class="form-control ew-select@(templateAktivitasList.DibuatOleh.IsInvalidClass)"
+            data-select2-id="fTemplateAktivitassrch_x_DibuatOleh"
+            data-table="TemplateAktivitas"
+            data-field="x_DibuatOleh"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(templateAktivitasList.DibuatOleh.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(templateAktivitasList.DibuatOleh.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(templateAktivitasList.DibuatOleh.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(templateAktivitasList.DibuatOleh.EditAttributes)>
+            @(templateAktivitasList.DibuatOleh.SelectOptionListHtml("x_DibuatOleh", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(templateAktivitasList.DibuatOleh.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fTemplateAktivitassrch", function() {
+            var options = {
+                name: "x_DibuatOleh",
+                selectId: "fTemplateAktivitassrch_x_DibuatOleh",
+                ajax: { id: "x_DibuatOleh", form: "fTemplateAktivitassrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.TemplateAktivitas.fields.DibuatOleh.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* templateAktivitasList.DibuatOleh.Visible (end) *@
+@if (templateAktivitasList.TanggalDibuat.Visible) { // templateAktivitasList.TanggalDibuat.Visible (begin)
+    if (!templateAktivitasList.TanggalDibuat.UseFilter) {
+        templateAktivitasList.SearchColumnCount++;
+    }
+    <div id="xs_TanggalDibuat" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(templateAktivitasList.TanggalDibuat.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_TanggalDibuat"
+            name="x_TanggalDibuat[]"
+            class="form-control ew-select@(templateAktivitasList.TanggalDibuat.IsInvalidClass)"
+            data-select2-id="fTemplateAktivitassrch_x_TanggalDibuat"
+            data-table="TemplateAktivitas"
+            data-field="x_TanggalDibuat"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(templateAktivitasList.TanggalDibuat.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(templateAktivitasList.TanggalDibuat.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(templateAktivitasList.TanggalDibuat.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(templateAktivitasList.TanggalDibuat.EditAttributes)>
+            @(templateAktivitasList.TanggalDibuat.SelectOptionListHtml("x_TanggalDibuat", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(templateAktivitasList.TanggalDibuat.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fTemplateAktivitassrch", function() {
+            var options = {
+                name: "x_TanggalDibuat",
+                selectId: "fTemplateAktivitassrch_x_TanggalDibuat",
+                ajax: { id: "x_TanggalDibuat", form: "fTemplateAktivitassrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.TemplateAktivitas.fields.TanggalDibuat.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* templateAktivitasList.TanggalDibuat.Visible (end) *@
+@if (templateAktivitasList.DiperbaruiOleh.Visible) { // templateAktivitasList.DiperbaruiOleh.Visible (begin)
+    if (!templateAktivitasList.DiperbaruiOleh.UseFilter) {
+        templateAktivitasList.SearchColumnCount++;
+    }
+    <div id="xs_DiperbaruiOleh" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(templateAktivitasList.DiperbaruiOleh.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_DiperbaruiOleh"
+            name="x_DiperbaruiOleh[]"
+            class="form-control ew-select@(templateAktivitasList.DiperbaruiOleh.IsInvalidClass)"
+            data-select2-id="fTemplateAktivitassrch_x_DiperbaruiOleh"
+            data-table="TemplateAktivitas"
+            data-field="x_DiperbaruiOleh"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(templateAktivitasList.DiperbaruiOleh.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(templateAktivitasList.DiperbaruiOleh.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(templateAktivitasList.DiperbaruiOleh.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(templateAktivitasList.DiperbaruiOleh.EditAttributes)>
+            @(templateAktivitasList.DiperbaruiOleh.SelectOptionListHtml("x_DiperbaruiOleh", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(templateAktivitasList.DiperbaruiOleh.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fTemplateAktivitassrch", function() {
+            var options = {
+                name: "x_DiperbaruiOleh",
+                selectId: "fTemplateAktivitassrch_x_DiperbaruiOleh",
+                ajax: { id: "x_DiperbaruiOleh", form: "fTemplateAktivitassrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.TemplateAktivitas.fields.DiperbaruiOleh.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* templateAktivitasList.DiperbaruiOleh.Visible (end) *@
+@if (templateAktivitasList.TanggalDiperbarui.Visible) { // templateAktivitasList.TanggalDiperbarui.Visible (begin)
+    if (!templateAktivitasList.TanggalDiperbarui.UseFilter) {
+        templateAktivitasList.SearchColumnCount++;
+    }
+    <div id="xs_TanggalDiperbarui" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(templateAktivitasList.TanggalDiperbarui.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_TanggalDiperbarui"
+            name="x_TanggalDiperbarui[]"
+            class="form-control ew-select@(templateAktivitasList.TanggalDiperbarui.IsInvalidClass)"
+            data-select2-id="fTemplateAktivitassrch_x_TanggalDiperbarui"
+            data-table="TemplateAktivitas"
+            data-field="x_TanggalDiperbarui"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(templateAktivitasList.TanggalDiperbarui.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(templateAktivitasList.TanggalDiperbarui.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(templateAktivitasList.TanggalDiperbarui.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(templateAktivitasList.TanggalDiperbarui.EditAttributes)>
+            @(templateAktivitasList.TanggalDiperbarui.SelectOptionListHtml("x_TanggalDiperbarui", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(templateAktivitasList.TanggalDiperbarui.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fTemplateAktivitassrch", function() {
+            var options = {
+                name: "x_TanggalDiperbarui",
+                selectId: "fTemplateAktivitassrch_x_TanggalDiperbarui",
+                ajax: { id: "x_TanggalDiperbarui", form: "fTemplateAktivitassrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.TemplateAktivitas.fields.TanggalDiperbarui.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* templateAktivitasList.TanggalDiperbarui.Visible (end) *@
+@if (templateAktivitasList.TipeAktivitas.Visible) { // templateAktivitasList.TipeAktivitas.Visible (begin)
+    if (!templateAktivitasList.TipeAktivitas.UseFilter) {
+        templateAktivitasList.SearchColumnCount++;
+    }
+    <div id="xs_TipeAktivitas" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(templateAktivitasList.TipeAktivitas.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_TipeAktivitas"
+            name="x_TipeAktivitas[]"
+            class="form-control ew-select@(templateAktivitasList.TipeAktivitas.IsInvalidClass)"
+            data-select2-id="fTemplateAktivitassrch_x_TipeAktivitas"
+            data-table="TemplateAktivitas"
+            data-field="x_TipeAktivitas"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(templateAktivitasList.TipeAktivitas.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(templateAktivitasList.TipeAktivitas.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(templateAktivitasList.TipeAktivitas.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(templateAktivitasList.TipeAktivitas.EditAttributes)>
+            @(templateAktivitasList.TipeAktivitas.SelectOptionListHtml("x_TipeAktivitas", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(templateAktivitasList.TipeAktivitas.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fTemplateAktivitassrch", function() {
+            var options = {
+                name: "x_TipeAktivitas",
+                selectId: "fTemplateAktivitassrch_x_TipeAktivitas",
+                ajax: { id: "x_TipeAktivitas", form: "fTemplateAktivitassrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.TemplateAktivitas.fields.TipeAktivitas.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* templateAktivitasList.TipeAktivitas.Visible (end) *@
+@if (templateAktivitasList._URL.Visible) { // templateAktivitasList._URL.Visible (begin)
+    if (!templateAktivitasList._URL.UseFilter) {
+        templateAktivitasList.SearchColumnCount++;
+    }
+    <div id="xs__URL" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(templateAktivitasList._URL.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x__URL"
+            name="x__URL[]"
+            class="form-control ew-select@(templateAktivitasList._URL.IsInvalidClass)"
+            data-select2-id="fTemplateAktivitassrch_x__URL"
+            data-table="TemplateAktivitas"
+            data-field="x__URL"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(templateAktivitasList._URL.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(templateAktivitasList._URL.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(templateAktivitasList._URL.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(templateAktivitasList._URL.EditAttributes)>
+            @(templateAktivitasList._URL.SelectOptionListHtml("x__URL", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(templateAktivitasList._URL.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fTemplateAktivitassrch", function() {
+            var options = {
+                name: "x__URL",
+                selectId: "fTemplateAktivitassrch_x__URL",
+                ajax: { id: "x__URL", form: "fTemplateAktivitassrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.TemplateAktivitas.fields._URL.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* templateAktivitasList._URL.Visible (end) *@
+</div><!-- /.row -->
+<div class="row mb-0">
+    <div class="col-sm-auto px-0 pe-sm-2">
+        <div class="ew-basic-search input-group">
+            <input type="search" name="@(Config.TableBasicSearch)" id="@(Config.TableBasicSearch)" class="form-control ew-basic-search-keyword" value="@Html.Raw(HtmlEncode(templateAktivitasList.BasicSearch.SessionKeyword))" placeholder="@(HtmlEncode(Language.Phrase("Search")))" aria-label="@(HtmlEncode(Language.Phrase("Search")))">
+            <input type="hidden" name="@(Config.TableBasicSearchType)" id="@(Config.TableBasicSearchType)" class="ew-basic-search-type" value="@(HtmlEncode(templateAktivitasList.BasicSearch.SessionType))">
+            <button type="button" data-bs-toggle="dropdown" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split" aria-haspopup="true" aria-expanded="false">
+                <span id="searchtype">@Html.Raw(templateAktivitasList.BasicSearch.TypeNameShort)</span>
+            </button>
+            <div class="dropdown-menu dropdown-menu-end">
+                <button type="button" class="dropdown-item@(templateAktivitasList.BasicSearch.SessionType == "" ? " active" : "")" form="fTemplateAktivitassrch" data-ew-action="search-type">@Html.Raw(Language.Phrase("QuickSearchAuto"))</button>
+                <button type="button" class="dropdown-item@(templateAktivitasList.BasicSearch.SessionType == "=" ? " active" : "")" form="fTemplateAktivitassrch" data-ew-action="search-type" data-search-type="=">@Html.Raw(Language.Phrase("QuickSearchExact"))</button>
+                <button type="button" class="dropdown-item@(templateAktivitasList.BasicSearch.SessionType == "AND" ? " active" : "")" form="fTemplateAktivitassrch" data-ew-action="search-type" data-search-type="AND">@Html.Raw(Language.Phrase("QuickSearchAll"))</button>
+                <button type="button" class="dropdown-item@(templateAktivitasList.BasicSearch.SessionType == "OR" ? " active" : "")" form="fTemplateAktivitassrch" data-ew-action="search-type" data-search-type="OR">@Html.Raw(Language.Phrase("QuickSearchAny"))</button>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-auto mb-3">
+        <button class="btn btn-primary" name="btn-submit" id="btn-submit" type="submit">@Html.Raw(Language.Phrase("SearchBtn"))</button>
+    </div>
+</div>
+</div><!-- /.ew-extended-search -->
+} @* Show search form (end) *@
+}
+</div><!-- /.ew-search-panel -->
+</form>
+}
+@templateAktivitasList.ShowPageHeader()
+@templateAktivitasList.ShowMessages()
+<main class="list @(templateAktivitasList.TotalRecords == 0 && !templateAktivitasList.IsAdd ? " ew-no-record" : "")">
+<div id="ew-header-options">
+    @templateAktivitasList.HeaderOptions.RenderBody()
+</div>
+<div id="ew-list">
+@if (templateAktivitasList.TotalRecords > 0 || !Empty(templateAktivitasList.CurrentAction)) {
+<div class="card ew-card ew-grid@(templateAktivitasList.IsAddOrEdit ? " ew-grid-add-edit" : "") @(templateAktivitasList.TableGridClass)">
+<form name="@(templateAktivitasList.FormName)" id="@(templateAktivitasList.FormName)" class="ew-form ew-list-form" action="@AppPath(templateAktivitasList.PageName)" method="post" novalidate autocomplete="off">
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+@if (templateAktivitasList.IsModal) {
+<input type="hidden" name="modal" value="1">
+}
+@if (templateAktivitasList.CurrentMasterTable == "TemplateProses" && !Empty(templateAktivitasList.CurrentAction)) {
+<input type="hidden" name="@(Config.TableShowMaster)" value="TemplateProses">
+<input type="hidden" name="fk_IdTemplateProses" value="@(HtmlEncode(templateAktivitasList.IdTemplateProses.SessionValue))">
+}
+<div id="gmp_TemplateAktivitas" class="card-body ew-grid-middle-panel @(templateAktivitasList.TableContainerClass)" style="@(templateAktivitasList.TableContainerStyle)">
+@if (templateAktivitasList.TotalRecords > 0 || templateAktivitasList.IsGridEdit || templateAktivitasList.IsMultiEdit) {
+<table id="tbl_TemplateAktivitaslist" class="@(templateAktivitasList.TableClass)"><!-- .ew-table -->
+<thead>
+    <tr class="ew-table-header">
+@{
+    // Header row
+    templateAktivitasList.RowType = RowType.Header;
+
+    // Render list options
+    await templateAktivitasList.RenderListOptions();
+}
+@* Render list options (header, left) *@
+@templateAktivitasList.ListOptions.RenderHeader("left")
+@if (templateAktivitasList.IdTemplateProses.Visible) { // templateAktivitasList.IdTemplateProses.Visible (begin)
+        <th data-name="IdTemplateProses" class="@(templateAktivitasList.IdTemplateProses.HeaderCellClass)"><div id="elh_TemplateAktivitas_IdTemplateProses" class="TemplateAktivitas_IdTemplateProses">@Html.Raw(templateAktivitasList.RenderFieldHeader(templateAktivitasList.IdTemplateProses))</div></th>
+} @* templateAktivitasList.IdTemplateProses.Visible (end) *@
+@if (templateAktivitasList.UrutanAktivitas.Visible) { // templateAktivitasList.UrutanAktivitas.Visible (begin)
+        <th data-name="UrutanAktivitas" class="@(templateAktivitasList.UrutanAktivitas.HeaderCellClass)"><div id="elh_TemplateAktivitas_UrutanAktivitas" class="TemplateAktivitas_UrutanAktivitas">@Html.Raw(templateAktivitasList.RenderFieldHeader(templateAktivitasList.UrutanAktivitas))</div></th>
+} @* templateAktivitasList.UrutanAktivitas.Visible (end) *@
+@if (templateAktivitasList.NamaAktivitas.Visible) { // templateAktivitasList.NamaAktivitas.Visible (begin)
+        <th data-name="NamaAktivitas" class="@(templateAktivitasList.NamaAktivitas.HeaderCellClass)"><div id="elh_TemplateAktivitas_NamaAktivitas" class="TemplateAktivitas_NamaAktivitas">@Html.Raw(templateAktivitasList.RenderFieldHeader(templateAktivitasList.NamaAktivitas))</div></th>
+} @* templateAktivitasList.NamaAktivitas.Visible (end) *@
+@if (templateAktivitasList.IdPIC.Visible) { // templateAktivitasList.IdPIC.Visible (begin)
+        <th data-name="IdPIC" class="@(templateAktivitasList.IdPIC.HeaderCellClass)"><div id="elh_TemplateAktivitas_IdPIC" class="TemplateAktivitas_IdPIC">@Html.Raw(templateAktivitasList.RenderFieldHeader(templateAktivitasList.IdPIC))</div></th>
+} @* templateAktivitasList.IdPIC.Visible (end) *@
+@if (templateAktivitasList.Keterangan.Visible) { // templateAktivitasList.Keterangan.Visible (begin)
+        <th data-name="Keterangan" class="@(templateAktivitasList.Keterangan.HeaderCellClass)"><div id="elh_TemplateAktivitas_Keterangan" class="TemplateAktivitas_Keterangan">@Html.Raw(templateAktivitasList.RenderFieldHeader(templateAktivitasList.Keterangan))</div></th>
+} @* templateAktivitasList.Keterangan.Visible (end) *@
+@if (templateAktivitasList.DibuatOleh.Visible) { // templateAktivitasList.DibuatOleh.Visible (begin)
+        <th data-name="DibuatOleh" class="@(templateAktivitasList.DibuatOleh.HeaderCellClass)"><div id="elh_TemplateAktivitas_DibuatOleh" class="TemplateAktivitas_DibuatOleh">@Html.Raw(templateAktivitasList.RenderFieldHeader(templateAktivitasList.DibuatOleh))</div></th>
+} @* templateAktivitasList.DibuatOleh.Visible (end) *@
+@if (templateAktivitasList.TanggalDibuat.Visible) { // templateAktivitasList.TanggalDibuat.Visible (begin)
+        <th data-name="TanggalDibuat" class="@(templateAktivitasList.TanggalDibuat.HeaderCellClass)"><div id="elh_TemplateAktivitas_TanggalDibuat" class="TemplateAktivitas_TanggalDibuat">@Html.Raw(templateAktivitasList.RenderFieldHeader(templateAktivitasList.TanggalDibuat))</div></th>
+} @* templateAktivitasList.TanggalDibuat.Visible (end) *@
+@if (templateAktivitasList.DiperbaruiOleh.Visible) { // templateAktivitasList.DiperbaruiOleh.Visible (begin)
+        <th data-name="DiperbaruiOleh" class="@(templateAktivitasList.DiperbaruiOleh.HeaderCellClass)"><div id="elh_TemplateAktivitas_DiperbaruiOleh" class="TemplateAktivitas_DiperbaruiOleh">@Html.Raw(templateAktivitasList.RenderFieldHeader(templateAktivitasList.DiperbaruiOleh))</div></th>
+} @* templateAktivitasList.DiperbaruiOleh.Visible (end) *@
+@if (templateAktivitasList.TanggalDiperbarui.Visible) { // templateAktivitasList.TanggalDiperbarui.Visible (begin)
+        <th data-name="TanggalDiperbarui" class="@(templateAktivitasList.TanggalDiperbarui.HeaderCellClass)"><div id="elh_TemplateAktivitas_TanggalDiperbarui" class="TemplateAktivitas_TanggalDiperbarui">@Html.Raw(templateAktivitasList.RenderFieldHeader(templateAktivitasList.TanggalDiperbarui))</div></th>
+} @* templateAktivitasList.TanggalDiperbarui.Visible (end) *@
+@if (templateAktivitasList.TipeAktivitas.Visible) { // templateAktivitasList.TipeAktivitas.Visible (begin)
+        <th data-name="TipeAktivitas" class="@(templateAktivitasList.TipeAktivitas.HeaderCellClass)"><div id="elh_TemplateAktivitas_TipeAktivitas" class="TemplateAktivitas_TipeAktivitas">@Html.Raw(templateAktivitasList.RenderFieldHeader(templateAktivitasList.TipeAktivitas))</div></th>
+} @* templateAktivitasList.TipeAktivitas.Visible (end) *@
+@if (templateAktivitasList._URL.Visible) { // templateAktivitasList._URL.Visible (begin)
+        <th data-name="_URL" class="@(templateAktivitasList._URL.HeaderCellClass)"><div id="elh_TemplateAktivitas__URL" class="TemplateAktivitas__URL">@Html.Raw(templateAktivitasList.RenderFieldHeader(templateAktivitasList._URL))</div></th>
+} @* templateAktivitasList._URL.Visible (end) *@
+@* Render list options (header, right) *@
+@templateAktivitasList.ListOptions.RenderHeader("right")
+    </tr>
+</thead>
+<tbody data-page="@(templateAktivitasList.PageNumber)">
+@{
+    await templateAktivitasList.SetupGrid();
+    bool eof = templateAktivitasList.Recordset == null; // DN
+}
+@while (templateAktivitasList.RecordCount < templateAktivitasList.StopRecord || SameString(templateAktivitasList.RowIndex, "$rowindex$")) { // Begin While
+    if (!eof && !SameString(templateAktivitasList.RowIndex, "$rowindex$") &&
+        (!templateAktivitasList.IsGridAdd || templateAktivitasList.CurrentMode == "copy") &&
+        (!((templateAktivitasList.IsCopy || templateAktivitasList.IsAdd) && templateAktivitasList.RowIndex is int rowIndex && rowIndex == 0))) // DN
+        eof = !await templateAktivitasList.Recordset.ReadAsync();
+    templateAktivitasList.RecordCount++;
+    if (templateAktivitasList.RecordCount >= templateAktivitasList.StartRecord) {
+        await templateAktivitasList.SetupRow();
+    <tr @Html.Raw(templateAktivitasList.RowAttributes)>
+    @* Render list options (body, left) *@
+    @templateAktivitasList.ListOptions.RenderBody("left", templateAktivitasList.RowCount)
+    @if (templateAktivitasList.IdTemplateProses.Visible) { // templateAktivitasList.IdTemplateProses.Visible (begin)
+        <td data-name="IdTemplateProses" @Html.Raw(templateAktivitasList.IdTemplateProses.CellAttributes)>
+<span id="el@(templateAktivitasList.RowIndex == "$rowindex$" ? "$rowindex$" : templateAktivitasList.RowCount)_TemplateAktivitas_IdTemplateProses" class="el_TemplateAktivitas_IdTemplateProses">
+<span @Html.Raw(templateAktivitasList.IdTemplateProses.ViewAttributes)>
+@Html.Raw(templateAktivitasList.IdTemplateProses.GetViewValue())</span>
+</span>
+</td>
+    } @* templateAktivitasList.IdTemplateProses.Visible (end) *@
+    @if (templateAktivitasList.UrutanAktivitas.Visible) { // templateAktivitasList.UrutanAktivitas.Visible (begin)
+        <td data-name="UrutanAktivitas" @Html.Raw(templateAktivitasList.UrutanAktivitas.CellAttributes)>
+<span id="el@(templateAktivitasList.RowIndex == "$rowindex$" ? "$rowindex$" : templateAktivitasList.RowCount)_TemplateAktivitas_UrutanAktivitas" class="el_TemplateAktivitas_UrutanAktivitas">
+<span @Html.Raw(templateAktivitasList.UrutanAktivitas.ViewAttributes)>
+@Html.Raw(templateAktivitasList.UrutanAktivitas.GetViewValue())</span>
+</span>
+</td>
+    } @* templateAktivitasList.UrutanAktivitas.Visible (end) *@
+    @if (templateAktivitasList.NamaAktivitas.Visible) { // templateAktivitasList.NamaAktivitas.Visible (begin)
+        <td data-name="NamaAktivitas" @Html.Raw(templateAktivitasList.NamaAktivitas.CellAttributes)>
+<span id="el@(templateAktivitasList.RowIndex == "$rowindex$" ? "$rowindex$" : templateAktivitasList.RowCount)_TemplateAktivitas_NamaAktivitas" class="el_TemplateAktivitas_NamaAktivitas">
+<span @Html.Raw(templateAktivitasList.NamaAktivitas.ViewAttributes)>
+@Html.Raw(templateAktivitasList.NamaAktivitas.GetViewValue())</span>
+</span>
+</td>
+    } @* templateAktivitasList.NamaAktivitas.Visible (end) *@
+    @if (templateAktivitasList.IdPIC.Visible) { // templateAktivitasList.IdPIC.Visible (begin)
+        <td data-name="IdPIC" @Html.Raw(templateAktivitasList.IdPIC.CellAttributes)>
+<span id="el@(templateAktivitasList.RowIndex == "$rowindex$" ? "$rowindex$" : templateAktivitasList.RowCount)_TemplateAktivitas_IdPIC" class="el_TemplateAktivitas_IdPIC">
+<span @Html.Raw(templateAktivitasList.IdPIC.ViewAttributes)>
+@Html.Raw(templateAktivitasList.IdPIC.GetViewValue())</span>
+</span>
+</td>
+    } @* templateAktivitasList.IdPIC.Visible (end) *@
+    @if (templateAktivitasList.Keterangan.Visible) { // templateAktivitasList.Keterangan.Visible (begin)
+        <td data-name="Keterangan" @Html.Raw(templateAktivitasList.Keterangan.CellAttributes)>
+<span id="el@(templateAktivitasList.RowIndex == "$rowindex$" ? "$rowindex$" : templateAktivitasList.RowCount)_TemplateAktivitas_Keterangan" class="el_TemplateAktivitas_Keterangan">
+<span @Html.Raw(templateAktivitasList.Keterangan.ViewAttributes)>
+@Html.Raw(templateAktivitasList.Keterangan.GetViewValue())</span>
+</span>
+</td>
+    } @* templateAktivitasList.Keterangan.Visible (end) *@
+    @if (templateAktivitasList.DibuatOleh.Visible) { // templateAktivitasList.DibuatOleh.Visible (begin)
+        <td data-name="DibuatOleh" @Html.Raw(templateAktivitasList.DibuatOleh.CellAttributes)>
+<span id="el@(templateAktivitasList.RowIndex == "$rowindex$" ? "$rowindex$" : templateAktivitasList.RowCount)_TemplateAktivitas_DibuatOleh" class="el_TemplateAktivitas_DibuatOleh">
+<span @Html.Raw(templateAktivitasList.DibuatOleh.ViewAttributes)>
+@Html.Raw(templateAktivitasList.DibuatOleh.GetViewValue())</span>
+</span>
+</td>
+    } @* templateAktivitasList.DibuatOleh.Visible (end) *@
+    @if (templateAktivitasList.TanggalDibuat.Visible) { // templateAktivitasList.TanggalDibuat.Visible (begin)
+        <td data-name="TanggalDibuat" @Html.Raw(templateAktivitasList.TanggalDibuat.CellAttributes)>
+<span id="el@(templateAktivitasList.RowIndex == "$rowindex$" ? "$rowindex$" : templateAktivitasList.RowCount)_TemplateAktivitas_TanggalDibuat" class="el_TemplateAktivitas_TanggalDibuat">
+<span @Html.Raw(templateAktivitasList.TanggalDibuat.ViewAttributes)>
+@Html.Raw(templateAktivitasList.TanggalDibuat.GetViewValue())</span>
+</span>
+</td>
+    } @* templateAktivitasList.TanggalDibuat.Visible (end) *@
+    @if (templateAktivitasList.DiperbaruiOleh.Visible) { // templateAktivitasList.DiperbaruiOleh.Visible (begin)
+        <td data-name="DiperbaruiOleh" @Html.Raw(templateAktivitasList.DiperbaruiOleh.CellAttributes)>
+<span id="el@(templateAktivitasList.RowIndex == "$rowindex$" ? "$rowindex$" : templateAktivitasList.RowCount)_TemplateAktivitas_DiperbaruiOleh" class="el_TemplateAktivitas_DiperbaruiOleh">
+<span @Html.Raw(templateAktivitasList.DiperbaruiOleh.ViewAttributes)>
+@Html.Raw(templateAktivitasList.DiperbaruiOleh.GetViewValue())</span>
+</span>
+</td>
+    } @* templateAktivitasList.DiperbaruiOleh.Visible (end) *@
+    @if (templateAktivitasList.TanggalDiperbarui.Visible) { // templateAktivitasList.TanggalDiperbarui.Visible (begin)
+        <td data-name="TanggalDiperbarui" @Html.Raw(templateAktivitasList.TanggalDiperbarui.CellAttributes)>
+<span id="el@(templateAktivitasList.RowIndex == "$rowindex$" ? "$rowindex$" : templateAktivitasList.RowCount)_TemplateAktivitas_TanggalDiperbarui" class="el_TemplateAktivitas_TanggalDiperbarui">
+<span @Html.Raw(templateAktivitasList.TanggalDiperbarui.ViewAttributes)>
+@Html.Raw(templateAktivitasList.TanggalDiperbarui.GetViewValue())</span>
+</span>
+</td>
+    } @* templateAktivitasList.TanggalDiperbarui.Visible (end) *@
+    @if (templateAktivitasList.TipeAktivitas.Visible) { // templateAktivitasList.TipeAktivitas.Visible (begin)
+        <td data-name="TipeAktivitas" @Html.Raw(templateAktivitasList.TipeAktivitas.CellAttributes)>
+<span id="el@(templateAktivitasList.RowIndex == "$rowindex$" ? "$rowindex$" : templateAktivitasList.RowCount)_TemplateAktivitas_TipeAktivitas" class="el_TemplateAktivitas_TipeAktivitas">
+<span @Html.Raw(templateAktivitasList.TipeAktivitas.ViewAttributes)>
+@Html.Raw(templateAktivitasList.TipeAktivitas.GetViewValue())</span>
+</span>
+</td>
+    } @* templateAktivitasList.TipeAktivitas.Visible (end) *@
+    @if (templateAktivitasList._URL.Visible) { // templateAktivitasList._URL.Visible (begin)
+        <td data-name="_URL" @Html.Raw(templateAktivitasList._URL.CellAttributes)>
+<span id="el@(templateAktivitasList.RowIndex == "$rowindex$" ? "$rowindex$" : templateAktivitasList.RowCount)_TemplateAktivitas__URL" class="el_TemplateAktivitas__URL">
+<span @Html.Raw(templateAktivitasList._URL.ViewAttributes)>
+@Html.Raw(templateAktivitasList._URL.GetViewValue())</span>
+</span>
+</td>
+    } @* templateAktivitasList._URL.Visible (end) *@
+    @* Render list options (body, right) *@
+    @templateAktivitasList.ListOptions.RenderBody("right", templateAktivitasList.RowCount)
+    </tr>
+    } @* End if *@
+
+    // Reset for template row
+    if (SameString(templateAktivitasList.RowIndex, "$rowindex$"))
+        templateAktivitasList.RowIndex = 0;
+
+    // Reset inline add/copy row
+    if ((templateAktivitasList.IsCopy || templateAktivitasList.IsAdd) && templateAktivitasList.RowIndex is int rowIndex2 && rowIndex2 == 0)
+        templateAktivitasList.RowIndex = 1;
+} @* End While *@
+</tbody>
+</table><!-- /.ew-table -->
+} @* End If TotalRecords > 0 *@
+</div><!-- /.ew-grid-middle-panel -->
+@if (Empty(templateAktivitasList.CurrentAction) && !templateAktivitasList.UseAjaxActions) {
+<input type="hidden" name="action" id="action" value="">
+}
+</form><!-- /.ew-list-form -->
+@{ templateAktivitasList.CloseRecordset(); }
+@if (!templateAktivitasList.IsExport()) {
+<div class="card-footer ew-grid-lower-panel">
+@if (!templateAktivitasList.IsGridAdd && !(templateAktivitasList.IsGridEdit && templateAktivitasList.ModalGridEdit) && !templateAktivitasList.IsMultiEdit) {
+@Html.Raw(templateAktivitasList.Pager.Render())
+}
+<div class="ew-list-other-options">
+@templateAktivitasList.OtherOptions.RenderBody("bottom")
+</div>
+</div>
+}
+</div><!-- /.ew-grid -->
+} else { // Show other options
+<div class="ew-list-other-options">
+@templateAktivitasList.OtherOptions.ForEach(opt => opt.ButtonClass = "").RenderBody()
+</div>
+}
+</div>
+<div id="ew-footer-options">
+    @templateAktivitasList.FooterOptions.RenderBody()
+</div>
+</main>
+@templateAktivitasList.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+@if (!templateAktivitasList.IsExport()) {
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("TemplateAktivitas");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Write your table-specific startup script here
+    // document.write("page loaded");
+});
+</script>
+}

@@ -1,0 +1,1220 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (prosesList.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = prosesList.UseLayout ? "_Layout" : "";
+}
+@if (!prosesList.IsExport()) {
+<script>
+var currentTable = @Html.Raw(ConvertToJson(prosesList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { Proses: currentTable } });
+var currentPageID = ew.PAGE_ID = "list";
+var currentForm;
+var @(prosesList.FormName);
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("@(prosesList.FormName)")
+        .setPageId("list")
+        .setSubmitWithFetch(@(prosesList.UseAjaxActions ? "true" : "false"))
+        .setFormKeyCountName("@(prosesList.FormKeyCountName)")
+
+        // Dynamic selection lists
+        .setLists({
+            "IdReferensi": @Html.Raw(prosesList.IdReferensi.ToClientList(prosesList)),
+            "Aktivitas2": @Html.Raw(prosesList.Aktivitas2.ToClientList(prosesList)),
+            "TanggalMulai": @Html.Raw(prosesList.TanggalMulai.ToClientList(prosesList)),
+            "TanggalSelesai": @Html.Raw(prosesList.TanggalSelesai.ToClientList(prosesList)),
+            "StatusProses": @Html.Raw(prosesList.StatusProses.ToClientList(prosesList)),
+            "TipeProses": @Html.Raw(prosesList.TipeProses.ToClientList(prosesList)),
+            "DibuatOleh": @Html.Raw(prosesList.DibuatOleh.ToClientList(prosesList)),
+            "TanggalDibuat": @Html.Raw(prosesList.TanggalDibuat.ToClientList(prosesList)),
+            "DiperbaruiOleh": @Html.Raw(prosesList.DiperbaruiOleh.ToClientList(prosesList)),
+            "TanggalDiperbarui": @Html.Raw(prosesList.TanggalDiperbarui.ToClientList(prosesList)),
+        })
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Client script
+    var parent_url = ew.PATH_BASE;
+    $(document).on('click', '.download-document', function () {
+        var IdAktivitasDokumen = $(this).attr('IdAktivitasDokumen');
+        event.preventDefault();
+        $.ajax({
+            url: parent_url + 'api/LookUpList/download_activity_document',
+            type: 'GET',
+            data: { IdDokumen: IdAktivitasDokumen },
+            beforeSend: function () {
+                showLoading();
+            },
+            xhrFields: {
+                responseType: 'blob'
+            },
+            success: function(response, status, xhr) {
+                const disposition = xhr.getResponseHeader('Content-Disposition');
+                let fileName = "file_download";
+                if (disposition && disposition.indexOf('filename=') !== -1) {
+                    const fileNameMatch = disposition.match(/filename="?([^";]+)"?/);
+                    if (fileNameMatch && fileNameMatch[1]) {
+                        fileName = fileNameMatch[1];
+                    }
+                }
+                const blobUrl = window.URL.createObjectURL(response);
+                const a = document.createElement('a');
+                a.href = blobUrl;
+                a.download = fileName; 
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(blobUrl);
+                ew.alert("Download successful!");
+            },
+            error: function(xhr, status, error) {
+                if (xhr.status === 404) {
+                    ew.alert("File not found on the server.");
+                } else if (xhr.status === 500) {
+                    ew.alert("An error occurred. Please try again later.");
+                } else {
+                    ew.alert("Failed to download the file. Error: " + xhr.responseText);
+                }
+            },
+            complete: function () {
+                hideLoading();
+            }
+        });
+    });
+});
+</script>
+}
+@if (!prosesList.IsExport()) {
+<div class="btn-toolbar ew-toolbar">
+@if (prosesList.TotalRecords > 0 && prosesList.ExportOptions.Visible) {
+    prosesList.ExportOptions.Render("body");
+}
+@if (prosesList.ImportOptions.Visible) {
+    prosesList.ImportOptions.Render("body");
+}
+@if (prosesList.SearchOptions.Visible) {
+    prosesList.SearchOptions.Render("body");
+}
+@if (prosesList.FilterOptions.Visible) {
+    prosesList.FilterOptions.Render("body");
+}
+</div>
+}
+@if (prosesList.ShowCurrentFilter) {
+    prosesList.ShowFilterList();
+}
+@if (!prosesList.IsModal) {
+<form name="fProsessrch" id="fProsessrch" class="ew-form ew-ext-search-form" action="@AppPath(CurrentPageName())" novalidate autocomplete="off">
+<div id="fProsessrch_search_panel" class="mb-2 mb-sm-0 @(prosesList.SearchPanelClass)"><!-- .ew-search-panel -->
+<script>
+var currentTable = @Html.Raw(ConvertToJson(prosesList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { Proses: currentTable } });
+var currentForm;
+var fProsessrch, currentSearchForm, currentAdvancedSearchForm;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery,
+        fields = currentTable.fields;
+
+    // Form object for search
+    let form = new ew.FormBuilder()
+        .setId("fProsessrch")
+        .setPageId("list")
+@if (prosesList.UseAjaxActions) {
+        <text>.setSubmitWithFetch(true)</text>
+}
+
+        // Add fields
+        .setFields([
+        ])
+        // Validate form
+        .setValidate(
+            async function () {
+                if (!this.validateRequired)
+                    return true; // Ignore validation
+                let fobj = this.getForm();
+
+                // Validate fields
+                if (!this.validateFields())
+                    return false;
+
+                // Call Form_CustomValidate event
+                if (!(await this.customValidate?.(fobj) ?? true)) {
+                    this.focus();
+                    return false;
+                }
+                return true;
+            }
+        )
+
+        // Form_CustomValidate
+        .setCustomValidate(
+            function(fobj) { // DO NOT CHANGE THIS LINE!
+                    // Your custom validation code here, return false if invalid.
+                    return true;
+                }
+        )
+
+        // Use JavaScript validation or not
+        .setValidateRequired(ew.CLIENT_VALIDATE)
+
+        // Dynamic selection lists
+        .setLists({
+            "IdReferensi": @Html.Raw(prosesList.IdReferensi.ToClientList(prosesList)),
+            "IdTemplateProses": @Html.Raw(prosesList.IdTemplateProses.ToClientList(prosesList)),
+            "NamaProses": @Html.Raw(prosesList.NamaProses.ToClientList(prosesList)),
+            "Aktivitas2": @Html.Raw(prosesList.Aktivitas2.ToClientList(prosesList)),
+            "TanggalMulai": @Html.Raw(prosesList.TanggalMulai.ToClientList(prosesList)),
+            "TanggalSelesai": @Html.Raw(prosesList.TanggalSelesai.ToClientList(prosesList)),
+            "StatusProses": @Html.Raw(prosesList.StatusProses.ToClientList(prosesList)),
+            "TipeProses": @Html.Raw(prosesList.TipeProses.ToClientList(prosesList)),
+            "Catatan": @Html.Raw(prosesList.Catatan.ToClientList(prosesList)),
+            "DibuatOleh": @Html.Raw(prosesList.DibuatOleh.ToClientList(prosesList)),
+            "TanggalDibuat": @Html.Raw(prosesList.TanggalDibuat.ToClientList(prosesList)),
+            "DiperbaruiOleh": @Html.Raw(prosesList.DiperbaruiOleh.ToClientList(prosesList)),
+            "TanggalDiperbarui": @Html.Raw(prosesList.TanggalDiperbarui.ToClientList(prosesList)),
+        })
+
+        // Filters
+        .setFilterList(@Html.Raw(prosesList.GetFilterList()))
+        .build();
+    window[form.id] = form;
+    currentSearchForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<input type="hidden" name="cmd" value="search">
+@if (Security.CanSearch) {
+if (!prosesList.IsExport() && Empty(prosesList.CurrentAction) && prosesList.HasSearchFields()) { @* Show search form (begin) *@
+<div class="ew-extended-search container-fluid ps-2">
+<div class="row mb-0@(prosesList.SearchFieldsPerRow > 0 ? " row-cols-sm-" + prosesList.SearchFieldsPerRow : "")">
+@{
+    // Render search row
+    prosesList.RowType = RowType.Search;
+    prosesList.ResetAttributes();
+    await prosesList.RenderRow();
+}
+@if (prosesList.IdReferensi.Visible) { // prosesList.IdReferensi.Visible (begin)
+    if (!prosesList.IdReferensi.UseFilter) {
+        prosesList.SearchColumnCount++;
+    }
+    <div id="xs_IdReferensi" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(prosesList.IdReferensi.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_IdReferensi"
+            name="x_IdReferensi[]"
+            class="form-control ew-select@(prosesList.IdReferensi.IsInvalidClass)"
+            data-select2-id="fProsessrch_x_IdReferensi"
+            data-table="Proses"
+            data-field="x_IdReferensi"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(prosesList.IdReferensi.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(prosesList.IdReferensi.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(prosesList.IdReferensi.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(prosesList.IdReferensi.EditAttributes)>
+            @(prosesList.IdReferensi.SelectOptionListHtml("x_IdReferensi", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(prosesList.IdReferensi.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fProsessrch", function() {
+            var options = {
+                name: "x_IdReferensi",
+                selectId: "fProsessrch_x_IdReferensi",
+                ajax: { id: "x_IdReferensi", form: "fProsessrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.Proses.fields.IdReferensi.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* prosesList.IdReferensi.Visible (end) *@
+@if (prosesList.IdTemplateProses.Visible) { // prosesList.IdTemplateProses.Visible (begin)
+    if (!prosesList.IdTemplateProses.UseFilter) {
+        prosesList.SearchColumnCount++;
+    }
+    <div id="xs_IdTemplateProses" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(prosesList.IdTemplateProses.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_IdTemplateProses"
+            name="x_IdTemplateProses[]"
+            class="form-control ew-select@(prosesList.IdTemplateProses.IsInvalidClass)"
+            data-select2-id="fProsessrch_x_IdTemplateProses"
+            data-table="Proses"
+            data-field="x_IdTemplateProses"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(prosesList.IdTemplateProses.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(prosesList.IdTemplateProses.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(prosesList.IdTemplateProses.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(prosesList.IdTemplateProses.EditAttributes)>
+            @(prosesList.IdTemplateProses.SelectOptionListHtml("x_IdTemplateProses", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(prosesList.IdTemplateProses.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fProsessrch", function() {
+            var options = {
+                name: "x_IdTemplateProses",
+                selectId: "fProsessrch_x_IdTemplateProses",
+                ajax: { id: "x_IdTemplateProses", form: "fProsessrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.Proses.fields.IdTemplateProses.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* prosesList.IdTemplateProses.Visible (end) *@
+@if (prosesList.NamaProses.Visible) { // prosesList.NamaProses.Visible (begin)
+    if (!prosesList.NamaProses.UseFilter) {
+        prosesList.SearchColumnCount++;
+    }
+    <div id="xs_NamaProses" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(prosesList.NamaProses.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_NamaProses"
+            name="x_NamaProses[]"
+            class="form-control ew-select@(prosesList.NamaProses.IsInvalidClass)"
+            data-select2-id="fProsessrch_x_NamaProses"
+            data-table="Proses"
+            data-field="x_NamaProses"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(prosesList.NamaProses.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(prosesList.NamaProses.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(prosesList.NamaProses.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(prosesList.NamaProses.EditAttributes)>
+            @(prosesList.NamaProses.SelectOptionListHtml("x_NamaProses", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(prosesList.NamaProses.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fProsessrch", function() {
+            var options = {
+                name: "x_NamaProses",
+                selectId: "fProsessrch_x_NamaProses",
+                ajax: { id: "x_NamaProses", form: "fProsessrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.Proses.fields.NamaProses.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* prosesList.NamaProses.Visible (end) *@
+@if (prosesList.Aktivitas2.Visible) { // prosesList.Aktivitas2.Visible (begin)
+    if (!prosesList.Aktivitas2.UseFilter) {
+        prosesList.SearchColumnCount++;
+    }
+    <div id="xs_Aktivitas2" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(prosesList.Aktivitas2.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_Aktivitas2"
+            name="x_Aktivitas2[]"
+            class="form-control ew-select@(prosesList.Aktivitas2.IsInvalidClass)"
+            data-select2-id="fProsessrch_x_Aktivitas2"
+            data-table="Proses"
+            data-field="x_Aktivitas2"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(prosesList.Aktivitas2.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(prosesList.Aktivitas2.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(prosesList.Aktivitas2.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(prosesList.Aktivitas2.EditAttributes)>
+            @(prosesList.Aktivitas2.SelectOptionListHtml("x_Aktivitas2", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(prosesList.Aktivitas2.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fProsessrch", function() {
+            var options = {
+                name: "x_Aktivitas2",
+                selectId: "fProsessrch_x_Aktivitas2",
+                ajax: { id: "x_Aktivitas2", form: "fProsessrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.Proses.fields.Aktivitas2.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* prosesList.Aktivitas2.Visible (end) *@
+@if (prosesList.TanggalMulai.Visible) { // prosesList.TanggalMulai.Visible (begin)
+    if (!prosesList.TanggalMulai.UseFilter) {
+        prosesList.SearchColumnCount++;
+    }
+    <div id="xs_TanggalMulai" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(prosesList.TanggalMulai.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_TanggalMulai"
+            name="x_TanggalMulai[]"
+            class="form-control ew-select@(prosesList.TanggalMulai.IsInvalidClass)"
+            data-select2-id="fProsessrch_x_TanggalMulai"
+            data-table="Proses"
+            data-field="x_TanggalMulai"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(prosesList.TanggalMulai.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(prosesList.TanggalMulai.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(prosesList.TanggalMulai.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(prosesList.TanggalMulai.EditAttributes)>
+            @(prosesList.TanggalMulai.SelectOptionListHtml("x_TanggalMulai", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(prosesList.TanggalMulai.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fProsessrch", function() {
+            var options = {
+                name: "x_TanggalMulai",
+                selectId: "fProsessrch_x_TanggalMulai",
+                ajax: { id: "x_TanggalMulai", form: "fProsessrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.Proses.fields.TanggalMulai.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* prosesList.TanggalMulai.Visible (end) *@
+@if (prosesList.TanggalSelesai.Visible) { // prosesList.TanggalSelesai.Visible (begin)
+    if (!prosesList.TanggalSelesai.UseFilter) {
+        prosesList.SearchColumnCount++;
+    }
+    <div id="xs_TanggalSelesai" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(prosesList.TanggalSelesai.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_TanggalSelesai"
+            name="x_TanggalSelesai[]"
+            class="form-control ew-select@(prosesList.TanggalSelesai.IsInvalidClass)"
+            data-select2-id="fProsessrch_x_TanggalSelesai"
+            data-table="Proses"
+            data-field="x_TanggalSelesai"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(prosesList.TanggalSelesai.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(prosesList.TanggalSelesai.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(prosesList.TanggalSelesai.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(prosesList.TanggalSelesai.EditAttributes)>
+            @(prosesList.TanggalSelesai.SelectOptionListHtml("x_TanggalSelesai", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(prosesList.TanggalSelesai.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fProsessrch", function() {
+            var options = {
+                name: "x_TanggalSelesai",
+                selectId: "fProsessrch_x_TanggalSelesai",
+                ajax: { id: "x_TanggalSelesai", form: "fProsessrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.Proses.fields.TanggalSelesai.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* prosesList.TanggalSelesai.Visible (end) *@
+@if (prosesList.StatusProses.Visible) { // prosesList.StatusProses.Visible (begin)
+    if (!prosesList.StatusProses.UseFilter) {
+        prosesList.SearchColumnCount++;
+    }
+    <div id="xs_StatusProses" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(prosesList.StatusProses.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_StatusProses"
+            name="x_StatusProses[]"
+            class="form-control ew-select@(prosesList.StatusProses.IsInvalidClass)"
+            data-select2-id="fProsessrch_x_StatusProses"
+            data-table="Proses"
+            data-field="x_StatusProses"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(prosesList.StatusProses.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(prosesList.StatusProses.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(prosesList.StatusProses.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(prosesList.StatusProses.EditAttributes)>
+            @(prosesList.StatusProses.SelectOptionListHtml("x_StatusProses", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(prosesList.StatusProses.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fProsessrch", function() {
+            var options = {
+                name: "x_StatusProses",
+                selectId: "fProsessrch_x_StatusProses",
+                ajax: { id: "x_StatusProses", form: "fProsessrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.Proses.fields.StatusProses.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* prosesList.StatusProses.Visible (end) *@
+@if (prosesList.TipeProses.Visible) { // prosesList.TipeProses.Visible (begin)
+    if (!prosesList.TipeProses.UseFilter) {
+        prosesList.SearchColumnCount++;
+    }
+    <div id="xs_TipeProses" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(prosesList.TipeProses.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_TipeProses"
+            name="x_TipeProses[]"
+            class="form-control ew-select@(prosesList.TipeProses.IsInvalidClass)"
+            data-select2-id="fProsessrch_x_TipeProses"
+            data-table="Proses"
+            data-field="x_TipeProses"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(prosesList.TipeProses.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(prosesList.TipeProses.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(prosesList.TipeProses.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(prosesList.TipeProses.EditAttributes)>
+            @(prosesList.TipeProses.SelectOptionListHtml("x_TipeProses", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(prosesList.TipeProses.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fProsessrch", function() {
+            var options = {
+                name: "x_TipeProses",
+                selectId: "fProsessrch_x_TipeProses",
+                ajax: { id: "x_TipeProses", form: "fProsessrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.Proses.fields.TipeProses.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* prosesList.TipeProses.Visible (end) *@
+@if (prosesList.Catatan.Visible) { // prosesList.Catatan.Visible (begin)
+    if (!prosesList.Catatan.UseFilter) {
+        prosesList.SearchColumnCount++;
+    }
+    <div id="xs_Catatan" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(prosesList.Catatan.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_Catatan"
+            name="x_Catatan[]"
+            class="form-control ew-select@(prosesList.Catatan.IsInvalidClass)"
+            data-select2-id="fProsessrch_x_Catatan"
+            data-table="Proses"
+            data-field="x_Catatan"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(prosesList.Catatan.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(prosesList.Catatan.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(prosesList.Catatan.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(prosesList.Catatan.EditAttributes)>
+            @(prosesList.Catatan.SelectOptionListHtml("x_Catatan", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(prosesList.Catatan.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fProsessrch", function() {
+            var options = {
+                name: "x_Catatan",
+                selectId: "fProsessrch_x_Catatan",
+                ajax: { id: "x_Catatan", form: "fProsessrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.Proses.fields.Catatan.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* prosesList.Catatan.Visible (end) *@
+@if (prosesList.DibuatOleh.Visible) { // prosesList.DibuatOleh.Visible (begin)
+    if (!prosesList.DibuatOleh.UseFilter) {
+        prosesList.SearchColumnCount++;
+    }
+    <div id="xs_DibuatOleh" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(prosesList.DibuatOleh.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_DibuatOleh"
+            name="x_DibuatOleh[]"
+            class="form-control ew-select@(prosesList.DibuatOleh.IsInvalidClass)"
+            data-select2-id="fProsessrch_x_DibuatOleh"
+            data-table="Proses"
+            data-field="x_DibuatOleh"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(prosesList.DibuatOleh.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(prosesList.DibuatOleh.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(prosesList.DibuatOleh.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(prosesList.DibuatOleh.EditAttributes)>
+            @(prosesList.DibuatOleh.SelectOptionListHtml("x_DibuatOleh", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(prosesList.DibuatOleh.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fProsessrch", function() {
+            var options = {
+                name: "x_DibuatOleh",
+                selectId: "fProsessrch_x_DibuatOleh",
+                ajax: { id: "x_DibuatOleh", form: "fProsessrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.Proses.fields.DibuatOleh.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* prosesList.DibuatOleh.Visible (end) *@
+@if (prosesList.TanggalDibuat.Visible) { // prosesList.TanggalDibuat.Visible (begin)
+    if (!prosesList.TanggalDibuat.UseFilter) {
+        prosesList.SearchColumnCount++;
+    }
+    <div id="xs_TanggalDibuat" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(prosesList.TanggalDibuat.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_TanggalDibuat"
+            name="x_TanggalDibuat[]"
+            class="form-control ew-select@(prosesList.TanggalDibuat.IsInvalidClass)"
+            data-select2-id="fProsessrch_x_TanggalDibuat"
+            data-table="Proses"
+            data-field="x_TanggalDibuat"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(prosesList.TanggalDibuat.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(prosesList.TanggalDibuat.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(prosesList.TanggalDibuat.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(prosesList.TanggalDibuat.EditAttributes)>
+            @(prosesList.TanggalDibuat.SelectOptionListHtml("x_TanggalDibuat", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(prosesList.TanggalDibuat.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fProsessrch", function() {
+            var options = {
+                name: "x_TanggalDibuat",
+                selectId: "fProsessrch_x_TanggalDibuat",
+                ajax: { id: "x_TanggalDibuat", form: "fProsessrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.Proses.fields.TanggalDibuat.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* prosesList.TanggalDibuat.Visible (end) *@
+@if (prosesList.DiperbaruiOleh.Visible) { // prosesList.DiperbaruiOleh.Visible (begin)
+    if (!prosesList.DiperbaruiOleh.UseFilter) {
+        prosesList.SearchColumnCount++;
+    }
+    <div id="xs_DiperbaruiOleh" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(prosesList.DiperbaruiOleh.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_DiperbaruiOleh"
+            name="x_DiperbaruiOleh[]"
+            class="form-control ew-select@(prosesList.DiperbaruiOleh.IsInvalidClass)"
+            data-select2-id="fProsessrch_x_DiperbaruiOleh"
+            data-table="Proses"
+            data-field="x_DiperbaruiOleh"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(prosesList.DiperbaruiOleh.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(prosesList.DiperbaruiOleh.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(prosesList.DiperbaruiOleh.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(prosesList.DiperbaruiOleh.EditAttributes)>
+            @(prosesList.DiperbaruiOleh.SelectOptionListHtml("x_DiperbaruiOleh", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(prosesList.DiperbaruiOleh.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fProsessrch", function() {
+            var options = {
+                name: "x_DiperbaruiOleh",
+                selectId: "fProsessrch_x_DiperbaruiOleh",
+                ajax: { id: "x_DiperbaruiOleh", form: "fProsessrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.Proses.fields.DiperbaruiOleh.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* prosesList.DiperbaruiOleh.Visible (end) *@
+@if (prosesList.TanggalDiperbarui.Visible) { // prosesList.TanggalDiperbarui.Visible (begin)
+    if (!prosesList.TanggalDiperbarui.UseFilter) {
+        prosesList.SearchColumnCount++;
+    }
+    <div id="xs_TanggalDiperbarui" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(prosesList.TanggalDiperbarui.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_TanggalDiperbarui"
+            name="x_TanggalDiperbarui[]"
+            class="form-control ew-select@(prosesList.TanggalDiperbarui.IsInvalidClass)"
+            data-select2-id="fProsessrch_x_TanggalDiperbarui"
+            data-table="Proses"
+            data-field="x_TanggalDiperbarui"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(prosesList.TanggalDiperbarui.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(prosesList.TanggalDiperbarui.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(prosesList.TanggalDiperbarui.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(prosesList.TanggalDiperbarui.EditAttributes)>
+            @(prosesList.TanggalDiperbarui.SelectOptionListHtml("x_TanggalDiperbarui", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(prosesList.TanggalDiperbarui.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fProsessrch", function() {
+            var options = {
+                name: "x_TanggalDiperbarui",
+                selectId: "fProsessrch_x_TanggalDiperbarui",
+                ajax: { id: "x_TanggalDiperbarui", form: "fProsessrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.Proses.fields.TanggalDiperbarui.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* prosesList.TanggalDiperbarui.Visible (end) *@
+</div><!-- /.row -->
+<div class="row mb-0">
+    <div class="col-sm-auto px-0 pe-sm-2">
+        <div class="ew-basic-search input-group">
+            <input type="search" name="@(Config.TableBasicSearch)" id="@(Config.TableBasicSearch)" class="form-control ew-basic-search-keyword" value="@Html.Raw(HtmlEncode(prosesList.BasicSearch.SessionKeyword))" placeholder="@(HtmlEncode(Language.Phrase("Search")))" aria-label="@(HtmlEncode(Language.Phrase("Search")))">
+            <input type="hidden" name="@(Config.TableBasicSearchType)" id="@(Config.TableBasicSearchType)" class="ew-basic-search-type" value="@(HtmlEncode(prosesList.BasicSearch.SessionType))">
+            <button type="button" data-bs-toggle="dropdown" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split" aria-haspopup="true" aria-expanded="false">
+                <span id="searchtype">@Html.Raw(prosesList.BasicSearch.TypeNameShort)</span>
+            </button>
+            <div class="dropdown-menu dropdown-menu-end">
+                <button type="button" class="dropdown-item@(prosesList.BasicSearch.SessionType == "" ? " active" : "")" form="fProsessrch" data-ew-action="search-type">@Html.Raw(Language.Phrase("QuickSearchAuto"))</button>
+                <button type="button" class="dropdown-item@(prosesList.BasicSearch.SessionType == "=" ? " active" : "")" form="fProsessrch" data-ew-action="search-type" data-search-type="=">@Html.Raw(Language.Phrase("QuickSearchExact"))</button>
+                <button type="button" class="dropdown-item@(prosesList.BasicSearch.SessionType == "AND" ? " active" : "")" form="fProsessrch" data-ew-action="search-type" data-search-type="AND">@Html.Raw(Language.Phrase("QuickSearchAll"))</button>
+                <button type="button" class="dropdown-item@(prosesList.BasicSearch.SessionType == "OR" ? " active" : "")" form="fProsessrch" data-ew-action="search-type" data-search-type="OR">@Html.Raw(Language.Phrase("QuickSearchAny"))</button>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-auto mb-3">
+        <button class="btn btn-primary" name="btn-submit" id="btn-submit" type="submit">@Html.Raw(Language.Phrase("SearchBtn"))</button>
+    </div>
+</div>
+</div><!-- /.ew-extended-search -->
+} @* Show search form (end) *@
+}
+</div><!-- /.ew-search-panel -->
+</form>
+}
+@prosesList.ShowPageHeader()
+@prosesList.ShowMessages()
+<main class="list @(prosesList.TotalRecords == 0 && !prosesList.IsAdd ? " ew-no-record" : "")">
+<div id="ew-header-options">
+    @prosesList.HeaderOptions.RenderBody()
+</div>
+<div id="ew-list">
+@if (prosesList.TotalRecords > 0 || !Empty(prosesList.CurrentAction)) {
+<div class="card ew-card ew-grid@(prosesList.IsAddOrEdit ? " ew-grid-add-edit" : "") @(prosesList.TableGridClass)">
+<form name="@(prosesList.FormName)" id="@(prosesList.FormName)" class="ew-form ew-list-form" action="@AppPath(prosesList.PageName)" method="post" novalidate autocomplete="off">
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+@if (prosesList.IsModal) {
+<input type="hidden" name="modal" value="1">
+}
+<div id="gmp_Proses" class="card-body ew-grid-middle-panel @(prosesList.TableContainerClass)" style="@(prosesList.TableContainerStyle)">
+@if (prosesList.TotalRecords > 0 || prosesList.IsGridEdit || prosesList.IsMultiEdit) {
+<table id="tbl_Proseslist" class="@(prosesList.TableClass)"><!-- .ew-table -->
+<thead>
+    <tr class="ew-table-header">
+@{
+    // Header row
+    prosesList.RowType = RowType.Header;
+
+    // Render list options
+    await prosesList.RenderListOptions();
+}
+@* Render list options (header, left) *@
+@prosesList.ListOptions.RenderHeader("left")
+@if (prosesList.IdReferensi.Visible) { // prosesList.IdReferensi.Visible (begin)
+        <th data-name="IdReferensi" class="@(prosesList.IdReferensi.HeaderCellClass)"><div id="elh_Proses_IdReferensi" class="Proses_IdReferensi">@Html.Raw(prosesList.RenderFieldHeader(prosesList.IdReferensi))</div></th>
+} @* prosesList.IdReferensi.Visible (end) *@
+@if (prosesList.Aktivitas2.Visible) { // prosesList.Aktivitas2.Visible (begin)
+        <th data-name="Aktivitas2" class="@(prosesList.Aktivitas2.HeaderCellClass)"><div id="elh_Proses_Aktivitas2" class="Proses_Aktivitas2">@Html.Raw(prosesList.RenderFieldHeader(prosesList.Aktivitas2))</div></th>
+} @* prosesList.Aktivitas2.Visible (end) *@
+@if (prosesList.TanggalMulai.Visible) { // prosesList.TanggalMulai.Visible (begin)
+        <th data-name="TanggalMulai" class="@(prosesList.TanggalMulai.HeaderCellClass)"><div id="elh_Proses_TanggalMulai" class="Proses_TanggalMulai">@Html.Raw(prosesList.RenderFieldHeader(prosesList.TanggalMulai))</div></th>
+} @* prosesList.TanggalMulai.Visible (end) *@
+@if (prosesList.TanggalSelesai.Visible) { // prosesList.TanggalSelesai.Visible (begin)
+        <th data-name="TanggalSelesai" class="@(prosesList.TanggalSelesai.HeaderCellClass)"><div id="elh_Proses_TanggalSelesai" class="Proses_TanggalSelesai">@Html.Raw(prosesList.RenderFieldHeader(prosesList.TanggalSelesai))</div></th>
+} @* prosesList.TanggalSelesai.Visible (end) *@
+@if (prosesList.StatusProses.Visible) { // prosesList.StatusProses.Visible (begin)
+        <th data-name="StatusProses" class="@(prosesList.StatusProses.HeaderCellClass)"><div id="elh_Proses_StatusProses" class="Proses_StatusProses">@Html.Raw(prosesList.RenderFieldHeader(prosesList.StatusProses))</div></th>
+} @* prosesList.StatusProses.Visible (end) *@
+@if (prosesList.TipeProses.Visible) { // prosesList.TipeProses.Visible (begin)
+        <th data-name="TipeProses" class="@(prosesList.TipeProses.HeaderCellClass)"><div id="elh_Proses_TipeProses" class="Proses_TipeProses">@Html.Raw(prosesList.RenderFieldHeader(prosesList.TipeProses))</div></th>
+} @* prosesList.TipeProses.Visible (end) *@
+@if (prosesList.DibuatOleh.Visible) { // prosesList.DibuatOleh.Visible (begin)
+        <th data-name="DibuatOleh" class="@(prosesList.DibuatOleh.HeaderCellClass)"><div id="elh_Proses_DibuatOleh" class="Proses_DibuatOleh">@Html.Raw(prosesList.RenderFieldHeader(prosesList.DibuatOleh))</div></th>
+} @* prosesList.DibuatOleh.Visible (end) *@
+@if (prosesList.TanggalDibuat.Visible) { // prosesList.TanggalDibuat.Visible (begin)
+        <th data-name="TanggalDibuat" class="@(prosesList.TanggalDibuat.HeaderCellClass)"><div id="elh_Proses_TanggalDibuat" class="Proses_TanggalDibuat">@Html.Raw(prosesList.RenderFieldHeader(prosesList.TanggalDibuat))</div></th>
+} @* prosesList.TanggalDibuat.Visible (end) *@
+@if (prosesList.DiperbaruiOleh.Visible) { // prosesList.DiperbaruiOleh.Visible (begin)
+        <th data-name="DiperbaruiOleh" class="@(prosesList.DiperbaruiOleh.HeaderCellClass)"><div id="elh_Proses_DiperbaruiOleh" class="Proses_DiperbaruiOleh">@Html.Raw(prosesList.RenderFieldHeader(prosesList.DiperbaruiOleh))</div></th>
+} @* prosesList.DiperbaruiOleh.Visible (end) *@
+@if (prosesList.TanggalDiperbarui.Visible) { // prosesList.TanggalDiperbarui.Visible (begin)
+        <th data-name="TanggalDiperbarui" class="@(prosesList.TanggalDiperbarui.HeaderCellClass)"><div id="elh_Proses_TanggalDiperbarui" class="Proses_TanggalDiperbarui">@Html.Raw(prosesList.RenderFieldHeader(prosesList.TanggalDiperbarui))</div></th>
+} @* prosesList.TanggalDiperbarui.Visible (end) *@
+@* Render list options (header, right) *@
+@prosesList.ListOptions.RenderHeader("right")
+    </tr>
+</thead>
+<tbody data-page="@(prosesList.PageNumber)">
+@{
+    await prosesList.SetupGrid();
+    bool eof = prosesList.Recordset == null; // DN
+}
+@while (prosesList.RecordCount < prosesList.StopRecord || SameString(prosesList.RowIndex, "$rowindex$")) { // Begin While
+    if (!eof && !SameString(prosesList.RowIndex, "$rowindex$") &&
+        (!prosesList.IsGridAdd || prosesList.CurrentMode == "copy") &&
+        (!((prosesList.IsCopy || prosesList.IsAdd) && prosesList.RowIndex is int rowIndex && rowIndex == 0))) // DN
+        eof = !await prosesList.Recordset.ReadAsync();
+    prosesList.RecordCount++;
+    if (prosesList.RecordCount >= prosesList.StartRecord) {
+        await prosesList.SetupRow();
+    <tr @Html.Raw(prosesList.RowAttributes)>
+    @* Render list options (body, left) *@
+    @prosesList.ListOptions.RenderBody("left", prosesList.RowCount)
+    @if (prosesList.IdReferensi.Visible) { // prosesList.IdReferensi.Visible (begin)
+        <td data-name="IdReferensi" @Html.Raw(prosesList.IdReferensi.CellAttributes)>
+<span id="el@(prosesList.RowIndex == "$rowindex$" ? "$rowindex$" : prosesList.RowCount)_Proses_IdReferensi" class="el_Proses_IdReferensi">
+<span @Html.Raw(prosesList.IdReferensi.ViewAttributes)>
+@Html.Raw(prosesList.IdReferensi.GetViewValue())</span>
+</span>
+</td>
+    } @* prosesList.IdReferensi.Visible (end) *@
+    @if (prosesList.Aktivitas2.Visible) { // prosesList.Aktivitas2.Visible (begin)
+        <td data-name="Aktivitas2" @Html.Raw(prosesList.Aktivitas2.CellAttributes)>
+<span id="el@(prosesList.RowIndex == "$rowindex$" ? "$rowindex$" : prosesList.RowCount)_Proses_Aktivitas2" class="el_Proses_Aktivitas2">
+<span @Html.Raw(prosesList.Aktivitas2.ViewAttributes)>
+@Html.Raw(prosesList.Aktivitas2.GetViewValue())</span>
+</span>
+</td>
+    } @* prosesList.Aktivitas2.Visible (end) *@
+    @if (prosesList.TanggalMulai.Visible) { // prosesList.TanggalMulai.Visible (begin)
+        <td data-name="TanggalMulai" @Html.Raw(prosesList.TanggalMulai.CellAttributes)>
+<span id="el@(prosesList.RowIndex == "$rowindex$" ? "$rowindex$" : prosesList.RowCount)_Proses_TanggalMulai" class="el_Proses_TanggalMulai">
+<span @Html.Raw(prosesList.TanggalMulai.ViewAttributes)>
+@Html.Raw(prosesList.TanggalMulai.GetViewValue())</span>
+</span>
+</td>
+    } @* prosesList.TanggalMulai.Visible (end) *@
+    @if (prosesList.TanggalSelesai.Visible) { // prosesList.TanggalSelesai.Visible (begin)
+        <td data-name="TanggalSelesai" @Html.Raw(prosesList.TanggalSelesai.CellAttributes)>
+<span id="el@(prosesList.RowIndex == "$rowindex$" ? "$rowindex$" : prosesList.RowCount)_Proses_TanggalSelesai" class="el_Proses_TanggalSelesai">
+<span @Html.Raw(prosesList.TanggalSelesai.ViewAttributes)>
+@Html.Raw(prosesList.TanggalSelesai.GetViewValue())</span>
+</span>
+</td>
+    } @* prosesList.TanggalSelesai.Visible (end) *@
+    @if (prosesList.StatusProses.Visible) { // prosesList.StatusProses.Visible (begin)
+        <td data-name="StatusProses" @Html.Raw(prosesList.StatusProses.CellAttributes)>
+<span id="el@(prosesList.RowIndex == "$rowindex$" ? "$rowindex$" : prosesList.RowCount)_Proses_StatusProses" class="el_Proses_StatusProses">
+<span @Html.Raw(prosesList.StatusProses.ViewAttributes)>
+@Html.Raw(prosesList.StatusProses.GetViewValue())</span>
+</span>
+</td>
+    } @* prosesList.StatusProses.Visible (end) *@
+    @if (prosesList.TipeProses.Visible) { // prosesList.TipeProses.Visible (begin)
+        <td data-name="TipeProses" @Html.Raw(prosesList.TipeProses.CellAttributes)>
+<span id="el@(prosesList.RowIndex == "$rowindex$" ? "$rowindex$" : prosesList.RowCount)_Proses_TipeProses" class="el_Proses_TipeProses">
+<span @Html.Raw(prosesList.TipeProses.ViewAttributes)>
+@Html.Raw(prosesList.TipeProses.GetViewValue())</span>
+</span>
+</td>
+    } @* prosesList.TipeProses.Visible (end) *@
+    @if (prosesList.DibuatOleh.Visible) { // prosesList.DibuatOleh.Visible (begin)
+        <td data-name="DibuatOleh" @Html.Raw(prosesList.DibuatOleh.CellAttributes)>
+<span id="el@(prosesList.RowIndex == "$rowindex$" ? "$rowindex$" : prosesList.RowCount)_Proses_DibuatOleh" class="el_Proses_DibuatOleh">
+<span @Html.Raw(prosesList.DibuatOleh.ViewAttributes)>
+@Html.Raw(prosesList.DibuatOleh.GetViewValue())</span>
+</span>
+</td>
+    } @* prosesList.DibuatOleh.Visible (end) *@
+    @if (prosesList.TanggalDibuat.Visible) { // prosesList.TanggalDibuat.Visible (begin)
+        <td data-name="TanggalDibuat" @Html.Raw(prosesList.TanggalDibuat.CellAttributes)>
+<span id="el@(prosesList.RowIndex == "$rowindex$" ? "$rowindex$" : prosesList.RowCount)_Proses_TanggalDibuat" class="el_Proses_TanggalDibuat">
+<span @Html.Raw(prosesList.TanggalDibuat.ViewAttributes)>
+@Html.Raw(prosesList.TanggalDibuat.GetViewValue())</span>
+</span>
+</td>
+    } @* prosesList.TanggalDibuat.Visible (end) *@
+    @if (prosesList.DiperbaruiOleh.Visible) { // prosesList.DiperbaruiOleh.Visible (begin)
+        <td data-name="DiperbaruiOleh" @Html.Raw(prosesList.DiperbaruiOleh.CellAttributes)>
+<span id="el@(prosesList.RowIndex == "$rowindex$" ? "$rowindex$" : prosesList.RowCount)_Proses_DiperbaruiOleh" class="el_Proses_DiperbaruiOleh">
+<span @Html.Raw(prosesList.DiperbaruiOleh.ViewAttributes)>
+@Html.Raw(prosesList.DiperbaruiOleh.GetViewValue())</span>
+</span>
+</td>
+    } @* prosesList.DiperbaruiOleh.Visible (end) *@
+    @if (prosesList.TanggalDiperbarui.Visible) { // prosesList.TanggalDiperbarui.Visible (begin)
+        <td data-name="TanggalDiperbarui" @Html.Raw(prosesList.TanggalDiperbarui.CellAttributes)>
+<span id="el@(prosesList.RowIndex == "$rowindex$" ? "$rowindex$" : prosesList.RowCount)_Proses_TanggalDiperbarui" class="el_Proses_TanggalDiperbarui">
+<span @Html.Raw(prosesList.TanggalDiperbarui.ViewAttributes)>
+@Html.Raw(prosesList.TanggalDiperbarui.GetViewValue())</span>
+</span>
+</td>
+    } @* prosesList.TanggalDiperbarui.Visible (end) *@
+    @* Render list options (body, right) *@
+    @prosesList.ListOptions.RenderBody("right", prosesList.RowCount)
+    </tr>
+    } @* End if *@
+
+    // Reset for template row
+    if (SameString(prosesList.RowIndex, "$rowindex$"))
+        prosesList.RowIndex = 0;
+
+    // Reset inline add/copy row
+    if ((prosesList.IsCopy || prosesList.IsAdd) && prosesList.RowIndex is int rowIndex2 && rowIndex2 == 0)
+        prosesList.RowIndex = 1;
+} @* End While *@
+</tbody>
+</table><!-- /.ew-table -->
+} @* End If TotalRecords > 0 *@
+</div><!-- /.ew-grid-middle-panel -->
+@if (Empty(prosesList.CurrentAction) && !prosesList.UseAjaxActions) {
+<input type="hidden" name="action" id="action" value="">
+}
+</form><!-- /.ew-list-form -->
+@{ prosesList.CloseRecordset(); }
+@if (!prosesList.IsExport()) {
+<div class="card-footer ew-grid-lower-panel">
+@if (!prosesList.IsGridAdd && !(prosesList.IsGridEdit && prosesList.ModalGridEdit) && !prosesList.IsMultiEdit) {
+@Html.Raw(prosesList.Pager.Render())
+}
+<div class="ew-list-other-options">
+@prosesList.OtherOptions.RenderBody("bottom")
+</div>
+</div>
+}
+</div><!-- /.ew-grid -->
+} else { // Show other options
+<div class="ew-list-other-options">
+@prosesList.OtherOptions.ForEach(opt => opt.ButtonClass = "").RenderBody()
+</div>
+}
+</div>
+<div id="ew-footer-options">
+    @prosesList.FooterOptions.RenderBody()
+</div>
+</main>
+@prosesList.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+@if (!prosesList.IsExport()) {
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("Proses");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Startup script
+    var parent_url = ew.PATH_BASE;
+    var TipeProses = "@prosesList.TipeProses.CurrentValue";
+    var TipeProsesView = "@prosesList.TipeProses.CurrentValue";
+    var NoReferensi = "@prosesList.IdReferensi.CurrentValue";
+    let iconProses = "";
+    if (TipeProses == "Penerimaan" || TipeProses == "PenerimaanSTSBBM" || TipeProses == "PenerimaanSTSLPG" || 
+        TipeProses == "PenerimaanPipa" || TipeProses == "PenerimaanSalesPipa" || TipeProses == "PenerimaanRTW" ||
+        TipeProses == "PenerimaanTruck" || TipeProses == "PenerimaanPipaRefinery") {
+        TipeProses = "Penerimaan";
+        TipeProsesView = "Penerimaan";
+        iconProses = "fa-box-open";
+    } else if (TipeProses == "Penyaluran" || TipeProses == "PenyaluranTasNgs" || TipeProses == "PenyaluranTruck" ||  
+               TipeProses == "PenyaluranLPGTASNGS" || TipeProses == "PenyaluranKonsinyasiSTSBBM" || 
+               TipeProses == "PenyaluranKonsinyasiSTSLPG" || TipeProses == "PenyaluranPipa" || TipeProses == "PenyaluranSalesPipa" ||
+               TipeProses == "PenyaluranPipaLPG" || TipeProses == "PenyaluranKonsinyasiRTW" || TipeProses == "PenyaluranPipaJarakDekat"){
+        TipeProses = "Penyaluran";
+        TipeProsesView = "Proses Penyaluran";
+        iconProses = "fa-truck-fast";
+    } else if (TipeProses == "RencanaPenyaluran" || TipeProses == "RencanaPenyaluranLPG" || TipeProses == "RencanaPenyaluranPipa") {
+        TipeProses = "RencanaPenyaluran";
+        TipeProsesView = "Rencana & Realisasi Penyaluran";
+        iconProses = "fa-solid fa-clipboard-list";
+    } else if (TipeProses == "SamplingLabTest") {
+        TipeProsesView = "Sampling Lab Test";
+        iconProses = "fa-flask";
+    } else if (TipeProses == "Penimbunan" || TipeProses == "PenyimpananPenerimaanLPG" || 
+               TipeProses == "PenyimpananPenerimaanSTSBBM" || TipeProses == "PenyimpananPenerimaanLPGSTS" || 
+               TipeProses == "PenyimpananPenerimaanPipa" || TipeProses == "PenyimpananPenerimaanPipaLPG" ||
+               TipeProses == "PenyimpananPenerimaanRTW" || TipeProses == "PenyimpananPenerimaanTruck"){
+        TipeProses = "Penimbunan";
+        TipeProsesView = "Proses Penerimaan";
+        iconProses = "fa-oil-can";
+    } else if (TipeProses == "PenimbunanPenyaluran" || TipeProses == "PenimbunanPenyaluranLPG" || 
+               TipeProses == "PenyimpananPenyaluranSalesSTSBBM" || TipeProses == "PenyimpananPenyaluranKonsinyasiSTSBBM" || 
+               TipeProses == "PenyimpananPenyaluranSalesPipa" || TipeProses == "PenyimpananPenyaluranKonsinyasiPipa" ||
+               TipeProses == "PenyimpananPenyaluranSalesSTSLPG" || TipeProses == "PenyimpananPenyaluranKonsinyasiSTSLPG" || TipeProses == "PenyimpananPenyaluranSalesRTW") {
+        TipeProses = "PenimbunanPenyaluran";
+        TipeProsesView = "Proses Penyaluran";
+        iconProses = "fa-route";
+    } else if (TipeProses == "ClosingStock" || TipeProses == "ClosingStockSTSBBM" || TipeProses == "ClosingStockSTSLPG") {
+        TipeProses = "ClosingStock";
+        TipeProsesView = "Closing Stock";
+        iconProses = "fa-inbox";
+    } else if (['PenyimpananPenyaluranKonsinyasiRTW', 'PenyimpananPenyaluranKonsinyasi'].includes(TipeProses)) {
+        TipeProses = 'PenimbunanPenyaluran';
+        TipeProsesView = 'Proses Penyaluran';
+        iconProses = 'fa-route';
+    } else if (['PenyaluranKonsinyasiTruck', 'PenyaluranKonsinyasiTruckTAS'].includes(TipeProses)) {
+        TipeProses = "Penyaluran";
+        TipeProsesView = "Proses Penyaluran";
+        iconProses = "fa-truck-fast";
+    } 
+    var steps = [
+        { number: 1, label: TipeProsesView, url: `${parent_url}${TipeProses}List`, icon: iconProses },
+        { number: 2, label: "Proses", url: '', icon: "fa-gears" },
+    ];
+    var currentStep = 2;
+    $("<style>")
+        .prop("type", "text/css")
+        .html(`
+            .stepper {
+                display: flex;
+                counter-reset: step;
+            }
+            .step {
+                width: 150px;
+                text-align: center;
+                position: relative;
+            }
+            .step:not(:last-child)::after {
+                content: '';
+                position: absolute;
+                top: 20px;
+                right: -50%;
+                width: 100%;
+                height: 4px;
+                background-color: #ccc;
+                z-index: 0;
+            }
+            .step.completed:not(:last-child)::after {
+                background-color: #3c6dbd;
+            }
+            .step-icon {
+                width: 36px;
+                height: 36px;
+                line-height: 36px;
+                border-radius: 50%;
+                background: #ccc;
+                display: inline-block;
+                z-index: 1;
+                position: relative;
+                color: white;
+                font-weight: bold;
+            }
+            .step.active .step-icon {
+                background: #3c6dbd;
+            }
+            .step-label {
+                margin-top: 8px;
+                font-size: 14px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                gap: 6px;
+                color: #333;
+            }
+            .step-label {
+                color: #3c6dbd !important;
+                text-decoration: none;
+                margin: 0;
+                padding: 0;
+            }
+            .step-label-not-active {
+                color: #CCCCCC !important;
+            }
+
+            /* warna selector */
+            [data-bs-theme=light] .ew-grid .ew-table {
+                --bs-table-active-bg: #98caef;
+                --bs-table-active-color: #1d3343;
+            }
+            [data-bs-theme=light] .ew-grid .ew-table .table-active a  {
+                color: #1d3343; /* Sesuaikan dengan active-color */
+                text-decoration: underline; /* Optional */
+            }
+            [data-bs-theme=light] .ew-grid .ew-table a:hover {
+                color: #0d1a23; /* Lebih gelap saat hover (optional) */
+            }
+            .table-hover>tbody>tr.table-active:hover>* {
+                background-color: #77aacf !important;
+                color: var(--primary-white) !important;
+            }
+        `)
+        .appendTo("head");
+    var $stepperWrapper = $('<div class="d-flex border-bottom border-2 pb-2"><div class="stepper"></div></div>');
+    var $stepper = $stepperWrapper.find(".stepper");
+    steps.forEach(function (step, i) {
+        var isActive = step.number === currentStep;
+        var isCompleted = step.number < currentStep;
+        var stepClass = isActive ? "active" : isCompleted ? "completed" : "";
+        var icon, labelContent, html;
+        if (isActive) {
+            icon = `<div class="step-icon bg-success">${step.number}</div>`;
+            labelContent = `<div class="step-label"><p class="text-success mb-1"><i class="fa-solid ${step.icon} me-1 text-success"></i> ${step.label}</p></div>`;
+            html = `<div class="step ${stepClass} text-success">${icon}${labelContent}</div>`;
+        } else if (isCompleted) {
+            icon = `<div class="step-icon" style="background: #3c6dbd;">${step.number}</div>`;
+            labelContent = `<div class="step-label"><a href="${step.url}" class="text-primary"><i class="fa-solid ${step.icon} me-1"></i>${step.label}</a></div>`;
+            html = `<div class="step ${stepClass}">${icon}${labelContent}</div>`;
+        } else {
+            icon = `<div class="step-icon">${step.number}</div>`;
+            labelContent = `<div class="step-label-not-active"><p style="margin: 0;"><i class="fa-solid ${step.icon} me-1"></i>${step.label}</p></div>`;
+            html = `<div class="step ${stepClass} text-secondary">${icon}${labelContent}</div>`;
+        }
+        $stepper.append(html);
+    });
+    $(".content-header .container-fluid .row").append($stepperWrapper);
+    $(document).ready(function () {
+        let idReferensi = getURLParameter("x_IdReferensi[]") || [];
+        if (idReferensi.length > 0) {
+            idReferensi = idReferensi[0];
+            createTextProses(idReferensi);
+        }
+        const buttonCopy = `
+            <button type="button" id="btn-copy-referensi" class="btn ew-btn btn-success" disabled>
+                <i class="fas fa-plus"></i> Add Product
+            </button>
+        `;
+        if (TipeProses === 'Penerimaan' || TipeProses === 'SamplingLabTest') {
+            $('#btn-submit').after(buttonCopy);
+            GetIdReferensi();
+        } else if (TipeProses === 'Penyaluran') {
+            $.ajax({
+                url: parent_url + 'api/LookUpList/GetTipePenyaluran',
+                type: 'GET',
+                data: { NoReferensi: NoReferensi },
+                success: function (rs) {
+                    if (rs.success && rs.TipePenyaluran === 'Konsinyasi') {
+                        if(rs.KategoriPenyaluran === 'Non TAS/NGS' || rs.IdModa === 1 || rs.IdModa === 2 ){
+                            $('#btn-submit').after(buttonCopy);
+                            GetIdReferensi();
+                        }
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error AJAX:", status, error);
+                }
+            });
+        }
+    });
+    function createTextProses(idReferensi) {
+        // $.ajax({
+        //     url: parent_url + `api/LookUpList/get_penerimaan_detail?nomorPenerimaan=${idReferensi}`,
+        //     type: 'GET',
+        //     success: function (res) {
+        //         let produk = res.namaProduk;
+        //         let kapal = res.namaKapal;
+        //         let nomorPengiriman = res.nomorPengiriman;
+        //         let resultHtml = `<span class="ms-3" style="font-weight: bold; font-style: italic;">
+        //             Proses ${TipeProses} Produk <span style="color: red">${produk} ${kapal}</span> SN <span style="color: red">${nomorPengiriman}</span>
+        //         </span>`;
+
+        //             // Sisipkan setelah tombol export
+        //         $(".ew-filter-option").after(resultHtml);
+        //     },
+        //     error: function (xhr, status, error) {
+        //         console.error('Gagal update status aktivitas:', status, error);
+        //     }
+        // })
+    $.ajax({
+            url: parent_url + `api/LookUpList/get_referensi_detail?nomorReferensi=${idReferensi}`,
+            type: 'GET',
+            success: function (res) { 
+
+                // let produk = res.NamaProduk;
+                // let tanggal = res.TanggalDibuat;
+                // let kapal = res.NomorKendaraan;
+                // let nomorPengiriman = res.NomorPengiriman;
+                // let tanggalAktifitas = res.TanggalAktifitas;
+
+                // let detail = "";
+
+                // if (produk) detail += ` Produk: <span style="color: red">${produk}</span>`;
+                // if (tanggal) detail += ` Dibuat: <span style="color: red">${tanggal}</span>`;
+                // if (kapal) detail += ` Kendaraan: <span style="color: red">${kapal}</span>`;
+                // if (nomorPengiriman) detail += ` No Pengiriman: <span style="color: red">${nomorPengiriman}</span>`;
+                // if (tanggalAktifitas) detail += ` Tanggal Aktifitas: <span style="color: red">${tanggalAktifitas}</span>`;
+
+                // if (detail) detail = ` , ${detail}`
+                let namaJudul = res.namaJudul;
+                let resultHtml = `<span class="ms-3" style="font-weight: bold; font-style: italic;">
+                                    ${namaJudul} 
+                                  </span>` ;
+
+                // Sisipkan setelah tombol export
+                $(".ew-filter-option").after(resultHtml);
+            },
+            error: function (xhr, status, error) {
+                console.error('Gagal update status aktivitas:', status, error);
+            }
+        })
+    }
+    function getURLParameter(param) {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.has(param) ? urlParams.getAll(param) : null;
+    }
+
+    // $(document).ready(function () {
+    //         var foundCompleted = false; // Flag to track if "Completed" has been found
+    //         var processedNextRow = false; // Flag to track if the next row after "Completed" has been processed
+
+    //         $rows.each(function (i) {
+    //             if (i === 0 && statusText !== "Completed") {
+    //                 return;
+    //             }
+
+    //             if (statusText === "Completed") {
+    //                 foundCompleted = true; // Mark that "Completed" has been found
+    //                 return; // Skip processing this row
+    //             }
+
+    //             if (foundCompleted && !processedNextRow) {
+    //                 // Allow the first row after "Completed" to retain <a> tag
+    //                 processedNextRow = true;
+    //                 return;
+    //             }
+
+    //             // For all other rows, remove <a> tags
+    //             var aktivitasCell = $(this).find('[data-name="Aktivitas2"]');
+    //             var aktivitasText = aktivitasCell.text().trim();
+    //             aktivitasCell.find('a').replaceWith(aktivitasText);
+    //         });
+    // });
+    function GetIdReferensi() {
+        $.ajax({
+            url: parent_url + 'api/LookUpList/GetIdReferensi',
+            type: 'GET',
+            data: {
+                NoReferensi: NoReferensi,
+                Referensi: TipeProses
+            },
+            success: function (rs) {
+                if (rs.success && rs.IdReferensi && rs.Referensi) {
+                    let newHref = parent_url + `${rs.Referensi}Add/${rs.IdReferensi}?action=addproduct`;
+                    $("#btn-copy-referensi").prop("disabled", false);
+                    $("#btn-copy-referensi").click(function() {
+                        window.location.href = newHref;
+                    });
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error("Error AJAX:", status, error);
+            }
+        });
+    }
+});
+</script>
+}

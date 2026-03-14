@@ -1,0 +1,982 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (formInputControlRutinSecurityList.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = formInputControlRutinSecurityList.UseLayout ? "_Layout" : "";
+}
+@if (!formInputControlRutinSecurityList.IsExport()) {
+<script>
+var currentTable = @Html.Raw(ConvertToJson(formInputControlRutinSecurityList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { FormInputControlRutinSecurity: currentTable } });
+var currentPageID = ew.PAGE_ID = "list";
+var currentForm;
+var @(formInputControlRutinSecurityList.FormName);
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("@(formInputControlRutinSecurityList.FormName)")
+        .setPageId("list")
+        .setSubmitWithFetch(@(formInputControlRutinSecurityList.UseAjaxActions ? "true" : "false"))
+        .setFormKeyCountName("@(formInputControlRutinSecurityList.FormKeyCountName)")
+
+        // Dynamic selection lists
+        .setLists({
+            "NoReferensi": @Html.Raw(formInputControlRutinSecurityList.NoReferensi.ToClientList(formInputControlRutinSecurityList)),
+            "NamaSecurity": @Html.Raw(formInputControlRutinSecurityList.NamaSecurity.ToClientList(formInputControlRutinSecurityList)),
+            "Tanggal": @Html.Raw(formInputControlRutinSecurityList.Tanggal.ToClientList(formInputControlRutinSecurityList)),
+            "Lokasi": @Html.Raw(formInputControlRutinSecurityList.Lokasi.ToClientList(formInputControlRutinSecurityList)),
+            "Ketidaksesuaiaan": @Html.Raw(formInputControlRutinSecurityList.Ketidaksesuaiaan.ToClientList(formInputControlRutinSecurityList)),
+            "Keterangan": @Html.Raw(formInputControlRutinSecurityList.Keterangan.ToClientList(formInputControlRutinSecurityList)),
+            "IdPosition": @Html.Raw(formInputControlRutinSecurityList.IdPosition.ToClientList(formInputControlRutinSecurityList)),
+            "UserInput": @Html.Raw(formInputControlRutinSecurityList.UserInput.ToClientList(formInputControlRutinSecurityList)),
+            "EtlDate": @Html.Raw(formInputControlRutinSecurityList.EtlDate.ToClientList(formInputControlRutinSecurityList)),
+            "LastUpdatedBy": @Html.Raw(formInputControlRutinSecurityList.LastUpdatedBy.ToClientList(formInputControlRutinSecurityList)),
+        })
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Client script
+    const parent_url = ew.PATH_BASE;
+    $(document).on('click', '.download-document', function (e) {
+        e.preventDefault();
+        const idPOV = $(this).data('id');
+        if (!idPOV) {
+            ew.alert("ID dokumen tidak ditemukan.");
+            return;
+        }
+        $.ajax({
+            url: parent_url + 'api/LookUpList/DownloadDocumentZip',
+            type: 'GET',
+            data: { 
+                idRef: idPOV,
+                table: 'DetailUploadCRS',
+                colRef: 'IdCRS',
+                path: 'CRSDocument'
+            },
+            xhrFields: {
+                responseType: 'blob'
+            },
+            beforeSend: function () {
+                showLoading();
+            },
+            success: function (response, status, xhr) {
+                const disposition = xhr.getResponseHeader('Content-Disposition');
+                let fileName = "download_file";
+                if (disposition) {
+                    const fileNameMatch = disposition.match(/filename="?([^";]+)"?/);
+                    if (fileNameMatch && fileNameMatch[1]) {
+                        fileName = decodeURIComponent(fileNameMatch[1]);
+                    }
+                    const utf8FileNameMatch = disposition.match(/filename\*\s*=\s*UTF-8''([^;]+)/);
+                    if (utf8FileNameMatch && utf8FileNameMatch[1]) {
+                        fileName = decodeURIComponent(utf8FileNameMatch[1]);
+                    }
+                }
+                const blobUrl = window.URL.createObjectURL(response);
+                const a = document.createElement('a');
+                a.href = blobUrl;
+                a.download = fileName;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(blobUrl);
+                ew.alert("Download berhasil!");
+            },
+            error: function (xhr, status, error) {
+                if (xhr.status === 404) {
+                    ew.alert("File tidak ditemukan di server.");
+                } else if (xhr.status === 500) {
+                    ew.alert("Terjadi kesalahan server. Coba lagi nanti.");
+                } else {
+                    ew.alert("Gagal mendownload file. Error: " + xhr.responseText);
+                }
+            },
+            complete: function () {
+                hideLoading();
+            }
+        });
+    });
+});
+</script>
+}
+@if (!formInputControlRutinSecurityList.IsExport()) {
+<div class="btn-toolbar ew-toolbar">
+@if (formInputControlRutinSecurityList.TotalRecords > 0 && formInputControlRutinSecurityList.ExportOptions.Visible) {
+    formInputControlRutinSecurityList.ExportOptions.Render("body");
+}
+@if (formInputControlRutinSecurityList.ImportOptions.Visible) {
+    formInputControlRutinSecurityList.ImportOptions.Render("body");
+}
+@if (formInputControlRutinSecurityList.SearchOptions.Visible) {
+    formInputControlRutinSecurityList.SearchOptions.Render("body");
+}
+@if (formInputControlRutinSecurityList.FilterOptions.Visible) {
+    formInputControlRutinSecurityList.FilterOptions.Render("body");
+}
+</div>
+}
+@if (formInputControlRutinSecurityList.ShowCurrentFilter) {
+    formInputControlRutinSecurityList.ShowFilterList();
+}
+@if (!formInputControlRutinSecurityList.IsModal) {
+<form name="fFormInputControlRutinSecuritysrch" id="fFormInputControlRutinSecuritysrch" class="ew-form ew-ext-search-form" action="@AppPath(CurrentPageName())" novalidate autocomplete="off">
+<div id="fFormInputControlRutinSecuritysrch_search_panel" class="mb-2 mb-sm-0 @(formInputControlRutinSecurityList.SearchPanelClass)"><!-- .ew-search-panel -->
+<script>
+var currentTable = @Html.Raw(ConvertToJson(formInputControlRutinSecurityList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { FormInputControlRutinSecurity: currentTable } });
+var currentForm;
+var fFormInputControlRutinSecuritysrch, currentSearchForm, currentAdvancedSearchForm;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery,
+        fields = currentTable.fields;
+
+    // Form object for search
+    let form = new ew.FormBuilder()
+        .setId("fFormInputControlRutinSecuritysrch")
+        .setPageId("list")
+@if (formInputControlRutinSecurityList.UseAjaxActions) {
+        <text>.setSubmitWithFetch(true)</text>
+}
+
+        // Add fields
+        .setFields([
+        ])
+        // Validate form
+        .setValidate(
+            async function () {
+                if (!this.validateRequired)
+                    return true; // Ignore validation
+                let fobj = this.getForm();
+
+                // Validate fields
+                if (!this.validateFields())
+                    return false;
+
+                // Call Form_CustomValidate event
+                if (!(await this.customValidate?.(fobj) ?? true)) {
+                    this.focus();
+                    return false;
+                }
+                return true;
+            }
+        )
+
+        // Form_CustomValidate
+        .setCustomValidate(
+            function(fobj) { // DO NOT CHANGE THIS LINE!
+                    // Your custom validation code here, return false if invalid.
+                    return true;
+                }
+        )
+
+        // Use JavaScript validation or not
+        .setValidateRequired(ew.CLIENT_VALIDATE)
+
+        // Dynamic selection lists
+        .setLists({
+            "NoReferensi": @Html.Raw(formInputControlRutinSecurityList.NoReferensi.ToClientList(formInputControlRutinSecurityList)),
+            "NamaSecurity": @Html.Raw(formInputControlRutinSecurityList.NamaSecurity.ToClientList(formInputControlRutinSecurityList)),
+            "Tanggal": @Html.Raw(formInputControlRutinSecurityList.Tanggal.ToClientList(formInputControlRutinSecurityList)),
+            "Lokasi": @Html.Raw(formInputControlRutinSecurityList.Lokasi.ToClientList(formInputControlRutinSecurityList)),
+            "Keterangan": @Html.Raw(formInputControlRutinSecurityList.Keterangan.ToClientList(formInputControlRutinSecurityList)),
+            "IdPosition": @Html.Raw(formInputControlRutinSecurityList.IdPosition.ToClientList(formInputControlRutinSecurityList)),
+            "UserInput": @Html.Raw(formInputControlRutinSecurityList.UserInput.ToClientList(formInputControlRutinSecurityList)),
+            "EtlDate": @Html.Raw(formInputControlRutinSecurityList.EtlDate.ToClientList(formInputControlRutinSecurityList)),
+            "LastUpdatedBy": @Html.Raw(formInputControlRutinSecurityList.LastUpdatedBy.ToClientList(formInputControlRutinSecurityList)),
+        })
+
+        // Filters
+        .setFilterList(@Html.Raw(formInputControlRutinSecurityList.GetFilterList()))
+        .build();
+    window[form.id] = form;
+    currentSearchForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<input type="hidden" name="cmd" value="search">
+@if (Security.CanSearch) {
+if (!formInputControlRutinSecurityList.IsExport() && Empty(formInputControlRutinSecurityList.CurrentAction) && formInputControlRutinSecurityList.HasSearchFields()) { @* Show search form (begin) *@
+<div class="ew-extended-search container-fluid ps-2">
+<div class="row mb-0@(formInputControlRutinSecurityList.SearchFieldsPerRow > 0 ? " row-cols-sm-" + formInputControlRutinSecurityList.SearchFieldsPerRow : "")">
+@{
+    // Render search row
+    formInputControlRutinSecurityList.RowType = RowType.Search;
+    formInputControlRutinSecurityList.ResetAttributes();
+    await formInputControlRutinSecurityList.RenderRow();
+}
+@if (formInputControlRutinSecurityList.NoReferensi.Visible) { // formInputControlRutinSecurityList.NoReferensi.Visible (begin)
+    if (!formInputControlRutinSecurityList.NoReferensi.UseFilter) {
+        formInputControlRutinSecurityList.SearchColumnCount++;
+    }
+    <div id="xs_NoReferensi" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(formInputControlRutinSecurityList.NoReferensi.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_NoReferensi"
+            name="x_NoReferensi[]"
+            class="form-control ew-select@(formInputControlRutinSecurityList.NoReferensi.IsInvalidClass)"
+            data-select2-id="fFormInputControlRutinSecuritysrch_x_NoReferensi"
+            data-table="FormInputControlRutinSecurity"
+            data-field="x_NoReferensi"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(formInputControlRutinSecurityList.NoReferensi.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(formInputControlRutinSecurityList.NoReferensi.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(formInputControlRutinSecurityList.NoReferensi.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(formInputControlRutinSecurityList.NoReferensi.EditAttributes)>
+            @(formInputControlRutinSecurityList.NoReferensi.SelectOptionListHtml("x_NoReferensi", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(formInputControlRutinSecurityList.NoReferensi.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fFormInputControlRutinSecuritysrch", function() {
+            var options = {
+                name: "x_NoReferensi",
+                selectId: "fFormInputControlRutinSecuritysrch_x_NoReferensi",
+                ajax: { id: "x_NoReferensi", form: "fFormInputControlRutinSecuritysrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.FormInputControlRutinSecurity.fields.NoReferensi.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* formInputControlRutinSecurityList.NoReferensi.Visible (end) *@
+@if (formInputControlRutinSecurityList.NamaSecurity.Visible) { // formInputControlRutinSecurityList.NamaSecurity.Visible (begin)
+    if (!formInputControlRutinSecurityList.NamaSecurity.UseFilter) {
+        formInputControlRutinSecurityList.SearchColumnCount++;
+    }
+    <div id="xs_NamaSecurity" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(formInputControlRutinSecurityList.NamaSecurity.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_NamaSecurity"
+            name="x_NamaSecurity[]"
+            class="form-control ew-select@(formInputControlRutinSecurityList.NamaSecurity.IsInvalidClass)"
+            data-select2-id="fFormInputControlRutinSecuritysrch_x_NamaSecurity"
+            data-table="FormInputControlRutinSecurity"
+            data-field="x_NamaSecurity"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(formInputControlRutinSecurityList.NamaSecurity.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(formInputControlRutinSecurityList.NamaSecurity.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(formInputControlRutinSecurityList.NamaSecurity.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(formInputControlRutinSecurityList.NamaSecurity.EditAttributes)>
+            @(formInputControlRutinSecurityList.NamaSecurity.SelectOptionListHtml("x_NamaSecurity", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(formInputControlRutinSecurityList.NamaSecurity.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fFormInputControlRutinSecuritysrch", function() {
+            var options = {
+                name: "x_NamaSecurity",
+                selectId: "fFormInputControlRutinSecuritysrch_x_NamaSecurity",
+                ajax: { id: "x_NamaSecurity", form: "fFormInputControlRutinSecuritysrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.FormInputControlRutinSecurity.fields.NamaSecurity.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* formInputControlRutinSecurityList.NamaSecurity.Visible (end) *@
+@if (formInputControlRutinSecurityList.Tanggal.Visible) { // formInputControlRutinSecurityList.Tanggal.Visible (begin)
+    if (!formInputControlRutinSecurityList.Tanggal.UseFilter) {
+        formInputControlRutinSecurityList.SearchColumnCount++;
+    }
+    <div id="xs_Tanggal" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(formInputControlRutinSecurityList.Tanggal.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_Tanggal"
+            name="x_Tanggal[]"
+            class="form-control ew-select@(formInputControlRutinSecurityList.Tanggal.IsInvalidClass)"
+            data-select2-id="fFormInputControlRutinSecuritysrch_x_Tanggal"
+            data-table="FormInputControlRutinSecurity"
+            data-field="x_Tanggal"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(formInputControlRutinSecurityList.Tanggal.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(formInputControlRutinSecurityList.Tanggal.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(formInputControlRutinSecurityList.Tanggal.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(formInputControlRutinSecurityList.Tanggal.EditAttributes)>
+            @(formInputControlRutinSecurityList.Tanggal.SelectOptionListHtml("x_Tanggal", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(formInputControlRutinSecurityList.Tanggal.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fFormInputControlRutinSecuritysrch", function() {
+            var options = {
+                name: "x_Tanggal",
+                selectId: "fFormInputControlRutinSecuritysrch_x_Tanggal",
+                ajax: { id: "x_Tanggal", form: "fFormInputControlRutinSecuritysrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.FormInputControlRutinSecurity.fields.Tanggal.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* formInputControlRutinSecurityList.Tanggal.Visible (end) *@
+@if (formInputControlRutinSecurityList.Lokasi.Visible) { // formInputControlRutinSecurityList.Lokasi.Visible (begin)
+    if (!formInputControlRutinSecurityList.Lokasi.UseFilter) {
+        formInputControlRutinSecurityList.SearchColumnCount++;
+    }
+    <div id="xs_Lokasi" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(formInputControlRutinSecurityList.Lokasi.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_Lokasi"
+            name="x_Lokasi[]"
+            class="form-control ew-select@(formInputControlRutinSecurityList.Lokasi.IsInvalidClass)"
+            data-select2-id="fFormInputControlRutinSecuritysrch_x_Lokasi"
+            data-table="FormInputControlRutinSecurity"
+            data-field="x_Lokasi"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(formInputControlRutinSecurityList.Lokasi.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(formInputControlRutinSecurityList.Lokasi.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(formInputControlRutinSecurityList.Lokasi.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(formInputControlRutinSecurityList.Lokasi.EditAttributes)>
+            @(formInputControlRutinSecurityList.Lokasi.SelectOptionListHtml("x_Lokasi", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(formInputControlRutinSecurityList.Lokasi.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fFormInputControlRutinSecuritysrch", function() {
+            var options = {
+                name: "x_Lokasi",
+                selectId: "fFormInputControlRutinSecuritysrch_x_Lokasi",
+                ajax: { id: "x_Lokasi", form: "fFormInputControlRutinSecuritysrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.FormInputControlRutinSecurity.fields.Lokasi.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* formInputControlRutinSecurityList.Lokasi.Visible (end) *@
+@if (formInputControlRutinSecurityList.Keterangan.Visible) { // formInputControlRutinSecurityList.Keterangan.Visible (begin)
+    if (!formInputControlRutinSecurityList.Keterangan.UseFilter) {
+        formInputControlRutinSecurityList.SearchColumnCount++;
+    }
+    <div id="xs_Keterangan" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(formInputControlRutinSecurityList.Keterangan.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_Keterangan"
+            name="x_Keterangan[]"
+            class="form-control ew-select@(formInputControlRutinSecurityList.Keterangan.IsInvalidClass)"
+            data-select2-id="fFormInputControlRutinSecuritysrch_x_Keterangan"
+            data-table="FormInputControlRutinSecurity"
+            data-field="x_Keterangan"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(formInputControlRutinSecurityList.Keterangan.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(formInputControlRutinSecurityList.Keterangan.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(formInputControlRutinSecurityList.Keterangan.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(formInputControlRutinSecurityList.Keterangan.EditAttributes)>
+            @(formInputControlRutinSecurityList.Keterangan.SelectOptionListHtml("x_Keterangan", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(formInputControlRutinSecurityList.Keterangan.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fFormInputControlRutinSecuritysrch", function() {
+            var options = {
+                name: "x_Keterangan",
+                selectId: "fFormInputControlRutinSecuritysrch_x_Keterangan",
+                ajax: { id: "x_Keterangan", form: "fFormInputControlRutinSecuritysrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.FormInputControlRutinSecurity.fields.Keterangan.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* formInputControlRutinSecurityList.Keterangan.Visible (end) *@
+@if (formInputControlRutinSecurityList.IdPosition.Visible) { // formInputControlRutinSecurityList.IdPosition.Visible (begin)
+    if (!formInputControlRutinSecurityList.IdPosition.UseFilter) {
+        formInputControlRutinSecurityList.SearchColumnCount++;
+    }
+    <div id="xs_IdPosition" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(formInputControlRutinSecurityList.IdPosition.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_IdPosition"
+            name="x_IdPosition[]"
+            class="form-control ew-select@(formInputControlRutinSecurityList.IdPosition.IsInvalidClass)"
+            data-select2-id="fFormInputControlRutinSecuritysrch_x_IdPosition"
+            data-table="FormInputControlRutinSecurity"
+            data-field="x_IdPosition"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(formInputControlRutinSecurityList.IdPosition.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(formInputControlRutinSecurityList.IdPosition.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(formInputControlRutinSecurityList.IdPosition.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(formInputControlRutinSecurityList.IdPosition.EditAttributes)>
+            @(formInputControlRutinSecurityList.IdPosition.SelectOptionListHtml("x_IdPosition", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(formInputControlRutinSecurityList.IdPosition.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fFormInputControlRutinSecuritysrch", function() {
+            var options = {
+                name: "x_IdPosition",
+                selectId: "fFormInputControlRutinSecuritysrch_x_IdPosition",
+                ajax: { id: "x_IdPosition", form: "fFormInputControlRutinSecuritysrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.FormInputControlRutinSecurity.fields.IdPosition.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* formInputControlRutinSecurityList.IdPosition.Visible (end) *@
+@if (formInputControlRutinSecurityList.UserInput.Visible) { // formInputControlRutinSecurityList.UserInput.Visible (begin)
+    if (!formInputControlRutinSecurityList.UserInput.UseFilter) {
+        formInputControlRutinSecurityList.SearchColumnCount++;
+    }
+    <div id="xs_UserInput" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(formInputControlRutinSecurityList.UserInput.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_UserInput"
+            name="x_UserInput[]"
+            class="form-control ew-select@(formInputControlRutinSecurityList.UserInput.IsInvalidClass)"
+            data-select2-id="fFormInputControlRutinSecuritysrch_x_UserInput"
+            data-table="FormInputControlRutinSecurity"
+            data-field="x_UserInput"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(formInputControlRutinSecurityList.UserInput.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(formInputControlRutinSecurityList.UserInput.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(formInputControlRutinSecurityList.UserInput.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(formInputControlRutinSecurityList.UserInput.EditAttributes)>
+            @(formInputControlRutinSecurityList.UserInput.SelectOptionListHtml("x_UserInput", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(formInputControlRutinSecurityList.UserInput.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fFormInputControlRutinSecuritysrch", function() {
+            var options = {
+                name: "x_UserInput",
+                selectId: "fFormInputControlRutinSecuritysrch_x_UserInput",
+                ajax: { id: "x_UserInput", form: "fFormInputControlRutinSecuritysrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.FormInputControlRutinSecurity.fields.UserInput.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* formInputControlRutinSecurityList.UserInput.Visible (end) *@
+@if (formInputControlRutinSecurityList.EtlDate.Visible) { // formInputControlRutinSecurityList.EtlDate.Visible (begin)
+    if (!formInputControlRutinSecurityList.EtlDate.UseFilter) {
+        formInputControlRutinSecurityList.SearchColumnCount++;
+    }
+    <div id="xs_EtlDate" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(formInputControlRutinSecurityList.EtlDate.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_EtlDate"
+            name="x_EtlDate[]"
+            class="form-control ew-select@(formInputControlRutinSecurityList.EtlDate.IsInvalidClass)"
+            data-select2-id="fFormInputControlRutinSecuritysrch_x_EtlDate"
+            data-table="FormInputControlRutinSecurity"
+            data-field="x_EtlDate"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(formInputControlRutinSecurityList.EtlDate.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(formInputControlRutinSecurityList.EtlDate.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(formInputControlRutinSecurityList.EtlDate.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(formInputControlRutinSecurityList.EtlDate.EditAttributes)>
+            @(formInputControlRutinSecurityList.EtlDate.SelectOptionListHtml("x_EtlDate", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(formInputControlRutinSecurityList.EtlDate.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fFormInputControlRutinSecuritysrch", function() {
+            var options = {
+                name: "x_EtlDate",
+                selectId: "fFormInputControlRutinSecuritysrch_x_EtlDate",
+                ajax: { id: "x_EtlDate", form: "fFormInputControlRutinSecuritysrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.FormInputControlRutinSecurity.fields.EtlDate.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* formInputControlRutinSecurityList.EtlDate.Visible (end) *@
+@if (formInputControlRutinSecurityList.LastUpdatedBy.Visible) { // formInputControlRutinSecurityList.LastUpdatedBy.Visible (begin)
+    if (!formInputControlRutinSecurityList.LastUpdatedBy.UseFilter) {
+        formInputControlRutinSecurityList.SearchColumnCount++;
+    }
+    <div id="xs_LastUpdatedBy" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(formInputControlRutinSecurityList.LastUpdatedBy.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_LastUpdatedBy"
+            name="x_LastUpdatedBy[]"
+            class="form-control ew-select@(formInputControlRutinSecurityList.LastUpdatedBy.IsInvalidClass)"
+            data-select2-id="fFormInputControlRutinSecuritysrch_x_LastUpdatedBy"
+            data-table="FormInputControlRutinSecurity"
+            data-field="x_LastUpdatedBy"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(formInputControlRutinSecurityList.LastUpdatedBy.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(formInputControlRutinSecurityList.LastUpdatedBy.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(formInputControlRutinSecurityList.LastUpdatedBy.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(formInputControlRutinSecurityList.LastUpdatedBy.EditAttributes)>
+            @(formInputControlRutinSecurityList.LastUpdatedBy.SelectOptionListHtml("x_LastUpdatedBy", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(formInputControlRutinSecurityList.LastUpdatedBy.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fFormInputControlRutinSecuritysrch", function() {
+            var options = {
+                name: "x_LastUpdatedBy",
+                selectId: "fFormInputControlRutinSecuritysrch_x_LastUpdatedBy",
+                ajax: { id: "x_LastUpdatedBy", form: "fFormInputControlRutinSecuritysrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.FormInputControlRutinSecurity.fields.LastUpdatedBy.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* formInputControlRutinSecurityList.LastUpdatedBy.Visible (end) *@
+</div><!-- /.row -->
+<div class="row mb-0">
+    <div class="col-sm-auto px-0 pe-sm-2">
+        <div class="ew-basic-search input-group">
+            <input type="search" name="@(Config.TableBasicSearch)" id="@(Config.TableBasicSearch)" class="form-control ew-basic-search-keyword" value="@Html.Raw(HtmlEncode(formInputControlRutinSecurityList.BasicSearch.SessionKeyword))" placeholder="@(HtmlEncode(Language.Phrase("Search")))" aria-label="@(HtmlEncode(Language.Phrase("Search")))">
+            <input type="hidden" name="@(Config.TableBasicSearchType)" id="@(Config.TableBasicSearchType)" class="ew-basic-search-type" value="@(HtmlEncode(formInputControlRutinSecurityList.BasicSearch.SessionType))">
+            <button type="button" data-bs-toggle="dropdown" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split" aria-haspopup="true" aria-expanded="false">
+                <span id="searchtype">@Html.Raw(formInputControlRutinSecurityList.BasicSearch.TypeNameShort)</span>
+            </button>
+            <div class="dropdown-menu dropdown-menu-end">
+                <button type="button" class="dropdown-item@(formInputControlRutinSecurityList.BasicSearch.SessionType == "" ? " active" : "")" form="fFormInputControlRutinSecuritysrch" data-ew-action="search-type">@Html.Raw(Language.Phrase("QuickSearchAuto"))</button>
+                <button type="button" class="dropdown-item@(formInputControlRutinSecurityList.BasicSearch.SessionType == "=" ? " active" : "")" form="fFormInputControlRutinSecuritysrch" data-ew-action="search-type" data-search-type="=">@Html.Raw(Language.Phrase("QuickSearchExact"))</button>
+                <button type="button" class="dropdown-item@(formInputControlRutinSecurityList.BasicSearch.SessionType == "AND" ? " active" : "")" form="fFormInputControlRutinSecuritysrch" data-ew-action="search-type" data-search-type="AND">@Html.Raw(Language.Phrase("QuickSearchAll"))</button>
+                <button type="button" class="dropdown-item@(formInputControlRutinSecurityList.BasicSearch.SessionType == "OR" ? " active" : "")" form="fFormInputControlRutinSecuritysrch" data-ew-action="search-type" data-search-type="OR">@Html.Raw(Language.Phrase("QuickSearchAny"))</button>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-auto mb-3">
+        <button class="btn btn-primary" name="btn-submit" id="btn-submit" type="submit">@Html.Raw(Language.Phrase("SearchBtn"))</button>
+    </div>
+</div>
+</div><!-- /.ew-extended-search -->
+} @* Show search form (end) *@
+}
+</div><!-- /.ew-search-panel -->
+</form>
+}
+@formInputControlRutinSecurityList.ShowPageHeader()
+@formInputControlRutinSecurityList.ShowMessages()
+<main class="list @(formInputControlRutinSecurityList.TotalRecords == 0 && !formInputControlRutinSecurityList.IsAdd ? " ew-no-record" : "")">
+<div id="ew-header-options">
+    @formInputControlRutinSecurityList.HeaderOptions.RenderBody()
+</div>
+<div id="ew-list">
+@if (formInputControlRutinSecurityList.TotalRecords > 0 || !Empty(formInputControlRutinSecurityList.CurrentAction)) {
+<div class="card ew-card ew-grid@(formInputControlRutinSecurityList.IsAddOrEdit ? " ew-grid-add-edit" : "") @(formInputControlRutinSecurityList.TableGridClass)">
+<form name="@(formInputControlRutinSecurityList.FormName)" id="@(formInputControlRutinSecurityList.FormName)" class="ew-form ew-list-form" action="@AppPath(formInputControlRutinSecurityList.PageName)" method="post" novalidate autocomplete="off">
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+@if (formInputControlRutinSecurityList.IsModal) {
+<input type="hidden" name="modal" value="1">
+}
+<div id="gmp_FormInputControlRutinSecurity" class="card-body ew-grid-middle-panel @(formInputControlRutinSecurityList.TableContainerClass)" style="@(formInputControlRutinSecurityList.TableContainerStyle)">
+@if (formInputControlRutinSecurityList.TotalRecords > 0 || formInputControlRutinSecurityList.IsGridEdit || formInputControlRutinSecurityList.IsMultiEdit) {
+<table id="tbl_FormInputControlRutinSecuritylist" class="@(formInputControlRutinSecurityList.TableClass)"><!-- .ew-table -->
+<thead>
+    <tr class="ew-table-header">
+@{
+    // Header row
+    formInputControlRutinSecurityList.RowType = RowType.Header;
+
+    // Render list options
+    await formInputControlRutinSecurityList.RenderListOptions();
+}
+@* Render list options (header, left) *@
+@formInputControlRutinSecurityList.ListOptions.RenderHeader("left")
+@if (formInputControlRutinSecurityList.NoReferensi.Visible) { // formInputControlRutinSecurityList.NoReferensi.Visible (begin)
+        <th data-name="NoReferensi" class="@(formInputControlRutinSecurityList.NoReferensi.HeaderCellClass)"><div id="elh_FormInputControlRutinSecurity_NoReferensi" class="FormInputControlRutinSecurity_NoReferensi">@Html.Raw(formInputControlRutinSecurityList.RenderFieldHeader(formInputControlRutinSecurityList.NoReferensi))</div></th>
+} @* formInputControlRutinSecurityList.NoReferensi.Visible (end) *@
+@if (formInputControlRutinSecurityList.NamaSecurity.Visible) { // formInputControlRutinSecurityList.NamaSecurity.Visible (begin)
+        <th data-name="NamaSecurity" class="@(formInputControlRutinSecurityList.NamaSecurity.HeaderCellClass)"><div id="elh_FormInputControlRutinSecurity_NamaSecurity" class="FormInputControlRutinSecurity_NamaSecurity">@Html.Raw(formInputControlRutinSecurityList.RenderFieldHeader(formInputControlRutinSecurityList.NamaSecurity))</div></th>
+} @* formInputControlRutinSecurityList.NamaSecurity.Visible (end) *@
+@if (formInputControlRutinSecurityList.Tanggal.Visible) { // formInputControlRutinSecurityList.Tanggal.Visible (begin)
+        <th data-name="Tanggal" class="@(formInputControlRutinSecurityList.Tanggal.HeaderCellClass)"><div id="elh_FormInputControlRutinSecurity_Tanggal" class="FormInputControlRutinSecurity_Tanggal">@Html.Raw(formInputControlRutinSecurityList.RenderFieldHeader(formInputControlRutinSecurityList.Tanggal))</div></th>
+} @* formInputControlRutinSecurityList.Tanggal.Visible (end) *@
+@if (formInputControlRutinSecurityList.Lokasi.Visible) { // formInputControlRutinSecurityList.Lokasi.Visible (begin)
+        <th data-name="Lokasi" class="@(formInputControlRutinSecurityList.Lokasi.HeaderCellClass)"><div id="elh_FormInputControlRutinSecurity_Lokasi" class="FormInputControlRutinSecurity_Lokasi">@Html.Raw(formInputControlRutinSecurityList.RenderFieldHeader(formInputControlRutinSecurityList.Lokasi))</div></th>
+} @* formInputControlRutinSecurityList.Lokasi.Visible (end) *@
+@if (formInputControlRutinSecurityList.DownloadDokumen.Visible) { // formInputControlRutinSecurityList.DownloadDokumen.Visible (begin)
+        <th data-name="DownloadDokumen" class="@(formInputControlRutinSecurityList.DownloadDokumen.HeaderCellClass)"><div id="elh_FormInputControlRutinSecurity_DownloadDokumen" class="FormInputControlRutinSecurity_DownloadDokumen">@Html.Raw(formInputControlRutinSecurityList.RenderFieldHeader(formInputControlRutinSecurityList.DownloadDokumen))</div></th>
+} @* formInputControlRutinSecurityList.DownloadDokumen.Visible (end) *@
+@if (formInputControlRutinSecurityList.Ketidaksesuaiaan.Visible) { // formInputControlRutinSecurityList.Ketidaksesuaiaan.Visible (begin)
+        <th data-name="Ketidaksesuaiaan" class="@(formInputControlRutinSecurityList.Ketidaksesuaiaan.HeaderCellClass)"><div id="elh_FormInputControlRutinSecurity_Ketidaksesuaiaan" class="FormInputControlRutinSecurity_Ketidaksesuaiaan">@Html.Raw(formInputControlRutinSecurityList.RenderFieldHeader(formInputControlRutinSecurityList.Ketidaksesuaiaan))</div></th>
+} @* formInputControlRutinSecurityList.Ketidaksesuaiaan.Visible (end) *@
+@if (formInputControlRutinSecurityList.Keterangan.Visible) { // formInputControlRutinSecurityList.Keterangan.Visible (begin)
+        <th data-name="Keterangan" class="@(formInputControlRutinSecurityList.Keterangan.HeaderCellClass)"><div id="elh_FormInputControlRutinSecurity_Keterangan" class="FormInputControlRutinSecurity_Keterangan">@Html.Raw(formInputControlRutinSecurityList.RenderFieldHeader(formInputControlRutinSecurityList.Keterangan))</div></th>
+} @* formInputControlRutinSecurityList.Keterangan.Visible (end) *@
+@if (formInputControlRutinSecurityList.IdPosition.Visible) { // formInputControlRutinSecurityList.IdPosition.Visible (begin)
+        <th data-name="IdPosition" class="@(formInputControlRutinSecurityList.IdPosition.HeaderCellClass)"><div id="elh_FormInputControlRutinSecurity_IdPosition" class="FormInputControlRutinSecurity_IdPosition">@Html.Raw(formInputControlRutinSecurityList.RenderFieldHeader(formInputControlRutinSecurityList.IdPosition))</div></th>
+} @* formInputControlRutinSecurityList.IdPosition.Visible (end) *@
+@if (formInputControlRutinSecurityList.UserInput.Visible) { // formInputControlRutinSecurityList.UserInput.Visible (begin)
+        <th data-name="UserInput" class="@(formInputControlRutinSecurityList.UserInput.HeaderCellClass)"><div id="elh_FormInputControlRutinSecurity_UserInput" class="FormInputControlRutinSecurity_UserInput">@Html.Raw(formInputControlRutinSecurityList.RenderFieldHeader(formInputControlRutinSecurityList.UserInput))</div></th>
+} @* formInputControlRutinSecurityList.UserInput.Visible (end) *@
+@if (formInputControlRutinSecurityList.EtlDate.Visible) { // formInputControlRutinSecurityList.EtlDate.Visible (begin)
+        <th data-name="EtlDate" class="@(formInputControlRutinSecurityList.EtlDate.HeaderCellClass)"><div id="elh_FormInputControlRutinSecurity_EtlDate" class="FormInputControlRutinSecurity_EtlDate">@Html.Raw(formInputControlRutinSecurityList.RenderFieldHeader(formInputControlRutinSecurityList.EtlDate))</div></th>
+} @* formInputControlRutinSecurityList.EtlDate.Visible (end) *@
+@if (formInputControlRutinSecurityList.LastUpdatedBy.Visible) { // formInputControlRutinSecurityList.LastUpdatedBy.Visible (begin)
+        <th data-name="LastUpdatedBy" class="@(formInputControlRutinSecurityList.LastUpdatedBy.HeaderCellClass)"><div id="elh_FormInputControlRutinSecurity_LastUpdatedBy" class="FormInputControlRutinSecurity_LastUpdatedBy">@Html.Raw(formInputControlRutinSecurityList.RenderFieldHeader(formInputControlRutinSecurityList.LastUpdatedBy))</div></th>
+} @* formInputControlRutinSecurityList.LastUpdatedBy.Visible (end) *@
+@if (formInputControlRutinSecurityList.LastUpdatedDate.Visible) { // formInputControlRutinSecurityList.LastUpdatedDate.Visible (begin)
+        <th data-name="LastUpdatedDate" class="@(formInputControlRutinSecurityList.LastUpdatedDate.HeaderCellClass)"><div id="elh_FormInputControlRutinSecurity_LastUpdatedDate" class="FormInputControlRutinSecurity_LastUpdatedDate">@Html.Raw(formInputControlRutinSecurityList.RenderFieldHeader(formInputControlRutinSecurityList.LastUpdatedDate))</div></th>
+} @* formInputControlRutinSecurityList.LastUpdatedDate.Visible (end) *@
+@* Render list options (header, right) *@
+@formInputControlRutinSecurityList.ListOptions.RenderHeader("right")
+    </tr>
+</thead>
+<tbody data-page="@(formInputControlRutinSecurityList.PageNumber)">
+@{
+    await formInputControlRutinSecurityList.SetupGrid();
+    bool eof = formInputControlRutinSecurityList.Recordset == null; // DN
+}
+@while (formInputControlRutinSecurityList.RecordCount < formInputControlRutinSecurityList.StopRecord || SameString(formInputControlRutinSecurityList.RowIndex, "$rowindex$")) { // Begin While
+    if (!eof && !SameString(formInputControlRutinSecurityList.RowIndex, "$rowindex$") &&
+        (!formInputControlRutinSecurityList.IsGridAdd || formInputControlRutinSecurityList.CurrentMode == "copy") &&
+        (!((formInputControlRutinSecurityList.IsCopy || formInputControlRutinSecurityList.IsAdd) && formInputControlRutinSecurityList.RowIndex is int rowIndex && rowIndex == 0))) // DN
+        eof = !await formInputControlRutinSecurityList.Recordset.ReadAsync();
+    formInputControlRutinSecurityList.RecordCount++;
+    if (formInputControlRutinSecurityList.RecordCount >= formInputControlRutinSecurityList.StartRecord) {
+        await formInputControlRutinSecurityList.SetupRow();
+    <tr @Html.Raw(formInputControlRutinSecurityList.RowAttributes)>
+    @* Render list options (body, left) *@
+    @formInputControlRutinSecurityList.ListOptions.RenderBody("left", formInputControlRutinSecurityList.RowCount)
+    @if (formInputControlRutinSecurityList.NoReferensi.Visible) { // formInputControlRutinSecurityList.NoReferensi.Visible (begin)
+        <td data-name="NoReferensi" @Html.Raw(formInputControlRutinSecurityList.NoReferensi.CellAttributes)>
+<span id="el@(formInputControlRutinSecurityList.RowIndex == "$rowindex$" ? "$rowindex$" : formInputControlRutinSecurityList.RowCount)_FormInputControlRutinSecurity_NoReferensi" class="el_FormInputControlRutinSecurity_NoReferensi">
+<span @Html.Raw(formInputControlRutinSecurityList.NoReferensi.ViewAttributes)>
+@Html.Raw(formInputControlRutinSecurityList.NoReferensi.GetViewValue())</span>
+</span>
+</td>
+    } @* formInputControlRutinSecurityList.NoReferensi.Visible (end) *@
+    @if (formInputControlRutinSecurityList.NamaSecurity.Visible) { // formInputControlRutinSecurityList.NamaSecurity.Visible (begin)
+        <td data-name="NamaSecurity" @Html.Raw(formInputControlRutinSecurityList.NamaSecurity.CellAttributes)>
+<span id="el@(formInputControlRutinSecurityList.RowIndex == "$rowindex$" ? "$rowindex$" : formInputControlRutinSecurityList.RowCount)_FormInputControlRutinSecurity_NamaSecurity" class="el_FormInputControlRutinSecurity_NamaSecurity">
+<span @Html.Raw(formInputControlRutinSecurityList.NamaSecurity.ViewAttributes)>
+@Html.Raw(formInputControlRutinSecurityList.NamaSecurity.GetViewValue())</span>
+</span>
+</td>
+    } @* formInputControlRutinSecurityList.NamaSecurity.Visible (end) *@
+    @if (formInputControlRutinSecurityList.Tanggal.Visible) { // formInputControlRutinSecurityList.Tanggal.Visible (begin)
+        <td data-name="Tanggal" @Html.Raw(formInputControlRutinSecurityList.Tanggal.CellAttributes)>
+<span id="el@(formInputControlRutinSecurityList.RowIndex == "$rowindex$" ? "$rowindex$" : formInputControlRutinSecurityList.RowCount)_FormInputControlRutinSecurity_Tanggal" class="el_FormInputControlRutinSecurity_Tanggal">
+<span @Html.Raw(formInputControlRutinSecurityList.Tanggal.ViewAttributes)>
+@Html.Raw(formInputControlRutinSecurityList.Tanggal.GetViewValue())</span>
+</span>
+</td>
+    } @* formInputControlRutinSecurityList.Tanggal.Visible (end) *@
+    @if (formInputControlRutinSecurityList.Lokasi.Visible) { // formInputControlRutinSecurityList.Lokasi.Visible (begin)
+        <td data-name="Lokasi" @Html.Raw(formInputControlRutinSecurityList.Lokasi.CellAttributes)>
+<span id="el@(formInputControlRutinSecurityList.RowIndex == "$rowindex$" ? "$rowindex$" : formInputControlRutinSecurityList.RowCount)_FormInputControlRutinSecurity_Lokasi" class="el_FormInputControlRutinSecurity_Lokasi">
+<span @Html.Raw(formInputControlRutinSecurityList.Lokasi.ViewAttributes)>
+@Html.Raw(formInputControlRutinSecurityList.Lokasi.GetViewValue())</span>
+</span>
+</td>
+    } @* formInputControlRutinSecurityList.Lokasi.Visible (end) *@
+    @if (formInputControlRutinSecurityList.DownloadDokumen.Visible) { // formInputControlRutinSecurityList.DownloadDokumen.Visible (begin)
+        <td data-name="DownloadDokumen" @Html.Raw(formInputControlRutinSecurityList.DownloadDokumen.CellAttributes)>
+<span id="el@(formInputControlRutinSecurityList.RowIndex == "$rowindex$" ? "$rowindex$" : formInputControlRutinSecurityList.RowCount)_FormInputControlRutinSecurity_DownloadDokumen" class="el_FormInputControlRutinSecurity_DownloadDokumen">
+<span @Html.Raw(formInputControlRutinSecurityList.DownloadDokumen.ViewAttributes)>
+@Html.Raw(formInputControlRutinSecurityList.DownloadDokumen.GetViewValue())</span>
+</span>
+</td>
+    } @* formInputControlRutinSecurityList.DownloadDokumen.Visible (end) *@
+    @if (formInputControlRutinSecurityList.Ketidaksesuaiaan.Visible) { // formInputControlRutinSecurityList.Ketidaksesuaiaan.Visible (begin)
+        <td data-name="Ketidaksesuaiaan" @Html.Raw(formInputControlRutinSecurityList.Ketidaksesuaiaan.CellAttributes)>
+<span id="el@(formInputControlRutinSecurityList.RowIndex == "$rowindex$" ? "$rowindex$" : formInputControlRutinSecurityList.RowCount)_FormInputControlRutinSecurity_Ketidaksesuaiaan" class="el_FormInputControlRutinSecurity_Ketidaksesuaiaan">
+<span @Html.Raw(formInputControlRutinSecurityList.Ketidaksesuaiaan.ViewAttributes)>
+@Html.Raw(formInputControlRutinSecurityList.Ketidaksesuaiaan.GetViewValue())</span>
+</span>
+</td>
+    } @* formInputControlRutinSecurityList.Ketidaksesuaiaan.Visible (end) *@
+    @if (formInputControlRutinSecurityList.Keterangan.Visible) { // formInputControlRutinSecurityList.Keterangan.Visible (begin)
+        <td data-name="Keterangan" @Html.Raw(formInputControlRutinSecurityList.Keterangan.CellAttributes)>
+<span id="el@(formInputControlRutinSecurityList.RowIndex == "$rowindex$" ? "$rowindex$" : formInputControlRutinSecurityList.RowCount)_FormInputControlRutinSecurity_Keterangan" class="el_FormInputControlRutinSecurity_Keterangan">
+<span @Html.Raw(formInputControlRutinSecurityList.Keterangan.ViewAttributes)>
+@Html.Raw(formInputControlRutinSecurityList.Keterangan.GetViewValue())</span>
+</span>
+</td>
+    } @* formInputControlRutinSecurityList.Keterangan.Visible (end) *@
+    @if (formInputControlRutinSecurityList.IdPosition.Visible) { // formInputControlRutinSecurityList.IdPosition.Visible (begin)
+        <td data-name="IdPosition" @Html.Raw(formInputControlRutinSecurityList.IdPosition.CellAttributes)>
+<span id="el@(formInputControlRutinSecurityList.RowIndex == "$rowindex$" ? "$rowindex$" : formInputControlRutinSecurityList.RowCount)_FormInputControlRutinSecurity_IdPosition" class="el_FormInputControlRutinSecurity_IdPosition">
+<span @Html.Raw(formInputControlRutinSecurityList.IdPosition.ViewAttributes)>
+@Html.Raw(formInputControlRutinSecurityList.IdPosition.GetViewValue())</span>
+</span>
+</td>
+    } @* formInputControlRutinSecurityList.IdPosition.Visible (end) *@
+    @if (formInputControlRutinSecurityList.UserInput.Visible) { // formInputControlRutinSecurityList.UserInput.Visible (begin)
+        <td data-name="UserInput" @Html.Raw(formInputControlRutinSecurityList.UserInput.CellAttributes)>
+<span id="el@(formInputControlRutinSecurityList.RowIndex == "$rowindex$" ? "$rowindex$" : formInputControlRutinSecurityList.RowCount)_FormInputControlRutinSecurity_UserInput" class="el_FormInputControlRutinSecurity_UserInput">
+<span @Html.Raw(formInputControlRutinSecurityList.UserInput.ViewAttributes)>
+@Html.Raw(formInputControlRutinSecurityList.UserInput.GetViewValue())</span>
+</span>
+</td>
+    } @* formInputControlRutinSecurityList.UserInput.Visible (end) *@
+    @if (formInputControlRutinSecurityList.EtlDate.Visible) { // formInputControlRutinSecurityList.EtlDate.Visible (begin)
+        <td data-name="EtlDate" @Html.Raw(formInputControlRutinSecurityList.EtlDate.CellAttributes)>
+<span id="el@(formInputControlRutinSecurityList.RowIndex == "$rowindex$" ? "$rowindex$" : formInputControlRutinSecurityList.RowCount)_FormInputControlRutinSecurity_EtlDate" class="el_FormInputControlRutinSecurity_EtlDate">
+<span @Html.Raw(formInputControlRutinSecurityList.EtlDate.ViewAttributes)>
+@Html.Raw(formInputControlRutinSecurityList.EtlDate.GetViewValue())</span>
+</span>
+</td>
+    } @* formInputControlRutinSecurityList.EtlDate.Visible (end) *@
+    @if (formInputControlRutinSecurityList.LastUpdatedBy.Visible) { // formInputControlRutinSecurityList.LastUpdatedBy.Visible (begin)
+        <td data-name="LastUpdatedBy" @Html.Raw(formInputControlRutinSecurityList.LastUpdatedBy.CellAttributes)>
+<span id="el@(formInputControlRutinSecurityList.RowIndex == "$rowindex$" ? "$rowindex$" : formInputControlRutinSecurityList.RowCount)_FormInputControlRutinSecurity_LastUpdatedBy" class="el_FormInputControlRutinSecurity_LastUpdatedBy">
+<span @Html.Raw(formInputControlRutinSecurityList.LastUpdatedBy.ViewAttributes)>
+@Html.Raw(formInputControlRutinSecurityList.LastUpdatedBy.GetViewValue())</span>
+</span>
+</td>
+    } @* formInputControlRutinSecurityList.LastUpdatedBy.Visible (end) *@
+    @if (formInputControlRutinSecurityList.LastUpdatedDate.Visible) { // formInputControlRutinSecurityList.LastUpdatedDate.Visible (begin)
+        <td data-name="LastUpdatedDate" @Html.Raw(formInputControlRutinSecurityList.LastUpdatedDate.CellAttributes)>
+<span id="el@(formInputControlRutinSecurityList.RowIndex == "$rowindex$" ? "$rowindex$" : formInputControlRutinSecurityList.RowCount)_FormInputControlRutinSecurity_LastUpdatedDate" class="el_FormInputControlRutinSecurity_LastUpdatedDate">
+<span @Html.Raw(formInputControlRutinSecurityList.LastUpdatedDate.ViewAttributes)>
+@Html.Raw(formInputControlRutinSecurityList.LastUpdatedDate.GetViewValue())</span>
+</span>
+</td>
+    } @* formInputControlRutinSecurityList.LastUpdatedDate.Visible (end) *@
+    @* Render list options (body, right) *@
+    @formInputControlRutinSecurityList.ListOptions.RenderBody("right", formInputControlRutinSecurityList.RowCount)
+    </tr>
+    } @* End if *@
+
+    // Reset for template row
+    if (SameString(formInputControlRutinSecurityList.RowIndex, "$rowindex$"))
+        formInputControlRutinSecurityList.RowIndex = 0;
+
+    // Reset inline add/copy row
+    if ((formInputControlRutinSecurityList.IsCopy || formInputControlRutinSecurityList.IsAdd) && formInputControlRutinSecurityList.RowIndex is int rowIndex2 && rowIndex2 == 0)
+        formInputControlRutinSecurityList.RowIndex = 1;
+} @* End While *@
+</tbody>
+</table><!-- /.ew-table -->
+} @* End If TotalRecords > 0 *@
+</div><!-- /.ew-grid-middle-panel -->
+@if (Empty(formInputControlRutinSecurityList.CurrentAction) && !formInputControlRutinSecurityList.UseAjaxActions) {
+<input type="hidden" name="action" id="action" value="">
+}
+</form><!-- /.ew-list-form -->
+@{ formInputControlRutinSecurityList.CloseRecordset(); }
+@if (!formInputControlRutinSecurityList.IsExport()) {
+<div class="card-footer ew-grid-lower-panel">
+@if (!formInputControlRutinSecurityList.IsGridAdd && !(formInputControlRutinSecurityList.IsGridEdit && formInputControlRutinSecurityList.ModalGridEdit) && !formInputControlRutinSecurityList.IsMultiEdit) {
+@Html.Raw(formInputControlRutinSecurityList.Pager.Render())
+}
+<div class="ew-list-other-options">
+@formInputControlRutinSecurityList.OtherOptions.RenderBody("bottom")
+</div>
+</div>
+}
+</div><!-- /.ew-grid -->
+} else { // Show other options
+<div class="ew-list-other-options">
+@formInputControlRutinSecurityList.OtherOptions.ForEach(opt => opt.ButtonClass = "").RenderBody()
+</div>
+}
+</div>
+<div id="ew-footer-options">
+    @formInputControlRutinSecurityList.FooterOptions.RenderBody()
+</div>
+</main>
+@formInputControlRutinSecurityList.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+@if (!formInputControlRutinSecurityList.IsExport()) {
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("FormInputControlRutinSecurity");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Startup script
+    const parent_url = ew.PATH_BASE;
+
+    /* ==== Ambil NoReferensi dari URL / form (tanpa bergantung data list) ==== */
+    function resolveNoRef() {
+        const qs = new URLSearchParams(location.search);
+        let v = (qs.getAll("x_NoReferensi[]")[0] || "").trim();
+        if (!v) v = (qs.get("x_NoReferensi") || "").trim();
+        if (!v) v = (qs.get("NoReferensi") || "").trim();
+        if (!v) {
+            v = ($('input[name="x_NoReferensi[]"]').val() || $('input[name="x_NoReferensi"]').val() || "").trim();
+        }
+        return v;
+    }
+    const NoReferensi = resolveNoRef();
+
+    /* ==== Stepper ==== */
+    (function () {
+        const steps = [
+            { number: 1, label: "Control Rutin Security", url: parent_url + 'ControlRutinSecurityList', icon: "fa-clipboard-list" },
+            { number: 2, label: "Input Data", url: "", icon: "fa-pen-to-square" }
+        ];
+        const currentStep = 2;
+        if (!document.querySelector("style[data-hsse-stepper]")) {
+            $("<style data-hsse-stepper>")
+                .prop("type", "text/css")
+                .html(`
+                .stepper{display:flex;counter-reset:step}
+                .step{width:150px;text-align:center;position:relative}
+                .step:not(:last-child)::after{content:'';position:absolute;top:20px;right:-50%;width:100%;height:4px;background-color:#ccc;z-index:0}
+                .step.completed:not(:last-child)::after{background-color:#3c6dbd}
+                .step-icon{width:36px;height:36px;line-height:36px;border-radius:50%;background:#ccc;display:inline-block;z-index:1;position:relative;color:#fff;font-weight:bold}
+                .step.active .step-icon{background:#28a745}
+                .step-label{margin-top:8px;font-size:14px;display:flex;justify-content:center;align-items:center;gap:6px;color:#3c6dbd;text-decoration:none}
+                .step-label-not-active{color:#CCC!important}
+            `).appendTo("head");
+        }
+        const $wrapper = $('<div class="d-flex border-bottom border-2 pb-2"><div class="stepper"></div></div>');
+        const $stepper = $wrapper.find(".stepper");
+        steps.forEach(step => {
+            const isActive = step.number === currentStep;
+            const isCompleted = step.number < currentStep;
+            let icon, label, html;
+            if (isActive) {
+                icon = `<div class="step-icon bg-success">${step.number}</div>`;
+                label = `<div class="step-label text-success"><i class="fa-solid ${step.icon} me-1 text-success"></i>${step.label}</div>`;
+                html = `<div class="step active text-success">${icon}${label}</div>`;
+            } else if (isCompleted) {
+                icon = `<div class="step-icon" style="background:#3c6dbd">${step.number}</div>`;
+                label = `<div class="step-label"><a href="${step.url}" class="text-primary"><i class="fa-solid ${step.icon} me-1"></i>${step.label}</a></div>`;
+                html = `<div class="step completed text-primary">${icon}${label}</div>`;
+            } else {
+                icon = `<div class="step-icon">${step.number}</div>`;
+                label = `<div class="step-label-not-active"><i class="fa-solid ${step.icon} me-1"></i>${step.label}</div>`;
+                html = `<div class="step text-secondary">${icon}${label}</div>`;
+            }
+            $stepper.append(html);
+        });
+        $(".content-header .container-fluid .row").append($wrapper);
+    })();
+
+    /* ==== Judul kecil di samping Filter (pakai NoReferensi dari URL) ==== */
+    (function () {
+        const id = "title-pov-plant-date";
+        $("#" + id).remove();
+        const noRef = NoReferensi;
+        if (!noRef) return;
+        $.get(ew.PATH_BASE + "api/LookUpList/get_crs_header", { nomorReferensi: noRef })
+            .done(res => {
+                const plant = (res && res.success && (res.plantDisplay || res.plant)) || "-";
+                const tgl = (res && res.success && res.tanggal) || "-";
+                const html =
+                    `<span id="${id}" class="ms-3 fw-bold fst-italic d-inline-block align-middle">
+                Nomor Referensi: <span style="color:red">${noRef}</span>,
+                Plant: <span style="color:red">${plant}</span>,
+                Tanggal: <span style="color:red">${tgl}</span>
+                </span>`;
+                const $filter = $(".ew-toolbar .ew-filter-option").first();
+                if ($filter.length) $filter.after(html);
+                else $(".ew-toolbar").first().append(html);
+            });
+    })();
+
+    /* ==== Tombol Add kustom (selalu pakai NoReferensi dari URL) ==== */
+    (function () {
+        const $originalButton = $(`a.btn.btn-default.ew-add-edit.ew-add[href="${parent_url}FormInputControlRutinSecurityAdd"]`);
+        if ($originalButton.length) {
+            $originalButton.remove(); // Remove the default button
+            const nref = resolveNoRef();
+            if (!nref) {
+                return;
+            }
+            $.ajax({
+                url: parent_url + "api/LookUpList/GetTanggalDibuatCRS",
+                type: 'GET',
+                data: { noReferensi: nref },
+                success: function(response) {
+                    if (response && response.success) {
+                        const tanggalDibuat = new Date(response.tanggalDibuat);
+                        const now = new Date();
+                        const offsetWIB = 7 * 60; // 7 hours in minutes
+                        const todayWIB = new Date(now.getTime() + (offsetWIB + now.getTimezoneOffset()) * 60000);
+                        const isSameDate =
+                                tanggalDibuat.getFullYear() === todayWIB.getFullYear() &&
+                                tanggalDibuat.getMonth() === todayWIB.getMonth() &&
+                                tanggalDibuat.getDate() === todayWIB.getDate();
+                        if (isSameDate) {
+                            const $buttonContainer = $('button.btn-primary[name="btn-submit"]').first().parent();
+                            const $addButton = $(`
+                                <button class="btn btn-success ms-2" id="btn-add-pov">
+                                    <i class="fas fa-plus"></i> Add New
+                                </button>
+                            `);
+                            $addButton.on('click', function (e) {
+                                e.preventDefault();
+                                window.location.href = `${parent_url}FormInputControlRutinSecurityAdd?NoReferensi=${encodeURIComponent(nref)}`;
+                            });
+                            ($buttonContainer.length ? $buttonContainer : $(".ew-toolbar").first()).append($addButton);
+                        }
+                    }
+                },
+                error: function() {
+                    console.error("Failed to verify POV creation date.");
+                }
+            });
+        }
+    })();
+
+    /* ==== Gate akses List: Admin/OH bebas; lainnya harus MOD (API GetMODForPOV) ==== */
+    (function () {
+        const role = parseInt('@CurrentUserInfo("Rule")') || 0; // 0 = Superadmin, 10 = OH
+        if (role == 0 || role === 10) return;
+        const noRef = NoReferensi;
+        if (!noRef) return; // jika NoReferensi tidak ada, biarkan UI default
+        const hideRestrictedUI = () => {
+            // Add (default & custom)
+            $('.ew-toolbar a.ew-add, .ew-grid-lower-panel a').filter(function () {
+                const href = (this.href || "").toLowerCase();
+                return href.includes("forminputControlRutinSecurityadd");
+            }).closest('.btn, a, .ew-list-other-options').hide();
+            $('#btn-add-pov').closest('.btn, button').hide();
+
+            // Multi-delete
+            $('.ew-toolbar .ew-multi-delete, .ew-grid-lower-panel .ew-multi-delete')
+                .closest('.btn, button, a, .ew-list-other-options').hide();
+
+            // Per-row Edit/Delete/Copy
+            $('a.ew-row-link.ew-edit, a.ew-row-link.ew-delete, a.ew-row-link.ew-copy, button.ew-row-link.ew-delete')
+                .closest('.ew-list-options, .ew-list-option-body, a, button, li').hide();
+
+            // Checkbox seleksi
+            $('input[type="checkbox"][name="key_m[]"], input#key, input#toggle-all')
+                .closest('th, td, .form-check, label').hide();
+
+            // Info kecil
+            const $filter = $(".ew-toolbar .ew-filter-option").first();
+            if ($filter.length) {
+                $filter.after('<span class="ms-3 text-warning fw-bold">Akses dibatasi: hanya User MOD / OH / Admin.</span>');
+            }
+        };
+        $.get(ew.PATH_BASE + "api/LookUpList/GetMODForPOV", { noRef: noRef })
+            .done(function (res) {
+                if (!res || res.success !== true || res.isCurrentUserMOD !== true) {
+                    hideRestrictedUI();
+                    if (parseInt('@CurrentUserInfo("UserLevel")') == 4) $('a.ew-row-link.ew-edit').show();
+                }
+            })
+            .fail(function () {
+                hideRestrictedUI();
+            });
+    })();
+});
+</script>
+}

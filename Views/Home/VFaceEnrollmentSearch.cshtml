@@ -1,0 +1,375 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (vFaceEnrollmentSearch.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = vFaceEnrollmentSearch.UseLayout ? "_Layout" : "";
+}
+<script>
+var currentTable = @Html.Raw(ConvertToJson(vFaceEnrollmentSearch.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { VFaceEnrollment: currentTable } });
+var currentPageID = ew.PAGE_ID = "search";
+var currentForm;
+var fVFaceEnrollmentsearch, currentSearchForm, currentAdvancedSearchForm;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery,
+        fields = currentTable.fields;
+
+    // Form object for search
+    let form = new ew.FormBuilder()
+        .setId("fVFaceEnrollmentsearch")
+        .setPageId("search")
+@if (vFaceEnrollmentSearch.IsModal && vFaceEnrollmentSearch.UseAjaxActions) {
+        <text>.setSubmitWithFetch(true)</text>
+}
+
+        // Add fields
+        .setFields([
+
+            ["IdUser", [ew.Validators.integer], fields.IdUser.isInvalid],
+            ["_Username", [], fields._Username.isInvalid],
+            ["_Email", [], fields._Email.isInvalid],
+            ["NamaLengkap", [], fields.NamaLengkap.isInvalid],
+            ["IdPosition", [ew.Validators.integer], fields.IdPosition.isInvalid],
+            ["Jabatan", [], fields.Jabatan.isInvalid],
+            ["Face", [], fields.Face.isInvalid],
+            ["TanggalInputFace", [ew.Validators.datetime(fields.TanggalInputFace.clientFormatPattern)], fields.TanggalInputFace.isInvalid],
+            ["UserInputFace", [], fields.UserInputFace.isInvalid],
+            ["AzurePersonId", [ew.Validators.guid], fields.AzurePersonId.isInvalid]
+        ])
+        // Validate form
+        .setValidate(
+            async function () {
+                if (!this.validateRequired)
+                    return true; // Ignore validation
+                let fobj = this.getForm();
+
+                // Validate fields
+                if (!this.validateFields())
+                    return false;
+
+                // Call Form_CustomValidate event
+                if (!(await this.customValidate?.(fobj) ?? true)) {
+                    this.focus();
+                    return false;
+                }
+                return true;
+            }
+        )
+
+        // Form_CustomValidate
+        .setCustomValidate(
+            function(fobj) { // DO NOT CHANGE THIS LINE!
+                    // Your custom validation code here, return false if invalid.
+                    return true;
+                }
+        )
+
+        // Use JavaScript validation or not
+        .setValidateRequired(ew.CLIENT_VALIDATE)
+
+        // Dynamic selection lists
+        .setLists({
+            "IdPosition": @Html.Raw(vFaceEnrollmentSearch.IdPosition.ToClientList(vFaceEnrollmentSearch)),
+        })
+        .build();
+    window[form.id] = form;
+@if (vFaceEnrollmentSearch.IsModal) {
+    <text>currentAdvancedSearchForm = form;</text>
+} else {
+    <text>currentForm = form;</text>
+}
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Write your client script here, no need to add script tags.
+});
+</script>
+@vFaceEnrollmentSearch.ShowPageHeader()
+@vFaceEnrollmentSearch.ShowMessages()
+<form name="fVFaceEnrollmentsearch" id="fVFaceEnrollmentsearch" class="@(vFaceEnrollmentSearch.FormClassName)" action="@AppPath(CurrentPageName())" method="post" novalidate autocomplete="off">
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+<input type="hidden" name="action" id="action" value="search">
+@if (vFaceEnrollmentSearch.IsModal) {
+<input type="hidden" name="modal" value="1">
+}
+<div class="ew-search-div"><!-- page* -->
+@if (vFaceEnrollmentSearch.IdUser.Visible) { // vFaceEnrollmentSearch.IdUser.Visible (begin)
+    <div id="r_IdUser" class="row" @Html.Raw(vFaceEnrollmentSearch.IdUser.RowAttributes)>
+        <label for="x_IdUser" class="@(vFaceEnrollmentSearch.LeftColumnClass)"><span id="elh_VFaceEnrollment_IdUser">@Html.Raw(vFaceEnrollmentSearch.IdUser.Caption)</span>
+        <span class="ew-search-operator">
+@Html.Raw(Language.Phrase("="))
+<input type="hidden" name="z_IdUser" id="z_IdUser" value="=">
+</span>
+        </label>
+        <div class="@(vFaceEnrollmentSearch.RightColumnClass)">
+            <div @Html.Raw(vFaceEnrollmentSearch.IdUser.CellAttributes)>
+                <div class="d-flex align-items-start">
+                <span id="el_VFaceEnrollment_IdUser" class="ew-search-field ew-search-field-single">
+<input type="@(vFaceEnrollmentSearch.IdUser.InputTextType)" name="x_IdUser" id="x_IdUser" data-table="VFaceEnrollment" data-field="x_IdUser" value="@Html.Raw(vFaceEnrollmentSearch.IdUser.EditValue)" size="30" placeholder="@Html.Raw(HtmlEncode(vFaceEnrollmentSearch.IdUser.PlaceHolder))" data-format-pattern="@(vFaceEnrollmentSearch.IdUser.FormatPattern)"@Html.Raw(vFaceEnrollmentSearch.IdUser.EditAttributes)>
+<div class="invalid-feedback">@Html.Raw(vFaceEnrollmentSearch.IdUser.GetErrorMessage(false))</div>
+</span>
+                </div>
+            </div>
+        </div>
+    </div>
+} @* vFaceEnrollmentSearch.IdUser.Visible (end) *@
+@if (vFaceEnrollmentSearch._Username.Visible) { // vFaceEnrollmentSearch._Username.Visible (begin)
+    <div id="r__Username" class="row" @Html.Raw(vFaceEnrollmentSearch._Username.RowAttributes)>
+        <label for="x__Username" class="@(vFaceEnrollmentSearch.LeftColumnClass)"><span id="elh_VFaceEnrollment__Username">@Html.Raw(vFaceEnrollmentSearch._Username.Caption)</span>
+        <span class="ew-search-operator">
+@Html.Raw(Language.Phrase("LIKE"))
+<input type="hidden" name="z__Username" id="z__Username" value="LIKE">
+</span>
+        </label>
+        <div class="@(vFaceEnrollmentSearch.RightColumnClass)">
+            <div @Html.Raw(vFaceEnrollmentSearch._Username.CellAttributes)>
+                <div class="d-flex align-items-start">
+                <span id="el_VFaceEnrollment__Username" class="ew-search-field ew-search-field-single">
+<input type="@(vFaceEnrollmentSearch._Username.InputTextType)" name="x__Username" id="x__Username" data-table="VFaceEnrollment" data-field="x__Username" value="@Html.Raw(vFaceEnrollmentSearch._Username.EditValue)" size="30" maxlength="50" placeholder="@Html.Raw(HtmlEncode(vFaceEnrollmentSearch._Username.PlaceHolder))" data-format-pattern="@(vFaceEnrollmentSearch._Username.FormatPattern)"@Html.Raw(vFaceEnrollmentSearch._Username.EditAttributes)>
+<div class="invalid-feedback">@Html.Raw(vFaceEnrollmentSearch._Username.GetErrorMessage(false))</div>
+</span>
+                </div>
+            </div>
+        </div>
+    </div>
+} @* vFaceEnrollmentSearch._Username.Visible (end) *@
+@if (vFaceEnrollmentSearch._Email.Visible) { // vFaceEnrollmentSearch._Email.Visible (begin)
+    <div id="r__Email" class="row" @Html.Raw(vFaceEnrollmentSearch._Email.RowAttributes)>
+        <label for="x__Email" class="@(vFaceEnrollmentSearch.LeftColumnClass)"><span id="elh_VFaceEnrollment__Email">@Html.Raw(vFaceEnrollmentSearch._Email.Caption)</span>
+        <span class="ew-search-operator">
+@Html.Raw(Language.Phrase("LIKE"))
+<input type="hidden" name="z__Email" id="z__Email" value="LIKE">
+</span>
+        </label>
+        <div class="@(vFaceEnrollmentSearch.RightColumnClass)">
+            <div @Html.Raw(vFaceEnrollmentSearch._Email.CellAttributes)>
+                <div class="d-flex align-items-start">
+                <span id="el_VFaceEnrollment__Email" class="ew-search-field ew-search-field-single">
+<input type="@(vFaceEnrollmentSearch._Email.InputTextType)" name="x__Email" id="x__Email" data-table="VFaceEnrollment" data-field="x__Email" value="@Html.Raw(vFaceEnrollmentSearch._Email.EditValue)" size="30" maxlength="100" placeholder="@Html.Raw(HtmlEncode(vFaceEnrollmentSearch._Email.PlaceHolder))" data-format-pattern="@(vFaceEnrollmentSearch._Email.FormatPattern)"@Html.Raw(vFaceEnrollmentSearch._Email.EditAttributes)>
+<div class="invalid-feedback">@Html.Raw(vFaceEnrollmentSearch._Email.GetErrorMessage(false))</div>
+</span>
+                </div>
+            </div>
+        </div>
+    </div>
+} @* vFaceEnrollmentSearch._Email.Visible (end) *@
+@if (vFaceEnrollmentSearch.NamaLengkap.Visible) { // vFaceEnrollmentSearch.NamaLengkap.Visible (begin)
+    <div id="r_NamaLengkap" class="row" @Html.Raw(vFaceEnrollmentSearch.NamaLengkap.RowAttributes)>
+        <label for="x_NamaLengkap" class="@(vFaceEnrollmentSearch.LeftColumnClass)"><span id="elh_VFaceEnrollment_NamaLengkap">@Html.Raw(vFaceEnrollmentSearch.NamaLengkap.Caption)</span>
+        <span class="ew-search-operator">
+@Html.Raw(Language.Phrase("LIKE"))
+<input type="hidden" name="z_NamaLengkap" id="z_NamaLengkap" value="LIKE">
+</span>
+        </label>
+        <div class="@(vFaceEnrollmentSearch.RightColumnClass)">
+            <div @Html.Raw(vFaceEnrollmentSearch.NamaLengkap.CellAttributes)>
+                <div class="d-flex align-items-start">
+                <span id="el_VFaceEnrollment_NamaLengkap" class="ew-search-field ew-search-field-single">
+<input type="@(vFaceEnrollmentSearch.NamaLengkap.InputTextType)" name="x_NamaLengkap" id="x_NamaLengkap" data-table="VFaceEnrollment" data-field="x_NamaLengkap" value="@Html.Raw(vFaceEnrollmentSearch.NamaLengkap.EditValue)" size="30" maxlength="100" placeholder="@Html.Raw(HtmlEncode(vFaceEnrollmentSearch.NamaLengkap.PlaceHolder))" data-format-pattern="@(vFaceEnrollmentSearch.NamaLengkap.FormatPattern)"@Html.Raw(vFaceEnrollmentSearch.NamaLengkap.EditAttributes)>
+<div class="invalid-feedback">@Html.Raw(vFaceEnrollmentSearch.NamaLengkap.GetErrorMessage(false))</div>
+</span>
+                </div>
+            </div>
+        </div>
+    </div>
+} @* vFaceEnrollmentSearch.NamaLengkap.Visible (end) *@
+@if (vFaceEnrollmentSearch.IdPosition.Visible) { // vFaceEnrollmentSearch.IdPosition.Visible (begin)
+    <div id="r_IdPosition" class="row" @Html.Raw(vFaceEnrollmentSearch.IdPosition.RowAttributes)>
+        <label class="@(vFaceEnrollmentSearch.LeftColumnClass)"><span id="elh_VFaceEnrollment_IdPosition">@Html.Raw(vFaceEnrollmentSearch.IdPosition.Caption)</span>
+        <span class="ew-search-operator">
+@Html.Raw(Language.Phrase("="))
+<input type="hidden" name="z_IdPosition" id="z_IdPosition" value="=">
+</span>
+        </label>
+        <div class="@(vFaceEnrollmentSearch.RightColumnClass)">
+            <div @Html.Raw(vFaceEnrollmentSearch.IdPosition.CellAttributes)>
+                <div class="d-flex align-items-start">
+                <span id="el_VFaceEnrollment_IdPosition" class="ew-search-field ew-search-field-single">
+<span>@{
+    if (IsRTL) {
+        vFaceEnrollmentSearch.IdPosition.EditAttrs["dir"] = "rtl";
+    }
+}</span>
+<span id="as_x_IdPosition" class="ew-auto-suggest">
+    <input type="text" class="form-control" name="sv_x_IdPosition" id="sv_x_IdPosition" value="@(RemoveHtml(ConvertToString(vFaceEnrollmentSearch.IdPosition.EditValue)))" autocomplete="off" size="30" placeholder="@Html.Raw(HtmlEncode(vFaceEnrollmentSearch.IdPosition.PlaceHolder))" data-placeholder="@Html.Raw(HtmlEncode(vFaceEnrollmentSearch.IdPosition.PlaceHolder))" data-format-pattern="@(vFaceEnrollmentSearch.IdPosition.FormatPattern)" @Html.Raw(vFaceEnrollmentSearch.IdPosition.EditAttributes)>
+</span>
+<selection-list hidden class="form-control" data-table="VFaceEnrollment" data-field="x_IdPosition" data-input="sv_x_IdPosition" data-value-separator="@(vFaceEnrollmentSearch.IdPosition.DisplayValueSeparatorAttribute)" name="x_IdPosition" id="x_IdPosition" value="@(HtmlEncode(vFaceEnrollmentSearch.IdPosition.AdvancedSearch.SearchValue))"></selection-list>
+<div class="invalid-feedback">@Html.Raw(vFaceEnrollmentSearch.IdPosition.GetErrorMessage(false))</div>
+<script>
+loadjs.ready(["fVFaceEnrollmentsearch"], function() {
+    fVFaceEnrollmentsearch.createAutoSuggest(Object.assign({"id":"x_IdPosition","forceSelect":false}, { lookupAllDisplayFields: @(vFaceEnrollmentSearch.IdPosition.Lookup.LookupAllDisplayFields ? "true" : "false") }, ew.vars.tables.VFaceEnrollment.fields.IdPosition.autoSuggestOptions));
+});
+</script>
+@Html.Raw(vFaceEnrollmentSearch.IdPosition.Lookup.GetParamTag(vFaceEnrollmentSearch, "p_x_IdPosition"))
+</span>
+                </div>
+            </div>
+        </div>
+    </div>
+} @* vFaceEnrollmentSearch.IdPosition.Visible (end) *@
+@if (vFaceEnrollmentSearch.Jabatan.Visible) { // vFaceEnrollmentSearch.Jabatan.Visible (begin)
+    <div id="r_Jabatan" class="row" @Html.Raw(vFaceEnrollmentSearch.Jabatan.RowAttributes)>
+        <label for="x_Jabatan" class="@(vFaceEnrollmentSearch.LeftColumnClass)"><span id="elh_VFaceEnrollment_Jabatan">@Html.Raw(vFaceEnrollmentSearch.Jabatan.Caption)</span>
+        <span class="ew-search-operator">
+@Html.Raw(Language.Phrase("LIKE"))
+<input type="hidden" name="z_Jabatan" id="z_Jabatan" value="LIKE">
+</span>
+        </label>
+        <div class="@(vFaceEnrollmentSearch.RightColumnClass)">
+            <div @Html.Raw(vFaceEnrollmentSearch.Jabatan.CellAttributes)>
+                <div class="d-flex align-items-start">
+                <span id="el_VFaceEnrollment_Jabatan" class="ew-search-field ew-search-field-single">
+<input type="@(vFaceEnrollmentSearch.Jabatan.InputTextType)" name="x_Jabatan" id="x_Jabatan" data-table="VFaceEnrollment" data-field="x_Jabatan" value="@Html.Raw(vFaceEnrollmentSearch.Jabatan.EditValue)" size="30" maxlength="100" placeholder="@Html.Raw(HtmlEncode(vFaceEnrollmentSearch.Jabatan.PlaceHolder))" data-format-pattern="@(vFaceEnrollmentSearch.Jabatan.FormatPattern)"@Html.Raw(vFaceEnrollmentSearch.Jabatan.EditAttributes)>
+<div class="invalid-feedback">@Html.Raw(vFaceEnrollmentSearch.Jabatan.GetErrorMessage(false))</div>
+</span>
+                </div>
+            </div>
+        </div>
+    </div>
+} @* vFaceEnrollmentSearch.Jabatan.Visible (end) *@
+@if (vFaceEnrollmentSearch.Face.Visible) { // vFaceEnrollmentSearch.Face.Visible (begin)
+    <div id="r_Face" class="row" @Html.Raw(vFaceEnrollmentSearch.Face.RowAttributes)>
+        <label for="x_Face" class="@(vFaceEnrollmentSearch.LeftColumnClass)"><span id="elh_VFaceEnrollment_Face">@Html.Raw(vFaceEnrollmentSearch.Face.Caption)</span>
+        <span class="ew-search-operator">
+@Html.Raw(Language.Phrase("LIKE"))
+<input type="hidden" name="z_Face" id="z_Face" value="LIKE">
+</span>
+        </label>
+        <div class="@(vFaceEnrollmentSearch.RightColumnClass)">
+            <div @Html.Raw(vFaceEnrollmentSearch.Face.CellAttributes)>
+                <div class="d-flex align-items-start">
+                <span id="el_VFaceEnrollment_Face" class="ew-search-field ew-search-field-single">
+<input type="@(vFaceEnrollmentSearch.Face.InputTextType)" name="x_Face" id="x_Face" data-table="VFaceEnrollment" data-field="x_Face" value="@Html.Raw(vFaceEnrollmentSearch.Face.EditValue)" size="30" maxlength="255" placeholder="@Html.Raw(HtmlEncode(vFaceEnrollmentSearch.Face.PlaceHolder))" data-format-pattern="@(vFaceEnrollmentSearch.Face.FormatPattern)"@Html.Raw(vFaceEnrollmentSearch.Face.EditAttributes)>
+<div class="invalid-feedback">@Html.Raw(vFaceEnrollmentSearch.Face.GetErrorMessage(false))</div>
+</span>
+                </div>
+            </div>
+        </div>
+    </div>
+} @* vFaceEnrollmentSearch.Face.Visible (end) *@
+@if (vFaceEnrollmentSearch.TanggalInputFace.Visible) { // vFaceEnrollmentSearch.TanggalInputFace.Visible (begin)
+    <div id="r_TanggalInputFace" class="row" @Html.Raw(vFaceEnrollmentSearch.TanggalInputFace.RowAttributes)>
+        <label for="x_TanggalInputFace" class="@(vFaceEnrollmentSearch.LeftColumnClass)"><span id="elh_VFaceEnrollment_TanggalInputFace">@Html.Raw(vFaceEnrollmentSearch.TanggalInputFace.Caption)</span>
+        <span class="ew-search-operator">
+@Html.Raw(Language.Phrase("="))
+<input type="hidden" name="z_TanggalInputFace" id="z_TanggalInputFace" value="=">
+</span>
+        </label>
+        <div class="@(vFaceEnrollmentSearch.RightColumnClass)">
+            <div @Html.Raw(vFaceEnrollmentSearch.TanggalInputFace.CellAttributes)>
+                <div class="d-flex align-items-start">
+                <span id="el_VFaceEnrollment_TanggalInputFace" class="ew-search-field ew-search-field-single">
+<input type="@(vFaceEnrollmentSearch.TanggalInputFace.InputTextType)" name="x_TanggalInputFace" id="x_TanggalInputFace" data-table="VFaceEnrollment" data-field="x_TanggalInputFace" value="@Html.Raw(vFaceEnrollmentSearch.TanggalInputFace.EditValue)" placeholder="@Html.Raw(HtmlEncode(vFaceEnrollmentSearch.TanggalInputFace.PlaceHolder))" data-format-pattern="@(vFaceEnrollmentSearch.TanggalInputFace.FormatPattern)"@Html.Raw(vFaceEnrollmentSearch.TanggalInputFace.EditAttributes)>
+<div class="invalid-feedback">@Html.Raw(vFaceEnrollmentSearch.TanggalInputFace.GetErrorMessage(false))</div>
+@if (!vFaceEnrollmentSearch.TanggalInputFace.ReadOnly && !vFaceEnrollmentSearch.TanggalInputFace.Disabled && !vFaceEnrollmentSearch.TanggalInputFace.EditAttrs.Is("readonly") && !vFaceEnrollmentSearch.TanggalInputFace.EditAttrs.Is("disabled")) {
+<script>
+loadjs.ready(["fVFaceEnrollmentsearch", "datetimepicker"], function () {
+    let format = "@Html.Raw(DateFormat(9))", // DN
+        options = {
+                localization: {
+                    locale: ew.LANGUAGE_ID + "-u-nu-" + ew.getNumberingSystem(),
+                    hourCycle: format.match(/H/) ? "h24" : "h12",
+                    format,
+                    ...ew.language.phrase("datetimepicker")
+                },
+                display: {
+                    icons: {
+                        previous: ew.IS_RTL ? "fa-solid fa-chevron-right" : "fa-solid fa-chevron-left",
+                        next: ew.IS_RTL ? "fa-solid fa-chevron-left" : "fa-solid fa-chevron-right"
+                    },
+                    components: {
+                        clock: !!format.match(/h/i) || !!format.match(/m/) || !!format.match(/s/i),
+                        hours: !!format.match(/h/i),
+                        minutes: !!format.match(/m/),
+                        seconds: !!format.match(/s/i)
+                    },
+                theme: ew.getPreferredTheme()
+                }
+            };
+    ew.createDateTimePicker("fVFaceEnrollmentsearch", "x_TanggalInputFace", ew.deepAssign({"useCurrent":false,"display":{"sideBySide":false}}, options));
+});
+</script>
+}
+</span>
+                </div>
+            </div>
+        </div>
+    </div>
+} @* vFaceEnrollmentSearch.TanggalInputFace.Visible (end) *@
+@if (vFaceEnrollmentSearch.UserInputFace.Visible) { // vFaceEnrollmentSearch.UserInputFace.Visible (begin)
+    <div id="r_UserInputFace" class="row" @Html.Raw(vFaceEnrollmentSearch.UserInputFace.RowAttributes)>
+        <label for="x_UserInputFace" class="@(vFaceEnrollmentSearch.LeftColumnClass)"><span id="elh_VFaceEnrollment_UserInputFace">@Html.Raw(vFaceEnrollmentSearch.UserInputFace.Caption)</span>
+        <span class="ew-search-operator">
+@Html.Raw(Language.Phrase("LIKE"))
+<input type="hidden" name="z_UserInputFace" id="z_UserInputFace" value="LIKE">
+</span>
+        </label>
+        <div class="@(vFaceEnrollmentSearch.RightColumnClass)">
+            <div @Html.Raw(vFaceEnrollmentSearch.UserInputFace.CellAttributes)>
+                <div class="d-flex align-items-start">
+                <span id="el_VFaceEnrollment_UserInputFace" class="ew-search-field ew-search-field-single">
+<input type="@(vFaceEnrollmentSearch.UserInputFace.InputTextType)" name="x_UserInputFace" id="x_UserInputFace" data-table="VFaceEnrollment" data-field="x_UserInputFace" value="@Html.Raw(vFaceEnrollmentSearch.UserInputFace.EditValue)" size="30" maxlength="255" placeholder="@Html.Raw(HtmlEncode(vFaceEnrollmentSearch.UserInputFace.PlaceHolder))" data-format-pattern="@(vFaceEnrollmentSearch.UserInputFace.FormatPattern)"@Html.Raw(vFaceEnrollmentSearch.UserInputFace.EditAttributes)>
+<div class="invalid-feedback">@Html.Raw(vFaceEnrollmentSearch.UserInputFace.GetErrorMessage(false))</div>
+</span>
+                </div>
+            </div>
+        </div>
+    </div>
+} @* vFaceEnrollmentSearch.UserInputFace.Visible (end) *@
+@if (vFaceEnrollmentSearch.AzurePersonId.Visible) { // vFaceEnrollmentSearch.AzurePersonId.Visible (begin)
+    <div id="r_AzurePersonId" class="row" @Html.Raw(vFaceEnrollmentSearch.AzurePersonId.RowAttributes)>
+        <label for="x_AzurePersonId" class="@(vFaceEnrollmentSearch.LeftColumnClass)"><span id="elh_VFaceEnrollment_AzurePersonId">@Html.Raw(vFaceEnrollmentSearch.AzurePersonId.Caption)</span>
+        <span class="ew-search-operator">
+@Html.Raw(Language.Phrase("="))
+<input type="hidden" name="z_AzurePersonId" id="z_AzurePersonId" value="=">
+</span>
+        </label>
+        <div class="@(vFaceEnrollmentSearch.RightColumnClass)">
+            <div @Html.Raw(vFaceEnrollmentSearch.AzurePersonId.CellAttributes)>
+                <div class="d-flex align-items-start">
+                <span id="el_VFaceEnrollment_AzurePersonId" class="ew-search-field ew-search-field-single">
+<input type="@(vFaceEnrollmentSearch.AzurePersonId.InputTextType)" name="x_AzurePersonId" id="x_AzurePersonId" data-table="VFaceEnrollment" data-field="x_AzurePersonId" value="@Html.Raw(vFaceEnrollmentSearch.AzurePersonId.EditValue)" size="38" maxlength="38" placeholder="@Html.Raw(HtmlEncode(vFaceEnrollmentSearch.AzurePersonId.PlaceHolder))" data-format-pattern="@(vFaceEnrollmentSearch.AzurePersonId.FormatPattern)"@Html.Raw(vFaceEnrollmentSearch.AzurePersonId.EditAttributes)>
+<div class="invalid-feedback">@Html.Raw(vFaceEnrollmentSearch.AzurePersonId.GetErrorMessage(false))</div>
+</span>
+                </div>
+            </div>
+        </div>
+    </div>
+} @* vFaceEnrollmentSearch.AzurePersonId.Visible (end) *@
+</div><!-- /page* -->
+@Html.Raw(vFaceEnrollmentSearch.IsModal ? Html.Raw("<template class=\"ew-modal-buttons\">") : Html.Raw("<div class=\"row ew-buttons\">"))<!-- buttons .row -->
+    <div class="@(vFaceEnrollmentSearch.OffsetColumnClass)"><!-- buttons offset -->
+        <button class="btn btn-primary ew-btn" name="btn-action" id="btn-action" type="submit" form="fVFaceEnrollmentsearch">@Html.Raw(Language.Phrase("Search"))</button>
+@if (vFaceEnrollmentSearch.IsModal) {
+        <button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" form="fVFaceEnrollmentsearch">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+} else {
+        <button class="btn btn-default ew-btn" name="btn-reset" id="btn-reset" type="button" form="fVFaceEnrollmentsearch" data-ew-action="reload">@Html.Raw(Language.Phrase("Reset"))</button>
+}
+    </div><!-- /buttons offset -->
+@Html.Raw(vFaceEnrollmentSearch.IsModal ? Html.Raw("</template>") : Html.Raw("</div>"))<!-- /buttons .row -->
+</form>
+@vFaceEnrollmentSearch.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("VFaceEnrollment");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Write your table-specific startup script here
+    // document.write("page loaded");
+});
+</script>

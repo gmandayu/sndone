@@ -1,0 +1,119 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (masterToolsDelete.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = masterToolsDelete.UseLayout ? "_Layout" : "";
+}
+<script>
+var currentTable = @Html.Raw(ConvertToJson(masterToolsDelete.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { MasterTools: currentTable } });
+var currentPageID = ew.PAGE_ID = "delete";
+var currentForm;
+var fMasterToolsdelete;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("fMasterToolsdelete")
+        .setPageId("delete")
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Client script
+    $('#fMasterToolsdelete').on('submit', function (e) {
+        e.preventDefault();
+        showLoading();
+        setTimeout(() => {
+            hideLoading();
+        }, 3000);
+        this.requestSubmit();
+    });
+});
+</script>
+@masterToolsDelete.ShowPageHeader()
+@masterToolsDelete.ShowMessages()
+<form name="fMasterToolsdelete" id="fMasterToolsdelete" class="ew-form ew-delete-form" action="@AppPath(CurrentPageName())" method="post" novalidate autocomplete="off">
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+<input type="hidden" name="action" id="action" value="delete">
+@foreach (string key in masterToolsDelete.RecordKeys) {
+<input type="hidden" name="key_m[]" value="@key">
+}
+<div class="card ew-card ew-grid @(masterToolsDelete.TableGridClass)">
+<div class="card-body ew-grid-middle-panel @(masterToolsDelete.TableContainerClass)" style="@(masterToolsDelete.TableContainerStyle)">
+<table class="@(masterToolsDelete.TableClass)">
+    <thead>
+    <tr class="ew-table-header">
+@if (masterToolsDelete.IdTools.Visible) { // masterToolsDelete.IdTools.Visible (begin)
+        <th class="@Html.Raw(masterToolsDelete.IdTools.HeaderCellClass)"><span id="elh_MasterTools_IdTools" class="MasterTools_IdTools">@Html.Raw(masterToolsDelete.IdTools.Caption)</span></th>
+} @* masterToolsDelete.IdTools.Visible (end) *@
+@if (masterToolsDelete.NamaTools.Visible) { // masterToolsDelete.NamaTools.Visible (begin)
+        <th class="@Html.Raw(masterToolsDelete.NamaTools.HeaderCellClass)"><span id="elh_MasterTools_NamaTools" class="MasterTools_NamaTools">@Html.Raw(masterToolsDelete.NamaTools.Caption)</span></th>
+} @* masterToolsDelete.NamaTools.Visible (end) *@
+    </tr>
+    </thead>
+    <tbody>
+@{ masterToolsDelete.RecordCount = 0; }
+@while (masterToolsDelete.Recordset != null && await masterToolsDelete.Recordset.ReadAsync()) { // DN
+    masterToolsDelete.RecordCount++;
+    masterToolsDelete.RowCount++;
+
+    // Set row properties
+    masterToolsDelete.ResetAttributes();
+    masterToolsDelete.RowType = RowType.View; // View
+
+    // Get the field contents
+    await masterToolsDelete.LoadRowValues(masterToolsDelete.Recordset);
+
+    // Render row
+    await masterToolsDelete.RenderRow();
+    <tr @Html.Raw(masterToolsDelete.RowAttributes)>
+@if (masterToolsDelete.IdTools.Visible) { // masterToolsDelete.IdTools.Visible (begin)
+        <td @Html.Raw(masterToolsDelete.IdTools.CellAttributes)>
+<span id="">
+<span @Html.Raw(masterToolsDelete.IdTools.ViewAttributes)>
+@Html.Raw(masterToolsDelete.IdTools.GetViewValue())</span>
+</span></td>
+} @* masterToolsDelete.IdTools.Visible (end) *@
+@if (masterToolsDelete.NamaTools.Visible) { // masterToolsDelete.NamaTools.Visible (begin)
+        <td @Html.Raw(masterToolsDelete.NamaTools.CellAttributes)>
+<span id="">
+<span @Html.Raw(masterToolsDelete.NamaTools.ViewAttributes)>
+@Html.Raw(masterToolsDelete.NamaTools.GetViewValue())</span>
+</span></td>
+} @* masterToolsDelete.NamaTools.Visible (end) *@
+    </tr>
+}
+@{ masterToolsDelete.CloseRecordset(); }
+</tbody>
+</table>
+</div>
+</div>
+<div class="ew-buttons ew-desktop-buttons">
+<button class="btn btn-primary ew-btn" name="btn-action" id="btn-action" type="submit">@Html.Raw(Language.Phrase("DeleteBtn"))</button>
+<button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" data-href="@AppPath(masterToolsDelete.ReturnUrl)">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+</div>
+</form>
+@masterToolsDelete.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+<script>
+loadjs.ready("load", function() {
+    // Write your table-specific startup script here
+    // document.write("page loaded");
+});
+</script>

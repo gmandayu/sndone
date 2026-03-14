@@ -1,0 +1,89 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (masterDokumenView.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = masterDokumenView.UseLayout ? "_Layout" : "";
+}
+@if (!masterDokumenView.IsExport()) {
+<div class="btn-toolbar ew-toolbar">
+    @masterDokumenView.ExportOptions.RenderBody()
+    @masterDokumenView.OtherOptions.RenderBody()
+</div>
+}
+@masterDokumenView.ShowPageHeader()
+@masterDokumenView.ShowMessages()
+<main class="view">
+<form name="fMasterDokumenview" id="fMasterDokumenview" class="ew-form ew-view-form overlay-wrapper" action="@AppPath(CurrentPageName())" method="post" novalidate autocomplete="off">
+@if (!masterDokumenView.IsExport()) {
+<script>
+var currentTable = @Html.Raw(ConvertToJson(masterDokumenView.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { MasterDokumen: currentTable } });
+var currentPageID = ew.PAGE_ID = "view";
+var currentForm;
+var fMasterDokumenview;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("fMasterDokumenview")
+        .setPageId("view")
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Write your client script here, no need to add script tags.
+});
+</script>
+}
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+<input type="hidden" name="modal" value="@ConvertToInt(masterDokumenView.IsModal)">
+<table class="@(masterDokumenView.TableClass)">
+@if (masterDokumenView.IdDokumen.Visible) { // masterDokumenView.IdDokumen.Visible (begin)
+    <tr id="r_IdDokumen" @Html.Raw(masterDokumenView.IdDokumen.RowAttributes)>
+        <td class="@(masterDokumenView.TableLeftColumnClass)"><span id="elh_MasterDokumen_IdDokumen">@Html.Raw(masterDokumenView.IdDokumen.Caption)</span></td>
+        <td data-name="IdDokumen" @Html.Raw(masterDokumenView.IdDokumen.CellAttributes)>
+<span id="el_MasterDokumen_IdDokumen">
+<span @Html.Raw(masterDokumenView.IdDokumen.ViewAttributes)>
+@Html.Raw(masterDokumenView.IdDokumen.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* masterDokumenView.IdDokumen.Visible (end) *@
+@if (masterDokumenView.NamaDokumen.Visible) { // masterDokumenView.NamaDokumen.Visible (begin)
+    <tr id="r_NamaDokumen" @Html.Raw(masterDokumenView.NamaDokumen.RowAttributes)>
+        <td class="@(masterDokumenView.TableLeftColumnClass)"><span id="elh_MasterDokumen_NamaDokumen">@Html.Raw(masterDokumenView.NamaDokumen.Caption)</span></td>
+        <td data-name="NamaDokumen" @Html.Raw(masterDokumenView.NamaDokumen.CellAttributes)>
+<span id="el_MasterDokumen_NamaDokumen">
+<span @Html.Raw(masterDokumenView.NamaDokumen.ViewAttributes)>
+@Html.Raw(masterDokumenView.NamaDokumen.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* masterDokumenView.NamaDokumen.Visible (end) *@
+</table>
+@{ masterDokumenView.CloseRecordset(); }
+</form>
+</main>
+@masterDokumenView.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+@if (!masterDokumenView.IsExport()) {
+<script>
+loadjs.ready("load", function() {
+    // Write your table-specific startup script here
+    // document.write("page loaded");
+});
+</script>
+}

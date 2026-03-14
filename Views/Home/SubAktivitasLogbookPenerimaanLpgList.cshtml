@@ -1,0 +1,461 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (subAktivitasLogbookPenerimaanLpgList.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = subAktivitasLogbookPenerimaanLpgList.UseLayout ? "_Layout" : "";
+}
+@if (!subAktivitasLogbookPenerimaanLpgList.IsExport()) {
+<script>
+var currentTable = @Html.Raw(ConvertToJson(subAktivitasLogbookPenerimaanLpgList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { SubAktivitasLogbookPenerimaanLPG: currentTable } });
+var currentPageID = ew.PAGE_ID = "list";
+var currentForm;
+var @(subAktivitasLogbookPenerimaanLpgList.FormName);
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("@(subAktivitasLogbookPenerimaanLpgList.FormName)")
+        .setPageId("list")
+        .setSubmitWithFetch(@(subAktivitasLogbookPenerimaanLpgList.UseAjaxActions ? "true" : "false"))
+        .setFormKeyCountName("@(subAktivitasLogbookPenerimaanLpgList.FormKeyCountName)")
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Write your client script here, no need to add script tags.
+});
+</script>
+}
+@if (!subAktivitasLogbookPenerimaanLpgList.IsExport()) {
+<div class="btn-toolbar ew-toolbar">
+@if (subAktivitasLogbookPenerimaanLpgList.TotalRecords > 0 && subAktivitasLogbookPenerimaanLpgList.ExportOptions.Visible) {
+    subAktivitasLogbookPenerimaanLpgList.ExportOptions.Render("body");
+}
+@if (subAktivitasLogbookPenerimaanLpgList.ImportOptions.Visible) {
+    subAktivitasLogbookPenerimaanLpgList.ImportOptions.Render("body");
+}
+@if (subAktivitasLogbookPenerimaanLpgList.SearchOptions.Visible) {
+    subAktivitasLogbookPenerimaanLpgList.SearchOptions.Render("body");
+}
+@if (subAktivitasLogbookPenerimaanLpgList.FilterOptions.Visible) {
+    subAktivitasLogbookPenerimaanLpgList.FilterOptions.Render("body");
+}
+</div>
+}
+@if (!subAktivitasLogbookPenerimaanLpgList.IsModal) {
+<form name="fSubAktivitasLogbookPenerimaanLPGsrch" id="fSubAktivitasLogbookPenerimaanLPGsrch" class="ew-form ew-ext-search-form" action="@AppPath(CurrentPageName())" novalidate autocomplete="off">
+<div id="fSubAktivitasLogbookPenerimaanLPGsrch_search_panel" class="mb-2 mb-sm-0 @(subAktivitasLogbookPenerimaanLpgList.SearchPanelClass)"><!-- .ew-search-panel -->
+<script>
+var currentTable = @Html.Raw(ConvertToJson(subAktivitasLogbookPenerimaanLpgList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { SubAktivitasLogbookPenerimaanLPG: currentTable } });
+var currentForm;
+var fSubAktivitasLogbookPenerimaanLPGsrch, currentSearchForm, currentAdvancedSearchForm;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery,
+        fields = currentTable.fields;
+
+    // Form object for search
+    let form = new ew.FormBuilder()
+        .setId("fSubAktivitasLogbookPenerimaanLPGsrch")
+        .setPageId("list")
+@if (subAktivitasLogbookPenerimaanLpgList.UseAjaxActions) {
+        <text>.setSubmitWithFetch(true)</text>
+}
+
+        // Dynamic selection lists
+        .setLists({
+        })
+
+        // Filters
+        .setFilterList(@Html.Raw(subAktivitasLogbookPenerimaanLpgList.GetFilterList()))
+        .build();
+    window[form.id] = form;
+    currentSearchForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<input type="hidden" name="cmd" value="search">
+@if (Security.CanSearch) {
+if (!subAktivitasLogbookPenerimaanLpgList.IsExport() && Empty(subAktivitasLogbookPenerimaanLpgList.CurrentAction) && subAktivitasLogbookPenerimaanLpgList.HasSearchFields()) { @* Show search form (begin) *@
+<div class="ew-extended-search container-fluid ps-2">
+<div class="row mb-0">
+    <div class="col-sm-auto px-0 pe-sm-2">
+        <div class="ew-basic-search input-group">
+            <input type="search" name="@(Config.TableBasicSearch)" id="@(Config.TableBasicSearch)" class="form-control ew-basic-search-keyword" value="@Html.Raw(HtmlEncode(subAktivitasLogbookPenerimaanLpgList.BasicSearch.SessionKeyword))" placeholder="@(HtmlEncode(Language.Phrase("Search")))" aria-label="@(HtmlEncode(Language.Phrase("Search")))">
+            <input type="hidden" name="@(Config.TableBasicSearchType)" id="@(Config.TableBasicSearchType)" class="ew-basic-search-type" value="@(HtmlEncode(subAktivitasLogbookPenerimaanLpgList.BasicSearch.SessionType))">
+            <button type="button" data-bs-toggle="dropdown" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split" aria-haspopup="true" aria-expanded="false">
+                <span id="searchtype">@Html.Raw(subAktivitasLogbookPenerimaanLpgList.BasicSearch.TypeNameShort)</span>
+            </button>
+            <div class="dropdown-menu dropdown-menu-end">
+                <button type="button" class="dropdown-item@(subAktivitasLogbookPenerimaanLpgList.BasicSearch.SessionType == "" ? " active" : "")" form="fSubAktivitasLogbookPenerimaanLPGsrch" data-ew-action="search-type">@Html.Raw(Language.Phrase("QuickSearchAuto"))</button>
+                <button type="button" class="dropdown-item@(subAktivitasLogbookPenerimaanLpgList.BasicSearch.SessionType == "=" ? " active" : "")" form="fSubAktivitasLogbookPenerimaanLPGsrch" data-ew-action="search-type" data-search-type="=">@Html.Raw(Language.Phrase("QuickSearchExact"))</button>
+                <button type="button" class="dropdown-item@(subAktivitasLogbookPenerimaanLpgList.BasicSearch.SessionType == "AND" ? " active" : "")" form="fSubAktivitasLogbookPenerimaanLPGsrch" data-ew-action="search-type" data-search-type="AND">@Html.Raw(Language.Phrase("QuickSearchAll"))</button>
+                <button type="button" class="dropdown-item@(subAktivitasLogbookPenerimaanLpgList.BasicSearch.SessionType == "OR" ? " active" : "")" form="fSubAktivitasLogbookPenerimaanLPGsrch" data-ew-action="search-type" data-search-type="OR">@Html.Raw(Language.Phrase("QuickSearchAny"))</button>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-auto mb-3">
+        <button class="btn btn-primary" name="btn-submit" id="btn-submit" type="submit">@Html.Raw(Language.Phrase("SearchBtn"))</button>
+    </div>
+</div>
+</div><!-- /.ew-extended-search -->
+} @* Show search form (end) *@
+}
+</div><!-- /.ew-search-panel -->
+</form>
+}
+@subAktivitasLogbookPenerimaanLpgList.ShowPageHeader()
+@subAktivitasLogbookPenerimaanLpgList.ShowMessages()
+<main class="list @(subAktivitasLogbookPenerimaanLpgList.TotalRecords == 0 && !subAktivitasLogbookPenerimaanLpgList.IsAdd ? " ew-no-record" : "")">
+<div id="ew-header-options">
+    @subAktivitasLogbookPenerimaanLpgList.HeaderOptions.RenderBody()
+</div>
+<div id="ew-list">
+@if (subAktivitasLogbookPenerimaanLpgList.TotalRecords > 0 || !Empty(subAktivitasLogbookPenerimaanLpgList.CurrentAction)) {
+<div class="card ew-card ew-grid@(subAktivitasLogbookPenerimaanLpgList.IsAddOrEdit ? " ew-grid-add-edit" : "") @(subAktivitasLogbookPenerimaanLpgList.TableGridClass)">
+<form name="@(subAktivitasLogbookPenerimaanLpgList.FormName)" id="@(subAktivitasLogbookPenerimaanLpgList.FormName)" class="ew-form ew-list-form" action="@AppPath(subAktivitasLogbookPenerimaanLpgList.PageName)" method="post" novalidate autocomplete="off">
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+@if (subAktivitasLogbookPenerimaanLpgList.IsModal) {
+<input type="hidden" name="modal" value="1">
+}
+<div id="gmp_SubAktivitasLogbookPenerimaanLPG" class="card-body ew-grid-middle-panel @(subAktivitasLogbookPenerimaanLpgList.TableContainerClass)" style="@(subAktivitasLogbookPenerimaanLpgList.TableContainerStyle)">
+@if (subAktivitasLogbookPenerimaanLpgList.TotalRecords > 0 || subAktivitasLogbookPenerimaanLpgList.IsGridEdit || subAktivitasLogbookPenerimaanLpgList.IsMultiEdit) {
+<table id="tbl_SubAktivitasLogbookPenerimaanLPGlist" class="@(subAktivitasLogbookPenerimaanLpgList.TableClass)"><!-- .ew-table -->
+<thead>
+    <tr class="ew-table-header">
+@{
+    // Header row
+    subAktivitasLogbookPenerimaanLpgList.RowType = RowType.Header;
+
+    // Render list options
+    await subAktivitasLogbookPenerimaanLpgList.RenderListOptions();
+}
+@* Render list options (header, left) *@
+@subAktivitasLogbookPenerimaanLpgList.ListOptions.RenderHeader("left")
+@if (subAktivitasLogbookPenerimaanLpgList.id.Visible) { // subAktivitasLogbookPenerimaanLpgList.id.Visible (begin)
+        <th data-name="id" class="@(subAktivitasLogbookPenerimaanLpgList.id.HeaderCellClass)"><div id="elh_SubAktivitasLogbookPenerimaanLPG_id" class="SubAktivitasLogbookPenerimaanLPG_id">@Html.Raw(subAktivitasLogbookPenerimaanLpgList.RenderFieldHeader(subAktivitasLogbookPenerimaanLpgList.id))</div></th>
+} @* subAktivitasLogbookPenerimaanLpgList.id.Visible (end) *@
+@if (subAktivitasLogbookPenerimaanLpgList.idProses.Visible) { // subAktivitasLogbookPenerimaanLpgList.idProses.Visible (begin)
+        <th data-name="idProses" class="@(subAktivitasLogbookPenerimaanLpgList.idProses.HeaderCellClass)"><div id="elh_SubAktivitasLogbookPenerimaanLPG_idProses" class="SubAktivitasLogbookPenerimaanLPG_idProses">@Html.Raw(subAktivitasLogbookPenerimaanLpgList.RenderFieldHeader(subAktivitasLogbookPenerimaanLpgList.idProses))</div></th>
+} @* subAktivitasLogbookPenerimaanLpgList.idProses.Visible (end) *@
+@if (subAktivitasLogbookPenerimaanLpgList.idAktifitas.Visible) { // subAktivitasLogbookPenerimaanLpgList.idAktifitas.Visible (begin)
+        <th data-name="idAktifitas" class="@(subAktivitasLogbookPenerimaanLpgList.idAktifitas.HeaderCellClass)"><div id="elh_SubAktivitasLogbookPenerimaanLPG_idAktifitas" class="SubAktivitasLogbookPenerimaanLPG_idAktifitas">@Html.Raw(subAktivitasLogbookPenerimaanLpgList.RenderFieldHeader(subAktivitasLogbookPenerimaanLpgList.idAktifitas))</div></th>
+} @* subAktivitasLogbookPenerimaanLpgList.idAktifitas.Visible (end) *@
+@if (subAktivitasLogbookPenerimaanLpgList.NoReferensi.Visible) { // subAktivitasLogbookPenerimaanLpgList.NoReferensi.Visible (begin)
+        <th data-name="NoReferensi" class="@(subAktivitasLogbookPenerimaanLpgList.NoReferensi.HeaderCellClass)"><div id="elh_SubAktivitasLogbookPenerimaanLPG_NoReferensi" class="SubAktivitasLogbookPenerimaanLPG_NoReferensi">@Html.Raw(subAktivitasLogbookPenerimaanLpgList.RenderFieldHeader(subAktivitasLogbookPenerimaanLpgList.NoReferensi))</div></th>
+} @* subAktivitasLogbookPenerimaanLpgList.NoReferensi.Visible (end) *@
+@if (subAktivitasLogbookPenerimaanLpgList.Nama_Kapal.Visible) { // subAktivitasLogbookPenerimaanLpgList.Nama_Kapal.Visible (begin)
+        <th data-name="Nama_Kapal" class="@(subAktivitasLogbookPenerimaanLpgList.Nama_Kapal.HeaderCellClass)"><div id="elh_SubAktivitasLogbookPenerimaanLPG_Nama_Kapal" class="SubAktivitasLogbookPenerimaanLPG_Nama_Kapal">@Html.Raw(subAktivitasLogbookPenerimaanLpgList.RenderFieldHeader(subAktivitasLogbookPenerimaanLpgList.Nama_Kapal))</div></th>
+} @* subAktivitasLogbookPenerimaanLpgList.Nama_Kapal.Visible (end) *@
+@if (subAktivitasLogbookPenerimaanLpgList.TanggalJam.Visible) { // subAktivitasLogbookPenerimaanLpgList.TanggalJam.Visible (begin)
+        <th data-name="TanggalJam" class="@(subAktivitasLogbookPenerimaanLpgList.TanggalJam.HeaderCellClass)"><div id="elh_SubAktivitasLogbookPenerimaanLPG_TanggalJam" class="SubAktivitasLogbookPenerimaanLPG_TanggalJam">@Html.Raw(subAktivitasLogbookPenerimaanLpgList.RenderFieldHeader(subAktivitasLogbookPenerimaanLpgList.TanggalJam))</div></th>
+} @* subAktivitasLogbookPenerimaanLpgList.TanggalJam.Visible (end) *@
+@if (subAktivitasLogbookPenerimaanLpgList.Nama_Kegiatan.Visible) { // subAktivitasLogbookPenerimaanLpgList.Nama_Kegiatan.Visible (begin)
+        <th data-name="Nama_Kegiatan" class="@(subAktivitasLogbookPenerimaanLpgList.Nama_Kegiatan.HeaderCellClass)"><div id="elh_SubAktivitasLogbookPenerimaanLPG_Nama_Kegiatan" class="SubAktivitasLogbookPenerimaanLPG_Nama_Kegiatan">@Html.Raw(subAktivitasLogbookPenerimaanLpgList.RenderFieldHeader(subAktivitasLogbookPenerimaanLpgList.Nama_Kegiatan))</div></th>
+} @* subAktivitasLogbookPenerimaanLpgList.Nama_Kegiatan.Visible (end) *@
+@if (subAktivitasLogbookPenerimaanLpgList.Produk.Visible) { // subAktivitasLogbookPenerimaanLpgList.Produk.Visible (begin)
+        <th data-name="Produk" class="@(subAktivitasLogbookPenerimaanLpgList.Produk.HeaderCellClass)"><div id="elh_SubAktivitasLogbookPenerimaanLPG_Produk" class="SubAktivitasLogbookPenerimaanLPG_Produk">@Html.Raw(subAktivitasLogbookPenerimaanLpgList.RenderFieldHeader(subAktivitasLogbookPenerimaanLpgList.Produk))</div></th>
+} @* subAktivitasLogbookPenerimaanLpgList.Produk.Visible (end) *@
+@if (subAktivitasLogbookPenerimaanLpgList.Density.Visible) { // subAktivitasLogbookPenerimaanLpgList.Density.Visible (begin)
+        <th data-name="Density" class="@(subAktivitasLogbookPenerimaanLpgList.Density.HeaderCellClass)"><div id="elh_SubAktivitasLogbookPenerimaanLPG_Density" class="SubAktivitasLogbookPenerimaanLPG_Density">@Html.Raw(subAktivitasLogbookPenerimaanLpgList.RenderFieldHeader(subAktivitasLogbookPenerimaanLpgList.Density))</div></th>
+} @* subAktivitasLogbookPenerimaanLpgList.Density.Visible (end) *@
+@if (subAktivitasLogbookPenerimaanLpgList.Temperatur.Visible) { // subAktivitasLogbookPenerimaanLpgList.Temperatur.Visible (begin)
+        <th data-name="Temperatur" class="@(subAktivitasLogbookPenerimaanLpgList.Temperatur.HeaderCellClass)"><div id="elh_SubAktivitasLogbookPenerimaanLPG_Temperatur" class="SubAktivitasLogbookPenerimaanLPG_Temperatur">@Html.Raw(subAktivitasLogbookPenerimaanLpgList.RenderFieldHeader(subAktivitasLogbookPenerimaanLpgList.Temperatur))</div></th>
+} @* subAktivitasLogbookPenerimaanLpgList.Temperatur.Visible (end) *@
+@if (subAktivitasLogbookPenerimaanLpgList.userInput.Visible) { // subAktivitasLogbookPenerimaanLpgList.userInput.Visible (begin)
+        <th data-name="userInput" class="@(subAktivitasLogbookPenerimaanLpgList.userInput.HeaderCellClass)"><div id="elh_SubAktivitasLogbookPenerimaanLPG_userInput" class="SubAktivitasLogbookPenerimaanLPG_userInput">@Html.Raw(subAktivitasLogbookPenerimaanLpgList.RenderFieldHeader(subAktivitasLogbookPenerimaanLpgList.userInput))</div></th>
+} @* subAktivitasLogbookPenerimaanLpgList.userInput.Visible (end) *@
+@if (subAktivitasLogbookPenerimaanLpgList.etlDate.Visible) { // subAktivitasLogbookPenerimaanLpgList.etlDate.Visible (begin)
+        <th data-name="etlDate" class="@(subAktivitasLogbookPenerimaanLpgList.etlDate.HeaderCellClass)"><div id="elh_SubAktivitasLogbookPenerimaanLPG_etlDate" class="SubAktivitasLogbookPenerimaanLPG_etlDate">@Html.Raw(subAktivitasLogbookPenerimaanLpgList.RenderFieldHeader(subAktivitasLogbookPenerimaanLpgList.etlDate))</div></th>
+} @* subAktivitasLogbookPenerimaanLpgList.etlDate.Visible (end) *@
+@if (subAktivitasLogbookPenerimaanLpgList.LastUpdatedBy.Visible) { // subAktivitasLogbookPenerimaanLpgList.LastUpdatedBy.Visible (begin)
+        <th data-name="LastUpdatedBy" class="@(subAktivitasLogbookPenerimaanLpgList.LastUpdatedBy.HeaderCellClass)"><div id="elh_SubAktivitasLogbookPenerimaanLPG_LastUpdatedBy" class="SubAktivitasLogbookPenerimaanLPG_LastUpdatedBy">@Html.Raw(subAktivitasLogbookPenerimaanLpgList.RenderFieldHeader(subAktivitasLogbookPenerimaanLpgList.LastUpdatedBy))</div></th>
+} @* subAktivitasLogbookPenerimaanLpgList.LastUpdatedBy.Visible (end) *@
+@if (subAktivitasLogbookPenerimaanLpgList.lastUpdatedDate.Visible) { // subAktivitasLogbookPenerimaanLpgList.lastUpdatedDate.Visible (begin)
+        <th data-name="lastUpdatedDate" class="@(subAktivitasLogbookPenerimaanLpgList.lastUpdatedDate.HeaderCellClass)"><div id="elh_SubAktivitasLogbookPenerimaanLPG_lastUpdatedDate" class="SubAktivitasLogbookPenerimaanLPG_lastUpdatedDate">@Html.Raw(subAktivitasLogbookPenerimaanLpgList.RenderFieldHeader(subAktivitasLogbookPenerimaanLpgList.lastUpdatedDate))</div></th>
+} @* subAktivitasLogbookPenerimaanLpgList.lastUpdatedDate.Visible (end) *@
+@if (subAktivitasLogbookPenerimaanLpgList.SubAktivitasHasilPemeriksaanId.Visible) { // subAktivitasLogbookPenerimaanLpgList.SubAktivitasHasilPemeriksaanId.Visible (begin)
+        <th data-name="SubAktivitasHasilPemeriksaanId" class="@(subAktivitasLogbookPenerimaanLpgList.SubAktivitasHasilPemeriksaanId.HeaderCellClass)"><div id="elh_SubAktivitasLogbookPenerimaanLPG_SubAktivitasHasilPemeriksaanId" class="SubAktivitasLogbookPenerimaanLPG_SubAktivitasHasilPemeriksaanId">@Html.Raw(subAktivitasLogbookPenerimaanLpgList.RenderFieldHeader(subAktivitasLogbookPenerimaanLpgList.SubAktivitasHasilPemeriksaanId))</div></th>
+} @* subAktivitasLogbookPenerimaanLpgList.SubAktivitasHasilPemeriksaanId.Visible (end) *@
+@if (subAktivitasLogbookPenerimaanLpgList.Level.Visible) { // subAktivitasLogbookPenerimaanLpgList.Level.Visible (begin)
+        <th data-name="Level" class="@(subAktivitasLogbookPenerimaanLpgList.Level.HeaderCellClass)"><div id="elh_SubAktivitasLogbookPenerimaanLPG_Level" class="SubAktivitasLogbookPenerimaanLPG_Level">@Html.Raw(subAktivitasLogbookPenerimaanLpgList.RenderFieldHeader(subAktivitasLogbookPenerimaanLpgList.Level))</div></th>
+} @* subAktivitasLogbookPenerimaanLpgList.Level.Visible (end) *@
+@if (subAktivitasLogbookPenerimaanLpgList.Volume.Visible) { // subAktivitasLogbookPenerimaanLpgList.Volume.Visible (begin)
+        <th data-name="Volume" class="@(subAktivitasLogbookPenerimaanLpgList.Volume.HeaderCellClass)"><div id="elh_SubAktivitasLogbookPenerimaanLPG_Volume" class="SubAktivitasLogbookPenerimaanLPG_Volume">@Html.Raw(subAktivitasLogbookPenerimaanLpgList.RenderFieldHeader(subAktivitasLogbookPenerimaanLpgList.Volume))</div></th>
+} @* subAktivitasLogbookPenerimaanLpgList.Volume.Visible (end) *@
+@if (subAktivitasLogbookPenerimaanLpgList.Flowrate.Visible) { // subAktivitasLogbookPenerimaanLpgList.Flowrate.Visible (begin)
+        <th data-name="Flowrate" class="@(subAktivitasLogbookPenerimaanLpgList.Flowrate.HeaderCellClass)"><div id="elh_SubAktivitasLogbookPenerimaanLPG_Flowrate" class="SubAktivitasLogbookPenerimaanLPG_Flowrate">@Html.Raw(subAktivitasLogbookPenerimaanLpgList.RenderFieldHeader(subAktivitasLogbookPenerimaanLpgList.Flowrate))</div></th>
+} @* subAktivitasLogbookPenerimaanLpgList.Flowrate.Visible (end) *@
+@if (subAktivitasLogbookPenerimaanLpgList.TanggalJamSOP.Visible) { // subAktivitasLogbookPenerimaanLpgList.TanggalJamSOP.Visible (begin)
+        <th data-name="TanggalJamSOP" class="@(subAktivitasLogbookPenerimaanLpgList.TanggalJamSOP.HeaderCellClass)"><div id="elh_SubAktivitasLogbookPenerimaanLPG_TanggalJamSOP" class="SubAktivitasLogbookPenerimaanLPG_TanggalJamSOP">@Html.Raw(subAktivitasLogbookPenerimaanLpgList.RenderFieldHeader(subAktivitasLogbookPenerimaanLpgList.TanggalJamSOP))</div></th>
+} @* subAktivitasLogbookPenerimaanLpgList.TanggalJamSOP.Visible (end) *@
+@if (subAktivitasLogbookPenerimaanLpgList.SelisihWaktu.Visible) { // subAktivitasLogbookPenerimaanLpgList.SelisihWaktu.Visible (begin)
+        <th data-name="SelisihWaktu" class="@(subAktivitasLogbookPenerimaanLpgList.SelisihWaktu.HeaderCellClass)"><div id="elh_SubAktivitasLogbookPenerimaanLPG_SelisihWaktu" class="SubAktivitasLogbookPenerimaanLPG_SelisihWaktu">@Html.Raw(subAktivitasLogbookPenerimaanLpgList.RenderFieldHeader(subAktivitasLogbookPenerimaanLpgList.SelisihWaktu))</div></th>
+} @* subAktivitasLogbookPenerimaanLpgList.SelisihWaktu.Visible (end) *@
+@if (subAktivitasLogbookPenerimaanLpgList.IsQualityActive.Visible) { // subAktivitasLogbookPenerimaanLpgList.IsQualityActive.Visible (begin)
+        <th data-name="IsQualityActive" class="@(subAktivitasLogbookPenerimaanLpgList.IsQualityActive.HeaderCellClass)"><div id="elh_SubAktivitasLogbookPenerimaanLPG_IsQualityActive" class="SubAktivitasLogbookPenerimaanLPG_IsQualityActive">@Html.Raw(subAktivitasLogbookPenerimaanLpgList.RenderFieldHeader(subAktivitasLogbookPenerimaanLpgList.IsQualityActive))</div></th>
+} @* subAktivitasLogbookPenerimaanLpgList.IsQualityActive.Visible (end) *@
+@* Render list options (header, right) *@
+@subAktivitasLogbookPenerimaanLpgList.ListOptions.RenderHeader("right")
+    </tr>
+</thead>
+<tbody data-page="@(subAktivitasLogbookPenerimaanLpgList.PageNumber)">
+@{
+    await subAktivitasLogbookPenerimaanLpgList.SetupGrid();
+    bool eof = subAktivitasLogbookPenerimaanLpgList.Recordset == null; // DN
+}
+@while (subAktivitasLogbookPenerimaanLpgList.RecordCount < subAktivitasLogbookPenerimaanLpgList.StopRecord || SameString(subAktivitasLogbookPenerimaanLpgList.RowIndex, "$rowindex$")) { // Begin While
+    if (!eof && !SameString(subAktivitasLogbookPenerimaanLpgList.RowIndex, "$rowindex$") &&
+        (!subAktivitasLogbookPenerimaanLpgList.IsGridAdd || subAktivitasLogbookPenerimaanLpgList.CurrentMode == "copy") &&
+        (!((subAktivitasLogbookPenerimaanLpgList.IsCopy || subAktivitasLogbookPenerimaanLpgList.IsAdd) && subAktivitasLogbookPenerimaanLpgList.RowIndex is int rowIndex && rowIndex == 0))) // DN
+        eof = !await subAktivitasLogbookPenerimaanLpgList.Recordset.ReadAsync();
+    subAktivitasLogbookPenerimaanLpgList.RecordCount++;
+    if (subAktivitasLogbookPenerimaanLpgList.RecordCount >= subAktivitasLogbookPenerimaanLpgList.StartRecord) {
+        await subAktivitasLogbookPenerimaanLpgList.SetupRow();
+    <tr @Html.Raw(subAktivitasLogbookPenerimaanLpgList.RowAttributes)>
+    @* Render list options (body, left) *@
+    @subAktivitasLogbookPenerimaanLpgList.ListOptions.RenderBody("left", subAktivitasLogbookPenerimaanLpgList.RowCount)
+    @if (subAktivitasLogbookPenerimaanLpgList.id.Visible) { // subAktivitasLogbookPenerimaanLpgList.id.Visible (begin)
+        <td data-name="id" @Html.Raw(subAktivitasLogbookPenerimaanLpgList.id.CellAttributes)>
+<span id="el@(subAktivitasLogbookPenerimaanLpgList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasLogbookPenerimaanLpgList.RowCount)_SubAktivitasLogbookPenerimaanLPG_id" class="el_SubAktivitasLogbookPenerimaanLPG_id">
+<span @Html.Raw(subAktivitasLogbookPenerimaanLpgList.id.ViewAttributes)>
+@Html.Raw(subAktivitasLogbookPenerimaanLpgList.id.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasLogbookPenerimaanLpgList.id.Visible (end) *@
+    @if (subAktivitasLogbookPenerimaanLpgList.idProses.Visible) { // subAktivitasLogbookPenerimaanLpgList.idProses.Visible (begin)
+        <td data-name="idProses" @Html.Raw(subAktivitasLogbookPenerimaanLpgList.idProses.CellAttributes)>
+<span id="el@(subAktivitasLogbookPenerimaanLpgList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasLogbookPenerimaanLpgList.RowCount)_SubAktivitasLogbookPenerimaanLPG_idProses" class="el_SubAktivitasLogbookPenerimaanLPG_idProses">
+<span @Html.Raw(subAktivitasLogbookPenerimaanLpgList.idProses.ViewAttributes)>
+@Html.Raw(subAktivitasLogbookPenerimaanLpgList.idProses.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasLogbookPenerimaanLpgList.idProses.Visible (end) *@
+    @if (subAktivitasLogbookPenerimaanLpgList.idAktifitas.Visible) { // subAktivitasLogbookPenerimaanLpgList.idAktifitas.Visible (begin)
+        <td data-name="idAktifitas" @Html.Raw(subAktivitasLogbookPenerimaanLpgList.idAktifitas.CellAttributes)>
+<span id="el@(subAktivitasLogbookPenerimaanLpgList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasLogbookPenerimaanLpgList.RowCount)_SubAktivitasLogbookPenerimaanLPG_idAktifitas" class="el_SubAktivitasLogbookPenerimaanLPG_idAktifitas">
+<span @Html.Raw(subAktivitasLogbookPenerimaanLpgList.idAktifitas.ViewAttributes)>
+@Html.Raw(subAktivitasLogbookPenerimaanLpgList.idAktifitas.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasLogbookPenerimaanLpgList.idAktifitas.Visible (end) *@
+    @if (subAktivitasLogbookPenerimaanLpgList.NoReferensi.Visible) { // subAktivitasLogbookPenerimaanLpgList.NoReferensi.Visible (begin)
+        <td data-name="NoReferensi" @Html.Raw(subAktivitasLogbookPenerimaanLpgList.NoReferensi.CellAttributes)>
+<span id="el@(subAktivitasLogbookPenerimaanLpgList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasLogbookPenerimaanLpgList.RowCount)_SubAktivitasLogbookPenerimaanLPG_NoReferensi" class="el_SubAktivitasLogbookPenerimaanLPG_NoReferensi">
+<span @Html.Raw(subAktivitasLogbookPenerimaanLpgList.NoReferensi.ViewAttributes)>
+@Html.Raw(subAktivitasLogbookPenerimaanLpgList.NoReferensi.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasLogbookPenerimaanLpgList.NoReferensi.Visible (end) *@
+    @if (subAktivitasLogbookPenerimaanLpgList.Nama_Kapal.Visible) { // subAktivitasLogbookPenerimaanLpgList.Nama_Kapal.Visible (begin)
+        <td data-name="Nama_Kapal" @Html.Raw(subAktivitasLogbookPenerimaanLpgList.Nama_Kapal.CellAttributes)>
+<span id="el@(subAktivitasLogbookPenerimaanLpgList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasLogbookPenerimaanLpgList.RowCount)_SubAktivitasLogbookPenerimaanLPG_Nama_Kapal" class="el_SubAktivitasLogbookPenerimaanLPG_Nama_Kapal">
+<span @Html.Raw(subAktivitasLogbookPenerimaanLpgList.Nama_Kapal.ViewAttributes)>
+@Html.Raw(subAktivitasLogbookPenerimaanLpgList.Nama_Kapal.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasLogbookPenerimaanLpgList.Nama_Kapal.Visible (end) *@
+    @if (subAktivitasLogbookPenerimaanLpgList.TanggalJam.Visible) { // subAktivitasLogbookPenerimaanLpgList.TanggalJam.Visible (begin)
+        <td data-name="TanggalJam" @Html.Raw(subAktivitasLogbookPenerimaanLpgList.TanggalJam.CellAttributes)>
+<span id="el@(subAktivitasLogbookPenerimaanLpgList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasLogbookPenerimaanLpgList.RowCount)_SubAktivitasLogbookPenerimaanLPG_TanggalJam" class="el_SubAktivitasLogbookPenerimaanLPG_TanggalJam">
+<span @Html.Raw(subAktivitasLogbookPenerimaanLpgList.TanggalJam.ViewAttributes)>
+@Html.Raw(subAktivitasLogbookPenerimaanLpgList.TanggalJam.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasLogbookPenerimaanLpgList.TanggalJam.Visible (end) *@
+    @if (subAktivitasLogbookPenerimaanLpgList.Nama_Kegiatan.Visible) { // subAktivitasLogbookPenerimaanLpgList.Nama_Kegiatan.Visible (begin)
+        <td data-name="Nama_Kegiatan" @Html.Raw(subAktivitasLogbookPenerimaanLpgList.Nama_Kegiatan.CellAttributes)>
+<span id="el@(subAktivitasLogbookPenerimaanLpgList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasLogbookPenerimaanLpgList.RowCount)_SubAktivitasLogbookPenerimaanLPG_Nama_Kegiatan" class="el_SubAktivitasLogbookPenerimaanLPG_Nama_Kegiatan">
+<span @Html.Raw(subAktivitasLogbookPenerimaanLpgList.Nama_Kegiatan.ViewAttributes)>
+@Html.Raw(subAktivitasLogbookPenerimaanLpgList.Nama_Kegiatan.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasLogbookPenerimaanLpgList.Nama_Kegiatan.Visible (end) *@
+    @if (subAktivitasLogbookPenerimaanLpgList.Produk.Visible) { // subAktivitasLogbookPenerimaanLpgList.Produk.Visible (begin)
+        <td data-name="Produk" @Html.Raw(subAktivitasLogbookPenerimaanLpgList.Produk.CellAttributes)>
+<span id="el@(subAktivitasLogbookPenerimaanLpgList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasLogbookPenerimaanLpgList.RowCount)_SubAktivitasLogbookPenerimaanLPG_Produk" class="el_SubAktivitasLogbookPenerimaanLPG_Produk">
+<span @Html.Raw(subAktivitasLogbookPenerimaanLpgList.Produk.ViewAttributes)>
+@Html.Raw(subAktivitasLogbookPenerimaanLpgList.Produk.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasLogbookPenerimaanLpgList.Produk.Visible (end) *@
+    @if (subAktivitasLogbookPenerimaanLpgList.Density.Visible) { // subAktivitasLogbookPenerimaanLpgList.Density.Visible (begin)
+        <td data-name="Density" @Html.Raw(subAktivitasLogbookPenerimaanLpgList.Density.CellAttributes)>
+<span id="el@(subAktivitasLogbookPenerimaanLpgList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasLogbookPenerimaanLpgList.RowCount)_SubAktivitasLogbookPenerimaanLPG_Density" class="el_SubAktivitasLogbookPenerimaanLPG_Density">
+<span @Html.Raw(subAktivitasLogbookPenerimaanLpgList.Density.ViewAttributes)>
+@Html.Raw(subAktivitasLogbookPenerimaanLpgList.Density.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasLogbookPenerimaanLpgList.Density.Visible (end) *@
+    @if (subAktivitasLogbookPenerimaanLpgList.Temperatur.Visible) { // subAktivitasLogbookPenerimaanLpgList.Temperatur.Visible (begin)
+        <td data-name="Temperatur" @Html.Raw(subAktivitasLogbookPenerimaanLpgList.Temperatur.CellAttributes)>
+<span id="el@(subAktivitasLogbookPenerimaanLpgList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasLogbookPenerimaanLpgList.RowCount)_SubAktivitasLogbookPenerimaanLPG_Temperatur" class="el_SubAktivitasLogbookPenerimaanLPG_Temperatur">
+<span @Html.Raw(subAktivitasLogbookPenerimaanLpgList.Temperatur.ViewAttributes)>
+@Html.Raw(subAktivitasLogbookPenerimaanLpgList.Temperatur.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasLogbookPenerimaanLpgList.Temperatur.Visible (end) *@
+    @if (subAktivitasLogbookPenerimaanLpgList.userInput.Visible) { // subAktivitasLogbookPenerimaanLpgList.userInput.Visible (begin)
+        <td data-name="userInput" @Html.Raw(subAktivitasLogbookPenerimaanLpgList.userInput.CellAttributes)>
+<span id="el@(subAktivitasLogbookPenerimaanLpgList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasLogbookPenerimaanLpgList.RowCount)_SubAktivitasLogbookPenerimaanLPG_userInput" class="el_SubAktivitasLogbookPenerimaanLPG_userInput">
+<span @Html.Raw(subAktivitasLogbookPenerimaanLpgList.userInput.ViewAttributes)>
+@Html.Raw(subAktivitasLogbookPenerimaanLpgList.userInput.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasLogbookPenerimaanLpgList.userInput.Visible (end) *@
+    @if (subAktivitasLogbookPenerimaanLpgList.etlDate.Visible) { // subAktivitasLogbookPenerimaanLpgList.etlDate.Visible (begin)
+        <td data-name="etlDate" @Html.Raw(subAktivitasLogbookPenerimaanLpgList.etlDate.CellAttributes)>
+<span id="el@(subAktivitasLogbookPenerimaanLpgList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasLogbookPenerimaanLpgList.RowCount)_SubAktivitasLogbookPenerimaanLPG_etlDate" class="el_SubAktivitasLogbookPenerimaanLPG_etlDate">
+<span @Html.Raw(subAktivitasLogbookPenerimaanLpgList.etlDate.ViewAttributes)>
+@Html.Raw(subAktivitasLogbookPenerimaanLpgList.etlDate.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasLogbookPenerimaanLpgList.etlDate.Visible (end) *@
+    @if (subAktivitasLogbookPenerimaanLpgList.LastUpdatedBy.Visible) { // subAktivitasLogbookPenerimaanLpgList.LastUpdatedBy.Visible (begin)
+        <td data-name="LastUpdatedBy" @Html.Raw(subAktivitasLogbookPenerimaanLpgList.LastUpdatedBy.CellAttributes)>
+<span id="el@(subAktivitasLogbookPenerimaanLpgList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasLogbookPenerimaanLpgList.RowCount)_SubAktivitasLogbookPenerimaanLPG_LastUpdatedBy" class="el_SubAktivitasLogbookPenerimaanLPG_LastUpdatedBy">
+<span @Html.Raw(subAktivitasLogbookPenerimaanLpgList.LastUpdatedBy.ViewAttributes)>
+@Html.Raw(subAktivitasLogbookPenerimaanLpgList.LastUpdatedBy.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasLogbookPenerimaanLpgList.LastUpdatedBy.Visible (end) *@
+    @if (subAktivitasLogbookPenerimaanLpgList.lastUpdatedDate.Visible) { // subAktivitasLogbookPenerimaanLpgList.lastUpdatedDate.Visible (begin)
+        <td data-name="lastUpdatedDate" @Html.Raw(subAktivitasLogbookPenerimaanLpgList.lastUpdatedDate.CellAttributes)>
+<span id="el@(subAktivitasLogbookPenerimaanLpgList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasLogbookPenerimaanLpgList.RowCount)_SubAktivitasLogbookPenerimaanLPG_lastUpdatedDate" class="el_SubAktivitasLogbookPenerimaanLPG_lastUpdatedDate">
+<span @Html.Raw(subAktivitasLogbookPenerimaanLpgList.lastUpdatedDate.ViewAttributes)>
+@Html.Raw(subAktivitasLogbookPenerimaanLpgList.lastUpdatedDate.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasLogbookPenerimaanLpgList.lastUpdatedDate.Visible (end) *@
+    @if (subAktivitasLogbookPenerimaanLpgList.SubAktivitasHasilPemeriksaanId.Visible) { // subAktivitasLogbookPenerimaanLpgList.SubAktivitasHasilPemeriksaanId.Visible (begin)
+        <td data-name="SubAktivitasHasilPemeriksaanId" @Html.Raw(subAktivitasLogbookPenerimaanLpgList.SubAktivitasHasilPemeriksaanId.CellAttributes)>
+<span id="el@(subAktivitasLogbookPenerimaanLpgList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasLogbookPenerimaanLpgList.RowCount)_SubAktivitasLogbookPenerimaanLPG_SubAktivitasHasilPemeriksaanId" class="el_SubAktivitasLogbookPenerimaanLPG_SubAktivitasHasilPemeriksaanId">
+<span @Html.Raw(subAktivitasLogbookPenerimaanLpgList.SubAktivitasHasilPemeriksaanId.ViewAttributes)>
+@Html.Raw(subAktivitasLogbookPenerimaanLpgList.SubAktivitasHasilPemeriksaanId.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasLogbookPenerimaanLpgList.SubAktivitasHasilPemeriksaanId.Visible (end) *@
+    @if (subAktivitasLogbookPenerimaanLpgList.Level.Visible) { // subAktivitasLogbookPenerimaanLpgList.Level.Visible (begin)
+        <td data-name="Level" @Html.Raw(subAktivitasLogbookPenerimaanLpgList.Level.CellAttributes)>
+<span id="el@(subAktivitasLogbookPenerimaanLpgList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasLogbookPenerimaanLpgList.RowCount)_SubAktivitasLogbookPenerimaanLPG_Level" class="el_SubAktivitasLogbookPenerimaanLPG_Level">
+<span @Html.Raw(subAktivitasLogbookPenerimaanLpgList.Level.ViewAttributes)>
+@Html.Raw(subAktivitasLogbookPenerimaanLpgList.Level.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasLogbookPenerimaanLpgList.Level.Visible (end) *@
+    @if (subAktivitasLogbookPenerimaanLpgList.Volume.Visible) { // subAktivitasLogbookPenerimaanLpgList.Volume.Visible (begin)
+        <td data-name="Volume" @Html.Raw(subAktivitasLogbookPenerimaanLpgList.Volume.CellAttributes)>
+<span id="el@(subAktivitasLogbookPenerimaanLpgList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasLogbookPenerimaanLpgList.RowCount)_SubAktivitasLogbookPenerimaanLPG_Volume" class="el_SubAktivitasLogbookPenerimaanLPG_Volume">
+<span @Html.Raw(subAktivitasLogbookPenerimaanLpgList.Volume.ViewAttributes)>
+@Html.Raw(subAktivitasLogbookPenerimaanLpgList.Volume.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasLogbookPenerimaanLpgList.Volume.Visible (end) *@
+    @if (subAktivitasLogbookPenerimaanLpgList.Flowrate.Visible) { // subAktivitasLogbookPenerimaanLpgList.Flowrate.Visible (begin)
+        <td data-name="Flowrate" @Html.Raw(subAktivitasLogbookPenerimaanLpgList.Flowrate.CellAttributes)>
+<span id="el@(subAktivitasLogbookPenerimaanLpgList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasLogbookPenerimaanLpgList.RowCount)_SubAktivitasLogbookPenerimaanLPG_Flowrate" class="el_SubAktivitasLogbookPenerimaanLPG_Flowrate">
+<span @Html.Raw(subAktivitasLogbookPenerimaanLpgList.Flowrate.ViewAttributes)>
+@Html.Raw(subAktivitasLogbookPenerimaanLpgList.Flowrate.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasLogbookPenerimaanLpgList.Flowrate.Visible (end) *@
+    @if (subAktivitasLogbookPenerimaanLpgList.TanggalJamSOP.Visible) { // subAktivitasLogbookPenerimaanLpgList.TanggalJamSOP.Visible (begin)
+        <td data-name="TanggalJamSOP" @Html.Raw(subAktivitasLogbookPenerimaanLpgList.TanggalJamSOP.CellAttributes)>
+<span id="el@(subAktivitasLogbookPenerimaanLpgList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasLogbookPenerimaanLpgList.RowCount)_SubAktivitasLogbookPenerimaanLPG_TanggalJamSOP" class="el_SubAktivitasLogbookPenerimaanLPG_TanggalJamSOP">
+<span @Html.Raw(subAktivitasLogbookPenerimaanLpgList.TanggalJamSOP.ViewAttributes)>
+@Html.Raw(subAktivitasLogbookPenerimaanLpgList.TanggalJamSOP.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasLogbookPenerimaanLpgList.TanggalJamSOP.Visible (end) *@
+    @if (subAktivitasLogbookPenerimaanLpgList.SelisihWaktu.Visible) { // subAktivitasLogbookPenerimaanLpgList.SelisihWaktu.Visible (begin)
+        <td data-name="SelisihWaktu" @Html.Raw(subAktivitasLogbookPenerimaanLpgList.SelisihWaktu.CellAttributes)>
+<span id="el@(subAktivitasLogbookPenerimaanLpgList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasLogbookPenerimaanLpgList.RowCount)_SubAktivitasLogbookPenerimaanLPG_SelisihWaktu" class="el_SubAktivitasLogbookPenerimaanLPG_SelisihWaktu">
+<span @Html.Raw(subAktivitasLogbookPenerimaanLpgList.SelisihWaktu.ViewAttributes)>
+@Html.Raw(subAktivitasLogbookPenerimaanLpgList.SelisihWaktu.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasLogbookPenerimaanLpgList.SelisihWaktu.Visible (end) *@
+    @if (subAktivitasLogbookPenerimaanLpgList.IsQualityActive.Visible) { // subAktivitasLogbookPenerimaanLpgList.IsQualityActive.Visible (begin)
+        <td data-name="IsQualityActive" @Html.Raw(subAktivitasLogbookPenerimaanLpgList.IsQualityActive.CellAttributes)>
+<span id="el@(subAktivitasLogbookPenerimaanLpgList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasLogbookPenerimaanLpgList.RowCount)_SubAktivitasLogbookPenerimaanLPG_IsQualityActive" class="el_SubAktivitasLogbookPenerimaanLPG_IsQualityActive">
+<span @Html.Raw(subAktivitasLogbookPenerimaanLpgList.IsQualityActive.ViewAttributes)>
+<i class="fa-regular @(ConvertToBool(subAktivitasLogbookPenerimaanLpgList.IsQualityActive.CurrentValue) ? "fa-square-check" : "fa-square") ew-icon ew-boolean"></i>
+</span>
+</span>
+</td>
+    } @* subAktivitasLogbookPenerimaanLpgList.IsQualityActive.Visible (end) *@
+    @* Render list options (body, right) *@
+    @subAktivitasLogbookPenerimaanLpgList.ListOptions.RenderBody("right", subAktivitasLogbookPenerimaanLpgList.RowCount)
+    </tr>
+    } @* End if *@
+
+    // Reset for template row
+    if (SameString(subAktivitasLogbookPenerimaanLpgList.RowIndex, "$rowindex$"))
+        subAktivitasLogbookPenerimaanLpgList.RowIndex = 0;
+
+    // Reset inline add/copy row
+    if ((subAktivitasLogbookPenerimaanLpgList.IsCopy || subAktivitasLogbookPenerimaanLpgList.IsAdd) && subAktivitasLogbookPenerimaanLpgList.RowIndex is int rowIndex2 && rowIndex2 == 0)
+        subAktivitasLogbookPenerimaanLpgList.RowIndex = 1;
+} @* End While *@
+</tbody>
+</table><!-- /.ew-table -->
+} @* End If TotalRecords > 0 *@
+</div><!-- /.ew-grid-middle-panel -->
+@if (Empty(subAktivitasLogbookPenerimaanLpgList.CurrentAction) && !subAktivitasLogbookPenerimaanLpgList.UseAjaxActions) {
+<input type="hidden" name="action" id="action" value="">
+}
+</form><!-- /.ew-list-form -->
+@{ subAktivitasLogbookPenerimaanLpgList.CloseRecordset(); }
+@if (!subAktivitasLogbookPenerimaanLpgList.IsExport()) {
+<div class="card-footer ew-grid-lower-panel">
+@if (!subAktivitasLogbookPenerimaanLpgList.IsGridAdd && !(subAktivitasLogbookPenerimaanLpgList.IsGridEdit && subAktivitasLogbookPenerimaanLpgList.ModalGridEdit) && !subAktivitasLogbookPenerimaanLpgList.IsMultiEdit) {
+@Html.Raw(subAktivitasLogbookPenerimaanLpgList.Pager.Render())
+}
+<div class="ew-list-other-options">
+@subAktivitasLogbookPenerimaanLpgList.OtherOptions.RenderBody("bottom")
+</div>
+</div>
+}
+</div><!-- /.ew-grid -->
+} else { // Show other options
+<div class="ew-list-other-options">
+@subAktivitasLogbookPenerimaanLpgList.OtherOptions.ForEach(opt => opt.ButtonClass = "").RenderBody()
+</div>
+}
+</div>
+<div id="ew-footer-options">
+    @subAktivitasLogbookPenerimaanLpgList.FooterOptions.RenderBody()
+</div>
+</main>
+@subAktivitasLogbookPenerimaanLpgList.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+@if (!subAktivitasLogbookPenerimaanLpgList.IsExport()) {
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("SubAktivitasLogbookPenerimaanLPG");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Write your table-specific startup script here
+    // document.write("page loaded");
+});
+</script>
+}

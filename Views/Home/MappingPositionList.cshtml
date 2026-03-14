@@ -1,0 +1,536 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (mappingPositionList.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = mappingPositionList.UseLayout ? "_Layout" : "";
+}
+@if (!mappingPositionList.IsExport()) {
+<script>
+var currentTable = @Html.Raw(ConvertToJson(mappingPositionList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { MappingPosition: currentTable } });
+var currentPageID = ew.PAGE_ID = "list";
+var currentForm;
+var @(mappingPositionList.FormName);
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("@(mappingPositionList.FormName)")
+        .setPageId("list")
+        .setSubmitWithFetch(@(mappingPositionList.UseAjaxActions ? "true" : "false"))
+        .setFormKeyCountName("@(mappingPositionList.FormKeyCountName)")
+
+        // Dynamic selection lists
+        .setLists({
+            "IdPosition": @Html.Raw(mappingPositionList.IdPosition.ToClientList(mappingPositionList)),
+            "IdRegion": @Html.Raw(mappingPositionList.IdRegion.ToClientList(mappingPositionList)),
+            "IdPlant": @Html.Raw(mappingPositionList.IdPlant.ToClientList(mappingPositionList)),
+        })
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Write your client script here, no need to add script tags.
+});
+</script>
+}
+@if (!mappingPositionList.IsExport()) {
+<div class="btn-toolbar ew-toolbar">
+@if (mappingPositionList.TotalRecords > 0 && mappingPositionList.ExportOptions.Visible) {
+    mappingPositionList.ExportOptions.Render("body");
+}
+@if (mappingPositionList.ImportOptions.Visible) {
+    mappingPositionList.ImportOptions.Render("body");
+}
+@if (mappingPositionList.SearchOptions.Visible) {
+    mappingPositionList.SearchOptions.Render("body");
+}
+@if (mappingPositionList.FilterOptions.Visible) {
+    mappingPositionList.FilterOptions.Render("body");
+}
+</div>
+}
+@if (mappingPositionList.ShowCurrentFilter) {
+    mappingPositionList.ShowFilterList();
+}
+@if (!mappingPositionList.IsModal) {
+<form name="fMappingPositionsrch" id="fMappingPositionsrch" class="ew-form ew-ext-search-form" action="@AppPath(CurrentPageName())" novalidate autocomplete="off">
+<div id="fMappingPositionsrch_search_panel" class="mb-2 mb-sm-0 @(mappingPositionList.SearchPanelClass)"><!-- .ew-search-panel -->
+<script>
+var currentTable = @Html.Raw(ConvertToJson(mappingPositionList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { MappingPosition: currentTable } });
+var currentForm;
+var fMappingPositionsrch, currentSearchForm, currentAdvancedSearchForm;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery,
+        fields = currentTable.fields;
+
+    // Form object for search
+    let form = new ew.FormBuilder()
+        .setId("fMappingPositionsrch")
+        .setPageId("list")
+@if (mappingPositionList.UseAjaxActions) {
+        <text>.setSubmitWithFetch(true)</text>
+}
+
+        // Add fields
+        .setFields([
+        ])
+        // Validate form
+        .setValidate(
+            async function () {
+                if (!this.validateRequired)
+                    return true; // Ignore validation
+                let fobj = this.getForm();
+
+                // Validate fields
+                if (!this.validateFields())
+                    return false;
+
+                // Call Form_CustomValidate event
+                if (!(await this.customValidate?.(fobj) ?? true)) {
+                    this.focus();
+                    return false;
+                }
+                return true;
+            }
+        )
+
+        // Form_CustomValidate
+        .setCustomValidate(
+            function(fobj) { // DO NOT CHANGE THIS LINE!
+                    // Your custom validation code here, return false if invalid.
+                    return true;
+                }
+        )
+
+        // Use JavaScript validation or not
+        .setValidateRequired(ew.CLIENT_VALIDATE)
+
+        // Dynamic selection lists
+        .setLists({
+            "Id": @Html.Raw(mappingPositionList.Id.ToClientList(mappingPositionList)),
+            "IdPosition": @Html.Raw(mappingPositionList.IdPosition.ToClientList(mappingPositionList)),
+            "IdRegion": @Html.Raw(mappingPositionList.IdRegion.ToClientList(mappingPositionList)),
+            "NamaRegion": @Html.Raw(mappingPositionList.NamaRegion.ToClientList(mappingPositionList)),
+            "IdPlant": @Html.Raw(mappingPositionList.IdPlant.ToClientList(mappingPositionList)),
+            "NamaPlant": @Html.Raw(mappingPositionList.NamaPlant.ToClientList(mappingPositionList)),
+        })
+
+        // Filters
+        .setFilterList(@Html.Raw(mappingPositionList.GetFilterList()))
+        .build();
+    window[form.id] = form;
+    currentSearchForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<input type="hidden" name="cmd" value="search">
+@if (Security.CanSearch) {
+if (!mappingPositionList.IsExport() && Empty(mappingPositionList.CurrentAction) && mappingPositionList.HasSearchFields()) { @* Show search form (begin) *@
+<div class="ew-extended-search container-fluid ps-2">
+<div class="row mb-0@(mappingPositionList.SearchFieldsPerRow > 0 ? " row-cols-sm-" + mappingPositionList.SearchFieldsPerRow : "")">
+@{
+    // Render search row
+    mappingPositionList.RowType = RowType.Search;
+    mappingPositionList.ResetAttributes();
+    await mappingPositionList.RenderRow();
+}
+@if (mappingPositionList.Id.Visible) { // mappingPositionList.Id.Visible (begin)
+    if (!mappingPositionList.Id.UseFilter) {
+        mappingPositionList.SearchColumnCount++;
+    }
+    <div id="xs_Id" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(mappingPositionList.Id.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_Id"
+            name="x_Id[]"
+            class="form-control ew-select@(mappingPositionList.Id.IsInvalidClass)"
+            data-select2-id="fMappingPositionsrch_x_Id"
+            data-table="MappingPosition"
+            data-field="x_Id"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(mappingPositionList.Id.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(mappingPositionList.Id.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(mappingPositionList.Id.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(mappingPositionList.Id.EditAttributes)>
+            @(mappingPositionList.Id.SelectOptionListHtml("x_Id", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(mappingPositionList.Id.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMappingPositionsrch", function() {
+            var options = {
+                name: "x_Id",
+                selectId: "fMappingPositionsrch_x_Id",
+                ajax: { id: "x_Id", form: "fMappingPositionsrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MappingPosition.fields.Id.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* mappingPositionList.Id.Visible (end) *@
+@if (mappingPositionList.IdPosition.Visible) { // mappingPositionList.IdPosition.Visible (begin)
+    if (!mappingPositionList.IdPosition.UseFilter) {
+        mappingPositionList.SearchColumnCount++;
+    }
+    <div id="xs_IdPosition" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(mappingPositionList.IdPosition.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_IdPosition"
+            name="x_IdPosition[]"
+            class="form-control ew-select@(mappingPositionList.IdPosition.IsInvalidClass)"
+            data-select2-id="fMappingPositionsrch_x_IdPosition"
+            data-table="MappingPosition"
+            data-field="x_IdPosition"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(mappingPositionList.IdPosition.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(mappingPositionList.IdPosition.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(mappingPositionList.IdPosition.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(mappingPositionList.IdPosition.EditAttributes)>
+            @(mappingPositionList.IdPosition.SelectOptionListHtml("x_IdPosition", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(mappingPositionList.IdPosition.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMappingPositionsrch", function() {
+            var options = {
+                name: "x_IdPosition",
+                selectId: "fMappingPositionsrch_x_IdPosition",
+                ajax: { id: "x_IdPosition", form: "fMappingPositionsrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MappingPosition.fields.IdPosition.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* mappingPositionList.IdPosition.Visible (end) *@
+@if (mappingPositionList.IdRegion.Visible) { // mappingPositionList.IdRegion.Visible (begin)
+    if (!mappingPositionList.IdRegion.UseFilter) {
+        mappingPositionList.SearchColumnCount++;
+    }
+    <div id="xs_IdRegion" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(mappingPositionList.IdRegion.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_IdRegion"
+            name="x_IdRegion[]"
+            class="form-control ew-select@(mappingPositionList.IdRegion.IsInvalidClass)"
+            data-select2-id="fMappingPositionsrch_x_IdRegion"
+            data-table="MappingPosition"
+            data-field="x_IdRegion"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(mappingPositionList.IdRegion.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(mappingPositionList.IdRegion.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(mappingPositionList.IdRegion.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(mappingPositionList.IdRegion.EditAttributes)>
+            @(mappingPositionList.IdRegion.SelectOptionListHtml("x_IdRegion", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(mappingPositionList.IdRegion.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMappingPositionsrch", function() {
+            var options = {
+                name: "x_IdRegion",
+                selectId: "fMappingPositionsrch_x_IdRegion",
+                ajax: { id: "x_IdRegion", form: "fMappingPositionsrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MappingPosition.fields.IdRegion.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* mappingPositionList.IdRegion.Visible (end) *@
+@if (mappingPositionList.NamaRegion.Visible) { // mappingPositionList.NamaRegion.Visible (begin)
+    if (!mappingPositionList.NamaRegion.UseFilter) {
+        mappingPositionList.SearchColumnCount++;
+    }
+    <div id="xs_NamaRegion" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(mappingPositionList.NamaRegion.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_NamaRegion"
+            name="x_NamaRegion[]"
+            class="form-control ew-select@(mappingPositionList.NamaRegion.IsInvalidClass)"
+            data-select2-id="fMappingPositionsrch_x_NamaRegion"
+            data-table="MappingPosition"
+            data-field="x_NamaRegion"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(mappingPositionList.NamaRegion.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(mappingPositionList.NamaRegion.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(mappingPositionList.NamaRegion.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(mappingPositionList.NamaRegion.EditAttributes)>
+            @(mappingPositionList.NamaRegion.SelectOptionListHtml("x_NamaRegion", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(mappingPositionList.NamaRegion.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMappingPositionsrch", function() {
+            var options = {
+                name: "x_NamaRegion",
+                selectId: "fMappingPositionsrch_x_NamaRegion",
+                ajax: { id: "x_NamaRegion", form: "fMappingPositionsrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MappingPosition.fields.NamaRegion.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* mappingPositionList.NamaRegion.Visible (end) *@
+@if (mappingPositionList.IdPlant.Visible) { // mappingPositionList.IdPlant.Visible (begin)
+    if (!mappingPositionList.IdPlant.UseFilter) {
+        mappingPositionList.SearchColumnCount++;
+    }
+    <div id="xs_IdPlant" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(mappingPositionList.IdPlant.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_IdPlant"
+            name="x_IdPlant[]"
+            class="form-control ew-select@(mappingPositionList.IdPlant.IsInvalidClass)"
+            data-select2-id="fMappingPositionsrch_x_IdPlant"
+            data-table="MappingPosition"
+            data-field="x_IdPlant"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(mappingPositionList.IdPlant.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(mappingPositionList.IdPlant.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(mappingPositionList.IdPlant.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(mappingPositionList.IdPlant.EditAttributes)>
+            @(mappingPositionList.IdPlant.SelectOptionListHtml("x_IdPlant", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(mappingPositionList.IdPlant.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMappingPositionsrch", function() {
+            var options = {
+                name: "x_IdPlant",
+                selectId: "fMappingPositionsrch_x_IdPlant",
+                ajax: { id: "x_IdPlant", form: "fMappingPositionsrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MappingPosition.fields.IdPlant.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* mappingPositionList.IdPlant.Visible (end) *@
+@if (mappingPositionList.NamaPlant.Visible) { // mappingPositionList.NamaPlant.Visible (begin)
+    if (!mappingPositionList.NamaPlant.UseFilter) {
+        mappingPositionList.SearchColumnCount++;
+    }
+    <div id="xs_NamaPlant" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(mappingPositionList.NamaPlant.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_NamaPlant"
+            name="x_NamaPlant[]"
+            class="form-control ew-select@(mappingPositionList.NamaPlant.IsInvalidClass)"
+            data-select2-id="fMappingPositionsrch_x_NamaPlant"
+            data-table="MappingPosition"
+            data-field="x_NamaPlant"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(mappingPositionList.NamaPlant.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(mappingPositionList.NamaPlant.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(mappingPositionList.NamaPlant.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(mappingPositionList.NamaPlant.EditAttributes)>
+            @(mappingPositionList.NamaPlant.SelectOptionListHtml("x_NamaPlant", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(mappingPositionList.NamaPlant.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMappingPositionsrch", function() {
+            var options = {
+                name: "x_NamaPlant",
+                selectId: "fMappingPositionsrch_x_NamaPlant",
+                ajax: { id: "x_NamaPlant", form: "fMappingPositionsrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MappingPosition.fields.NamaPlant.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* mappingPositionList.NamaPlant.Visible (end) *@
+</div><!-- /.row -->
+<div class="row mb-0">
+    <div class="col-sm-auto px-0 pe-sm-2">
+        <div class="ew-basic-search input-group">
+            <input type="search" name="@(Config.TableBasicSearch)" id="@(Config.TableBasicSearch)" class="form-control ew-basic-search-keyword" value="@Html.Raw(HtmlEncode(mappingPositionList.BasicSearch.SessionKeyword))" placeholder="@(HtmlEncode(Language.Phrase("Search")))" aria-label="@(HtmlEncode(Language.Phrase("Search")))">
+            <input type="hidden" name="@(Config.TableBasicSearchType)" id="@(Config.TableBasicSearchType)" class="ew-basic-search-type" value="@(HtmlEncode(mappingPositionList.BasicSearch.SessionType))">
+            <button type="button" data-bs-toggle="dropdown" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split" aria-haspopup="true" aria-expanded="false">
+                <span id="searchtype">@Html.Raw(mappingPositionList.BasicSearch.TypeNameShort)</span>
+            </button>
+            <div class="dropdown-menu dropdown-menu-end">
+                <button type="button" class="dropdown-item@(mappingPositionList.BasicSearch.SessionType == "" ? " active" : "")" form="fMappingPositionsrch" data-ew-action="search-type">@Html.Raw(Language.Phrase("QuickSearchAuto"))</button>
+                <button type="button" class="dropdown-item@(mappingPositionList.BasicSearch.SessionType == "=" ? " active" : "")" form="fMappingPositionsrch" data-ew-action="search-type" data-search-type="=">@Html.Raw(Language.Phrase("QuickSearchExact"))</button>
+                <button type="button" class="dropdown-item@(mappingPositionList.BasicSearch.SessionType == "AND" ? " active" : "")" form="fMappingPositionsrch" data-ew-action="search-type" data-search-type="AND">@Html.Raw(Language.Phrase("QuickSearchAll"))</button>
+                <button type="button" class="dropdown-item@(mappingPositionList.BasicSearch.SessionType == "OR" ? " active" : "")" form="fMappingPositionsrch" data-ew-action="search-type" data-search-type="OR">@Html.Raw(Language.Phrase("QuickSearchAny"))</button>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-auto mb-3">
+        <button class="btn btn-primary" name="btn-submit" id="btn-submit" type="submit">@Html.Raw(Language.Phrase("SearchBtn"))</button>
+    </div>
+</div>
+</div><!-- /.ew-extended-search -->
+} @* Show search form (end) *@
+}
+</div><!-- /.ew-search-panel -->
+</form>
+}
+@mappingPositionList.ShowPageHeader()
+@mappingPositionList.ShowMessages()
+<main class="list @(mappingPositionList.TotalRecords == 0 && !mappingPositionList.IsAdd ? " ew-no-record" : "")">
+<div id="ew-header-options">
+    @mappingPositionList.HeaderOptions.RenderBody()
+</div>
+<div id="ew-list">
+@if (mappingPositionList.TotalRecords > 0 || !Empty(mappingPositionList.CurrentAction)) {
+<div class="card ew-card ew-grid@(mappingPositionList.IsAddOrEdit ? " ew-grid-add-edit" : "") @(mappingPositionList.TableGridClass)">
+<form name="@(mappingPositionList.FormName)" id="@(mappingPositionList.FormName)" class="ew-form ew-list-form" action="@AppPath(mappingPositionList.PageName)" method="post" novalidate autocomplete="off">
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+@if (mappingPositionList.IsModal) {
+<input type="hidden" name="modal" value="1">
+}
+<div id="gmp_MappingPosition" class="card-body ew-grid-middle-panel @(mappingPositionList.TableContainerClass)" style="@(mappingPositionList.TableContainerStyle)">
+@if (mappingPositionList.TotalRecords > 0 || mappingPositionList.IsGridEdit || mappingPositionList.IsMultiEdit) {
+<table id="tbl_MappingPositionlist" class="@(mappingPositionList.TableClass)"><!-- .ew-table -->
+<thead>
+    <tr class="ew-table-header">
+@{
+    // Header row
+    mappingPositionList.RowType = RowType.Header;
+
+    // Render list options
+    await mappingPositionList.RenderListOptions();
+}
+@* Render list options (header, left) *@
+@mappingPositionList.ListOptions.RenderHeader("left")
+@if (mappingPositionList.IdPosition.Visible) { // mappingPositionList.IdPosition.Visible (begin)
+        <th data-name="IdPosition" class="@(mappingPositionList.IdPosition.HeaderCellClass)"><div id="elh_MappingPosition_IdPosition" class="MappingPosition_IdPosition">@Html.Raw(mappingPositionList.RenderFieldHeader(mappingPositionList.IdPosition))</div></th>
+} @* mappingPositionList.IdPosition.Visible (end) *@
+@if (mappingPositionList.IdRegion.Visible) { // mappingPositionList.IdRegion.Visible (begin)
+        <th data-name="IdRegion" class="@(mappingPositionList.IdRegion.HeaderCellClass)"><div id="elh_MappingPosition_IdRegion" class="MappingPosition_IdRegion">@Html.Raw(mappingPositionList.RenderFieldHeader(mappingPositionList.IdRegion))</div></th>
+} @* mappingPositionList.IdRegion.Visible (end) *@
+@if (mappingPositionList.IdPlant.Visible) { // mappingPositionList.IdPlant.Visible (begin)
+        <th data-name="IdPlant" class="@(mappingPositionList.IdPlant.HeaderCellClass)"><div id="elh_MappingPosition_IdPlant" class="MappingPosition_IdPlant">@Html.Raw(mappingPositionList.RenderFieldHeader(mappingPositionList.IdPlant))</div></th>
+} @* mappingPositionList.IdPlant.Visible (end) *@
+@* Render list options (header, right) *@
+@mappingPositionList.ListOptions.RenderHeader("right")
+    </tr>
+</thead>
+<tbody data-page="@(mappingPositionList.PageNumber)">
+@{
+    await mappingPositionList.SetupGrid();
+    bool eof = mappingPositionList.Recordset == null; // DN
+}
+@while (mappingPositionList.RecordCount < mappingPositionList.StopRecord || SameString(mappingPositionList.RowIndex, "$rowindex$")) { // Begin While
+    if (!eof && !SameString(mappingPositionList.RowIndex, "$rowindex$") &&
+        (!mappingPositionList.IsGridAdd || mappingPositionList.CurrentMode == "copy") &&
+        (!((mappingPositionList.IsCopy || mappingPositionList.IsAdd) && mappingPositionList.RowIndex is int rowIndex && rowIndex == 0))) // DN
+        eof = !await mappingPositionList.Recordset.ReadAsync();
+    mappingPositionList.RecordCount++;
+    if (mappingPositionList.RecordCount >= mappingPositionList.StartRecord) {
+        await mappingPositionList.SetupRow();
+    <tr @Html.Raw(mappingPositionList.RowAttributes)>
+    @* Render list options (body, left) *@
+    @mappingPositionList.ListOptions.RenderBody("left", mappingPositionList.RowCount)
+    @if (mappingPositionList.IdPosition.Visible) { // mappingPositionList.IdPosition.Visible (begin)
+        <td data-name="IdPosition" @Html.Raw(mappingPositionList.IdPosition.CellAttributes)>
+<span id="el@(mappingPositionList.RowIndex == "$rowindex$" ? "$rowindex$" : mappingPositionList.RowCount)_MappingPosition_IdPosition" class="el_MappingPosition_IdPosition">
+<span @Html.Raw(mappingPositionList.IdPosition.ViewAttributes)>
+@Html.Raw(mappingPositionList.IdPosition.GetViewValue())</span>
+</span>
+</td>
+    } @* mappingPositionList.IdPosition.Visible (end) *@
+    @if (mappingPositionList.IdRegion.Visible) { // mappingPositionList.IdRegion.Visible (begin)
+        <td data-name="IdRegion" @Html.Raw(mappingPositionList.IdRegion.CellAttributes)>
+<span id="el@(mappingPositionList.RowIndex == "$rowindex$" ? "$rowindex$" : mappingPositionList.RowCount)_MappingPosition_IdRegion" class="el_MappingPosition_IdRegion">
+<span @Html.Raw(mappingPositionList.IdRegion.ViewAttributes)>
+@Html.Raw(mappingPositionList.IdRegion.GetViewValue())</span>
+</span>
+</td>
+    } @* mappingPositionList.IdRegion.Visible (end) *@
+    @if (mappingPositionList.IdPlant.Visible) { // mappingPositionList.IdPlant.Visible (begin)
+        <td data-name="IdPlant" @Html.Raw(mappingPositionList.IdPlant.CellAttributes)>
+<span id="el@(mappingPositionList.RowIndex == "$rowindex$" ? "$rowindex$" : mappingPositionList.RowCount)_MappingPosition_IdPlant" class="el_MappingPosition_IdPlant">
+<span @Html.Raw(mappingPositionList.IdPlant.ViewAttributes)>
+@Html.Raw(mappingPositionList.IdPlant.GetViewValue())</span>
+</span>
+</td>
+    } @* mappingPositionList.IdPlant.Visible (end) *@
+    @* Render list options (body, right) *@
+    @mappingPositionList.ListOptions.RenderBody("right", mappingPositionList.RowCount)
+    </tr>
+    } @* End if *@
+
+    // Reset for template row
+    if (SameString(mappingPositionList.RowIndex, "$rowindex$"))
+        mappingPositionList.RowIndex = 0;
+
+    // Reset inline add/copy row
+    if ((mappingPositionList.IsCopy || mappingPositionList.IsAdd) && mappingPositionList.RowIndex is int rowIndex2 && rowIndex2 == 0)
+        mappingPositionList.RowIndex = 1;
+} @* End While *@
+</tbody>
+</table><!-- /.ew-table -->
+} @* End If TotalRecords > 0 *@
+</div><!-- /.ew-grid-middle-panel -->
+@if (Empty(mappingPositionList.CurrentAction) && !mappingPositionList.UseAjaxActions) {
+<input type="hidden" name="action" id="action" value="">
+}
+</form><!-- /.ew-list-form -->
+@{ mappingPositionList.CloseRecordset(); }
+@if (!mappingPositionList.IsExport()) {
+<div class="card-footer ew-grid-lower-panel">
+@if (!mappingPositionList.IsGridAdd && !(mappingPositionList.IsGridEdit && mappingPositionList.ModalGridEdit) && !mappingPositionList.IsMultiEdit) {
+@Html.Raw(mappingPositionList.Pager.Render())
+}
+<div class="ew-list-other-options">
+@mappingPositionList.OtherOptions.RenderBody("bottom")
+</div>
+</div>
+}
+</div><!-- /.ew-grid -->
+} else { // Show other options
+<div class="ew-list-other-options">
+@mappingPositionList.OtherOptions.ForEach(opt => opt.ButtonClass = "").RenderBody()
+</div>
+}
+</div>
+<div id="ew-footer-options">
+    @mappingPositionList.FooterOptions.RenderBody()
+</div>
+</main>
+@mappingPositionList.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+@if (!mappingPositionList.IsExport()) {
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("MappingPosition");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Write your table-specific startup script here
+    // document.write("page loaded");
+});
+</script>
+}

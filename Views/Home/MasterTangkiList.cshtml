@@ -1,0 +1,1050 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (masterTangkiList.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = masterTangkiList.UseLayout ? "_Layout" : "";
+}
+@if (!masterTangkiList.IsExport()) {
+<script>
+var currentTable = @Html.Raw(ConvertToJson(masterTangkiList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { MasterTangki: currentTable } });
+var currentPageID = ew.PAGE_ID = "list";
+var currentForm;
+var @(masterTangkiList.FormName);
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("@(masterTangkiList.FormName)")
+        .setPageId("list")
+        .setSubmitWithFetch(@(masterTangkiList.UseAjaxActions ? "true" : "false"))
+        .setFormKeyCountName("@(masterTangkiList.FormKeyCountName)")
+
+        // Dynamic selection lists
+        .setLists({
+            "NamaTerminal": @Html.Raw(masterTangkiList.NamaTerminal.ToClientList(masterTangkiList)),
+            "Plant": @Html.Raw(masterTangkiList.Plant.ToClientList(masterTangkiList)),
+            "Sloc": @Html.Raw(masterTangkiList.Sloc.ToClientList(masterTangkiList)),
+            "SeqTangki": @Html.Raw(masterTangkiList.SeqTangki.ToClientList(masterTangkiList)),
+            "MatNo": @Html.Raw(masterTangkiList.MatNo.ToClientList(masterTangkiList)),
+            "TglKalibrasi": @Html.Raw(masterTangkiList.TglKalibrasi.ToClientList(masterTangkiList)),
+            "ExpDate": @Html.Raw(masterTangkiList.ExpDate.ToClientList(masterTangkiList)),
+            "Status": @Html.Raw(masterTangkiList.Status.ToClientList(masterTangkiList)),
+            "TinggiMejaUk": @Html.Raw(masterTangkiList.TinggiMejaUk.ToClientList(masterTangkiList)),
+            "MaxDipping": @Html.Raw(masterTangkiList.MaxDipping.ToClientList(masterTangkiList)),
+            "MaxCapacity": @Html.Raw(masterTangkiList.MaxCapacity.ToClientList(masterTangkiList)),
+            "UnpumpableQty": @Html.Raw(masterTangkiList.UnpumpableQty.ToClientList(masterTangkiList)),
+            "PumpableQty": @Html.Raw(masterTangkiList.PumpableQty.ToClientList(masterTangkiList)),
+            "LastUpdatedBy": @Html.Raw(masterTangkiList.LastUpdatedBy.ToClientList(masterTangkiList)),
+            "lastUpdatedDate": @Html.Raw(masterTangkiList.lastUpdatedDate.ToClientList(masterTangkiList)),
+        })
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Write your client script here, no need to add script tags.
+});
+</script>
+}
+@if (!masterTangkiList.IsExport()) {
+<div class="btn-toolbar ew-toolbar">
+@if (masterTangkiList.TotalRecords > 0 && masterTangkiList.ExportOptions.Visible) {
+    masterTangkiList.ExportOptions.Render("body");
+}
+@if (masterTangkiList.ImportOptions.Visible) {
+    masterTangkiList.ImportOptions.Render("body");
+}
+@if (masterTangkiList.SearchOptions.Visible) {
+    masterTangkiList.SearchOptions.Render("body");
+}
+@if (masterTangkiList.FilterOptions.Visible) {
+    masterTangkiList.FilterOptions.Render("body");
+}
+</div>
+}
+@if (masterTangkiList.ShowCurrentFilter) {
+    masterTangkiList.ShowFilterList();
+}
+@if (!masterTangkiList.IsModal) {
+<form name="fMasterTangkisrch" id="fMasterTangkisrch" class="ew-form ew-ext-search-form" action="@AppPath(CurrentPageName())" novalidate autocomplete="off">
+<div id="fMasterTangkisrch_search_panel" class="mb-2 mb-sm-0 @(masterTangkiList.SearchPanelClass)"><!-- .ew-search-panel -->
+<script>
+var currentTable = @Html.Raw(ConvertToJson(masterTangkiList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { MasterTangki: currentTable } });
+var currentForm;
+var fMasterTangkisrch, currentSearchForm, currentAdvancedSearchForm;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery,
+        fields = currentTable.fields;
+
+    // Form object for search
+    let form = new ew.FormBuilder()
+        .setId("fMasterTangkisrch")
+        .setPageId("list")
+@if (masterTangkiList.UseAjaxActions) {
+        <text>.setSubmitWithFetch(true)</text>
+}
+
+        // Add fields
+        .setFields([
+        ])
+        // Validate form
+        .setValidate(
+            async function () {
+                if (!this.validateRequired)
+                    return true; // Ignore validation
+                let fobj = this.getForm();
+
+                // Validate fields
+                if (!this.validateFields())
+                    return false;
+
+                // Call Form_CustomValidate event
+                if (!(await this.customValidate?.(fobj) ?? true)) {
+                    this.focus();
+                    return false;
+                }
+                return true;
+            }
+        )
+
+        // Form_CustomValidate
+        .setCustomValidate(
+            function(fobj) { // DO NOT CHANGE THIS LINE!
+                    // Your custom validation code here, return false if invalid.
+                    return true;
+                }
+        )
+
+        // Use JavaScript validation or not
+        .setValidateRequired(ew.CLIENT_VALIDATE)
+
+        // Dynamic selection lists
+        .setLists({
+            "NamaTerminal": @Html.Raw(masterTangkiList.NamaTerminal.ToClientList(masterTangkiList)),
+            "Plant": @Html.Raw(masterTangkiList.Plant.ToClientList(masterTangkiList)),
+            "Sloc": @Html.Raw(masterTangkiList.Sloc.ToClientList(masterTangkiList)),
+            "SeqTangki": @Html.Raw(masterTangkiList.SeqTangki.ToClientList(masterTangkiList)),
+            "MatNo": @Html.Raw(masterTangkiList.MatNo.ToClientList(masterTangkiList)),
+            "TglKalibrasi": @Html.Raw(masterTangkiList.TglKalibrasi.ToClientList(masterTangkiList)),
+            "ExpDate": @Html.Raw(masterTangkiList.ExpDate.ToClientList(masterTangkiList)),
+            "Status": @Html.Raw(masterTangkiList.Status.ToClientList(masterTangkiList)),
+            "TinggiMejaUk": @Html.Raw(masterTangkiList.TinggiMejaUk.ToClientList(masterTangkiList)),
+            "MaxDipping": @Html.Raw(masterTangkiList.MaxDipping.ToClientList(masterTangkiList)),
+            "MaxCapacity": @Html.Raw(masterTangkiList.MaxCapacity.ToClientList(masterTangkiList)),
+            "UnpumpableQty": @Html.Raw(masterTangkiList.UnpumpableQty.ToClientList(masterTangkiList)),
+            "PumpableQty": @Html.Raw(masterTangkiList.PumpableQty.ToClientList(masterTangkiList)),
+            "etlDate": @Html.Raw(masterTangkiList.etlDate.ToClientList(masterTangkiList)),
+            "LastUpdatedBy": @Html.Raw(masterTangkiList.LastUpdatedBy.ToClientList(masterTangkiList)),
+            "lastUpdatedDate": @Html.Raw(masterTangkiList.lastUpdatedDate.ToClientList(masterTangkiList)),
+        })
+
+        // Filters
+        .setFilterList(@Html.Raw(masterTangkiList.GetFilterList()))
+        .build();
+    window[form.id] = form;
+    currentSearchForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<input type="hidden" name="cmd" value="search">
+@if (Security.CanSearch) {
+if (!masterTangkiList.IsExport() && Empty(masterTangkiList.CurrentAction) && masterTangkiList.HasSearchFields()) { @* Show search form (begin) *@
+<div class="ew-extended-search container-fluid ps-2">
+<div class="row mb-0@(masterTangkiList.SearchFieldsPerRow > 0 ? " row-cols-sm-" + masterTangkiList.SearchFieldsPerRow : "")">
+@{
+    // Render search row
+    masterTangkiList.RowType = RowType.Search;
+    masterTangkiList.ResetAttributes();
+    await masterTangkiList.RenderRow();
+}
+@if (masterTangkiList.NamaTerminal.Visible) { // masterTangkiList.NamaTerminal.Visible (begin)
+    if (!masterTangkiList.NamaTerminal.UseFilter) {
+        masterTangkiList.SearchColumnCount++;
+    }
+    <div id="xs_NamaTerminal" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(masterTangkiList.NamaTerminal.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_NamaTerminal"
+            name="x_NamaTerminal[]"
+            class="form-control ew-select@(masterTangkiList.NamaTerminal.IsInvalidClass)"
+            data-select2-id="fMasterTangkisrch_x_NamaTerminal"
+            data-table="MasterTangki"
+            data-field="x_NamaTerminal"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(masterTangkiList.NamaTerminal.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(masterTangkiList.NamaTerminal.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(masterTangkiList.NamaTerminal.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(masterTangkiList.NamaTerminal.EditAttributes)>
+            @(masterTangkiList.NamaTerminal.SelectOptionListHtml("x_NamaTerminal", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(masterTangkiList.NamaTerminal.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMasterTangkisrch", function() {
+            var options = {
+                name: "x_NamaTerminal",
+                selectId: "fMasterTangkisrch_x_NamaTerminal",
+                ajax: { id: "x_NamaTerminal", form: "fMasterTangkisrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MasterTangki.fields.NamaTerminal.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* masterTangkiList.NamaTerminal.Visible (end) *@
+@if (masterTangkiList.Plant.Visible) { // masterTangkiList.Plant.Visible (begin)
+    if (!masterTangkiList.Plant.UseFilter) {
+        masterTangkiList.SearchColumnCount++;
+    }
+    <div id="xs_Plant" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(masterTangkiList.Plant.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_Plant"
+            name="x_Plant[]"
+            class="form-control ew-select@(masterTangkiList.Plant.IsInvalidClass)"
+            data-select2-id="fMasterTangkisrch_x_Plant"
+            data-table="MasterTangki"
+            data-field="x_Plant"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(masterTangkiList.Plant.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(masterTangkiList.Plant.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(masterTangkiList.Plant.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(masterTangkiList.Plant.EditAttributes)>
+            @(masterTangkiList.Plant.SelectOptionListHtml("x_Plant", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(masterTangkiList.Plant.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMasterTangkisrch", function() {
+            var options = {
+                name: "x_Plant",
+                selectId: "fMasterTangkisrch_x_Plant",
+                ajax: { id: "x_Plant", form: "fMasterTangkisrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MasterTangki.fields.Plant.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* masterTangkiList.Plant.Visible (end) *@
+@if (masterTangkiList.Sloc.Visible) { // masterTangkiList.Sloc.Visible (begin)
+    if (!masterTangkiList.Sloc.UseFilter) {
+        masterTangkiList.SearchColumnCount++;
+    }
+    <div id="xs_Sloc" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(masterTangkiList.Sloc.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_Sloc"
+            name="x_Sloc[]"
+            class="form-control ew-select@(masterTangkiList.Sloc.IsInvalidClass)"
+            data-select2-id="fMasterTangkisrch_x_Sloc"
+            data-table="MasterTangki"
+            data-field="x_Sloc"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(masterTangkiList.Sloc.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(masterTangkiList.Sloc.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(masterTangkiList.Sloc.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(masterTangkiList.Sloc.EditAttributes)>
+            @(masterTangkiList.Sloc.SelectOptionListHtml("x_Sloc", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(masterTangkiList.Sloc.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMasterTangkisrch", function() {
+            var options = {
+                name: "x_Sloc",
+                selectId: "fMasterTangkisrch_x_Sloc",
+                ajax: { id: "x_Sloc", form: "fMasterTangkisrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MasterTangki.fields.Sloc.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* masterTangkiList.Sloc.Visible (end) *@
+@if (masterTangkiList.SeqTangki.Visible) { // masterTangkiList.SeqTangki.Visible (begin)
+    if (!masterTangkiList.SeqTangki.UseFilter) {
+        masterTangkiList.SearchColumnCount++;
+    }
+    <div id="xs_SeqTangki" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(masterTangkiList.SeqTangki.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_SeqTangki"
+            name="x_SeqTangki[]"
+            class="form-control ew-select@(masterTangkiList.SeqTangki.IsInvalidClass)"
+            data-select2-id="fMasterTangkisrch_x_SeqTangki"
+            data-table="MasterTangki"
+            data-field="x_SeqTangki"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(masterTangkiList.SeqTangki.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(masterTangkiList.SeqTangki.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(masterTangkiList.SeqTangki.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(masterTangkiList.SeqTangki.EditAttributes)>
+            @(masterTangkiList.SeqTangki.SelectOptionListHtml("x_SeqTangki", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(masterTangkiList.SeqTangki.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMasterTangkisrch", function() {
+            var options = {
+                name: "x_SeqTangki",
+                selectId: "fMasterTangkisrch_x_SeqTangki",
+                ajax: { id: "x_SeqTangki", form: "fMasterTangkisrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MasterTangki.fields.SeqTangki.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* masterTangkiList.SeqTangki.Visible (end) *@
+@if (masterTangkiList.MatNo.Visible) { // masterTangkiList.MatNo.Visible (begin)
+    if (!masterTangkiList.MatNo.UseFilter) {
+        masterTangkiList.SearchColumnCount++;
+    }
+    <div id="xs_MatNo" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(masterTangkiList.MatNo.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_MatNo"
+            name="x_MatNo[]"
+            class="form-control ew-select@(masterTangkiList.MatNo.IsInvalidClass)"
+            data-select2-id="fMasterTangkisrch_x_MatNo"
+            data-table="MasterTangki"
+            data-field="x_MatNo"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(masterTangkiList.MatNo.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(masterTangkiList.MatNo.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(masterTangkiList.MatNo.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(masterTangkiList.MatNo.EditAttributes)>
+            @(masterTangkiList.MatNo.SelectOptionListHtml("x_MatNo", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(masterTangkiList.MatNo.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMasterTangkisrch", function() {
+            var options = {
+                name: "x_MatNo",
+                selectId: "fMasterTangkisrch_x_MatNo",
+                ajax: { id: "x_MatNo", form: "fMasterTangkisrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MasterTangki.fields.MatNo.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* masterTangkiList.MatNo.Visible (end) *@
+@if (masterTangkiList.TglKalibrasi.Visible) { // masterTangkiList.TglKalibrasi.Visible (begin)
+    if (!masterTangkiList.TglKalibrasi.UseFilter) {
+        masterTangkiList.SearchColumnCount++;
+    }
+    <div id="xs_TglKalibrasi" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(masterTangkiList.TglKalibrasi.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_TglKalibrasi"
+            name="x_TglKalibrasi[]"
+            class="form-control ew-select@(masterTangkiList.TglKalibrasi.IsInvalidClass)"
+            data-select2-id="fMasterTangkisrch_x_TglKalibrasi"
+            data-table="MasterTangki"
+            data-field="x_TglKalibrasi"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(masterTangkiList.TglKalibrasi.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(masterTangkiList.TglKalibrasi.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(masterTangkiList.TglKalibrasi.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(masterTangkiList.TglKalibrasi.EditAttributes)>
+            @(masterTangkiList.TglKalibrasi.SelectOptionListHtml("x_TglKalibrasi", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(masterTangkiList.TglKalibrasi.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMasterTangkisrch", function() {
+            var options = {
+                name: "x_TglKalibrasi",
+                selectId: "fMasterTangkisrch_x_TglKalibrasi",
+                ajax: { id: "x_TglKalibrasi", form: "fMasterTangkisrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MasterTangki.fields.TglKalibrasi.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* masterTangkiList.TglKalibrasi.Visible (end) *@
+@if (masterTangkiList.ExpDate.Visible) { // masterTangkiList.ExpDate.Visible (begin)
+    if (!masterTangkiList.ExpDate.UseFilter) {
+        masterTangkiList.SearchColumnCount++;
+    }
+    <div id="xs_ExpDate" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(masterTangkiList.ExpDate.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_ExpDate"
+            name="x_ExpDate[]"
+            class="form-control ew-select@(masterTangkiList.ExpDate.IsInvalidClass)"
+            data-select2-id="fMasterTangkisrch_x_ExpDate"
+            data-table="MasterTangki"
+            data-field="x_ExpDate"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(masterTangkiList.ExpDate.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(masterTangkiList.ExpDate.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(masterTangkiList.ExpDate.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(masterTangkiList.ExpDate.EditAttributes)>
+            @(masterTangkiList.ExpDate.SelectOptionListHtml("x_ExpDate", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(masterTangkiList.ExpDate.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMasterTangkisrch", function() {
+            var options = {
+                name: "x_ExpDate",
+                selectId: "fMasterTangkisrch_x_ExpDate",
+                ajax: { id: "x_ExpDate", form: "fMasterTangkisrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MasterTangki.fields.ExpDate.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* masterTangkiList.ExpDate.Visible (end) *@
+@if (masterTangkiList.Status.Visible) { // masterTangkiList.Status.Visible (begin)
+    if (!masterTangkiList.Status.UseFilter) {
+        masterTangkiList.SearchColumnCount++;
+    }
+    <div id="xs_Status" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(masterTangkiList.Status.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_Status"
+            name="x_Status[]"
+            class="form-control ew-select@(masterTangkiList.Status.IsInvalidClass)"
+            data-select2-id="fMasterTangkisrch_x_Status"
+            data-table="MasterTangki"
+            data-field="x_Status"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(masterTangkiList.Status.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(masterTangkiList.Status.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(masterTangkiList.Status.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(masterTangkiList.Status.EditAttributes)>
+            @(masterTangkiList.Status.SelectOptionListHtml("x_Status", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(masterTangkiList.Status.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMasterTangkisrch", function() {
+            var options = {
+                name: "x_Status",
+                selectId: "fMasterTangkisrch_x_Status",
+                ajax: { id: "x_Status", form: "fMasterTangkisrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MasterTangki.fields.Status.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* masterTangkiList.Status.Visible (end) *@
+@if (masterTangkiList.TinggiMejaUk.Visible) { // masterTangkiList.TinggiMejaUk.Visible (begin)
+    if (!masterTangkiList.TinggiMejaUk.UseFilter) {
+        masterTangkiList.SearchColumnCount++;
+    }
+    <div id="xs_TinggiMejaUk" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(masterTangkiList.TinggiMejaUk.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_TinggiMejaUk"
+            name="x_TinggiMejaUk[]"
+            class="form-control ew-select@(masterTangkiList.TinggiMejaUk.IsInvalidClass)"
+            data-select2-id="fMasterTangkisrch_x_TinggiMejaUk"
+            data-table="MasterTangki"
+            data-field="x_TinggiMejaUk"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(masterTangkiList.TinggiMejaUk.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(masterTangkiList.TinggiMejaUk.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(masterTangkiList.TinggiMejaUk.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(masterTangkiList.TinggiMejaUk.EditAttributes)>
+            @(masterTangkiList.TinggiMejaUk.SelectOptionListHtml("x_TinggiMejaUk", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(masterTangkiList.TinggiMejaUk.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMasterTangkisrch", function() {
+            var options = {
+                name: "x_TinggiMejaUk",
+                selectId: "fMasterTangkisrch_x_TinggiMejaUk",
+                ajax: { id: "x_TinggiMejaUk", form: "fMasterTangkisrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MasterTangki.fields.TinggiMejaUk.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* masterTangkiList.TinggiMejaUk.Visible (end) *@
+@if (masterTangkiList.MaxDipping.Visible) { // masterTangkiList.MaxDipping.Visible (begin)
+    if (!masterTangkiList.MaxDipping.UseFilter) {
+        masterTangkiList.SearchColumnCount++;
+    }
+    <div id="xs_MaxDipping" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(masterTangkiList.MaxDipping.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_MaxDipping"
+            name="x_MaxDipping[]"
+            class="form-control ew-select@(masterTangkiList.MaxDipping.IsInvalidClass)"
+            data-select2-id="fMasterTangkisrch_x_MaxDipping"
+            data-table="MasterTangki"
+            data-field="x_MaxDipping"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(masterTangkiList.MaxDipping.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(masterTangkiList.MaxDipping.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(masterTangkiList.MaxDipping.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(masterTangkiList.MaxDipping.EditAttributes)>
+            @(masterTangkiList.MaxDipping.SelectOptionListHtml("x_MaxDipping", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(masterTangkiList.MaxDipping.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMasterTangkisrch", function() {
+            var options = {
+                name: "x_MaxDipping",
+                selectId: "fMasterTangkisrch_x_MaxDipping",
+                ajax: { id: "x_MaxDipping", form: "fMasterTangkisrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MasterTangki.fields.MaxDipping.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* masterTangkiList.MaxDipping.Visible (end) *@
+@if (masterTangkiList.MaxCapacity.Visible) { // masterTangkiList.MaxCapacity.Visible (begin)
+    if (!masterTangkiList.MaxCapacity.UseFilter) {
+        masterTangkiList.SearchColumnCount++;
+    }
+    <div id="xs_MaxCapacity" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(masterTangkiList.MaxCapacity.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_MaxCapacity"
+            name="x_MaxCapacity[]"
+            class="form-control ew-select@(masterTangkiList.MaxCapacity.IsInvalidClass)"
+            data-select2-id="fMasterTangkisrch_x_MaxCapacity"
+            data-table="MasterTangki"
+            data-field="x_MaxCapacity"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(masterTangkiList.MaxCapacity.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(masterTangkiList.MaxCapacity.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(masterTangkiList.MaxCapacity.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(masterTangkiList.MaxCapacity.EditAttributes)>
+            @(masterTangkiList.MaxCapacity.SelectOptionListHtml("x_MaxCapacity", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(masterTangkiList.MaxCapacity.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMasterTangkisrch", function() {
+            var options = {
+                name: "x_MaxCapacity",
+                selectId: "fMasterTangkisrch_x_MaxCapacity",
+                ajax: { id: "x_MaxCapacity", form: "fMasterTangkisrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MasterTangki.fields.MaxCapacity.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* masterTangkiList.MaxCapacity.Visible (end) *@
+@if (masterTangkiList.UnpumpableQty.Visible) { // masterTangkiList.UnpumpableQty.Visible (begin)
+    if (!masterTangkiList.UnpumpableQty.UseFilter) {
+        masterTangkiList.SearchColumnCount++;
+    }
+    <div id="xs_UnpumpableQty" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(masterTangkiList.UnpumpableQty.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_UnpumpableQty"
+            name="x_UnpumpableQty[]"
+            class="form-control ew-select@(masterTangkiList.UnpumpableQty.IsInvalidClass)"
+            data-select2-id="fMasterTangkisrch_x_UnpumpableQty"
+            data-table="MasterTangki"
+            data-field="x_UnpumpableQty"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(masterTangkiList.UnpumpableQty.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(masterTangkiList.UnpumpableQty.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(masterTangkiList.UnpumpableQty.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(masterTangkiList.UnpumpableQty.EditAttributes)>
+            @(masterTangkiList.UnpumpableQty.SelectOptionListHtml("x_UnpumpableQty", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(masterTangkiList.UnpumpableQty.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMasterTangkisrch", function() {
+            var options = {
+                name: "x_UnpumpableQty",
+                selectId: "fMasterTangkisrch_x_UnpumpableQty",
+                ajax: { id: "x_UnpumpableQty", form: "fMasterTangkisrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MasterTangki.fields.UnpumpableQty.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* masterTangkiList.UnpumpableQty.Visible (end) *@
+@if (masterTangkiList.PumpableQty.Visible) { // masterTangkiList.PumpableQty.Visible (begin)
+    if (!masterTangkiList.PumpableQty.UseFilter) {
+        masterTangkiList.SearchColumnCount++;
+    }
+    <div id="xs_PumpableQty" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(masterTangkiList.PumpableQty.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_PumpableQty"
+            name="x_PumpableQty[]"
+            class="form-control ew-select@(masterTangkiList.PumpableQty.IsInvalidClass)"
+            data-select2-id="fMasterTangkisrch_x_PumpableQty"
+            data-table="MasterTangki"
+            data-field="x_PumpableQty"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(masterTangkiList.PumpableQty.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(masterTangkiList.PumpableQty.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(masterTangkiList.PumpableQty.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(masterTangkiList.PumpableQty.EditAttributes)>
+            @(masterTangkiList.PumpableQty.SelectOptionListHtml("x_PumpableQty", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(masterTangkiList.PumpableQty.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMasterTangkisrch", function() {
+            var options = {
+                name: "x_PumpableQty",
+                selectId: "fMasterTangkisrch_x_PumpableQty",
+                ajax: { id: "x_PumpableQty", form: "fMasterTangkisrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MasterTangki.fields.PumpableQty.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* masterTangkiList.PumpableQty.Visible (end) *@
+@if (masterTangkiList.etlDate.Visible) { // masterTangkiList.etlDate.Visible (begin)
+    if (!masterTangkiList.etlDate.UseFilter) {
+        masterTangkiList.SearchColumnCount++;
+    }
+    <div id="xs_etlDate" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(masterTangkiList.etlDate.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_etlDate"
+            name="x_etlDate[]"
+            class="form-control ew-select@(masterTangkiList.etlDate.IsInvalidClass)"
+            data-select2-id="fMasterTangkisrch_x_etlDate"
+            data-table="MasterTangki"
+            data-field="x_etlDate"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(masterTangkiList.etlDate.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(masterTangkiList.etlDate.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(masterTangkiList.etlDate.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(masterTangkiList.etlDate.EditAttributes)>
+            @(masterTangkiList.etlDate.SelectOptionListHtml("x_etlDate", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(masterTangkiList.etlDate.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMasterTangkisrch", function() {
+            var options = {
+                name: "x_etlDate",
+                selectId: "fMasterTangkisrch_x_etlDate",
+                ajax: { id: "x_etlDate", form: "fMasterTangkisrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MasterTangki.fields.etlDate.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* masterTangkiList.etlDate.Visible (end) *@
+@if (masterTangkiList.LastUpdatedBy.Visible) { // masterTangkiList.LastUpdatedBy.Visible (begin)
+    if (!masterTangkiList.LastUpdatedBy.UseFilter) {
+        masterTangkiList.SearchColumnCount++;
+    }
+    <div id="xs_LastUpdatedBy" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(masterTangkiList.LastUpdatedBy.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_LastUpdatedBy"
+            name="x_LastUpdatedBy[]"
+            class="form-control ew-select@(masterTangkiList.LastUpdatedBy.IsInvalidClass)"
+            data-select2-id="fMasterTangkisrch_x_LastUpdatedBy"
+            data-table="MasterTangki"
+            data-field="x_LastUpdatedBy"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(masterTangkiList.LastUpdatedBy.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(masterTangkiList.LastUpdatedBy.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(masterTangkiList.LastUpdatedBy.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(masterTangkiList.LastUpdatedBy.EditAttributes)>
+            @(masterTangkiList.LastUpdatedBy.SelectOptionListHtml("x_LastUpdatedBy", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(masterTangkiList.LastUpdatedBy.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMasterTangkisrch", function() {
+            var options = {
+                name: "x_LastUpdatedBy",
+                selectId: "fMasterTangkisrch_x_LastUpdatedBy",
+                ajax: { id: "x_LastUpdatedBy", form: "fMasterTangkisrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MasterTangki.fields.LastUpdatedBy.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* masterTangkiList.LastUpdatedBy.Visible (end) *@
+@if (masterTangkiList.lastUpdatedDate.Visible) { // masterTangkiList.lastUpdatedDate.Visible (begin)
+    if (!masterTangkiList.lastUpdatedDate.UseFilter) {
+        masterTangkiList.SearchColumnCount++;
+    }
+    <div id="xs_lastUpdatedDate" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(masterTangkiList.lastUpdatedDate.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_lastUpdatedDate"
+            name="x_lastUpdatedDate[]"
+            class="form-control ew-select@(masterTangkiList.lastUpdatedDate.IsInvalidClass)"
+            data-select2-id="fMasterTangkisrch_x_lastUpdatedDate"
+            data-table="MasterTangki"
+            data-field="x_lastUpdatedDate"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(masterTangkiList.lastUpdatedDate.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(masterTangkiList.lastUpdatedDate.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(masterTangkiList.lastUpdatedDate.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(masterTangkiList.lastUpdatedDate.EditAttributes)>
+            @(masterTangkiList.lastUpdatedDate.SelectOptionListHtml("x_lastUpdatedDate", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(masterTangkiList.lastUpdatedDate.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMasterTangkisrch", function() {
+            var options = {
+                name: "x_lastUpdatedDate",
+                selectId: "fMasterTangkisrch_x_lastUpdatedDate",
+                ajax: { id: "x_lastUpdatedDate", form: "fMasterTangkisrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MasterTangki.fields.lastUpdatedDate.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* masterTangkiList.lastUpdatedDate.Visible (end) *@
+</div><!-- /.row -->
+<div class="row mb-0">
+    <div class="col-sm-auto px-0 pe-sm-2">
+        <div class="ew-basic-search input-group">
+            <input type="search" name="@(Config.TableBasicSearch)" id="@(Config.TableBasicSearch)" class="form-control ew-basic-search-keyword" value="@Html.Raw(HtmlEncode(masterTangkiList.BasicSearch.SessionKeyword))" placeholder="@(HtmlEncode(Language.Phrase("Search")))" aria-label="@(HtmlEncode(Language.Phrase("Search")))">
+            <input type="hidden" name="@(Config.TableBasicSearchType)" id="@(Config.TableBasicSearchType)" class="ew-basic-search-type" value="@(HtmlEncode(masterTangkiList.BasicSearch.SessionType))">
+            <button type="button" data-bs-toggle="dropdown" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split" aria-haspopup="true" aria-expanded="false">
+                <span id="searchtype">@Html.Raw(masterTangkiList.BasicSearch.TypeNameShort)</span>
+            </button>
+            <div class="dropdown-menu dropdown-menu-end">
+                <button type="button" class="dropdown-item@(masterTangkiList.BasicSearch.SessionType == "" ? " active" : "")" form="fMasterTangkisrch" data-ew-action="search-type">@Html.Raw(Language.Phrase("QuickSearchAuto"))</button>
+                <button type="button" class="dropdown-item@(masterTangkiList.BasicSearch.SessionType == "=" ? " active" : "")" form="fMasterTangkisrch" data-ew-action="search-type" data-search-type="=">@Html.Raw(Language.Phrase("QuickSearchExact"))</button>
+                <button type="button" class="dropdown-item@(masterTangkiList.BasicSearch.SessionType == "AND" ? " active" : "")" form="fMasterTangkisrch" data-ew-action="search-type" data-search-type="AND">@Html.Raw(Language.Phrase("QuickSearchAll"))</button>
+                <button type="button" class="dropdown-item@(masterTangkiList.BasicSearch.SessionType == "OR" ? " active" : "")" form="fMasterTangkisrch" data-ew-action="search-type" data-search-type="OR">@Html.Raw(Language.Phrase("QuickSearchAny"))</button>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-auto mb-3">
+        <button class="btn btn-primary" name="btn-submit" id="btn-submit" type="submit">@Html.Raw(Language.Phrase("SearchBtn"))</button>
+    </div>
+</div>
+</div><!-- /.ew-extended-search -->
+} @* Show search form (end) *@
+}
+</div><!-- /.ew-search-panel -->
+</form>
+}
+@masterTangkiList.ShowPageHeader()
+@masterTangkiList.ShowMessages()
+<main class="list @(masterTangkiList.TotalRecords == 0 && !masterTangkiList.IsAdd ? " ew-no-record" : "")">
+<div id="ew-header-options">
+    @masterTangkiList.HeaderOptions.RenderBody()
+</div>
+<div id="ew-list">
+@if (masterTangkiList.TotalRecords > 0 || !Empty(masterTangkiList.CurrentAction)) {
+<div class="card ew-card ew-grid@(masterTangkiList.IsAddOrEdit ? " ew-grid-add-edit" : "") @(masterTangkiList.TableGridClass)">
+<form name="@(masterTangkiList.FormName)" id="@(masterTangkiList.FormName)" class="ew-form ew-list-form" action="@AppPath(masterTangkiList.PageName)" method="post" novalidate autocomplete="off">
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+@if (masterTangkiList.IsModal) {
+<input type="hidden" name="modal" value="1">
+}
+<div id="gmp_MasterTangki" class="card-body ew-grid-middle-panel @(masterTangkiList.TableContainerClass)" style="@(masterTangkiList.TableContainerStyle)">
+@if (masterTangkiList.TotalRecords > 0 || masterTangkiList.IsGridEdit || masterTangkiList.IsMultiEdit) {
+<table id="tbl_MasterTangkilist" class="@(masterTangkiList.TableClass)"><!-- .ew-table -->
+<thead>
+    <tr class="ew-table-header">
+@{
+    // Header row
+    masterTangkiList.RowType = RowType.Header;
+
+    // Render list options
+    await masterTangkiList.RenderListOptions();
+}
+@* Render list options (header, left) *@
+@masterTangkiList.ListOptions.RenderHeader("left")
+@if (masterTangkiList.NamaTerminal.Visible) { // masterTangkiList.NamaTerminal.Visible (begin)
+        <th data-name="NamaTerminal" class="@(masterTangkiList.NamaTerminal.HeaderCellClass)"><div id="elh_MasterTangki_NamaTerminal" class="MasterTangki_NamaTerminal">@Html.Raw(masterTangkiList.RenderFieldHeader(masterTangkiList.NamaTerminal))</div></th>
+} @* masterTangkiList.NamaTerminal.Visible (end) *@
+@if (masterTangkiList.Plant.Visible) { // masterTangkiList.Plant.Visible (begin)
+        <th data-name="Plant" class="@(masterTangkiList.Plant.HeaderCellClass)"><div id="elh_MasterTangki_Plant" class="MasterTangki_Plant">@Html.Raw(masterTangkiList.RenderFieldHeader(masterTangkiList.Plant))</div></th>
+} @* masterTangkiList.Plant.Visible (end) *@
+@if (masterTangkiList.Sloc.Visible) { // masterTangkiList.Sloc.Visible (begin)
+        <th data-name="Sloc" class="@(masterTangkiList.Sloc.HeaderCellClass)"><div id="elh_MasterTangki_Sloc" class="MasterTangki_Sloc">@Html.Raw(masterTangkiList.RenderFieldHeader(masterTangkiList.Sloc))</div></th>
+} @* masterTangkiList.Sloc.Visible (end) *@
+@if (masterTangkiList.SeqTangki.Visible) { // masterTangkiList.SeqTangki.Visible (begin)
+        <th data-name="SeqTangki" class="@(masterTangkiList.SeqTangki.HeaderCellClass)"><div id="elh_MasterTangki_SeqTangki" class="MasterTangki_SeqTangki">@Html.Raw(masterTangkiList.RenderFieldHeader(masterTangkiList.SeqTangki))</div></th>
+} @* masterTangkiList.SeqTangki.Visible (end) *@
+@if (masterTangkiList.MatNo.Visible) { // masterTangkiList.MatNo.Visible (begin)
+        <th data-name="MatNo" class="@(masterTangkiList.MatNo.HeaderCellClass)"><div id="elh_MasterTangki_MatNo" class="MasterTangki_MatNo">@Html.Raw(masterTangkiList.RenderFieldHeader(masterTangkiList.MatNo))</div></th>
+} @* masterTangkiList.MatNo.Visible (end) *@
+@if (masterTangkiList.TglKalibrasi.Visible) { // masterTangkiList.TglKalibrasi.Visible (begin)
+        <th data-name="TglKalibrasi" class="@(masterTangkiList.TglKalibrasi.HeaderCellClass)"><div id="elh_MasterTangki_TglKalibrasi" class="MasterTangki_TglKalibrasi">@Html.Raw(masterTangkiList.RenderFieldHeader(masterTangkiList.TglKalibrasi))</div></th>
+} @* masterTangkiList.TglKalibrasi.Visible (end) *@
+@if (masterTangkiList.ExpDate.Visible) { // masterTangkiList.ExpDate.Visible (begin)
+        <th data-name="ExpDate" class="@(masterTangkiList.ExpDate.HeaderCellClass)"><div id="elh_MasterTangki_ExpDate" class="MasterTangki_ExpDate">@Html.Raw(masterTangkiList.RenderFieldHeader(masterTangkiList.ExpDate))</div></th>
+} @* masterTangkiList.ExpDate.Visible (end) *@
+@if (masterTangkiList.Status.Visible) { // masterTangkiList.Status.Visible (begin)
+        <th data-name="Status" class="@(masterTangkiList.Status.HeaderCellClass)"><div id="elh_MasterTangki_Status" class="MasterTangki_Status">@Html.Raw(masterTangkiList.RenderFieldHeader(masterTangkiList.Status))</div></th>
+} @* masterTangkiList.Status.Visible (end) *@
+@if (masterTangkiList.TinggiMejaUk.Visible) { // masterTangkiList.TinggiMejaUk.Visible (begin)
+        <th data-name="TinggiMejaUk" class="@(masterTangkiList.TinggiMejaUk.HeaderCellClass)"><div id="elh_MasterTangki_TinggiMejaUk" class="MasterTangki_TinggiMejaUk">@Html.Raw(masterTangkiList.RenderFieldHeader(masterTangkiList.TinggiMejaUk))</div></th>
+} @* masterTangkiList.TinggiMejaUk.Visible (end) *@
+@if (masterTangkiList.MaxDipping.Visible) { // masterTangkiList.MaxDipping.Visible (begin)
+        <th data-name="MaxDipping" class="@(masterTangkiList.MaxDipping.HeaderCellClass)"><div id="elh_MasterTangki_MaxDipping" class="MasterTangki_MaxDipping">@Html.Raw(masterTangkiList.RenderFieldHeader(masterTangkiList.MaxDipping))</div></th>
+} @* masterTangkiList.MaxDipping.Visible (end) *@
+@if (masterTangkiList.MaxCapacity.Visible) { // masterTangkiList.MaxCapacity.Visible (begin)
+        <th data-name="MaxCapacity" class="@(masterTangkiList.MaxCapacity.HeaderCellClass)"><div id="elh_MasterTangki_MaxCapacity" class="MasterTangki_MaxCapacity">@Html.Raw(masterTangkiList.RenderFieldHeader(masterTangkiList.MaxCapacity))</div></th>
+} @* masterTangkiList.MaxCapacity.Visible (end) *@
+@if (masterTangkiList.UnpumpableQty.Visible) { // masterTangkiList.UnpumpableQty.Visible (begin)
+        <th data-name="UnpumpableQty" class="@(masterTangkiList.UnpumpableQty.HeaderCellClass)"><div id="elh_MasterTangki_UnpumpableQty" class="MasterTangki_UnpumpableQty">@Html.Raw(masterTangkiList.RenderFieldHeader(masterTangkiList.UnpumpableQty))</div></th>
+} @* masterTangkiList.UnpumpableQty.Visible (end) *@
+@if (masterTangkiList.PumpableQty.Visible) { // masterTangkiList.PumpableQty.Visible (begin)
+        <th data-name="PumpableQty" class="@(masterTangkiList.PumpableQty.HeaderCellClass)"><div id="elh_MasterTangki_PumpableQty" class="MasterTangki_PumpableQty">@Html.Raw(masterTangkiList.RenderFieldHeader(masterTangkiList.PumpableQty))</div></th>
+} @* masterTangkiList.PumpableQty.Visible (end) *@
+@if (masterTangkiList.LastUpdatedBy.Visible) { // masterTangkiList.LastUpdatedBy.Visible (begin)
+        <th data-name="LastUpdatedBy" class="@(masterTangkiList.LastUpdatedBy.HeaderCellClass)"><div id="elh_MasterTangki_LastUpdatedBy" class="MasterTangki_LastUpdatedBy">@Html.Raw(masterTangkiList.RenderFieldHeader(masterTangkiList.LastUpdatedBy))</div></th>
+} @* masterTangkiList.LastUpdatedBy.Visible (end) *@
+@if (masterTangkiList.lastUpdatedDate.Visible) { // masterTangkiList.lastUpdatedDate.Visible (begin)
+        <th data-name="lastUpdatedDate" class="@(masterTangkiList.lastUpdatedDate.HeaderCellClass)"><div id="elh_MasterTangki_lastUpdatedDate" class="MasterTangki_lastUpdatedDate">@Html.Raw(masterTangkiList.RenderFieldHeader(masterTangkiList.lastUpdatedDate))</div></th>
+} @* masterTangkiList.lastUpdatedDate.Visible (end) *@
+@* Render list options (header, right) *@
+@masterTangkiList.ListOptions.RenderHeader("right")
+    </tr>
+</thead>
+<tbody data-page="@(masterTangkiList.PageNumber)">
+@{
+    await masterTangkiList.SetupGrid();
+    bool eof = masterTangkiList.Recordset == null; // DN
+}
+@while (masterTangkiList.RecordCount < masterTangkiList.StopRecord || SameString(masterTangkiList.RowIndex, "$rowindex$")) { // Begin While
+    if (!eof && !SameString(masterTangkiList.RowIndex, "$rowindex$") &&
+        (!masterTangkiList.IsGridAdd || masterTangkiList.CurrentMode == "copy") &&
+        (!((masterTangkiList.IsCopy || masterTangkiList.IsAdd) && masterTangkiList.RowIndex is int rowIndex && rowIndex == 0))) // DN
+        eof = !await masterTangkiList.Recordset.ReadAsync();
+    masterTangkiList.RecordCount++;
+    if (masterTangkiList.RecordCount >= masterTangkiList.StartRecord) {
+        await masterTangkiList.SetupRow();
+    <tr @Html.Raw(masterTangkiList.RowAttributes)>
+    @* Render list options (body, left) *@
+    @masterTangkiList.ListOptions.RenderBody("left", masterTangkiList.RowCount)
+    @if (masterTangkiList.NamaTerminal.Visible) { // masterTangkiList.NamaTerminal.Visible (begin)
+        <td data-name="NamaTerminal" @Html.Raw(masterTangkiList.NamaTerminal.CellAttributes)>
+<span id="el@(masterTangkiList.RowIndex == "$rowindex$" ? "$rowindex$" : masterTangkiList.RowCount)_MasterTangki_NamaTerminal" class="el_MasterTangki_NamaTerminal">
+<span @Html.Raw(masterTangkiList.NamaTerminal.ViewAttributes)>
+@Html.Raw(masterTangkiList.NamaTerminal.GetViewValue())</span>
+</span>
+</td>
+    } @* masterTangkiList.NamaTerminal.Visible (end) *@
+    @if (masterTangkiList.Plant.Visible) { // masterTangkiList.Plant.Visible (begin)
+        <td data-name="Plant" @Html.Raw(masterTangkiList.Plant.CellAttributes)>
+<span id="el@(masterTangkiList.RowIndex == "$rowindex$" ? "$rowindex$" : masterTangkiList.RowCount)_MasterTangki_Plant" class="el_MasterTangki_Plant">
+<span @Html.Raw(masterTangkiList.Plant.ViewAttributes)>
+@Html.Raw(masterTangkiList.Plant.GetViewValue())</span>
+</span>
+</td>
+    } @* masterTangkiList.Plant.Visible (end) *@
+    @if (masterTangkiList.Sloc.Visible) { // masterTangkiList.Sloc.Visible (begin)
+        <td data-name="Sloc" @Html.Raw(masterTangkiList.Sloc.CellAttributes)>
+<span id="el@(masterTangkiList.RowIndex == "$rowindex$" ? "$rowindex$" : masterTangkiList.RowCount)_MasterTangki_Sloc" class="el_MasterTangki_Sloc">
+<span @Html.Raw(masterTangkiList.Sloc.ViewAttributes)>
+@Html.Raw(masterTangkiList.Sloc.GetViewValue())</span>
+</span>
+</td>
+    } @* masterTangkiList.Sloc.Visible (end) *@
+    @if (masterTangkiList.SeqTangki.Visible) { // masterTangkiList.SeqTangki.Visible (begin)
+        <td data-name="SeqTangki" @Html.Raw(masterTangkiList.SeqTangki.CellAttributes)>
+<span id="el@(masterTangkiList.RowIndex == "$rowindex$" ? "$rowindex$" : masterTangkiList.RowCount)_MasterTangki_SeqTangki" class="el_MasterTangki_SeqTangki">
+<span @Html.Raw(masterTangkiList.SeqTangki.ViewAttributes)>
+@Html.Raw(masterTangkiList.SeqTangki.GetViewValue())</span>
+</span>
+</td>
+    } @* masterTangkiList.SeqTangki.Visible (end) *@
+    @if (masterTangkiList.MatNo.Visible) { // masterTangkiList.MatNo.Visible (begin)
+        <td data-name="MatNo" @Html.Raw(masterTangkiList.MatNo.CellAttributes)>
+<span id="el@(masterTangkiList.RowIndex == "$rowindex$" ? "$rowindex$" : masterTangkiList.RowCount)_MasterTangki_MatNo" class="el_MasterTangki_MatNo">
+<span @Html.Raw(masterTangkiList.MatNo.ViewAttributes)>
+@Html.Raw(masterTangkiList.MatNo.GetViewValue())</span>
+</span>
+</td>
+    } @* masterTangkiList.MatNo.Visible (end) *@
+    @if (masterTangkiList.TglKalibrasi.Visible) { // masterTangkiList.TglKalibrasi.Visible (begin)
+        <td data-name="TglKalibrasi" @Html.Raw(masterTangkiList.TglKalibrasi.CellAttributes)>
+<span id="el@(masterTangkiList.RowIndex == "$rowindex$" ? "$rowindex$" : masterTangkiList.RowCount)_MasterTangki_TglKalibrasi" class="el_MasterTangki_TglKalibrasi">
+<span @Html.Raw(masterTangkiList.TglKalibrasi.ViewAttributes)>
+@Html.Raw(masterTangkiList.TglKalibrasi.GetViewValue())</span>
+</span>
+</td>
+    } @* masterTangkiList.TglKalibrasi.Visible (end) *@
+    @if (masterTangkiList.ExpDate.Visible) { // masterTangkiList.ExpDate.Visible (begin)
+        <td data-name="ExpDate" @Html.Raw(masterTangkiList.ExpDate.CellAttributes)>
+<span id="el@(masterTangkiList.RowIndex == "$rowindex$" ? "$rowindex$" : masterTangkiList.RowCount)_MasterTangki_ExpDate" class="el_MasterTangki_ExpDate">
+<span @Html.Raw(masterTangkiList.ExpDate.ViewAttributes)>
+@Html.Raw(masterTangkiList.ExpDate.GetViewValue())</span>
+</span>
+</td>
+    } @* masterTangkiList.ExpDate.Visible (end) *@
+    @if (masterTangkiList.Status.Visible) { // masterTangkiList.Status.Visible (begin)
+        <td data-name="Status" @Html.Raw(masterTangkiList.Status.CellAttributes)>
+<span id="el@(masterTangkiList.RowIndex == "$rowindex$" ? "$rowindex$" : masterTangkiList.RowCount)_MasterTangki_Status" class="el_MasterTangki_Status">
+<span @Html.Raw(masterTangkiList.Status.ViewAttributes)>
+@Html.Raw(masterTangkiList.Status.GetViewValue())</span>
+</span>
+</td>
+    } @* masterTangkiList.Status.Visible (end) *@
+    @if (masterTangkiList.TinggiMejaUk.Visible) { // masterTangkiList.TinggiMejaUk.Visible (begin)
+        <td data-name="TinggiMejaUk" @Html.Raw(masterTangkiList.TinggiMejaUk.CellAttributes)>
+<span id="el@(masterTangkiList.RowIndex == "$rowindex$" ? "$rowindex$" : masterTangkiList.RowCount)_MasterTangki_TinggiMejaUk" class="el_MasterTangki_TinggiMejaUk">
+<span @Html.Raw(masterTangkiList.TinggiMejaUk.ViewAttributes)>
+@Html.Raw(masterTangkiList.TinggiMejaUk.GetViewValue())</span>
+</span>
+</td>
+    } @* masterTangkiList.TinggiMejaUk.Visible (end) *@
+    @if (masterTangkiList.MaxDipping.Visible) { // masterTangkiList.MaxDipping.Visible (begin)
+        <td data-name="MaxDipping" @Html.Raw(masterTangkiList.MaxDipping.CellAttributes)>
+<span id="el@(masterTangkiList.RowIndex == "$rowindex$" ? "$rowindex$" : masterTangkiList.RowCount)_MasterTangki_MaxDipping" class="el_MasterTangki_MaxDipping">
+<span @Html.Raw(masterTangkiList.MaxDipping.ViewAttributes)>
+@Html.Raw(masterTangkiList.MaxDipping.GetViewValue())</span>
+</span>
+</td>
+    } @* masterTangkiList.MaxDipping.Visible (end) *@
+    @if (masterTangkiList.MaxCapacity.Visible) { // masterTangkiList.MaxCapacity.Visible (begin)
+        <td data-name="MaxCapacity" @Html.Raw(masterTangkiList.MaxCapacity.CellAttributes)>
+<span id="el@(masterTangkiList.RowIndex == "$rowindex$" ? "$rowindex$" : masterTangkiList.RowCount)_MasterTangki_MaxCapacity" class="el_MasterTangki_MaxCapacity">
+<span @Html.Raw(masterTangkiList.MaxCapacity.ViewAttributes)>
+@Html.Raw(masterTangkiList.MaxCapacity.GetViewValue())</span>
+</span>
+</td>
+    } @* masterTangkiList.MaxCapacity.Visible (end) *@
+    @if (masterTangkiList.UnpumpableQty.Visible) { // masterTangkiList.UnpumpableQty.Visible (begin)
+        <td data-name="UnpumpableQty" @Html.Raw(masterTangkiList.UnpumpableQty.CellAttributes)>
+<span id="el@(masterTangkiList.RowIndex == "$rowindex$" ? "$rowindex$" : masterTangkiList.RowCount)_MasterTangki_UnpumpableQty" class="el_MasterTangki_UnpumpableQty">
+<span @Html.Raw(masterTangkiList.UnpumpableQty.ViewAttributes)>
+@Html.Raw(masterTangkiList.UnpumpableQty.GetViewValue())</span>
+</span>
+</td>
+    } @* masterTangkiList.UnpumpableQty.Visible (end) *@
+    @if (masterTangkiList.PumpableQty.Visible) { // masterTangkiList.PumpableQty.Visible (begin)
+        <td data-name="PumpableQty" @Html.Raw(masterTangkiList.PumpableQty.CellAttributes)>
+<span id="el@(masterTangkiList.RowIndex == "$rowindex$" ? "$rowindex$" : masterTangkiList.RowCount)_MasterTangki_PumpableQty" class="el_MasterTangki_PumpableQty">
+<span @Html.Raw(masterTangkiList.PumpableQty.ViewAttributes)>
+@Html.Raw(masterTangkiList.PumpableQty.GetViewValue())</span>
+</span>
+</td>
+    } @* masterTangkiList.PumpableQty.Visible (end) *@
+    @if (masterTangkiList.LastUpdatedBy.Visible) { // masterTangkiList.LastUpdatedBy.Visible (begin)
+        <td data-name="LastUpdatedBy" @Html.Raw(masterTangkiList.LastUpdatedBy.CellAttributes)>
+<span id="el@(masterTangkiList.RowIndex == "$rowindex$" ? "$rowindex$" : masterTangkiList.RowCount)_MasterTangki_LastUpdatedBy" class="el_MasterTangki_LastUpdatedBy">
+<span @Html.Raw(masterTangkiList.LastUpdatedBy.ViewAttributes)>
+@Html.Raw(masterTangkiList.LastUpdatedBy.GetViewValue())</span>
+</span>
+</td>
+    } @* masterTangkiList.LastUpdatedBy.Visible (end) *@
+    @if (masterTangkiList.lastUpdatedDate.Visible) { // masterTangkiList.lastUpdatedDate.Visible (begin)
+        <td data-name="lastUpdatedDate" @Html.Raw(masterTangkiList.lastUpdatedDate.CellAttributes)>
+<span id="el@(masterTangkiList.RowIndex == "$rowindex$" ? "$rowindex$" : masterTangkiList.RowCount)_MasterTangki_lastUpdatedDate" class="el_MasterTangki_lastUpdatedDate">
+<span @Html.Raw(masterTangkiList.lastUpdatedDate.ViewAttributes)>
+@Html.Raw(masterTangkiList.lastUpdatedDate.GetViewValue())</span>
+</span>
+</td>
+    } @* masterTangkiList.lastUpdatedDate.Visible (end) *@
+    @* Render list options (body, right) *@
+    @masterTangkiList.ListOptions.RenderBody("right", masterTangkiList.RowCount)
+    </tr>
+    } @* End if *@
+
+    // Reset for template row
+    if (SameString(masterTangkiList.RowIndex, "$rowindex$"))
+        masterTangkiList.RowIndex = 0;
+
+    // Reset inline add/copy row
+    if ((masterTangkiList.IsCopy || masterTangkiList.IsAdd) && masterTangkiList.RowIndex is int rowIndex2 && rowIndex2 == 0)
+        masterTangkiList.RowIndex = 1;
+} @* End While *@
+</tbody>
+</table><!-- /.ew-table -->
+} @* End If TotalRecords > 0 *@
+</div><!-- /.ew-grid-middle-panel -->
+@if (Empty(masterTangkiList.CurrentAction) && !masterTangkiList.UseAjaxActions) {
+<input type="hidden" name="action" id="action" value="">
+}
+</form><!-- /.ew-list-form -->
+@{ masterTangkiList.CloseRecordset(); }
+@if (!masterTangkiList.IsExport()) {
+<div class="card-footer ew-grid-lower-panel">
+@if (!masterTangkiList.IsGridAdd && !(masterTangkiList.IsGridEdit && masterTangkiList.ModalGridEdit) && !masterTangkiList.IsMultiEdit) {
+@Html.Raw(masterTangkiList.Pager.Render())
+}
+<div class="ew-list-other-options">
+@masterTangkiList.OtherOptions.RenderBody("bottom")
+</div>
+</div>
+}
+</div><!-- /.ew-grid -->
+} else { // Show other options
+<div class="ew-list-other-options">
+@masterTangkiList.OtherOptions.ForEach(opt => opt.ButtonClass = "").RenderBody()
+</div>
+}
+</div>
+<div id="ew-footer-options">
+    @masterTangkiList.FooterOptions.RenderBody()
+</div>
+</main>
+@masterTangkiList.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+@if (!masterTangkiList.IsExport()) {
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("MasterTangki");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Write your table-specific startup script here
+    // document.write("page loaded");
+});
+</script>
+}

@@ -1,0 +1,263 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (goodHouseKeepingAdd.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = goodHouseKeepingAdd.UseLayout ? "_Layout" : "";
+}
+<script>
+var currentTable = @Html.Raw(ConvertToJson(goodHouseKeepingAdd.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { GoodHouseKeeping: currentTable } });
+var currentPageID = ew.PAGE_ID = "add";
+var currentForm;
+var fGoodHouseKeepingadd;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("fGoodHouseKeepingadd")
+        .setPageId("add")
+
+        // Add fields
+        .setFields([
+
+            ["NomorGoodHouseKeeping", [fields.NomorGoodHouseKeeping.visible && fields.NomorGoodHouseKeeping.required ? ew.Validators.required(fields.NomorGoodHouseKeeping.caption) : null], fields.NomorGoodHouseKeeping.isInvalid],
+            ["LookupPlant", [fields.LookupPlant.visible && fields.LookupPlant.required ? ew.Validators.required(fields.LookupPlant.caption) : null], fields.LookupPlant.isInvalid],
+            ["Plant", [fields.Plant.visible && fields.Plant.required ? ew.Validators.required(fields.Plant.caption) : null], fields.Plant.isInvalid],
+            ["Catatan", [fields.Catatan.visible && fields.Catatan.required ? ew.Validators.required(fields.Catatan.caption) : null], fields.Catatan.isInvalid]
+        ])
+
+        // Form_CustomValidate
+        .setCustomValidate(
+            function(fobj) { // DO NOT CHANGE THIS LINE!
+                    // Your custom validation code here, return false if invalid.
+                    return true;
+                }
+        )
+
+        // Use JavaScript validation or not
+        .setValidateRequired(ew.CLIENT_VALIDATE)
+
+        // Dynamic selection lists
+        .setLists({
+            "LookupPlant": @Html.Raw(goodHouseKeepingAdd.LookupPlant.ToClientList(goodHouseKeepingAdd)),
+            "Plant": @Html.Raw(goodHouseKeepingAdd.Plant.ToClientList(goodHouseKeepingAdd)),
+        })
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Client script
+    // Write your client script here, no need to add script tags.
+    const syncPlantFields = (value, label) => {
+        if (label !== undefined) {
+            $('#sv_x_Plant').val(label);
+        }
+        if (value !== undefined) {
+            $('#x_Plant').val(value).attr('value', value).trigger('change');
+            const selectionList = document.querySelector('selection-list[name="x_Plant"]');
+            if (selectionList) {
+                selectionList.value = value;
+                selectionList.setAttribute('value', value);
+                selectionList.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+        }
+    };
+    $('#x_LookupPlant').on("change", function () {
+        const selectedValue = $(this).val();
+        const selectedLabel = $(this).find('option:selected').text();
+        syncPlantFields(selectedValue, selectedLabel);
+    });
+    $('#fGoodHouseKeepingadd').on('submit', function () {
+        const selectedValue = $('#x_LookupPlant').val();
+        const selectedLabel = $('#x_LookupPlant option:selected').text();
+        syncPlantFields(selectedValue, selectedLabel);
+    });
+});
+</script>
+@goodHouseKeepingAdd.ShowPageHeader()
+@goodHouseKeepingAdd.ShowMessages()
+<form name="fGoodHouseKeepingadd" id="fGoodHouseKeepingadd" class="@(goodHouseKeepingAdd.FormClassName)" action="@AppPath(CurrentPageName())" method="post" novalidate autocomplete="off">
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+<input type="hidden" name="action" id="action" value="insert">
+<input type="hidden" name="modal" value="@ConvertToInt(goodHouseKeepingAdd.IsModal)">
+@if (IsJsonResponse()) {
+<input type="hidden" name="json" value="1">
+}
+<input type="hidden" name="@(goodHouseKeepingAdd.OldKeyName)" value="@Html.Raw(goodHouseKeepingAdd.OldKey)">
+<div class="ew-add-div"><!-- page* -->
+@if (goodHouseKeepingAdd.NomorGoodHouseKeeping.Visible) { // goodHouseKeepingAdd.NomorGoodHouseKeeping.Visible (begin)
+    <div id="r_NomorGoodHouseKeeping" @Html.Raw(goodHouseKeepingAdd.NomorGoodHouseKeeping.RowAttributes)>
+        <label id="elh_GoodHouseKeeping_NomorGoodHouseKeeping" for="x_NomorGoodHouseKeeping" class="@(goodHouseKeepingAdd.LeftColumnClass)">@Html.Raw(goodHouseKeepingAdd.NomorGoodHouseKeeping.Caption)@Html.Raw(goodHouseKeepingAdd.NomorGoodHouseKeeping.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(goodHouseKeepingAdd.RightColumnClass)"><div @Html.Raw(goodHouseKeepingAdd.NomorGoodHouseKeeping.CellAttributes)>
+<span id="el_GoodHouseKeeping_NomorGoodHouseKeeping">
+<input type="@(goodHouseKeepingAdd.NomorGoodHouseKeeping.InputTextType)" name="x_NomorGoodHouseKeeping" id="x_NomorGoodHouseKeeping" data-table="GoodHouseKeeping" data-field="x_NomorGoodHouseKeeping" value="@Html.Raw(goodHouseKeepingAdd.NomorGoodHouseKeeping.EditValue)" size="30" maxlength="50" placeholder="@Html.Raw(HtmlEncode(goodHouseKeepingAdd.NomorGoodHouseKeeping.PlaceHolder))" data-format-pattern="@(goodHouseKeepingAdd.NomorGoodHouseKeeping.FormatPattern)"@Html.Raw(goodHouseKeepingAdd.NomorGoodHouseKeeping.EditAttributes) aria-describedby="x_NomorGoodHouseKeeping_help">
+@Html.Raw(goodHouseKeepingAdd.NomorGoodHouseKeeping.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(goodHouseKeepingAdd.NomorGoodHouseKeeping.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* goodHouseKeepingAdd.NomorGoodHouseKeeping.Visible (end) *@
+@if (goodHouseKeepingAdd.LookupPlant.Visible) { // goodHouseKeepingAdd.LookupPlant.Visible (begin)
+    <div id="r_LookupPlant" @Html.Raw(goodHouseKeepingAdd.LookupPlant.RowAttributes)>
+        <label id="elh_GoodHouseKeeping_LookupPlant" for="x_LookupPlant" class="@(goodHouseKeepingAdd.LeftColumnClass)">@Html.Raw(goodHouseKeepingAdd.LookupPlant.Caption)@Html.Raw(goodHouseKeepingAdd.LookupPlant.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(goodHouseKeepingAdd.RightColumnClass)"><div @Html.Raw(goodHouseKeepingAdd.LookupPlant.CellAttributes)>
+<span id="el_GoodHouseKeeping_LookupPlant">
+    <select
+        id="x_LookupPlant"
+        name="x_LookupPlant"
+        class="form-select ew-select@(goodHouseKeepingAdd.LookupPlant.IsInvalidClass)"
+        data-select2-id="fGoodHouseKeepingadd_x_LookupPlant"
+        data-table="GoodHouseKeeping"
+        data-field="x_LookupPlant"
+        data-value-separator="@(goodHouseKeepingAdd.LookupPlant.DisplayValueSeparatorAttribute)"
+        data-placeholder="@(HtmlEncode(goodHouseKeepingAdd.LookupPlant.PlaceHolder))"
+        @Html.Raw(goodHouseKeepingAdd.LookupPlant.EditAttributes)>
+        @(goodHouseKeepingAdd.LookupPlant.SelectOptionListHtml("x_LookupPlant"))
+    </select>
+    @Html.Raw(goodHouseKeepingAdd.LookupPlant.GetCustomMessage)
+    <div class="invalid-feedback">@Html.Raw(goodHouseKeepingAdd.LookupPlant.GetErrorMessage())</div>
+<script>
+loadjs.ready("fGoodHouseKeepingadd", function() {
+    var options = { name: "x_LookupPlant", selectId: "fGoodHouseKeepingadd_x_LookupPlant" },
+        el = document.querySelector("select[data-select2-id='" + options.selectId + "']");
+    if (!el)
+        return;
+    options.closeOnSelect = !options.multiple;
+    options.dropdownParent = el.closest("#ew-modal-dialog, #ew-add-opt-dialog");
+    if (fGoodHouseKeepingadd.lists.LookupPlant?.lookupOptions.length) {
+        options.data = { id: "x_LookupPlant", form: "fGoodHouseKeepingadd" };
+    } else {
+        options.ajax = { id: "x_LookupPlant", form: "fGoodHouseKeepingadd", limit: ew.LOOKUP_PAGE_SIZE };
+    }
+    options.minimumInputLength = ew.selectMinimumInputLength;
+    options = Object.assign({}, ew.selectOptions, options, ew.vars.tables.GoodHouseKeeping.fields.LookupPlant.selectOptions);
+    ew.createSelect(options);
+});
+</script>
+</span>
+</div></div>
+    </div>
+} @* goodHouseKeepingAdd.LookupPlant.Visible (end) *@
+@if (goodHouseKeepingAdd.Plant.Visible) { // goodHouseKeepingAdd.Plant.Visible (begin)
+    <div id="r_Plant" @Html.Raw(goodHouseKeepingAdd.Plant.RowAttributes)>
+        <label id="elh_GoodHouseKeeping_Plant" class="@(goodHouseKeepingAdd.LeftColumnClass)">@Html.Raw(goodHouseKeepingAdd.Plant.Caption)@Html.Raw(goodHouseKeepingAdd.Plant.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(goodHouseKeepingAdd.RightColumnClass)"><div @Html.Raw(goodHouseKeepingAdd.Plant.CellAttributes)>
+<span id="el_GoodHouseKeeping_Plant">
+<span>@{
+    if (IsRTL) {
+        goodHouseKeepingAdd.Plant.EditAttrs["dir"] = "rtl";
+    }
+}</span>
+<span id="as_x_Plant" class="ew-auto-suggest">
+    <input type="text" class="form-control" name="sv_x_Plant" id="sv_x_Plant" value="@(RemoveHtml(ConvertToString(goodHouseKeepingAdd.Plant.EditValue)))" autocomplete="off" size="30" placeholder="@Html.Raw(HtmlEncode(goodHouseKeepingAdd.Plant.PlaceHolder))" data-placeholder="@Html.Raw(HtmlEncode(goodHouseKeepingAdd.Plant.PlaceHolder))" data-format-pattern="@(goodHouseKeepingAdd.Plant.FormatPattern)" @Html.Raw(goodHouseKeepingAdd.Plant.EditAttributes) aria-describedby="x_Plant_help">
+</span>
+<selection-list hidden class="form-control" data-table="GoodHouseKeeping" data-field="x_Plant" data-input="sv_x_Plant" data-value-separator="@(goodHouseKeepingAdd.Plant.DisplayValueSeparatorAttribute)" name="x_Plant" id="x_Plant" value="@(HtmlEncode(goodHouseKeepingAdd.Plant.CurrentValue))"></selection-list>
+@Html.Raw(goodHouseKeepingAdd.Plant.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(goodHouseKeepingAdd.Plant.GetErrorMessage())</div>
+<script>
+loadjs.ready(["fGoodHouseKeepingadd"], function() {
+    fGoodHouseKeepingadd.createAutoSuggest(Object.assign({"id":"x_Plant","forceSelect":true}, { lookupAllDisplayFields: @(goodHouseKeepingAdd.Plant.Lookup.LookupAllDisplayFields ? "true" : "false") }, ew.vars.tables.GoodHouseKeeping.fields.Plant.autoSuggestOptions));
+});
+</script>
+@Html.Raw(goodHouseKeepingAdd.Plant.Lookup.GetParamTag(goodHouseKeepingAdd, "p_x_Plant"))
+</span>
+</div></div>
+    </div>
+} @* goodHouseKeepingAdd.Plant.Visible (end) *@
+@if (goodHouseKeepingAdd.Catatan.Visible) { // goodHouseKeepingAdd.Catatan.Visible (begin)
+    <div id="r_Catatan" @Html.Raw(goodHouseKeepingAdd.Catatan.RowAttributes)>
+        <label id="elh_GoodHouseKeeping_Catatan" for="x_Catatan" class="@(goodHouseKeepingAdd.LeftColumnClass)">@Html.Raw(goodHouseKeepingAdd.Catatan.Caption)@Html.Raw(goodHouseKeepingAdd.Catatan.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(goodHouseKeepingAdd.RightColumnClass)"><div @Html.Raw(goodHouseKeepingAdd.Catatan.CellAttributes)>
+<span id="el_GoodHouseKeeping_Catatan">
+<textarea data-table="GoodHouseKeeping" data-field="x_Catatan" name="x_Catatan" id="x_Catatan" cols="35" rows="4" placeholder="@Html.Raw(HtmlEncode(goodHouseKeepingAdd.Catatan.PlaceHolder))"@Html.Raw(goodHouseKeepingAdd.Catatan.EditAttributes) aria-describedby="x_Catatan_help">@(goodHouseKeepingAdd.Catatan.EditValue)</textarea>
+@Html.Raw(goodHouseKeepingAdd.Catatan.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(goodHouseKeepingAdd.Catatan.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* goodHouseKeepingAdd.Catatan.Visible (end) *@
+</div><!-- /page* -->
+@{ goodHouseKeepingAdd.CloseRecordset(); }
+@Html.Raw(goodHouseKeepingAdd.IsModal ? "<template class=\"ew-modal-buttons\">" : "<div class=\"row ew-buttons\">")<!-- buttons .row -->
+    <div class="@(goodHouseKeepingAdd.OffsetColumnClass)"><!-- buttons offset -->
+    <button class="btn btn-primary ew-btn" name="btn-action" id="btn-action" type="submit" form="fGoodHouseKeepingadd">@Html.Raw(Language.Phrase("AddBtn"))</button>
+@if (IsJsonResponse()) {
+    <button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" data-bs-dismiss="modal">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+} else {
+    <button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" form="fGoodHouseKeepingadd" data-href="@AppPath(goodHouseKeepingAdd.ReturnUrl)">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+}
+    </div><!-- /buttons offset -->
+@Html.Raw(goodHouseKeepingAdd.IsModal ? "</template>" : "</div>")<!-- /buttons .row -->
+</form>
+@goodHouseKeepingAdd.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("GoodHouseKeeping");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Startup script
+    var parent_url = ew.PATH_BASE;
+    $('#r_NomorGoodHouseKeeping').hide();
+    $('#r_Plant').hide();
+    const syncPlantFields = (value, label) => {
+        if (label !== undefined) {
+            $('#sv_x_Plant').val(label);
+        }
+        if (value !== undefined) {
+            $('#x_Plant').val(value).attr('value', value).trigger('change');
+            const selectionList = document.querySelector('selection-list[name="x_Plant"]');
+            if (selectionList) {
+                selectionList.value = value;
+                selectionList.setAttribute('value', value);
+                selectionList.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+        }
+    };
+    $(document).ready(function () {
+        const ddl = $("#x_LookupPlant");
+        ddl.empty();
+        ddl.append('<option value="">Loading...</option>');
+        $.ajax({
+            url: parent_url + 'api/LookUpList/get-dropdown/plant',
+            method: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                ddl.empty(); 
+                $.each(data, function (index, item) {
+                    const selected = index === 0 ? 'selected' : '';
+                    ddl.append(`<option value="${item.Value}" ${selected}>${item.Label}</option>`);
+                    if (selected){
+                        syncPlantFields(item.Value, item.Label);
+                    }
+                });
+                const selectedOption = ddl.find('option:selected');
+                syncPlantFields(selectedOption.val(), selectedOption.text());
+                ddl.trigger('change');
+            },
+            error: function (xhr, status, error) {
+                console.error("Gagal ambil data dropdown:", error);
+                ddl.empty();
+            }
+        });
+    });
+});
+</script>

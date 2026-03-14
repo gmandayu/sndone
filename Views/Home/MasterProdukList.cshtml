@@ -1,0 +1,523 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (masterProdukList.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = masterProdukList.UseLayout ? "_Layout" : "";
+}
+@if (!masterProdukList.IsExport()) {
+<script>
+var currentTable = @Html.Raw(ConvertToJson(masterProdukList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { MasterProduk: currentTable } });
+var currentPageID = ew.PAGE_ID = "list";
+var currentForm;
+var @(masterProdukList.FormName);
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("@(masterProdukList.FormName)")
+        .setPageId("list")
+        .setSubmitWithFetch(@(masterProdukList.UseAjaxActions ? "true" : "false"))
+        .setFormKeyCountName("@(masterProdukList.FormKeyCountName)")
+
+        // Dynamic selection lists
+        .setLists({
+            "NoProduk": @Html.Raw(masterProdukList.NoProduk.ToClientList(masterProdukList)),
+            "NamaProduk": @Html.Raw(masterProdukList.NamaProduk.ToClientList(masterProdukList)),
+            "TipeProduk": @Html.Raw(masterProdukList.TipeProduk.ToClientList(masterProdukList)),
+            "DensityMin": @Html.Raw(masterProdukList.DensityMin.ToClientList(masterProdukList)),
+            "DensityMax": @Html.Raw(masterProdukList.DensityMax.ToClientList(masterProdukList)),
+        })
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Write your client script here, no need to add script tags.
+});
+</script>
+}
+@if (!masterProdukList.IsExport()) {
+<div class="btn-toolbar ew-toolbar">
+@if (masterProdukList.TotalRecords > 0 && masterProdukList.ExportOptions.Visible) {
+    masterProdukList.ExportOptions.Render("body");
+}
+@if (masterProdukList.ImportOptions.Visible) {
+    masterProdukList.ImportOptions.Render("body");
+}
+@if (masterProdukList.SearchOptions.Visible) {
+    masterProdukList.SearchOptions.Render("body");
+}
+@if (masterProdukList.FilterOptions.Visible) {
+    masterProdukList.FilterOptions.Render("body");
+}
+</div>
+}
+@if (masterProdukList.ShowCurrentFilter) {
+    masterProdukList.ShowFilterList();
+}
+@if (!masterProdukList.IsModal) {
+<form name="fMasterProduksrch" id="fMasterProduksrch" class="ew-form ew-ext-search-form" action="@AppPath(CurrentPageName())" novalidate autocomplete="off">
+<div id="fMasterProduksrch_search_panel" class="mb-2 mb-sm-0 @(masterProdukList.SearchPanelClass)"><!-- .ew-search-panel -->
+<script>
+var currentTable = @Html.Raw(ConvertToJson(masterProdukList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { MasterProduk: currentTable } });
+var currentForm;
+var fMasterProduksrch, currentSearchForm, currentAdvancedSearchForm;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery,
+        fields = currentTable.fields;
+
+    // Form object for search
+    let form = new ew.FormBuilder()
+        .setId("fMasterProduksrch")
+        .setPageId("list")
+@if (masterProdukList.UseAjaxActions) {
+        <text>.setSubmitWithFetch(true)</text>
+}
+
+        // Add fields
+        .setFields([
+        ])
+        // Validate form
+        .setValidate(
+            async function () {
+                if (!this.validateRequired)
+                    return true; // Ignore validation
+                let fobj = this.getForm();
+
+                // Validate fields
+                if (!this.validateFields())
+                    return false;
+
+                // Call Form_CustomValidate event
+                if (!(await this.customValidate?.(fobj) ?? true)) {
+                    this.focus();
+                    return false;
+                }
+                return true;
+            }
+        )
+
+        // Form_CustomValidate
+        .setCustomValidate(
+            function(fobj) { // DO NOT CHANGE THIS LINE!
+                    // Your custom validation code here, return false if invalid.
+                    return true;
+                }
+        )
+
+        // Use JavaScript validation or not
+        .setValidateRequired(ew.CLIENT_VALIDATE)
+
+        // Dynamic selection lists
+        .setLists({
+            "NoProduk": @Html.Raw(masterProdukList.NoProduk.ToClientList(masterProdukList)),
+            "NamaProduk": @Html.Raw(masterProdukList.NamaProduk.ToClientList(masterProdukList)),
+            "TipeProduk": @Html.Raw(masterProdukList.TipeProduk.ToClientList(masterProdukList)),
+            "DensityMin": @Html.Raw(masterProdukList.DensityMin.ToClientList(masterProdukList)),
+            "DensityMax": @Html.Raw(masterProdukList.DensityMax.ToClientList(masterProdukList)),
+        })
+
+        // Filters
+        .setFilterList(@Html.Raw(masterProdukList.GetFilterList()))
+        .build();
+    window[form.id] = form;
+    currentSearchForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<input type="hidden" name="cmd" value="search">
+@if (Security.CanSearch) {
+if (!masterProdukList.IsExport() && Empty(masterProdukList.CurrentAction) && masterProdukList.HasSearchFields()) { @* Show search form (begin) *@
+<div class="ew-extended-search container-fluid ps-2">
+<div class="row mb-0@(masterProdukList.SearchFieldsPerRow > 0 ? " row-cols-sm-" + masterProdukList.SearchFieldsPerRow : "")">
+@{
+    // Render search row
+    masterProdukList.RowType = RowType.Search;
+    masterProdukList.ResetAttributes();
+    await masterProdukList.RenderRow();
+}
+@if (masterProdukList.NoProduk.Visible) { // masterProdukList.NoProduk.Visible (begin)
+    if (!masterProdukList.NoProduk.UseFilter) {
+        masterProdukList.SearchColumnCount++;
+    }
+    <div id="xs_NoProduk" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(masterProdukList.NoProduk.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_NoProduk"
+            name="x_NoProduk[]"
+            class="form-control ew-select@(masterProdukList.NoProduk.IsInvalidClass)"
+            data-select2-id="fMasterProduksrch_x_NoProduk"
+            data-table="MasterProduk"
+            data-field="x_NoProduk"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(masterProdukList.NoProduk.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(masterProdukList.NoProduk.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(masterProdukList.NoProduk.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(masterProdukList.NoProduk.EditAttributes)>
+            @(masterProdukList.NoProduk.SelectOptionListHtml("x_NoProduk", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(masterProdukList.NoProduk.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMasterProduksrch", function() {
+            var options = {
+                name: "x_NoProduk",
+                selectId: "fMasterProduksrch_x_NoProduk",
+                ajax: { id: "x_NoProduk", form: "fMasterProduksrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MasterProduk.fields.NoProduk.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* masterProdukList.NoProduk.Visible (end) *@
+@if (masterProdukList.NamaProduk.Visible) { // masterProdukList.NamaProduk.Visible (begin)
+    if (!masterProdukList.NamaProduk.UseFilter) {
+        masterProdukList.SearchColumnCount++;
+    }
+    <div id="xs_NamaProduk" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(masterProdukList.NamaProduk.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_NamaProduk"
+            name="x_NamaProduk[]"
+            class="form-control ew-select@(masterProdukList.NamaProduk.IsInvalidClass)"
+            data-select2-id="fMasterProduksrch_x_NamaProduk"
+            data-table="MasterProduk"
+            data-field="x_NamaProduk"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(masterProdukList.NamaProduk.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(masterProdukList.NamaProduk.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(masterProdukList.NamaProduk.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(masterProdukList.NamaProduk.EditAttributes)>
+            @(masterProdukList.NamaProduk.SelectOptionListHtml("x_NamaProduk", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(masterProdukList.NamaProduk.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMasterProduksrch", function() {
+            var options = {
+                name: "x_NamaProduk",
+                selectId: "fMasterProduksrch_x_NamaProduk",
+                ajax: { id: "x_NamaProduk", form: "fMasterProduksrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MasterProduk.fields.NamaProduk.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* masterProdukList.NamaProduk.Visible (end) *@
+@if (masterProdukList.TipeProduk.Visible) { // masterProdukList.TipeProduk.Visible (begin)
+    if (!masterProdukList.TipeProduk.UseFilter) {
+        masterProdukList.SearchColumnCount++;
+    }
+    <div id="xs_TipeProduk" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(masterProdukList.TipeProduk.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_TipeProduk"
+            name="x_TipeProduk[]"
+            class="form-control ew-select@(masterProdukList.TipeProduk.IsInvalidClass)"
+            data-select2-id="fMasterProduksrch_x_TipeProduk"
+            data-table="MasterProduk"
+            data-field="x_TipeProduk"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(masterProdukList.TipeProduk.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(masterProdukList.TipeProduk.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(masterProdukList.TipeProduk.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(masterProdukList.TipeProduk.EditAttributes)>
+            @(masterProdukList.TipeProduk.SelectOptionListHtml("x_TipeProduk", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(masterProdukList.TipeProduk.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMasterProduksrch", function() {
+            var options = {
+                name: "x_TipeProduk",
+                selectId: "fMasterProduksrch_x_TipeProduk",
+                ajax: { id: "x_TipeProduk", form: "fMasterProduksrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MasterProduk.fields.TipeProduk.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* masterProdukList.TipeProduk.Visible (end) *@
+@if (masterProdukList.DensityMin.Visible) { // masterProdukList.DensityMin.Visible (begin)
+    if (!masterProdukList.DensityMin.UseFilter) {
+        masterProdukList.SearchColumnCount++;
+    }
+    <div id="xs_DensityMin" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(masterProdukList.DensityMin.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_DensityMin"
+            name="x_DensityMin[]"
+            class="form-control ew-select@(masterProdukList.DensityMin.IsInvalidClass)"
+            data-select2-id="fMasterProduksrch_x_DensityMin"
+            data-table="MasterProduk"
+            data-field="x_DensityMin"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(masterProdukList.DensityMin.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(masterProdukList.DensityMin.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(masterProdukList.DensityMin.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(masterProdukList.DensityMin.EditAttributes)>
+            @(masterProdukList.DensityMin.SelectOptionListHtml("x_DensityMin", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(masterProdukList.DensityMin.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMasterProduksrch", function() {
+            var options = {
+                name: "x_DensityMin",
+                selectId: "fMasterProduksrch_x_DensityMin",
+                ajax: { id: "x_DensityMin", form: "fMasterProduksrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MasterProduk.fields.DensityMin.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* masterProdukList.DensityMin.Visible (end) *@
+@if (masterProdukList.DensityMax.Visible) { // masterProdukList.DensityMax.Visible (begin)
+    if (!masterProdukList.DensityMax.UseFilter) {
+        masterProdukList.SearchColumnCount++;
+    }
+    <div id="xs_DensityMax" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(masterProdukList.DensityMax.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_DensityMax"
+            name="x_DensityMax[]"
+            class="form-control ew-select@(masterProdukList.DensityMax.IsInvalidClass)"
+            data-select2-id="fMasterProduksrch_x_DensityMax"
+            data-table="MasterProduk"
+            data-field="x_DensityMax"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(masterProdukList.DensityMax.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(masterProdukList.DensityMax.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(masterProdukList.DensityMax.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(masterProdukList.DensityMax.EditAttributes)>
+            @(masterProdukList.DensityMax.SelectOptionListHtml("x_DensityMax", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(masterProdukList.DensityMax.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMasterProduksrch", function() {
+            var options = {
+                name: "x_DensityMax",
+                selectId: "fMasterProduksrch_x_DensityMax",
+                ajax: { id: "x_DensityMax", form: "fMasterProduksrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MasterProduk.fields.DensityMax.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* masterProdukList.DensityMax.Visible (end) *@
+</div><!-- /.row -->
+<div class="row mb-0">
+    <div class="col-sm-auto px-0 pe-sm-2">
+        <div class="ew-basic-search input-group">
+            <input type="search" name="@(Config.TableBasicSearch)" id="@(Config.TableBasicSearch)" class="form-control ew-basic-search-keyword" value="@Html.Raw(HtmlEncode(masterProdukList.BasicSearch.SessionKeyword))" placeholder="@(HtmlEncode(Language.Phrase("Search")))" aria-label="@(HtmlEncode(Language.Phrase("Search")))">
+            <input type="hidden" name="@(Config.TableBasicSearchType)" id="@(Config.TableBasicSearchType)" class="ew-basic-search-type" value="@(HtmlEncode(masterProdukList.BasicSearch.SessionType))">
+            <button type="button" data-bs-toggle="dropdown" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split" aria-haspopup="true" aria-expanded="false">
+                <span id="searchtype">@Html.Raw(masterProdukList.BasicSearch.TypeNameShort)</span>
+            </button>
+            <div class="dropdown-menu dropdown-menu-end">
+                <button type="button" class="dropdown-item@(masterProdukList.BasicSearch.SessionType == "" ? " active" : "")" form="fMasterProduksrch" data-ew-action="search-type">@Html.Raw(Language.Phrase("QuickSearchAuto"))</button>
+                <button type="button" class="dropdown-item@(masterProdukList.BasicSearch.SessionType == "=" ? " active" : "")" form="fMasterProduksrch" data-ew-action="search-type" data-search-type="=">@Html.Raw(Language.Phrase("QuickSearchExact"))</button>
+                <button type="button" class="dropdown-item@(masterProdukList.BasicSearch.SessionType == "AND" ? " active" : "")" form="fMasterProduksrch" data-ew-action="search-type" data-search-type="AND">@Html.Raw(Language.Phrase("QuickSearchAll"))</button>
+                <button type="button" class="dropdown-item@(masterProdukList.BasicSearch.SessionType == "OR" ? " active" : "")" form="fMasterProduksrch" data-ew-action="search-type" data-search-type="OR">@Html.Raw(Language.Phrase("QuickSearchAny"))</button>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-auto mb-3">
+        <button class="btn btn-primary" name="btn-submit" id="btn-submit" type="submit">@Html.Raw(Language.Phrase("SearchBtn"))</button>
+    </div>
+</div>
+</div><!-- /.ew-extended-search -->
+} @* Show search form (end) *@
+}
+</div><!-- /.ew-search-panel -->
+</form>
+}
+@masterProdukList.ShowPageHeader()
+@masterProdukList.ShowMessages()
+<main class="list @(masterProdukList.TotalRecords == 0 && !masterProdukList.IsAdd ? " ew-no-record" : "")">
+<div id="ew-header-options">
+    @masterProdukList.HeaderOptions.RenderBody()
+</div>
+<div id="ew-list">
+@if (masterProdukList.TotalRecords > 0 || !Empty(masterProdukList.CurrentAction)) {
+<div class="card ew-card ew-grid@(masterProdukList.IsAddOrEdit ? " ew-grid-add-edit" : "") @(masterProdukList.TableGridClass)">
+<form name="@(masterProdukList.FormName)" id="@(masterProdukList.FormName)" class="ew-form ew-list-form" action="@AppPath(masterProdukList.PageName)" method="post" novalidate autocomplete="off">
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+@if (masterProdukList.IsModal) {
+<input type="hidden" name="modal" value="1">
+}
+<div id="gmp_MasterProduk" class="card-body ew-grid-middle-panel @(masterProdukList.TableContainerClass)" style="@(masterProdukList.TableContainerStyle)">
+@if (masterProdukList.TotalRecords > 0 || masterProdukList.IsGridEdit || masterProdukList.IsMultiEdit) {
+<table id="tbl_MasterProduklist" class="@(masterProdukList.TableClass)"><!-- .ew-table -->
+<thead>
+    <tr class="ew-table-header">
+@{
+    // Header row
+    masterProdukList.RowType = RowType.Header;
+
+    // Render list options
+    await masterProdukList.RenderListOptions();
+}
+@* Render list options (header, left) *@
+@masterProdukList.ListOptions.RenderHeader("left")
+@if (masterProdukList.NoProduk.Visible) { // masterProdukList.NoProduk.Visible (begin)
+        <th data-name="NoProduk" class="@(masterProdukList.NoProduk.HeaderCellClass)"><div id="elh_MasterProduk_NoProduk" class="MasterProduk_NoProduk">@Html.Raw(masterProdukList.RenderFieldHeader(masterProdukList.NoProduk))</div></th>
+} @* masterProdukList.NoProduk.Visible (end) *@
+@if (masterProdukList.NamaProduk.Visible) { // masterProdukList.NamaProduk.Visible (begin)
+        <th data-name="NamaProduk" class="@(masterProdukList.NamaProduk.HeaderCellClass)"><div id="elh_MasterProduk_NamaProduk" class="MasterProduk_NamaProduk">@Html.Raw(masterProdukList.RenderFieldHeader(masterProdukList.NamaProduk))</div></th>
+} @* masterProdukList.NamaProduk.Visible (end) *@
+@if (masterProdukList.TipeProduk.Visible) { // masterProdukList.TipeProduk.Visible (begin)
+        <th data-name="TipeProduk" class="@(masterProdukList.TipeProduk.HeaderCellClass)"><div id="elh_MasterProduk_TipeProduk" class="MasterProduk_TipeProduk">@Html.Raw(masterProdukList.RenderFieldHeader(masterProdukList.TipeProduk))</div></th>
+} @* masterProdukList.TipeProduk.Visible (end) *@
+@if (masterProdukList.DensityMin.Visible) { // masterProdukList.DensityMin.Visible (begin)
+        <th data-name="DensityMin" class="@(masterProdukList.DensityMin.HeaderCellClass)"><div id="elh_MasterProduk_DensityMin" class="MasterProduk_DensityMin">@Html.Raw(masterProdukList.RenderFieldHeader(masterProdukList.DensityMin))</div></th>
+} @* masterProdukList.DensityMin.Visible (end) *@
+@if (masterProdukList.DensityMax.Visible) { // masterProdukList.DensityMax.Visible (begin)
+        <th data-name="DensityMax" class="@(masterProdukList.DensityMax.HeaderCellClass)"><div id="elh_MasterProduk_DensityMax" class="MasterProduk_DensityMax">@Html.Raw(masterProdukList.RenderFieldHeader(masterProdukList.DensityMax))</div></th>
+} @* masterProdukList.DensityMax.Visible (end) *@
+@* Render list options (header, right) *@
+@masterProdukList.ListOptions.RenderHeader("right")
+    </tr>
+</thead>
+<tbody data-page="@(masterProdukList.PageNumber)">
+@{
+    await masterProdukList.SetupGrid();
+    bool eof = masterProdukList.Recordset == null; // DN
+}
+@while (masterProdukList.RecordCount < masterProdukList.StopRecord || SameString(masterProdukList.RowIndex, "$rowindex$")) { // Begin While
+    if (!eof && !SameString(masterProdukList.RowIndex, "$rowindex$") &&
+        (!masterProdukList.IsGridAdd || masterProdukList.CurrentMode == "copy") &&
+        (!((masterProdukList.IsCopy || masterProdukList.IsAdd) && masterProdukList.RowIndex is int rowIndex && rowIndex == 0))) // DN
+        eof = !await masterProdukList.Recordset.ReadAsync();
+    masterProdukList.RecordCount++;
+    if (masterProdukList.RecordCount >= masterProdukList.StartRecord) {
+        await masterProdukList.SetupRow();
+    <tr @Html.Raw(masterProdukList.RowAttributes)>
+    @* Render list options (body, left) *@
+    @masterProdukList.ListOptions.RenderBody("left", masterProdukList.RowCount)
+    @if (masterProdukList.NoProduk.Visible) { // masterProdukList.NoProduk.Visible (begin)
+        <td data-name="NoProduk" @Html.Raw(masterProdukList.NoProduk.CellAttributes)>
+<span id="el@(masterProdukList.RowIndex == "$rowindex$" ? "$rowindex$" : masterProdukList.RowCount)_MasterProduk_NoProduk" class="el_MasterProduk_NoProduk">
+<span @Html.Raw(masterProdukList.NoProduk.ViewAttributes)>
+@Html.Raw(masterProdukList.NoProduk.GetViewValue())</span>
+</span>
+</td>
+    } @* masterProdukList.NoProduk.Visible (end) *@
+    @if (masterProdukList.NamaProduk.Visible) { // masterProdukList.NamaProduk.Visible (begin)
+        <td data-name="NamaProduk" @Html.Raw(masterProdukList.NamaProduk.CellAttributes)>
+<span id="el@(masterProdukList.RowIndex == "$rowindex$" ? "$rowindex$" : masterProdukList.RowCount)_MasterProduk_NamaProduk" class="el_MasterProduk_NamaProduk">
+<span @Html.Raw(masterProdukList.NamaProduk.ViewAttributes)>
+@Html.Raw(masterProdukList.NamaProduk.GetViewValue())</span>
+</span>
+</td>
+    } @* masterProdukList.NamaProduk.Visible (end) *@
+    @if (masterProdukList.TipeProduk.Visible) { // masterProdukList.TipeProduk.Visible (begin)
+        <td data-name="TipeProduk" @Html.Raw(masterProdukList.TipeProduk.CellAttributes)>
+<span id="el@(masterProdukList.RowIndex == "$rowindex$" ? "$rowindex$" : masterProdukList.RowCount)_MasterProduk_TipeProduk" class="el_MasterProduk_TipeProduk">
+<span @Html.Raw(masterProdukList.TipeProduk.ViewAttributes)>
+@Html.Raw(masterProdukList.TipeProduk.GetViewValue())</span>
+</span>
+</td>
+    } @* masterProdukList.TipeProduk.Visible (end) *@
+    @if (masterProdukList.DensityMin.Visible) { // masterProdukList.DensityMin.Visible (begin)
+        <td data-name="DensityMin" @Html.Raw(masterProdukList.DensityMin.CellAttributes)>
+<span id="el@(masterProdukList.RowIndex == "$rowindex$" ? "$rowindex$" : masterProdukList.RowCount)_MasterProduk_DensityMin" class="el_MasterProduk_DensityMin">
+<span @Html.Raw(masterProdukList.DensityMin.ViewAttributes)>
+@Html.Raw(masterProdukList.DensityMin.GetViewValue())</span>
+</span>
+</td>
+    } @* masterProdukList.DensityMin.Visible (end) *@
+    @if (masterProdukList.DensityMax.Visible) { // masterProdukList.DensityMax.Visible (begin)
+        <td data-name="DensityMax" @Html.Raw(masterProdukList.DensityMax.CellAttributes)>
+<span id="el@(masterProdukList.RowIndex == "$rowindex$" ? "$rowindex$" : masterProdukList.RowCount)_MasterProduk_DensityMax" class="el_MasterProduk_DensityMax">
+<span @Html.Raw(masterProdukList.DensityMax.ViewAttributes)>
+@Html.Raw(masterProdukList.DensityMax.GetViewValue())</span>
+</span>
+</td>
+    } @* masterProdukList.DensityMax.Visible (end) *@
+    @* Render list options (body, right) *@
+    @masterProdukList.ListOptions.RenderBody("right", masterProdukList.RowCount)
+    </tr>
+    } @* End if *@
+
+    // Reset for template row
+    if (SameString(masterProdukList.RowIndex, "$rowindex$"))
+        masterProdukList.RowIndex = 0;
+
+    // Reset inline add/copy row
+    if ((masterProdukList.IsCopy || masterProdukList.IsAdd) && masterProdukList.RowIndex is int rowIndex2 && rowIndex2 == 0)
+        masterProdukList.RowIndex = 1;
+} @* End While *@
+</tbody>
+</table><!-- /.ew-table -->
+} @* End If TotalRecords > 0 *@
+</div><!-- /.ew-grid-middle-panel -->
+@if (Empty(masterProdukList.CurrentAction) && !masterProdukList.UseAjaxActions) {
+<input type="hidden" name="action" id="action" value="">
+}
+</form><!-- /.ew-list-form -->
+@{ masterProdukList.CloseRecordset(); }
+@if (!masterProdukList.IsExport()) {
+<div class="card-footer ew-grid-lower-panel">
+@if (!masterProdukList.IsGridAdd && !(masterProdukList.IsGridEdit && masterProdukList.ModalGridEdit) && !masterProdukList.IsMultiEdit) {
+@Html.Raw(masterProdukList.Pager.Render())
+}
+<div class="ew-list-other-options">
+@masterProdukList.OtherOptions.RenderBody("bottom")
+</div>
+</div>
+}
+</div><!-- /.ew-grid -->
+} else { // Show other options
+<div class="ew-list-other-options">
+@masterProdukList.OtherOptions.ForEach(opt => opt.ButtonClass = "").RenderBody()
+</div>
+}
+</div>
+<div id="ew-footer-options">
+    @masterProdukList.FooterOptions.RenderBody()
+</div>
+</main>
+@masterProdukList.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+@if (!masterProdukList.IsExport()) {
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("MasterProduk");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Write your table-specific startup script here
+    // document.write("page loaded");
+});
+</script>
+}

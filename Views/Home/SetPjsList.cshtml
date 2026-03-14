@@ -1,0 +1,1078 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (setPjsList.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = setPjsList.UseLayout ? "_Layout" : "";
+}
+@if (!setPjsList.IsExport()) {
+<script>
+var currentTable = @Html.Raw(ConvertToJson(setPjsList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { SetPjs: currentTable } });
+var currentPageID = ew.PAGE_ID = "list";
+var currentForm;
+var @(setPjsList.FormName);
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("@(setPjsList.FormName)")
+        .setPageId("list")
+        .setSubmitWithFetch(@(setPjsList.UseAjaxActions ? "true" : "false"))
+        .setFormKeyCountName("@(setPjsList.FormKeyCountName)")
+
+        // Dynamic selection lists
+        .setLists({
+            "RedirectLink": @Html.Raw(setPjsList.RedirectLink.ToClientList(setPjsList)),
+            "Nama": @Html.Raw(setPjsList.Nama.ToClientList(setPjsList)),
+            "OrganizationLevel": @Html.Raw(setPjsList.OrganizationLevel.ToClientList(setPjsList)),
+            "PosisiAwal": @Html.Raw(setPjsList.PosisiAwal.ToClientList(setPjsList)),
+            "PosisiPJS": @Html.Raw(setPjsList.PosisiPJS.ToClientList(setPjsList)),
+            "TanggalMulai": @Html.Raw(setPjsList.TanggalMulai.ToClientList(setPjsList)),
+            "TanggalSelesai": @Html.Raw(setPjsList.TanggalSelesai.ToClientList(setPjsList)),
+            "Status": @Html.Raw(setPjsList.Status.ToClientList(setPjsList)),
+            "Remaks": @Html.Raw(setPjsList.Remaks.ToClientList(setPjsList)),
+            "DibuatOleh": @Html.Raw(setPjsList.DibuatOleh.ToClientList(setPjsList)),
+            "TanggalDibuat": @Html.Raw(setPjsList.TanggalDibuat.ToClientList(setPjsList)),
+            "DiperbaharuiOleh": @Html.Raw(setPjsList.DiperbaharuiOleh.ToClientList(setPjsList)),
+            "DiperbaharuiTanggal": @Html.Raw(setPjsList.DiperbaharuiTanggal.ToClientList(setPjsList)),
+        })
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Client script
+    const parent_url = ew.PATH_BASE;
+    $(document).on('click', '.btn-download', function (e) {
+        e.preventDefault();
+        const id = $(this).data('id');
+        if (!id) {
+            ew.alert("ID dokumen tidak ditemukan.");
+            return;
+        }
+        $.ajax({
+            url: parent_url + 'api/LookUpList/DownloadSingleDocument',
+            type: 'GET',
+            data: { 
+                id: id,
+                menu: 'PJS'
+            },
+            xhrFields: {
+                responseType: 'blob'
+            },
+            beforeSend: function () {
+                showLoading();
+            },
+            success: function (response, status, xhr) {
+                const disposition = xhr.getResponseHeader('Content-Disposition');
+                let fileName = "download_file";
+                if (disposition) {
+                    const fileNameMatch = disposition.match(/filename="?([^";]+)"?/);
+                    if (fileNameMatch && fileNameMatch[1]) {
+                        fileName = decodeURIComponent(fileNameMatch[1]);
+                    }
+                    const utf8FileNameMatch = disposition.match(/filename\*\s*=\s*UTF-8''([^;]+)/);
+                    if (utf8FileNameMatch && utf8FileNameMatch[1]) {
+                        fileName = decodeURIComponent(utf8FileNameMatch[1]);
+                    }
+                }
+                const blobUrl = window.URL.createObjectURL(response);
+                const a = document.createElement('a');
+                a.href = blobUrl;
+                a.download = fileName;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(blobUrl);
+                ew.alert("Download berhasil!");
+            },
+            error: function (xhr, status, error) {
+                if (xhr.status === 404) {
+                    ew.alert("File tidak ditemukan di server.");
+                } else if (xhr.status === 500) {
+                    ew.alert("Terjadi kesalahan server. Coba lagi nanti.");
+                } else {
+                    ew.alert("Gagal mendownload file. Error: " + xhr.responseText);
+                }
+            },
+            complete: function () {
+                hideLoading();
+            }
+        });
+    });
+});
+</script>
+}
+@if (!setPjsList.IsExport()) {
+<div class="btn-toolbar ew-toolbar">
+@if (setPjsList.TotalRecords > 0 && setPjsList.ExportOptions.Visible) {
+    setPjsList.ExportOptions.Render("body");
+}
+@if (setPjsList.ImportOptions.Visible) {
+    setPjsList.ImportOptions.Render("body");
+}
+@if (setPjsList.SearchOptions.Visible) {
+    setPjsList.SearchOptions.Render("body");
+}
+@if (setPjsList.FilterOptions.Visible) {
+    setPjsList.FilterOptions.Render("body");
+}
+</div>
+}
+@if (setPjsList.ShowCurrentFilter) {
+    setPjsList.ShowFilterList();
+}
+@if (!setPjsList.IsModal) {
+<form name="fSetPjssrch" id="fSetPjssrch" class="ew-form ew-ext-search-form" action="@AppPath(CurrentPageName())" novalidate autocomplete="off">
+<div id="fSetPjssrch_search_panel" class="mb-2 mb-sm-0 @(setPjsList.SearchPanelClass)"><!-- .ew-search-panel -->
+<script>
+var currentTable = @Html.Raw(ConvertToJson(setPjsList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { SetPjs: currentTable } });
+var currentForm;
+var fSetPjssrch, currentSearchForm, currentAdvancedSearchForm;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery,
+        fields = currentTable.fields;
+
+    // Form object for search
+    let form = new ew.FormBuilder()
+        .setId("fSetPjssrch")
+        .setPageId("list")
+@if (setPjsList.UseAjaxActions) {
+        <text>.setSubmitWithFetch(true)</text>
+}
+
+        // Add fields
+        .setFields([
+        ])
+        // Validate form
+        .setValidate(
+            async function () {
+                if (!this.validateRequired)
+                    return true; // Ignore validation
+                let fobj = this.getForm();
+
+                // Validate fields
+                if (!this.validateFields())
+                    return false;
+
+                // Call Form_CustomValidate event
+                if (!(await this.customValidate?.(fobj) ?? true)) {
+                    this.focus();
+                    return false;
+                }
+                return true;
+            }
+        )
+
+        // Form_CustomValidate
+        .setCustomValidate(
+            function(fobj) { // DO NOT CHANGE THIS LINE!
+                    // Your custom validation code here, return false if invalid.
+                    return true;
+                }
+        )
+
+        // Use JavaScript validation or not
+        .setValidateRequired(ew.CLIENT_VALIDATE)
+
+        // Dynamic selection lists
+        .setLists({
+            "RedirectLink": @Html.Raw(setPjsList.RedirectLink.ToClientList(setPjsList)),
+            "Nama": @Html.Raw(setPjsList.Nama.ToClientList(setPjsList)),
+            "OrganizationLevel": @Html.Raw(setPjsList.OrganizationLevel.ToClientList(setPjsList)),
+            "PosisiAwal": @Html.Raw(setPjsList.PosisiAwal.ToClientList(setPjsList)),
+            "PosisiPJS": @Html.Raw(setPjsList.PosisiPJS.ToClientList(setPjsList)),
+            "TanggalMulai": @Html.Raw(setPjsList.TanggalMulai.ToClientList(setPjsList)),
+            "TanggalSelesai": @Html.Raw(setPjsList.TanggalSelesai.ToClientList(setPjsList)),
+            "Status": @Html.Raw(setPjsList.Status.ToClientList(setPjsList)),
+            "Remaks": @Html.Raw(setPjsList.Remaks.ToClientList(setPjsList)),
+            "DibuatOleh": @Html.Raw(setPjsList.DibuatOleh.ToClientList(setPjsList)),
+            "TanggalDibuat": @Html.Raw(setPjsList.TanggalDibuat.ToClientList(setPjsList)),
+            "DiperbaharuiOleh": @Html.Raw(setPjsList.DiperbaharuiOleh.ToClientList(setPjsList)),
+            "DiperbaharuiTanggal": @Html.Raw(setPjsList.DiperbaharuiTanggal.ToClientList(setPjsList)),
+        })
+
+        // Filters
+        .setFilterList(@Html.Raw(setPjsList.GetFilterList()))
+        .build();
+    window[form.id] = form;
+    currentSearchForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<input type="hidden" name="cmd" value="search">
+@if (Security.CanSearch) {
+if (!setPjsList.IsExport() && Empty(setPjsList.CurrentAction) && setPjsList.HasSearchFields()) { @* Show search form (begin) *@
+<div class="ew-extended-search container-fluid ps-2">
+<div class="row mb-0@(setPjsList.SearchFieldsPerRow > 0 ? " row-cols-sm-" + setPjsList.SearchFieldsPerRow : "")">
+@{
+    // Render search row
+    setPjsList.RowType = RowType.Search;
+    setPjsList.ResetAttributes();
+    await setPjsList.RenderRow();
+}
+@if (setPjsList.RedirectLink.Visible) { // setPjsList.RedirectLink.Visible (begin)
+    if (!setPjsList.RedirectLink.UseFilter) {
+        setPjsList.SearchColumnCount++;
+    }
+    <div id="xs_RedirectLink" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(setPjsList.RedirectLink.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_RedirectLink"
+            name="x_RedirectLink[]"
+            class="form-control ew-select@(setPjsList.RedirectLink.IsInvalidClass)"
+            data-select2-id="fSetPjssrch_x_RedirectLink"
+            data-table="SetPjs"
+            data-field="x_RedirectLink"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(setPjsList.RedirectLink.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(setPjsList.RedirectLink.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(setPjsList.RedirectLink.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(setPjsList.RedirectLink.EditAttributes)>
+            @(setPjsList.RedirectLink.SelectOptionListHtml("x_RedirectLink", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(setPjsList.RedirectLink.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fSetPjssrch", function() {
+            var options = {
+                name: "x_RedirectLink",
+                selectId: "fSetPjssrch_x_RedirectLink",
+                ajax: { id: "x_RedirectLink", form: "fSetPjssrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.SetPjs.fields.RedirectLink.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* setPjsList.RedirectLink.Visible (end) *@
+@if (setPjsList.Nama.Visible) { // setPjsList.Nama.Visible (begin)
+    if (!setPjsList.Nama.UseFilter) {
+        setPjsList.SearchColumnCount++;
+    }
+    <div id="xs_Nama" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(setPjsList.Nama.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_Nama"
+            name="x_Nama[]"
+            class="form-control ew-select@(setPjsList.Nama.IsInvalidClass)"
+            data-select2-id="fSetPjssrch_x_Nama"
+            data-table="SetPjs"
+            data-field="x_Nama"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(setPjsList.Nama.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(setPjsList.Nama.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(setPjsList.Nama.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(setPjsList.Nama.EditAttributes)>
+            @(setPjsList.Nama.SelectOptionListHtml("x_Nama", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(setPjsList.Nama.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fSetPjssrch", function() {
+            var options = {
+                name: "x_Nama",
+                selectId: "fSetPjssrch_x_Nama",
+                ajax: { id: "x_Nama", form: "fSetPjssrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.SetPjs.fields.Nama.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* setPjsList.Nama.Visible (end) *@
+@if (setPjsList.OrganizationLevel.Visible) { // setPjsList.OrganizationLevel.Visible (begin)
+    if (!setPjsList.OrganizationLevel.UseFilter) {
+        setPjsList.SearchColumnCount++;
+    }
+    <div id="xs_OrganizationLevel" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(setPjsList.OrganizationLevel.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_OrganizationLevel"
+            name="x_OrganizationLevel[]"
+            class="form-control ew-select@(setPjsList.OrganizationLevel.IsInvalidClass)"
+            data-select2-id="fSetPjssrch_x_OrganizationLevel"
+            data-table="SetPjs"
+            data-field="x_OrganizationLevel"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(setPjsList.OrganizationLevel.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(setPjsList.OrganizationLevel.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(setPjsList.OrganizationLevel.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(setPjsList.OrganizationLevel.EditAttributes)>
+            @(setPjsList.OrganizationLevel.SelectOptionListHtml("x_OrganizationLevel", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(setPjsList.OrganizationLevel.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fSetPjssrch", function() {
+            var options = {
+                name: "x_OrganizationLevel",
+                selectId: "fSetPjssrch_x_OrganizationLevel",
+                ajax: { id: "x_OrganizationLevel", form: "fSetPjssrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.SetPjs.fields.OrganizationLevel.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* setPjsList.OrganizationLevel.Visible (end) *@
+@if (setPjsList.PosisiAwal.Visible) { // setPjsList.PosisiAwal.Visible (begin)
+    if (!setPjsList.PosisiAwal.UseFilter) {
+        setPjsList.SearchColumnCount++;
+    }
+    <div id="xs_PosisiAwal" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(setPjsList.PosisiAwal.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_PosisiAwal"
+            name="x_PosisiAwal[]"
+            class="form-control ew-select@(setPjsList.PosisiAwal.IsInvalidClass)"
+            data-select2-id="fSetPjssrch_x_PosisiAwal"
+            data-table="SetPjs"
+            data-field="x_PosisiAwal"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(setPjsList.PosisiAwal.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(setPjsList.PosisiAwal.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(setPjsList.PosisiAwal.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(setPjsList.PosisiAwal.EditAttributes)>
+            @(setPjsList.PosisiAwal.SelectOptionListHtml("x_PosisiAwal", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(setPjsList.PosisiAwal.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fSetPjssrch", function() {
+            var options = {
+                name: "x_PosisiAwal",
+                selectId: "fSetPjssrch_x_PosisiAwal",
+                ajax: { id: "x_PosisiAwal", form: "fSetPjssrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.SetPjs.fields.PosisiAwal.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* setPjsList.PosisiAwal.Visible (end) *@
+@if (setPjsList.PosisiPJS.Visible) { // setPjsList.PosisiPJS.Visible (begin)
+    if (!setPjsList.PosisiPJS.UseFilter) {
+        setPjsList.SearchColumnCount++;
+    }
+    <div id="xs_PosisiPJS" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(setPjsList.PosisiPJS.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_PosisiPJS"
+            name="x_PosisiPJS[]"
+            class="form-control ew-select@(setPjsList.PosisiPJS.IsInvalidClass)"
+            data-select2-id="fSetPjssrch_x_PosisiPJS"
+            data-table="SetPjs"
+            data-field="x_PosisiPJS"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(setPjsList.PosisiPJS.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(setPjsList.PosisiPJS.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(setPjsList.PosisiPJS.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(setPjsList.PosisiPJS.EditAttributes)>
+            @(setPjsList.PosisiPJS.SelectOptionListHtml("x_PosisiPJS", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(setPjsList.PosisiPJS.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fSetPjssrch", function() {
+            var options = {
+                name: "x_PosisiPJS",
+                selectId: "fSetPjssrch_x_PosisiPJS",
+                ajax: { id: "x_PosisiPJS", form: "fSetPjssrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.SetPjs.fields.PosisiPJS.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* setPjsList.PosisiPJS.Visible (end) *@
+@if (setPjsList.TanggalMulai.Visible) { // setPjsList.TanggalMulai.Visible (begin)
+    if (!setPjsList.TanggalMulai.UseFilter) {
+        setPjsList.SearchColumnCount++;
+    }
+    <div id="xs_TanggalMulai" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(setPjsList.TanggalMulai.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_TanggalMulai"
+            name="x_TanggalMulai[]"
+            class="form-control ew-select@(setPjsList.TanggalMulai.IsInvalidClass)"
+            data-select2-id="fSetPjssrch_x_TanggalMulai"
+            data-table="SetPjs"
+            data-field="x_TanggalMulai"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(setPjsList.TanggalMulai.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(setPjsList.TanggalMulai.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(setPjsList.TanggalMulai.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(setPjsList.TanggalMulai.EditAttributes)>
+            @(setPjsList.TanggalMulai.SelectOptionListHtml("x_TanggalMulai", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(setPjsList.TanggalMulai.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fSetPjssrch", function() {
+            var options = {
+                name: "x_TanggalMulai",
+                selectId: "fSetPjssrch_x_TanggalMulai",
+                ajax: { id: "x_TanggalMulai", form: "fSetPjssrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.SetPjs.fields.TanggalMulai.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* setPjsList.TanggalMulai.Visible (end) *@
+@if (setPjsList.TanggalSelesai.Visible) { // setPjsList.TanggalSelesai.Visible (begin)
+    if (!setPjsList.TanggalSelesai.UseFilter) {
+        setPjsList.SearchColumnCount++;
+    }
+    <div id="xs_TanggalSelesai" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(setPjsList.TanggalSelesai.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_TanggalSelesai"
+            name="x_TanggalSelesai[]"
+            class="form-control ew-select@(setPjsList.TanggalSelesai.IsInvalidClass)"
+            data-select2-id="fSetPjssrch_x_TanggalSelesai"
+            data-table="SetPjs"
+            data-field="x_TanggalSelesai"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(setPjsList.TanggalSelesai.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(setPjsList.TanggalSelesai.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(setPjsList.TanggalSelesai.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(setPjsList.TanggalSelesai.EditAttributes)>
+            @(setPjsList.TanggalSelesai.SelectOptionListHtml("x_TanggalSelesai", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(setPjsList.TanggalSelesai.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fSetPjssrch", function() {
+            var options = {
+                name: "x_TanggalSelesai",
+                selectId: "fSetPjssrch_x_TanggalSelesai",
+                ajax: { id: "x_TanggalSelesai", form: "fSetPjssrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.SetPjs.fields.TanggalSelesai.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* setPjsList.TanggalSelesai.Visible (end) *@
+@if (setPjsList.Status.Visible) { // setPjsList.Status.Visible (begin)
+    if (!setPjsList.Status.UseFilter) {
+        setPjsList.SearchColumnCount++;
+    }
+    <div id="xs_Status" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(setPjsList.Status.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_Status"
+            name="x_Status[]"
+            class="form-control ew-select@(setPjsList.Status.IsInvalidClass)"
+            data-select2-id="fSetPjssrch_x_Status"
+            data-table="SetPjs"
+            data-field="x_Status"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(setPjsList.Status.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(setPjsList.Status.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(setPjsList.Status.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(setPjsList.Status.EditAttributes)>
+            @(setPjsList.Status.SelectOptionListHtml("x_Status", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(setPjsList.Status.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fSetPjssrch", function() {
+            var options = {
+                name: "x_Status",
+                selectId: "fSetPjssrch_x_Status",
+                ajax: { id: "x_Status", form: "fSetPjssrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.SetPjs.fields.Status.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* setPjsList.Status.Visible (end) *@
+@if (setPjsList.Remaks.Visible) { // setPjsList.Remaks.Visible (begin)
+    if (!setPjsList.Remaks.UseFilter) {
+        setPjsList.SearchColumnCount++;
+    }
+    <div id="xs_Remaks" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(setPjsList.Remaks.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_Remaks"
+            name="x_Remaks[]"
+            class="form-control ew-select@(setPjsList.Remaks.IsInvalidClass)"
+            data-select2-id="fSetPjssrch_x_Remaks"
+            data-table="SetPjs"
+            data-field="x_Remaks"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(setPjsList.Remaks.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(setPjsList.Remaks.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(setPjsList.Remaks.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(setPjsList.Remaks.EditAttributes)>
+            @(setPjsList.Remaks.SelectOptionListHtml("x_Remaks", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(setPjsList.Remaks.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fSetPjssrch", function() {
+            var options = {
+                name: "x_Remaks",
+                selectId: "fSetPjssrch_x_Remaks",
+                ajax: { id: "x_Remaks", form: "fSetPjssrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.SetPjs.fields.Remaks.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* setPjsList.Remaks.Visible (end) *@
+@if (setPjsList.DibuatOleh.Visible) { // setPjsList.DibuatOleh.Visible (begin)
+    if (!setPjsList.DibuatOleh.UseFilter) {
+        setPjsList.SearchColumnCount++;
+    }
+    <div id="xs_DibuatOleh" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(setPjsList.DibuatOleh.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_DibuatOleh"
+            name="x_DibuatOleh[]"
+            class="form-control ew-select@(setPjsList.DibuatOleh.IsInvalidClass)"
+            data-select2-id="fSetPjssrch_x_DibuatOleh"
+            data-table="SetPjs"
+            data-field="x_DibuatOleh"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(setPjsList.DibuatOleh.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(setPjsList.DibuatOleh.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(setPjsList.DibuatOleh.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(setPjsList.DibuatOleh.EditAttributes)>
+            @(setPjsList.DibuatOleh.SelectOptionListHtml("x_DibuatOleh", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(setPjsList.DibuatOleh.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fSetPjssrch", function() {
+            var options = {
+                name: "x_DibuatOleh",
+                selectId: "fSetPjssrch_x_DibuatOleh",
+                ajax: { id: "x_DibuatOleh", form: "fSetPjssrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.SetPjs.fields.DibuatOleh.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* setPjsList.DibuatOleh.Visible (end) *@
+@if (setPjsList.TanggalDibuat.Visible) { // setPjsList.TanggalDibuat.Visible (begin)
+    if (!setPjsList.TanggalDibuat.UseFilter) {
+        setPjsList.SearchColumnCount++;
+    }
+    <div id="xs_TanggalDibuat" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(setPjsList.TanggalDibuat.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_TanggalDibuat"
+            name="x_TanggalDibuat[]"
+            class="form-control ew-select@(setPjsList.TanggalDibuat.IsInvalidClass)"
+            data-select2-id="fSetPjssrch_x_TanggalDibuat"
+            data-table="SetPjs"
+            data-field="x_TanggalDibuat"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(setPjsList.TanggalDibuat.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(setPjsList.TanggalDibuat.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(setPjsList.TanggalDibuat.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(setPjsList.TanggalDibuat.EditAttributes)>
+            @(setPjsList.TanggalDibuat.SelectOptionListHtml("x_TanggalDibuat", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(setPjsList.TanggalDibuat.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fSetPjssrch", function() {
+            var options = {
+                name: "x_TanggalDibuat",
+                selectId: "fSetPjssrch_x_TanggalDibuat",
+                ajax: { id: "x_TanggalDibuat", form: "fSetPjssrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.SetPjs.fields.TanggalDibuat.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* setPjsList.TanggalDibuat.Visible (end) *@
+@if (setPjsList.DiperbaharuiOleh.Visible) { // setPjsList.DiperbaharuiOleh.Visible (begin)
+    if (!setPjsList.DiperbaharuiOleh.UseFilter) {
+        setPjsList.SearchColumnCount++;
+    }
+    <div id="xs_DiperbaharuiOleh" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(setPjsList.DiperbaharuiOleh.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_DiperbaharuiOleh"
+            name="x_DiperbaharuiOleh[]"
+            class="form-control ew-select@(setPjsList.DiperbaharuiOleh.IsInvalidClass)"
+            data-select2-id="fSetPjssrch_x_DiperbaharuiOleh"
+            data-table="SetPjs"
+            data-field="x_DiperbaharuiOleh"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(setPjsList.DiperbaharuiOleh.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(setPjsList.DiperbaharuiOleh.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(setPjsList.DiperbaharuiOleh.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(setPjsList.DiperbaharuiOleh.EditAttributes)>
+            @(setPjsList.DiperbaharuiOleh.SelectOptionListHtml("x_DiperbaharuiOleh", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(setPjsList.DiperbaharuiOleh.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fSetPjssrch", function() {
+            var options = {
+                name: "x_DiperbaharuiOleh",
+                selectId: "fSetPjssrch_x_DiperbaharuiOleh",
+                ajax: { id: "x_DiperbaharuiOleh", form: "fSetPjssrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.SetPjs.fields.DiperbaharuiOleh.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* setPjsList.DiperbaharuiOleh.Visible (end) *@
+@if (setPjsList.DiperbaharuiTanggal.Visible) { // setPjsList.DiperbaharuiTanggal.Visible (begin)
+    if (!setPjsList.DiperbaharuiTanggal.UseFilter) {
+        setPjsList.SearchColumnCount++;
+    }
+    <div id="xs_DiperbaharuiTanggal" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(setPjsList.DiperbaharuiTanggal.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_DiperbaharuiTanggal"
+            name="x_DiperbaharuiTanggal[]"
+            class="form-control ew-select@(setPjsList.DiperbaharuiTanggal.IsInvalidClass)"
+            data-select2-id="fSetPjssrch_x_DiperbaharuiTanggal"
+            data-table="SetPjs"
+            data-field="x_DiperbaharuiTanggal"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(setPjsList.DiperbaharuiTanggal.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(setPjsList.DiperbaharuiTanggal.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(setPjsList.DiperbaharuiTanggal.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(setPjsList.DiperbaharuiTanggal.EditAttributes)>
+            @(setPjsList.DiperbaharuiTanggal.SelectOptionListHtml("x_DiperbaharuiTanggal", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(setPjsList.DiperbaharuiTanggal.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fSetPjssrch", function() {
+            var options = {
+                name: "x_DiperbaharuiTanggal",
+                selectId: "fSetPjssrch_x_DiperbaharuiTanggal",
+                ajax: { id: "x_DiperbaharuiTanggal", form: "fSetPjssrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.SetPjs.fields.DiperbaharuiTanggal.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* setPjsList.DiperbaharuiTanggal.Visible (end) *@
+</div><!-- /.row -->
+<div class="row mb-0">
+    <div class="col-sm-auto px-0 pe-sm-2">
+        <div class="ew-basic-search input-group">
+            <input type="search" name="@(Config.TableBasicSearch)" id="@(Config.TableBasicSearch)" class="form-control ew-basic-search-keyword" value="@Html.Raw(HtmlEncode(setPjsList.BasicSearch.SessionKeyword))" placeholder="@(HtmlEncode(Language.Phrase("Search")))" aria-label="@(HtmlEncode(Language.Phrase("Search")))">
+            <input type="hidden" name="@(Config.TableBasicSearchType)" id="@(Config.TableBasicSearchType)" class="ew-basic-search-type" value="@(HtmlEncode(setPjsList.BasicSearch.SessionType))">
+            <button type="button" data-bs-toggle="dropdown" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split" aria-haspopup="true" aria-expanded="false">
+                <span id="searchtype">@Html.Raw(setPjsList.BasicSearch.TypeNameShort)</span>
+            </button>
+            <div class="dropdown-menu dropdown-menu-end">
+                <button type="button" class="dropdown-item@(setPjsList.BasicSearch.SessionType == "" ? " active" : "")" form="fSetPjssrch" data-ew-action="search-type">@Html.Raw(Language.Phrase("QuickSearchAuto"))</button>
+                <button type="button" class="dropdown-item@(setPjsList.BasicSearch.SessionType == "=" ? " active" : "")" form="fSetPjssrch" data-ew-action="search-type" data-search-type="=">@Html.Raw(Language.Phrase("QuickSearchExact"))</button>
+                <button type="button" class="dropdown-item@(setPjsList.BasicSearch.SessionType == "AND" ? " active" : "")" form="fSetPjssrch" data-ew-action="search-type" data-search-type="AND">@Html.Raw(Language.Phrase("QuickSearchAll"))</button>
+                <button type="button" class="dropdown-item@(setPjsList.BasicSearch.SessionType == "OR" ? " active" : "")" form="fSetPjssrch" data-ew-action="search-type" data-search-type="OR">@Html.Raw(Language.Phrase("QuickSearchAny"))</button>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-auto mb-3">
+        <button class="btn btn-primary" name="btn-submit" id="btn-submit" type="submit">@Html.Raw(Language.Phrase("SearchBtn"))</button>
+    </div>
+</div>
+</div><!-- /.ew-extended-search -->
+} @* Show search form (end) *@
+}
+</div><!-- /.ew-search-panel -->
+</form>
+}
+@setPjsList.ShowPageHeader()
+@setPjsList.ShowMessages()
+<main class="list @(setPjsList.TotalRecords == 0 && !setPjsList.IsAdd ? " ew-no-record" : "")">
+<div id="ew-header-options">
+    @setPjsList.HeaderOptions.RenderBody()
+</div>
+<div id="ew-list">
+@if (setPjsList.TotalRecords > 0 || !Empty(setPjsList.CurrentAction)) {
+<div class="card ew-card ew-grid@(setPjsList.IsAddOrEdit ? " ew-grid-add-edit" : "") @(setPjsList.TableGridClass)">
+<form name="@(setPjsList.FormName)" id="@(setPjsList.FormName)" class="ew-form ew-list-form" action="@AppPath(setPjsList.PageName)" method="post" novalidate autocomplete="off">
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+@if (setPjsList.IsModal) {
+<input type="hidden" name="modal" value="1">
+}
+<div id="gmp_SetPjs" class="card-body ew-grid-middle-panel @(setPjsList.TableContainerClass)" style="@(setPjsList.TableContainerStyle)">
+@if (setPjsList.TotalRecords > 0 || setPjsList.IsGridEdit || setPjsList.IsMultiEdit) {
+<table id="tbl_SetPjslist" class="@(setPjsList.TableClass)"><!-- .ew-table -->
+<thead>
+    <tr class="ew-table-header">
+@{
+    // Header row
+    setPjsList.RowType = RowType.Header;
+
+    // Render list options
+    await setPjsList.RenderListOptions();
+}
+@* Render list options (header, left) *@
+@setPjsList.ListOptions.RenderHeader("left")
+@if (setPjsList.RedirectLink.Visible) { // setPjsList.RedirectLink.Visible (begin)
+        <th data-name="RedirectLink" class="@(setPjsList.RedirectLink.HeaderCellClass)"><div id="elh_SetPjs_RedirectLink" class="SetPjs_RedirectLink">@Html.Raw(setPjsList.RenderFieldHeader(setPjsList.RedirectLink))</div></th>
+} @* setPjsList.RedirectLink.Visible (end) *@
+@if (setPjsList.Nama.Visible) { // setPjsList.Nama.Visible (begin)
+        <th data-name="Nama" class="@(setPjsList.Nama.HeaderCellClass)"><div id="elh_SetPjs_Nama" class="SetPjs_Nama">@Html.Raw(setPjsList.RenderFieldHeader(setPjsList.Nama))</div></th>
+} @* setPjsList.Nama.Visible (end) *@
+@if (setPjsList.OrganizationLevel.Visible) { // setPjsList.OrganizationLevel.Visible (begin)
+        <th data-name="OrganizationLevel" class="@(setPjsList.OrganizationLevel.HeaderCellClass)"><div id="elh_SetPjs_OrganizationLevel" class="SetPjs_OrganizationLevel">@Html.Raw(setPjsList.RenderFieldHeader(setPjsList.OrganizationLevel))</div></th>
+} @* setPjsList.OrganizationLevel.Visible (end) *@
+@if (setPjsList.PosisiAwal.Visible) { // setPjsList.PosisiAwal.Visible (begin)
+        <th data-name="PosisiAwal" class="@(setPjsList.PosisiAwal.HeaderCellClass)"><div id="elh_SetPjs_PosisiAwal" class="SetPjs_PosisiAwal">@Html.Raw(setPjsList.RenderFieldHeader(setPjsList.PosisiAwal))</div></th>
+} @* setPjsList.PosisiAwal.Visible (end) *@
+@if (setPjsList.PosisiPJS.Visible) { // setPjsList.PosisiPJS.Visible (begin)
+        <th data-name="PosisiPJS" class="@(setPjsList.PosisiPJS.HeaderCellClass)"><div id="elh_SetPjs_PosisiPJS" class="SetPjs_PosisiPJS">@Html.Raw(setPjsList.RenderFieldHeader(setPjsList.PosisiPJS))</div></th>
+} @* setPjsList.PosisiPJS.Visible (end) *@
+@if (setPjsList.TanggalMulai.Visible) { // setPjsList.TanggalMulai.Visible (begin)
+        <th data-name="TanggalMulai" class="@(setPjsList.TanggalMulai.HeaderCellClass)"><div id="elh_SetPjs_TanggalMulai" class="SetPjs_TanggalMulai">@Html.Raw(setPjsList.RenderFieldHeader(setPjsList.TanggalMulai))</div></th>
+} @* setPjsList.TanggalMulai.Visible (end) *@
+@if (setPjsList.TanggalSelesai.Visible) { // setPjsList.TanggalSelesai.Visible (begin)
+        <th data-name="TanggalSelesai" class="@(setPjsList.TanggalSelesai.HeaderCellClass)"><div id="elh_SetPjs_TanggalSelesai" class="SetPjs_TanggalSelesai">@Html.Raw(setPjsList.RenderFieldHeader(setPjsList.TanggalSelesai))</div></th>
+} @* setPjsList.TanggalSelesai.Visible (end) *@
+@if (setPjsList.Status.Visible) { // setPjsList.Status.Visible (begin)
+        <th data-name="Status" class="@(setPjsList.Status.HeaderCellClass)"><div id="elh_SetPjs_Status" class="SetPjs_Status">@Html.Raw(setPjsList.RenderFieldHeader(setPjsList.Status))</div></th>
+} @* setPjsList.Status.Visible (end) *@
+@if (setPjsList.DownloadSuratTugas.Visible) { // setPjsList.DownloadSuratTugas.Visible (begin)
+        <th data-name="DownloadSuratTugas" class="@(setPjsList.DownloadSuratTugas.HeaderCellClass)" style="white-space: nowrap;"><div id="elh_SetPjs_DownloadSuratTugas" class="SetPjs_DownloadSuratTugas">@Html.Raw(setPjsList.RenderFieldHeader(setPjsList.DownloadSuratTugas))</div></th>
+} @* setPjsList.DownloadSuratTugas.Visible (end) *@
+@if (setPjsList.Remaks.Visible) { // setPjsList.Remaks.Visible (begin)
+        <th data-name="Remaks" class="@(setPjsList.Remaks.HeaderCellClass)"><div id="elh_SetPjs_Remaks" class="SetPjs_Remaks">@Html.Raw(setPjsList.RenderFieldHeader(setPjsList.Remaks))</div></th>
+} @* setPjsList.Remaks.Visible (end) *@
+@if (setPjsList.DibuatOleh.Visible) { // setPjsList.DibuatOleh.Visible (begin)
+        <th data-name="DibuatOleh" class="@(setPjsList.DibuatOleh.HeaderCellClass)"><div id="elh_SetPjs_DibuatOleh" class="SetPjs_DibuatOleh">@Html.Raw(setPjsList.RenderFieldHeader(setPjsList.DibuatOleh))</div></th>
+} @* setPjsList.DibuatOleh.Visible (end) *@
+@if (setPjsList.TanggalDibuat.Visible) { // setPjsList.TanggalDibuat.Visible (begin)
+        <th data-name="TanggalDibuat" class="@(setPjsList.TanggalDibuat.HeaderCellClass)"><div id="elh_SetPjs_TanggalDibuat" class="SetPjs_TanggalDibuat">@Html.Raw(setPjsList.RenderFieldHeader(setPjsList.TanggalDibuat))</div></th>
+} @* setPjsList.TanggalDibuat.Visible (end) *@
+@if (setPjsList.DiperbaharuiOleh.Visible) { // setPjsList.DiperbaharuiOleh.Visible (begin)
+        <th data-name="DiperbaharuiOleh" class="@(setPjsList.DiperbaharuiOleh.HeaderCellClass)"><div id="elh_SetPjs_DiperbaharuiOleh" class="SetPjs_DiperbaharuiOleh">@Html.Raw(setPjsList.RenderFieldHeader(setPjsList.DiperbaharuiOleh))</div></th>
+} @* setPjsList.DiperbaharuiOleh.Visible (end) *@
+@if (setPjsList.DiperbaharuiTanggal.Visible) { // setPjsList.DiperbaharuiTanggal.Visible (begin)
+        <th data-name="DiperbaharuiTanggal" class="@(setPjsList.DiperbaharuiTanggal.HeaderCellClass)"><div id="elh_SetPjs_DiperbaharuiTanggal" class="SetPjs_DiperbaharuiTanggal">@Html.Raw(setPjsList.RenderFieldHeader(setPjsList.DiperbaharuiTanggal))</div></th>
+} @* setPjsList.DiperbaharuiTanggal.Visible (end) *@
+@* Render list options (header, right) *@
+@setPjsList.ListOptions.RenderHeader("right")
+    </tr>
+</thead>
+<tbody data-page="@(setPjsList.PageNumber)">
+@{
+    await setPjsList.SetupGrid();
+    bool eof = setPjsList.Recordset == null; // DN
+}
+@while (setPjsList.RecordCount < setPjsList.StopRecord || SameString(setPjsList.RowIndex, "$rowindex$")) { // Begin While
+    if (!eof && !SameString(setPjsList.RowIndex, "$rowindex$") &&
+        (!setPjsList.IsGridAdd || setPjsList.CurrentMode == "copy") &&
+        (!((setPjsList.IsCopy || setPjsList.IsAdd) && setPjsList.RowIndex is int rowIndex && rowIndex == 0))) // DN
+        eof = !await setPjsList.Recordset.ReadAsync();
+    setPjsList.RecordCount++;
+    if (setPjsList.RecordCount >= setPjsList.StartRecord) {
+        await setPjsList.SetupRow();
+    <tr @Html.Raw(setPjsList.RowAttributes)>
+    @* Render list options (body, left) *@
+    @setPjsList.ListOptions.RenderBody("left", setPjsList.RowCount)
+    @if (setPjsList.RedirectLink.Visible) { // setPjsList.RedirectLink.Visible (begin)
+        <td data-name="RedirectLink" @Html.Raw(setPjsList.RedirectLink.CellAttributes)>
+<span id="el@(setPjsList.RowIndex == "$rowindex$" ? "$rowindex$" : setPjsList.RowCount)_SetPjs_RedirectLink" class="el_SetPjs_RedirectLink">
+<span @Html.Raw(setPjsList.RedirectLink.ViewAttributes)>
+@Html.Raw(setPjsList.RedirectLink.GetViewValue())</span>
+</span>
+</td>
+    } @* setPjsList.RedirectLink.Visible (end) *@
+    @if (setPjsList.Nama.Visible) { // setPjsList.Nama.Visible (begin)
+        <td data-name="Nama" @Html.Raw(setPjsList.Nama.CellAttributes)>
+<span id="el@(setPjsList.RowIndex == "$rowindex$" ? "$rowindex$" : setPjsList.RowCount)_SetPjs_Nama" class="el_SetPjs_Nama">
+<span @Html.Raw(setPjsList.Nama.ViewAttributes)>
+@Html.Raw(setPjsList.Nama.GetViewValue())</span>
+</span>
+</td>
+    } @* setPjsList.Nama.Visible (end) *@
+    @if (setPjsList.OrganizationLevel.Visible) { // setPjsList.OrganizationLevel.Visible (begin)
+        <td data-name="OrganizationLevel" @Html.Raw(setPjsList.OrganizationLevel.CellAttributes)>
+<span id="el@(setPjsList.RowIndex == "$rowindex$" ? "$rowindex$" : setPjsList.RowCount)_SetPjs_OrganizationLevel" class="el_SetPjs_OrganizationLevel">
+<span @Html.Raw(setPjsList.OrganizationLevel.ViewAttributes)>
+@Html.Raw(setPjsList.OrganizationLevel.GetViewValue())</span>
+</span>
+</td>
+    } @* setPjsList.OrganizationLevel.Visible (end) *@
+    @if (setPjsList.PosisiAwal.Visible) { // setPjsList.PosisiAwal.Visible (begin)
+        <td data-name="PosisiAwal" @Html.Raw(setPjsList.PosisiAwal.CellAttributes)>
+<span id="el@(setPjsList.RowIndex == "$rowindex$" ? "$rowindex$" : setPjsList.RowCount)_SetPjs_PosisiAwal" class="el_SetPjs_PosisiAwal">
+<span @Html.Raw(setPjsList.PosisiAwal.ViewAttributes)>
+@Html.Raw(setPjsList.PosisiAwal.GetViewValue())</span>
+</span>
+</td>
+    } @* setPjsList.PosisiAwal.Visible (end) *@
+    @if (setPjsList.PosisiPJS.Visible) { // setPjsList.PosisiPJS.Visible (begin)
+        <td data-name="PosisiPJS" @Html.Raw(setPjsList.PosisiPJS.CellAttributes)>
+<span id="el@(setPjsList.RowIndex == "$rowindex$" ? "$rowindex$" : setPjsList.RowCount)_SetPjs_PosisiPJS" class="el_SetPjs_PosisiPJS">
+<span @Html.Raw(setPjsList.PosisiPJS.ViewAttributes)>
+@Html.Raw(setPjsList.PosisiPJS.GetViewValue())</span>
+</span>
+</td>
+    } @* setPjsList.PosisiPJS.Visible (end) *@
+    @if (setPjsList.TanggalMulai.Visible) { // setPjsList.TanggalMulai.Visible (begin)
+        <td data-name="TanggalMulai" @Html.Raw(setPjsList.TanggalMulai.CellAttributes)>
+<span id="el@(setPjsList.RowIndex == "$rowindex$" ? "$rowindex$" : setPjsList.RowCount)_SetPjs_TanggalMulai" class="el_SetPjs_TanggalMulai">
+<span @Html.Raw(setPjsList.TanggalMulai.ViewAttributes)>
+@Html.Raw(setPjsList.TanggalMulai.GetViewValue())</span>
+</span>
+</td>
+    } @* setPjsList.TanggalMulai.Visible (end) *@
+    @if (setPjsList.TanggalSelesai.Visible) { // setPjsList.TanggalSelesai.Visible (begin)
+        <td data-name="TanggalSelesai" @Html.Raw(setPjsList.TanggalSelesai.CellAttributes)>
+<span id="el@(setPjsList.RowIndex == "$rowindex$" ? "$rowindex$" : setPjsList.RowCount)_SetPjs_TanggalSelesai" class="el_SetPjs_TanggalSelesai">
+<span @Html.Raw(setPjsList.TanggalSelesai.ViewAttributes)>
+@Html.Raw(setPjsList.TanggalSelesai.GetViewValue())</span>
+</span>
+</td>
+    } @* setPjsList.TanggalSelesai.Visible (end) *@
+    @if (setPjsList.Status.Visible) { // setPjsList.Status.Visible (begin)
+        <td data-name="Status" @Html.Raw(setPjsList.Status.CellAttributes)>
+<span id="el@(setPjsList.RowIndex == "$rowindex$" ? "$rowindex$" : setPjsList.RowCount)_SetPjs_Status" class="el_SetPjs_Status">
+<span @Html.Raw(setPjsList.Status.ViewAttributes)>
+@Html.Raw(setPjsList.Status.GetViewValue())</span>
+</span>
+</td>
+    } @* setPjsList.Status.Visible (end) *@
+    @if (setPjsList.DownloadSuratTugas.Visible) { // setPjsList.DownloadSuratTugas.Visible (begin)
+        <td data-name="DownloadSuratTugas" @Html.Raw(setPjsList.DownloadSuratTugas.CellAttributes)>
+<span id="el@(setPjsList.RowIndex == "$rowindex$" ? "$rowindex$" : setPjsList.RowCount)_SetPjs_DownloadSuratTugas" class="el_SetPjs_DownloadSuratTugas">
+<span @Html.Raw(setPjsList.DownloadSuratTugas.ViewAttributes)>
+@Html.Raw(setPjsList.DownloadSuratTugas.GetViewValue())</span>
+</span>
+</td>
+    } @* setPjsList.DownloadSuratTugas.Visible (end) *@
+    @if (setPjsList.Remaks.Visible) { // setPjsList.Remaks.Visible (begin)
+        <td data-name="Remaks" @Html.Raw(setPjsList.Remaks.CellAttributes)>
+<span id="el@(setPjsList.RowIndex == "$rowindex$" ? "$rowindex$" : setPjsList.RowCount)_SetPjs_Remaks" class="el_SetPjs_Remaks">
+<span @Html.Raw(setPjsList.Remaks.ViewAttributes)>
+@Html.Raw(setPjsList.Remaks.GetViewValue())</span>
+</span>
+</td>
+    } @* setPjsList.Remaks.Visible (end) *@
+    @if (setPjsList.DibuatOleh.Visible) { // setPjsList.DibuatOleh.Visible (begin)
+        <td data-name="DibuatOleh" @Html.Raw(setPjsList.DibuatOleh.CellAttributes)>
+<span id="el@(setPjsList.RowIndex == "$rowindex$" ? "$rowindex$" : setPjsList.RowCount)_SetPjs_DibuatOleh" class="el_SetPjs_DibuatOleh">
+<span @Html.Raw(setPjsList.DibuatOleh.ViewAttributes)>
+@Html.Raw(setPjsList.DibuatOleh.GetViewValue())</span>
+</span>
+</td>
+    } @* setPjsList.DibuatOleh.Visible (end) *@
+    @if (setPjsList.TanggalDibuat.Visible) { // setPjsList.TanggalDibuat.Visible (begin)
+        <td data-name="TanggalDibuat" @Html.Raw(setPjsList.TanggalDibuat.CellAttributes)>
+<span id="el@(setPjsList.RowIndex == "$rowindex$" ? "$rowindex$" : setPjsList.RowCount)_SetPjs_TanggalDibuat" class="el_SetPjs_TanggalDibuat">
+<span @Html.Raw(setPjsList.TanggalDibuat.ViewAttributes)>
+@Html.Raw(setPjsList.TanggalDibuat.GetViewValue())</span>
+</span>
+</td>
+    } @* setPjsList.TanggalDibuat.Visible (end) *@
+    @if (setPjsList.DiperbaharuiOleh.Visible) { // setPjsList.DiperbaharuiOleh.Visible (begin)
+        <td data-name="DiperbaharuiOleh" @Html.Raw(setPjsList.DiperbaharuiOleh.CellAttributes)>
+<span id="el@(setPjsList.RowIndex == "$rowindex$" ? "$rowindex$" : setPjsList.RowCount)_SetPjs_DiperbaharuiOleh" class="el_SetPjs_DiperbaharuiOleh">
+<span @Html.Raw(setPjsList.DiperbaharuiOleh.ViewAttributes)>
+@Html.Raw(setPjsList.DiperbaharuiOleh.GetViewValue())</span>
+</span>
+</td>
+    } @* setPjsList.DiperbaharuiOleh.Visible (end) *@
+    @if (setPjsList.DiperbaharuiTanggal.Visible) { // setPjsList.DiperbaharuiTanggal.Visible (begin)
+        <td data-name="DiperbaharuiTanggal" @Html.Raw(setPjsList.DiperbaharuiTanggal.CellAttributes)>
+<span id="el@(setPjsList.RowIndex == "$rowindex$" ? "$rowindex$" : setPjsList.RowCount)_SetPjs_DiperbaharuiTanggal" class="el_SetPjs_DiperbaharuiTanggal">
+<span @Html.Raw(setPjsList.DiperbaharuiTanggal.ViewAttributes)>
+@Html.Raw(setPjsList.DiperbaharuiTanggal.GetViewValue())</span>
+</span>
+</td>
+    } @* setPjsList.DiperbaharuiTanggal.Visible (end) *@
+    @* Render list options (body, right) *@
+    @setPjsList.ListOptions.RenderBody("right", setPjsList.RowCount)
+    </tr>
+    } @* End if *@
+
+    // Reset for template row
+    if (SameString(setPjsList.RowIndex, "$rowindex$"))
+        setPjsList.RowIndex = 0;
+
+    // Reset inline add/copy row
+    if ((setPjsList.IsCopy || setPjsList.IsAdd) && setPjsList.RowIndex is int rowIndex2 && rowIndex2 == 0)
+        setPjsList.RowIndex = 1;
+} @* End While *@
+</tbody>
+</table><!-- /.ew-table -->
+} @* End If TotalRecords > 0 *@
+</div><!-- /.ew-grid-middle-panel -->
+@if (Empty(setPjsList.CurrentAction) && !setPjsList.UseAjaxActions) {
+<input type="hidden" name="action" id="action" value="">
+}
+</form><!-- /.ew-list-form -->
+@{ setPjsList.CloseRecordset(); }
+@if (!setPjsList.IsExport()) {
+<div class="card-footer ew-grid-lower-panel">
+@if (!setPjsList.IsGridAdd && !(setPjsList.IsGridEdit && setPjsList.ModalGridEdit) && !setPjsList.IsMultiEdit) {
+@Html.Raw(setPjsList.Pager.Render())
+}
+<div class="ew-list-other-options">
+@setPjsList.OtherOptions.RenderBody("bottom")
+</div>
+</div>
+}
+</div><!-- /.ew-grid -->
+} else { // Show other options
+<div class="ew-list-other-options">
+@setPjsList.OtherOptions.ForEach(opt => opt.ButtonClass = "").RenderBody()
+</div>
+}
+</div>
+<div id="ew-footer-options">
+    @setPjsList.FooterOptions.RenderBody()
+</div>
+</main>
+@setPjsList.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+@if (!setPjsList.IsExport()) {
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("SetPjs");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Startup script
+    const parent_url = ew.PATH_BASE;
+    // Stepper untuk halaman ProofOfVisit (tampilkan hanya step 1)
+    (function() {
+        // definisi 1 langkah saja
+        const steps = [
+            { number: 1, label: "Set User PJS", url: "", icon: "fa-user-clock" }
+        ];
+        const currentStep = 1;
+
+        // sisipkan CSS stepper sekali saja
+        if (!document.querySelector("style[data-hsse-stepper]")) {
+            $("<style data-hsse-stepper>")
+              .prop("type", "text/css")
+              .html(`
+                .stepper{display:flex;counter-reset:step}
+                .step{width:150px;text-align:center;position:relative}
+                .step:not(:last-child)::after{content:'';position:absolute;top:20px;right:-50%;width:100%;height:4px;background-color:#ccc;z-index:0}
+                .step.completed:not(:last-child)::after{background-color:#3c6dbd}
+                .step-icon{width:36px;height:36px;line-height:36px;border-radius:50%;background:#ccc;display:inline-block;z-index:1;position:relative;color:#fff;font-weight:bold}
+                .step.active .step-icon{background:#3c6dbd}
+                .step-label{margin-top:8px;font-size:14px;display:flex;justify-content:center;align-items:center;gap:6px;color:#3c6dbd;text-decoration:none}
+                .step-label-not-active{color:#CCC!important}
+            `).appendTo("head");
+        }
+
+        // bangun HTML stepper
+        const $wrapper = $('<div class="d-flex border-bottom border-2 pb-2"><div class="stepper"></div></div>');
+        const $stepper = $wrapper.find(".stepper");
+        steps.forEach(step => {
+            const isActive = step.number === currentStep;
+            const icon = `<div class="step-icon${isActive ? ' bg-success' : ''}">${step.number}</div>`;
+            const label = isActive
+                ? `<div class="step-label text-success"><i class="fa-solid ${step.icon} me-1 text-success"></i>${step.label}</div>`
+                : `<div class="step-label-not-active"><i class="fa-solid ${step.icon} me-1"></i>${step.label}</div>`;
+            $stepper.append(`<div class="step ${isActive ? 'active text-success' : 'text-secondary'}">${icon}${label}</div>`);
+        });
+        $(".content-header .container-fluid .row").append($wrapper);
+    })();
+
+    // ===== Pindahkan tombol Add ke samping Search =====
+    (function () {
+      const addUrl = `${parent_url}SetPjsAdd`;
+      const $addBtn = $(`
+        <a href="${addUrl}" class="btn btn-success ms-2" id="btn-add-pjs">
+          <i class="fa-solid fa-plus"></i> Add New
+        </a>
+      `);
+
+      // Cari tombol Search di panel pencarian lalu sisipkan tombol Add setelahnya
+      const $searchBtn =
+        $('.ew-search-panel button[type="submit"].btn-primary').first()   // ASP.NET Maker default
+        .add($('#btn-search').first());                                   // fallback kalau ada id custom
+      if ($searchBtn.length) {
+        $searchBtn.after($addBtn);
+      } else {
+        // Fallback terakhir: taruh di ujung panel pencarian
+        $('.ew-search-panel .ew-extended-search, .ew-search-panel').first().append($('<div class="mt-2"></div>').append($addBtn));
+      }
+
+      // Sembunyikan tombol Add di bagian bawah grid agar tidak dobel
+      $('.ew-grid-lower-panel .ew-list-other-options a, .ew-grid-lower-panel a').filter(function () {
+        return (this.href || '').includes('SetPjsAdd');
+      }).closest('.ew-list-other-options, .btn, a').hide();
+
+      // Jika tombol Add di footer berupa ikon (+), sembunyikan juga
+      $('.ew-grid-lower-panel .btn, .ew-grid-lower-panel a').filter(function () {
+        return $(this).find('.fa-plus, .fa-solid.fa-plus').length > 0;
+      }).closest('.btn, a').hide();
+    })();
+    $.ajax({
+        url: `${parent_url}api/LookUpList/GetDetailPjs`,
+        type: 'GET',
+        success: function (res) {
+            let resultHtml = '';
+            const username = "@CurrentUserName()";
+            if (res.success) {
+                if (res.result.exception) {
+                    resultHtml  =   `<span class="ms-3 fw-bold">
+                                        Saat ini user <span style="color: red; font-style: italic;">${username}</span> sedang menjabat sebagai PJS 
+                                        <span style="color: red; font-style: italic;">${res.result.PosisiPJS}</span>, 
+                                        mulai tanggal <span style="color: red; font-style: italic;">${res.result.TanggalMulai}</span> 
+                                        hingga tanggal <span style="color: red; font-style: italic;">${res.result.TanggalSelesai}</span>
+                                    </span>` ;
+                } else {
+                    resultHtml  =   `<span class="ms-3 fw-bold">
+                                        Saat ini user <span style="color: red; font-style: italic;">${username}</span> tidak sedang menjabat sebagai PJS 
+                                    </span>` ;
+                }
+            }
+            $(".ew-filter-option").after(resultHtml);
+        },
+        error: function (xhr, status, error) {
+            console.error('Gagal get detail pjs:', status, error);
+        }
+    });
+});
+</script>
+}

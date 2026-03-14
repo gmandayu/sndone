@@ -1,0 +1,574 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (masterUserEdit.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = masterUserEdit.UseLayout ? "_Layout" : "";
+}
+@masterUserEdit.ShowPageHeader()
+@masterUserEdit.ShowMessages()
+<main class="edit">
+<form name="fMasterUseredit" id="fMasterUseredit" class="@(masterUserEdit.FormClassName)" action="@AppPath(CurrentPageName())" method="post" novalidate autocomplete="off">
+<script>
+var currentTable = @Html.Raw(ConvertToJson(masterUserEdit.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { MasterUser: currentTable } });
+var currentPageID = ew.PAGE_ID = "edit";
+var currentForm;
+var fMasterUseredit;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("fMasterUseredit")
+        .setPageId("edit")
+
+        // Add fields
+        .setFields([
+
+            ["_Email", [fields._Email.visible && fields._Email.required ? ew.Validators.required(fields._Email.caption) : null, ew.Validators.email], fields._Email.isInvalid],
+            ["_Username", [fields._Username.visible && fields._Username.required ? ew.Validators.required(fields._Username.caption) : null], fields._Username.isInvalid],
+            ["NamaLengkap", [fields.NamaLengkap.visible && fields.NamaLengkap.required ? ew.Validators.required(fields.NamaLengkap.caption) : null], fields.NamaLengkap.isInvalid],
+            ["_UserLevel", [fields._UserLevel.visible && fields._UserLevel.required ? ew.Validators.required(fields._UserLevel.caption) : null], fields._UserLevel.isInvalid],
+            ["Rule", [fields.Rule.visible && fields.Rule.required ? ew.Validators.required(fields.Rule.caption) : null], fields.Rule.isInvalid],
+            ["IdPosition", [fields.IdPosition.visible && fields.IdPosition.required ? ew.Validators.required(fields.IdPosition.caption) : null, ew.Validators.integer], fields.IdPosition.isInvalid],
+            ["Region", [fields.Region.visible && fields.Region.required ? ew.Validators.required(fields.Region.caption) : null], fields.Region.isInvalid],
+            ["Plant", [fields.Plant.visible && fields.Plant.required ? ew.Validators.required(fields.Plant.caption) : null], fields.Plant.isInvalid],
+            ["LookupPosition", [fields.LookupPosition.visible && fields.LookupPosition.required ? ew.Validators.required(fields.LookupPosition.caption) : null], fields.LookupPosition.isInvalid],
+            ["StatusAktif", [fields.StatusAktif.visible && fields.StatusAktif.required ? ew.Validators.required(fields.StatusAktif.caption) : null], fields.StatusAktif.isInvalid],
+            ["Keterangan", [fields.Keterangan.visible && fields.Keterangan.required ? ew.Validators.required(fields.Keterangan.caption) : null], fields.Keterangan.isInvalid],
+            ["exception", [fields.exception.visible && fields.exception.required ? ew.Validators.required(fields.exception.caption) : null], fields.exception.isInvalid]
+        ])
+
+        // Form_CustomValidate
+        .setCustomValidate(
+            function(fobj) { // DO NOT CHANGE THIS LINE!
+                    // Your custom validation code here, return false if invalid.
+                    return true;
+                }
+        )
+
+        // Use JavaScript validation or not
+        .setValidateRequired(ew.CLIENT_VALIDATE)
+
+        // Dynamic selection lists
+        .setLists({
+            "_UserLevel": @Html.Raw(masterUserEdit._UserLevel.ToClientList(masterUserEdit)),
+            "Rule": @Html.Raw(masterUserEdit.Rule.ToClientList(masterUserEdit)),
+            "IdPosition": @Html.Raw(masterUserEdit.IdPosition.ToClientList(masterUserEdit)),
+            "Region": @Html.Raw(masterUserEdit.Region.ToClientList(masterUserEdit)),
+            "Plant": @Html.Raw(masterUserEdit.Plant.ToClientList(masterUserEdit)),
+            "LookupPosition": @Html.Raw(masterUserEdit.LookupPosition.ToClientList(masterUserEdit)),
+            "StatusAktif": @Html.Raw(masterUserEdit.StatusAktif.ToClientList(masterUserEdit)),
+            "exception": @Html.Raw(masterUserEdit.exception.ToClientList(masterUserEdit)),
+        })
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Client script
+    const parent_url = ew.PATH_BASE;
+    let currentIdPosition = '@masterUserEdit.IdPosition.CurrentValue';
+    $('#x_LookupPosition').on('change', function () {
+        hideFeedback($(this));
+        $('#x_IdPosition').val($(this).val());
+    });
+    function disabledPosition() {
+        $("#x_LookupPosition").hide();
+        $("#x_LookupPosition").empty();
+        $("#x_LookupPosition").val('').trigger('change');
+        ddl.prop('disabled', true);
+    }
+    function getPosition(userLevel, Rule, Region, Plant) {
+        const ddl = $("#x_LookupPosition");
+        ddl.empty();
+        ddl.prop('disabled', false);
+        $("#r_LookupPosition").show();
+        let url = `${parent_url}api/LookUpList/get-dropdown/user-position?UserLevel=${userLevel}`;
+        if (Rule) {
+            url += `&IdRule=${Rule}`;
+        }
+        if (Region) {
+            url += `&IdRegion=${Region}`;
+        }
+        if (Plant) {
+            url += `&IdPlant=${Plant}`;
+        }
+        $.ajax({
+            url: url,
+            method: 'GET',
+            dataType: 'json',
+            beforeSend: function () {
+                showLoading();
+            },
+            success: function (data) {
+                $.each(data, function (index, item) {
+                    if (currentIdPosition && item.Value == currentIdPosition) {
+                        ddl.append(`<option value="${item.Value}" selected>${item.Label}</option>`);
+                        currentIdPosition = null;
+                    } else {
+                        ddl.append(`<option value="${item.Value}">${item.Label}</option>`);
+                    }
+                });
+            },
+            error: function (xhr, status, error) {
+                console.error("Gagal ambil data dropdown:", error);
+                ddl.empty();
+            },
+            complete: function() {
+                hideLoading()
+            }      
+        });
+    }
+    $('#x__UserLevel, #x_Rule, #x_Region, #x_Plant').on('change', function () {
+        hideFeedback($(this));
+        const userLevel = $('#x__UserLevel').val();
+        const Rule = $('#x_Rule').val();
+        const Region = $('#x_Region').val();
+        const Plant = $('#x_Plant').val();
+        if (!userLevel) {
+            $('#r_Plant').hide();
+            $('#r_Region').hide();
+            $('#r_Plant').val('');
+            $('#r_Region').val('');
+            $('#x_Region').prop('disabled', true);
+            $('#x_Plant').prop('disabled', true);
+            disabledPosition();
+            return;
+        }
+        if (userLevel == '3') {
+            $('#r_Plant').hide();
+            $('#r_Region').hide();
+            $('#r_Plant').val('');
+            $('#r_Region').val('');
+            $('#x_Region').prop('disabled', true);
+            $('#x_Plant').prop('disabled', true);
+        } else if (userLevel == '4') {
+            $('#r_Region').show();
+            $('#r_Plant').hide();
+            $('#r_Plant').val('');
+            $('#x_Region').prop('disabled', false);
+        } else {
+            $('#r_Plant').show();
+            $('#r_Region').show();
+            $('#x_Region').prop('disabled', false);
+            if (!Region) {
+                $('#x_Plant').prop('disabled', true);
+            } else {
+                $('#x_Plant').prop('disabled', false);
+            }
+        }
+        getPosition(userLevel, Rule, Region, Plant);
+    });
+    function hideFeedback(el) {
+        let feedback = el.siblings('.invalid-feedback');
+        el.removeClass('is-invalid');
+        feedback.hide();
+    }
+    $('#fMasterUseredit').on('submit', function (e) {
+        e.preventDefault();
+        const userLevel = $('#x__UserLevel').val();
+        const IdPosition = $('#x_IdPosition').val();
+        const Rule = $('#x_Rule').val();
+        if (!userLevel) {
+            $('#x__UserLevel').addClass('is-invalid');
+            var feedback = $('#x__UserLevel').siblings('.invalid-feedback');
+            feedback.text('User level harus dipilih.').show();
+            return false;
+        }
+        if (!Rule) {
+            $('#x_Rule').addClass('is-invalid');
+            var feedback = $('#x_Rule').siblings('.invalid-feedback');
+            feedback.text('Role harus dipilih.').show();
+            return false;
+        }
+        if (!IdPosition) {
+            $('#x_LookupPosition').addClass('is-invalid');
+            var feedback = $('#x_LookupPosition').siblings('.invalid-feedback');
+            feedback.text('Position harus dipilih.').show();
+            return false;
+        }
+        showLoading();
+        setTimeout(() => {
+            hideLoading();
+        }, 3000);
+        this.requestSubmit();
+    });
+});
+</script>
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+<input type="hidden" name="action" id="action" value="update">
+<input type="hidden" name="modal" value="@ConvertToInt(masterUserEdit.IsModal)">
+@if (IsJsonResponse()) {
+<input type="hidden" name="json" value="1">
+}
+<input type="hidden" name="@(masterUserEdit.OldKeyName)" value="@Html.Raw(masterUserEdit.OldKey)">
+<div class="ew-edit-div"><!-- page* -->
+@if (masterUserEdit._Email.Visible) { // masterUserEdit._Email.Visible (begin)
+    <div id="r__Email" @Html.Raw(masterUserEdit._Email.RowAttributes)>
+        <label id="elh_MasterUser__Email" for="x__Email" class="@(masterUserEdit.LeftColumnClass)">@Html.Raw(masterUserEdit._Email.Caption)@Html.Raw(masterUserEdit._Email.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(masterUserEdit.RightColumnClass)"><div @Html.Raw(masterUserEdit._Email.CellAttributes)>
+<span id="el_MasterUser__Email">
+<input type="@(masterUserEdit._Email.InputTextType)" name="x__Email" id="x__Email" data-table="MasterUser" data-field="x__Email" value="@Html.Raw(masterUserEdit._Email.EditValue)" size="30" maxlength="100" placeholder="@Html.Raw(HtmlEncode(masterUserEdit._Email.PlaceHolder))" data-format-pattern="@(masterUserEdit._Email.FormatPattern)"@Html.Raw(masterUserEdit._Email.EditAttributes) aria-describedby="x__Email_help">
+@Html.Raw(masterUserEdit._Email.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(masterUserEdit._Email.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* masterUserEdit._Email.Visible (end) *@
+@if (masterUserEdit._Username.Visible) { // masterUserEdit._Username.Visible (begin)
+    <div id="r__Username" @Html.Raw(masterUserEdit._Username.RowAttributes)>
+        <label id="elh_MasterUser__Username" for="x__Username" class="@(masterUserEdit.LeftColumnClass)">@Html.Raw(masterUserEdit._Username.Caption)@Html.Raw(masterUserEdit._Username.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(masterUserEdit.RightColumnClass)"><div @Html.Raw(masterUserEdit._Username.CellAttributes)>
+<span id="el_MasterUser__Username">
+<input type="@(masterUserEdit._Username.InputTextType)" name="x__Username" id="x__Username" data-table="MasterUser" data-field="x__Username" value="@Html.Raw(masterUserEdit._Username.EditValue)" size="30" maxlength="50" placeholder="@Html.Raw(HtmlEncode(masterUserEdit._Username.PlaceHolder))" data-format-pattern="@(masterUserEdit._Username.FormatPattern)"@Html.Raw(masterUserEdit._Username.EditAttributes) aria-describedby="x__Username_help">
+@Html.Raw(masterUserEdit._Username.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(masterUserEdit._Username.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* masterUserEdit._Username.Visible (end) *@
+@if (masterUserEdit.NamaLengkap.Visible) { // masterUserEdit.NamaLengkap.Visible (begin)
+    <div id="r_NamaLengkap" @Html.Raw(masterUserEdit.NamaLengkap.RowAttributes)>
+        <label id="elh_MasterUser_NamaLengkap" for="x_NamaLengkap" class="@(masterUserEdit.LeftColumnClass)">@Html.Raw(masterUserEdit.NamaLengkap.Caption)@Html.Raw(masterUserEdit.NamaLengkap.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(masterUserEdit.RightColumnClass)"><div @Html.Raw(masterUserEdit.NamaLengkap.CellAttributes)>
+<span id="el_MasterUser_NamaLengkap">
+<input type="@(masterUserEdit.NamaLengkap.InputTextType)" name="x_NamaLengkap" id="x_NamaLengkap" data-table="MasterUser" data-field="x_NamaLengkap" value="@Html.Raw(masterUserEdit.NamaLengkap.EditValue)" size="30" maxlength="100" placeholder="@Html.Raw(HtmlEncode(masterUserEdit.NamaLengkap.PlaceHolder))" data-format-pattern="@(masterUserEdit.NamaLengkap.FormatPattern)"@Html.Raw(masterUserEdit.NamaLengkap.EditAttributes) aria-describedby="x_NamaLengkap_help">
+@Html.Raw(masterUserEdit.NamaLengkap.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(masterUserEdit.NamaLengkap.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* masterUserEdit.NamaLengkap.Visible (end) *@
+@if (masterUserEdit._UserLevel.Visible) { // masterUserEdit._UserLevel.Visible (begin)
+    <div id="r__UserLevel" @Html.Raw(masterUserEdit._UserLevel.RowAttributes)>
+        <label id="elh_MasterUser__UserLevel" for="x__UserLevel" class="@(masterUserEdit.LeftColumnClass)">@Html.Raw(masterUserEdit._UserLevel.Caption)@Html.Raw(masterUserEdit._UserLevel.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(masterUserEdit.RightColumnClass)"><div @Html.Raw(masterUserEdit._UserLevel.CellAttributes)>
+@if (!Security.IsAdmin && Security.IsLoggedIn) { // Non system admin
+<span id="el_MasterUser__UserLevel">
+<span class="form-control-plaintext">@Html.Raw(masterUserEdit._UserLevel.DisplayValue(masterUserEdit._UserLevel.EditValue))</span>
+</span>
+} else {
+<span id="el_MasterUser__UserLevel">
+    <select
+        id="x__UserLevel"
+        name="x__UserLevel"
+        class="form-select ew-select@(masterUserEdit._UserLevel.IsInvalidClass)"
+        data-select2-id="fMasterUseredit_x__UserLevel"
+        data-table="MasterUser"
+        data-field="x__UserLevel"
+        data-value-separator="@(masterUserEdit._UserLevel.DisplayValueSeparatorAttribute)"
+        data-placeholder="@(HtmlEncode(masterUserEdit._UserLevel.PlaceHolder))"
+        @Html.Raw(masterUserEdit._UserLevel.EditAttributes)>
+        @(masterUserEdit._UserLevel.SelectOptionListHtml("x__UserLevel"))
+    </select>
+    @Html.Raw(masterUserEdit._UserLevel.GetCustomMessage)
+    <div class="invalid-feedback">@Html.Raw(masterUserEdit._UserLevel.GetErrorMessage())</div>
+@Html.Raw(masterUserEdit._UserLevel.Lookup.GetParamTag(masterUserEdit, "p_x__UserLevel"))
+<script>
+loadjs.ready("fMasterUseredit", function() {
+    var options = { name: "x__UserLevel", selectId: "fMasterUseredit_x__UserLevel" },
+        el = document.querySelector("select[data-select2-id='" + options.selectId + "']");
+    if (!el)
+        return;
+    options.closeOnSelect = !options.multiple;
+    options.dropdownParent = el.closest("#ew-modal-dialog, #ew-add-opt-dialog");
+    if (fMasterUseredit.lists._UserLevel?.lookupOptions.length) {
+        options.data = { id: "x__UserLevel", form: "fMasterUseredit" };
+    } else {
+        options.ajax = { id: "x__UserLevel", form: "fMasterUseredit", limit: ew.LOOKUP_PAGE_SIZE };
+    }
+    options.minimumInputLength = ew.selectMinimumInputLength;
+    options = Object.assign({}, ew.selectOptions, options, ew.vars.tables.MasterUser.fields._UserLevel.selectOptions);
+    ew.createSelect(options);
+});
+</script>
+</span>
+}
+</div></div>
+    </div>
+} @* masterUserEdit._UserLevel.Visible (end) *@
+@if (masterUserEdit.Rule.Visible) { // masterUserEdit.Rule.Visible (begin)
+    <div id="r_Rule" @Html.Raw(masterUserEdit.Rule.RowAttributes)>
+        <label id="elh_MasterUser_Rule" for="x_Rule" class="@(masterUserEdit.LeftColumnClass)">@Html.Raw(masterUserEdit.Rule.Caption)@Html.Raw(masterUserEdit.Rule.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(masterUserEdit.RightColumnClass)"><div @Html.Raw(masterUserEdit.Rule.CellAttributes)>
+<span id="el_MasterUser_Rule">
+    <select
+        id="x_Rule"
+        name="x_Rule"
+        class="form-select ew-select@(masterUserEdit.Rule.IsInvalidClass)"
+        data-select2-id="fMasterUseredit_x_Rule"
+        data-table="MasterUser"
+        data-field="x_Rule"
+        data-value-separator="@(masterUserEdit.Rule.DisplayValueSeparatorAttribute)"
+        data-placeholder="@(HtmlEncode(masterUserEdit.Rule.PlaceHolder))"
+        @Html.Raw(masterUserEdit.Rule.EditAttributes)>
+        @(masterUserEdit.Rule.SelectOptionListHtml("x_Rule"))
+    </select>
+    @Html.Raw(masterUserEdit.Rule.GetCustomMessage)
+    <div class="invalid-feedback">@Html.Raw(masterUserEdit.Rule.GetErrorMessage())</div>
+@Html.Raw(masterUserEdit.Rule.Lookup.GetParamTag(masterUserEdit, "p_x_Rule"))
+<script>
+loadjs.ready("fMasterUseredit", function() {
+    var options = { name: "x_Rule", selectId: "fMasterUseredit_x_Rule" },
+        el = document.querySelector("select[data-select2-id='" + options.selectId + "']");
+    if (!el)
+        return;
+    options.closeOnSelect = !options.multiple;
+    options.dropdownParent = el.closest("#ew-modal-dialog, #ew-add-opt-dialog");
+    if (fMasterUseredit.lists.Rule?.lookupOptions.length) {
+        options.data = { id: "x_Rule", form: "fMasterUseredit" };
+    } else {
+        options.ajax = { id: "x_Rule", form: "fMasterUseredit", limit: ew.LOOKUP_PAGE_SIZE };
+    }
+    options.minimumInputLength = ew.selectMinimumInputLength;
+    options = Object.assign({}, ew.selectOptions, options, ew.vars.tables.MasterUser.fields.Rule.selectOptions);
+    ew.createSelect(options);
+});
+</script>
+</span>
+</div></div>
+    </div>
+} @* masterUserEdit.Rule.Visible (end) *@
+@if (masterUserEdit.IdPosition.Visible) { // masterUserEdit.IdPosition.Visible (begin)
+    <div id="r_IdPosition" @Html.Raw(masterUserEdit.IdPosition.RowAttributes)>
+        <label id="elh_MasterUser_IdPosition" class="@(masterUserEdit.LeftColumnClass)">@Html.Raw(masterUserEdit.IdPosition.Caption)@Html.Raw(masterUserEdit.IdPosition.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(masterUserEdit.RightColumnClass)"><div @Html.Raw(masterUserEdit.IdPosition.CellAttributes)>
+<span id="el_MasterUser_IdPosition">
+<span>@{
+    if (IsRTL) {
+        masterUserEdit.IdPosition.EditAttrs["dir"] = "rtl";
+    }
+}</span>
+<span id="as_x_IdPosition" class="ew-auto-suggest">
+    <input type="text" class="form-control" name="sv_x_IdPosition" id="sv_x_IdPosition" value="@(RemoveHtml(ConvertToString(masterUserEdit.IdPosition.EditValue)))" autocomplete="off" size="30" placeholder="@Html.Raw(HtmlEncode(masterUserEdit.IdPosition.PlaceHolder))" data-placeholder="@Html.Raw(HtmlEncode(masterUserEdit.IdPosition.PlaceHolder))" data-format-pattern="@(masterUserEdit.IdPosition.FormatPattern)" @Html.Raw(masterUserEdit.IdPosition.EditAttributes) aria-describedby="x_IdPosition_help">
+</span>
+<selection-list hidden class="form-control" data-table="MasterUser" data-field="x_IdPosition" data-input="sv_x_IdPosition" data-value-separator="@(masterUserEdit.IdPosition.DisplayValueSeparatorAttribute)" name="x_IdPosition" id="x_IdPosition" value="@(HtmlEncode(masterUserEdit.IdPosition.CurrentValue))"></selection-list>
+@Html.Raw(masterUserEdit.IdPosition.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(masterUserEdit.IdPosition.GetErrorMessage())</div>
+<script>
+loadjs.ready(["fMasterUseredit"], function() {
+    fMasterUseredit.createAutoSuggest(Object.assign({"id":"x_IdPosition","forceSelect":false}, { lookupAllDisplayFields: @(masterUserEdit.IdPosition.Lookup.LookupAllDisplayFields ? "true" : "false") }, ew.vars.tables.MasterUser.fields.IdPosition.autoSuggestOptions));
+});
+</script>
+@Html.Raw(masterUserEdit.IdPosition.Lookup.GetParamTag(masterUserEdit, "p_x_IdPosition"))
+</span>
+</div></div>
+    </div>
+} @* masterUserEdit.IdPosition.Visible (end) *@
+@if (masterUserEdit.Region.Visible) { // masterUserEdit.Region.Visible (begin)
+    <div id="r_Region" @Html.Raw(masterUserEdit.Region.RowAttributes)>
+        <label id="elh_MasterUser_Region" for="x_Region" class="@(masterUserEdit.LeftColumnClass)">@Html.Raw(masterUserEdit.Region.Caption)@Html.Raw(masterUserEdit.Region.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(masterUserEdit.RightColumnClass)"><div @Html.Raw(masterUserEdit.Region.CellAttributes)>
+<span id="el_MasterUser_Region">
+    <select
+        id="x_Region"
+        name="x_Region"
+        class="form-select ew-select@(masterUserEdit.Region.IsInvalidClass)"
+        data-select2-id="fMasterUseredit_x_Region"
+        data-table="MasterUser"
+        data-field="x_Region"
+        data-value-separator="@(masterUserEdit.Region.DisplayValueSeparatorAttribute)"
+        data-placeholder="@(HtmlEncode(masterUserEdit.Region.PlaceHolder))"
+        data-ew-action="update-options"
+        @Html.Raw(masterUserEdit.Region.EditAttributes)>
+        @(masterUserEdit.Region.SelectOptionListHtml("x_Region"))
+    </select>
+    @Html.Raw(masterUserEdit.Region.GetCustomMessage)
+    <div class="invalid-feedback">@Html.Raw(masterUserEdit.Region.GetErrorMessage())</div>
+@Html.Raw(masterUserEdit.Region.Lookup.GetParamTag(masterUserEdit, "p_x_Region"))
+<script>
+loadjs.ready("fMasterUseredit", function() {
+    var options = { name: "x_Region", selectId: "fMasterUseredit_x_Region" },
+        el = document.querySelector("select[data-select2-id='" + options.selectId + "']");
+    if (!el)
+        return;
+    options.closeOnSelect = !options.multiple;
+    options.dropdownParent = el.closest("#ew-modal-dialog, #ew-add-opt-dialog");
+    if (fMasterUseredit.lists.Region?.lookupOptions.length) {
+        options.data = { id: "x_Region", form: "fMasterUseredit" };
+    } else {
+        options.ajax = { id: "x_Region", form: "fMasterUseredit", limit: ew.LOOKUP_PAGE_SIZE };
+    }
+    options.minimumInputLength = ew.selectMinimumInputLength;
+    options = Object.assign({}, ew.selectOptions, options, ew.vars.tables.MasterUser.fields.Region.selectOptions);
+    ew.createSelect(options);
+});
+</script>
+</span>
+</div></div>
+    </div>
+} @* masterUserEdit.Region.Visible (end) *@
+@if (masterUserEdit.Plant.Visible) { // masterUserEdit.Plant.Visible (begin)
+    <div id="r_Plant" @Html.Raw(masterUserEdit.Plant.RowAttributes)>
+        <label id="elh_MasterUser_Plant" for="x_Plant" class="@(masterUserEdit.LeftColumnClass)">@Html.Raw(masterUserEdit.Plant.Caption)@Html.Raw(masterUserEdit.Plant.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(masterUserEdit.RightColumnClass)"><div @Html.Raw(masterUserEdit.Plant.CellAttributes)>
+<span id="el_MasterUser_Plant">
+    <select
+        id="x_Plant"
+        name="x_Plant"
+        class="form-select ew-select@(masterUserEdit.Plant.IsInvalidClass)"
+        data-select2-id="fMasterUseredit_x_Plant"
+        data-table="MasterUser"
+        data-field="x_Plant"
+        data-value-separator="@(masterUserEdit.Plant.DisplayValueSeparatorAttribute)"
+        data-placeholder="@(HtmlEncode(masterUserEdit.Plant.PlaceHolder))"
+        @Html.Raw(masterUserEdit.Plant.EditAttributes)>
+        @(masterUserEdit.Plant.SelectOptionListHtml("x_Plant"))
+    </select>
+    @Html.Raw(masterUserEdit.Plant.GetCustomMessage)
+    <div class="invalid-feedback">@Html.Raw(masterUserEdit.Plant.GetErrorMessage())</div>
+@Html.Raw(masterUserEdit.Plant.Lookup.GetParamTag(masterUserEdit, "p_x_Plant"))
+<script>
+loadjs.ready("fMasterUseredit", function() {
+    var options = { name: "x_Plant", selectId: "fMasterUseredit_x_Plant" },
+        el = document.querySelector("select[data-select2-id='" + options.selectId + "']");
+    if (!el)
+        return;
+    options.closeOnSelect = !options.multiple;
+    options.dropdownParent = el.closest("#ew-modal-dialog, #ew-add-opt-dialog");
+    if (fMasterUseredit.lists.Plant?.lookupOptions.length) {
+        options.data = { id: "x_Plant", form: "fMasterUseredit" };
+    } else {
+        options.ajax = { id: "x_Plant", form: "fMasterUseredit", limit: ew.LOOKUP_PAGE_SIZE };
+    }
+    options.minimumInputLength = ew.selectMinimumInputLength;
+    options = Object.assign({}, ew.selectOptions, options, ew.vars.tables.MasterUser.fields.Plant.selectOptions);
+    ew.createSelect(options);
+});
+</script>
+</span>
+</div></div>
+    </div>
+} @* masterUserEdit.Plant.Visible (end) *@
+@if (masterUserEdit.LookupPosition.Visible) { // masterUserEdit.LookupPosition.Visible (begin)
+    <div id="r_LookupPosition" @Html.Raw(masterUserEdit.LookupPosition.RowAttributes)>
+        <label id="elh_MasterUser_LookupPosition" for="x_LookupPosition" class="@(masterUserEdit.LeftColumnClass)">@Html.Raw(masterUserEdit.LookupPosition.Caption)@Html.Raw(masterUserEdit.LookupPosition.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(masterUserEdit.RightColumnClass)"><div @Html.Raw(masterUserEdit.LookupPosition.CellAttributes)>
+<span id="el_MasterUser_LookupPosition">
+    <select
+        id="x_LookupPosition"
+        name="x_LookupPosition"
+        class="form-select ew-select@(masterUserEdit.LookupPosition.IsInvalidClass)"
+        data-select2-id="fMasterUseredit_x_LookupPosition"
+        data-table="MasterUser"
+        data-field="x_LookupPosition"
+        data-value-separator="@(masterUserEdit.LookupPosition.DisplayValueSeparatorAttribute)"
+        data-placeholder="@(HtmlEncode(masterUserEdit.LookupPosition.PlaceHolder))"
+        @Html.Raw(masterUserEdit.LookupPosition.EditAttributes)>
+        @(masterUserEdit.LookupPosition.SelectOptionListHtml("x_LookupPosition"))
+    </select>
+    @Html.Raw(masterUserEdit.LookupPosition.GetCustomMessage)
+    <div class="invalid-feedback">@Html.Raw(masterUserEdit.LookupPosition.GetErrorMessage())</div>
+<script>
+loadjs.ready("fMasterUseredit", function() {
+    var options = { name: "x_LookupPosition", selectId: "fMasterUseredit_x_LookupPosition" },
+        el = document.querySelector("select[data-select2-id='" + options.selectId + "']");
+    if (!el)
+        return;
+    options.closeOnSelect = !options.multiple;
+    options.dropdownParent = el.closest("#ew-modal-dialog, #ew-add-opt-dialog");
+    if (fMasterUseredit.lists.LookupPosition?.lookupOptions.length) {
+        options.data = { id: "x_LookupPosition", form: "fMasterUseredit" };
+    } else {
+        options.ajax = { id: "x_LookupPosition", form: "fMasterUseredit", limit: ew.LOOKUP_PAGE_SIZE };
+    }
+    options.minimumInputLength = ew.selectMinimumInputLength;
+    options = Object.assign({}, ew.selectOptions, options, ew.vars.tables.MasterUser.fields.LookupPosition.selectOptions);
+    ew.createSelect(options);
+});
+</script>
+</span>
+</div></div>
+    </div>
+} @* masterUserEdit.LookupPosition.Visible (end) *@
+@if (masterUserEdit.StatusAktif.Visible) { // masterUserEdit.StatusAktif.Visible (begin)
+    <div id="r_StatusAktif" @Html.Raw(masterUserEdit.StatusAktif.RowAttributes)>
+        <label id="elh_MasterUser_StatusAktif" class="@(masterUserEdit.LeftColumnClass)">@Html.Raw(masterUserEdit.StatusAktif.Caption)@Html.Raw(masterUserEdit.StatusAktif.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(masterUserEdit.RightColumnClass)"><div @Html.Raw(masterUserEdit.StatusAktif.CellAttributes)>
+<span id="el_MasterUser_StatusAktif">
+<div class="form-check d-inline-block">
+    <input type="checkbox" class="form-check-input@(masterUserEdit.StatusAktif.IsInvalidClass)" data-table="MasterUser" data-field="x_StatusAktif" data-boolean name="x_StatusAktif" id="x_StatusAktif" value="1" checked="@ConvertToBool(masterUserEdit.StatusAktif.CurrentValue)" @Html.Raw(masterUserEdit.StatusAktif.EditAttributes) aria-describedby="x_StatusAktif_help">
+    <div class="invalid-feedback">@Html.Raw(masterUserEdit.StatusAktif.GetErrorMessage())</div>
+</div>
+@Html.Raw(masterUserEdit.StatusAktif.GetCustomMessage)
+</span>
+</div></div>
+    </div>
+} @* masterUserEdit.StatusAktif.Visible (end) *@
+@if (masterUserEdit.Keterangan.Visible) { // masterUserEdit.Keterangan.Visible (begin)
+    <div id="r_Keterangan" @Html.Raw(masterUserEdit.Keterangan.RowAttributes)>
+        <label id="elh_MasterUser_Keterangan" for="x_Keterangan" class="@(masterUserEdit.LeftColumnClass)">@Html.Raw(masterUserEdit.Keterangan.Caption)@Html.Raw(masterUserEdit.Keterangan.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(masterUserEdit.RightColumnClass)"><div @Html.Raw(masterUserEdit.Keterangan.CellAttributes)>
+<span id="el_MasterUser_Keterangan">
+<textarea data-table="MasterUser" data-field="x_Keterangan" name="x_Keterangan" id="x_Keterangan" cols="35" rows="4" placeholder="@Html.Raw(HtmlEncode(masterUserEdit.Keterangan.PlaceHolder))"@Html.Raw(masterUserEdit.Keterangan.EditAttributes) aria-describedby="x_Keterangan_help">@(masterUserEdit.Keterangan.EditValue)</textarea>
+@Html.Raw(masterUserEdit.Keterangan.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(masterUserEdit.Keterangan.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* masterUserEdit.Keterangan.Visible (end) *@
+@if (masterUserEdit.exception.Visible) { // masterUserEdit.exception.Visible (begin)
+    <div id="r_exception" @Html.Raw(masterUserEdit.exception.RowAttributes)>
+        <label id="elh_MasterUser_exception" class="@(masterUserEdit.LeftColumnClass)">@Html.Raw(masterUserEdit.exception.Caption)@Html.Raw(masterUserEdit.exception.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(masterUserEdit.RightColumnClass)"><div @Html.Raw(masterUserEdit.exception.CellAttributes)>
+<span id="el_MasterUser_exception">
+<div class="form-check d-inline-block">
+    <input type="checkbox" class="form-check-input@(masterUserEdit.exception.IsInvalidClass)" data-table="MasterUser" data-field="x_exception" data-boolean name="x_exception" id="x_exception" value="1" checked="@ConvertToBool(masterUserEdit.exception.CurrentValue)" @Html.Raw(masterUserEdit.exception.EditAttributes) aria-describedby="x_exception_help">
+    <div class="invalid-feedback">@Html.Raw(masterUserEdit.exception.GetErrorMessage())</div>
+</div>
+@Html.Raw(masterUserEdit.exception.GetCustomMessage)
+</span>
+</div></div>
+    </div>
+} @* masterUserEdit.exception.Visible (end) *@
+</div><!-- /page* -->
+    <input type="hidden" data-table="MasterUser" data-field="x_IdUser" data-hidden="1" name="x_IdUser" id="x_IdUser" value="@Html.Raw(HtmlEncode(masterUserEdit.IdUser.CurrentValue))">
+@{ masterUserEdit.CloseRecordset(); }
+@Html.Raw(masterUserEdit.IsModal ? "<template class=\"ew-modal-buttons\">" : "<div class=\"row ew-buttons\">")<!-- buttons .row -->
+    <div class="@(masterUserEdit.OffsetColumnClass)"><!-- buttons offset -->
+    <button class="btn btn-primary ew-btn" name="btn-action" id="btn-action" type="submit" form="fMasterUseredit">@Html.Raw(Language.Phrase("SaveBtn"))</button>
+@if (IsJsonResponse()) {
+    <button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" data-bs-dismiss="modal">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+} else {
+    <button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" form="fMasterUseredit" data-href="@AppPath(masterUserEdit.ReturnUrl)">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+}
+    </div><!-- /buttons offset -->
+@Html.Raw(masterUserEdit.IsModal ? "</template>" : "</div>")<!-- /buttons .row -->
+</form>
+</main>
+@masterUserEdit.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("MasterUser");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Startup script
+    $('#r_Plant').hide();
+    $('#r_Region').hide();
+    $('#r_IdPosition').hide();
+    $("#r_LookupPosition").hide();
+    $("#x_LookupPosition").empty();
+    $("#x_LookupPosition").prop('disable', true);
+    $('#r_Plant').prop('disable', true);
+    $('#r_Region').prop('disable', true);
+    $('#x__UserLevel').trigger('change');
+});
+</script>

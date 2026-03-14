@@ -1,0 +1,376 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (masterDokumenList.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = masterDokumenList.UseLayout ? "_Layout" : "";
+}
+@if (!masterDokumenList.IsExport()) {
+<script>
+var currentTable = @Html.Raw(ConvertToJson(masterDokumenList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { MasterDokumen: currentTable } });
+var currentPageID = ew.PAGE_ID = "list";
+var currentForm;
+var @(masterDokumenList.FormName);
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("@(masterDokumenList.FormName)")
+        .setPageId("list")
+        .setSubmitWithFetch(@(masterDokumenList.UseAjaxActions ? "true" : "false"))
+        .setFormKeyCountName("@(masterDokumenList.FormKeyCountName)")
+
+        // Dynamic selection lists
+        .setLists({
+            "IdDokumen": @Html.Raw(masterDokumenList.IdDokumen.ToClientList(masterDokumenList)),
+            "NamaDokumen": @Html.Raw(masterDokumenList.NamaDokumen.ToClientList(masterDokumenList)),
+        })
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Write your client script here, no need to add script tags.
+});
+</script>
+}
+@if (!masterDokumenList.IsExport()) {
+<div class="btn-toolbar ew-toolbar">
+@if (masterDokumenList.TotalRecords > 0 && masterDokumenList.ExportOptions.Visible) {
+    masterDokumenList.ExportOptions.Render("body");
+}
+@if (masterDokumenList.ImportOptions.Visible) {
+    masterDokumenList.ImportOptions.Render("body");
+}
+@if (masterDokumenList.SearchOptions.Visible) {
+    masterDokumenList.SearchOptions.Render("body");
+}
+@if (masterDokumenList.FilterOptions.Visible) {
+    masterDokumenList.FilterOptions.Render("body");
+}
+</div>
+}
+@if (masterDokumenList.ShowCurrentFilter) {
+    masterDokumenList.ShowFilterList();
+}
+@if (!masterDokumenList.IsModal) {
+<form name="fMasterDokumensrch" id="fMasterDokumensrch" class="ew-form ew-ext-search-form" action="@AppPath(CurrentPageName())" novalidate autocomplete="off">
+<div id="fMasterDokumensrch_search_panel" class="mb-2 mb-sm-0 @(masterDokumenList.SearchPanelClass)"><!-- .ew-search-panel -->
+<script>
+var currentTable = @Html.Raw(ConvertToJson(masterDokumenList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { MasterDokumen: currentTable } });
+var currentForm;
+var fMasterDokumensrch, currentSearchForm, currentAdvancedSearchForm;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery,
+        fields = currentTable.fields;
+
+    // Form object for search
+    let form = new ew.FormBuilder()
+        .setId("fMasterDokumensrch")
+        .setPageId("list")
+@if (masterDokumenList.UseAjaxActions) {
+        <text>.setSubmitWithFetch(true)</text>
+}
+
+        // Add fields
+        .setFields([
+        ])
+        // Validate form
+        .setValidate(
+            async function () {
+                if (!this.validateRequired)
+                    return true; // Ignore validation
+                let fobj = this.getForm();
+
+                // Validate fields
+                if (!this.validateFields())
+                    return false;
+
+                // Call Form_CustomValidate event
+                if (!(await this.customValidate?.(fobj) ?? true)) {
+                    this.focus();
+                    return false;
+                }
+                return true;
+            }
+        )
+
+        // Form_CustomValidate
+        .setCustomValidate(
+            function(fobj) { // DO NOT CHANGE THIS LINE!
+                    // Your custom validation code here, return false if invalid.
+                    return true;
+                }
+        )
+
+        // Use JavaScript validation or not
+        .setValidateRequired(ew.CLIENT_VALIDATE)
+
+        // Dynamic selection lists
+        .setLists({
+            "IdDokumen": @Html.Raw(masterDokumenList.IdDokumen.ToClientList(masterDokumenList)),
+            "NamaDokumen": @Html.Raw(masterDokumenList.NamaDokumen.ToClientList(masterDokumenList)),
+        })
+
+        // Filters
+        .setFilterList(@Html.Raw(masterDokumenList.GetFilterList()))
+        .build();
+    window[form.id] = form;
+    currentSearchForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<input type="hidden" name="cmd" value="search">
+@if (Security.CanSearch) {
+if (!masterDokumenList.IsExport() && Empty(masterDokumenList.CurrentAction) && masterDokumenList.HasSearchFields()) { @* Show search form (begin) *@
+<div class="ew-extended-search container-fluid ps-2">
+<div class="row mb-0@(masterDokumenList.SearchFieldsPerRow > 0 ? " row-cols-sm-" + masterDokumenList.SearchFieldsPerRow : "")">
+@{
+    // Render search row
+    masterDokumenList.RowType = RowType.Search;
+    masterDokumenList.ResetAttributes();
+    await masterDokumenList.RenderRow();
+}
+@if (masterDokumenList.IdDokumen.Visible) { // masterDokumenList.IdDokumen.Visible (begin)
+    if (!masterDokumenList.IdDokumen.UseFilter) {
+        masterDokumenList.SearchColumnCount++;
+    }
+    <div id="xs_IdDokumen" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(masterDokumenList.IdDokumen.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_IdDokumen"
+            name="x_IdDokumen[]"
+            class="form-control ew-select@(masterDokumenList.IdDokumen.IsInvalidClass)"
+            data-select2-id="fMasterDokumensrch_x_IdDokumen"
+            data-table="MasterDokumen"
+            data-field="x_IdDokumen"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(masterDokumenList.IdDokumen.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(masterDokumenList.IdDokumen.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(masterDokumenList.IdDokumen.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(masterDokumenList.IdDokumen.EditAttributes)>
+            @(masterDokumenList.IdDokumen.SelectOptionListHtml("x_IdDokumen", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(masterDokumenList.IdDokumen.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMasterDokumensrch", function() {
+            var options = {
+                name: "x_IdDokumen",
+                selectId: "fMasterDokumensrch_x_IdDokumen",
+                ajax: { id: "x_IdDokumen", form: "fMasterDokumensrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MasterDokumen.fields.IdDokumen.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* masterDokumenList.IdDokumen.Visible (end) *@
+@if (masterDokumenList.NamaDokumen.Visible) { // masterDokumenList.NamaDokumen.Visible (begin)
+    if (!masterDokumenList.NamaDokumen.UseFilter) {
+        masterDokumenList.SearchColumnCount++;
+    }
+    <div id="xs_NamaDokumen" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(masterDokumenList.NamaDokumen.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_NamaDokumen"
+            name="x_NamaDokumen[]"
+            class="form-control ew-select@(masterDokumenList.NamaDokumen.IsInvalidClass)"
+            data-select2-id="fMasterDokumensrch_x_NamaDokumen"
+            data-table="MasterDokumen"
+            data-field="x_NamaDokumen"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(masterDokumenList.NamaDokumen.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(masterDokumenList.NamaDokumen.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(masterDokumenList.NamaDokumen.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(masterDokumenList.NamaDokumen.EditAttributes)>
+            @(masterDokumenList.NamaDokumen.SelectOptionListHtml("x_NamaDokumen", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(masterDokumenList.NamaDokumen.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fMasterDokumensrch", function() {
+            var options = {
+                name: "x_NamaDokumen",
+                selectId: "fMasterDokumensrch_x_NamaDokumen",
+                ajax: { id: "x_NamaDokumen", form: "fMasterDokumensrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.MasterDokumen.fields.NamaDokumen.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* masterDokumenList.NamaDokumen.Visible (end) *@
+</div><!-- /.row -->
+<div class="row mb-0">
+    <div class="col-sm-auto px-0 pe-sm-2">
+        <div class="ew-basic-search input-group">
+            <input type="search" name="@(Config.TableBasicSearch)" id="@(Config.TableBasicSearch)" class="form-control ew-basic-search-keyword" value="@Html.Raw(HtmlEncode(masterDokumenList.BasicSearch.SessionKeyword))" placeholder="@(HtmlEncode(Language.Phrase("Search")))" aria-label="@(HtmlEncode(Language.Phrase("Search")))">
+            <input type="hidden" name="@(Config.TableBasicSearchType)" id="@(Config.TableBasicSearchType)" class="ew-basic-search-type" value="@(HtmlEncode(masterDokumenList.BasicSearch.SessionType))">
+            <button type="button" data-bs-toggle="dropdown" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split" aria-haspopup="true" aria-expanded="false">
+                <span id="searchtype">@Html.Raw(masterDokumenList.BasicSearch.TypeNameShort)</span>
+            </button>
+            <div class="dropdown-menu dropdown-menu-end">
+                <button type="button" class="dropdown-item@(masterDokumenList.BasicSearch.SessionType == "" ? " active" : "")" form="fMasterDokumensrch" data-ew-action="search-type">@Html.Raw(Language.Phrase("QuickSearchAuto"))</button>
+                <button type="button" class="dropdown-item@(masterDokumenList.BasicSearch.SessionType == "=" ? " active" : "")" form="fMasterDokumensrch" data-ew-action="search-type" data-search-type="=">@Html.Raw(Language.Phrase("QuickSearchExact"))</button>
+                <button type="button" class="dropdown-item@(masterDokumenList.BasicSearch.SessionType == "AND" ? " active" : "")" form="fMasterDokumensrch" data-ew-action="search-type" data-search-type="AND">@Html.Raw(Language.Phrase("QuickSearchAll"))</button>
+                <button type="button" class="dropdown-item@(masterDokumenList.BasicSearch.SessionType == "OR" ? " active" : "")" form="fMasterDokumensrch" data-ew-action="search-type" data-search-type="OR">@Html.Raw(Language.Phrase("QuickSearchAny"))</button>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-auto mb-3">
+        <button class="btn btn-primary" name="btn-submit" id="btn-submit" type="submit">@Html.Raw(Language.Phrase("SearchBtn"))</button>
+    </div>
+</div>
+</div><!-- /.ew-extended-search -->
+} @* Show search form (end) *@
+}
+</div><!-- /.ew-search-panel -->
+</form>
+}
+@masterDokumenList.ShowPageHeader()
+@masterDokumenList.ShowMessages()
+<main class="list @(masterDokumenList.TotalRecords == 0 && !masterDokumenList.IsAdd ? " ew-no-record" : "")">
+<div id="ew-header-options">
+    @masterDokumenList.HeaderOptions.RenderBody()
+</div>
+<div id="ew-list">
+@if (masterDokumenList.TotalRecords > 0 || !Empty(masterDokumenList.CurrentAction)) {
+<div class="card ew-card ew-grid@(masterDokumenList.IsAddOrEdit ? " ew-grid-add-edit" : "") @(masterDokumenList.TableGridClass)">
+<form name="@(masterDokumenList.FormName)" id="@(masterDokumenList.FormName)" class="ew-form ew-list-form" action="@AppPath(masterDokumenList.PageName)" method="post" novalidate autocomplete="off">
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+@if (masterDokumenList.IsModal) {
+<input type="hidden" name="modal" value="1">
+}
+<div id="gmp_MasterDokumen" class="card-body ew-grid-middle-panel @(masterDokumenList.TableContainerClass)" style="@(masterDokumenList.TableContainerStyle)">
+@if (masterDokumenList.TotalRecords > 0 || masterDokumenList.IsGridEdit || masterDokumenList.IsMultiEdit) {
+<table id="tbl_MasterDokumenlist" class="@(masterDokumenList.TableClass)"><!-- .ew-table -->
+<thead>
+    <tr class="ew-table-header">
+@{
+    // Header row
+    masterDokumenList.RowType = RowType.Header;
+
+    // Render list options
+    await masterDokumenList.RenderListOptions();
+}
+@* Render list options (header, left) *@
+@masterDokumenList.ListOptions.RenderHeader("left")
+@if (masterDokumenList.IdDokumen.Visible) { // masterDokumenList.IdDokumen.Visible (begin)
+        <th data-name="IdDokumen" class="@(masterDokumenList.IdDokumen.HeaderCellClass)"><div id="elh_MasterDokumen_IdDokumen" class="MasterDokumen_IdDokumen">@Html.Raw(masterDokumenList.RenderFieldHeader(masterDokumenList.IdDokumen))</div></th>
+} @* masterDokumenList.IdDokumen.Visible (end) *@
+@if (masterDokumenList.NamaDokumen.Visible) { // masterDokumenList.NamaDokumen.Visible (begin)
+        <th data-name="NamaDokumen" class="@(masterDokumenList.NamaDokumen.HeaderCellClass)"><div id="elh_MasterDokumen_NamaDokumen" class="MasterDokumen_NamaDokumen">@Html.Raw(masterDokumenList.RenderFieldHeader(masterDokumenList.NamaDokumen))</div></th>
+} @* masterDokumenList.NamaDokumen.Visible (end) *@
+@* Render list options (header, right) *@
+@masterDokumenList.ListOptions.RenderHeader("right")
+    </tr>
+</thead>
+<tbody data-page="@(masterDokumenList.PageNumber)">
+@{
+    await masterDokumenList.SetupGrid();
+    bool eof = masterDokumenList.Recordset == null; // DN
+}
+@while (masterDokumenList.RecordCount < masterDokumenList.StopRecord || SameString(masterDokumenList.RowIndex, "$rowindex$")) { // Begin While
+    if (!eof && !SameString(masterDokumenList.RowIndex, "$rowindex$") &&
+        (!masterDokumenList.IsGridAdd || masterDokumenList.CurrentMode == "copy") &&
+        (!((masterDokumenList.IsCopy || masterDokumenList.IsAdd) && masterDokumenList.RowIndex is int rowIndex && rowIndex == 0))) // DN
+        eof = !await masterDokumenList.Recordset.ReadAsync();
+    masterDokumenList.RecordCount++;
+    if (masterDokumenList.RecordCount >= masterDokumenList.StartRecord) {
+        await masterDokumenList.SetupRow();
+    <tr @Html.Raw(masterDokumenList.RowAttributes)>
+    @* Render list options (body, left) *@
+    @masterDokumenList.ListOptions.RenderBody("left", masterDokumenList.RowCount)
+    @if (masterDokumenList.IdDokumen.Visible) { // masterDokumenList.IdDokumen.Visible (begin)
+        <td data-name="IdDokumen" @Html.Raw(masterDokumenList.IdDokumen.CellAttributes)>
+<span id="el@(masterDokumenList.RowIndex == "$rowindex$" ? "$rowindex$" : masterDokumenList.RowCount)_MasterDokumen_IdDokumen" class="el_MasterDokumen_IdDokumen">
+<span @Html.Raw(masterDokumenList.IdDokumen.ViewAttributes)>
+@Html.Raw(masterDokumenList.IdDokumen.GetViewValue())</span>
+</span>
+</td>
+    } @* masterDokumenList.IdDokumen.Visible (end) *@
+    @if (masterDokumenList.NamaDokumen.Visible) { // masterDokumenList.NamaDokumen.Visible (begin)
+        <td data-name="NamaDokumen" @Html.Raw(masterDokumenList.NamaDokumen.CellAttributes)>
+<span id="el@(masterDokumenList.RowIndex == "$rowindex$" ? "$rowindex$" : masterDokumenList.RowCount)_MasterDokumen_NamaDokumen" class="el_MasterDokumen_NamaDokumen">
+<span @Html.Raw(masterDokumenList.NamaDokumen.ViewAttributes)>
+@Html.Raw(masterDokumenList.NamaDokumen.GetViewValue())</span>
+</span>
+</td>
+    } @* masterDokumenList.NamaDokumen.Visible (end) *@
+    @* Render list options (body, right) *@
+    @masterDokumenList.ListOptions.RenderBody("right", masterDokumenList.RowCount)
+    </tr>
+    } @* End if *@
+
+    // Reset for template row
+    if (SameString(masterDokumenList.RowIndex, "$rowindex$"))
+        masterDokumenList.RowIndex = 0;
+
+    // Reset inline add/copy row
+    if ((masterDokumenList.IsCopy || masterDokumenList.IsAdd) && masterDokumenList.RowIndex is int rowIndex2 && rowIndex2 == 0)
+        masterDokumenList.RowIndex = 1;
+} @* End While *@
+</tbody>
+</table><!-- /.ew-table -->
+} @* End If TotalRecords > 0 *@
+</div><!-- /.ew-grid-middle-panel -->
+@if (Empty(masterDokumenList.CurrentAction) && !masterDokumenList.UseAjaxActions) {
+<input type="hidden" name="action" id="action" value="">
+}
+</form><!-- /.ew-list-form -->
+@{ masterDokumenList.CloseRecordset(); }
+@if (!masterDokumenList.IsExport()) {
+<div class="card-footer ew-grid-lower-panel">
+@if (!masterDokumenList.IsGridAdd && !(masterDokumenList.IsGridEdit && masterDokumenList.ModalGridEdit) && !masterDokumenList.IsMultiEdit) {
+@Html.Raw(masterDokumenList.Pager.Render())
+}
+<div class="ew-list-other-options">
+@masterDokumenList.OtherOptions.RenderBody("bottom")
+</div>
+</div>
+}
+</div><!-- /.ew-grid -->
+} else { // Show other options
+<div class="ew-list-other-options">
+@masterDokumenList.OtherOptions.ForEach(opt => opt.ButtonClass = "").RenderBody()
+</div>
+}
+</div>
+<div id="ew-footer-options">
+    @masterDokumenList.FooterOptions.RenderBody()
+</div>
+</main>
+@masterDokumenList.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+@if (!masterDokumenList.IsExport()) {
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("MasterDokumen");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Write your table-specific startup script here
+    // document.write("page loaded");
+});
+</script>
+}

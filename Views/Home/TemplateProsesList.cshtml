@@ -1,0 +1,816 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (templateProsesList.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = templateProsesList.UseLayout ? "_Layout" : "";
+}
+@if (!templateProsesList.IsExport()) {
+<script>
+var currentTable = @Html.Raw(ConvertToJson(templateProsesList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { TemplateProses: currentTable } });
+var currentPageID = ew.PAGE_ID = "list";
+var currentForm;
+var @(templateProsesList.FormName);
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("@(templateProsesList.FormName)")
+        .setPageId("list")
+        .setSubmitWithFetch(@(templateProsesList.UseAjaxActions ? "true" : "false"))
+        .setFormKeyCountName("@(templateProsesList.FormKeyCountName)")
+
+        // Dynamic selection lists
+        .setLists({
+            "IdTemplate": @Html.Raw(templateProsesList.IdTemplate.ToClientList(templateProsesList)),
+            "UrutanProses": @Html.Raw(templateProsesList.UrutanProses.ToClientList(templateProsesList)),
+            "NamaProses": @Html.Raw(templateProsesList.NamaProses.ToClientList(templateProsesList)),
+            "IdPIC": @Html.Raw(templateProsesList.IdPIC.ToClientList(templateProsesList)),
+            "IdTools": @Html.Raw(templateProsesList.IdTools.ToClientList(templateProsesList)),
+            "Keterangan": @Html.Raw(templateProsesList.Keterangan.ToClientList(templateProsesList)),
+            "DibuatOleh": @Html.Raw(templateProsesList.DibuatOleh.ToClientList(templateProsesList)),
+            "TanggalDibuat": @Html.Raw(templateProsesList.TanggalDibuat.ToClientList(templateProsesList)),
+            "DiperbaruiOleh": @Html.Raw(templateProsesList.DiperbaruiOleh.ToClientList(templateProsesList)),
+            "TanggalDiperbarui": @Html.Raw(templateProsesList.TanggalDiperbarui.ToClientList(templateProsesList)),
+        })
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Write your client script here, no need to add script tags.
+});
+</script>
+}
+@if (!templateProsesList.IsExport()) {
+<div class="btn-toolbar ew-toolbar">
+@if (templateProsesList.TotalRecords > 0 && templateProsesList.ExportOptions.Visible) {
+    templateProsesList.ExportOptions.Render("body");
+}
+@if (templateProsesList.ImportOptions.Visible) {
+    templateProsesList.ImportOptions.Render("body");
+}
+@if (templateProsesList.SearchOptions.Visible) {
+    templateProsesList.SearchOptions.Render("body");
+}
+@if (templateProsesList.FilterOptions.Visible) {
+    templateProsesList.FilterOptions.Render("body");
+}
+</div>
+}
+@if (!templateProsesList.IsExport() || Config.ExportMasterRecord && templateProsesList.IsExport("print")) {
+if (!Empty(templateProsesList.DbMasterFilter) && templateProsesList.CurrentMasterTable == "MasterTemplate") {
+    if (templateProsesList.MasterRecordExists) {
+        @await Html.PartialAsync("MasterTemplateMaster.cshtml")
+    }
+}
+}
+@if (templateProsesList.ShowCurrentFilter) {
+    templateProsesList.ShowFilterList();
+}
+@if (!templateProsesList.IsModal) {
+<form name="fTemplateProsessrch" id="fTemplateProsessrch" class="ew-form ew-ext-search-form" action="@AppPath(CurrentPageName())" novalidate autocomplete="off">
+<div id="fTemplateProsessrch_search_panel" class="mb-2 mb-sm-0 @(templateProsesList.SearchPanelClass)"><!-- .ew-search-panel -->
+<script>
+var currentTable = @Html.Raw(ConvertToJson(templateProsesList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { TemplateProses: currentTable } });
+var currentForm;
+var fTemplateProsessrch, currentSearchForm, currentAdvancedSearchForm;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery,
+        fields = currentTable.fields;
+
+    // Form object for search
+    let form = new ew.FormBuilder()
+        .setId("fTemplateProsessrch")
+        .setPageId("list")
+@if (templateProsesList.UseAjaxActions) {
+        <text>.setSubmitWithFetch(true)</text>
+}
+
+        // Add fields
+        .setFields([
+        ])
+        // Validate form
+        .setValidate(
+            async function () {
+                if (!this.validateRequired)
+                    return true; // Ignore validation
+                let fobj = this.getForm();
+
+                // Validate fields
+                if (!this.validateFields())
+                    return false;
+
+                // Call Form_CustomValidate event
+                if (!(await this.customValidate?.(fobj) ?? true)) {
+                    this.focus();
+                    return false;
+                }
+                return true;
+            }
+        )
+
+        // Form_CustomValidate
+        .setCustomValidate(
+            function(fobj) { // DO NOT CHANGE THIS LINE!
+                    // Your custom validation code here, return false if invalid.
+                    return true;
+                }
+        )
+
+        // Use JavaScript validation or not
+        .setValidateRequired(ew.CLIENT_VALIDATE)
+
+        // Dynamic selection lists
+        .setLists({
+            "IdTemplate": @Html.Raw(templateProsesList.IdTemplate.ToClientList(templateProsesList)),
+            "UrutanProses": @Html.Raw(templateProsesList.UrutanProses.ToClientList(templateProsesList)),
+            "NamaProses": @Html.Raw(templateProsesList.NamaProses.ToClientList(templateProsesList)),
+            "IdPIC": @Html.Raw(templateProsesList.IdPIC.ToClientList(templateProsesList)),
+            "IdTools": @Html.Raw(templateProsesList.IdTools.ToClientList(templateProsesList)),
+            "Keterangan": @Html.Raw(templateProsesList.Keterangan.ToClientList(templateProsesList)),
+            "DibuatOleh": @Html.Raw(templateProsesList.DibuatOleh.ToClientList(templateProsesList)),
+            "TanggalDibuat": @Html.Raw(templateProsesList.TanggalDibuat.ToClientList(templateProsesList)),
+            "DiperbaruiOleh": @Html.Raw(templateProsesList.DiperbaruiOleh.ToClientList(templateProsesList)),
+            "TanggalDiperbarui": @Html.Raw(templateProsesList.TanggalDiperbarui.ToClientList(templateProsesList)),
+            "TipeProses": @Html.Raw(templateProsesList.TipeProses.ToClientList(templateProsesList)),
+        })
+
+        // Filters
+        .setFilterList(@Html.Raw(templateProsesList.GetFilterList()))
+        .build();
+    window[form.id] = form;
+    currentSearchForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<input type="hidden" name="cmd" value="search">
+@if (Security.CanSearch) {
+if (!templateProsesList.IsExport() && Empty(templateProsesList.CurrentAction) && templateProsesList.HasSearchFields()) { @* Show search form (begin) *@
+<div class="ew-extended-search container-fluid ps-2">
+<div class="row mb-0@(templateProsesList.SearchFieldsPerRow > 0 ? " row-cols-sm-" + templateProsesList.SearchFieldsPerRow : "")">
+@{
+    // Render search row
+    templateProsesList.RowType = RowType.Search;
+    templateProsesList.ResetAttributes();
+    await templateProsesList.RenderRow();
+}
+@if (templateProsesList.IdTemplate.Visible) { // templateProsesList.IdTemplate.Visible (begin)
+    if (!templateProsesList.IdTemplate.UseFilter) {
+        templateProsesList.SearchColumnCount++;
+    }
+    <div id="xs_IdTemplate" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(templateProsesList.IdTemplate.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_IdTemplate"
+            name="x_IdTemplate[]"
+            class="form-control ew-select@(templateProsesList.IdTemplate.IsInvalidClass)"
+            data-select2-id="fTemplateProsessrch_x_IdTemplate"
+            data-table="TemplateProses"
+            data-field="x_IdTemplate"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(templateProsesList.IdTemplate.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(templateProsesList.IdTemplate.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(templateProsesList.IdTemplate.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(templateProsesList.IdTemplate.EditAttributes)>
+            @(templateProsesList.IdTemplate.SelectOptionListHtml("x_IdTemplate", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(templateProsesList.IdTemplate.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fTemplateProsessrch", function() {
+            var options = {
+                name: "x_IdTemplate",
+                selectId: "fTemplateProsessrch_x_IdTemplate",
+                ajax: { id: "x_IdTemplate", form: "fTemplateProsessrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.TemplateProses.fields.IdTemplate.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* templateProsesList.IdTemplate.Visible (end) *@
+@if (templateProsesList.UrutanProses.Visible) { // templateProsesList.UrutanProses.Visible (begin)
+    if (!templateProsesList.UrutanProses.UseFilter) {
+        templateProsesList.SearchColumnCount++;
+    }
+    <div id="xs_UrutanProses" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(templateProsesList.UrutanProses.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_UrutanProses"
+            name="x_UrutanProses[]"
+            class="form-control ew-select@(templateProsesList.UrutanProses.IsInvalidClass)"
+            data-select2-id="fTemplateProsessrch_x_UrutanProses"
+            data-table="TemplateProses"
+            data-field="x_UrutanProses"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(templateProsesList.UrutanProses.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(templateProsesList.UrutanProses.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(templateProsesList.UrutanProses.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(templateProsesList.UrutanProses.EditAttributes)>
+            @(templateProsesList.UrutanProses.SelectOptionListHtml("x_UrutanProses", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(templateProsesList.UrutanProses.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fTemplateProsessrch", function() {
+            var options = {
+                name: "x_UrutanProses",
+                selectId: "fTemplateProsessrch_x_UrutanProses",
+                ajax: { id: "x_UrutanProses", form: "fTemplateProsessrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.TemplateProses.fields.UrutanProses.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* templateProsesList.UrutanProses.Visible (end) *@
+@if (templateProsesList.NamaProses.Visible) { // templateProsesList.NamaProses.Visible (begin)
+    if (!templateProsesList.NamaProses.UseFilter) {
+        templateProsesList.SearchColumnCount++;
+    }
+    <div id="xs_NamaProses" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(templateProsesList.NamaProses.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_NamaProses"
+            name="x_NamaProses[]"
+            class="form-control ew-select@(templateProsesList.NamaProses.IsInvalidClass)"
+            data-select2-id="fTemplateProsessrch_x_NamaProses"
+            data-table="TemplateProses"
+            data-field="x_NamaProses"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(templateProsesList.NamaProses.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(templateProsesList.NamaProses.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(templateProsesList.NamaProses.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(templateProsesList.NamaProses.EditAttributes)>
+            @(templateProsesList.NamaProses.SelectOptionListHtml("x_NamaProses", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(templateProsesList.NamaProses.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fTemplateProsessrch", function() {
+            var options = {
+                name: "x_NamaProses",
+                selectId: "fTemplateProsessrch_x_NamaProses",
+                ajax: { id: "x_NamaProses", form: "fTemplateProsessrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.TemplateProses.fields.NamaProses.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* templateProsesList.NamaProses.Visible (end) *@
+@if (templateProsesList.IdPIC.Visible) { // templateProsesList.IdPIC.Visible (begin)
+    if (!templateProsesList.IdPIC.UseFilter) {
+        templateProsesList.SearchColumnCount++;
+    }
+    <div id="xs_IdPIC" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(templateProsesList.IdPIC.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_IdPIC"
+            name="x_IdPIC[]"
+            class="form-control ew-select@(templateProsesList.IdPIC.IsInvalidClass)"
+            data-select2-id="fTemplateProsessrch_x_IdPIC"
+            data-table="TemplateProses"
+            data-field="x_IdPIC"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(templateProsesList.IdPIC.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(templateProsesList.IdPIC.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(templateProsesList.IdPIC.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(templateProsesList.IdPIC.EditAttributes)>
+            @(templateProsesList.IdPIC.SelectOptionListHtml("x_IdPIC", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(templateProsesList.IdPIC.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fTemplateProsessrch", function() {
+            var options = {
+                name: "x_IdPIC",
+                selectId: "fTemplateProsessrch_x_IdPIC",
+                ajax: { id: "x_IdPIC", form: "fTemplateProsessrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.TemplateProses.fields.IdPIC.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* templateProsesList.IdPIC.Visible (end) *@
+@if (templateProsesList.IdTools.Visible) { // templateProsesList.IdTools.Visible (begin)
+    if (!templateProsesList.IdTools.UseFilter) {
+        templateProsesList.SearchColumnCount++;
+    }
+    <div id="xs_IdTools" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(templateProsesList.IdTools.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_IdTools"
+            name="x_IdTools[]"
+            class="form-control ew-select@(templateProsesList.IdTools.IsInvalidClass)"
+            data-select2-id="fTemplateProsessrch_x_IdTools"
+            data-table="TemplateProses"
+            data-field="x_IdTools"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(templateProsesList.IdTools.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(templateProsesList.IdTools.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(templateProsesList.IdTools.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(templateProsesList.IdTools.EditAttributes)>
+            @(templateProsesList.IdTools.SelectOptionListHtml("x_IdTools", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(templateProsesList.IdTools.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fTemplateProsessrch", function() {
+            var options = {
+                name: "x_IdTools",
+                selectId: "fTemplateProsessrch_x_IdTools",
+                ajax: { id: "x_IdTools", form: "fTemplateProsessrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.TemplateProses.fields.IdTools.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* templateProsesList.IdTools.Visible (end) *@
+@if (templateProsesList.Keterangan.Visible) { // templateProsesList.Keterangan.Visible (begin)
+    if (!templateProsesList.Keterangan.UseFilter) {
+        templateProsesList.SearchColumnCount++;
+    }
+    <div id="xs_Keterangan" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(templateProsesList.Keterangan.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_Keterangan"
+            name="x_Keterangan[]"
+            class="form-control ew-select@(templateProsesList.Keterangan.IsInvalidClass)"
+            data-select2-id="fTemplateProsessrch_x_Keterangan"
+            data-table="TemplateProses"
+            data-field="x_Keterangan"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(templateProsesList.Keterangan.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(templateProsesList.Keterangan.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(templateProsesList.Keterangan.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(templateProsesList.Keterangan.EditAttributes)>
+            @(templateProsesList.Keterangan.SelectOptionListHtml("x_Keterangan", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(templateProsesList.Keterangan.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fTemplateProsessrch", function() {
+            var options = {
+                name: "x_Keterangan",
+                selectId: "fTemplateProsessrch_x_Keterangan",
+                ajax: { id: "x_Keterangan", form: "fTemplateProsessrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.TemplateProses.fields.Keterangan.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* templateProsesList.Keterangan.Visible (end) *@
+@if (templateProsesList.DibuatOleh.Visible) { // templateProsesList.DibuatOleh.Visible (begin)
+    if (!templateProsesList.DibuatOleh.UseFilter) {
+        templateProsesList.SearchColumnCount++;
+    }
+    <div id="xs_DibuatOleh" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(templateProsesList.DibuatOleh.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_DibuatOleh"
+            name="x_DibuatOleh[]"
+            class="form-control ew-select@(templateProsesList.DibuatOleh.IsInvalidClass)"
+            data-select2-id="fTemplateProsessrch_x_DibuatOleh"
+            data-table="TemplateProses"
+            data-field="x_DibuatOleh"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(templateProsesList.DibuatOleh.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(templateProsesList.DibuatOleh.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(templateProsesList.DibuatOleh.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(templateProsesList.DibuatOleh.EditAttributes)>
+            @(templateProsesList.DibuatOleh.SelectOptionListHtml("x_DibuatOleh", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(templateProsesList.DibuatOleh.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fTemplateProsessrch", function() {
+            var options = {
+                name: "x_DibuatOleh",
+                selectId: "fTemplateProsessrch_x_DibuatOleh",
+                ajax: { id: "x_DibuatOleh", form: "fTemplateProsessrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.TemplateProses.fields.DibuatOleh.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* templateProsesList.DibuatOleh.Visible (end) *@
+@if (templateProsesList.TanggalDibuat.Visible) { // templateProsesList.TanggalDibuat.Visible (begin)
+    if (!templateProsesList.TanggalDibuat.UseFilter) {
+        templateProsesList.SearchColumnCount++;
+    }
+    <div id="xs_TanggalDibuat" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(templateProsesList.TanggalDibuat.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_TanggalDibuat"
+            name="x_TanggalDibuat[]"
+            class="form-control ew-select@(templateProsesList.TanggalDibuat.IsInvalidClass)"
+            data-select2-id="fTemplateProsessrch_x_TanggalDibuat"
+            data-table="TemplateProses"
+            data-field="x_TanggalDibuat"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(templateProsesList.TanggalDibuat.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(templateProsesList.TanggalDibuat.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(templateProsesList.TanggalDibuat.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(templateProsesList.TanggalDibuat.EditAttributes)>
+            @(templateProsesList.TanggalDibuat.SelectOptionListHtml("x_TanggalDibuat", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(templateProsesList.TanggalDibuat.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fTemplateProsessrch", function() {
+            var options = {
+                name: "x_TanggalDibuat",
+                selectId: "fTemplateProsessrch_x_TanggalDibuat",
+                ajax: { id: "x_TanggalDibuat", form: "fTemplateProsessrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.TemplateProses.fields.TanggalDibuat.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* templateProsesList.TanggalDibuat.Visible (end) *@
+@if (templateProsesList.DiperbaruiOleh.Visible) { // templateProsesList.DiperbaruiOleh.Visible (begin)
+    if (!templateProsesList.DiperbaruiOleh.UseFilter) {
+        templateProsesList.SearchColumnCount++;
+    }
+    <div id="xs_DiperbaruiOleh" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(templateProsesList.DiperbaruiOleh.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_DiperbaruiOleh"
+            name="x_DiperbaruiOleh[]"
+            class="form-control ew-select@(templateProsesList.DiperbaruiOleh.IsInvalidClass)"
+            data-select2-id="fTemplateProsessrch_x_DiperbaruiOleh"
+            data-table="TemplateProses"
+            data-field="x_DiperbaruiOleh"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(templateProsesList.DiperbaruiOleh.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(templateProsesList.DiperbaruiOleh.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(templateProsesList.DiperbaruiOleh.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(templateProsesList.DiperbaruiOleh.EditAttributes)>
+            @(templateProsesList.DiperbaruiOleh.SelectOptionListHtml("x_DiperbaruiOleh", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(templateProsesList.DiperbaruiOleh.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fTemplateProsessrch", function() {
+            var options = {
+                name: "x_DiperbaruiOleh",
+                selectId: "fTemplateProsessrch_x_DiperbaruiOleh",
+                ajax: { id: "x_DiperbaruiOleh", form: "fTemplateProsessrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.TemplateProses.fields.DiperbaruiOleh.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* templateProsesList.DiperbaruiOleh.Visible (end) *@
+@if (templateProsesList.TanggalDiperbarui.Visible) { // templateProsesList.TanggalDiperbarui.Visible (begin)
+    if (!templateProsesList.TanggalDiperbarui.UseFilter) {
+        templateProsesList.SearchColumnCount++;
+    }
+    <div id="xs_TanggalDiperbarui" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(templateProsesList.TanggalDiperbarui.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_TanggalDiperbarui"
+            name="x_TanggalDiperbarui[]"
+            class="form-control ew-select@(templateProsesList.TanggalDiperbarui.IsInvalidClass)"
+            data-select2-id="fTemplateProsessrch_x_TanggalDiperbarui"
+            data-table="TemplateProses"
+            data-field="x_TanggalDiperbarui"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(templateProsesList.TanggalDiperbarui.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(templateProsesList.TanggalDiperbarui.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(templateProsesList.TanggalDiperbarui.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(templateProsesList.TanggalDiperbarui.EditAttributes)>
+            @(templateProsesList.TanggalDiperbarui.SelectOptionListHtml("x_TanggalDiperbarui", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(templateProsesList.TanggalDiperbarui.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fTemplateProsessrch", function() {
+            var options = {
+                name: "x_TanggalDiperbarui",
+                selectId: "fTemplateProsessrch_x_TanggalDiperbarui",
+                ajax: { id: "x_TanggalDiperbarui", form: "fTemplateProsessrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.TemplateProses.fields.TanggalDiperbarui.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* templateProsesList.TanggalDiperbarui.Visible (end) *@
+@if (templateProsesList.TipeProses.Visible) { // templateProsesList.TipeProses.Visible (begin)
+    if (!templateProsesList.TipeProses.UseFilter) {
+        templateProsesList.SearchColumnCount++;
+    }
+    <div id="xs_TipeProses" class="col-sm-auto d-sm-flex align-items-start mb-3 px-0 pe-sm-2@(templateProsesList.TipeProses.UseFilter ? " ew-filter-field" : "")">
+        <select
+            id="x_TipeProses"
+            name="x_TipeProses[]"
+            class="form-control ew-select@(templateProsesList.TipeProses.IsInvalidClass)"
+            data-select2-id="fTemplateProsessrch_x_TipeProses"
+            data-table="TemplateProses"
+            data-field="x_TipeProses"
+            data-caption="@Html.Raw(HtmlEncode(RemoveHtml(templateProsesList.TipeProses.Caption)))"
+            data-filter="true"
+            multiple
+            size="1"
+            data-value-separator="@(templateProsesList.TipeProses.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(templateProsesList.TipeProses.PlaceHolder))"
+            data-ew-action="update-options"
+            @Html.Raw(templateProsesList.TipeProses.EditAttributes)>
+            @(templateProsesList.TipeProses.SelectOptionListHtml("x_TipeProses", true))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(templateProsesList.TipeProses.GetErrorMessage(false))</div>
+        <script>
+        loadjs.ready("fTemplateProsessrch", function() {
+            var options = {
+                name: "x_TipeProses",
+                selectId: "fTemplateProsessrch_x_TipeProses",
+                ajax: { id: "x_TipeProses", form: "fTemplateProsessrch", limit: ew.FILTER_PAGE_SIZE, data: { ajax: "filter" } }
+            };
+            options = Object.assign({}, ew.filterOptions, options, ew.vars.tables.TemplateProses.fields.TipeProses.filterOptions);
+            ew.createFilter(options);
+        });
+        </script>
+    </div><!-- /.col-sm-auto -->
+} @* templateProsesList.TipeProses.Visible (end) *@
+</div><!-- /.row -->
+<div class="row mb-0">
+    <div class="col-sm-auto px-0 pe-sm-2">
+        <div class="ew-basic-search input-group">
+            <input type="search" name="@(Config.TableBasicSearch)" id="@(Config.TableBasicSearch)" class="form-control ew-basic-search-keyword" value="@Html.Raw(HtmlEncode(templateProsesList.BasicSearch.SessionKeyword))" placeholder="@(HtmlEncode(Language.Phrase("Search")))" aria-label="@(HtmlEncode(Language.Phrase("Search")))">
+            <input type="hidden" name="@(Config.TableBasicSearchType)" id="@(Config.TableBasicSearchType)" class="ew-basic-search-type" value="@(HtmlEncode(templateProsesList.BasicSearch.SessionType))">
+            <button type="button" data-bs-toggle="dropdown" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split" aria-haspopup="true" aria-expanded="false">
+                <span id="searchtype">@Html.Raw(templateProsesList.BasicSearch.TypeNameShort)</span>
+            </button>
+            <div class="dropdown-menu dropdown-menu-end">
+                <button type="button" class="dropdown-item@(templateProsesList.BasicSearch.SessionType == "" ? " active" : "")" form="fTemplateProsessrch" data-ew-action="search-type">@Html.Raw(Language.Phrase("QuickSearchAuto"))</button>
+                <button type="button" class="dropdown-item@(templateProsesList.BasicSearch.SessionType == "=" ? " active" : "")" form="fTemplateProsessrch" data-ew-action="search-type" data-search-type="=">@Html.Raw(Language.Phrase("QuickSearchExact"))</button>
+                <button type="button" class="dropdown-item@(templateProsesList.BasicSearch.SessionType == "AND" ? " active" : "")" form="fTemplateProsessrch" data-ew-action="search-type" data-search-type="AND">@Html.Raw(Language.Phrase("QuickSearchAll"))</button>
+                <button type="button" class="dropdown-item@(templateProsesList.BasicSearch.SessionType == "OR" ? " active" : "")" form="fTemplateProsessrch" data-ew-action="search-type" data-search-type="OR">@Html.Raw(Language.Phrase("QuickSearchAny"))</button>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-auto mb-3">
+        <button class="btn btn-primary" name="btn-submit" id="btn-submit" type="submit">@Html.Raw(Language.Phrase("SearchBtn"))</button>
+    </div>
+</div>
+</div><!-- /.ew-extended-search -->
+} @* Show search form (end) *@
+}
+</div><!-- /.ew-search-panel -->
+</form>
+}
+@templateProsesList.ShowPageHeader()
+@templateProsesList.ShowMessages()
+<main class="list @(templateProsesList.TotalRecords == 0 && !templateProsesList.IsAdd ? " ew-no-record" : "")">
+<div id="ew-header-options">
+    @templateProsesList.HeaderOptions.RenderBody()
+</div>
+<div id="ew-list">
+@if (templateProsesList.TotalRecords > 0 || !Empty(templateProsesList.CurrentAction)) {
+<div class="card ew-card ew-grid@(templateProsesList.IsAddOrEdit ? " ew-grid-add-edit" : "") @(templateProsesList.TableGridClass)">
+<form name="@(templateProsesList.FormName)" id="@(templateProsesList.FormName)" class="ew-form ew-list-form" action="@AppPath(templateProsesList.PageName)" method="post" novalidate autocomplete="off">
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+@if (templateProsesList.IsModal) {
+<input type="hidden" name="modal" value="1">
+}
+@if (templateProsesList.CurrentMasterTable == "MasterTemplate" && !Empty(templateProsesList.CurrentAction)) {
+<input type="hidden" name="@(Config.TableShowMaster)" value="MasterTemplate">
+<input type="hidden" name="fk_IdTemplate" value="@(HtmlEncode(templateProsesList.IdTemplate.SessionValue))">
+}
+<div id="gmp_TemplateProses" class="card-body ew-grid-middle-panel @(templateProsesList.TableContainerClass)" style="@(templateProsesList.TableContainerStyle)">
+@if (templateProsesList.TotalRecords > 0 || templateProsesList.IsGridEdit || templateProsesList.IsMultiEdit) {
+<table id="tbl_TemplateProseslist" class="@(templateProsesList.TableClass)"><!-- .ew-table -->
+<thead>
+    <tr class="ew-table-header">
+@{
+    // Header row
+    templateProsesList.RowType = RowType.Header;
+
+    // Render list options
+    await templateProsesList.RenderListOptions();
+}
+@* Render list options (header, left) *@
+@templateProsesList.ListOptions.RenderHeader("left")
+@if (templateProsesList.IdTemplate.Visible) { // templateProsesList.IdTemplate.Visible (begin)
+        <th data-name="IdTemplate" class="@(templateProsesList.IdTemplate.HeaderCellClass)"><div id="elh_TemplateProses_IdTemplate" class="TemplateProses_IdTemplate">@Html.Raw(templateProsesList.RenderFieldHeader(templateProsesList.IdTemplate))</div></th>
+} @* templateProsesList.IdTemplate.Visible (end) *@
+@if (templateProsesList.UrutanProses.Visible) { // templateProsesList.UrutanProses.Visible (begin)
+        <th data-name="UrutanProses" class="@(templateProsesList.UrutanProses.HeaderCellClass)"><div id="elh_TemplateProses_UrutanProses" class="TemplateProses_UrutanProses">@Html.Raw(templateProsesList.RenderFieldHeader(templateProsesList.UrutanProses))</div></th>
+} @* templateProsesList.UrutanProses.Visible (end) *@
+@if (templateProsesList.NamaProses.Visible) { // templateProsesList.NamaProses.Visible (begin)
+        <th data-name="NamaProses" class="@(templateProsesList.NamaProses.HeaderCellClass)"><div id="elh_TemplateProses_NamaProses" class="TemplateProses_NamaProses">@Html.Raw(templateProsesList.RenderFieldHeader(templateProsesList.NamaProses))</div></th>
+} @* templateProsesList.NamaProses.Visible (end) *@
+@if (templateProsesList.IdPIC.Visible) { // templateProsesList.IdPIC.Visible (begin)
+        <th data-name="IdPIC" class="@(templateProsesList.IdPIC.HeaderCellClass)"><div id="elh_TemplateProses_IdPIC" class="TemplateProses_IdPIC">@Html.Raw(templateProsesList.RenderFieldHeader(templateProsesList.IdPIC))</div></th>
+} @* templateProsesList.IdPIC.Visible (end) *@
+@if (templateProsesList.IdTools.Visible) { // templateProsesList.IdTools.Visible (begin)
+        <th data-name="IdTools" class="@(templateProsesList.IdTools.HeaderCellClass)"><div id="elh_TemplateProses_IdTools" class="TemplateProses_IdTools">@Html.Raw(templateProsesList.RenderFieldHeader(templateProsesList.IdTools))</div></th>
+} @* templateProsesList.IdTools.Visible (end) *@
+@if (templateProsesList.Keterangan.Visible) { // templateProsesList.Keterangan.Visible (begin)
+        <th data-name="Keterangan" class="@(templateProsesList.Keterangan.HeaderCellClass)"><div id="elh_TemplateProses_Keterangan" class="TemplateProses_Keterangan">@Html.Raw(templateProsesList.RenderFieldHeader(templateProsesList.Keterangan))</div></th>
+} @* templateProsesList.Keterangan.Visible (end) *@
+@if (templateProsesList.DibuatOleh.Visible) { // templateProsesList.DibuatOleh.Visible (begin)
+        <th data-name="DibuatOleh" class="@(templateProsesList.DibuatOleh.HeaderCellClass)"><div id="elh_TemplateProses_DibuatOleh" class="TemplateProses_DibuatOleh">@Html.Raw(templateProsesList.RenderFieldHeader(templateProsesList.DibuatOleh))</div></th>
+} @* templateProsesList.DibuatOleh.Visible (end) *@
+@if (templateProsesList.TanggalDibuat.Visible) { // templateProsesList.TanggalDibuat.Visible (begin)
+        <th data-name="TanggalDibuat" class="@(templateProsesList.TanggalDibuat.HeaderCellClass)"><div id="elh_TemplateProses_TanggalDibuat" class="TemplateProses_TanggalDibuat">@Html.Raw(templateProsesList.RenderFieldHeader(templateProsesList.TanggalDibuat))</div></th>
+} @* templateProsesList.TanggalDibuat.Visible (end) *@
+@if (templateProsesList.DiperbaruiOleh.Visible) { // templateProsesList.DiperbaruiOleh.Visible (begin)
+        <th data-name="DiperbaruiOleh" class="@(templateProsesList.DiperbaruiOleh.HeaderCellClass)"><div id="elh_TemplateProses_DiperbaruiOleh" class="TemplateProses_DiperbaruiOleh">@Html.Raw(templateProsesList.RenderFieldHeader(templateProsesList.DiperbaruiOleh))</div></th>
+} @* templateProsesList.DiperbaruiOleh.Visible (end) *@
+@if (templateProsesList.TanggalDiperbarui.Visible) { // templateProsesList.TanggalDiperbarui.Visible (begin)
+        <th data-name="TanggalDiperbarui" class="@(templateProsesList.TanggalDiperbarui.HeaderCellClass)"><div id="elh_TemplateProses_TanggalDiperbarui" class="TemplateProses_TanggalDiperbarui">@Html.Raw(templateProsesList.RenderFieldHeader(templateProsesList.TanggalDiperbarui))</div></th>
+} @* templateProsesList.TanggalDiperbarui.Visible (end) *@
+@* Render list options (header, right) *@
+@templateProsesList.ListOptions.RenderHeader("right")
+    </tr>
+</thead>
+<tbody data-page="@(templateProsesList.PageNumber)">
+@{
+    await templateProsesList.SetupGrid();
+    bool eof = templateProsesList.Recordset == null; // DN
+}
+@while (templateProsesList.RecordCount < templateProsesList.StopRecord || SameString(templateProsesList.RowIndex, "$rowindex$")) { // Begin While
+    if (!eof && !SameString(templateProsesList.RowIndex, "$rowindex$") &&
+        (!templateProsesList.IsGridAdd || templateProsesList.CurrentMode == "copy") &&
+        (!((templateProsesList.IsCopy || templateProsesList.IsAdd) && templateProsesList.RowIndex is int rowIndex && rowIndex == 0))) // DN
+        eof = !await templateProsesList.Recordset.ReadAsync();
+    templateProsesList.RecordCount++;
+    if (templateProsesList.RecordCount >= templateProsesList.StartRecord) {
+        await templateProsesList.SetupRow();
+    <tr @Html.Raw(templateProsesList.RowAttributes)>
+    @* Render list options (body, left) *@
+    @templateProsesList.ListOptions.RenderBody("left", templateProsesList.RowCount)
+    @if (templateProsesList.IdTemplate.Visible) { // templateProsesList.IdTemplate.Visible (begin)
+        <td data-name="IdTemplate" @Html.Raw(templateProsesList.IdTemplate.CellAttributes)>
+<span id="el@(templateProsesList.RowIndex == "$rowindex$" ? "$rowindex$" : templateProsesList.RowCount)_TemplateProses_IdTemplate" class="el_TemplateProses_IdTemplate">
+<span @Html.Raw(templateProsesList.IdTemplate.ViewAttributes)>
+@Html.Raw(templateProsesList.IdTemplate.GetViewValue())</span>
+</span>
+</td>
+    } @* templateProsesList.IdTemplate.Visible (end) *@
+    @if (templateProsesList.UrutanProses.Visible) { // templateProsesList.UrutanProses.Visible (begin)
+        <td data-name="UrutanProses" @Html.Raw(templateProsesList.UrutanProses.CellAttributes)>
+<span id="el@(templateProsesList.RowIndex == "$rowindex$" ? "$rowindex$" : templateProsesList.RowCount)_TemplateProses_UrutanProses" class="el_TemplateProses_UrutanProses">
+<span @Html.Raw(templateProsesList.UrutanProses.ViewAttributes)>
+@Html.Raw(templateProsesList.UrutanProses.GetViewValue())</span>
+</span>
+</td>
+    } @* templateProsesList.UrutanProses.Visible (end) *@
+    @if (templateProsesList.NamaProses.Visible) { // templateProsesList.NamaProses.Visible (begin)
+        <td data-name="NamaProses" @Html.Raw(templateProsesList.NamaProses.CellAttributes)>
+<span id="el@(templateProsesList.RowIndex == "$rowindex$" ? "$rowindex$" : templateProsesList.RowCount)_TemplateProses_NamaProses" class="el_TemplateProses_NamaProses">
+<span @Html.Raw(templateProsesList.NamaProses.ViewAttributes)>
+@Html.Raw(templateProsesList.NamaProses.GetViewValue())</span>
+</span>
+</td>
+    } @* templateProsesList.NamaProses.Visible (end) *@
+    @if (templateProsesList.IdPIC.Visible) { // templateProsesList.IdPIC.Visible (begin)
+        <td data-name="IdPIC" @Html.Raw(templateProsesList.IdPIC.CellAttributes)>
+<span id="el@(templateProsesList.RowIndex == "$rowindex$" ? "$rowindex$" : templateProsesList.RowCount)_TemplateProses_IdPIC" class="el_TemplateProses_IdPIC">
+<span @Html.Raw(templateProsesList.IdPIC.ViewAttributes)>
+@Html.Raw(templateProsesList.IdPIC.GetViewValue())</span>
+</span>
+</td>
+    } @* templateProsesList.IdPIC.Visible (end) *@
+    @if (templateProsesList.IdTools.Visible) { // templateProsesList.IdTools.Visible (begin)
+        <td data-name="IdTools" @Html.Raw(templateProsesList.IdTools.CellAttributes)>
+<span id="el@(templateProsesList.RowIndex == "$rowindex$" ? "$rowindex$" : templateProsesList.RowCount)_TemplateProses_IdTools" class="el_TemplateProses_IdTools">
+<span @Html.Raw(templateProsesList.IdTools.ViewAttributes)>
+@Html.Raw(templateProsesList.IdTools.GetViewValue())</span>
+</span>
+</td>
+    } @* templateProsesList.IdTools.Visible (end) *@
+    @if (templateProsesList.Keterangan.Visible) { // templateProsesList.Keterangan.Visible (begin)
+        <td data-name="Keterangan" @Html.Raw(templateProsesList.Keterangan.CellAttributes)>
+<span id="el@(templateProsesList.RowIndex == "$rowindex$" ? "$rowindex$" : templateProsesList.RowCount)_TemplateProses_Keterangan" class="el_TemplateProses_Keterangan">
+<span @Html.Raw(templateProsesList.Keterangan.ViewAttributes)>
+@Html.Raw(templateProsesList.Keterangan.GetViewValue())</span>
+</span>
+</td>
+    } @* templateProsesList.Keterangan.Visible (end) *@
+    @if (templateProsesList.DibuatOleh.Visible) { // templateProsesList.DibuatOleh.Visible (begin)
+        <td data-name="DibuatOleh" @Html.Raw(templateProsesList.DibuatOleh.CellAttributes)>
+<span id="el@(templateProsesList.RowIndex == "$rowindex$" ? "$rowindex$" : templateProsesList.RowCount)_TemplateProses_DibuatOleh" class="el_TemplateProses_DibuatOleh">
+<span @Html.Raw(templateProsesList.DibuatOleh.ViewAttributes)>
+@Html.Raw(templateProsesList.DibuatOleh.GetViewValue())</span>
+</span>
+</td>
+    } @* templateProsesList.DibuatOleh.Visible (end) *@
+    @if (templateProsesList.TanggalDibuat.Visible) { // templateProsesList.TanggalDibuat.Visible (begin)
+        <td data-name="TanggalDibuat" @Html.Raw(templateProsesList.TanggalDibuat.CellAttributes)>
+<span id="el@(templateProsesList.RowIndex == "$rowindex$" ? "$rowindex$" : templateProsesList.RowCount)_TemplateProses_TanggalDibuat" class="el_TemplateProses_TanggalDibuat">
+<span @Html.Raw(templateProsesList.TanggalDibuat.ViewAttributes)>
+@Html.Raw(templateProsesList.TanggalDibuat.GetViewValue())</span>
+</span>
+</td>
+    } @* templateProsesList.TanggalDibuat.Visible (end) *@
+    @if (templateProsesList.DiperbaruiOleh.Visible) { // templateProsesList.DiperbaruiOleh.Visible (begin)
+        <td data-name="DiperbaruiOleh" @Html.Raw(templateProsesList.DiperbaruiOleh.CellAttributes)>
+<span id="el@(templateProsesList.RowIndex == "$rowindex$" ? "$rowindex$" : templateProsesList.RowCount)_TemplateProses_DiperbaruiOleh" class="el_TemplateProses_DiperbaruiOleh">
+<span @Html.Raw(templateProsesList.DiperbaruiOleh.ViewAttributes)>
+@Html.Raw(templateProsesList.DiperbaruiOleh.GetViewValue())</span>
+</span>
+</td>
+    } @* templateProsesList.DiperbaruiOleh.Visible (end) *@
+    @if (templateProsesList.TanggalDiperbarui.Visible) { // templateProsesList.TanggalDiperbarui.Visible (begin)
+        <td data-name="TanggalDiperbarui" @Html.Raw(templateProsesList.TanggalDiperbarui.CellAttributes)>
+<span id="el@(templateProsesList.RowIndex == "$rowindex$" ? "$rowindex$" : templateProsesList.RowCount)_TemplateProses_TanggalDiperbarui" class="el_TemplateProses_TanggalDiperbarui">
+<span @Html.Raw(templateProsesList.TanggalDiperbarui.ViewAttributes)>
+@Html.Raw(templateProsesList.TanggalDiperbarui.GetViewValue())</span>
+</span>
+</td>
+    } @* templateProsesList.TanggalDiperbarui.Visible (end) *@
+    @* Render list options (body, right) *@
+    @templateProsesList.ListOptions.RenderBody("right", templateProsesList.RowCount)
+    </tr>
+    } @* End if *@
+
+    // Reset for template row
+    if (SameString(templateProsesList.RowIndex, "$rowindex$"))
+        templateProsesList.RowIndex = 0;
+
+    // Reset inline add/copy row
+    if ((templateProsesList.IsCopy || templateProsesList.IsAdd) && templateProsesList.RowIndex is int rowIndex2 && rowIndex2 == 0)
+        templateProsesList.RowIndex = 1;
+} @* End While *@
+</tbody>
+</table><!-- /.ew-table -->
+} @* End If TotalRecords > 0 *@
+</div><!-- /.ew-grid-middle-panel -->
+@if (Empty(templateProsesList.CurrentAction) && !templateProsesList.UseAjaxActions) {
+<input type="hidden" name="action" id="action" value="">
+}
+</form><!-- /.ew-list-form -->
+@{ templateProsesList.CloseRecordset(); }
+@if (!templateProsesList.IsExport()) {
+<div class="card-footer ew-grid-lower-panel">
+@if (!templateProsesList.IsGridAdd && !(templateProsesList.IsGridEdit && templateProsesList.ModalGridEdit) && !templateProsesList.IsMultiEdit) {
+@Html.Raw(templateProsesList.Pager.Render())
+}
+<div class="ew-list-other-options">
+@templateProsesList.OtherOptions.RenderBody("bottom")
+</div>
+</div>
+}
+</div><!-- /.ew-grid -->
+} else { // Show other options
+<div class="ew-list-other-options">
+@templateProsesList.OtherOptions.ForEach(opt => opt.ButtonClass = "").RenderBody()
+</div>
+}
+</div>
+<div id="ew-footer-options">
+    @templateProsesList.FooterOptions.RenderBody()
+</div>
+</main>
+@templateProsesList.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+@if (!templateProsesList.IsExport()) {
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("TemplateProses");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Write your table-specific startup script here
+    // document.write("page loaded");
+});
+</script>
+}

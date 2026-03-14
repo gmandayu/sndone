@@ -1,0 +1,721 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (subAktivitasPengecekanMtEdit.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = subAktivitasPengecekanMtEdit.UseLayout ? "_Layout" : "";
+}
+@subAktivitasPengecekanMtEdit.ShowPageHeader()
+@subAktivitasPengecekanMtEdit.ShowMessages()
+<main class="edit">
+<form name="fSubAktivitasPengecekanMTedit" id="fSubAktivitasPengecekanMTedit" class="@(subAktivitasPengecekanMtEdit.FormClassName)" action="@AppPath(CurrentPageName())" method="post" novalidate autocomplete="off">
+<script>
+var currentTable = @Html.Raw(ConvertToJson(subAktivitasPengecekanMtEdit.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { SubAktivitasPengecekanMT: currentTable } });
+var currentPageID = ew.PAGE_ID = "edit";
+var currentForm;
+var fSubAktivitasPengecekanMTedit;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("fSubAktivitasPengecekanMTedit")
+        .setPageId("edit")
+
+        // Add fields
+        .setFields([
+
+            ["NoReferensi", [fields.NoReferensi.visible && fields.NoReferensi.required ? ew.Validators.required(fields.NoReferensi.caption) : null], fields.NoReferensi.isInvalid],
+            ["idProses", [fields.idProses.visible && fields.idProses.required ? ew.Validators.required(fields.idProses.caption) : null], fields.idProses.isInvalid],
+            ["idAktifitas", [fields.idAktifitas.visible && fields.idAktifitas.required ? ew.Validators.required(fields.idAktifitas.caption) : null], fields.idAktifitas.isInvalid],
+            ["Produk", [fields.Produk.visible && fields.Produk.required ? ew.Validators.required(fields.Produk.caption) : null], fields.Produk.isInvalid],
+            ["StatusAktivitas", [fields.StatusAktivitas.visible && fields.StatusAktivitas.required ? ew.Validators.required(fields.StatusAktivitas.caption) : null], fields.StatusAktivitas.isInvalid],
+            ["LastUpdatedBy", [fields.LastUpdatedBy.visible && fields.LastUpdatedBy.required ? ew.Validators.required(fields.LastUpdatedBy.caption) : null], fields.LastUpdatedBy.isInvalid],
+            ["lastUpdatedDate", [fields.lastUpdatedDate.visible && fields.lastUpdatedDate.required ? ew.Validators.required(fields.lastUpdatedDate.caption) : null], fields.lastUpdatedDate.isInvalid],
+            ["NomorPolisi", [fields.NomorPolisi.visible && fields.NomorPolisi.required ? ew.Validators.required(fields.NomorPolisi.caption) : null], fields.NomorPolisi.isInvalid],
+            ["JamPemeriksaan", [fields.JamPemeriksaan.visible && fields.JamPemeriksaan.required ? ew.Validators.required(fields.JamPemeriksaan.caption) : null, ew.Validators.datetime(fields.JamPemeriksaan.clientFormatPattern)], fields.JamPemeriksaan.isInvalid],
+            ["ExTangki", [fields.ExTangki.visible && fields.ExTangki.required ? ew.Validators.required(fields.ExTangki.caption) : null], fields.ExTangki.isInvalid],
+            ["Keterangan", [fields.Keterangan.visible && fields.Keterangan.required ? ew.Validators.required(fields.Keterangan.caption) : null], fields.Keterangan.isInvalid]
+        ])
+
+        // Form_CustomValidate
+        .setCustomValidate(
+            function(fobj) { // DO NOT CHANGE THIS LINE!
+                    // Your custom validation code here, return false if invalid.
+                    return true;
+                }
+        )
+
+        // Use JavaScript validation or not
+        .setValidateRequired(ew.CLIENT_VALIDATE)
+
+        // Dynamic selection lists
+        .setLists({
+        })
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Client script
+    // Write your client script here, no need to add script tags.
+    var parent_url = ew.PATH_BASE;
+    var IdProses = "@subAktivitasPengecekanMt.idProses.CurrentValue";
+    var NoReferensi = "@subAktivitasPengecekanMt.NoReferensi.CurrentValue";
+    function handleCustomSubmit(status) {
+        let idAktivitas = $("#x_idAktifitas").val();
+        const originalStatus = document.querySelector('#el_SubAktivitasPengecekanMT_StatusAktivitas .form-control-plaintext').textContent;
+        $.ajax({
+            url: parent_url + `api/LookUpList/check_valid_status_aktivitas?idAktivitas=${idAktivitas}&originalStatus=${originalStatus}`,
+            type: 'GET',
+            beforeSend: function () {
+                showLoading();
+            },
+            success: function (response) {
+                if (!response.IsValid){
+                    hideLoading();
+                    ew.alert(response.Message ?? "Status aktivitas telah diubah oleh pengguna lain");
+                    return;
+                } else {
+                    let form = $("#fSubAktivitasPengecekanMTedit");
+                    $.ajax({
+                        url: form.attr("action"),
+                        type: form.attr("method"),
+                        data: form.serialize(),
+                        success: function (response) {
+                            updateStatus(idAktivitas, status);
+                        },
+                        error: function (xhr, status, error) {
+                            hideLoading();
+                            ew.alert("Gagal menyimpan data.");
+                            console.error("Form submit gagal:", error);
+                        }
+                    });  
+                }
+            },
+            error: function (xhr, status, error) {
+                hideLoading();
+                ew.alert("Gagal menyimpan data.");
+                console.error("Form submit gagal:", error);
+            }
+        }); 
+    }
+    function updateStatus(idAktivitas, status) {
+        $.ajax({
+            url: parent_url + `api/LookUpList/update_status_aktivitas?idAktivitas=${idAktivitas}&statusAktivitas=${status}`,
+            type: 'POST',
+            success: function () {
+                console.log("Status berhasil diperbarui.");
+                if (status == "Completed" || status == "Completed Edit") {
+                    window.location.href = `${parent_url}AktivitasList?cmd=search&x_IdProses%5B%5D=${IdProses}&search=&searchtype=`;
+                } else {
+                    location.reload();
+                }
+            },
+            error: function (xhr, status, error) {
+                ew.alert("Status gagal diperbarui.");
+                console.error("Update status gagal:", error);
+            },
+            complete: function () {
+                hideLoading();
+            }
+        });
+    }
+    function reverseStatus(status, catatan) {
+        showLoading();
+        let idAktivitas = $("#x_idAktifitas").val();
+        $.ajax({
+            url: parent_url + `api/LookUpList/update_status_aktivitas-v2`,
+            type: 'POST',
+            data: JSON.stringify({ IdAktivitas: idAktivitas, StatusAktivitas: status, Catatan: catatan ?? null }),
+            contentType: 'application/json',
+            success: function () {
+                setTimeout(function () {
+                    window.location.href = `${parent_url}AktivitasList?cmd=search&x_IdProses%5B%5D=${IdProses}&search=&searchtype=`;
+                }, 1000);
+            },
+            error: function (xhr, status, error) {
+                ew.alert("Status gagal diperbarui.");
+                console.error("Update status gagal:", error);
+            },
+            complete: function () {
+                hideLoading();
+            }
+        });
+    }
+    $(document).on("submit", "#reverseStatusEditingModalForm", function (e) {
+        e.preventDefault();
+        let catatanText = $("#catatanReverseStatusEditing").val();
+        reverseStatus("Editing", catatanText);
+    });
+    $(document).on("click", "#btn-draft", function () {
+        handleCustomSubmit("Draft");
+    });
+    $(document).on("click", "#btn-completed", function () {
+        handleCustomSubmit("Completed");
+    });
+    $(document).on("click", "#btn-editing", function () {
+        handleCustomSubmit("Editing");
+    });
+    $(document).on("click", "#btn-completedEdit", function () {
+        handleCustomSubmit("Completed Edit");
+    });
+});
+</script>
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+<input type="hidden" name="action" id="action" value="update">
+<input type="hidden" name="modal" value="@ConvertToInt(subAktivitasPengecekanMtEdit.IsModal)">
+@if (IsJsonResponse()) {
+<input type="hidden" name="json" value="1">
+}
+<input type="hidden" name="@(subAktivitasPengecekanMtEdit.OldKeyName)" value="@Html.Raw(subAktivitasPengecekanMtEdit.OldKey)">
+<div class="ew-edit-div"><!-- page* -->
+@if (subAktivitasPengecekanMtEdit.NoReferensi.Visible) { // subAktivitasPengecekanMtEdit.NoReferensi.Visible (begin)
+    <div id="r_NoReferensi" @Html.Raw(subAktivitasPengecekanMtEdit.NoReferensi.RowAttributes)>
+        <label id="elh_SubAktivitasPengecekanMT_NoReferensi" for="x_NoReferensi" class="@(subAktivitasPengecekanMtEdit.LeftColumnClass)">@Html.Raw(subAktivitasPengecekanMtEdit.NoReferensi.Caption)@Html.Raw(subAktivitasPengecekanMtEdit.NoReferensi.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(subAktivitasPengecekanMtEdit.RightColumnClass)"><div @Html.Raw(subAktivitasPengecekanMtEdit.NoReferensi.CellAttributes)>
+<span id="el_SubAktivitasPengecekanMT_NoReferensi">
+<span @Html.Raw(subAktivitasPengecekanMtEdit.NoReferensi.ViewAttributes)>
+<input type="text" readonly class="form-control-plaintext" value="@Html.Raw(RemoveHtml(ConvertToString(subAktivitasPengecekanMtEdit.NoReferensi.EditValue)))"></span>
+<input type="hidden" data-table="SubAktivitasPengecekanMT" data-field="x_NoReferensi" data-hidden="1" name="x_NoReferensi" id="x_NoReferensi" value="@Html.Raw(HtmlEncode(subAktivitasPengecekanMtEdit.NoReferensi.CurrentValue))">
+</span>
+</div></div>
+    </div>
+} @* subAktivitasPengecekanMtEdit.NoReferensi.Visible (end) *@
+@if (subAktivitasPengecekanMtEdit.idProses.Visible) { // subAktivitasPengecekanMtEdit.idProses.Visible (begin)
+    <div id="r_idProses" @Html.Raw(subAktivitasPengecekanMtEdit.idProses.RowAttributes)>
+        <label id="elh_SubAktivitasPengecekanMT_idProses" class="@(subAktivitasPengecekanMtEdit.LeftColumnClass)">@Html.Raw(subAktivitasPengecekanMtEdit.idProses.Caption)@Html.Raw(subAktivitasPengecekanMtEdit.idProses.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(subAktivitasPengecekanMtEdit.RightColumnClass)"><div @Html.Raw(subAktivitasPengecekanMtEdit.idProses.CellAttributes)>
+<span id="el_SubAktivitasPengecekanMT_idProses">
+<span @Html.Raw(subAktivitasPengecekanMtEdit.idProses.ViewAttributes)>
+<span class="form-control-plaintext">@Html.Raw(subAktivitasPengecekanMtEdit.idProses.DisplayValue(subAktivitasPengecekanMtEdit.idProses.EditValue))</span></span>
+<input type="hidden" data-table="SubAktivitasPengecekanMT" data-field="x_idProses" data-hidden="1" name="x_idProses" id="x_idProses" value="@Html.Raw(HtmlEncode(subAktivitasPengecekanMtEdit.idProses.CurrentValue))">
+</span>
+</div></div>
+    </div>
+} @* subAktivitasPengecekanMtEdit.idProses.Visible (end) *@
+@if (subAktivitasPengecekanMtEdit.idAktifitas.Visible) { // subAktivitasPengecekanMtEdit.idAktifitas.Visible (begin)
+    <div id="r_idAktifitas" @Html.Raw(subAktivitasPengecekanMtEdit.idAktifitas.RowAttributes)>
+        <label id="elh_SubAktivitasPengecekanMT_idAktifitas" class="@(subAktivitasPengecekanMtEdit.LeftColumnClass)">@Html.Raw(subAktivitasPengecekanMtEdit.idAktifitas.Caption)@Html.Raw(subAktivitasPengecekanMtEdit.idAktifitas.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(subAktivitasPengecekanMtEdit.RightColumnClass)"><div @Html.Raw(subAktivitasPengecekanMtEdit.idAktifitas.CellAttributes)>
+<span id="el_SubAktivitasPengecekanMT_idAktifitas">
+<span @Html.Raw(subAktivitasPengecekanMtEdit.idAktifitas.ViewAttributes)>
+<span class="form-control-plaintext">@Html.Raw(subAktivitasPengecekanMtEdit.idAktifitas.DisplayValue(subAktivitasPengecekanMtEdit.idAktifitas.EditValue))</span></span>
+<input type="hidden" data-table="SubAktivitasPengecekanMT" data-field="x_idAktifitas" data-hidden="1" name="x_idAktifitas" id="x_idAktifitas" value="@Html.Raw(HtmlEncode(subAktivitasPengecekanMtEdit.idAktifitas.CurrentValue))">
+</span>
+</div></div>
+    </div>
+} @* subAktivitasPengecekanMtEdit.idAktifitas.Visible (end) *@
+@if (subAktivitasPengecekanMtEdit.Produk.Visible) { // subAktivitasPengecekanMtEdit.Produk.Visible (begin)
+    <div id="r_Produk" @Html.Raw(subAktivitasPengecekanMtEdit.Produk.RowAttributes)>
+        <label id="elh_SubAktivitasPengecekanMT_Produk" class="@(subAktivitasPengecekanMtEdit.LeftColumnClass)">@Html.Raw(subAktivitasPengecekanMtEdit.Produk.Caption)@Html.Raw(subAktivitasPengecekanMtEdit.Produk.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(subAktivitasPengecekanMtEdit.RightColumnClass)"><div @Html.Raw(subAktivitasPengecekanMtEdit.Produk.CellAttributes)>
+<span id="el_SubAktivitasPengecekanMT_Produk">
+<span @Html.Raw(subAktivitasPengecekanMtEdit.Produk.ViewAttributes)>
+<span class="form-control-plaintext">@Html.Raw(subAktivitasPengecekanMtEdit.Produk.DisplayValue(subAktivitasPengecekanMtEdit.Produk.EditValue))</span></span>
+<input type="hidden" data-table="SubAktivitasPengecekanMT" data-field="x_Produk" data-hidden="1" name="x_Produk" id="x_Produk" value="@Html.Raw(HtmlEncode(subAktivitasPengecekanMtEdit.Produk.CurrentValue))">
+</span>
+</div></div>
+    </div>
+} @* subAktivitasPengecekanMtEdit.Produk.Visible (end) *@
+@if (subAktivitasPengecekanMtEdit.StatusAktivitas.Visible) { // subAktivitasPengecekanMtEdit.StatusAktivitas.Visible (begin)
+    <div id="r_StatusAktivitas" @Html.Raw(subAktivitasPengecekanMtEdit.StatusAktivitas.RowAttributes)>
+        <label id="elh_SubAktivitasPengecekanMT_StatusAktivitas" class="@(subAktivitasPengecekanMtEdit.LeftColumnClass)">@Html.Raw(subAktivitasPengecekanMtEdit.StatusAktivitas.Caption)@Html.Raw(subAktivitasPengecekanMtEdit.StatusAktivitas.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(subAktivitasPengecekanMtEdit.RightColumnClass)"><div @Html.Raw(subAktivitasPengecekanMtEdit.StatusAktivitas.CellAttributes)>
+<span id="el_SubAktivitasPengecekanMT_StatusAktivitas">
+<span @Html.Raw(subAktivitasPengecekanMtEdit.StatusAktivitas.ViewAttributes)>
+<span class="form-control-plaintext">@Html.Raw(subAktivitasPengecekanMtEdit.StatusAktivitas.DisplayValue(subAktivitasPengecekanMtEdit.StatusAktivitas.EditValue))</span></span>
+<input type="hidden" data-table="SubAktivitasPengecekanMT" data-field="x_StatusAktivitas" data-hidden="1" name="x_StatusAktivitas" id="x_StatusAktivitas" value="@Html.Raw(HtmlEncode(subAktivitasPengecekanMtEdit.StatusAktivitas.CurrentValue))">
+</span>
+</div></div>
+    </div>
+} @* subAktivitasPengecekanMtEdit.StatusAktivitas.Visible (end) *@
+@if (subAktivitasPengecekanMtEdit.LastUpdatedBy.Visible) { // subAktivitasPengecekanMtEdit.LastUpdatedBy.Visible (begin)
+    <div id="r_LastUpdatedBy" @Html.Raw(subAktivitasPengecekanMtEdit.LastUpdatedBy.RowAttributes)>
+        <label id="elh_SubAktivitasPengecekanMT_LastUpdatedBy" for="x_LastUpdatedBy" class="@(subAktivitasPengecekanMtEdit.LeftColumnClass)">@Html.Raw(subAktivitasPengecekanMtEdit.LastUpdatedBy.Caption)@Html.Raw(subAktivitasPengecekanMtEdit.LastUpdatedBy.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(subAktivitasPengecekanMtEdit.RightColumnClass)"><div @Html.Raw(subAktivitasPengecekanMtEdit.LastUpdatedBy.CellAttributes)>
+<span id="el_SubAktivitasPengecekanMT_LastUpdatedBy">
+<span @Html.Raw(subAktivitasPengecekanMtEdit.LastUpdatedBy.ViewAttributes)>
+<input type="text" readonly class="form-control-plaintext" value="@Html.Raw(RemoveHtml(ConvertToString(subAktivitasPengecekanMtEdit.LastUpdatedBy.EditValue)))"></span>
+<input type="hidden" data-table="SubAktivitasPengecekanMT" data-field="x_LastUpdatedBy" data-hidden="1" name="x_LastUpdatedBy" id="x_LastUpdatedBy" value="@Html.Raw(HtmlEncode(subAktivitasPengecekanMtEdit.LastUpdatedBy.CurrentValue))">
+</span>
+</div></div>
+    </div>
+} @* subAktivitasPengecekanMtEdit.LastUpdatedBy.Visible (end) *@
+@if (subAktivitasPengecekanMtEdit.lastUpdatedDate.Visible) { // subAktivitasPengecekanMtEdit.lastUpdatedDate.Visible (begin)
+    <div id="r_lastUpdatedDate" @Html.Raw(subAktivitasPengecekanMtEdit.lastUpdatedDate.RowAttributes)>
+        <label id="elh_SubAktivitasPengecekanMT_lastUpdatedDate" for="x_lastUpdatedDate" class="@(subAktivitasPengecekanMtEdit.LeftColumnClass)">@Html.Raw(subAktivitasPengecekanMtEdit.lastUpdatedDate.Caption)@Html.Raw(subAktivitasPengecekanMtEdit.lastUpdatedDate.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(subAktivitasPengecekanMtEdit.RightColumnClass)"><div @Html.Raw(subAktivitasPengecekanMtEdit.lastUpdatedDate.CellAttributes)>
+<span id="el_SubAktivitasPengecekanMT_lastUpdatedDate">
+<span @Html.Raw(subAktivitasPengecekanMtEdit.lastUpdatedDate.ViewAttributes)>
+<input type="text" readonly class="form-control-plaintext" value="@Html.Raw(RemoveHtml(ConvertToString(subAktivitasPengecekanMtEdit.lastUpdatedDate.EditValue)))"></span>
+<input type="hidden" data-table="SubAktivitasPengecekanMT" data-field="x_lastUpdatedDate" data-hidden="1" name="x_lastUpdatedDate" id="x_lastUpdatedDate" value="@Html.Raw(HtmlEncode(subAktivitasPengecekanMtEdit.lastUpdatedDate.CurrentValue))">
+</span>
+</div></div>
+    </div>
+} @* subAktivitasPengecekanMtEdit.lastUpdatedDate.Visible (end) *@
+@if (subAktivitasPengecekanMtEdit.NomorPolisi.Visible) { // subAktivitasPengecekanMtEdit.NomorPolisi.Visible (begin)
+    <div id="r_NomorPolisi" @Html.Raw(subAktivitasPengecekanMtEdit.NomorPolisi.RowAttributes)>
+        <label id="elh_SubAktivitasPengecekanMT_NomorPolisi" for="x_NomorPolisi" class="@(subAktivitasPengecekanMtEdit.LeftColumnClass)">@Html.Raw(subAktivitasPengecekanMtEdit.NomorPolisi.Caption)@Html.Raw(subAktivitasPengecekanMtEdit.NomorPolisi.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(subAktivitasPengecekanMtEdit.RightColumnClass)"><div @Html.Raw(subAktivitasPengecekanMtEdit.NomorPolisi.CellAttributes)>
+<span id="el_SubAktivitasPengecekanMT_NomorPolisi">
+<span @Html.Raw(subAktivitasPengecekanMtEdit.NomorPolisi.ViewAttributes)>
+<input type="text" readonly class="form-control-plaintext" value="@Html.Raw(RemoveHtml(ConvertToString(subAktivitasPengecekanMtEdit.NomorPolisi.EditValue)))"></span>
+<input type="hidden" data-table="SubAktivitasPengecekanMT" data-field="x_NomorPolisi" data-hidden="1" name="x_NomorPolisi" id="x_NomorPolisi" value="@Html.Raw(HtmlEncode(subAktivitasPengecekanMtEdit.NomorPolisi.CurrentValue))">
+</span>
+</div></div>
+    </div>
+} @* subAktivitasPengecekanMtEdit.NomorPolisi.Visible (end) *@
+@if (subAktivitasPengecekanMtEdit.JamPemeriksaan.Visible) { // subAktivitasPengecekanMtEdit.JamPemeriksaan.Visible (begin)
+    <div id="r_JamPemeriksaan" @Html.Raw(subAktivitasPengecekanMtEdit.JamPemeriksaan.RowAttributes)>
+        <label id="elh_SubAktivitasPengecekanMT_JamPemeriksaan" for="x_JamPemeriksaan" class="@(subAktivitasPengecekanMtEdit.LeftColumnClass)">@Html.Raw(subAktivitasPengecekanMtEdit.JamPemeriksaan.Caption)@Html.Raw(subAktivitasPengecekanMtEdit.JamPemeriksaan.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(subAktivitasPengecekanMtEdit.RightColumnClass)"><div @Html.Raw(subAktivitasPengecekanMtEdit.JamPemeriksaan.CellAttributes)>
+<span id="el_SubAktivitasPengecekanMT_JamPemeriksaan">
+<input type="@(subAktivitasPengecekanMtEdit.JamPemeriksaan.InputTextType)" name="x_JamPemeriksaan" id="x_JamPemeriksaan" data-table="SubAktivitasPengecekanMT" data-field="x_JamPemeriksaan" value="@Html.Raw(subAktivitasPengecekanMtEdit.JamPemeriksaan.EditValue)" placeholder="@Html.Raw(HtmlEncode(subAktivitasPengecekanMtEdit.JamPemeriksaan.PlaceHolder))" data-format-pattern="@(subAktivitasPengecekanMtEdit.JamPemeriksaan.FormatPattern)"@Html.Raw(subAktivitasPengecekanMtEdit.JamPemeriksaan.EditAttributes) aria-describedby="x_JamPemeriksaan_help">
+@Html.Raw(subAktivitasPengecekanMtEdit.JamPemeriksaan.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(subAktivitasPengecekanMtEdit.JamPemeriksaan.GetErrorMessage())</div>
+@if (!subAktivitasPengecekanMtEdit.JamPemeriksaan.ReadOnly && !subAktivitasPengecekanMtEdit.JamPemeriksaan.Disabled && !subAktivitasPengecekanMtEdit.JamPemeriksaan.EditAttrs.Is("readonly") && !subAktivitasPengecekanMtEdit.JamPemeriksaan.EditAttrs.Is("disabled")) {
+<script>
+loadjs.ready(["fSubAktivitasPengecekanMTedit", "datetimepicker"], function () {
+    let format = "@Html.Raw(DateFormat(9))", // DN
+        options = {
+                localization: {
+                    locale: ew.LANGUAGE_ID + "-u-nu-" + ew.getNumberingSystem(),
+                    hourCycle: format.match(/H/) ? "h24" : "h12",
+                    format,
+                    ...ew.language.phrase("datetimepicker")
+                },
+                display: {
+                    icons: {
+                        previous: ew.IS_RTL ? "fa-solid fa-chevron-right" : "fa-solid fa-chevron-left",
+                        next: ew.IS_RTL ? "fa-solid fa-chevron-left" : "fa-solid fa-chevron-right"
+                    },
+                    components: {
+                        clock: !!format.match(/h/i) || !!format.match(/m/) || !!format.match(/s/i),
+                        hours: !!format.match(/h/i),
+                        minutes: !!format.match(/m/),
+                        seconds: !!format.match(/s/i)
+                    },
+                theme: ew.getPreferredTheme()
+                }
+            };
+    ew.createDateTimePicker("fSubAktivitasPengecekanMTedit", "x_JamPemeriksaan", ew.deepAssign({"useCurrent":false,"display":{"sideBySide":false}}, options));
+});
+</script>
+}
+</span>
+</div></div>
+    </div>
+} @* subAktivitasPengecekanMtEdit.JamPemeriksaan.Visible (end) *@
+@if (subAktivitasPengecekanMtEdit.ExTangki.Visible) { // subAktivitasPengecekanMtEdit.ExTangki.Visible (begin)
+    <div id="r_ExTangki" @Html.Raw(subAktivitasPengecekanMtEdit.ExTangki.RowAttributes)>
+        <label id="elh_SubAktivitasPengecekanMT_ExTangki" for="x_ExTangki" class="@(subAktivitasPengecekanMtEdit.LeftColumnClass)">@Html.Raw(subAktivitasPengecekanMtEdit.ExTangki.Caption)@Html.Raw(subAktivitasPengecekanMtEdit.ExTangki.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(subAktivitasPengecekanMtEdit.RightColumnClass)"><div @Html.Raw(subAktivitasPengecekanMtEdit.ExTangki.CellAttributes)>
+<span id="el_SubAktivitasPengecekanMT_ExTangki">
+<input type="@(subAktivitasPengecekanMtEdit.ExTangki.InputTextType)" name="x_ExTangki" id="x_ExTangki" data-table="SubAktivitasPengecekanMT" data-field="x_ExTangki" value="@Html.Raw(subAktivitasPengecekanMtEdit.ExTangki.EditValue)" size="30" maxlength="100" placeholder="@Html.Raw(HtmlEncode(subAktivitasPengecekanMtEdit.ExTangki.PlaceHolder))" data-format-pattern="@(subAktivitasPengecekanMtEdit.ExTangki.FormatPattern)"@Html.Raw(subAktivitasPengecekanMtEdit.ExTangki.EditAttributes) aria-describedby="x_ExTangki_help">
+@Html.Raw(subAktivitasPengecekanMtEdit.ExTangki.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(subAktivitasPengecekanMtEdit.ExTangki.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* subAktivitasPengecekanMtEdit.ExTangki.Visible (end) *@
+@if (subAktivitasPengecekanMtEdit.Keterangan.Visible) { // subAktivitasPengecekanMtEdit.Keterangan.Visible (begin)
+    <div id="r_Keterangan" @Html.Raw(subAktivitasPengecekanMtEdit.Keterangan.RowAttributes)>
+        <label id="elh_SubAktivitasPengecekanMT_Keterangan" for="x_Keterangan" class="@(subAktivitasPengecekanMtEdit.LeftColumnClass)">@Html.Raw(subAktivitasPengecekanMtEdit.Keterangan.Caption)@Html.Raw(subAktivitasPengecekanMtEdit.Keterangan.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(subAktivitasPengecekanMtEdit.RightColumnClass)"><div @Html.Raw(subAktivitasPengecekanMtEdit.Keterangan.CellAttributes)>
+<span id="el_SubAktivitasPengecekanMT_Keterangan">
+<textarea data-table="SubAktivitasPengecekanMT" data-field="x_Keterangan" name="x_Keterangan" id="x_Keterangan" cols="35" rows="4" placeholder="@Html.Raw(HtmlEncode(subAktivitasPengecekanMtEdit.Keterangan.PlaceHolder))"@Html.Raw(subAktivitasPengecekanMtEdit.Keterangan.EditAttributes) aria-describedby="x_Keterangan_help">@(subAktivitasPengecekanMtEdit.Keterangan.EditValue)</textarea>
+@Html.Raw(subAktivitasPengecekanMtEdit.Keterangan.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(subAktivitasPengecekanMtEdit.Keterangan.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* subAktivitasPengecekanMtEdit.Keterangan.Visible (end) *@
+</div><!-- /page* -->
+    <input type="hidden" data-table="SubAktivitasPengecekanMT" data-field="x_id" data-hidden="1" name="x_id" id="x_id" value="@Html.Raw(HtmlEncode(subAktivitasPengecekanMtEdit.id.CurrentValue))">
+@{ subAktivitasPengecekanMtEdit.CloseRecordset(); }
+@Html.Raw(subAktivitasPengecekanMtEdit.IsModal ? "<template class=\"ew-modal-buttons\">" : "<div class=\"row ew-buttons\">")<!-- buttons .row -->
+    <div class="@(subAktivitasPengecekanMtEdit.OffsetColumnClass)"><!-- buttons offset -->
+    <button class="btn btn-primary ew-btn" name="btn-action" id="btn-action" type="submit" form="fSubAktivitasPengecekanMTedit">@Html.Raw(Language.Phrase("SaveBtn"))</button>
+@if (IsJsonResponse()) {
+    <button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" data-bs-dismiss="modal">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+} else {
+    <button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" form="fSubAktivitasPengecekanMTedit" data-href="@AppPath(subAktivitasPengecekanMtEdit.ReturnUrl)">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+}
+    </div><!-- /buttons offset -->
+@Html.Raw(subAktivitasPengecekanMtEdit.IsModal ? "</template>" : "</div>")<!-- /buttons .row -->
+</form>
+</main>
+@subAktivitasPengecekanMtEdit.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("SubAktivitasPengecekanMT");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Startup script
+    var IdReferensi = "@subAktivitasPengecekanMtEdit.NoReferensi.CurrentValue";
+    var IdProses = "@subAktivitasPengecekanMtEdit.idProses.CurrentValue";
+    var idAktivitas = "@subAktivitasPengecekanMtEdit.idAktifitas.CurrentValue";
+    var NamaAktivitas = $('#el_SubAktivitasPengecekanMT_idAktifitas').text();
+    const userLevel = "@CurrentUserLevel()";
+    let currentStatusAktivitas = "";
+    var parent_url = ew.PATH_BASE;
+    var steps = [
+        { number: 1, label: "Sampling Lab Test", url: `${parent_url}SamplingLabTestList`, icon: "fa-flask" },
+        { number: 2, label: "Proses", url: `${parent_url}ProsesList?cmd=search&x_IdReferensi%5B%5D=${IdReferensi}&search=&searchtype=`, icon: "fa-gears" },
+        { number: 3, label: "Aktivitas", url: `${parent_url}AktivitasList?cmd=search&x_IdProses%5B%5D=${IdProses}&search=&searchtype=`, icon: "fa-list-check" },
+        { number: 4, label: NamaAktivitas, url: '', icon: "fa-file-circle-check" }
+    ];
+    var currentStep = 4;
+    $("<style>")
+        .prop("type", "text/css")
+        .html(`
+            .stepper {
+                display: flex;
+                counter-reset: step;
+                flex-wrap: nowrap;        /* jangan pecah ke bawah */
+                overflow-x: auto;         /* scroll horizontal */
+                -webkit-overflow-scrolling: touch; /* smooth scroll di mobile */
+                padding-bottom: 8px;      /* space biar scroll bar gak nempel */
+            }
+            .stepper::-webkit-scrollbar {
+            height: 6px; /* tipis */
+            }
+            .stepper::-webkit-scrollbar-thumb {
+                background-color: #ccc;
+                border-radius: 3px;
+            }
+            .step {
+                width: 150px;
+                text-align: center;
+                position: relative;
+            }
+            .step:not(:last-child)::after {
+                content: '';
+                position: absolute;
+                top: 20px;
+                right: -50%;
+                width: 100%;
+                height: 4px;
+                background-color: #ccc;
+                z-index: 0;
+            }
+            .step.completed:not(:last-child)::after {
+                background-color: #3c6dbd;
+            }
+            .step-icon {
+                width: 36px;
+                height: 36px;
+                line-height: 36px;
+                border-radius: 50%;
+                background: #ccc;
+                display: inline-block;
+                z-index: 1;
+                position: relative;
+                color: white;
+                font-weight: bold;
+            }
+            .step.active .step-icon {
+                background: #3c6dbd;
+            }
+            .step-label {
+                margin-top: 8px;
+                font-size: 14px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                gap: 6px;
+                color: #333;
+            }
+            .step-label {
+                color: #3c6dbd !important;
+                text-decoration: none;
+                margin: 0;
+                padding: 0;
+            }
+            .step-label-not-active {
+                color: #CCCCCC !important;
+            }
+            .ag-theme-quartz .ag-header {
+                background-color: #3c6dbd !important;
+            }
+            .ag-theme-quartz .ag-header-cell-label {
+                color: #ffffff !important;
+            }
+            .ag-theme-quartz .ag-icon-filter {
+                color: #ffffff !important;
+            }
+            .rotate-down {
+                transform: rotate(90deg);
+                transition: transform 0.3s ease;
+            }
+            .rotate-right {
+                transform: rotate(0deg);
+                transition: transform 0.3s ease;
+            }
+        `)
+        .appendTo("head");
+    var $stepperWrapper = $('<div class="d-flex border-bottom border-2 pb-2"><div class="stepper"></div></div>');
+    var $stepper = $stepperWrapper.find(".stepper");
+    steps.forEach(function (step, i) {
+        var isActive = step.number === currentStep;
+        var isCompleted = step.number < currentStep;
+        var stepClass = isActive ? "active" : isCompleted ? "completed" : "";
+        var icon, labelContent, html;
+        if (isActive) {
+            icon = `<div class="step-icon bg-success">${step.number}</div>`;
+            labelContent = `<div class="step-label"><p class="text-success mb-1"><i class="fa-solid ${step.icon} me-1 text-success"></i> ${step.label}</p></div>`;
+            html = `<div class="step ${stepClass} text-success">${icon}${labelContent}</div>`;
+        } else if (isCompleted) {
+            icon = `<div class="step-icon" style="background: #3c6dbd;">${step.number}</div>`;
+            labelContent = `<div class="step-label"><a href="${step.url}" class="text-primary"><i class="fa-solid ${step.icon} me-1"></i>${step.label}</a></div>`;
+            html = `<div class="step ${stepClass}">${icon}${labelContent}</div>`;
+        } else {
+            icon = `<div class="step-icon">${step.number}</div>`;
+            labelContent = `<div class="step-label-not-active"><p style="margin: 0;"><i class="fa-solid ${step.icon} me-1"></i>${step.label}</p></div>`;
+            html = `<div class="step ${stepClass} text-secondary">${icon}${labelContent}</div>`;
+        }
+        $stepper.append(html);
+    });
+    $(".content-header .container-fluid .row").append($stepperWrapper);
+    $("#btn-action").hide();
+    $("#btn-cancel").html('<i class="fa-solid fa-ban"></i></i> Cancel');
+    const $cancelButton = $("#btn-cancel");
+    const idAktifitas = $("#x_idAktifitas").val();
+    let StatusAktivitas = $('#el_SubAktivitasPengecekanMT_StatusAktivitas').text().trim();
+
+    // --- log aktivitas start ---
+    $('#el_SubAktivitasPengecekanMT_LastUpdatedBy').addClass('d-flex gap-3');
+    $('#el_SubAktivitasPengecekanMT_LastUpdatedBy').append(`
+        <button type="button" class="btn btn-primary ew-btn ps-2" expand-log="false">
+            <i class="fa-solid fa-caret-right fa-2xl me-2 caret-icon rotate-right"></i>
+            Log History
+            <i class="fa-solid fa-clock-rotate-left ms-1"></i> 
+        </button>
+    `);
+    $(document).on('click', 'button[expand-log]', function () {
+        const $btn = $(this);
+        const isExpanded = $btn.attr('expand-log') === 'true';
+        const $row = $('#log-table-row');
+        const $wrapper = $('#log-table-wrapper');
+        const $caret = $btn.find('.caret-icon');
+        if (!isExpanded) {
+            $btn.attr('expand-log', 'true');
+            $row.removeClass('d-none');
+            setTimeout(() => {
+                $wrapper.css({
+                    maxHeight: '500px'
+                });
+            }, 10);
+            $caret.removeClass('rotate-right').addClass('rotate-down');
+        } else {
+            $btn.attr('expand-log', 'false');
+            $wrapper.css({
+                maxHeight: '0'
+            });
+            setTimeout(() => {
+                $row.addClass('d-none');
+            }, 600);
+            $caret.removeClass('rotate-down').addClass('rotate-right');
+        }
+    });
+    if (idAktivitas && idAktivitas !== "0") {
+        $.ajax({
+            url: parent_url + `api/LookUpList/sub-aktivitas/startup?idAktivitas=${idAktivitas}`,
+            type: 'GET',
+            success: function(response) {
+                // cek status
+                if ($cancelButton.length){
+                    let status = response.StatusAktivitas;
+                    currentStatusAktivitas = status;
+                    let $customButtons = ``;
+                    switch (status) {
+                        case "Waiting":
+                            $customButtons = `
+                                <button type="button" class="btn btn-primary ew-btn ml-2" id="btn-draft">
+                                    <i class="fas fa-save"></i> Save
+                                </button>
+                            `;
+                            break;
+                        case "Draft":
+                            $customButtons = `
+                                <button type="button" class="btn btn-primary ew-btn ml-2" id="btn-draft">
+                                    <i class="fas fa-save"></i> Save
+                                </button>
+                                <button type="button" class="btn btn-success ew-btn ml-2" id="btn-completed">
+                                    <i class="fas fa-paper-plane"></i> Submit
+                                </button>
+                            `
+                            break;
+                        case "Completed":
+                            $customButtons = `
+                                <button type="button" class="btn btn-primary ew-btn ml-2" id="btn-editing">
+                                    <i class="fa-solid fa-pen-to-square"></i> Edit
+                                </button>
+                                <button type="button" class="btn btn-success ew-btn ml-2" id="btn-completedEdit">
+                                    <i class="fas fa-paper-plane"></i> Submit
+                                </button>
+                            `;
+                            break;
+                        case "Editing":
+                            $customButtons = `
+                                <button type="button" class="btn btn-primary ew-btn ml-2" id="btn-editing">
+                                    <i class="fa-solid fa-pen-to-square"></i> Edit
+                                </button>
+                                <button type="button" class="btn btn-success ew-btn ml-2" id="btn-completedEdit">
+                                    <i class="fas fa-paper-plane"></i> Submit
+                                </button>
+                            `;
+                            break;
+                        case "Completed Edit":
+                            if (userLevel === '4'){
+                                $customButtons = `
+                                    <button type="button" class="btn btn-warning ew-btn ml-2" id="btn-reverse-status">
+                                        <i class="fa-solid fa-pen-to-square"></i> Edit 
+                                    </button>
+                                `;
+                            }
+                            break;
+                    }
+                    $cancelButton.before($customButtons);
+                }
+
+                // Cek is editable
+                if(!response.IsEditable || response.StatusAktivitas === "Completed Edit"){
+                    $("#btn-draft").hide();
+                    $("#btn-editing").hide();
+                    $("#btn-completed").hide();
+                    $("#btn-completedEdit").hide();
+                    $('input, select, textarea').prop('disabled', true);
+                    $('#catatanReverseStatusEditing').prop('disabled', false);
+                }
+
+                // Log
+                const mappedData = response.LogAktivitas.map(item => ({
+                    Aktivitas: item.Aktivitas,
+                    Username: item.UserName,
+                    StatusAktivitas: item.StatusAktivitas,
+                    Tanggal: item.Tanggal,
+                    Catatan: item.Catatan
+                }));
+                $.getScript('https://cdn.jsdelivr.net/npm/ag-grid-community/dist/ag-grid-community.min.js', function () {
+                        $('#r_LastUpdatedBy').after(`
+                            <div id="log-table-row" class="d-none row m-0">
+                                <div class="p-0 col-2"></div>
+                                <div class="p-0 col-10">
+                                    <div id="log-table-wrapper" style="overflow: hidden; transition: all 0.6s ease; max-height: 0;">
+                                        <div id="myGrid" class="ag-theme-quartz w-100 my-3" style="height: 300px;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        `);
+                        const gridOptions = {
+                            rowData: mappedData,
+                            columnDefs: [
+                                {
+                                    headerName: 'No.',
+                                    valueGetter: 'node.rowIndex + 1',
+                                    width: 80,
+                                    filter: false
+                                },
+                                {
+                                    headerName: 'Aktivitas',
+                                    field: 'Aktivitas',
+                                    flex: 1
+                                },
+                                {
+                                    headerName: 'Username',
+                                    field: 'Username',
+                                    flex: 1
+                                },
+                                {
+                                    headerName: 'Status Aktivitas',
+                                    field: 'StatusAktivitas',
+                                    flex: 1
+                                },
+                                {
+                                    headerName: 'Tanggal',
+                                    field: 'Tanggal',
+                                    flex: 1
+                                },
+                                {
+                                    headerName: 'Catatan',
+                                    field: 'Catatan',
+                                    flex: 1
+                                }
+                            ],
+                            defaultColDef: {
+                                sortable: false,
+                                suppressMovable: true,
+                                filter: true,
+                                resizable: false
+                            },
+                            rowSelection: 'multiple',
+                            suppressRowClickSelection: true,
+                            pagination: true,
+                            paginationPageSize: 10
+                        };
+                        const myGridElement = document.querySelector('#myGrid');
+                        agGrid.createGrid(myGridElement, gridOptions);
+                    });
+            },
+            error: function(xhr, status, error) {
+                ew.alert(xhr.responseJSON.message ?? "Terjadi kesalahan dalam memuat data");
+            }
+        });
+    } else {
+        console.warn("Skipping startup API: Invalid IdAktivitas");
+        $('button[expand-log]').hide(); 
+        $("#btn-draft, #btn-editing, #btn-completed, #btn-completedEdit").hide();
+        $('input, select, textarea').prop('disabled', true);
+    }
+    // --- log aktivitas end ---
+     let reverseStatusModal = `<div class="modal fade" id="confirmReverseStatusEditingModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                  <div class="modal-dialog">
+                    <div class="modal-content">
+                      <div class="modal-header bg-primary">
+                        <h1 class="modal-title fs-5" id="confirmReverseStatusEditingModalTitle">Konfirmasi Kembalikan Status</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                      </div>
+                      <form id="reverseStatusEditingModalForm">
+                        <div class="modal-body px-2 py-1">
+                            <div class="mb-3">
+                                <label for="message-text" class="col-form-label">Catatan:</label>
+                                <textarea class="form-control" id="catatanReverseStatusEditing" required rows="4"></textarea>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="btnReverseStatusEditingModalCancel">Batal</button>
+                            <button type="submit" class="btn btn-primary" id="btnReverseStatusEditingModalSubmit">Lanjutkan</button>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                </div>`
+    $("body").append(reverseStatusModal);
+    $("#btnReverseStatusEditingModalCancel").click(function (event) {
+        event.preventDefault();
+        $("#confirmReverseStatusEditingModal").modal("hide");
+    });
+    $(document).on("click", "#btn-reverse-status", function () {
+        $("#confirmReverseStatusEditingModal").modal("show");
+    });
+});
+</script>

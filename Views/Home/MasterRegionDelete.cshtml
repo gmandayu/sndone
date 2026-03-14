@@ -1,0 +1,121 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (masterRegionDelete.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = masterRegionDelete.UseLayout ? "_Layout" : "";
+}
+<script>
+var currentTable = @Html.Raw(ConvertToJson(masterRegionDelete.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { MasterRegion: currentTable } });
+var currentPageID = ew.PAGE_ID = "delete";
+var currentForm;
+var fMasterRegiondelete;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("fMasterRegiondelete")
+        .setPageId("delete")
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Write your client script here, no need to add script tags.
+});
+</script>
+@masterRegionDelete.ShowPageHeader()
+@masterRegionDelete.ShowMessages()
+<form name="fMasterRegiondelete" id="fMasterRegiondelete" class="ew-form ew-delete-form" action="@AppPath(CurrentPageName())" method="post" novalidate autocomplete="off">
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+<input type="hidden" name="action" id="action" value="delete">
+@foreach (string key in masterRegionDelete.RecordKeys) {
+<input type="hidden" name="key_m[]" value="@key">
+}
+<div class="card ew-card ew-grid @(masterRegionDelete.TableGridClass)">
+<div class="card-body ew-grid-middle-panel @(masterRegionDelete.TableContainerClass)" style="@(masterRegionDelete.TableContainerStyle)">
+<table class="@(masterRegionDelete.TableClass)">
+    <thead>
+    <tr class="ew-table-header">
+@if (masterRegionDelete.IdRegion.Visible) { // masterRegionDelete.IdRegion.Visible (begin)
+        <th class="@Html.Raw(masterRegionDelete.IdRegion.HeaderCellClass)"><span id="elh_MasterRegion_IdRegion" class="MasterRegion_IdRegion">@Html.Raw(masterRegionDelete.IdRegion.Caption)</span></th>
+} @* masterRegionDelete.IdRegion.Visible (end) *@
+@if (masterRegionDelete.Region.Visible) { // masterRegionDelete.Region.Visible (begin)
+        <th class="@Html.Raw(masterRegionDelete.Region.HeaderCellClass)"><span id="elh_MasterRegion_Region" class="MasterRegion_Region">@Html.Raw(masterRegionDelete.Region.Caption)</span></th>
+} @* masterRegionDelete.Region.Visible (end) *@
+@if (masterRegionDelete.RegionCode.Visible) { // masterRegionDelete.RegionCode.Visible (begin)
+        <th class="@Html.Raw(masterRegionDelete.RegionCode.HeaderCellClass)"><span id="elh_MasterRegion_RegionCode" class="MasterRegion_RegionCode">@Html.Raw(masterRegionDelete.RegionCode.Caption)</span></th>
+} @* masterRegionDelete.RegionCode.Visible (end) *@
+    </tr>
+    </thead>
+    <tbody>
+@{ masterRegionDelete.RecordCount = 0; }
+@while (masterRegionDelete.Recordset != null && await masterRegionDelete.Recordset.ReadAsync()) { // DN
+    masterRegionDelete.RecordCount++;
+    masterRegionDelete.RowCount++;
+
+    // Set row properties
+    masterRegionDelete.ResetAttributes();
+    masterRegionDelete.RowType = RowType.View; // View
+
+    // Get the field contents
+    await masterRegionDelete.LoadRowValues(masterRegionDelete.Recordset);
+
+    // Render row
+    await masterRegionDelete.RenderRow();
+    <tr @Html.Raw(masterRegionDelete.RowAttributes)>
+@if (masterRegionDelete.IdRegion.Visible) { // masterRegionDelete.IdRegion.Visible (begin)
+        <td @Html.Raw(masterRegionDelete.IdRegion.CellAttributes)>
+<span id="">
+<span @Html.Raw(masterRegionDelete.IdRegion.ViewAttributes)>
+@Html.Raw(masterRegionDelete.IdRegion.GetViewValue())</span>
+</span></td>
+} @* masterRegionDelete.IdRegion.Visible (end) *@
+@if (masterRegionDelete.Region.Visible) { // masterRegionDelete.Region.Visible (begin)
+        <td @Html.Raw(masterRegionDelete.Region.CellAttributes)>
+<span id="">
+<span @Html.Raw(masterRegionDelete.Region.ViewAttributes)>
+@Html.Raw(masterRegionDelete.Region.GetViewValue())</span>
+</span></td>
+} @* masterRegionDelete.Region.Visible (end) *@
+@if (masterRegionDelete.RegionCode.Visible) { // masterRegionDelete.RegionCode.Visible (begin)
+        <td @Html.Raw(masterRegionDelete.RegionCode.CellAttributes)>
+<span id="">
+<span @Html.Raw(masterRegionDelete.RegionCode.ViewAttributes)>
+@Html.Raw(masterRegionDelete.RegionCode.GetViewValue())</span>
+</span></td>
+} @* masterRegionDelete.RegionCode.Visible (end) *@
+    </tr>
+}
+@{ masterRegionDelete.CloseRecordset(); }
+</tbody>
+</table>
+</div>
+</div>
+<div class="ew-buttons ew-desktop-buttons">
+<button class="btn btn-primary ew-btn" name="btn-action" id="btn-action" type="submit">@Html.Raw(Language.Phrase("DeleteBtn"))</button>
+<button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" data-href="@AppPath(masterRegionDelete.ReturnUrl)">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+</div>
+</form>
+@masterRegionDelete.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+<script>
+loadjs.ready("load", function() {
+    // Write your table-specific startup script here
+    // document.write("page loaded");
+});
+</script>

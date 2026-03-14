@@ -1,0 +1,381 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (controlRutinSecurityList.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = controlRutinSecurityList.UseLayout ? "_Layout" : "";
+}
+@if (!controlRutinSecurityList.IsExport()) {
+<script>
+var currentTable = @Html.Raw(ConvertToJson(controlRutinSecurityList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { ControlRutinSecurity: currentTable } });
+var currentPageID = ew.PAGE_ID = "list";
+var currentForm;
+var @(controlRutinSecurityList.FormName);
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("@(controlRutinSecurityList.FormName)")
+        .setPageId("list")
+        .setSubmitWithFetch(@(controlRutinSecurityList.UseAjaxActions ? "true" : "false"))
+        .setFormKeyCountName("@(controlRutinSecurityList.FormKeyCountName)")
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Write your client script here, no need to add script tags.
+});
+</script>
+}
+@if (!controlRutinSecurityList.IsExport()) {
+<div class="btn-toolbar ew-toolbar">
+@if (controlRutinSecurityList.TotalRecords > 0 && controlRutinSecurityList.ExportOptions.Visible) {
+    controlRutinSecurityList.ExportOptions.Render("body");
+}
+@if (controlRutinSecurityList.ImportOptions.Visible) {
+    controlRutinSecurityList.ImportOptions.Render("body");
+}
+@if (controlRutinSecurityList.SearchOptions.Visible) {
+    controlRutinSecurityList.SearchOptions.Render("body");
+}
+@if (controlRutinSecurityList.FilterOptions.Visible) {
+    controlRutinSecurityList.FilterOptions.Render("body");
+}
+</div>
+}
+@if (!controlRutinSecurityList.IsModal) {
+<form name="fControlRutinSecuritysrch" id="fControlRutinSecuritysrch" class="ew-form ew-ext-search-form" action="@AppPath(CurrentPageName())" novalidate autocomplete="off">
+<div id="fControlRutinSecuritysrch_search_panel" class="mb-2 mb-sm-0 @(controlRutinSecurityList.SearchPanelClass)"><!-- .ew-search-panel -->
+<script>
+var currentTable = @Html.Raw(ConvertToJson(controlRutinSecurityList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { ControlRutinSecurity: currentTable } });
+var currentForm;
+var fControlRutinSecuritysrch, currentSearchForm, currentAdvancedSearchForm;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery,
+        fields = currentTable.fields;
+
+    // Form object for search
+    let form = new ew.FormBuilder()
+        .setId("fControlRutinSecuritysrch")
+        .setPageId("list")
+@if (controlRutinSecurityList.UseAjaxActions) {
+        <text>.setSubmitWithFetch(true)</text>
+}
+
+        // Dynamic selection lists
+        .setLists({
+        })
+
+        // Filters
+        .setFilterList(@Html.Raw(controlRutinSecurityList.GetFilterList()))
+        .build();
+    window[form.id] = form;
+    currentSearchForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<input type="hidden" name="cmd" value="search">
+@if (Security.CanSearch) {
+if (!controlRutinSecurityList.IsExport() && Empty(controlRutinSecurityList.CurrentAction) && controlRutinSecurityList.HasSearchFields()) { @* Show search form (begin) *@
+<div class="ew-extended-search container-fluid ps-2">
+<div class="row mb-0">
+    <div class="col-sm-auto px-0 pe-sm-2">
+        <div class="ew-basic-search input-group">
+            <input type="search" name="@(Config.TableBasicSearch)" id="@(Config.TableBasicSearch)" class="form-control ew-basic-search-keyword" value="@Html.Raw(HtmlEncode(controlRutinSecurityList.BasicSearch.SessionKeyword))" placeholder="@(HtmlEncode(Language.Phrase("Search")))" aria-label="@(HtmlEncode(Language.Phrase("Search")))">
+            <input type="hidden" name="@(Config.TableBasicSearchType)" id="@(Config.TableBasicSearchType)" class="ew-basic-search-type" value="@(HtmlEncode(controlRutinSecurityList.BasicSearch.SessionType))">
+            <button type="button" data-bs-toggle="dropdown" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split" aria-haspopup="true" aria-expanded="false">
+                <span id="searchtype">@Html.Raw(controlRutinSecurityList.BasicSearch.TypeNameShort)</span>
+            </button>
+            <div class="dropdown-menu dropdown-menu-end">
+                <button type="button" class="dropdown-item@(controlRutinSecurityList.BasicSearch.SessionType == "" ? " active" : "")" form="fControlRutinSecuritysrch" data-ew-action="search-type">@Html.Raw(Language.Phrase("QuickSearchAuto"))</button>
+                <button type="button" class="dropdown-item@(controlRutinSecurityList.BasicSearch.SessionType == "=" ? " active" : "")" form="fControlRutinSecuritysrch" data-ew-action="search-type" data-search-type="=">@Html.Raw(Language.Phrase("QuickSearchExact"))</button>
+                <button type="button" class="dropdown-item@(controlRutinSecurityList.BasicSearch.SessionType == "AND" ? " active" : "")" form="fControlRutinSecuritysrch" data-ew-action="search-type" data-search-type="AND">@Html.Raw(Language.Phrase("QuickSearchAll"))</button>
+                <button type="button" class="dropdown-item@(controlRutinSecurityList.BasicSearch.SessionType == "OR" ? " active" : "")" form="fControlRutinSecuritysrch" data-ew-action="search-type" data-search-type="OR">@Html.Raw(Language.Phrase("QuickSearchAny"))</button>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-auto mb-3">
+        <button class="btn btn-primary" name="btn-submit" id="btn-submit" type="submit">@Html.Raw(Language.Phrase("SearchBtn"))</button>
+    </div>
+</div>
+</div><!-- /.ew-extended-search -->
+} @* Show search form (end) *@
+}
+</div><!-- /.ew-search-panel -->
+</form>
+}
+@controlRutinSecurityList.ShowPageHeader()
+@controlRutinSecurityList.ShowMessages()
+<main class="list @(controlRutinSecurityList.TotalRecords == 0 && !controlRutinSecurityList.IsAdd ? " ew-no-record" : "")">
+<div id="ew-header-options">
+    @controlRutinSecurityList.HeaderOptions.RenderBody()
+</div>
+<div id="ew-list">
+@if (controlRutinSecurityList.TotalRecords > 0 || !Empty(controlRutinSecurityList.CurrentAction)) {
+<div class="card ew-card ew-grid@(controlRutinSecurityList.IsAddOrEdit ? " ew-grid-add-edit" : "") @(controlRutinSecurityList.TableGridClass)">
+<form name="@(controlRutinSecurityList.FormName)" id="@(controlRutinSecurityList.FormName)" class="ew-form ew-list-form" action="@AppPath(controlRutinSecurityList.PageName)" method="post" novalidate autocomplete="off">
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+@if (controlRutinSecurityList.IsModal) {
+<input type="hidden" name="modal" value="1">
+}
+<div id="gmp_ControlRutinSecurity" class="card-body ew-grid-middle-panel @(controlRutinSecurityList.TableContainerClass)" style="@(controlRutinSecurityList.TableContainerStyle)">
+@if (controlRutinSecurityList.TotalRecords > 0 || controlRutinSecurityList.IsGridEdit || controlRutinSecurityList.IsMultiEdit) {
+<table id="tbl_ControlRutinSecuritylist" class="@(controlRutinSecurityList.TableClass)"><!-- .ew-table -->
+<thead>
+    <tr class="ew-table-header">
+@{
+    // Header row
+    controlRutinSecurityList.RowType = RowType.Header;
+
+    // Render list options
+    await controlRutinSecurityList.RenderListOptions();
+}
+@* Render list options (header, left) *@
+@controlRutinSecurityList.ListOptions.RenderHeader("left")
+@if (controlRutinSecurityList.LinkRedirect.Visible) { // controlRutinSecurityList.LinkRedirect.Visible (begin)
+        <th data-name="LinkRedirect" class="@(controlRutinSecurityList.LinkRedirect.HeaderCellClass)"><div id="elh_ControlRutinSecurity_LinkRedirect" class="ControlRutinSecurity_LinkRedirect">@Html.Raw(controlRutinSecurityList.RenderFieldHeader(controlRutinSecurityList.LinkRedirect))</div></th>
+} @* controlRutinSecurityList.LinkRedirect.Visible (end) *@
+@if (controlRutinSecurityList.Plant.Visible) { // controlRutinSecurityList.Plant.Visible (begin)
+        <th data-name="Plant" class="@(controlRutinSecurityList.Plant.HeaderCellClass)"><div id="elh_ControlRutinSecurity_Plant" class="ControlRutinSecurity_Plant">@Html.Raw(controlRutinSecurityList.RenderFieldHeader(controlRutinSecurityList.Plant))</div></th>
+} @* controlRutinSecurityList.Plant.Visible (end) *@
+@if (controlRutinSecurityList.JumlahKetidaksesuaiaan.Visible) { // controlRutinSecurityList.JumlahKetidaksesuaiaan.Visible (begin)
+        <th data-name="JumlahKetidaksesuaiaan" class="@(controlRutinSecurityList.JumlahKetidaksesuaiaan.HeaderCellClass)"><div id="elh_ControlRutinSecurity_JumlahKetidaksesuaiaan" class="ControlRutinSecurity_JumlahKetidaksesuaiaan">@Html.Raw(controlRutinSecurityList.RenderFieldHeader(controlRutinSecurityList.JumlahKetidaksesuaiaan))</div></th>
+} @* controlRutinSecurityList.JumlahKetidaksesuaiaan.Visible (end) *@
+@if (controlRutinSecurityList.DibuatOleh.Visible) { // controlRutinSecurityList.DibuatOleh.Visible (begin)
+        <th data-name="DibuatOleh" class="@(controlRutinSecurityList.DibuatOleh.HeaderCellClass)"><div id="elh_ControlRutinSecurity_DibuatOleh" class="ControlRutinSecurity_DibuatOleh">@Html.Raw(controlRutinSecurityList.RenderFieldHeader(controlRutinSecurityList.DibuatOleh))</div></th>
+} @* controlRutinSecurityList.DibuatOleh.Visible (end) *@
+@if (controlRutinSecurityList.TanggalDibuat.Visible) { // controlRutinSecurityList.TanggalDibuat.Visible (begin)
+        <th data-name="TanggalDibuat" class="@(controlRutinSecurityList.TanggalDibuat.HeaderCellClass)"><div id="elh_ControlRutinSecurity_TanggalDibuat" class="ControlRutinSecurity_TanggalDibuat">@Html.Raw(controlRutinSecurityList.RenderFieldHeader(controlRutinSecurityList.TanggalDibuat))</div></th>
+} @* controlRutinSecurityList.TanggalDibuat.Visible (end) *@
+@if (controlRutinSecurityList.DiperbaruiOleh.Visible) { // controlRutinSecurityList.DiperbaruiOleh.Visible (begin)
+        <th data-name="DiperbaruiOleh" class="@(controlRutinSecurityList.DiperbaruiOleh.HeaderCellClass)"><div id="elh_ControlRutinSecurity_DiperbaruiOleh" class="ControlRutinSecurity_DiperbaruiOleh">@Html.Raw(controlRutinSecurityList.RenderFieldHeader(controlRutinSecurityList.DiperbaruiOleh))</div></th>
+} @* controlRutinSecurityList.DiperbaruiOleh.Visible (end) *@
+@if (controlRutinSecurityList.TanggalDiperbarui.Visible) { // controlRutinSecurityList.TanggalDiperbarui.Visible (begin)
+        <th data-name="TanggalDiperbarui" class="@(controlRutinSecurityList.TanggalDiperbarui.HeaderCellClass)"><div id="elh_ControlRutinSecurity_TanggalDiperbarui" class="ControlRutinSecurity_TanggalDiperbarui">@Html.Raw(controlRutinSecurityList.RenderFieldHeader(controlRutinSecurityList.TanggalDiperbarui))</div></th>
+} @* controlRutinSecurityList.TanggalDiperbarui.Visible (end) *@
+@* Render list options (header, right) *@
+@controlRutinSecurityList.ListOptions.RenderHeader("right")
+    </tr>
+</thead>
+<tbody data-page="@(controlRutinSecurityList.PageNumber)">
+@{
+    await controlRutinSecurityList.SetupGrid();
+    bool eof = controlRutinSecurityList.Recordset == null; // DN
+}
+@while (controlRutinSecurityList.RecordCount < controlRutinSecurityList.StopRecord || SameString(controlRutinSecurityList.RowIndex, "$rowindex$")) { // Begin While
+    if (!eof && !SameString(controlRutinSecurityList.RowIndex, "$rowindex$") &&
+        (!controlRutinSecurityList.IsGridAdd || controlRutinSecurityList.CurrentMode == "copy") &&
+        (!((controlRutinSecurityList.IsCopy || controlRutinSecurityList.IsAdd) && controlRutinSecurityList.RowIndex is int rowIndex && rowIndex == 0))) // DN
+        eof = !await controlRutinSecurityList.Recordset.ReadAsync();
+    controlRutinSecurityList.RecordCount++;
+    if (controlRutinSecurityList.RecordCount >= controlRutinSecurityList.StartRecord) {
+        await controlRutinSecurityList.SetupRow();
+    <tr @Html.Raw(controlRutinSecurityList.RowAttributes)>
+    @* Render list options (body, left) *@
+    @controlRutinSecurityList.ListOptions.RenderBody("left", controlRutinSecurityList.RowCount)
+    @if (controlRutinSecurityList.LinkRedirect.Visible) { // controlRutinSecurityList.LinkRedirect.Visible (begin)
+        <td data-name="LinkRedirect" @Html.Raw(controlRutinSecurityList.LinkRedirect.CellAttributes)>
+<span id="el@(controlRutinSecurityList.RowIndex == "$rowindex$" ? "$rowindex$" : controlRutinSecurityList.RowCount)_ControlRutinSecurity_LinkRedirect" class="el_ControlRutinSecurity_LinkRedirect">
+<span @Html.Raw(controlRutinSecurityList.LinkRedirect.ViewAttributes)>
+@Html.Raw(controlRutinSecurityList.LinkRedirect.GetViewValue())</span>
+</span>
+</td>
+    } @* controlRutinSecurityList.LinkRedirect.Visible (end) *@
+    @if (controlRutinSecurityList.Plant.Visible) { // controlRutinSecurityList.Plant.Visible (begin)
+        <td data-name="Plant" @Html.Raw(controlRutinSecurityList.Plant.CellAttributes)>
+<span id="el@(controlRutinSecurityList.RowIndex == "$rowindex$" ? "$rowindex$" : controlRutinSecurityList.RowCount)_ControlRutinSecurity_Plant" class="el_ControlRutinSecurity_Plant">
+<span @Html.Raw(controlRutinSecurityList.Plant.ViewAttributes)>
+@Html.Raw(controlRutinSecurityList.Plant.GetViewValue())</span>
+</span>
+</td>
+    } @* controlRutinSecurityList.Plant.Visible (end) *@
+    @if (controlRutinSecurityList.JumlahKetidaksesuaiaan.Visible) { // controlRutinSecurityList.JumlahKetidaksesuaiaan.Visible (begin)
+        <td data-name="JumlahKetidaksesuaiaan" @Html.Raw(controlRutinSecurityList.JumlahKetidaksesuaiaan.CellAttributes)>
+<span id="el@(controlRutinSecurityList.RowIndex == "$rowindex$" ? "$rowindex$" : controlRutinSecurityList.RowCount)_ControlRutinSecurity_JumlahKetidaksesuaiaan" class="el_ControlRutinSecurity_JumlahKetidaksesuaiaan">
+<span @Html.Raw(controlRutinSecurityList.JumlahKetidaksesuaiaan.ViewAttributes)>
+@Html.Raw(controlRutinSecurityList.JumlahKetidaksesuaiaan.GetViewValue())</span>
+</span>
+</td>
+    } @* controlRutinSecurityList.JumlahKetidaksesuaiaan.Visible (end) *@
+    @if (controlRutinSecurityList.DibuatOleh.Visible) { // controlRutinSecurityList.DibuatOleh.Visible (begin)
+        <td data-name="DibuatOleh" @Html.Raw(controlRutinSecurityList.DibuatOleh.CellAttributes)>
+<span id="el@(controlRutinSecurityList.RowIndex == "$rowindex$" ? "$rowindex$" : controlRutinSecurityList.RowCount)_ControlRutinSecurity_DibuatOleh" class="el_ControlRutinSecurity_DibuatOleh">
+<span @Html.Raw(controlRutinSecurityList.DibuatOleh.ViewAttributes)>
+@Html.Raw(controlRutinSecurityList.DibuatOleh.GetViewValue())</span>
+</span>
+</td>
+    } @* controlRutinSecurityList.DibuatOleh.Visible (end) *@
+    @if (controlRutinSecurityList.TanggalDibuat.Visible) { // controlRutinSecurityList.TanggalDibuat.Visible (begin)
+        <td data-name="TanggalDibuat" @Html.Raw(controlRutinSecurityList.TanggalDibuat.CellAttributes)>
+<span id="el@(controlRutinSecurityList.RowIndex == "$rowindex$" ? "$rowindex$" : controlRutinSecurityList.RowCount)_ControlRutinSecurity_TanggalDibuat" class="el_ControlRutinSecurity_TanggalDibuat">
+<span @Html.Raw(controlRutinSecurityList.TanggalDibuat.ViewAttributes)>
+@Html.Raw(controlRutinSecurityList.TanggalDibuat.GetViewValue())</span>
+</span>
+</td>
+    } @* controlRutinSecurityList.TanggalDibuat.Visible (end) *@
+    @if (controlRutinSecurityList.DiperbaruiOleh.Visible) { // controlRutinSecurityList.DiperbaruiOleh.Visible (begin)
+        <td data-name="DiperbaruiOleh" @Html.Raw(controlRutinSecurityList.DiperbaruiOleh.CellAttributes)>
+<span id="el@(controlRutinSecurityList.RowIndex == "$rowindex$" ? "$rowindex$" : controlRutinSecurityList.RowCount)_ControlRutinSecurity_DiperbaruiOleh" class="el_ControlRutinSecurity_DiperbaruiOleh">
+<span @Html.Raw(controlRutinSecurityList.DiperbaruiOleh.ViewAttributes)>
+@Html.Raw(controlRutinSecurityList.DiperbaruiOleh.GetViewValue())</span>
+</span>
+</td>
+    } @* controlRutinSecurityList.DiperbaruiOleh.Visible (end) *@
+    @if (controlRutinSecurityList.TanggalDiperbarui.Visible) { // controlRutinSecurityList.TanggalDiperbarui.Visible (begin)
+        <td data-name="TanggalDiperbarui" @Html.Raw(controlRutinSecurityList.TanggalDiperbarui.CellAttributes)>
+<span id="el@(controlRutinSecurityList.RowIndex == "$rowindex$" ? "$rowindex$" : controlRutinSecurityList.RowCount)_ControlRutinSecurity_TanggalDiperbarui" class="el_ControlRutinSecurity_TanggalDiperbarui">
+<span @Html.Raw(controlRutinSecurityList.TanggalDiperbarui.ViewAttributes)>
+@Html.Raw(controlRutinSecurityList.TanggalDiperbarui.GetViewValue())</span>
+</span>
+</td>
+    } @* controlRutinSecurityList.TanggalDiperbarui.Visible (end) *@
+    @* Render list options (body, right) *@
+    @controlRutinSecurityList.ListOptions.RenderBody("right", controlRutinSecurityList.RowCount)
+    </tr>
+    } @* End if *@
+
+    // Reset for template row
+    if (SameString(controlRutinSecurityList.RowIndex, "$rowindex$"))
+        controlRutinSecurityList.RowIndex = 0;
+
+    // Reset inline add/copy row
+    if ((controlRutinSecurityList.IsCopy || controlRutinSecurityList.IsAdd) && controlRutinSecurityList.RowIndex is int rowIndex2 && rowIndex2 == 0)
+        controlRutinSecurityList.RowIndex = 1;
+} @* End While *@
+</tbody>
+</table><!-- /.ew-table -->
+} @* End If TotalRecords > 0 *@
+</div><!-- /.ew-grid-middle-panel -->
+@if (Empty(controlRutinSecurityList.CurrentAction) && !controlRutinSecurityList.UseAjaxActions) {
+<input type="hidden" name="action" id="action" value="">
+}
+</form><!-- /.ew-list-form -->
+@{ controlRutinSecurityList.CloseRecordset(); }
+@if (!controlRutinSecurityList.IsExport()) {
+<div class="card-footer ew-grid-lower-panel">
+@if (!controlRutinSecurityList.IsGridAdd && !(controlRutinSecurityList.IsGridEdit && controlRutinSecurityList.ModalGridEdit) && !controlRutinSecurityList.IsMultiEdit) {
+@Html.Raw(controlRutinSecurityList.Pager.Render())
+}
+<div class="ew-list-other-options">
+@controlRutinSecurityList.OtherOptions.RenderBody("bottom")
+</div>
+</div>
+}
+</div><!-- /.ew-grid -->
+} else { // Show other options
+<div class="ew-list-other-options">
+@controlRutinSecurityList.OtherOptions.ForEach(opt => opt.ButtonClass = "").RenderBody()
+</div>
+}
+</div>
+<div id="ew-footer-options">
+    @controlRutinSecurityList.FooterOptions.RenderBody()
+</div>
+</main>
+@controlRutinSecurityList.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+@if (!controlRutinSecurityList.IsExport()) {
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("ControlRutinSecurity");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Startup script
+    // Stepper untuk halaman ProofOfVisit (tampilkan hanya step 1)
+    (function() {
+        const parent_url = ew.PATH_BASE;
+
+        // definisi 1 langkah saja
+        const steps = [
+            { number: 1, label: "Control Rutin Security", url: "", icon: "fa-clipboard-list" }
+        ];
+        const currentStep = 1;
+
+        // sisipkan CSS stepper sekali saja
+        if (!document.querySelector("style[data-hsse-stepper]")) {
+            $("<style data-hsse-stepper>")
+              .prop("type", "text/css")
+              .html(`
+                .stepper{display:flex;counter-reset:step}
+                .step{width:150px;text-align:center;position:relative}
+                .step:not(:last-child)::after{content:'';position:absolute;top:20px;right:-50%;width:100%;height:4px;background-color:#ccc;z-index:0}
+                .step.completed:not(:last-child)::after{background-color:#3c6dbd}
+                .step-icon{width:36px;height:36px;line-height:36px;border-radius:50%;background:#ccc;display:inline-block;z-index:1;position:relative;color:#fff;font-weight:bold}
+                .step.active .step-icon{background:#3c6dbd}
+                .step-label{margin-top:8px;font-size:14px;display:flex;justify-content:center;align-items:center;gap:6px;color:#3c6dbd;text-decoration:none}
+                .step-label-not-active{color:#CCC!important}
+            `).appendTo("head");
+        }
+
+        // bangun HTML stepper
+        const $wrapper = $('<div class="d-flex border-bottom border-2 pb-2"><div class="stepper"></div></div>');
+        const $stepper = $wrapper.find(".stepper");
+        steps.forEach(step => {
+            const isActive = step.number === currentStep;
+            const icon = `<div class="step-icon${isActive ? ' bg-success' : ''}">${step.number}</div>`;
+            const label = isActive
+                ? `<div class="step-label text-success"><i class="fa-solid ${step.icon} me-1 text-success"></i>${step.label}</div>`
+                : `<div class="step-label-not-active"><i class="fa-solid ${step.icon} me-1"></i>${step.label}</div>`;
+            $stepper.append(`<div class="step ${isActive ? 'active text-success' : 'text-secondary'}">${icon}${label}</div>`);
+        });
+        $(".content-header .container-fluid .row").append($wrapper);
+    })();
+
+    // ===== Pindahkan tombol Add ke samping Search =====
+    (function () {
+      const parent_url = ew.PATH_BASE;
+      const addUrl = `${parent_url}ControlRutinSecurityAdd`;
+        const roleStr = "@CurrentUserInfo("Rule")";
+        const role = parseInt(roleStr) || 0;
+      // Buat tombol Add seperti di Penerimaan
+      const $addBtn = $(`
+        <a href="${addUrl}" class="btn btn-success ms-2" id="btn-add-pov">
+          <i class="fa-solid fa-plus"></i> Add New
+        </a>
+      `);
+
+      // Cari tombol Search di panel pencarian lalu sisipkan tombol Add setelahnya
+      const $searchBtn =
+        $('.ew-search-panel button[type="submit"].btn-primary').first()   // ASP.NET Maker default
+        .add($('#btn-search').first());                                   // fallback kalau ada id custom
+      if ($searchBtn.length) {
+        if (role == 0 || role == 10){
+            $searchBtn.after($addBtn);
+        }
+      } else {
+        // Fallback terakhir: taruh di ujung panel pencarian
+        $('.ew-search-panel .ew-extended-search, .ew-search-panel').first().append($('<div class="mt-2"></div>').append($addBtn));
+      }
+
+      // Sembunyikan tombol Add di bagian bawah grid agar tidak dobel
+      $('.ew-grid-lower-panel .ew-list-other-options a, .ew-grid-lower-panel a').filter(function () {
+        return (this.href || '').includes('ProofOfVisitAdd');
+      }).closest('.ew-list-other-options, .btn, a').hide();
+
+      // Jika tombol Add di footer berupa ikon (+), sembunyikan juga
+      $('.ew-grid-lower-panel .btn, .ew-grid-lower-panel a').filter(function () {
+        return $(this).find('.fa-plus, .fa-solid.fa-plus').length > 0;
+      }).closest('.btn, a').hide();
+    })();
+});
+</script>
+}

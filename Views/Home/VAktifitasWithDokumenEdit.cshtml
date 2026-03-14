@@ -1,0 +1,517 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (vAktifitasWithDokumenEdit.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = vAktifitasWithDokumenEdit.UseLayout ? "_Layout" : "";
+}
+@vAktifitasWithDokumenEdit.ShowPageHeader()
+@vAktifitasWithDokumenEdit.ShowMessages()
+<main class="edit">
+<form name="fv_aktifitas_with_dokumenedit" id="fv_aktifitas_with_dokumenedit" class="@(vAktifitasWithDokumenEdit.FormClassName)" action="@AppPath(CurrentPageName())" method="post" novalidate autocomplete="off">
+<script>
+var currentTable = @Html.Raw(ConvertToJson(vAktifitasWithDokumenEdit.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { v_aktifitas_with_dokumen: currentTable } });
+var currentPageID = ew.PAGE_ID = "edit";
+var currentForm;
+var fv_aktifitas_with_dokumenedit;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("fv_aktifitas_with_dokumenedit")
+        .setPageId("edit")
+
+        // Add fields
+        .setFields([
+
+            ["NamaAktivitas", [fields.NamaAktivitas.visible && fields.NamaAktivitas.required ? ew.Validators.required(fields.NamaAktivitas.caption) : null], fields.NamaAktivitas.isInvalid],
+            ["Nama_Proses", [fields.Nama_Proses.visible && fields.Nama_Proses.required ? ew.Validators.required(fields.Nama_Proses.caption) : null], fields.Nama_Proses.isInvalid],
+            ["No_referensi", [fields.No_referensi.visible && fields.No_referensi.required ? ew.Validators.required(fields.No_referensi.caption) : null], fields.No_referensi.isInvalid],
+            ["Shipment", [fields.Shipment.visible && fields.Shipment.required ? ew.Validators.required(fields.Shipment.caption) : null], fields.Shipment.isInvalid],
+            ["Produk", [fields.Produk.visible && fields.Produk.required ? ew.Validators.required(fields.Produk.caption) : null], fields.Produk.isInvalid],
+            ["StatusAktivitas", [fields.StatusAktivitas.visible && fields.StatusAktivitas.required ? ew.Validators.required(fields.StatusAktivitas.caption) : null], fields.StatusAktivitas.isInvalid],
+            ["IdDokumen", [fields.IdDokumen.visible && fields.IdDokumen.required ? ew.Validators.required(fields.IdDokumen.caption) : null], fields.IdDokumen.isInvalid],
+            ["NamaDokumen", [fields.NamaDokumen.visible && fields.NamaDokumen.required ? ew.Validators.required(fields.NamaDokumen.caption) : null], fields.NamaDokumen.isInvalid],
+            ["PathFile", [fields.PathFile.visible && fields.PathFile.required ? ew.Validators.fileRequired(fields.PathFile.caption) : null], fields.PathFile.isInvalid],
+            ["IdProses", [fields.IdProses.visible && fields.IdProses.required ? ew.Validators.required(fields.IdProses.caption) : null, ew.Validators.integer], fields.IdProses.isInvalid]
+        ])
+
+        // Form_CustomValidate
+        .setCustomValidate(
+            function(fobj) { // DO NOT CHANGE THIS LINE!
+                    // Your custom validation code here, return false if invalid.
+                    return true;
+                }
+        )
+
+        // Use JavaScript validation or not
+        .setValidateRequired(ew.CLIENT_VALIDATE)
+
+        // Dynamic selection lists
+        .setLists({
+        })
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Client script
+    var parent_url = ew.PATH_BASE;
+    $(document).on('click', '.download-document', function () {
+        var IdAktivitas = $(this).attr('IdAktivitas');
+        event.preventDefault();
+        $.ajax({
+            url: parent_url + 'api/LookUpList/download_activity_document',
+            type: 'GET',
+            data: { IdAktivitas: IdAktivitas },
+            xhrFields: {
+                responseType: 'blob'
+            },
+            success: function(response, status, xhr) {
+                const disposition = xhr.getResponseHeader('Content-Disposition');
+                let fileName = "file_download";
+                if (disposition && disposition.indexOf('filename=') !== -1) {
+                    const fileNameMatch = disposition.match(/filename="?([^";]+)"?/);
+                    if (fileNameMatch && fileNameMatch[1]) {
+                        fileName = fileNameMatch[1];
+                    }
+                }
+                const blobUrl = window.URL.createObjectURL(response);
+                const a = document.createElement('a');
+                a.href = blobUrl;
+                a.download = fileName; 
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(blobUrl);
+                ew.alert("Download successful!");
+            },
+            error: function(xhr, status, error) {
+                if (xhr.status === 404) {
+                    ew.alert("File not found on the server.");
+                } else if (xhr.status === 500) {
+                    ew.alert("An error occurred. Please try again later.");
+                } else {
+                    ew.alert("Failed to download the file. Error: " + xhr.responseText);
+                }
+            }
+        });
+    });
+    function handleCustomSubmit(status) {
+        let idAktivitas = $("#x_IdAktivitas").val();
+        $.ajax({
+            url: parent_url + `api/LookUpList/update_status_aktivitas?idAktivitas=${idAktivitas}&statusAktivitas=${status}`,
+            type: 'POST',
+            success: function(response) {
+                $("#fv_aktifitas_with_dokumenedit").submit();
+            },
+            error: function(xhr, status, error) {
+                console.error('API call failed:', status, error);
+            }
+        });
+    }
+    $(document).on("click", "#btn-draft", function () {
+        handleCustomSubmit("Draft");
+    });
+    $(document).on("click", "#btn-completed", function () {
+        handleCustomSubmit("Completed");
+    });
+    $(document).on("click", "#btn-editing", function () {
+        handleCustomSubmit("Editing");
+    });
+    $(document).on("click", "#btn-completedEdit", function () {
+        handleCustomSubmit("Completed Edit");
+    });
+});
+</script>
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+<input type="hidden" name="action" id="action" value="update">
+<input type="hidden" name="modal" value="@ConvertToInt(vAktifitasWithDokumenEdit.IsModal)">
+@if (IsJsonResponse()) {
+<input type="hidden" name="json" value="1">
+}
+<input type="hidden" name="@(vAktifitasWithDokumenEdit.OldKeyName)" value="@Html.Raw(vAktifitasWithDokumenEdit.OldKey)">
+<div class="ew-edit-div"><!-- page* -->
+@if (vAktifitasWithDokumenEdit.NamaAktivitas.Visible) { // vAktifitasWithDokumenEdit.NamaAktivitas.Visible (begin)
+    <div id="r_NamaAktivitas" @Html.Raw(vAktifitasWithDokumenEdit.NamaAktivitas.RowAttributes)>
+        <label id="elh_v_aktifitas_with_dokumen_NamaAktivitas" for="x_NamaAktivitas" class="@(vAktifitasWithDokumenEdit.LeftColumnClass)">@Html.Raw(vAktifitasWithDokumenEdit.NamaAktivitas.Caption)@Html.Raw(vAktifitasWithDokumenEdit.NamaAktivitas.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(vAktifitasWithDokumenEdit.RightColumnClass)"><div @Html.Raw(vAktifitasWithDokumenEdit.NamaAktivitas.CellAttributes)>
+<span id="el_v_aktifitas_with_dokumen_NamaAktivitas">
+<span @Html.Raw(vAktifitasWithDokumenEdit.NamaAktivitas.ViewAttributes)>
+<input type="text" readonly class="form-control-plaintext" value="@Html.Raw(RemoveHtml(ConvertToString(vAktifitasWithDokumenEdit.NamaAktivitas.EditValue)))"></span>
+<input type="hidden" data-table="v_aktifitas_with_dokumen" data-field="x_NamaAktivitas" data-hidden="1" name="x_NamaAktivitas" id="x_NamaAktivitas" value="@Html.Raw(HtmlEncode(vAktifitasWithDokumenEdit.NamaAktivitas.CurrentValue))">
+</span>
+</div></div>
+    </div>
+} @* vAktifitasWithDokumenEdit.NamaAktivitas.Visible (end) *@
+@if (vAktifitasWithDokumenEdit.Nama_Proses.Visible) { // vAktifitasWithDokumenEdit.Nama_Proses.Visible (begin)
+    <div id="r_Nama_Proses" @Html.Raw(vAktifitasWithDokumenEdit.Nama_Proses.RowAttributes)>
+        <label id="elh_v_aktifitas_with_dokumen_Nama_Proses" for="x_Nama_Proses" class="@(vAktifitasWithDokumenEdit.LeftColumnClass)">@Html.Raw(vAktifitasWithDokumenEdit.Nama_Proses.Caption)@Html.Raw(vAktifitasWithDokumenEdit.Nama_Proses.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(vAktifitasWithDokumenEdit.RightColumnClass)"><div @Html.Raw(vAktifitasWithDokumenEdit.Nama_Proses.CellAttributes)>
+<span id="el_v_aktifitas_with_dokumen_Nama_Proses">
+<span @Html.Raw(vAktifitasWithDokumenEdit.Nama_Proses.ViewAttributes)>
+<input type="text" readonly class="form-control-plaintext" value="@Html.Raw(RemoveHtml(ConvertToString(vAktifitasWithDokumenEdit.Nama_Proses.EditValue)))"></span>
+<input type="hidden" data-table="v_aktifitas_with_dokumen" data-field="x_Nama_Proses" data-hidden="1" name="x_Nama_Proses" id="x_Nama_Proses" value="@Html.Raw(HtmlEncode(vAktifitasWithDokumenEdit.Nama_Proses.CurrentValue))">
+</span>
+</div></div>
+    </div>
+} @* vAktifitasWithDokumenEdit.Nama_Proses.Visible (end) *@
+@if (vAktifitasWithDokumenEdit.No_referensi.Visible) { // vAktifitasWithDokumenEdit.No_referensi.Visible (begin)
+    <div id="r_No_referensi" @Html.Raw(vAktifitasWithDokumenEdit.No_referensi.RowAttributes)>
+        <label id="elh_v_aktifitas_with_dokumen_No_referensi" for="x_No_referensi" class="@(vAktifitasWithDokumenEdit.LeftColumnClass)">@Html.Raw(vAktifitasWithDokumenEdit.No_referensi.Caption)@Html.Raw(vAktifitasWithDokumenEdit.No_referensi.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(vAktifitasWithDokumenEdit.RightColumnClass)"><div @Html.Raw(vAktifitasWithDokumenEdit.No_referensi.CellAttributes)>
+<span id="el_v_aktifitas_with_dokumen_No_referensi">
+<span @Html.Raw(vAktifitasWithDokumenEdit.No_referensi.ViewAttributes)>
+<input type="text" readonly class="form-control-plaintext" value="@Html.Raw(RemoveHtml(ConvertToString(vAktifitasWithDokumenEdit.No_referensi.EditValue)))"></span>
+<input type="hidden" data-table="v_aktifitas_with_dokumen" data-field="x_No_referensi" data-hidden="1" name="x_No_referensi" id="x_No_referensi" value="@Html.Raw(HtmlEncode(vAktifitasWithDokumenEdit.No_referensi.CurrentValue))">
+</span>
+</div></div>
+    </div>
+} @* vAktifitasWithDokumenEdit.No_referensi.Visible (end) *@
+@if (vAktifitasWithDokumenEdit.Shipment.Visible) { // vAktifitasWithDokumenEdit.Shipment.Visible (begin)
+    <div id="r_Shipment" @Html.Raw(vAktifitasWithDokumenEdit.Shipment.RowAttributes)>
+        <label id="elh_v_aktifitas_with_dokumen_Shipment" for="x_Shipment" class="@(vAktifitasWithDokumenEdit.LeftColumnClass)">@Html.Raw(vAktifitasWithDokumenEdit.Shipment.Caption)@Html.Raw(vAktifitasWithDokumenEdit.Shipment.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(vAktifitasWithDokumenEdit.RightColumnClass)"><div @Html.Raw(vAktifitasWithDokumenEdit.Shipment.CellAttributes)>
+<span id="el_v_aktifitas_with_dokumen_Shipment">
+<span @Html.Raw(vAktifitasWithDokumenEdit.Shipment.ViewAttributes)>
+<input type="text" readonly class="form-control-plaintext" value="@Html.Raw(RemoveHtml(ConvertToString(vAktifitasWithDokumenEdit.Shipment.EditValue)))"></span>
+<input type="hidden" data-table="v_aktifitas_with_dokumen" data-field="x_Shipment" data-hidden="1" name="x_Shipment" id="x_Shipment" value="@Html.Raw(HtmlEncode(vAktifitasWithDokumenEdit.Shipment.CurrentValue))">
+</span>
+</div></div>
+    </div>
+} @* vAktifitasWithDokumenEdit.Shipment.Visible (end) *@
+@if (vAktifitasWithDokumenEdit.Produk.Visible) { // vAktifitasWithDokumenEdit.Produk.Visible (begin)
+    <div id="r_Produk" @Html.Raw(vAktifitasWithDokumenEdit.Produk.RowAttributes)>
+        <label id="elh_v_aktifitas_with_dokumen_Produk" for="x_Produk" class="@(vAktifitasWithDokumenEdit.LeftColumnClass)">@Html.Raw(vAktifitasWithDokumenEdit.Produk.Caption)@Html.Raw(vAktifitasWithDokumenEdit.Produk.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(vAktifitasWithDokumenEdit.RightColumnClass)"><div @Html.Raw(vAktifitasWithDokumenEdit.Produk.CellAttributes)>
+<span id="el_v_aktifitas_with_dokumen_Produk">
+<span @Html.Raw(vAktifitasWithDokumenEdit.Produk.ViewAttributes)>
+<input type="text" readonly class="form-control-plaintext" value="@Html.Raw(RemoveHtml(ConvertToString(vAktifitasWithDokumenEdit.Produk.EditValue)))"></span>
+<input type="hidden" data-table="v_aktifitas_with_dokumen" data-field="x_Produk" data-hidden="1" name="x_Produk" id="x_Produk" value="@Html.Raw(HtmlEncode(vAktifitasWithDokumenEdit.Produk.CurrentValue))">
+</span>
+</div></div>
+    </div>
+} @* vAktifitasWithDokumenEdit.Produk.Visible (end) *@
+@if (vAktifitasWithDokumenEdit.StatusAktivitas.Visible) { // vAktifitasWithDokumenEdit.StatusAktivitas.Visible (begin)
+    <div id="r_StatusAktivitas" @Html.Raw(vAktifitasWithDokumenEdit.StatusAktivitas.RowAttributes)>
+        <label id="elh_v_aktifitas_with_dokumen_StatusAktivitas" for="x_StatusAktivitas" class="@(vAktifitasWithDokumenEdit.LeftColumnClass)">@Html.Raw(vAktifitasWithDokumenEdit.StatusAktivitas.Caption)@Html.Raw(vAktifitasWithDokumenEdit.StatusAktivitas.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(vAktifitasWithDokumenEdit.RightColumnClass)"><div @Html.Raw(vAktifitasWithDokumenEdit.StatusAktivitas.CellAttributes)>
+<span id="el_v_aktifitas_with_dokumen_StatusAktivitas">
+<span @Html.Raw(vAktifitasWithDokumenEdit.StatusAktivitas.ViewAttributes)>
+<input type="text" readonly class="form-control-plaintext" value="@Html.Raw(RemoveHtml(ConvertToString(vAktifitasWithDokumenEdit.StatusAktivitas.EditValue)))"></span>
+<input type="hidden" data-table="v_aktifitas_with_dokumen" data-field="x_StatusAktivitas" data-hidden="1" name="x_StatusAktivitas" id="x_StatusAktivitas" value="@Html.Raw(HtmlEncode(vAktifitasWithDokumenEdit.StatusAktivitas.CurrentValue))">
+</span>
+</div></div>
+    </div>
+} @* vAktifitasWithDokumenEdit.StatusAktivitas.Visible (end) *@
+@if (vAktifitasWithDokumenEdit.IdDokumen.Visible) { // vAktifitasWithDokumenEdit.IdDokumen.Visible (begin)
+    <div id="r_IdDokumen" @Html.Raw(vAktifitasWithDokumenEdit.IdDokumen.RowAttributes)>
+        <label id="elh_v_aktifitas_with_dokumen_IdDokumen" for="x_IdDokumen" class="@(vAktifitasWithDokumenEdit.LeftColumnClass)">@Html.Raw(vAktifitasWithDokumenEdit.IdDokumen.Caption)@Html.Raw(vAktifitasWithDokumenEdit.IdDokumen.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(vAktifitasWithDokumenEdit.RightColumnClass)"><div @Html.Raw(vAktifitasWithDokumenEdit.IdDokumen.CellAttributes)>
+<span id="el_v_aktifitas_with_dokumen_IdDokumen">
+<span @Html.Raw(vAktifitasWithDokumenEdit.IdDokumen.ViewAttributes)>
+<input type="text" readonly class="form-control-plaintext" value="@Html.Raw(RemoveHtml(ConvertToString(vAktifitasWithDokumenEdit.IdDokumen.EditValue)))"></span>
+<input type="hidden" data-table="v_aktifitas_with_dokumen" data-field="x_IdDokumen" data-hidden="1" name="x_IdDokumen" id="x_IdDokumen" value="@Html.Raw(HtmlEncode(vAktifitasWithDokumenEdit.IdDokumen.CurrentValue))">
+</span>
+</div></div>
+    </div>
+} @* vAktifitasWithDokumenEdit.IdDokumen.Visible (end) *@
+@if (vAktifitasWithDokumenEdit.NamaDokumen.Visible) { // vAktifitasWithDokumenEdit.NamaDokumen.Visible (begin)
+    <div id="r_NamaDokumen" @Html.Raw(vAktifitasWithDokumenEdit.NamaDokumen.RowAttributes)>
+        <label id="elh_v_aktifitas_with_dokumen_NamaDokumen" for="x_NamaDokumen" class="@(vAktifitasWithDokumenEdit.LeftColumnClass)">@Html.Raw(vAktifitasWithDokumenEdit.NamaDokumen.Caption)@Html.Raw(vAktifitasWithDokumenEdit.NamaDokumen.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(vAktifitasWithDokumenEdit.RightColumnClass)"><div @Html.Raw(vAktifitasWithDokumenEdit.NamaDokumen.CellAttributes)>
+<span id="el_v_aktifitas_with_dokumen_NamaDokumen">
+<span @Html.Raw(vAktifitasWithDokumenEdit.NamaDokumen.ViewAttributes)>
+<input type="text" readonly class="form-control-plaintext" value="@Html.Raw(RemoveHtml(ConvertToString(vAktifitasWithDokumenEdit.NamaDokumen.EditValue)))"></span>
+<input type="hidden" data-table="v_aktifitas_with_dokumen" data-field="x_NamaDokumen" data-hidden="1" name="x_NamaDokumen" id="x_NamaDokumen" value="@Html.Raw(HtmlEncode(vAktifitasWithDokumenEdit.NamaDokumen.CurrentValue))">
+</span>
+</div></div>
+    </div>
+} @* vAktifitasWithDokumenEdit.NamaDokumen.Visible (end) *@
+@if (vAktifitasWithDokumenEdit.PathFile.Visible) { // vAktifitasWithDokumenEdit.PathFile.Visible (begin)
+    <div id="r_PathFile" @Html.Raw(vAktifitasWithDokumenEdit.PathFile.RowAttributes)>
+        <label id="elh_v_aktifitas_with_dokumen_PathFile" class="@(vAktifitasWithDokumenEdit.LeftColumnClass)">@Html.Raw(vAktifitasWithDokumenEdit.PathFile.Caption)@Html.Raw(vAktifitasWithDokumenEdit.PathFile.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(vAktifitasWithDokumenEdit.RightColumnClass)"><div @Html.Raw(vAktifitasWithDokumenEdit.PathFile.CellAttributes)>
+<span id="el_v_aktifitas_with_dokumen_PathFile">
+<div id="fd_x_PathFile" class="fileinput-button ew-file-drop-zone">
+    <input
+        type="file"
+        id="x_PathFile"
+        name="x_PathFile"
+        class="form-control ew-file-input"
+        title="@(vAktifitasWithDokumenEdit.PathFile.Title)"
+        lang="@(CurrentLanguageID)"
+        data-table="v_aktifitas_with_dokumen"
+        data-field="x_PathFile"
+        data-size="255"
+        data-accept-file-types="@(vAktifitasWithDokumenEdit.PathFile.AcceptFileTypes)"
+        data-max-file-size="@(vAktifitasWithDokumenEdit.PathFile.UploadMaxFileSize)"
+        data-max-number-of-files="null"
+        data-disable-image-crop="@(vAktifitasWithDokumenEdit.PathFile.ImageCropper ? 0 : 1)"
+        aria-describedby="x_PathFile_help"
+        @Html.Raw((vAktifitasWithDokumenEdit.PathFile.ReadOnly || vAktifitasWithDokumenEdit.PathFile.Disabled) ? " disabled" : "")
+        @Html.Raw(vAktifitasWithDokumenEdit.PathFile.EditAttributes)
+    >
+    <div class="text-body-secondary ew-file-text">@Html.Raw(Language.Phrase("ChooseFile"))</div>
+    @Html.Raw(vAktifitasWithDokumenEdit.PathFile.GetCustomMessage)
+    <div class="invalid-feedback">@Html.Raw(vAktifitasWithDokumenEdit.PathFile.GetErrorMessage())</div>
+</div>
+<input type="hidden" name="fn_x_PathFile" id= "fn_x_PathFile" value="@(vAktifitasWithDokumenEdit.PathFile.Upload.FileName)">
+<input type="hidden" name="fa_x_PathFile" id= "fa_x_PathFile" value="@(Post("fa_x_PathFile") == "0" ? "0" : "1")">
+<table id="ft_x_PathFile" class="table table-sm float-start ew-upload-table"><tbody class="files"></tbody></table>
+</span>
+</div></div>
+    </div>
+} @* vAktifitasWithDokumenEdit.PathFile.Visible (end) *@
+@if (vAktifitasWithDokumenEdit.IdProses.Visible) { // vAktifitasWithDokumenEdit.IdProses.Visible (begin)
+    <div id="r_IdProses" @Html.Raw(vAktifitasWithDokumenEdit.IdProses.RowAttributes)>
+        <label id="elh_v_aktifitas_with_dokumen_IdProses" for="x_IdProses" class="@(vAktifitasWithDokumenEdit.LeftColumnClass)">@Html.Raw(vAktifitasWithDokumenEdit.IdProses.Caption)@Html.Raw(vAktifitasWithDokumenEdit.IdProses.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(vAktifitasWithDokumenEdit.RightColumnClass)"><div @Html.Raw(vAktifitasWithDokumenEdit.IdProses.CellAttributes)>
+<span id="el_v_aktifitas_with_dokumen_IdProses">
+<input type="@(vAktifitasWithDokumenEdit.IdProses.InputTextType)" name="x_IdProses" id="x_IdProses" data-table="v_aktifitas_with_dokumen" data-field="x_IdProses" value="@Html.Raw(vAktifitasWithDokumenEdit.IdProses.EditValue)" size="30" placeholder="@Html.Raw(HtmlEncode(vAktifitasWithDokumenEdit.IdProses.PlaceHolder))" data-format-pattern="@(vAktifitasWithDokumenEdit.IdProses.FormatPattern)"@Html.Raw(vAktifitasWithDokumenEdit.IdProses.EditAttributes) aria-describedby="x_IdProses_help">
+@Html.Raw(vAktifitasWithDokumenEdit.IdProses.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(vAktifitasWithDokumenEdit.IdProses.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* vAktifitasWithDokumenEdit.IdProses.Visible (end) *@
+</div><!-- /page* -->
+    <input type="hidden" data-table="v_aktifitas_with_dokumen" data-field="x_IdAktivitas" data-hidden="1" name="x_IdAktivitas" id="x_IdAktivitas" value="@Html.Raw(HtmlEncode(vAktifitasWithDokumenEdit.IdAktivitas.CurrentValue))">
+@{ vAktifitasWithDokumenEdit.CloseRecordset(); }
+@Html.Raw(vAktifitasWithDokumenEdit.IsModal ? "<template class=\"ew-modal-buttons\">" : "<div class=\"row ew-buttons\">")<!-- buttons .row -->
+    <div class="@(vAktifitasWithDokumenEdit.OffsetColumnClass)"><!-- buttons offset -->
+    <button class="btn btn-primary ew-btn" name="btn-action" id="btn-action" type="submit" form="fv_aktifitas_with_dokumenedit">@Html.Raw(Language.Phrase("SaveBtn"))</button>
+@if (IsJsonResponse()) {
+    <button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" data-bs-dismiss="modal">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+} else {
+    <button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" form="fv_aktifitas_with_dokumenedit" data-href="@AppPath(vAktifitasWithDokumenEdit.ReturnUrl)">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+}
+    </div><!-- /buttons offset -->
+@Html.Raw(vAktifitasWithDokumenEdit.IsModal ? "</template>" : "</div>")<!-- /buttons .row -->
+</form>
+</main>
+@vAktifitasWithDokumenEdit.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("v_aktifitas_with_dokumen");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Startup script
+    var IdDokumen = "@vAktifitasWithDokumenEdit.IdDokumen.CurrentValue";
+    var IdAktivitas = "@vAktifitasWithDokumenEdit.IdAktivitas.CurrentValue";
+    var PathFile = "@vAktifitasWithDokumenEdit.PathFile.CurrentValue";
+    $('#r_IdDokumen').hide();
+    var parent_url = ew.PATH_BASE;
+    var templateElement = `
+    <div id="template-document" class="row">
+        <label class="col-sm-2 col-form-label ew-label">Template Dokumen</label>
+        <div class="col-sm-10"> 
+            <a class="download-template btn btn-primary" href="${parent_url}TemplateDokumen?IdDokumen=${IdDokumen}"><i class="fa-solid fa-download"></i> Download Template</a>
+        </div>
+    </div>
+    `;
+    $('#r_NamaDokumen').after(templateElement);
+    var statusElement = "";
+    if (!PathFile) {
+        statusElement = `
+        <div class="row">
+            <label class="col-sm-2 col-form-label ew-label">Status Dokumen</label>
+            <div class="col-sm-10"> 
+                NotUploaded  
+            </div>
+        </div>
+        `;
+    } else {
+        statusElement = `
+        <div class="row">
+            <label class="col-sm-2 col-form-label ew-label">Status Dokumen</label>
+            <div class="col-sm-10"> 
+                <button IdAktivitas="${IdAktivitas}" class="download-document btn btn-primary"><i class="fa-solid fa-download"></i> Download Dokumen</button> 
+            </div>
+        </div>
+        `;
+    }
+    $('#template-document').after(statusElement);
+    var IdReferensi = "@vAktifitasWithDokumenEdit.No_referensi.CurrentValue";
+    var IdAktivitas = "@vAktifitasWithDokumenEdit.IdAktivitas.CurrentValue";
+    var IdProses = "@vAktifitasWithDokumenEdit.IdProses.CurrentValue";
+    var NamaAktivitas = "@vAktifitasWithDokumenEdit.NamaAktivitas.CurrentValue";
+    $('#r_IdProses').hide();
+    var steps = [
+        { number: 1, label: "Penerimaan", url: `${parent_url}PenerimaanList`, icon: "fa-box-open" },
+        { number: 2, label: "Proses", url: `${parent_url}ProsesList?cmd=search&x_IdReferensi%5B%5D=${IdReferensi}&search=&searchtype=`, icon: "fa-gears" },
+        { number: 3, label: "Aktivitas", url: `${parent_url}AktivitasList?cmd=search&x_IdProses%5B%5D=${IdProses}&search=&searchtype=`, icon: "fa-list-check" },
+        { number: 4, label: NamaAktivitas, url: '', icon: "fa-file-circle-check" }
+    ];
+    var currentStep = 4;
+    $("<style>")
+        .prop("type", "text/css")
+        .html(`
+            .stepper {
+                display: flex;
+                counter-reset: step;
+            }
+            .step {
+                width: 150px;
+                text-align: center;
+                position: relative;
+            }
+            .step:not(:last-child)::after {
+                content: '';
+                position: absolute;
+                top: 20px;
+                right: -50%;
+                width: 100%;
+                height: 4px;
+                background-color: #ccc;
+                z-index: 0;
+            }
+            .step.completed:not(:last-child)::after {
+                background-color: #006BB7;
+            }
+            .step-icon {
+                width: 36px;
+                height: 36px;
+                line-height: 36px;
+                border-radius: 50%;
+                background: #ccc;
+                display: inline-block;
+                z-index: 1;
+                position: relative;
+                color: white;
+                font-weight: bold;
+            }
+            .step.active .step-icon {
+                background: #006BB7;
+            }
+            .step-label {
+                margin-top: 8px;
+                font-size: 14px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                gap: 6px;
+                color: #333;
+            }
+            .step-label {
+                color: #006BB7 !important;
+                text-decoration: none;
+                margin: 0;
+                padding: 0;
+            }
+            .step-label-not-active {
+                color: #CCCCCC !important;
+            }
+        `)
+        .appendTo("head");
+    var $stepperWrapper = $('<div class="d-flex border-bottom border-2 pb-2"><div class="stepper"></div></div>');
+    var $stepper = $stepperWrapper.find(".stepper");
+    steps.forEach(function (step, i) {
+        var isActive = step.number === currentStep;
+        var isCompleted = step.number < currentStep;
+        var stepClass = isActive ? "active" : isCompleted ? "completed" : "";
+        var icon, labelContent, html;
+        if (isActive) {
+            icon = `<div class="step-icon bg-success">${step.number}</div>`;
+            labelContent = `<div class="step-label"><p class="text-success mb-1"><i class="fa-solid ${step.icon} me-1 text-success"></i> ${step.label}</p></div>`;
+            html = `<div class="step ${stepClass} text-success">${icon}${labelContent}</div>`;
+        } else if (isCompleted) {
+            icon = `<div class="step-icon" style="background: #006BB7;">${step.number}</div>`;
+            labelContent = `<div><a href="${step.url}" class="step-label"><i class="fa-solid ${step.icon} me-1"></i>${step.label}</a></div>`;
+            html = `<div class="step ${stepClass}">${icon}${labelContent}</div>`;
+        } else {
+            icon = `<div class="step-icon">${step.number}</div>`;
+            labelContent = `<div class="step-label-not-active"><p style="margin: 0;"><i class="fa-solid ${step.icon} me-1"></i>${step.label}</p></div>`;
+            html = `<div class="step ${stepClass} text-secondary">${icon}${labelContent}</div>`;
+        }
+        $stepper.append(html);
+    });
+    $(".content-header .container-fluid .row").append($stepperWrapper);
+    $("#btn-action").hide();
+    $("#btn-cancel").html('<i class="fa-solid fa-ban"></i></i> Cancel');
+        const $cancelButton = $("#btn-cancel");
+        if ($cancelButton.length) {
+            // Sisipkan tombol custom
+            let $customButtons = ``;
+            let status = $("#x_StatusAktivitas").val();
+            switch (status) {
+            case "Waiting":
+                    $customButtons = `
+                        <button type="button" class="btn btn-primary ew-btn ml-2" id="btn-draft">
+                            <i class="fas fa-save"></i> Save
+                        </button>
+                    `;
+                    break;
+                case "Draft":
+                    $customButtons = `
+                        <button type="button" class="btn btn-primary ew-btn ml-2" id="btn-draft">
+                            <i class="fas fa-save"></i> Save
+                        </button>
+                        <button type="button" class="btn btn-success ew-btn ml-2" id="btn-completed">
+                            <i class="fas fa-paper-plane"></i> Submit
+                        </button>
+                    `
+                    break;
+                case "Completed":
+                    $customButtons = `
+                        <button type="button" class="btn btn-primary ew-btn ml-2" id="btn-editing">
+                            <i class="fas fa-edit"></i> Save
+                        </button>
+                        <button type="button" class="btn btn-success ew-btn ml-2" id="btn-completedEdit">
+                            <i class="fas fa-paper-plane"></i> Submit
+                        </button>
+                    `;
+                    break;
+                case "Editing":
+                    $customButtons = `
+                        <button type="button" class="btn btn-primary ew-btn ml-2" id="btn-editing">
+                            <i class="fas fa-edit"></i> Save
+                        </button>
+                        <button type="button" class="btn btn-success ew-btn ml-2" id="btn-completedEdit">
+                            <i class="fas fa-paper-plane"></i> Submit
+                        </button>
+                    `;
+                    break;
+            }
+            $cancelButton.before($customButtons);
+            checkIsEditable();
+        }
+    function checkIsEditable() {
+        $.ajax({
+            url: parent_url + `api/LookUpList/check_iseditable_aktivitas_form?idAktivitas=${IdAktivitas}`,
+            type: 'GET',
+            success: function(response) {
+                if(!response.isEditable){
+                    $("#btn-draft").hide();
+                    $("#btn-editing").hide();
+                    $("#btn-completed").hide();
+                    $("#btn-completedEdit").hide();
+                    $('input, select, textarea, button').prop('disabled', true);
+                    $('#btn-cancel').prop('disabled', false);
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('API call failed:', status, error);
+            }
+        });
+    }
+});
+</script>

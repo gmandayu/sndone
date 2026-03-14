@@ -1,0 +1,394 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (masterTangkiAdd.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = masterTangkiAdd.UseLayout ? "_Layout" : "";
+}
+<script>
+var currentTable = @Html.Raw(ConvertToJson(masterTangkiAdd.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { MasterTangki: currentTable } });
+var currentPageID = ew.PAGE_ID = "add";
+var currentForm;
+var fMasterTangkiadd;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("fMasterTangkiadd")
+        .setPageId("add")
+
+        // Add fields
+        .setFields([
+
+            ["NamaTerminal", [fields.NamaTerminal.visible && fields.NamaTerminal.required ? ew.Validators.required(fields.NamaTerminal.caption) : null], fields.NamaTerminal.isInvalid],
+            ["Plant", [fields.Plant.visible && fields.Plant.required ? ew.Validators.required(fields.Plant.caption) : null], fields.Plant.isInvalid],
+            ["Sloc", [fields.Sloc.visible && fields.Sloc.required ? ew.Validators.required(fields.Sloc.caption) : null], fields.Sloc.isInvalid],
+            ["SeqTangki", [fields.SeqTangki.visible && fields.SeqTangki.required ? ew.Validators.required(fields.SeqTangki.caption) : null], fields.SeqTangki.isInvalid],
+            ["MatNo", [fields.MatNo.visible && fields.MatNo.required ? ew.Validators.required(fields.MatNo.caption) : null], fields.MatNo.isInvalid],
+            ["TglKalibrasi", [fields.TglKalibrasi.visible && fields.TglKalibrasi.required ? ew.Validators.required(fields.TglKalibrasi.caption) : null, ew.Validators.datetime(fields.TglKalibrasi.clientFormatPattern)], fields.TglKalibrasi.isInvalid],
+            ["ExpDate", [fields.ExpDate.visible && fields.ExpDate.required ? ew.Validators.required(fields.ExpDate.caption) : null, ew.Validators.datetime(fields.ExpDate.clientFormatPattern)], fields.ExpDate.isInvalid],
+            ["Status", [fields.Status.visible && fields.Status.required ? ew.Validators.required(fields.Status.caption) : null], fields.Status.isInvalid],
+            ["TinggiMejaUk", [fields.TinggiMejaUk.visible && fields.TinggiMejaUk.required ? ew.Validators.required(fields.TinggiMejaUk.caption) : null], fields.TinggiMejaUk.isInvalid],
+            ["MaxDipping", [fields.MaxDipping.visible && fields.MaxDipping.required ? ew.Validators.required(fields.MaxDipping.caption) : null], fields.MaxDipping.isInvalid],
+            ["MaxCapacity", [fields.MaxCapacity.visible && fields.MaxCapacity.required ? ew.Validators.required(fields.MaxCapacity.caption) : null], fields.MaxCapacity.isInvalid],
+            ["UnpumpableQty", [fields.UnpumpableQty.visible && fields.UnpumpableQty.required ? ew.Validators.required(fields.UnpumpableQty.caption) : null], fields.UnpumpableQty.isInvalid],
+            ["PumpableQty", [fields.PumpableQty.visible && fields.PumpableQty.required ? ew.Validators.required(fields.PumpableQty.caption) : null], fields.PumpableQty.isInvalid]
+        ])
+
+        // Form_CustomValidate
+        .setCustomValidate(
+            function(fobj) { // DO NOT CHANGE THIS LINE!
+                    // Your custom validation code here, return false if invalid.
+                    return true;
+                }
+        )
+
+        // Use JavaScript validation or not
+        .setValidateRequired(ew.CLIENT_VALIDATE)
+
+        // Dynamic selection lists
+        .setLists({
+            "Plant": @Html.Raw(masterTangkiAdd.Plant.ToClientList(masterTangkiAdd)),
+            "Status": @Html.Raw(masterTangkiAdd.Status.ToClientList(masterTangkiAdd)),
+        })
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Client script
+    $('#fMasterTangkiadd').on('submit', function (e) {
+        e.preventDefault();
+        showLoading();
+        setTimeout(() => {
+            hideLoading();
+        }, 3000);
+        this.requestSubmit();
+    });
+});
+</script>
+@masterTangkiAdd.ShowPageHeader()
+@masterTangkiAdd.ShowMessages()
+<form name="fMasterTangkiadd" id="fMasterTangkiadd" class="@(masterTangkiAdd.FormClassName)" action="@AppPath(CurrentPageName())" method="post" novalidate autocomplete="off">
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+<input type="hidden" name="action" id="action" value="insert">
+<input type="hidden" name="modal" value="@ConvertToInt(masterTangkiAdd.IsModal)">
+@if (IsJsonResponse()) {
+<input type="hidden" name="json" value="1">
+}
+<input type="hidden" name="@(masterTangkiAdd.OldKeyName)" value="@Html.Raw(masterTangkiAdd.OldKey)">
+<div class="ew-add-div"><!-- page* -->
+@if (masterTangkiAdd.NamaTerminal.Visible) { // masterTangkiAdd.NamaTerminal.Visible (begin)
+    <div id="r_NamaTerminal" @Html.Raw(masterTangkiAdd.NamaTerminal.RowAttributes)>
+        <label id="elh_MasterTangki_NamaTerminal" for="x_NamaTerminal" class="@(masterTangkiAdd.LeftColumnClass)">@Html.Raw(masterTangkiAdd.NamaTerminal.Caption)@Html.Raw(masterTangkiAdd.NamaTerminal.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(masterTangkiAdd.RightColumnClass)"><div @Html.Raw(masterTangkiAdd.NamaTerminal.CellAttributes)>
+<span id="el_MasterTangki_NamaTerminal">
+<input type="@(masterTangkiAdd.NamaTerminal.InputTextType)" name="x_NamaTerminal" id="x_NamaTerminal" data-table="MasterTangki" data-field="x_NamaTerminal" value="@Html.Raw(masterTangkiAdd.NamaTerminal.EditValue)" size="30" maxlength="200" placeholder="@Html.Raw(HtmlEncode(masterTangkiAdd.NamaTerminal.PlaceHolder))" data-format-pattern="@(masterTangkiAdd.NamaTerminal.FormatPattern)"@Html.Raw(masterTangkiAdd.NamaTerminal.EditAttributes) aria-describedby="x_NamaTerminal_help">
+@Html.Raw(masterTangkiAdd.NamaTerminal.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(masterTangkiAdd.NamaTerminal.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* masterTangkiAdd.NamaTerminal.Visible (end) *@
+@if (masterTangkiAdd.Plant.Visible) { // masterTangkiAdd.Plant.Visible (begin)
+    <div id="r_Plant" @Html.Raw(masterTangkiAdd.Plant.RowAttributes)>
+        <label id="elh_MasterTangki_Plant" for="x_Plant" class="@(masterTangkiAdd.LeftColumnClass)">@Html.Raw(masterTangkiAdd.Plant.Caption)@Html.Raw(masterTangkiAdd.Plant.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(masterTangkiAdd.RightColumnClass)"><div @Html.Raw(masterTangkiAdd.Plant.CellAttributes)>
+<span id="el_MasterTangki_Plant">
+    <select
+        id="x_Plant"
+        name="x_Plant"
+        class="form-select ew-select@(masterTangkiAdd.Plant.IsInvalidClass)"
+        data-select2-id="fMasterTangkiadd_x_Plant"
+        data-table="MasterTangki"
+        data-field="x_Plant"
+        data-value-separator="@(masterTangkiAdd.Plant.DisplayValueSeparatorAttribute)"
+        data-placeholder="@(HtmlEncode(masterTangkiAdd.Plant.PlaceHolder))"
+        @Html.Raw(masterTangkiAdd.Plant.EditAttributes)>
+        @(masterTangkiAdd.Plant.SelectOptionListHtml("x_Plant"))
+    </select>
+    @Html.Raw(masterTangkiAdd.Plant.GetCustomMessage)
+    <div class="invalid-feedback">@Html.Raw(masterTangkiAdd.Plant.GetErrorMessage())</div>
+@Html.Raw(masterTangkiAdd.Plant.Lookup.GetParamTag(masterTangkiAdd, "p_x_Plant"))
+<script>
+loadjs.ready("fMasterTangkiadd", function() {
+    var options = { name: "x_Plant", selectId: "fMasterTangkiadd_x_Plant" },
+        el = document.querySelector("select[data-select2-id='" + options.selectId + "']");
+    if (!el)
+        return;
+    options.closeOnSelect = !options.multiple;
+    options.dropdownParent = el.closest("#ew-modal-dialog, #ew-add-opt-dialog");
+    if (fMasterTangkiadd.lists.Plant?.lookupOptions.length) {
+        options.data = { id: "x_Plant", form: "fMasterTangkiadd" };
+    } else {
+        options.ajax = { id: "x_Plant", form: "fMasterTangkiadd", limit: ew.LOOKUP_PAGE_SIZE };
+    }
+    options.minimumInputLength = ew.selectMinimumInputLength;
+    options = Object.assign({}, ew.selectOptions, options, ew.vars.tables.MasterTangki.fields.Plant.selectOptions);
+    ew.createSelect(options);
+});
+</script>
+</span>
+</div></div>
+    </div>
+} @* masterTangkiAdd.Plant.Visible (end) *@
+@if (masterTangkiAdd.Sloc.Visible) { // masterTangkiAdd.Sloc.Visible (begin)
+    <div id="r_Sloc" @Html.Raw(masterTangkiAdd.Sloc.RowAttributes)>
+        <label id="elh_MasterTangki_Sloc" for="x_Sloc" class="@(masterTangkiAdd.LeftColumnClass)">@Html.Raw(masterTangkiAdd.Sloc.Caption)@Html.Raw(masterTangkiAdd.Sloc.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(masterTangkiAdd.RightColumnClass)"><div @Html.Raw(masterTangkiAdd.Sloc.CellAttributes)>
+<span id="el_MasterTangki_Sloc">
+<input type="@(masterTangkiAdd.Sloc.InputTextType)" name="x_Sloc" id="x_Sloc" data-table="MasterTangki" data-field="x_Sloc" value="@Html.Raw(masterTangkiAdd.Sloc.EditValue)" size="30" maxlength="50" placeholder="@Html.Raw(HtmlEncode(masterTangkiAdd.Sloc.PlaceHolder))" data-format-pattern="@(masterTangkiAdd.Sloc.FormatPattern)"@Html.Raw(masterTangkiAdd.Sloc.EditAttributes) aria-describedby="x_Sloc_help">
+@Html.Raw(masterTangkiAdd.Sloc.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(masterTangkiAdd.Sloc.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* masterTangkiAdd.Sloc.Visible (end) *@
+@if (masterTangkiAdd.SeqTangki.Visible) { // masterTangkiAdd.SeqTangki.Visible (begin)
+    <div id="r_SeqTangki" @Html.Raw(masterTangkiAdd.SeqTangki.RowAttributes)>
+        <label id="elh_MasterTangki_SeqTangki" for="x_SeqTangki" class="@(masterTangkiAdd.LeftColumnClass)">@Html.Raw(masterTangkiAdd.SeqTangki.Caption)@Html.Raw(masterTangkiAdd.SeqTangki.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(masterTangkiAdd.RightColumnClass)"><div @Html.Raw(masterTangkiAdd.SeqTangki.CellAttributes)>
+<span id="el_MasterTangki_SeqTangki">
+<input type="@(masterTangkiAdd.SeqTangki.InputTextType)" name="x_SeqTangki" id="x_SeqTangki" data-table="MasterTangki" data-field="x_SeqTangki" value="@Html.Raw(masterTangkiAdd.SeqTangki.EditValue)" size="30" maxlength="50" placeholder="@Html.Raw(HtmlEncode(masterTangkiAdd.SeqTangki.PlaceHolder))" data-format-pattern="@(masterTangkiAdd.SeqTangki.FormatPattern)"@Html.Raw(masterTangkiAdd.SeqTangki.EditAttributes) aria-describedby="x_SeqTangki_help">
+@Html.Raw(masterTangkiAdd.SeqTangki.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(masterTangkiAdd.SeqTangki.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* masterTangkiAdd.SeqTangki.Visible (end) *@
+@if (masterTangkiAdd.MatNo.Visible) { // masterTangkiAdd.MatNo.Visible (begin)
+    <div id="r_MatNo" @Html.Raw(masterTangkiAdd.MatNo.RowAttributes)>
+        <label id="elh_MasterTangki_MatNo" for="x_MatNo" class="@(masterTangkiAdd.LeftColumnClass)">@Html.Raw(masterTangkiAdd.MatNo.Caption)@Html.Raw(masterTangkiAdd.MatNo.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(masterTangkiAdd.RightColumnClass)"><div @Html.Raw(masterTangkiAdd.MatNo.CellAttributes)>
+<span id="el_MasterTangki_MatNo">
+<input type="@(masterTangkiAdd.MatNo.InputTextType)" name="x_MatNo" id="x_MatNo" data-table="MasterTangki" data-field="x_MatNo" value="@Html.Raw(masterTangkiAdd.MatNo.EditValue)" size="30" maxlength="50" placeholder="@Html.Raw(HtmlEncode(masterTangkiAdd.MatNo.PlaceHolder))" data-format-pattern="@(masterTangkiAdd.MatNo.FormatPattern)"@Html.Raw(masterTangkiAdd.MatNo.EditAttributes) aria-describedby="x_MatNo_help">
+@Html.Raw(masterTangkiAdd.MatNo.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(masterTangkiAdd.MatNo.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* masterTangkiAdd.MatNo.Visible (end) *@
+@if (masterTangkiAdd.TglKalibrasi.Visible) { // masterTangkiAdd.TglKalibrasi.Visible (begin)
+    <div id="r_TglKalibrasi" @Html.Raw(masterTangkiAdd.TglKalibrasi.RowAttributes)>
+        <label id="elh_MasterTangki_TglKalibrasi" for="x_TglKalibrasi" class="@(masterTangkiAdd.LeftColumnClass)">@Html.Raw(masterTangkiAdd.TglKalibrasi.Caption)@Html.Raw(masterTangkiAdd.TglKalibrasi.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(masterTangkiAdd.RightColumnClass)"><div @Html.Raw(masterTangkiAdd.TglKalibrasi.CellAttributes)>
+<span id="el_MasterTangki_TglKalibrasi">
+<input type="@(masterTangkiAdd.TglKalibrasi.InputTextType)" name="x_TglKalibrasi" id="x_TglKalibrasi" data-table="MasterTangki" data-field="x_TglKalibrasi" value="@Html.Raw(masterTangkiAdd.TglKalibrasi.EditValue)" placeholder="@Html.Raw(HtmlEncode(masterTangkiAdd.TglKalibrasi.PlaceHolder))" data-format-pattern="@(masterTangkiAdd.TglKalibrasi.FormatPattern)"@Html.Raw(masterTangkiAdd.TglKalibrasi.EditAttributes) aria-describedby="x_TglKalibrasi_help">
+@Html.Raw(masterTangkiAdd.TglKalibrasi.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(masterTangkiAdd.TglKalibrasi.GetErrorMessage())</div>
+@if (!masterTangkiAdd.TglKalibrasi.ReadOnly && !masterTangkiAdd.TglKalibrasi.Disabled && !masterTangkiAdd.TglKalibrasi.EditAttrs.Is("readonly") && !masterTangkiAdd.TglKalibrasi.EditAttrs.Is("disabled")) {
+<script>
+loadjs.ready(["fMasterTangkiadd", "datetimepicker"], function () {
+    let format = "@Html.Raw(DateFormat(9))", // DN
+        options = {
+                localization: {
+                    locale: ew.LANGUAGE_ID + "-u-nu-" + ew.getNumberingSystem(),
+                    hourCycle: format.match(/H/) ? "h24" : "h12",
+                    format,
+                    ...ew.language.phrase("datetimepicker")
+                },
+                display: {
+                    icons: {
+                        previous: ew.IS_RTL ? "fa-solid fa-chevron-right" : "fa-solid fa-chevron-left",
+                        next: ew.IS_RTL ? "fa-solid fa-chevron-left" : "fa-solid fa-chevron-right"
+                    },
+                    components: {
+                        clock: !!format.match(/h/i) || !!format.match(/m/) || !!format.match(/s/i),
+                        hours: !!format.match(/h/i),
+                        minutes: !!format.match(/m/),
+                        seconds: !!format.match(/s/i)
+                    },
+                theme: ew.getPreferredTheme()
+                }
+            };
+    ew.createDateTimePicker("fMasterTangkiadd", "x_TglKalibrasi", ew.deepAssign({"useCurrent":false,"display":{"sideBySide":false}}, options));
+});
+</script>
+}
+</span>
+</div></div>
+    </div>
+} @* masterTangkiAdd.TglKalibrasi.Visible (end) *@
+@if (masterTangkiAdd.ExpDate.Visible) { // masterTangkiAdd.ExpDate.Visible (begin)
+    <div id="r_ExpDate" @Html.Raw(masterTangkiAdd.ExpDate.RowAttributes)>
+        <label id="elh_MasterTangki_ExpDate" for="x_ExpDate" class="@(masterTangkiAdd.LeftColumnClass)">@Html.Raw(masterTangkiAdd.ExpDate.Caption)@Html.Raw(masterTangkiAdd.ExpDate.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(masterTangkiAdd.RightColumnClass)"><div @Html.Raw(masterTangkiAdd.ExpDate.CellAttributes)>
+<span id="el_MasterTangki_ExpDate">
+<input type="@(masterTangkiAdd.ExpDate.InputTextType)" name="x_ExpDate" id="x_ExpDate" data-table="MasterTangki" data-field="x_ExpDate" value="@Html.Raw(masterTangkiAdd.ExpDate.EditValue)" placeholder="@Html.Raw(HtmlEncode(masterTangkiAdd.ExpDate.PlaceHolder))" data-format-pattern="@(masterTangkiAdd.ExpDate.FormatPattern)"@Html.Raw(masterTangkiAdd.ExpDate.EditAttributes) aria-describedby="x_ExpDate_help">
+@Html.Raw(masterTangkiAdd.ExpDate.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(masterTangkiAdd.ExpDate.GetErrorMessage())</div>
+@if (!masterTangkiAdd.ExpDate.ReadOnly && !masterTangkiAdd.ExpDate.Disabled && !masterTangkiAdd.ExpDate.EditAttrs.Is("readonly") && !masterTangkiAdd.ExpDate.EditAttrs.Is("disabled")) {
+<script>
+loadjs.ready(["fMasterTangkiadd", "datetimepicker"], function () {
+    let format = "@Html.Raw(DateFormat(9))", // DN
+        options = {
+                localization: {
+                    locale: ew.LANGUAGE_ID + "-u-nu-" + ew.getNumberingSystem(),
+                    hourCycle: format.match(/H/) ? "h24" : "h12",
+                    format,
+                    ...ew.language.phrase("datetimepicker")
+                },
+                display: {
+                    icons: {
+                        previous: ew.IS_RTL ? "fa-solid fa-chevron-right" : "fa-solid fa-chevron-left",
+                        next: ew.IS_RTL ? "fa-solid fa-chevron-left" : "fa-solid fa-chevron-right"
+                    },
+                    components: {
+                        clock: !!format.match(/h/i) || !!format.match(/m/) || !!format.match(/s/i),
+                        hours: !!format.match(/h/i),
+                        minutes: !!format.match(/m/),
+                        seconds: !!format.match(/s/i)
+                    },
+                theme: ew.getPreferredTheme()
+                }
+            };
+    ew.createDateTimePicker("fMasterTangkiadd", "x_ExpDate", ew.deepAssign({"useCurrent":false,"display":{"sideBySide":false}}, options));
+});
+</script>
+}
+</span>
+</div></div>
+    </div>
+} @* masterTangkiAdd.ExpDate.Visible (end) *@
+@if (masterTangkiAdd.Status.Visible) { // masterTangkiAdd.Status.Visible (begin)
+    <div id="r_Status" @Html.Raw(masterTangkiAdd.Status.RowAttributes)>
+        <label id="elh_MasterTangki_Status" for="x_Status" class="@(masterTangkiAdd.LeftColumnClass)">@Html.Raw(masterTangkiAdd.Status.Caption)@Html.Raw(masterTangkiAdd.Status.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(masterTangkiAdd.RightColumnClass)"><div @Html.Raw(masterTangkiAdd.Status.CellAttributes)>
+<span id="el_MasterTangki_Status">
+    <select
+        id="x_Status"
+        name="x_Status"
+        class="form-select ew-select@(masterTangkiAdd.Status.IsInvalidClass)"
+        data-select2-id="fMasterTangkiadd_x_Status"
+        data-table="MasterTangki"
+        data-field="x_Status"
+        data-value-separator="@(masterTangkiAdd.Status.DisplayValueSeparatorAttribute)"
+        data-placeholder="@(HtmlEncode(masterTangkiAdd.Status.PlaceHolder))"
+        @Html.Raw(masterTangkiAdd.Status.EditAttributes)>
+        @(masterTangkiAdd.Status.SelectOptionListHtml("x_Status"))
+    </select>
+    @Html.Raw(masterTangkiAdd.Status.GetCustomMessage)
+    <div class="invalid-feedback">@Html.Raw(masterTangkiAdd.Status.GetErrorMessage())</div>
+<script>
+loadjs.ready("fMasterTangkiadd", function() {
+    var options = { name: "x_Status", selectId: "fMasterTangkiadd_x_Status" },
+        el = document.querySelector("select[data-select2-id='" + options.selectId + "']");
+    if (!el)
+        return;
+    options.closeOnSelect = !options.multiple;
+    options.dropdownParent = el.closest("#ew-modal-dialog, #ew-add-opt-dialog");
+    if (fMasterTangkiadd.lists.Status?.lookupOptions.length) {
+        options.data = { id: "x_Status", form: "fMasterTangkiadd" };
+    } else {
+        options.ajax = { id: "x_Status", form: "fMasterTangkiadd", limit: ew.LOOKUP_PAGE_SIZE };
+    }
+    options.minimumResultsForSearch = Infinity;
+    options = Object.assign({}, ew.selectOptions, options, ew.vars.tables.MasterTangki.fields.Status.selectOptions);
+    ew.createSelect(options);
+});
+</script>
+</span>
+</div></div>
+    </div>
+} @* masterTangkiAdd.Status.Visible (end) *@
+@if (masterTangkiAdd.TinggiMejaUk.Visible) { // masterTangkiAdd.TinggiMejaUk.Visible (begin)
+    <div id="r_TinggiMejaUk" @Html.Raw(masterTangkiAdd.TinggiMejaUk.RowAttributes)>
+        <label id="elh_MasterTangki_TinggiMejaUk" for="x_TinggiMejaUk" class="@(masterTangkiAdd.LeftColumnClass)">@Html.Raw(masterTangkiAdd.TinggiMejaUk.Caption)@Html.Raw(masterTangkiAdd.TinggiMejaUk.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(masterTangkiAdd.RightColumnClass)"><div @Html.Raw(masterTangkiAdd.TinggiMejaUk.CellAttributes)>
+<span id="el_MasterTangki_TinggiMejaUk">
+<input type="@(masterTangkiAdd.TinggiMejaUk.InputTextType)" name="x_TinggiMejaUk" id="x_TinggiMejaUk" data-table="MasterTangki" data-field="x_TinggiMejaUk" value="@Html.Raw(masterTangkiAdd.TinggiMejaUk.EditValue)" size="30" maxlength="50" placeholder="@Html.Raw(HtmlEncode(masterTangkiAdd.TinggiMejaUk.PlaceHolder))" data-format-pattern="@(masterTangkiAdd.TinggiMejaUk.FormatPattern)"@Html.Raw(masterTangkiAdd.TinggiMejaUk.EditAttributes) aria-describedby="x_TinggiMejaUk_help">
+@Html.Raw(masterTangkiAdd.TinggiMejaUk.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(masterTangkiAdd.TinggiMejaUk.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* masterTangkiAdd.TinggiMejaUk.Visible (end) *@
+@if (masterTangkiAdd.MaxDipping.Visible) { // masterTangkiAdd.MaxDipping.Visible (begin)
+    <div id="r_MaxDipping" @Html.Raw(masterTangkiAdd.MaxDipping.RowAttributes)>
+        <label id="elh_MasterTangki_MaxDipping" for="x_MaxDipping" class="@(masterTangkiAdd.LeftColumnClass)">@Html.Raw(masterTangkiAdd.MaxDipping.Caption)@Html.Raw(masterTangkiAdd.MaxDipping.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(masterTangkiAdd.RightColumnClass)"><div @Html.Raw(masterTangkiAdd.MaxDipping.CellAttributes)>
+<span id="el_MasterTangki_MaxDipping">
+<input type="@(masterTangkiAdd.MaxDipping.InputTextType)" name="x_MaxDipping" id="x_MaxDipping" data-table="MasterTangki" data-field="x_MaxDipping" value="@Html.Raw(masterTangkiAdd.MaxDipping.EditValue)" size="30" maxlength="50" placeholder="@Html.Raw(HtmlEncode(masterTangkiAdd.MaxDipping.PlaceHolder))" data-format-pattern="@(masterTangkiAdd.MaxDipping.FormatPattern)"@Html.Raw(masterTangkiAdd.MaxDipping.EditAttributes) aria-describedby="x_MaxDipping_help">
+@Html.Raw(masterTangkiAdd.MaxDipping.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(masterTangkiAdd.MaxDipping.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* masterTangkiAdd.MaxDipping.Visible (end) *@
+@if (masterTangkiAdd.MaxCapacity.Visible) { // masterTangkiAdd.MaxCapacity.Visible (begin)
+    <div id="r_MaxCapacity" @Html.Raw(masterTangkiAdd.MaxCapacity.RowAttributes)>
+        <label id="elh_MasterTangki_MaxCapacity" for="x_MaxCapacity" class="@(masterTangkiAdd.LeftColumnClass)">@Html.Raw(masterTangkiAdd.MaxCapacity.Caption)@Html.Raw(masterTangkiAdd.MaxCapacity.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(masterTangkiAdd.RightColumnClass)"><div @Html.Raw(masterTangkiAdd.MaxCapacity.CellAttributes)>
+<span id="el_MasterTangki_MaxCapacity">
+<input type="@(masterTangkiAdd.MaxCapacity.InputTextType)" name="x_MaxCapacity" id="x_MaxCapacity" data-table="MasterTangki" data-field="x_MaxCapacity" value="@Html.Raw(masterTangkiAdd.MaxCapacity.EditValue)" size="30" maxlength="50" placeholder="@Html.Raw(HtmlEncode(masterTangkiAdd.MaxCapacity.PlaceHolder))" data-format-pattern="@(masterTangkiAdd.MaxCapacity.FormatPattern)"@Html.Raw(masterTangkiAdd.MaxCapacity.EditAttributes) aria-describedby="x_MaxCapacity_help">
+@Html.Raw(masterTangkiAdd.MaxCapacity.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(masterTangkiAdd.MaxCapacity.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* masterTangkiAdd.MaxCapacity.Visible (end) *@
+@if (masterTangkiAdd.UnpumpableQty.Visible) { // masterTangkiAdd.UnpumpableQty.Visible (begin)
+    <div id="r_UnpumpableQty" @Html.Raw(masterTangkiAdd.UnpumpableQty.RowAttributes)>
+        <label id="elh_MasterTangki_UnpumpableQty" for="x_UnpumpableQty" class="@(masterTangkiAdd.LeftColumnClass)">@Html.Raw(masterTangkiAdd.UnpumpableQty.Caption)@Html.Raw(masterTangkiAdd.UnpumpableQty.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(masterTangkiAdd.RightColumnClass)"><div @Html.Raw(masterTangkiAdd.UnpumpableQty.CellAttributes)>
+<span id="el_MasterTangki_UnpumpableQty">
+<input type="@(masterTangkiAdd.UnpumpableQty.InputTextType)" name="x_UnpumpableQty" id="x_UnpumpableQty" data-table="MasterTangki" data-field="x_UnpumpableQty" value="@Html.Raw(masterTangkiAdd.UnpumpableQty.EditValue)" size="30" maxlength="50" placeholder="@Html.Raw(HtmlEncode(masterTangkiAdd.UnpumpableQty.PlaceHolder))" data-format-pattern="@(masterTangkiAdd.UnpumpableQty.FormatPattern)"@Html.Raw(masterTangkiAdd.UnpumpableQty.EditAttributes) aria-describedby="x_UnpumpableQty_help">
+@Html.Raw(masterTangkiAdd.UnpumpableQty.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(masterTangkiAdd.UnpumpableQty.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* masterTangkiAdd.UnpumpableQty.Visible (end) *@
+@if (masterTangkiAdd.PumpableQty.Visible) { // masterTangkiAdd.PumpableQty.Visible (begin)
+    <div id="r_PumpableQty" @Html.Raw(masterTangkiAdd.PumpableQty.RowAttributes)>
+        <label id="elh_MasterTangki_PumpableQty" for="x_PumpableQty" class="@(masterTangkiAdd.LeftColumnClass)">@Html.Raw(masterTangkiAdd.PumpableQty.Caption)@Html.Raw(masterTangkiAdd.PumpableQty.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(masterTangkiAdd.RightColumnClass)"><div @Html.Raw(masterTangkiAdd.PumpableQty.CellAttributes)>
+<span id="el_MasterTangki_PumpableQty">
+<input type="@(masterTangkiAdd.PumpableQty.InputTextType)" name="x_PumpableQty" id="x_PumpableQty" data-table="MasterTangki" data-field="x_PumpableQty" value="@Html.Raw(masterTangkiAdd.PumpableQty.EditValue)" size="30" maxlength="50" placeholder="@Html.Raw(HtmlEncode(masterTangkiAdd.PumpableQty.PlaceHolder))" data-format-pattern="@(masterTangkiAdd.PumpableQty.FormatPattern)"@Html.Raw(masterTangkiAdd.PumpableQty.EditAttributes) aria-describedby="x_PumpableQty_help">
+@Html.Raw(masterTangkiAdd.PumpableQty.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(masterTangkiAdd.PumpableQty.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* masterTangkiAdd.PumpableQty.Visible (end) *@
+</div><!-- /page* -->
+@{ masterTangkiAdd.CloseRecordset(); }
+@Html.Raw(masterTangkiAdd.IsModal ? "<template class=\"ew-modal-buttons\">" : "<div class=\"row ew-buttons\">")<!-- buttons .row -->
+    <div class="@(masterTangkiAdd.OffsetColumnClass)"><!-- buttons offset -->
+    <button class="btn btn-primary ew-btn" name="btn-action" id="btn-action" type="submit" form="fMasterTangkiadd">@Html.Raw(Language.Phrase("AddBtn"))</button>
+@if (IsJsonResponse()) {
+    <button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" data-bs-dismiss="modal">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+} else {
+    <button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" form="fMasterTangkiadd" data-href="@AppPath(masterTangkiAdd.ReturnUrl)">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+}
+    </div><!-- /buttons offset -->
+@Html.Raw(masterTangkiAdd.IsModal ? "</template>" : "</div>")<!-- /buttons .row -->
+</form>
+@masterTangkiAdd.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("MasterTangki");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Write your table-specific startup script here
+    // document.write("page loaded");
+});
+</script>

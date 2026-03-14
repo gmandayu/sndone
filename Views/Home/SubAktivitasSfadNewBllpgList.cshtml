@@ -1,0 +1,407 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (subAktivitasSfadNewBllpgList.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = subAktivitasSfadNewBllpgList.UseLayout ? "_Layout" : "";
+}
+@if (!subAktivitasSfadNewBllpgList.IsExport()) {
+<script>
+var currentTable = @Html.Raw(ConvertToJson(subAktivitasSfadNewBllpgList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { SubAktivitasSFADNewBLLPG: currentTable } });
+var currentPageID = ew.PAGE_ID = "list";
+var currentForm;
+var @(subAktivitasSfadNewBllpgList.FormName);
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("@(subAktivitasSfadNewBllpgList.FormName)")
+        .setPageId("list")
+        .setSubmitWithFetch(@(subAktivitasSfadNewBllpgList.UseAjaxActions ? "true" : "false"))
+        .setFormKeyCountName("@(subAktivitasSfadNewBllpgList.FormKeyCountName)")
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Write your client script here, no need to add script tags.
+});
+</script>
+}
+@if (!subAktivitasSfadNewBllpgList.IsExport()) {
+<div class="btn-toolbar ew-toolbar">
+@if (subAktivitasSfadNewBllpgList.TotalRecords > 0 && subAktivitasSfadNewBllpgList.ExportOptions.Visible) {
+    subAktivitasSfadNewBllpgList.ExportOptions.Render("body");
+}
+@if (subAktivitasSfadNewBllpgList.ImportOptions.Visible) {
+    subAktivitasSfadNewBllpgList.ImportOptions.Render("body");
+}
+@if (subAktivitasSfadNewBllpgList.SearchOptions.Visible) {
+    subAktivitasSfadNewBllpgList.SearchOptions.Render("body");
+}
+@if (subAktivitasSfadNewBllpgList.FilterOptions.Visible) {
+    subAktivitasSfadNewBllpgList.FilterOptions.Render("body");
+}
+</div>
+}
+@if (!subAktivitasSfadNewBllpgList.IsModal) {
+<form name="fSubAktivitasSFADNewBLLPGsrch" id="fSubAktivitasSFADNewBLLPGsrch" class="ew-form ew-ext-search-form" action="@AppPath(CurrentPageName())" novalidate autocomplete="off">
+<div id="fSubAktivitasSFADNewBLLPGsrch_search_panel" class="mb-2 mb-sm-0 @(subAktivitasSfadNewBllpgList.SearchPanelClass)"><!-- .ew-search-panel -->
+<script>
+var currentTable = @Html.Raw(ConvertToJson(subAktivitasSfadNewBllpgList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { SubAktivitasSFADNewBLLPG: currentTable } });
+var currentForm;
+var fSubAktivitasSFADNewBLLPGsrch, currentSearchForm, currentAdvancedSearchForm;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery,
+        fields = currentTable.fields;
+
+    // Form object for search
+    let form = new ew.FormBuilder()
+        .setId("fSubAktivitasSFADNewBLLPGsrch")
+        .setPageId("list")
+@if (subAktivitasSfadNewBllpgList.UseAjaxActions) {
+        <text>.setSubmitWithFetch(true)</text>
+}
+
+        // Dynamic selection lists
+        .setLists({
+        })
+
+        // Filters
+        .setFilterList(@Html.Raw(subAktivitasSfadNewBllpgList.GetFilterList()))
+        .build();
+    window[form.id] = form;
+    currentSearchForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<input type="hidden" name="cmd" value="search">
+@if (Security.CanSearch) {
+if (!subAktivitasSfadNewBllpgList.IsExport() && Empty(subAktivitasSfadNewBllpgList.CurrentAction) && subAktivitasSfadNewBllpgList.HasSearchFields()) { @* Show search form (begin) *@
+<div class="ew-extended-search container-fluid ps-2">
+<div class="row mb-0">
+    <div class="col-sm-auto px-0 pe-sm-2">
+        <div class="ew-basic-search input-group">
+            <input type="search" name="@(Config.TableBasicSearch)" id="@(Config.TableBasicSearch)" class="form-control ew-basic-search-keyword" value="@Html.Raw(HtmlEncode(subAktivitasSfadNewBllpgList.BasicSearch.SessionKeyword))" placeholder="@(HtmlEncode(Language.Phrase("Search")))" aria-label="@(HtmlEncode(Language.Phrase("Search")))">
+            <input type="hidden" name="@(Config.TableBasicSearchType)" id="@(Config.TableBasicSearchType)" class="ew-basic-search-type" value="@(HtmlEncode(subAktivitasSfadNewBllpgList.BasicSearch.SessionType))">
+            <button type="button" data-bs-toggle="dropdown" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split" aria-haspopup="true" aria-expanded="false">
+                <span id="searchtype">@Html.Raw(subAktivitasSfadNewBllpgList.BasicSearch.TypeNameShort)</span>
+            </button>
+            <div class="dropdown-menu dropdown-menu-end">
+                <button type="button" class="dropdown-item@(subAktivitasSfadNewBllpgList.BasicSearch.SessionType == "" ? " active" : "")" form="fSubAktivitasSFADNewBLLPGsrch" data-ew-action="search-type">@Html.Raw(Language.Phrase("QuickSearchAuto"))</button>
+                <button type="button" class="dropdown-item@(subAktivitasSfadNewBllpgList.BasicSearch.SessionType == "=" ? " active" : "")" form="fSubAktivitasSFADNewBLLPGsrch" data-ew-action="search-type" data-search-type="=">@Html.Raw(Language.Phrase("QuickSearchExact"))</button>
+                <button type="button" class="dropdown-item@(subAktivitasSfadNewBllpgList.BasicSearch.SessionType == "AND" ? " active" : "")" form="fSubAktivitasSFADNewBLLPGsrch" data-ew-action="search-type" data-search-type="AND">@Html.Raw(Language.Phrase("QuickSearchAll"))</button>
+                <button type="button" class="dropdown-item@(subAktivitasSfadNewBllpgList.BasicSearch.SessionType == "OR" ? " active" : "")" form="fSubAktivitasSFADNewBLLPGsrch" data-ew-action="search-type" data-search-type="OR">@Html.Raw(Language.Phrase("QuickSearchAny"))</button>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-auto mb-3">
+        <button class="btn btn-primary" name="btn-submit" id="btn-submit" type="submit">@Html.Raw(Language.Phrase("SearchBtn"))</button>
+    </div>
+</div>
+</div><!-- /.ew-extended-search -->
+} @* Show search form (end) *@
+}
+</div><!-- /.ew-search-panel -->
+</form>
+}
+@subAktivitasSfadNewBllpgList.ShowPageHeader()
+@subAktivitasSfadNewBllpgList.ShowMessages()
+<main class="list @(subAktivitasSfadNewBllpgList.TotalRecords == 0 && !subAktivitasSfadNewBllpgList.IsAdd ? " ew-no-record" : "")">
+<div id="ew-header-options">
+    @subAktivitasSfadNewBllpgList.HeaderOptions.RenderBody()
+</div>
+<div id="ew-list">
+@if (subAktivitasSfadNewBllpgList.TotalRecords > 0 || !Empty(subAktivitasSfadNewBllpgList.CurrentAction)) {
+<div class="card ew-card ew-grid@(subAktivitasSfadNewBllpgList.IsAddOrEdit ? " ew-grid-add-edit" : "") @(subAktivitasSfadNewBllpgList.TableGridClass)">
+<form name="@(subAktivitasSfadNewBllpgList.FormName)" id="@(subAktivitasSfadNewBllpgList.FormName)" class="ew-form ew-list-form" action="@AppPath(subAktivitasSfadNewBllpgList.PageName)" method="post" novalidate autocomplete="off">
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+@if (subAktivitasSfadNewBllpgList.IsModal) {
+<input type="hidden" name="modal" value="1">
+}
+<div id="gmp_SubAktivitasSFADNewBLLPG" class="card-body ew-grid-middle-panel @(subAktivitasSfadNewBllpgList.TableContainerClass)" style="@(subAktivitasSfadNewBllpgList.TableContainerStyle)">
+@if (subAktivitasSfadNewBllpgList.TotalRecords > 0 || subAktivitasSfadNewBllpgList.IsGridEdit || subAktivitasSfadNewBllpgList.IsMultiEdit) {
+<table id="tbl_SubAktivitasSFADNewBLLPGlist" class="@(subAktivitasSfadNewBllpgList.TableClass)"><!-- .ew-table -->
+<thead>
+    <tr class="ew-table-header">
+@{
+    // Header row
+    subAktivitasSfadNewBllpgList.RowType = RowType.Header;
+
+    // Render list options
+    await subAktivitasSfadNewBllpgList.RenderListOptions();
+}
+@* Render list options (header, left) *@
+@subAktivitasSfadNewBllpgList.ListOptions.RenderHeader("left")
+@if (subAktivitasSfadNewBllpgList.id.Visible) { // subAktivitasSfadNewBllpgList.id.Visible (begin)
+        <th data-name="id" class="@(subAktivitasSfadNewBllpgList.id.HeaderCellClass)"><div id="elh_SubAktivitasSFADNewBLLPG_id" class="SubAktivitasSFADNewBLLPG_id">@Html.Raw(subAktivitasSfadNewBllpgList.RenderFieldHeader(subAktivitasSfadNewBllpgList.id))</div></th>
+} @* subAktivitasSfadNewBllpgList.id.Visible (end) *@
+@if (subAktivitasSfadNewBllpgList.idProses.Visible) { // subAktivitasSfadNewBllpgList.idProses.Visible (begin)
+        <th data-name="idProses" class="@(subAktivitasSfadNewBllpgList.idProses.HeaderCellClass)"><div id="elh_SubAktivitasSFADNewBLLPG_idProses" class="SubAktivitasSFADNewBLLPG_idProses">@Html.Raw(subAktivitasSfadNewBllpgList.RenderFieldHeader(subAktivitasSfadNewBllpgList.idProses))</div></th>
+} @* subAktivitasSfadNewBllpgList.idProses.Visible (end) *@
+@if (subAktivitasSfadNewBllpgList.idAktifitas.Visible) { // subAktivitasSfadNewBllpgList.idAktifitas.Visible (begin)
+        <th data-name="idAktifitas" class="@(subAktivitasSfadNewBllpgList.idAktifitas.HeaderCellClass)"><div id="elh_SubAktivitasSFADNewBLLPG_idAktifitas" class="SubAktivitasSFADNewBLLPG_idAktifitas">@Html.Raw(subAktivitasSfadNewBllpgList.RenderFieldHeader(subAktivitasSfadNewBllpgList.idAktifitas))</div></th>
+} @* subAktivitasSfadNewBllpgList.idAktifitas.Visible (end) *@
+@if (subAktivitasSfadNewBllpgList.NoReferensi.Visible) { // subAktivitasSfadNewBllpgList.NoReferensi.Visible (begin)
+        <th data-name="NoReferensi" class="@(subAktivitasSfadNewBllpgList.NoReferensi.HeaderCellClass)"><div id="elh_SubAktivitasSFADNewBLLPG_NoReferensi" class="SubAktivitasSFADNewBLLPG_NoReferensi">@Html.Raw(subAktivitasSfadNewBllpgList.RenderFieldHeader(subAktivitasSfadNewBllpgList.NoReferensi))</div></th>
+} @* subAktivitasSfadNewBllpgList.NoReferensi.Visible (end) *@
+@if (subAktivitasSfadNewBllpgList.StatusAktivitas.Visible) { // subAktivitasSfadNewBllpgList.StatusAktivitas.Visible (begin)
+        <th data-name="StatusAktivitas" class="@(subAktivitasSfadNewBllpgList.StatusAktivitas.HeaderCellClass)"><div id="elh_SubAktivitasSFADNewBLLPG_StatusAktivitas" class="SubAktivitasSFADNewBLLPG_StatusAktivitas">@Html.Raw(subAktivitasSfadNewBllpgList.RenderFieldHeader(subAktivitasSfadNewBllpgList.StatusAktivitas))</div></th>
+} @* subAktivitasSfadNewBllpgList.StatusAktivitas.Visible (end) *@
+@if (subAktivitasSfadNewBllpgList.LastUpdatedBy.Visible) { // subAktivitasSfadNewBllpgList.LastUpdatedBy.Visible (begin)
+        <th data-name="LastUpdatedBy" class="@(subAktivitasSfadNewBllpgList.LastUpdatedBy.HeaderCellClass)"><div id="elh_SubAktivitasSFADNewBLLPG_LastUpdatedBy" class="SubAktivitasSFADNewBLLPG_LastUpdatedBy">@Html.Raw(subAktivitasSfadNewBllpgList.RenderFieldHeader(subAktivitasSfadNewBllpgList.LastUpdatedBy))</div></th>
+} @* subAktivitasSfadNewBllpgList.LastUpdatedBy.Visible (end) *@
+@if (subAktivitasSfadNewBllpgList.lastUpdatedDate.Visible) { // subAktivitasSfadNewBllpgList.lastUpdatedDate.Visible (begin)
+        <th data-name="lastUpdatedDate" class="@(subAktivitasSfadNewBllpgList.lastUpdatedDate.HeaderCellClass)"><div id="elh_SubAktivitasSFADNewBLLPG_lastUpdatedDate" class="SubAktivitasSFADNewBLLPG_lastUpdatedDate">@Html.Raw(subAktivitasSfadNewBllpgList.RenderFieldHeader(subAktivitasSfadNewBllpgList.lastUpdatedDate))</div></th>
+} @* subAktivitasSfadNewBllpgList.lastUpdatedDate.Visible (end) *@
+@if (subAktivitasSfadNewBllpgList.ApakahAdaROB.Visible) { // subAktivitasSfadNewBllpgList.ApakahAdaROB.Visible (begin)
+        <th data-name="ApakahAdaROB" class="@(subAktivitasSfadNewBllpgList.ApakahAdaROB.HeaderCellClass)"><div id="elh_SubAktivitasSFADNewBLLPG_ApakahAdaROB" class="SubAktivitasSFADNewBLLPG_ApakahAdaROB">@Html.Raw(subAktivitasSfadNewBllpgList.RenderFieldHeader(subAktivitasSfadNewBllpgList.ApakahAdaROB))</div></th>
+} @* subAktivitasSfadNewBllpgList.ApakahAdaROB.Visible (end) *@
+@if (subAktivitasSfadNewBllpgList.Import.Visible) { // subAktivitasSfadNewBllpgList.Import.Visible (begin)
+        <th data-name="Import" class="@(subAktivitasSfadNewBllpgList.Import.HeaderCellClass)"><div id="elh_SubAktivitasSFADNewBLLPG_Import" class="SubAktivitasSFADNewBLLPG_Import">@Html.Raw(subAktivitasSfadNewBllpgList.RenderFieldHeader(subAktivitasSfadNewBllpgList.Import))</div></th>
+} @* subAktivitasSfadNewBllpgList.Import.Visible (end) *@
+@if (subAktivitasSfadNewBllpgList.ApakahTerdapatROB.Visible) { // subAktivitasSfadNewBllpgList.ApakahTerdapatROB.Visible (begin)
+        <th data-name="ApakahTerdapatROB" class="@(subAktivitasSfadNewBllpgList.ApakahTerdapatROB.HeaderCellClass)"><div id="elh_SubAktivitasSFADNewBLLPG_ApakahTerdapatROB" class="SubAktivitasSFADNewBLLPG_ApakahTerdapatROB">@Html.Raw(subAktivitasSfadNewBllpgList.RenderFieldHeader(subAktivitasSfadNewBllpgList.ApakahTerdapatROB))</div></th>
+} @* subAktivitasSfadNewBllpgList.ApakahTerdapatROB.Visible (end) *@
+@if (subAktivitasSfadNewBllpgList.Tujuan.Visible) { // subAktivitasSfadNewBllpgList.Tujuan.Visible (begin)
+        <th data-name="Tujuan" class="@(subAktivitasSfadNewBllpgList.Tujuan.HeaderCellClass)"><div id="elh_SubAktivitasSFADNewBLLPG_Tujuan" class="SubAktivitasSFADNewBLLPG_Tujuan">@Html.Raw(subAktivitasSfadNewBllpgList.RenderFieldHeader(subAktivitasSfadNewBllpgList.Tujuan))</div></th>
+} @* subAktivitasSfadNewBllpgList.Tujuan.Visible (end) *@
+@if (subAktivitasSfadNewBllpgList.SFAD_mt.Visible) { // subAktivitasSfadNewBllpgList.SFAD_mt.Visible (begin)
+        <th data-name="SFAD_mt" class="@(subAktivitasSfadNewBllpgList.SFAD_mt.HeaderCellClass)"><div id="elh_SubAktivitasSFADNewBLLPG_SFAD_mt" class="SubAktivitasSFADNewBLLPG_SFAD_mt">@Html.Raw(subAktivitasSfadNewBllpgList.RenderFieldHeader(subAktivitasSfadNewBllpgList.SFAD_mt))</div></th>
+} @* subAktivitasSfadNewBllpgList.SFAD_mt.Visible (end) *@
+@if (subAktivitasSfadNewBllpgList.NewBl_mt.Visible) { // subAktivitasSfadNewBllpgList.NewBl_mt.Visible (begin)
+        <th data-name="NewBl_mt" class="@(subAktivitasSfadNewBllpgList.NewBl_mt.HeaderCellClass)"><div id="elh_SubAktivitasSFADNewBLLPG_NewBl_mt" class="SubAktivitasSFADNewBLLPG_NewBl_mt">@Html.Raw(subAktivitasSfadNewBllpgList.RenderFieldHeader(subAktivitasSfadNewBllpgList.NewBl_mt))</div></th>
+} @* subAktivitasSfadNewBllpgList.NewBl_mt.Visible (end) *@
+@if (subAktivitasSfadNewBllpgList.AR45B_mt.Visible) { // subAktivitasSfadNewBllpgList.AR45B_mt.Visible (begin)
+        <th data-name="AR45B_mt" class="@(subAktivitasSfadNewBllpgList.AR45B_mt.HeaderCellClass)"><div id="elh_SubAktivitasSFADNewBLLPG_AR45B_mt" class="SubAktivitasSFADNewBLLPG_AR45B_mt">@Html.Raw(subAktivitasSfadNewBllpgList.RenderFieldHeader(subAktivitasSfadNewBllpgList.AR45B_mt))</div></th>
+} @* subAktivitasSfadNewBllpgList.AR45B_mt.Visible (end) *@
+@if (subAktivitasSfadNewBllpgList.etlDate.Visible) { // subAktivitasSfadNewBllpgList.etlDate.Visible (begin)
+        <th data-name="etlDate" class="@(subAktivitasSfadNewBllpgList.etlDate.HeaderCellClass)"><div id="elh_SubAktivitasSFADNewBLLPG_etlDate" class="SubAktivitasSFADNewBLLPG_etlDate">@Html.Raw(subAktivitasSfadNewBllpgList.RenderFieldHeader(subAktivitasSfadNewBllpgList.etlDate))</div></th>
+} @* subAktivitasSfadNewBllpgList.etlDate.Visible (end) *@
+@if (subAktivitasSfadNewBllpgList.userInput.Visible) { // subAktivitasSfadNewBllpgList.userInput.Visible (begin)
+        <th data-name="userInput" class="@(subAktivitasSfadNewBllpgList.userInput.HeaderCellClass)"><div id="elh_SubAktivitasSFADNewBLLPG_userInput" class="SubAktivitasSFADNewBLLPG_userInput">@Html.Raw(subAktivitasSfadNewBllpgList.RenderFieldHeader(subAktivitasSfadNewBllpgList.userInput))</div></th>
+} @* subAktivitasSfadNewBllpgList.userInput.Visible (end) *@
+@* Render list options (header, right) *@
+@subAktivitasSfadNewBllpgList.ListOptions.RenderHeader("right")
+    </tr>
+</thead>
+<tbody data-page="@(subAktivitasSfadNewBllpgList.PageNumber)">
+@{
+    await subAktivitasSfadNewBllpgList.SetupGrid();
+    bool eof = subAktivitasSfadNewBllpgList.Recordset == null; // DN
+}
+@while (subAktivitasSfadNewBllpgList.RecordCount < subAktivitasSfadNewBllpgList.StopRecord || SameString(subAktivitasSfadNewBllpgList.RowIndex, "$rowindex$")) { // Begin While
+    if (!eof && !SameString(subAktivitasSfadNewBllpgList.RowIndex, "$rowindex$") &&
+        (!subAktivitasSfadNewBllpgList.IsGridAdd || subAktivitasSfadNewBllpgList.CurrentMode == "copy") &&
+        (!((subAktivitasSfadNewBllpgList.IsCopy || subAktivitasSfadNewBllpgList.IsAdd) && subAktivitasSfadNewBllpgList.RowIndex is int rowIndex && rowIndex == 0))) // DN
+        eof = !await subAktivitasSfadNewBllpgList.Recordset.ReadAsync();
+    subAktivitasSfadNewBllpgList.RecordCount++;
+    if (subAktivitasSfadNewBllpgList.RecordCount >= subAktivitasSfadNewBllpgList.StartRecord) {
+        await subAktivitasSfadNewBllpgList.SetupRow();
+    <tr @Html.Raw(subAktivitasSfadNewBllpgList.RowAttributes)>
+    @* Render list options (body, left) *@
+    @subAktivitasSfadNewBllpgList.ListOptions.RenderBody("left", subAktivitasSfadNewBllpgList.RowCount)
+    @if (subAktivitasSfadNewBllpgList.id.Visible) { // subAktivitasSfadNewBllpgList.id.Visible (begin)
+        <td data-name="id" @Html.Raw(subAktivitasSfadNewBllpgList.id.CellAttributes)>
+<span id="el@(subAktivitasSfadNewBllpgList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasSfadNewBllpgList.RowCount)_SubAktivitasSFADNewBLLPG_id" class="el_SubAktivitasSFADNewBLLPG_id">
+<span @Html.Raw(subAktivitasSfadNewBllpgList.id.ViewAttributes)>
+@Html.Raw(subAktivitasSfadNewBllpgList.id.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasSfadNewBllpgList.id.Visible (end) *@
+    @if (subAktivitasSfadNewBllpgList.idProses.Visible) { // subAktivitasSfadNewBllpgList.idProses.Visible (begin)
+        <td data-name="idProses" @Html.Raw(subAktivitasSfadNewBllpgList.idProses.CellAttributes)>
+<span id="el@(subAktivitasSfadNewBllpgList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasSfadNewBllpgList.RowCount)_SubAktivitasSFADNewBLLPG_idProses" class="el_SubAktivitasSFADNewBLLPG_idProses">
+<span @Html.Raw(subAktivitasSfadNewBllpgList.idProses.ViewAttributes)>
+@Html.Raw(subAktivitasSfadNewBllpgList.idProses.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasSfadNewBllpgList.idProses.Visible (end) *@
+    @if (subAktivitasSfadNewBllpgList.idAktifitas.Visible) { // subAktivitasSfadNewBllpgList.idAktifitas.Visible (begin)
+        <td data-name="idAktifitas" @Html.Raw(subAktivitasSfadNewBllpgList.idAktifitas.CellAttributes)>
+<span id="el@(subAktivitasSfadNewBllpgList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasSfadNewBllpgList.RowCount)_SubAktivitasSFADNewBLLPG_idAktifitas" class="el_SubAktivitasSFADNewBLLPG_idAktifitas">
+<span @Html.Raw(subAktivitasSfadNewBllpgList.idAktifitas.ViewAttributes)>
+@Html.Raw(subAktivitasSfadNewBllpgList.idAktifitas.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasSfadNewBllpgList.idAktifitas.Visible (end) *@
+    @if (subAktivitasSfadNewBllpgList.NoReferensi.Visible) { // subAktivitasSfadNewBllpgList.NoReferensi.Visible (begin)
+        <td data-name="NoReferensi" @Html.Raw(subAktivitasSfadNewBllpgList.NoReferensi.CellAttributes)>
+<span id="el@(subAktivitasSfadNewBllpgList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasSfadNewBllpgList.RowCount)_SubAktivitasSFADNewBLLPG_NoReferensi" class="el_SubAktivitasSFADNewBLLPG_NoReferensi">
+<span @Html.Raw(subAktivitasSfadNewBllpgList.NoReferensi.ViewAttributes)>
+@Html.Raw(subAktivitasSfadNewBllpgList.NoReferensi.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasSfadNewBllpgList.NoReferensi.Visible (end) *@
+    @if (subAktivitasSfadNewBllpgList.StatusAktivitas.Visible) { // subAktivitasSfadNewBllpgList.StatusAktivitas.Visible (begin)
+        <td data-name="StatusAktivitas" @Html.Raw(subAktivitasSfadNewBllpgList.StatusAktivitas.CellAttributes)>
+<span id="el@(subAktivitasSfadNewBllpgList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasSfadNewBllpgList.RowCount)_SubAktivitasSFADNewBLLPG_StatusAktivitas" class="el_SubAktivitasSFADNewBLLPG_StatusAktivitas">
+<span @Html.Raw(subAktivitasSfadNewBllpgList.StatusAktivitas.ViewAttributes)>
+@Html.Raw(subAktivitasSfadNewBllpgList.StatusAktivitas.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasSfadNewBllpgList.StatusAktivitas.Visible (end) *@
+    @if (subAktivitasSfadNewBllpgList.LastUpdatedBy.Visible) { // subAktivitasSfadNewBllpgList.LastUpdatedBy.Visible (begin)
+        <td data-name="LastUpdatedBy" @Html.Raw(subAktivitasSfadNewBllpgList.LastUpdatedBy.CellAttributes)>
+<span id="el@(subAktivitasSfadNewBllpgList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasSfadNewBllpgList.RowCount)_SubAktivitasSFADNewBLLPG_LastUpdatedBy" class="el_SubAktivitasSFADNewBLLPG_LastUpdatedBy">
+<span @Html.Raw(subAktivitasSfadNewBllpgList.LastUpdatedBy.ViewAttributes)>
+@Html.Raw(subAktivitasSfadNewBllpgList.LastUpdatedBy.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasSfadNewBllpgList.LastUpdatedBy.Visible (end) *@
+    @if (subAktivitasSfadNewBllpgList.lastUpdatedDate.Visible) { // subAktivitasSfadNewBllpgList.lastUpdatedDate.Visible (begin)
+        <td data-name="lastUpdatedDate" @Html.Raw(subAktivitasSfadNewBllpgList.lastUpdatedDate.CellAttributes)>
+<span id="el@(subAktivitasSfadNewBllpgList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasSfadNewBllpgList.RowCount)_SubAktivitasSFADNewBLLPG_lastUpdatedDate" class="el_SubAktivitasSFADNewBLLPG_lastUpdatedDate">
+<span @Html.Raw(subAktivitasSfadNewBllpgList.lastUpdatedDate.ViewAttributes)>
+@Html.Raw(subAktivitasSfadNewBllpgList.lastUpdatedDate.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasSfadNewBllpgList.lastUpdatedDate.Visible (end) *@
+    @if (subAktivitasSfadNewBllpgList.ApakahAdaROB.Visible) { // subAktivitasSfadNewBllpgList.ApakahAdaROB.Visible (begin)
+        <td data-name="ApakahAdaROB" @Html.Raw(subAktivitasSfadNewBllpgList.ApakahAdaROB.CellAttributes)>
+<span id="el@(subAktivitasSfadNewBllpgList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasSfadNewBllpgList.RowCount)_SubAktivitasSFADNewBLLPG_ApakahAdaROB" class="el_SubAktivitasSFADNewBLLPG_ApakahAdaROB">
+<span @Html.Raw(subAktivitasSfadNewBllpgList.ApakahAdaROB.ViewAttributes)>
+@Html.Raw(subAktivitasSfadNewBllpgList.ApakahAdaROB.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasSfadNewBllpgList.ApakahAdaROB.Visible (end) *@
+    @if (subAktivitasSfadNewBllpgList.Import.Visible) { // subAktivitasSfadNewBllpgList.Import.Visible (begin)
+        <td data-name="Import" @Html.Raw(subAktivitasSfadNewBllpgList.Import.CellAttributes)>
+<span id="el@(subAktivitasSfadNewBllpgList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasSfadNewBllpgList.RowCount)_SubAktivitasSFADNewBLLPG_Import" class="el_SubAktivitasSFADNewBLLPG_Import">
+<span @Html.Raw(subAktivitasSfadNewBllpgList.Import.ViewAttributes)>
+<i class="fa-regular @(ConvertToBool(subAktivitasSfadNewBllpgList.Import.CurrentValue) ? "fa-square-check" : "fa-square") ew-icon ew-boolean"></i>
+</span>
+</span>
+</td>
+    } @* subAktivitasSfadNewBllpgList.Import.Visible (end) *@
+    @if (subAktivitasSfadNewBllpgList.ApakahTerdapatROB.Visible) { // subAktivitasSfadNewBllpgList.ApakahTerdapatROB.Visible (begin)
+        <td data-name="ApakahTerdapatROB" @Html.Raw(subAktivitasSfadNewBllpgList.ApakahTerdapatROB.CellAttributes)>
+<span id="el@(subAktivitasSfadNewBllpgList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasSfadNewBllpgList.RowCount)_SubAktivitasSFADNewBLLPG_ApakahTerdapatROB" class="el_SubAktivitasSFADNewBLLPG_ApakahTerdapatROB">
+<span @Html.Raw(subAktivitasSfadNewBllpgList.ApakahTerdapatROB.ViewAttributes)>
+<i class="fa-regular @(ConvertToBool(subAktivitasSfadNewBllpgList.ApakahTerdapatROB.CurrentValue) ? "fa-square-check" : "fa-square") ew-icon ew-boolean"></i>
+</span>
+</span>
+</td>
+    } @* subAktivitasSfadNewBllpgList.ApakahTerdapatROB.Visible (end) *@
+    @if (subAktivitasSfadNewBllpgList.Tujuan.Visible) { // subAktivitasSfadNewBllpgList.Tujuan.Visible (begin)
+        <td data-name="Tujuan" @Html.Raw(subAktivitasSfadNewBllpgList.Tujuan.CellAttributes)>
+<span id="el@(subAktivitasSfadNewBllpgList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasSfadNewBllpgList.RowCount)_SubAktivitasSFADNewBLLPG_Tujuan" class="el_SubAktivitasSFADNewBLLPG_Tujuan">
+<span @Html.Raw(subAktivitasSfadNewBllpgList.Tujuan.ViewAttributes)>
+@Html.Raw(subAktivitasSfadNewBllpgList.Tujuan.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasSfadNewBllpgList.Tujuan.Visible (end) *@
+    @if (subAktivitasSfadNewBllpgList.SFAD_mt.Visible) { // subAktivitasSfadNewBllpgList.SFAD_mt.Visible (begin)
+        <td data-name="SFAD_mt" @Html.Raw(subAktivitasSfadNewBllpgList.SFAD_mt.CellAttributes)>
+<span id="el@(subAktivitasSfadNewBllpgList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasSfadNewBllpgList.RowCount)_SubAktivitasSFADNewBLLPG_SFAD_mt" class="el_SubAktivitasSFADNewBLLPG_SFAD_mt">
+<span @Html.Raw(subAktivitasSfadNewBllpgList.SFAD_mt.ViewAttributes)>
+@Html.Raw(subAktivitasSfadNewBllpgList.SFAD_mt.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasSfadNewBllpgList.SFAD_mt.Visible (end) *@
+    @if (subAktivitasSfadNewBllpgList.NewBl_mt.Visible) { // subAktivitasSfadNewBllpgList.NewBl_mt.Visible (begin)
+        <td data-name="NewBl_mt" @Html.Raw(subAktivitasSfadNewBllpgList.NewBl_mt.CellAttributes)>
+<span id="el@(subAktivitasSfadNewBllpgList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasSfadNewBllpgList.RowCount)_SubAktivitasSFADNewBLLPG_NewBl_mt" class="el_SubAktivitasSFADNewBLLPG_NewBl_mt">
+<span @Html.Raw(subAktivitasSfadNewBllpgList.NewBl_mt.ViewAttributes)>
+@Html.Raw(subAktivitasSfadNewBllpgList.NewBl_mt.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasSfadNewBllpgList.NewBl_mt.Visible (end) *@
+    @if (subAktivitasSfadNewBllpgList.AR45B_mt.Visible) { // subAktivitasSfadNewBllpgList.AR45B_mt.Visible (begin)
+        <td data-name="AR45B_mt" @Html.Raw(subAktivitasSfadNewBllpgList.AR45B_mt.CellAttributes)>
+<span id="el@(subAktivitasSfadNewBllpgList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasSfadNewBllpgList.RowCount)_SubAktivitasSFADNewBLLPG_AR45B_mt" class="el_SubAktivitasSFADNewBLLPG_AR45B_mt">
+<span @Html.Raw(subAktivitasSfadNewBllpgList.AR45B_mt.ViewAttributes)>
+@Html.Raw(subAktivitasSfadNewBllpgList.AR45B_mt.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasSfadNewBllpgList.AR45B_mt.Visible (end) *@
+    @if (subAktivitasSfadNewBllpgList.etlDate.Visible) { // subAktivitasSfadNewBllpgList.etlDate.Visible (begin)
+        <td data-name="etlDate" @Html.Raw(subAktivitasSfadNewBllpgList.etlDate.CellAttributes)>
+<span id="el@(subAktivitasSfadNewBllpgList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasSfadNewBllpgList.RowCount)_SubAktivitasSFADNewBLLPG_etlDate" class="el_SubAktivitasSFADNewBLLPG_etlDate">
+<span @Html.Raw(subAktivitasSfadNewBllpgList.etlDate.ViewAttributes)>
+@Html.Raw(subAktivitasSfadNewBllpgList.etlDate.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasSfadNewBllpgList.etlDate.Visible (end) *@
+    @if (subAktivitasSfadNewBllpgList.userInput.Visible) { // subAktivitasSfadNewBllpgList.userInput.Visible (begin)
+        <td data-name="userInput" @Html.Raw(subAktivitasSfadNewBllpgList.userInput.CellAttributes)>
+<span id="el@(subAktivitasSfadNewBllpgList.RowIndex == "$rowindex$" ? "$rowindex$" : subAktivitasSfadNewBllpgList.RowCount)_SubAktivitasSFADNewBLLPG_userInput" class="el_SubAktivitasSFADNewBLLPG_userInput">
+<span @Html.Raw(subAktivitasSfadNewBllpgList.userInput.ViewAttributes)>
+@Html.Raw(subAktivitasSfadNewBllpgList.userInput.GetViewValue())</span>
+</span>
+</td>
+    } @* subAktivitasSfadNewBllpgList.userInput.Visible (end) *@
+    @* Render list options (body, right) *@
+    @subAktivitasSfadNewBllpgList.ListOptions.RenderBody("right", subAktivitasSfadNewBllpgList.RowCount)
+    </tr>
+    } @* End if *@
+
+    // Reset for template row
+    if (SameString(subAktivitasSfadNewBllpgList.RowIndex, "$rowindex$"))
+        subAktivitasSfadNewBllpgList.RowIndex = 0;
+
+    // Reset inline add/copy row
+    if ((subAktivitasSfadNewBllpgList.IsCopy || subAktivitasSfadNewBllpgList.IsAdd) && subAktivitasSfadNewBllpgList.RowIndex is int rowIndex2 && rowIndex2 == 0)
+        subAktivitasSfadNewBllpgList.RowIndex = 1;
+} @* End While *@
+</tbody>
+</table><!-- /.ew-table -->
+} @* End If TotalRecords > 0 *@
+</div><!-- /.ew-grid-middle-panel -->
+@if (Empty(subAktivitasSfadNewBllpgList.CurrentAction) && !subAktivitasSfadNewBllpgList.UseAjaxActions) {
+<input type="hidden" name="action" id="action" value="">
+}
+</form><!-- /.ew-list-form -->
+@{ subAktivitasSfadNewBllpgList.CloseRecordset(); }
+@if (!subAktivitasSfadNewBllpgList.IsExport()) {
+<div class="card-footer ew-grid-lower-panel">
+@if (!subAktivitasSfadNewBllpgList.IsGridAdd && !(subAktivitasSfadNewBllpgList.IsGridEdit && subAktivitasSfadNewBllpgList.ModalGridEdit) && !subAktivitasSfadNewBllpgList.IsMultiEdit) {
+@Html.Raw(subAktivitasSfadNewBllpgList.Pager.Render())
+}
+<div class="ew-list-other-options">
+@subAktivitasSfadNewBllpgList.OtherOptions.RenderBody("bottom")
+</div>
+</div>
+}
+</div><!-- /.ew-grid -->
+} else { // Show other options
+<div class="ew-list-other-options">
+@subAktivitasSfadNewBllpgList.OtherOptions.ForEach(opt => opt.ButtonClass = "").RenderBody()
+</div>
+}
+</div>
+<div id="ew-footer-options">
+    @subAktivitasSfadNewBllpgList.FooterOptions.RenderBody()
+</div>
+</main>
+@subAktivitasSfadNewBllpgList.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+@if (!subAktivitasSfadNewBllpgList.IsExport()) {
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("SubAktivitasSFADNewBLLPG");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Write your table-specific startup script here
+    // document.write("page loaded");
+});
+</script>
+}

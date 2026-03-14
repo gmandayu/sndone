@@ -1,0 +1,559 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (login.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = login.UseLayout ? "_Layout" : "";
+}
+<script>
+loadjs.ready("head", function() {
+    // Client script
+    // Write your client script here, no need to add script tags.
+    // Client script
+    // Write your client script here, no need to add script tags.
+    });
+    </script>
+    <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
+    <style>
+        /* Custom login margin */
+        .login-custom-margin-left {
+            margin-left: 0px !important;
+            margin-top: 0px !important;
+        }
+    </style>
+    <script>
+    document.documentElement.style.opacity = '0';
+    loadjs.ready("head", function() {
+    const parentUrl = ew.PATH_BASE;
+    //remove footer
+    const footerTextDiv = $('footer.main-footer .ew-footer-text');
+    const footerText = footerTextDiv.text();
+    $('footer.main-footer').remove();
+    const newFooter = $('<footer>', {
+        class: 'custom-footer',
+        html: '<div class="ew-footer-text">' + footerText + '</div>'
+    });
+    newFooter.css({
+        'padding': '1rem',
+        'color': '#777c81'
+    });
+    $('body').append(newFooter);
+
+    //add margin to login card
+    document.querySelector('.ew-login-box').style.marginTop = "30px";
+    function adjustMarginRight() {
+        const loginBox = document.querySelector('.ew-login-box');
+        const viewportWidth = window.innerWidth;
+        if (viewportWidth <= 480) {
+            loginBox.style.marginRight = "calc(1%)";
+        } else if (viewportWidth <= 768) {
+            loginBox.style.marginRight = "calc(1%)";
+        } else {
+            loginBox.style.marginRight = "calc(1%)";
+        }
+    }
+    adjustMarginRight();
+    window.addEventListener('resize', adjustMarginRight);
+    document.querySelector('.ew-login-box').style.float = "inline-end";
+
+    //change card color
+    @* document.querySelector('.card').style.setProperty('--bs-card-bg', 'rgba(184, 208, 227, 0.8)'); *@
+    document.querySelector('.card').style.setProperty('--bs-card-bg', 'rgba(255,255,255, 0.8)');
+
+    //add pis logo
+    const cardBody = document.querySelector('.card-body');
+    const loginLogoDiv = document.createElement('div');
+    loginLogoDiv.classList.add('login-logo');
+    const img = document.createElement('img');
+    img.src = 'images/logo_ppn2.png';
+    img.alt = 'Logo';
+    img.style.width = '100%';
+    img.style.maxWidth = '220px';
+    img.style.height = 'auto';
+    loginLogoDiv.appendChild(img);
+    cardBody.insertBefore(loginLogoDiv, cardBody.firstChild);
+
+    //slideshow image
+    const contentWrapper = document.querySelector('.content-wrapper');
+    contentWrapper.style.backgroundSize = "cover";
+    contentWrapper.style.backgroundPosition = "center";
+    contentWrapper.style.backgroundRepeat = "no-repeat";
+    contentWrapper.style.backgroundColor = "var(--bs-lightblue)";
+    contentWrapper.style.transition = "background-image 1s ease-in-out, opacity 1s ease-in-out";
+    contentWrapper.style.opacity = "1";
+    const apiUrl = '@Url.Action("GetImageList", "Images")';
+    async function fetchImageList() {
+        try {
+            const response = await fetch(apiUrl);
+            const imageFilenames = await response.json();
+            return imageFilenames.map(filename => parentUrl+`${filename}`); 
+        } catch (error) {
+            console.error('Error fetching image list:', error);
+            return [];
+        }
+    }
+    function preloadImages(imageUrls) {
+        return new Promise((resolve) => {
+            let loadedImagesCount = 0;
+            const totalImages = imageUrls.length;
+            if (totalImages === 0) {
+                resolve();
+                return;
+            }
+            imageUrls.forEach((url) => {
+                const img = new Image();
+                img.src = url;
+                img.onload = () => {
+                    loadedImagesCount++;
+                    if (loadedImagesCount === totalImages) {
+                        resolve();
+                    }
+                };
+                img.onerror = () => {
+                    console.error('Error loading image:', url);
+                    loadedImagesCount++;
+                    if (loadedImagesCount === totalImages) {
+                        resolve();
+                    }
+                };
+            });
+        });
+    }
+    function setBackgroundImage(imageUrl) {
+        contentWrapper.style.backgroundImage = `url('${imageUrl}')`;
+        contentWrapper.style.backgroundSize = "100% 100%";
+        document.documentElement.style.opacity = '1';
+        document.documentElement.style.transition = 'all 2s';
+    }
+    async function startSlideshow() {
+        const imageUrls = await fetchImageList();
+        if (imageUrls.length === 0) {
+            console.error('No images found.');
+            return;
+        }
+        await preloadImages(imageUrls);
+        contentWrapper.style.opacity = '0';
+        let currentIndex = 0;
+        function changeImage() {
+            contentWrapper.style.opacity = '0';
+            const tempImg = new Image();
+            tempImg.src = imageUrls[currentIndex];
+            tempImg.onload = () => {
+                setBackgroundImage(imageUrls[currentIndex]);
+                contentWrapper.style.opacity = '1';
+            };
+            currentIndex = (currentIndex + 1) % imageUrls.length;
+        }
+        changeImage();
+        setInterval(changeImage, 10000);
+    }
+    window.onload = startSlideshow;
+
+    //remove navbar
+    const styleSheet = document.createElement("style");
+    styleSheet.innerHTML = ".navbar { background-color: transparent !important; }";
+    document.head.appendChild(styleSheet);
+    $('.main-header').remove();
+    $('ul[id="ew-navbar"]').remove();
+    $('aside[class="main-sidebar sidebar-dark-primary"]').remove();
+
+    //remove margin
+    let elements = document.querySelectorAll(
+    'body:not(.sidebar-mini-md):not(.sidebar-mini-xs):not(.layout-top-nav) .content-wrapper, ' +
+    'body:not(.sidebar-mini-md):not(.sidebar-mini-xs):not(.layout-top-nav) .main-footer, ' +
+    'body:not(.sidebar-mini-md):not(.sidebar-mini-xs):not(.layout-top-nav) .main-header'
+    );
+    for (let i = 0; i < elements.length; i++) {
+        elements[i].classList.add('login-custom-margin-left');
+    }
+
+    //login-box
+    const divs = document.querySelectorAll('div.card.ew-login-card');
+    divs.forEach(function(div) {
+        div.style.backgroundColor = 'rgba(255, 255, 255, 0.4)'; // putih 70% opacity
+        div.style.fontWeight  = 'bold';
+        div.style.fontStyle  = 'oblique';
+        div.style.borderWidth  = '0px';
+        div.style.color = '#000000';
+    }); 
+    $(document).on('click', '#btn-reset-password', function (e) {
+        e.preventDefault();
+        $('#modal-send-email').modal('show');
+    });
+    $(document).on('submit', '#form-send-email', function (e) {
+        e.preventDefault();
+        $.ajax({
+            url: parentUrl + 'api/LookUpList/SendEmail',
+            method: 'POST',
+            contentType: 'application/json',
+            beforeSend: function() {
+                showLoading();
+            },
+            data: JSON.stringify({
+                Email: $('#email-send').val(),
+            }),
+            success: function (res) {
+                ew.alert(res.message);
+                if (res.success) {
+                    $('#modal-send-email').modal('hide');
+                }
+            },
+            error: function (err) {
+                ew.alert('An error occured on the server.');
+                console.error(err);
+                return false;
+            },
+            complete: function() {
+                hideLoading();
+            }
+        });
+    });
+    $(document).on('hidden.bs.modal', '#modal-send-email', function () {
+        $('#form-send-email')[0].reset();
+    });
+    $(document).on('hidden.bs.modal', '#modal-reset-password', function () {
+        $('#form-reset-password')[0].reset();
+    });
+    const action = "@HttpContext.Request.Query["action"].ToString()";
+    const user = "@HttpContext.Request.Query["user"].ToString()";
+    const code = "@HttpContext.Request.Query["code"].ToString()";
+    if (action == 'resetpassword' && user !== '' && code !== '') {
+        showLoading();
+        setTimeout(() => {
+            $.ajax({
+                url: parentUrl + 'api/LookUpList/ValidateResetPassword',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    Action: action,
+                    User: user,
+                    Code: code
+                }),
+                success: function (res) {
+                    if (res.valid) {
+                        $('#modal-reset-password').modal('show');
+                    } else {
+                        ew.alert({
+                            text: 'Link reset password tidak valid'
+                        }).then(() => {
+                            window.location.href = parentUrl + 'login';
+                        });
+                    }
+                },
+                error: function (err) {
+                    ew.alert('An error occured on the server.');
+                    console.error(err);
+                    return false;
+                },
+                complete: function() {
+                    hideLoading();
+                }
+            });
+        }, 300);
+    }
+    $(document).on('submit', '#form-reset-password', function (e) {
+        e.preventDefault();
+        $.ajax({
+            url: parentUrl + 'api/LookUpList/ResetPassword',
+            method: 'POST',
+            contentType: 'application/json',
+            beforeSend: function() {
+                showLoading();
+            },
+            data: JSON.stringify({
+                Action: action,
+                User: user,
+                Code: code,
+                NewPassword: $('#new-password').val(),
+                NewPasswordConfirm: $('#new-password-confirm').val(),
+            }),
+            success: function (res) {
+                $('#modal-reset-password').modal('hide');
+                ew.alert({
+                    text: res.message
+                }).then(() => {
+                    window.location.href = parentUrl + 'login';
+                });
+            },
+            error: function (err) {
+                ew.alert('An error occured on the server.');
+                console.error(err);
+                return false;
+            },
+            complete: function() {
+                hideLoading();
+            }
+        });
+    });
+});
+</script>
+@login.ShowPageHeader()
+<div class="ew-login-box">
+    <div class="login-logo"></div>
+    <div class="card ew-login-card">
+        <div class="card-body">
+@login.ShowMessages()
+<script>
+// Script inside .card-body
+var flogin;
+loadjs.ready(["wrapper", "head"], function() {
+    let $ = jQuery;
+    ew.PAGE_ID ||= "login";
+    window.currentPageID ||= "login";
+    let form = new ew.FormBuilder()
+        .setId("flogin")
+        // Add fields
+        .addFields([
+            ["username", ew.Validators.required(ew.language.phrase("UserName")), @(login.LoginUsername.IsInvalid ? "true" : "false")],
+            ["password", ew.Validators.required(ew.language.phrase("Password")), @(login.LoginPassword.IsInvalid ? "true" : "false")]
+        ])
+
+        // Validate
+        .setValidate(
+            async function() {
+                if (!this.validateRequired)
+                    return true; // Ignore validation
+                let fobj = this.getForm();
+
+                // Validate fields
+                if (!this.validateFields())
+                    return false;
+
+                // Call Form_CustomValidate event
+                if (!(await this.customValidate?.(fobj) ?? true)) {
+                    this.focus();
+                    return false;
+                }
+                return true;
+            }
+        )
+
+        // Form_CustomValidate
+        .setCustomValidate(
+            function(fobj) { // DO NOT CHANGE THIS LINE!
+                    // Your custom validation code here, return false if invalid.
+                    return true;
+                }
+        )
+
+        // Use JavaScript validation
+        .setValidateRequired(ew.CLIENT_VALIDATE)
+        .build();
+    window[form.id] = form;
+    window.currentForm ||= form;
+    loadjs.done(form.id);
+});
+</script>
+<form name="flogin" id="flogin" class="ew-form ew-login-form" action="@AppPath(CurrentPageName())" method="post" novalidate autocomplete="off">
+    @if (CurrentPage?.CheckToken ?? false) {
+        <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+        @Html.AntiForgeryToken()
+    }
+    <p class="login-box-msg">@Html.Raw(Language.Phrase("LoginMsg"))</p>
+    <div class="row gx-0">
+        <input type="text" name="@Html.Raw(login.LoginUsername.FieldVar)" id="@Html.Raw(login.LoginUsername.FieldVar)" autocomplete="username" value="@(HtmlEncode(login.LoginUsername.CurrentValue))" placeholder="@Html.Raw(HtmlEncode(Language.Phrase("Username", true)))" @Html.Raw(login.LoginUsername.EditAttributes)>
+        <div class="invalid-feedback">@Html.Raw(login.LoginUsername.GetErrorMessage())</div>
+    </div>
+@if (!Config.OtpOnly) {
+    <div class="row gx-0">
+        <div class="input-group px-0">
+            <input type="password" name="@Html.Raw(login.LoginPassword.FieldVar)" id="@Html.Raw(login.LoginPassword.FieldVar)" autocomplete="current-password" placeholder="@Html.Raw(HtmlEncode(Language.Phrase("Password", true)))" @Html.Raw(login.LoginPassword.EditAttributes)>
+            <button type="button" class="btn btn-default ew-toggle-password rounded-end" data-ew-action="password"><i class="fa-solid fa-eye"></i></button>
+        </div>
+        <div class="valid-feedback">@(Language.Phrase("LoginSucceeded"))</div>
+        <div class="invalid-feedback">@Html.Raw(login.LoginPassword.GetErrorMessage())</div>
+    </div>
+}
+    <div class="d-grid">
+        <button class="btn btn-primary ew-btn disabled enable-on-init" name="btn-submit" id="btn-submit" type="submit" formaction="@AppPath(CurrentPageName())">@Html.Raw(Language.Phrase("Login", true))</button>
+    </div>
+@if (Config.Authentications.Count(kvp => kvp.Value.Enabled) > 0) {
+    <div class="social-auth-links text-center mt-3 d-grid gap-2">
+        <p>@Html.Raw(Language.Phrase("LoginOr"))</p>
+        @foreach (var (key, value) in Config.Authentications.Where(kvp => kvp.Value.Enabled)) {
+            string phrase = SameText(key, "Microsoft") ? "Azure" : key;
+            <a href="~/ExternalLogin/@key" class="btn btn-outline-@value.Color.ToLower()">@Html.Raw(Language.Phrase("Login" + phrase, null))</a>
+        }
+    </div>
+}
+<div class="login-page-links text-center mt-3"></div>
+<script type="text/html" class="ew-js-template"@(!login.IsModal ? " data-name=\"login-page\" data-seq=\"10\"" : "") data-data="login" data-target=".login-page-links">
+{{if canResetPassword && resetPassword}}
+<a class="card-link me-2"{{props resetPassword}} data-{{:key}}="{{>prop}}"{{/props}}>{{:resetPasswordText}}</a>
+{{/if}}
+{{if canRegister && register}}
+<a class="card-link me-2"{{props register}} data-{{:key}}="{{>prop}}"{{/props}}>{{:registerText}}</a>
+{{/if}}
+</script>
+</form>
+        </div><!-- ./card-body -->
+    </div><!-- ./card -->
+</div><!-- ./ew-login-box -->
+@login.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+<script>
+loadjs.ready("load", function() {
+    // Startup script
+    // Write your startup script here
+    // document.write("page loaded");
+    // Startup script
+    const parent_url = ew.PATH_BASE;
+    const idamanLoginButton = $("<a></a>", { 
+        text: "Login with IdAMan",
+        class: "btn mt-3 mb-1", 
+        id: "btn-idaman-login",
+        name: "btn-idaman-login",
+        href: `${ew.PATH_BASE}IdamanLogin`,
+    }).css({
+        "color": "#ffffff",
+        "background-color": "#afc535",
+    });
+    $('[data-caption="Reset Password"]').hide();
+    const resetPasswordButton = $("<button></button>", { 
+        type: "button",
+        text: "Reset Your Password Here",
+        class: "btn ew-btn fst-italic fw-bold pb-0", 
+        id: "btn-reset-password",
+        name: "btn-reset-password",
+        href: `${ew.PATH_BASE}ResetPassword`,
+    }).css({
+        "color": "#3c6dbd"
+    });
+
+    // const registerLoginButton = $("<a></a>", { 
+    //     text: "Register",
+    //     class: "btn mt-3 mb-1", 
+    //     id: "btn-register-login",
+    //     name: "btn-register-login",
+    //     href: `https://login-v3.qa.idaman.pertamina.com/registration/kms-app`,
+    // }).css({
+    //     "color": "#ffffff",
+    //     "background-color": "#afc535",
+    // });
+
+    //$('div.d-grid').append(registerLoginButton);
+    $('div.d-grid').append(idamanLoginButton);
+    $('div.d-grid').append(resetPasswordButton);
+    var captchaElement = `
+        <div id="captcha" class="captcha-wrapper" style="margin-bottom: 8px;">
+            <div id="hcaptcha-container" class="h-captcha" data-sitekey="2a8202e8-04b4-44ea-a442-f1a4efb4d3dc"></div>
+            <p id="captcha-error" style="margin-top: -2px; font-size: 12px; color: #DE3562;" class="d-none">Please complete the CAPTCHA correctly.</p>
+        </div>
+    `;
+    // $('#btn-submit').before(captchaElement);
+    // setTimeout(function() {
+    //     if (typeof hcaptcha !== 'undefined') {
+    //         hcaptcha.render('hcaptcha-container', {
+    //             sitekey: '2a8202e8-04b4-44ea-a442-f1a4efb4d3dc'
+    //         });
+    //         hcaptcha.reset();
+
+    //         $('#btn-submit').on('click', function(event) {
+    //             event.preventDefault();
+    //             const captchaResponse = hcaptcha.getResponse();
+
+    //             if (!captchaResponse) {
+    //                 $('#captcha-error').removeClass('d-none');
+    //                 hcaptcha.reset();
+    //             } else {
+    //                 $('#captcha-error').addClass('d-none'); 
+    //                 $('#flogin').off('submit').submit();
+    //             }
+
+    //             // $.ajax({
+    //             //     url: parent_url + 'api/LookUpList/HCaptcha_verification',
+    //             //     type: 'POST',
+    //             //     data: JSON.stringify({ client_response: captchaResponse }),
+    //             //     contentType: 'application/json',
+    //             //     success: function(response) {
+    //             //         if (response.success) {  // Sesuaikan nama properti dengan server
+    //             //             $('#flogin').off('submit').submit();
+    //             //         } else {
+    //             //             $('#captcha-error').removeClass('d-none');
+    //             //             hcaptcha.reset();
+    //             //             console.log("CAPTCHA verification failed: ", response.errors);
+    //             //         }
+    //             //     },
+    //             //     error: function(xhr, status, error) {
+    //             //         ew.alert("Error during CAPTCHA verification: " + error);
+    //             //         hcaptcha.reset();
+    //             //     }
+    //             // });
+    //         });
+    //     } else {
+    //         console.warn("hCaptcha tidak tersedia.");
+    //     }
+    // }, 600);
+    $('body').append(`
+        <div class="modal fade" id="modal-send-email" tabindex="-1" aria-labelledby="modal-popupLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <form id="form-send-email" autocomplete="off">
+                        <div class="modal-header text-white" style="background: #3c6dbd;">
+                            <h5 class="modal-title fw-bold" id="modal-popupLabel">
+                                Request Reset Password
+                            </h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="row my-2">
+                                <div class="col-2 fw-bold d-flex align-items-center">
+                                    Email
+                                </div>
+                                <div class="col-10">
+                                    <input type="email" class="form-control" id="email-send" name="email-send" required placeholder="Email">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn ew-btn w-100" style="background: #3c6dbd; color: #fff;">Send Email<i class="fas fa-paper-plane ms-3"></i></button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="modal-reset-password" tabindex="-1" aria-labelledby="modal-popupLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <form id="form-reset-password" autocomplete="off">
+                        <div class="modal-header text-white" style="background: #3c6dbd;">
+                            <h5 class="modal-title fw-bold" id="modal-popupLabel">
+                                Reset Password
+                            </h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body py-3">
+                            <div class="mb-3">
+                                <div class="mb-2 fw-bold d-flex align-items-center">
+                                    New Password
+                                </div>
+                                <div class="input-group">
+                                    <input type="password" class="form-control w-100" id="new-password" name="new-password" required placeholder="New Password">
+                                    <button type="button" class="btn btn-default ew-toggle-password rounded-end" data-ew-action="password"><i class="fa-solid fa-eye"></i></button>
+                                </div>
+                            </div>
+                            <div class="">
+                                <div class="mb-2 fw-bold d-flex align-items-center">
+                                    New Password Confirmation
+                                </div>
+                                <div class="input-group">
+                                    <input type="password" class="form-control w-100" id="new-password-confirm" name="new-password-confirm" required placeholder="New Password Confirmation">
+                                    <button type="button" class="btn btn-default ew-toggle-password rounded-end" data-ew-action="password"><i class="fa-solid fa-eye"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn ew-btn w-100" style="background: #3c6dbd; color: #fff;">Reset Password<i class="fas fa-paper-plane ms-3"></i></button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    `);
+});
+</script>

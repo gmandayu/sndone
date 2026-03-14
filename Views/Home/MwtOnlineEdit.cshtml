@@ -1,0 +1,1420 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (mwtOnlineEdit.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = mwtOnlineEdit.UseLayout ? "_Layout" : "";
+}
+@mwtOnlineEdit.ShowPageHeader()
+@mwtOnlineEdit.ShowMessages()
+<main class="edit">
+<form name="fMWTOnlineedit" id="fMWTOnlineedit" class="@(mwtOnlineEdit.FormClassName)" action="@AppPath(CurrentPageName())" method="post" novalidate autocomplete="off">
+<script>
+var currentTable = @Html.Raw(ConvertToJson(mwtOnlineEdit.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { MWTOnline: currentTable } });
+var currentPageID = ew.PAGE_ID = "edit";
+var currentForm;
+var fMWTOnlineedit;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("fMWTOnlineedit")
+        .setPageId("edit")
+
+        // Add fields
+        .setFields([
+
+            ["NoMWTOnline", [fields.NoMWTOnline.visible && fields.NoMWTOnline.required ? ew.Validators.required(fields.NoMWTOnline.caption) : null], fields.NoMWTOnline.isInvalid],
+            ["IdPlant", [fields.IdPlant.visible && fields.IdPlant.required ? ew.Validators.required(fields.IdPlant.caption) : null], fields.IdPlant.isInvalid],
+            ["TaskList", [fields.TaskList.visible && fields.TaskList.required ? ew.Validators.required(fields.TaskList.caption) : null], fields.TaskList.isInvalid],
+            ["Status", [fields.Status.visible && fields.Status.required ? ew.Validators.required(fields.Status.caption) : null], fields.Status.isInvalid],
+            ["_File", [fields._File.visible && fields._File.required ? ew.Validators.required(fields._File.caption) : null], fields._File.isInvalid],
+            ["DownloadFile", [fields.DownloadFile.visible && fields.DownloadFile.required ? ew.Validators.required(fields.DownloadFile.caption) : null], fields.DownloadFile.isInvalid],
+            ["StatusEmail", [fields.StatusEmail.visible && fields.StatusEmail.required ? ew.Validators.required(fields.StatusEmail.caption) : null], fields.StatusEmail.isInvalid],
+            ["CreatedBy", [fields.CreatedBy.visible && fields.CreatedBy.required ? ew.Validators.required(fields.CreatedBy.caption) : null], fields.CreatedBy.isInvalid],
+            ["LastUpdatedBy", [fields.LastUpdatedBy.visible && fields.LastUpdatedBy.required ? ew.Validators.required(fields.LastUpdatedBy.caption) : null], fields.LastUpdatedBy.isInvalid],
+            ["LastUpdatedDate", [fields.LastUpdatedDate.visible && fields.LastUpdatedDate.required ? ew.Validators.required(fields.LastUpdatedDate.caption) : null], fields.LastUpdatedDate.isInvalid],
+            ["CompletedBy", [fields.CompletedBy.visible && fields.CompletedBy.required ? ew.Validators.required(fields.CompletedBy.caption) : null], fields.CompletedBy.isInvalid],
+            ["CompletedDate", [fields.CompletedDate.visible && fields.CompletedDate.required ? ew.Validators.required(fields.CompletedDate.caption) : null], fields.CompletedDate.isInvalid]
+        ])
+
+        // Form_CustomValidate
+        .setCustomValidate(
+            function(fobj) { // DO NOT CHANGE THIS LINE!
+                    // Your custom validation code here, return false if invalid.
+                    return true;
+                }
+        )
+
+        // Use JavaScript validation or not
+        .setValidateRequired(ew.CLIENT_VALIDATE)
+
+        // Dynamic selection lists
+        .setLists({
+        })
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Client script
+    const parent_url = ew.PATH_BASE;
+    $("#File-Name").on("click", function (e) {
+        $("#File").trigger("click");
+    });
+    $("#btn-add-modal").on("click", function (e) {
+        ew.alert('Under Development');
+    });
+    $("#btn-submit-custom").on("click", function (e) {
+        ew.alert('Under Development');
+    });
+    $("#File").on("change", function(e) {
+        const file = $(this)[0].files[0];
+        $("#File-Name").val(file.name);
+    });
+    $(document).on("click", "#btn-cancel-custom", function(){
+        window.location.href = `${parent_url}MWTOnlineList`;
+    });
+    $(document).on("submit", "#form-add-reply", function(){
+        const Deskripsi = $('#Penjelasan').val().trim();
+        let formData = new FormData();
+        formData.append("Deskripsi", Deskripsi);
+        const file = $("#File")[0].files[0];
+        formData.append("File", file);
+        showLoading();
+        $.ajax({
+            url: parent_url + "api/LookUpList/AddReplyMWTOnline",
+            type: "POST",
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(rs) {
+                hideLoading();
+                if (rs.success) {
+                    ew.alert(rs.message);
+                    setTimeout(function() {
+                        location.reload();
+                    }, 2000);
+                } else {
+                    ew.alert(rs.message);
+                }
+            },
+            error: function(xhr) {
+                hideLoading();
+                ew.alert("Gagal menambah data: " + xhr.responseText);
+            }
+        });
+    });
+    $(document).on('click', '.btn-download', function (e) {
+        e.preventDefault();
+        const id = $(this).data('id');
+        if (!id) {
+            ew.alert("ID dokumen tidak ditemukan.");
+            return;
+        }
+        $.ajax({
+            url: parent_url + 'api/LookUpList/DownloadSingleDocument',
+            type: 'GET',
+            data: { 
+                id: id,
+                menu: 'MWTOnline'
+            },
+            xhrFields: {
+                responseType: 'blob'
+            },
+            beforeSend: function () {
+                showLoading();
+            },
+            success: function (response, status, xhr) {
+                const disposition = xhr.getResponseHeader('Content-Disposition');
+                let fileName = "download_file";
+                if (disposition) {
+                    const fileNameMatch = disposition.match(/filename="?([^";]+)"?/);
+                    if (fileNameMatch && fileNameMatch[1]) {
+                        fileName = decodeURIComponent(fileNameMatch[1]);
+                    }
+                    const utf8FileNameMatch = disposition.match(/filename\*\s*=\s*UTF-8''([^;]+)/);
+                    if (utf8FileNameMatch && utf8FileNameMatch[1]) {
+                        fileName = decodeURIComponent(utf8FileNameMatch[1]);
+                    }
+                }
+                const blobUrl = window.URL.createObjectURL(response);
+                const a = document.createElement('a');
+                a.href = blobUrl;
+                a.download = fileName;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(blobUrl);
+                ew.alert("Download berhasil!");
+            },
+            error: function (xhr, status, error) {
+                if (xhr.status === 404) {
+                    ew.alert("File tidak ditemukan di server.");
+                } else if (xhr.status === 500) {
+                    ew.alert("Terjadi kesalahan server. Coba lagi nanti.");
+                } else {
+                    ew.alert("Gagal mendownload file. Error: " + xhr.responseText);
+                }
+            },
+            complete: function () {
+                hideLoading();
+            }
+        });
+    });
+});
+</script>
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+<input type="hidden" name="action" id="action" value="update">
+<input type="hidden" name="modal" value="@ConvertToInt(mwtOnlineEdit.IsModal)">
+@if (IsJsonResponse()) {
+<input type="hidden" name="json" value="1">
+}
+<input type="hidden" name="@(mwtOnlineEdit.OldKeyName)" value="@Html.Raw(mwtOnlineEdit.OldKey)">
+<div class="ew-edit-div d-none"><!-- page* -->
+@if (mwtOnlineEdit.NoMWTOnline.Visible) { // mwtOnlineEdit.NoMWTOnline.Visible (begin)
+    <div id="r_NoMWTOnline" @Html.Raw(mwtOnlineEdit.NoMWTOnline.RowAttributes)>
+        <label id="elh_MWTOnline_NoMWTOnline" for="x_NoMWTOnline" class="@(mwtOnlineEdit.LeftColumnClass)"><template id="tpc_MWTOnline_NoMWTOnline">@Html.Raw(mwtOnlineEdit.NoMWTOnline.Caption)@Html.Raw(mwtOnlineEdit.NoMWTOnline.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(mwtOnlineEdit.RightColumnClass)"><div @Html.Raw(mwtOnlineEdit.NoMWTOnline.CellAttributes)>
+<template id="tpx_MWTOnline_NoMWTOnline"><span id="el_MWTOnline_NoMWTOnline">
+<span @Html.Raw(mwtOnlineEdit.NoMWTOnline.ViewAttributes)>
+<input type="text" readonly class="form-control-plaintext" value="@Html.Raw(RemoveHtml(ConvertToString(mwtOnlineEdit.NoMWTOnline.EditValue)))"></span>
+<input type="hidden" data-table="MWTOnline" data-field="x_NoMWTOnline" data-hidden="1" name="x_NoMWTOnline" id="x_NoMWTOnline" value="@Html.Raw(HtmlEncode(mwtOnlineEdit.NoMWTOnline.CurrentValue))">
+</span></template>
+</div></div>
+    </div>
+} @* mwtOnlineEdit.NoMWTOnline.Visible (end) *@
+@if (mwtOnlineEdit.IdPlant.Visible) { // mwtOnlineEdit.IdPlant.Visible (begin)
+    <div id="r_IdPlant" @Html.Raw(mwtOnlineEdit.IdPlant.RowAttributes)>
+        <label id="elh_MWTOnline_IdPlant" class="@(mwtOnlineEdit.LeftColumnClass)"><template id="tpc_MWTOnline_IdPlant">@Html.Raw(mwtOnlineEdit.IdPlant.Caption)@Html.Raw(mwtOnlineEdit.IdPlant.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(mwtOnlineEdit.RightColumnClass)"><div @Html.Raw(mwtOnlineEdit.IdPlant.CellAttributes)>
+<template id="tpx_MWTOnline_IdPlant"><span id="el_MWTOnline_IdPlant">
+<span @Html.Raw(mwtOnlineEdit.IdPlant.ViewAttributes)>
+<span class="form-control-plaintext">@Html.Raw(mwtOnlineEdit.IdPlant.DisplayValue(mwtOnlineEdit.IdPlant.EditValue))</span></span>
+<input type="hidden" data-table="MWTOnline" data-field="x_IdPlant" data-hidden="1" name="x_IdPlant" id="x_IdPlant" value="@Html.Raw(HtmlEncode(mwtOnlineEdit.IdPlant.CurrentValue))">
+</span></template>
+</div></div>
+    </div>
+} @* mwtOnlineEdit.IdPlant.Visible (end) *@
+@if (mwtOnlineEdit.TaskList.Visible) { // mwtOnlineEdit.TaskList.Visible (begin)
+    <div id="r_TaskList" @Html.Raw(mwtOnlineEdit.TaskList.RowAttributes)>
+        <label id="elh_MWTOnline_TaskList" for="x_TaskList" class="@(mwtOnlineEdit.LeftColumnClass)"><template id="tpc_MWTOnline_TaskList">@Html.Raw(mwtOnlineEdit.TaskList.Caption)@Html.Raw(mwtOnlineEdit.TaskList.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(mwtOnlineEdit.RightColumnClass)"><div @Html.Raw(mwtOnlineEdit.TaskList.CellAttributes)>
+<template id="tpx_MWTOnline_TaskList"><span id="el_MWTOnline_TaskList">
+<span @Html.Raw(mwtOnlineEdit.TaskList.ViewAttributes)>
+@Html.Raw(mwtOnlineEdit.TaskList.EditValue)</span>
+<input type="hidden" data-table="MWTOnline" data-field="x_TaskList" data-hidden="1" name="x_TaskList" id="x_TaskList" value="@Html.Raw(HtmlEncode(mwtOnlineEdit.TaskList.CurrentValue))">
+</span></template>
+</div></div>
+    </div>
+} @* mwtOnlineEdit.TaskList.Visible (end) *@
+@if (mwtOnlineEdit.Status.Visible) { // mwtOnlineEdit.Status.Visible (begin)
+    <div id="r_Status" @Html.Raw(mwtOnlineEdit.Status.RowAttributes)>
+        <label id="elh_MWTOnline_Status" for="x_Status" class="@(mwtOnlineEdit.LeftColumnClass)"><template id="tpc_MWTOnline_Status">@Html.Raw(mwtOnlineEdit.Status.Caption)@Html.Raw(mwtOnlineEdit.Status.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(mwtOnlineEdit.RightColumnClass)"><div @Html.Raw(mwtOnlineEdit.Status.CellAttributes)>
+<template id="tpx_MWTOnline_Status"><span id="el_MWTOnline_Status">
+<span @Html.Raw(mwtOnlineEdit.Status.ViewAttributes)>
+<input type="text" readonly class="form-control-plaintext" value="@Html.Raw(RemoveHtml(ConvertToString(mwtOnlineEdit.Status.EditValue)))"></span>
+<input type="hidden" data-table="MWTOnline" data-field="x_Status" data-hidden="1" name="x_Status" id="x_Status" value="@Html.Raw(HtmlEncode(mwtOnlineEdit.Status.CurrentValue))">
+</span></template>
+</div></div>
+    </div>
+} @* mwtOnlineEdit.Status.Visible (end) *@
+@if (mwtOnlineEdit._File.Visible) { // mwtOnlineEdit._File.Visible (begin)
+    <div id="r__File" @Html.Raw(mwtOnlineEdit._File.RowAttributes)>
+        <label id="elh_MWTOnline__File" for="x__File" class="@(mwtOnlineEdit.LeftColumnClass)"><template id="tpc_MWTOnline__File">@Html.Raw(mwtOnlineEdit._File.Caption)@Html.Raw(mwtOnlineEdit._File.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(mwtOnlineEdit.RightColumnClass)"><div @Html.Raw(mwtOnlineEdit._File.CellAttributes)>
+<template id="tpx_MWTOnline__File"><span id="el_MWTOnline__File">
+<input type="@(mwtOnlineEdit._File.InputTextType)" name="x__File" id="x__File" data-table="MWTOnline" data-field="x__File" value="@Html.Raw(mwtOnlineEdit._File.EditValue)" size="30" maxlength="255" placeholder="@Html.Raw(HtmlEncode(mwtOnlineEdit._File.PlaceHolder))" data-format-pattern="@(mwtOnlineEdit._File.FormatPattern)"@Html.Raw(mwtOnlineEdit._File.EditAttributes) aria-describedby="x__File_help">
+@Html.Raw(mwtOnlineEdit._File.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(mwtOnlineEdit._File.GetErrorMessage())</div>
+</span></template>
+</div></div>
+    </div>
+} @* mwtOnlineEdit._File.Visible (end) *@
+@if (mwtOnlineEdit.DownloadFile.Visible) { // mwtOnlineEdit.DownloadFile.Visible (begin)
+    <div id="r_DownloadFile" @Html.Raw(mwtOnlineEdit.DownloadFile.RowAttributes)>
+        <label id="elh_MWTOnline_DownloadFile" for="x_DownloadFile" class="@(mwtOnlineEdit.LeftColumnClass)"><template id="tpc_MWTOnline_DownloadFile">@Html.Raw(mwtOnlineEdit.DownloadFile.Caption)@Html.Raw(mwtOnlineEdit.DownloadFile.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(mwtOnlineEdit.RightColumnClass)"><div @Html.Raw(mwtOnlineEdit.DownloadFile.CellAttributes)>
+<template id="tpx_MWTOnline_DownloadFile"><span id="el_MWTOnline_DownloadFile">
+<input type="@(mwtOnlineEdit.DownloadFile.InputTextType)" name="x_DownloadFile" id="x_DownloadFile" data-table="MWTOnline" data-field="x_DownloadFile" value="@Html.Raw(mwtOnlineEdit.DownloadFile.EditValue)" size="30" maxlength="159" placeholder="@Html.Raw(HtmlEncode(mwtOnlineEdit.DownloadFile.PlaceHolder))" data-format-pattern="@(mwtOnlineEdit.DownloadFile.FormatPattern)"@Html.Raw(mwtOnlineEdit.DownloadFile.EditAttributes) aria-describedby="x_DownloadFile_help">
+@Html.Raw(mwtOnlineEdit.DownloadFile.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(mwtOnlineEdit.DownloadFile.GetErrorMessage())</div>
+</span></template>
+</div></div>
+    </div>
+} @* mwtOnlineEdit.DownloadFile.Visible (end) *@
+@if (mwtOnlineEdit.StatusEmail.Visible) { // mwtOnlineEdit.StatusEmail.Visible (begin)
+    <div id="r_StatusEmail" @Html.Raw(mwtOnlineEdit.StatusEmail.RowAttributes)>
+        <label id="elh_MWTOnline_StatusEmail" for="x_StatusEmail" class="@(mwtOnlineEdit.LeftColumnClass)"><template id="tpc_MWTOnline_StatusEmail">@Html.Raw(mwtOnlineEdit.StatusEmail.Caption)@Html.Raw(mwtOnlineEdit.StatusEmail.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(mwtOnlineEdit.RightColumnClass)"><div @Html.Raw(mwtOnlineEdit.StatusEmail.CellAttributes)>
+<template id="tpx_MWTOnline_StatusEmail"><span id="el_MWTOnline_StatusEmail">
+<span @Html.Raw(mwtOnlineEdit.StatusEmail.ViewAttributes)>
+<input type="text" readonly class="form-control-plaintext" value="@Html.Raw(RemoveHtml(ConvertToString(mwtOnlineEdit.StatusEmail.EditValue)))"></span>
+<input type="hidden" data-table="MWTOnline" data-field="x_StatusEmail" data-hidden="1" name="x_StatusEmail" id="x_StatusEmail" value="@Html.Raw(HtmlEncode(mwtOnlineEdit.StatusEmail.CurrentValue))">
+</span></template>
+</div></div>
+    </div>
+} @* mwtOnlineEdit.StatusEmail.Visible (end) *@
+@if (mwtOnlineEdit.CompletedBy.Visible) { // mwtOnlineEdit.CompletedBy.Visible (begin)
+    <div id="r_CompletedBy" @Html.Raw(mwtOnlineEdit.CompletedBy.RowAttributes)>
+        <label id="elh_MWTOnline_CompletedBy" for="x_CompletedBy" class="@(mwtOnlineEdit.LeftColumnClass)"><template id="tpc_MWTOnline_CompletedBy">@Html.Raw(mwtOnlineEdit.CompletedBy.Caption)@Html.Raw(mwtOnlineEdit.CompletedBy.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(mwtOnlineEdit.RightColumnClass)"><div @Html.Raw(mwtOnlineEdit.CompletedBy.CellAttributes)>
+<template id="tpx_MWTOnline_CompletedBy"><span id="el_MWTOnline_CompletedBy">
+<span @Html.Raw(mwtOnlineEdit.CompletedBy.ViewAttributes)>
+<input type="text" readonly class="form-control-plaintext" value="@Html.Raw(RemoveHtml(ConvertToString(mwtOnlineEdit.CompletedBy.EditValue)))"></span>
+<input type="hidden" data-table="MWTOnline" data-field="x_CompletedBy" data-hidden="1" name="x_CompletedBy" id="x_CompletedBy" value="@Html.Raw(HtmlEncode(mwtOnlineEdit.CompletedBy.CurrentValue))">
+</span></template>
+</div></div>
+    </div>
+} @* mwtOnlineEdit.CompletedBy.Visible (end) *@
+@if (mwtOnlineEdit.CompletedDate.Visible) { // mwtOnlineEdit.CompletedDate.Visible (begin)
+    <div id="r_CompletedDate" @Html.Raw(mwtOnlineEdit.CompletedDate.RowAttributes)>
+        <label id="elh_MWTOnline_CompletedDate" for="x_CompletedDate" class="@(mwtOnlineEdit.LeftColumnClass)"><template id="tpc_MWTOnline_CompletedDate">@Html.Raw(mwtOnlineEdit.CompletedDate.Caption)@Html.Raw(mwtOnlineEdit.CompletedDate.Required ? Language.Phrase("FieldRequiredIndicator") : "")</template></label>
+        <div class="@(mwtOnlineEdit.RightColumnClass)"><div @Html.Raw(mwtOnlineEdit.CompletedDate.CellAttributes)>
+<template id="tpx_MWTOnline_CompletedDate"><span id="el_MWTOnline_CompletedDate">
+<span @Html.Raw(mwtOnlineEdit.CompletedDate.ViewAttributes)>
+<input type="text" readonly class="form-control-plaintext" value="@Html.Raw(RemoveHtml(ConvertToString(mwtOnlineEdit.CompletedDate.EditValue)))"></span>
+<input type="hidden" data-table="MWTOnline" data-field="x_CompletedDate" data-hidden="1" name="x_CompletedDate" id="x_CompletedDate" value="@Html.Raw(HtmlEncode(mwtOnlineEdit.CompletedDate.CurrentValue))">
+</span></template>
+</div></div>
+    </div>
+} @* mwtOnlineEdit.CompletedDate.Visible (end) *@
+</div><!-- /page* -->
+    <input type="hidden" data-table="MWTOnline" data-field="x_Id" data-hidden="1" name="x_Id" id="x_Id" value="@Html.Raw(HtmlEncode(mwtOnlineEdit.Id.CurrentValue))">
+<div id="tpd_MWTOnlineedit" class="ew-custom-template"></div>
+<template id="tpm_MWTOnlineedit">
+<div id="ct_mwtOnlineEdit">@{
+    string NoReferensi = mwtOnlineEdit.NoMWTOnline.CurrentValue?.ToString();
+    int idPlant = Convert.ToInt32(mwtOnlineEdit.IdPlant.CurrentValue.ToString());
+    List<Dictionary<string, object>> dataList = new List<Dictionary<string, object>>();
+    string sqlData = "SELECT * FROM MWTOnlineDetail WHERE NoReferensi = @NoReferensi ORDER BY CreatedDate ASC;";
+    using (SqlConnection sqlConnection = GetConnection("Db").OpenConnection()) {
+        using (SqlCommand command = new SqlCommand(sqlData, sqlConnection)) {
+            command.Parameters.AddWithValue("@NoReferensi", NoReferensi);
+            using (SqlDataReader rs = command.ExecuteReader()) {
+                while (rs.Read()) {
+                    Dictionary<string, object> row = new Dictionary<string, object>();
+                    for (int i = 0; i < rs.FieldCount; i++) {
+                        row[rs.GetName(i)] = rs[i] != null? rs[i] : "";
+                    }
+                    dataList.Add(row);
+                }
+            }
+        }
+    }
+    var flagOneMessages = dataList
+        .Where(x => Convert.ToString(x["Flag"]) == "1")
+        .ToList();
+    Dictionary<string, object>? firstMessage = flagOneMessages.FirstOrDefault();
+    var chatHistory = dataList.Skip(flagOneMessages.Count).ToList();
+}
+<style>
+    .stepper { display: flex; counter-reset: step; flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 8px; }
+    .stepper::-webkit-scrollbar { height: 6px; }
+    .stepper::-webkit-scrollbar-thumb { background-color: #ccc; border-radius: 3px; }
+    .step { width: 150px; text-align: center; position: relative; }
+    .step-icon { width: 36px; height: 36px; line-height: 36px; border-radius: 50%; background: #ccc; display: inline-block; z-index: 1; position: relative; color: white; font-weight: bold; }
+    .step.active .step-icon { background: #3c6dbd; }
+    .step-label { margin-top: 8px; font-size: 14px; display: flex; justify-content: center; align-items: center; gap: 6px; color: #333; text-decoration: none; }
+    .info-header { background: #fff; padding: 10px 15px; border-bottom: 1px solid #dee2e6; display: flex; align-items: center; gap: 20px; margin-bottom: 0; flex-wrap: wrap; }
+    .info-item { display: flex; flex-direction: column; }
+    .info-label { font-size: 0.75rem; color: #6c757d; font-weight: bold; text-transform: uppercase; }
+    .info-value { font-weight: 500; color: #333; }
+    .chat-container {
+        display: flex;
+        flex-direction: column;
+        height: 75vh;
+        background-color: #f4f6f9;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        overflow: hidden;
+        position: relative;
+    }
+    @@media (max-width: 768px) {
+        .chat-container {
+            height: 60vh;
+        }
+    }
+    .chat-pinned-area {
+        background-color: #fff;
+        border-bottom: 1px solid #ccc;
+        padding: 15px 20px;
+        z-index: 10;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+    .pinned-bubble {
+        background-color: #f8f9fa; /* Light Gray */
+        border-left: 4px solid #016BB7;
+        padding: 10px 15px;
+        border-radius: 4px;
+        color: #333;
+    }
+    .chat-body {
+        flex: 1;
+        padding: 20px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+    .message-wrapper {
+        display: flex;
+        flex-direction: column;
+        max-width: 75%;
+    }
+    .message-wrapper.left { align-self: flex-start; align-items: flex-start;}
+    .message-wrapper.right { align-self: flex-end; align-items: flex-end; }
+    .bubble {
+        padding: 10px 10px;
+        border-radius: 12px;
+        position: relative;
+        font-size: 0.95rem;
+        line-height: 1.4;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    }
+    .bubble.left {
+        background-color: #ffffff;
+        color: #212529;
+        border-bottom-left-radius: 2px;
+    }
+    .bubble.right {
+        background-color: #3c6dbd;
+        color: #ffffff;
+        border-bottom-right-radius: 2px;
+    }
+    .message-info {
+        margin-top: 4px;
+        font-size: 0.75rem;
+        color: #6c757d;
+        display: flex;
+        gap: 8px;
+        align-items: center;
+    }
+    .message-wrapper.right .message-info { justify-content: flex-end; }
+    .chat-footer {
+        background-color: #ffffff;
+        padding: 15px;
+        border-top: 1px solid #dee2e6;
+        display: flex;
+        align-items: flex-end;
+        gap: 10px;
+        position: relative;
+        z-index: 1050;
+    }
+    .chat-input-wrapper {
+        flex: 1;
+        background: #f8f9fa;
+        border-radius: 24px;
+        padding: 5px 15px;
+        border: 1px solid #ced4da;
+        display: flex;
+        align-items: center;
+        position: relative;
+        z-index: 1051;
+    }
+    .chat-input {
+        flex: 1;
+        border: none;
+        background: transparent;
+        resize: none;
+        height: 40px;
+        padding: 8px 0;
+        outline: none;
+        max-height: 100px;
+        cursor: text;
+        color: #333333 !important;
+    }
+    .chat-input::placeholder {
+        color: #6c757d;
+        opacity: 1;
+    }
+    .chat-input:disabled {
+        background-color: transparent;
+        cursor: not-allowed;
+    }
+    .btn-icon {
+        border: none;
+        background: transparent;
+        color: #6c757d;
+        padding: 8px;
+        border-radius: 50%;
+        transition: background 0.2s;
+    }
+    .btn-icon:hover { background-color: #e9ecef; color: #3c6dbd; }
+    .btn-send {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        background-color: #3c6dbd;
+        color: white;
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: transform 0.1s;
+    }
+    .btn-send:hover { background-color: #2a5298; transform: scale(1.05); }
+    .btn-send:disabled { background-color: #9cb5dd; cursor: not-allowed; transform: none; }
+    .file-chip {
+        display: none;
+        background: #e9ecef;
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-size: 0.8rem;
+        margin-right: 10px;
+        align-items: center;
+        gap: 5px;
+        white-space: nowrap;
+        max-width: 150px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        color: #333;
+    }
+    #btn-action, #btn-cancel { display: none; }
+    .img-wrapper {
+        position: relative;
+        cursor: pointer;
+        overflow: hidden;
+        border-radius: 8px;
+    }
+    .img-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.65);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        opacity: 0;
+        transition: 0.25s;
+    }
+    .img-wrapper:hover .img-overlay {
+        opacity: 1;
+    }
+    .img-overlay i {
+        font-size: 32px;
+    }
+    .img-skeleton {
+        transition: opacity .3s ease;
+    }
+</style>
+<div class="info-header">
+    <div class="info-item" style="min-width: 150px;"><span class="info-label">Nomor MWT</span><span class="info-value"><slot class="ew-slot" name="tpx_MWTOnline_NoMWTOnline"></slot></span></div>
+    <div class="info-item"><span class="info-label">Plant</span><span class="info-value"><slot class="ew-slot" name="tpx_MWTOnline_IdPlant"></slot></span></div>
+    <div class="info-item">
+        <span class="info-label">Dibuat Oleh</span>
+        <span class="info-value">
+            <input type="text" readonly class="form-control-plaintext" value="@mwtOnlineEdit.CreatedBy.CurrentValue">
+        </span>
+    </div>
+    <button type="button" class="btn btn-info ms-2 text-white" id="btnDownloadAll">
+        <i class="fas fa-file-zipper me-1"></i> Download All Files
+    </button>
+    <div class="info-item ms-auto status-mwt px-3 py-2 rounded"> @mwtOnlineEdit.Status.CurrentValue </div>
+</div>
+<div class="chat-container">
+    @if (firstMessage != null) {
+        string pinnedMsg   = firstMessage["Penjelasan"]?.ToString() ?? "";
+        string pinnedDate  = Convert.ToDateTime(firstMessage["CreatedDate"]).ToString("dd MMM yyyy, HH:mm");
+        <div class="chat-pinned-area">
+            <div class="d-flex justify-content-between mb-1">
+                <strong style="color: #016BB7;" class="d-flex align-items-center gap-2">
+                    <i class="fas fa-thumbtack"></i> TASK LIST
+                </strong>
+                <small class="text-muted">@pinnedDate</small>
+            </div>
+            <div class="pinned-bubble">
+                @Html.Raw(pinnedMsg.Replace("\n", "<br>"))
+                @* one box for all files with Flag == 1
+                @{
+                    var pinnedFiles = flagOneMessages
+                        .Where(r => !string.IsNullOrEmpty(r["UploadEvidence"]?.ToString()))
+                        .ToList();
+                }
+                @if (pinnedFiles.Any()) {
+                    <div class="mt-2 pt-2 border-top border-secondary-subtle">
+                        @foreach (var pinnedRow in pinnedFiles)
+                        {
+                            string pinnedId       = pinnedRow["Id"]?.ToString() ?? "";
+                            string pinnedFile     = pinnedRow["UploadEvidence"]?.ToString() ?? "";
+                            string pinnedFileName = pinnedRow["OriginalFileName"]?.ToString() ?? "Download File";
+                            string pinnedExt = System.IO.Path
+                                .GetExtension(pinnedFile).Split('?')[0].ToLower();
+                            bool isPinnedImage = new[] { ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp" }
+                                .Contains(pinnedExt);
+                            string iconClass = "fa-file text-secondary";
+                            if (pinnedExt == ".pdf") iconClass = "fa-file-pdf text-danger";
+                            else if (new[] { ".doc", ".docx" }.Contains(pinnedExt)) iconClass = "fa-file-word text-primary";
+                            else if (new[] { ".xls", ".xlsx" }.Contains(pinnedExt)) iconClass = "fa-file-excel text-success";
+                            else if (new[] { ".zip", ".rar" }.Contains(pinnedExt)) iconClass = "fa-file-archive text-warning";
+                            if (isPinnedImage) {
+                                <button type="button"
+                                        class="img-wrapper position-relative btn-download btn p-0 mb-2"
+                                        style="height: 200px;"
+                                        data-id="@pinnedId">
+                                    <div class="img-skeleton w-100 h-100 position-absolute top-0 start-0 d-flex align-items-center justify-content-center" style="background: #f0f0f0;">
+                                        <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;"></div>
+                                    </div>
+                                    <img class="preview-image w-100 opacity-0"
+                                         style="max-height: 200px;"
+                                         src=""
+                                         alt="@pinnedFileName"
+                                         data-id="@pinnedId"
+                                         loading="lazy">
+                                    <div class="img-overlay">
+                                        <i class="fa fa-download text-primary"></i>
+                                    </div>
+                                </button>
+                            } else {
+                                <button type="button"
+                                        data-id="@pinnedId"
+                                        class="d-flex align-items-center text-decoration-none p-2 border rounded bg-white mt-1 btn-download gap-3"
+                                        style="max-width: 300px;">
+                                    <i class="fas @iconClass fa-2x"></i>
+                                    <div class="d-flex flex-column overflow-hidden">
+                                        <span class="fw-bold text-dark text-truncate" title="@pinnedFileName">@pinnedFileName</span>
+                                        <small class="text-muted" style="font-size: 0.75rem;">Click to download</small>
+                                    </div>
+                                    <i class="fas fa-download"></i>
+                                </button>
+                            }
+                        }
+                    </div>
+                } *@
+            </div>
+        </div>
+    }
+    <div class="chat-body" id="chatBody">
+        @foreach(var row in chatHistory)
+        {
+            string id = row["Id"]?.ToString() ?? "";
+            string msg = row["Penjelasan"]?.ToString() ?? "";
+            string evidence = row["UploadEvidence"]?.ToString() ?? "";
+            string createdBy = row["CreatedBy"]?.ToString() ?? "";
+            string createdDate = Convert.ToDateTime(row["CreatedDate"]).ToString("dd MMM yyyy, HH:mm");
+            string fileName = row["OriginalFileName"]?.ToString() ?? "Download File";
+            bool isMe = createdBy.ToLower() == CurrentUserName().ToLower();
+            string chatUrl = evidence;
+            if (!string.IsNullOrEmpty(evidence) && !evidence.StartsWith("http") && !evidence.StartsWith("/"))
+            {
+                 chatUrl = $"/uploads/mwt_chat/{evidence}";
+            }
+            string chatExt = "";
+            bool isChatImage = false;
+            string chatIcon = "fa-file";
+            if(!string.IsNullOrEmpty(evidence)) {
+                chatExt = System.IO.Path.GetExtension(evidence).Split('?')[0].ToLower();
+                isChatImage = new[] { ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp" }.Contains(chatExt);
+                if (chatExt == ".pdf") chatIcon = "fa-file-pdf";
+                else if (new[] { ".doc", ".docx" }.Contains(chatExt)) chatIcon = "fa-file-word";
+                else if (new[] { ".xls", ".xlsx" }.Contains(chatExt)) chatIcon = "fa-file-excel";
+                else if (new[] { ".zip", ".rar" }.Contains(chatExt)) chatIcon = "fa-file-archive";
+            }
+            <div class="message-wrapper @(isMe ? "right" : "left")">
+                <div class="bubble @(isMe ? "right" : "left")">
+                    @Html.Raw(msg.Replace("\n", "<br>"))
+                    @if(!string.IsNullOrEmpty(evidence)) {
+                        if (isChatImage) {
+                            <div class="@(!string.IsNullOrEmpty(msg) ? "mt-1" : "")">
+                                <button type="button" class="img-wrapper position-relative btn-download btn p-0" style="height: 200px;" data-id="@id">
+                                    <div class="img-skeleton w-100 h-100 position-absolute top-0 start-0 d-flex align-items-center justify-content-center">
+                                        <div class="spinner-border @(isMe ? "text-white" : "text-primary")" style="width: 3rem; height: 3rem;"></div>
+                                    </div>
+                                    <img class="preview-image w-100 opacity-0" style="max-height: 200px;" src="" alt="@fileName" data-id="@id" loading="lazy">
+                                    <div class="img-overlay">
+                                        <i class="fa fa-download text-primary"></i>
+                                    </div>
+                                </button>
+                            </div>
+                        } else {
+                            <div class="@(!string.IsNullOrEmpty(msg) ? "border-top border-white-50 mt-1 pt-2" : "")">
+                                <button type="button" data-id="@id" class="btn d-flex align-items-center text-decoration-none p-2 rounded btn-download @(isMe ? "bg-white bg-opacity-10 text-white" : "bg-light text-dark")">
+                                    <i class="fas @chatIcon fa-lg me-2"></i>
+                                    <span class="text-truncate" style="max-width: 200px;">@fileName</span>
+                                    <i class="fas fa-download ms-2 small"></i>
+                                </button>
+                            </div>
+                        }
+                    }
+                </div>
+                <div class="message-info"><span>@createdBy</span> • @createdDate</div>
+            </div>
+        }
+    </div>
+    @{
+        string curLevel = CurrentUserLevel()?.ToString();
+        string curRole  = Convert.ToString(CurrentUserInfo("Rule"));
+        bool canChat = (curLevel == "4" && curRole == "14") ||
+                       (curLevel == "3" && curRole == "15") ||
+                       (curLevel == "-1") ||
+                       (curLevel == "2" && curRole == "10");
+        string currentStatus = mwtOnlineEdit.Status.CurrentValue?.ToString();
+        string docCreator = mwtOnlineEdit.CreatedBy.CurrentValue?.ToString();
+        bool isCompleted = (currentStatus == "Completed");
+        bool isCreator = (docCreator != null && docCreator.Equals(CurrentUserName(), StringComparison.OrdinalIgnoreCase));
+        bool showChatInput = !isCompleted;
+    }
+    @if(showChatInput) {
+        <div class="chat-footer">
+            <input type="file" id="chatFileInput" multiple hidden>
+            <div class="chat-input-wrapper">
+                <div id="filePreviewChip" class="file-chip">
+                    <i class="fas fa-file"></i> <span id="fileNamePreview"></span>
+                    <i class="fas fa-times" style="cursor:pointer" onclick="clearFile()"></i>
+                </div>
+                <textarea id="chatMessageInput" class="chat-input" placeholder="Type a message..." rows="1"></textarea>
+                <button type="button" class="btn-icon" onclick="document.getElementById('chatFileInput').click()"><i class="fas fa-paperclip"></i></button>
+            </div>
+            <button type="button" id="btnSendChat" class="btn-send"><i class="fas fa-paper-plane"></i></button>
+        </div>
+    }
+    @if(isCompleted) {
+        <script>
+            ew.alert('Status MWT telah Completed, sehingga tidak dapat mengirim pesan lagi.');
+        </script>
+    }
+</div>
+<div class="d-flex justify-content-between mt-3">
+    <button type="button" class="btn btn-default" onclick="window.location.href='@AppPath("MWTOnlineList")'">
+        <i class="fas fa-arrow-left me-1"></i> Back
+    </button>
+    @if(isCreator && !isCompleted) {
+        <button type="button" class="btn btn-success" id="btnCompleteTask">
+            <i class="fas fa-check-circle me-1"></i> Complete
+        </button>
+    }
+</div>
+<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script> -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+<script>
+    let chatFileUrl = null;
+    let chatFileType = null;
+    let chatFileOriginalName = null;
+    let selectedFiles = [];
+    const parent_url = ew.PATH_BASE;
+    const idPlant = "@idPlant";
+    let statusMwt = "@mwtOnlineEdit.Status.CurrentValue";
+    function normalizeStatus(status) {
+        let lowerStatus = status.trim().toLowerCase();
+        if (lowerStatus.includes(' ')) {
+            lowerStatus = lowerStatus.replace(/\s+/g, '-');
+        }
+        return lowerStatus;
+    }
+    /* loadjs.ready("head", function() {
+        loadjs([
+            "https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"
+        ], "signalr_lib", {
+            success: function() {
+                console.log("SignalR library loaded successfully.");
+                initMwtChat();
+            },
+            error: function(pathsNotFound) {
+                console.error("Failed to load SignalR library: " + pathsNotFound);
+            }
+        });
+    }); */
+    loadjs.ready("head", function() {
+        initMwtChat();
+    });
+    /* function initMwtChat() {
+        if (typeof signalR === 'undefined') {
+            console.error("SignalR is still undefined!");
+            return;
+        }
+        const currentNoMwt = "@mwtOnlineEdit.NoMWTOnline.CurrentValue";
+        const currentUser = "@CurrentUserName()";
+        const baseUrl = (ew.PATH_BASE || "/").replace(/\/$/, "") + "/";
+        const hubUrl = baseUrl + "mwtChatHub";
+        console.log("Connecting to Hub at:", hubUrl);
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl(hubUrl)
+            .withAutomaticReconnect()
+            .build();
+        const chatBody = document.getElementById('chatBody');
+        if(chatBody) chatBody.scrollTop = chatBody.scrollHeight;
+        connection.start().then(function () {
+            console.log("SignalR Connected");
+            connection.invoke("JoinMwtGroup", currentNoMwt).catch(err => console.error(err));
+        }).catch(function (err) {
+            return console.error("SignalR Connection Error: " + err.toString());
+        });
+        $('#chatFileInput').off('change').on('change', async function() {
+             const file = this.files[0];
+            if (!file) return;
+            if (file.size > 20 * 1024 * 1024) {
+                ew.alert("File is too large (Max 20MB).");
+                clearFile();
+                return;
+            }
+            $('#fileNamePreview').text("Uploading: " + file.name + "...");
+            $('#filePreviewChip').css('display', 'flex');
+            const formData = new FormData();
+            formData.append("file", file);
+            try {
+                const res = await fetch(baseUrl + "api/LookUpList/uploadChatFile", {
+                    method: "POST",
+                    body: formData
+                });
+                if (!res.ok) throw new Error('Upload failed');
+                const result = await res.json();
+                chatFileUrl = result.url;
+                chatFileType = result.type;
+                chatFileOriginalName = result.originalName;
+                $('#fileNamePreview').text(file.name);
+                $('#fileNamePreview').css('color', 'green');
+            } catch (error) {
+                console.error("Upload error:", error);
+                ew.alert("File upload failed.");
+                clearFile();
+            }
+        });
+        // $('#btnSendChat').off('click').on('click', function() {
+        //     sendMessage(connection, currentNoMwt, currentUser);
+        // });
+        $('#chatMessageInput').off('keypress').on('keypress', function (e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage(connection, currentNoMwt, currentUser);
+            }
+        });
+        connection.on("ReceiveMwtMessage", function (sender, message, fileUrl, fileType, originalName, date) {
+            const isMe = sender.toLowerCase() === currentUser.toLowerCase();
+            let fileHtml = '';
+            if (fileUrl) {
+                 if (fileType && fileType.startsWith('image/')) {
+                     fileHtml = `<div class="mt-2"><a href="${fileUrl}" target="_blank"><img src="${fileUrl}" style="max-width: 100%; border-radius: 8px; max-height: 200px;"></a></div>`;
+                 } else {
+                     fileHtml = `<div class="mt-2 pt-2 border-top border-white-50"><a href="${fileUrl}" target="_blank" class="text-decoration-none ${isMe ? 'text-white' : 'text-primary'}"><i class="fas fa-paperclip me-1"></i> ${originalName || 'Download File'}</a></div>`;
+                 }
+            }
+            let bubbleHtml = `
+                <div class="message-wrapper ${isMe ? 'right' : 'left'}">
+                    <div class="bubble ${isMe ? 'right' : 'left'}">
+                        ${message ? message.replace(/\n/g, '<br>') : ''}
+                        ${fileHtml}
+                    </div>
+                    <div class="message-info">
+                        <span>${sender}</span> • ${date}
+                    </div>
+                </div>
+            `;
+            $('#chatBody').append(bubbleHtml);
+            const cb = document.getElementById('chatBody');
+            if(cb) cb.scrollTop = cb.scrollHeight;
+        });
+    } */
+    loadjs.ready("head", function() {
+        $('#btnDownloadAll').on('click', function() {
+            const noMwt = "@mwtOnlineEdit.NoMWTOnline.CurrentValue";
+            ew.alert("Preparing download...", "info");
+            $.ajax({
+                url: parent_url + 'api/LookUpList/DownloadMwtZip',
+                type: 'GET',
+                data: { noMwt: noMwt },
+                xhrFields: { responseType: 'blob' },
+                success: function(blob, status, xhr) {
+                    if (blob.type === "application/json") {
+                        const reader = new FileReader();
+                        reader.onload = function() {
+                            const result = JSON.parse(this.result);
+                            ew.alert(result.message || "Download failed.");
+                        };
+                        reader.readAsText(blob);
+                        return;
+                    }
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `MWT_Files_${noMwt}.zip`;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+                    Swal.close();
+                },
+                error: function(xhr) {
+                    if (xhr.status === 404) {
+                        ew.alert("No files found to download.");
+                    } else {
+                        ew.alert("Failed to download files.");
+                    }
+                }
+            });
+        });
+    });
+    function getChatIcon(fileType) {
+    if (!fileType) return "fa-file";
+        const mime = fileType.toLowerCase();
+        if (mime.startsWith("image/")) {
+            return "fa-file-image";
+        }
+        if (mime === "application/pdf") {
+            return "fa-file-pdf";
+        }
+        if ([
+            "application/msword",
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        ].includes(mime)) {
+            return "fa-file-word";
+        }
+        if ([
+            "application/vnd.ms-excel",
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        ].includes(mime)) {
+            return "fa-file-excel";
+        }
+        if ([
+            "application/zip",
+            "application/x-zip-compressed",
+            "application/x-rar-compressed"
+        ].includes(mime)) {
+            return "fa-file-archive";
+        }
+        return "fa-file";
+    }
+    function initMwtChat() {
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl('/mwtChatHub')
+            .withAutomaticReconnect()
+            .build();
+        console.log(connection);
+        if (!connection) {
+            console.log("Global SignalR not found, retrying in 500ms...");
+            setTimeout(initMwtChat, 500);
+            return;
+        }
+        const currentNoMwt = "@mwtOnlineEdit.NoMWTOnline.CurrentValue";
+        const currentUser = "@CurrentUserName()";
+        connection.off("ReceiveMwtMessage");
+        connection.on("ReceiveMwtMessage", function (sender, message, fileUrl, fileType, originalName, date, newId) {
+            const isMe = sender.toLowerCase() === currentUser.toLowerCase();
+            let fileHtml = '', chatIcon = '';
+            if (fileUrl) {
+                chatIcon = getChatIcon(fileType);
+                if (chatIcon == 'fa-file-image') {
+                    fileHtml = `
+                    <div class="${message ? 'mt-1' : ''}">
+                        <button type="button" class="img-wrapper position-relative btn-download btn p-0" style="height: 200px;" data-id="${newId}">
+                            <div class="img-skeleton w-100 h-100 position-absolute top-0 start-0 d-flex align-items-center justify-content-center">
+                                <div class="spinner-border ${isMe ? 'text-white' : 'text-primary'}" style="width: 3rem; height: 3rem;"></div>
+                            </div>
+                            <img class="preview-image w-100 opacity-0" style="max-height: 200px;" src="" alt="${originalName}" data-id="${newId}" loading="lazy">
+                            <div class="img-overlay">
+                                <i class="fa fa-download text-primary"></i>
+                            </div>
+                        </button>
+                    </div>`;
+                } else {
+                    fileHtml = `
+                    <div class="${message ? 'border-top border-white-50 mt-1 pt-2' : ''}">
+                        <button type="button" data-id="${newId}" class="btn d-flex align-items-center text-decoration-none p-2 rounded btn-download ${isMe ? 'bg-white bg-opacity-10 text-white' : 'bg-light text-dark'}">
+                            <i class="fas ${chatIcon} fa-lg me-2"></i>
+                            <span class="text-truncate" style="max-width: 200px;">${originalName || 'Download File'}</span>
+                            <i class="fas fa-download ms-2 small"></i>
+                        </button>
+                    </div>`;
+                }
+            }
+            let bubbleHtml = `
+                <div class="message-wrapper ${isMe ? 'right' : 'left'}">
+                    <div class="bubble ${isMe ? 'right' : 'left'}">
+                        ${message ? message.replace(/\n/g, '<br>') : ''}
+                        ${fileHtml}
+                    </div>
+                    <div class="message-info">
+                        <span>${sender}</span> • ${date}
+                    </div>
+                </div>
+            `;
+            $('#chatBody').append(bubbleHtml);
+            const cb = document.getElementById('chatBody');
+            if(cb) cb.scrollTop = cb.scrollHeight;
+            if (fileUrl && chatIcon == 'fa-file-image') {
+                const img = $(`img.preview-image[data-id="${newId}"]`);
+                const wrapper = img.closest('.img-wrapper');
+                const skeleton = wrapper.find('.img-skeleton');
+                const overlay = wrapper.find('.img-overlay');
+                $.ajax({
+                    url: parent_url + `api/LookUpList/GetPreviewDocument?id=${newId}`,
+                    type: "GET",
+                    xhrFields: { responseType: 'blob', withCredentials: true },
+                    success: function (blob) {
+                        const url = URL.createObjectURL(blob);
+                        img.attr('src', url);
+                        img.removeClass('opacity-0').addClass('opacity-100');
+                        skeleton.removeClass('opacity-100').addClass('opacity-0');
+                    }
+                });
+            }
+        });
+        if (connection.state === "Connected") {
+            connection.invoke("JoinMwtGroup", currentNoMwt).catch(err => console.error(err));
+        } else {
+            connection.start().then(() => {
+                connection.invoke("JoinMwtGroup", currentNoMwt).catch(err => console.error(err));
+            });
+        }
+        $('#chatFileInput').off('change').on('change', function() {
+            const newFiles = Array.from(this.files);
+            if (newFiles.length === 0) return;
+            let currentTotalSize = 0;
+            selectedFiles.forEach(f => currentTotalSize += f.size);
+            let newBatchSize = 0;
+            newFiles.forEach(f => newBatchSize += f.size);
+            if (currentTotalSize + newBatchSize > 50 * 1024 * 1024) {
+                ew.alert("Total file size is too large (Max 50MB).");
+                $(this).val('');
+                return;
+            }
+            selectedFiles = selectedFiles.concat(newFiles);
+            updateFileChipUI();
+            $(this).val('');
+        });
+        function updateFileChipUI() {
+            if (selectedFiles.length === 0) {
+                $('#filePreviewChip').hide();
+                $('#fileNamePreview').text('');
+                return;
+            }
+            $('#filePreviewChip').css('display', 'flex');
+            $('#fileNamePreview').css('color', 'green');
+            if (selectedFiles.length === 1) {
+                $('#fileNamePreview').text(selectedFiles[0].name);
+            } else {
+                // Show total count of accumulated files
+                $('#fileNamePreview').text(selectedFiles.length + " files selected");
+            }
+        }
+        $('#btnSendChat').off('click').on('click', function() {
+            sendMessage(connection, currentNoMwt, currentUser);
+        });
+        $('#chatMessageInput').off('keypress').on('keypress', function (e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage(connection, currentNoMwt, currentUser);
+            }
+        });
+        $('#btnCompleteTask').on('click', function() {
+            ew.prompt("Are you sure you want to mark this task as Completed?", function(result) {
+                if (result) {
+                    $.post(ew.PATH_BASE + "api/LookUpList/CompleteMWT", { id: "@mwtOnlineEdit.Id.CurrentValue" }, function(res) {
+                        if (res.success) {
+                            sendComplete(connection, currentNoMwt, currentUser);
+                            setTimeout(function () {
+                                ew.alert("Task Completed Successfully!", function() {
+                                    location.reload();
+                                });
+                            }, 2000);
+                        } else {
+                            ew.alert(res.message);
+                        }
+                    }).fail(function(xhr) {
+                        ew.alert("Error: " + xhr.responseText);
+                    });
+                }
+            });
+        });
+        connection.on("ReceiveMwtCompleted", function (sender) {
+            if (sender != currentUser) {
+                setTimeout(function () {
+                    ew.alert("Status MWT Online telah berubah!", function() {
+                        location.reload();
+                    });
+                }, 1000);
+            }
+        });
+    }
+    async function sendComplete(conn, noMwt, user) {
+        conn.invoke("SendMwtCompleted", noMwt, user)
+            .catch(err => console.error(err.toString()));
+    }
+    async function sendMessage(conn, noMwt, user) {
+        let uploadedFilesData = [];
+        const message = $('#chatMessageInput').val().trim();
+        if (!message && selectedFiles.length === 0) return;
+        if (selectedFiles.length > 0) {
+            const formData = new FormData();
+            // Append all files with the same key "files" so ASP.NET binds to List<IFormFile>
+            selectedFiles.forEach(file => {
+                formData.append("files", file);
+            });
+            $('#fileNamePreview').text("Uploading " + selectedFiles.length + " files...");
+            try {
+                const res = await $.ajax({
+                    url: parent_url + "api/LookUpList/uploadChatFiles",
+                    type: "POST",
+                    data: formData,
+                    contentType: false,
+                    processData: false
+                });
+                if (res.success) {
+                    uploadedFilesData = res.files;
+                } else {
+                    throw new Error("Server returned success:false");
+                }
+            } catch (err) {
+                ew.alert("Upload file gagal.");
+                console.log(err);
+                $('#fileNamePreview').text("Error!");
+                return;
+            }
+        }
+        conn.invoke("SendMwtBatchMessage", noMwt, user, message, uploadedFilesData, parseInt(idPlant))
+            .catch(err => console.error(err.toString()));
+        $('#chatMessageInput').val('');
+        $('#chatMessageInput').css('height', '40px');
+        clearFile();
+    }
+    function clearFile() {
+        $('#chatFileInput').val('');
+        selectedFiles = [];
+        $('#filePreviewChip').hide();
+        $('#fileNamePreview').text('');
+        chatFileUrl = null;
+        chatFileType = null;
+        chatFileOriginalName = null;
+    }
+    $(document).ready(function () {
+        $('.preview-image').each(function () {
+            const img = $(this);
+            const wrapper = img.closest('.img-wrapper');
+            const skeleton = wrapper.find('.img-skeleton');
+            const overlay = wrapper.find('.img-overlay');
+            const id = img.data('id');
+            $.ajax({
+                url: parent_url + `api/LookUpList/GetPreviewDocument?id=${id}`,
+                type: "GET",
+                xhrFields: { responseType: 'blob', withCredentials: true },
+                success: function (blob) {
+                    const url = URL.createObjectURL(blob);
+                    img.attr('src', url);
+                    img.removeClass('opacity-0').addClass('opacity-100');
+                    skeleton.removeClass('opacity-100').addClass('opacity-0');
+                }
+            });
+        });
+        $('.status-mwt').addClass(`status-indicator status-${normalizeStatus(statusMwt)}`);
+    });
+</script></div>
+</template>
+@{ mwtOnlineEdit.CloseRecordset(); }
+@Html.Raw(mwtOnlineEdit.IsModal ? "<template class=\"ew-modal-buttons\">" : "<div class=\"row ew-buttons\">")<!-- buttons .row -->
+    <div class="@(mwtOnlineEdit.OffsetColumnClass)"><!-- buttons offset -->
+    <button class="btn btn-primary ew-btn" name="btn-action" id="btn-action" type="submit" form="fMWTOnlineedit">@Html.Raw(Language.Phrase("SaveBtn"))</button>
+@if (IsJsonResponse()) {
+    <button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" data-bs-dismiss="modal">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+} else {
+    <button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" form="fMWTOnlineedit" data-href="@AppPath(mwtOnlineEdit.ReturnUrl)">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+}
+    </div><!-- /buttons offset -->
+@Html.Raw(mwtOnlineEdit.IsModal ? "</template>" : "</div>")<!-- /buttons .row -->
+</form>
+<script class="ew-apply-template">
+loadjs.ready(ew.applyTemplateId, function() {
+    var $ = jQuery;
+    ew.templateData = { rows: @Html.Raw(ConvertToJson(mwtOnlineEdit.Rows)) };
+    ew.applyTemplate("tpd_MWTOnlineedit", "tpm_MWTOnlineedit", "MWTOnlineedit", "@(mwtOnlineEdit.Export)", "MWTOnline", ew.templateData.rows[0], @(mwtOnlineEdit.IsModal ? "true" : "false"));
+    loadjs.done("customtemplate");
+});
+</script>
+</main>
+@mwtOnlineEdit.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("MWTOnline");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Startup script
+    var steps = [
+        { number: 1, label: "MWT Online", url: '', icon: "fa-comment-dots" },
+    ];
+    var currentStep = 1;
+    var $stepperWrapper = $('<div id="bread-crumb-nav" class="d-flex border-bottom border-2 pb-2"><div class="stepper"></div></div>');
+    var $stepper = $stepperWrapper.find(".stepper");
+    steps.forEach(function (step, i) {
+        var isActive = step.number === currentStep;
+        var isCompleted = step.number < currentStep;
+        var stepClass = isActive ? "active" : isCompleted ? "completed" : "";
+        var icon, labelContent, html;
+        if (isActive) {
+            icon = `<div class="step-icon bg-success">${step.number}</div>`;
+            labelContent = `<div class="step-label"><p class="text-success mb-1"><i class="fa-solid ${step.icon} me-1 text-success"></i> ${step.label}</p></div>`;
+            html = `<div class="step ${stepClass} text-success">${icon}${labelContent}</div>`;
+        } else if (isCompleted) {
+            icon = `<div class="step-icon" style="background: #3c6dbd;">${step.number}</div>`;
+            labelContent = `<div><a href="${step.url}" class="step-label"><i class="fa-solid ${step.icon} me-1"></i>${step.label}</a></div>`;
+            html = `<div class="step ${stepClass}">${icon}${labelContent}</div>`;
+        } else {
+            icon = `<div class="step-icon">${step.number}</div>`;
+            labelContent = `<div class="step-label-not-active"><p style="margin: 0;"><i class="fa-solid ${step.icon} me-1"></i>${step.label}</p></div>`;
+            html = `<div class="step ${stepClass} text-secondary">${icon}${labelContent}</div>`;
+        }
+        $stepper.append(html);
+    });
+    if ($('#bread-crumb-nav').length == 0) {
+        $(".content-header .container-fluid .row").append($stepperWrapper);
+    }
+
+    // ============================================================================
+    // SignalR Real-time Connection
+    // ============================================================================
+    (function() {
+        'use strict';
+        console.log('🚀 MWT Chat - Initializing SignalR...');
+
+        // Prevent multiple initialization
+        if (window.MwtChatSignalR) {
+            console.log('⛔ SignalR already initialized');
+            return;
+        }
+        const MwtChat = {
+            connection: null,
+            isInitialized: false,
+            isConnecting: false,
+            retryCount: 0,
+            maxRetries: 3,
+            getBaseUrl: function() {
+                return parent_url;
+            },
+            init: function() {
+                if (this.isInitialized) {
+                    console.log('⛔ Already initialized');
+                    return Promise.resolve(this.connection);
+                }
+                console.log('🔌 Starting initialization...');
+                this.isInitialized = true;
+                if (typeof signalR === 'undefined') {
+                    console.log('📦 Loading SignalR library...');
+                    return this.loadSignalRLibrary()
+                        .then(() => this.createConnection());
+                }
+                return this.createConnection();
+            },
+            loadSignalRLibrary: function() {
+                return new Promise((resolve, reject) => {
+                    const script = document.createElement('script');
+                    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js';
+                    script.async = true;
+                    script.onload = () => {
+                        console.log('✅ SignalR library loaded');
+                        resolve();
+                    };
+                    script.onerror = () => {
+                        console.error('❌ Failed to load SignalR');
+                        this.isInitialized = false;
+                        reject(new Error('Failed to load SignalR'));
+                    };
+                    document.head.appendChild(script);
+                });
+            },
+            createConnection: function() {
+                if (this.isConnecting) {
+                    console.log('⏳ Connection in progress...');
+                    return Promise.resolve(this.connection);
+                }
+                if (this.connection && this.connection.state === signalR.HubConnectionState.Connected) {
+                    console.log('✅ Already connected');
+                    return Promise.resolve(this.connection);
+                }
+                this.isConnecting = true;
+                try {
+                    const hubUrl = `${this.getBaseUrl()}mwtChatHub`;
+                    console.log('🔌 Connecting to:', hubUrl);
+                    this.connection = new signalR.HubConnectionBuilder()
+                        .withUrl(hubUrl)
+                        .withAutomaticReconnect([0, 2000, 5000, 10000, 30000])
+                        .configureLogging(signalR.LogLevel.Warning)
+                        .build();
+                    this.setupEventHandlers();
+                    return this.connection.start()
+                        .then(() => {
+                            console.log('✅ Connected! ID:', this.connection.connectionId);
+                            this.isConnecting = false;
+                            this.retryCount = 0;
+                            this.updateBadge();
+                            return this.connection;
+                        })
+                        .catch(err => {
+                            console.error('❌ Connection failed:', err);
+                            this.isConnecting = false;
+                            this.handleConnectionError(err);
+                            throw err;
+                        });
+                } catch (err) {
+                    console.error('❌ Error creating connection:', err);
+                    this.isConnecting = false;
+                    return Promise.reject(err);
+                }
+            },
+            setupEventHandlers: function() {
+                if (!this.connection) return;
+                this.connection.onclose((error) => {
+                    console.log('🔴 Connection closed', error);
+                    this.isConnecting = false;
+                });
+                this.connection.onreconnecting((error) => {
+                    console.log('🔄 Reconnecting...', error);
+                });
+                this.connection.onreconnected((connectionId) => {
+                    console.log('✅ Reconnected! ID:', connectionId);
+                    this.updateBadge();
+                });
+
+                // Badge update notification
+                this.connection.on('UpdateMwtBadge', () => {
+                    console.log('📢 Badge update received');
+                    this.updateBadge();
+                });
+
+                // Chat message notification
+                this.connection.on('ReceiveMessage', (user, message) => {
+                    console.log('💬 Message from', user);
+                    this.handleMessage(user, message);
+                });
+
+                // Chat updated notification
+                this.connection.on('ChatUpdated', (data) => {
+                    console.log('📝 Chat updated:', data);
+                    this.handleChatUpdate(data);
+                });
+            },
+            handleConnectionError: function(error) {
+                this.retryCount++;
+                if (this.retryCount <= this.maxRetries) {
+                    const delay = Math.min(5000 * Math.pow(2, this.retryCount - 1), 30000);
+                    console.log(`🔄 Retry ${this.retryCount}/${this.maxRetries} in ${delay}ms`);
+                    setTimeout(() => {
+                        this.isInitialized = false;
+                        this.init();
+                    }, delay);
+                } else {
+                    console.error('❌ Max retries reached');
+                }
+            },
+            updateBadge: function() {
+                $.ajax({
+                    url: `${parent_url}api/LookUpList/GetMwtOnProgressCount`,
+                    method: 'GET',
+                    cache: false,
+                    timeout: 5000,
+                    success: (data) => {
+                        if (data && data.success) {
+                            console.log('✅ Badge count:', data.count);
+                            this.renderBadge(data.count);
+                        }
+                    },
+                    error: (err) => {
+                        console.warn('⚠️ Failed to get badge:', err);
+                    }
+                });
+            },
+            renderBadge: function(count) {
+                const $menuLink = $('li[data-name="mi_MWTOnline"] > a > p');
+                if (!$menuLink.length) return;
+                $menuLink.find('.badge-mwt').remove();
+                if (count > 0) {
+                    const $badge = $('<span class="right badge badge-mwt">')
+                        .text(count)
+                        .css({
+                            'background-color': '#ff0000',
+                            'color': '#ffffff',
+                            'font-weight': 'bold',
+                            'margin-left': '5px',
+                            'padding': '2px 6px',
+                            'border-radius': '10px',
+                            'font-size': '11px'
+                        });
+                    $menuLink.append($badge);
+                }
+            },
+            handleMessage: function(user, message) {
+                console.log('Processing message from', user);
+                // Reload page untuk refresh chat list
+                setTimeout(() => location.reload(), 1000);
+            },
+            handleChatUpdate: function(data) {
+                console.log('Handling chat update:', data);
+                // Reload page untuk refresh
+                setTimeout(() => location.reload(), 1000);
+            },
+            sendMessage: function(message) {
+                if (!this.connection || this.connection.state !== signalR.HubConnectionState.Connected) {
+                    console.error('❌ Not connected');
+                    return Promise.reject(new Error('Not connected'));
+                }
+                return this.connection.invoke('SendMessage', message)
+                    .catch(err => {
+                        console.error('❌ Send failed:', err);
+                        throw err;
+                    });
+            },
+            broadcastUpdate: function(eventName, data) {
+                if (!this.connection || this.connection.state !== signalR.HubConnectionState.Connected) {
+                    return Promise.reject(new Error('Not connected'));
+                }
+                return this.connection.invoke(eventName, data);
+            },
+            disconnect: function() {
+                if (this.connection) {
+                    console.log('🔌 Disconnecting...');
+                    return this.connection.stop()
+                        .then(() => {
+                            console.log('✅ Disconnected');
+                            this.connection = null;
+                            this.isInitialized = false;
+                            this.isConnecting = false;
+                        });
+                }
+                return Promise.resolve();
+            },
+            getStatus: function() {
+                if (!this.connection) {
+                    return { state: 'Disconnected', connectionId: null };
+                }
+                return {
+                    state: this.connection.state,
+                    connectionId: this.connection.connectionId,
+                    isInitialized: this.isInitialized
+                };
+            }
+        };
+
+        // Expose globally
+        window.MwtChatSignalR = MwtChat;
+
+        // Auto-initialize when DOM ready
+        $(document).ready(function() {
+            MwtChat.init()
+                .then(() => console.log('✅ SignalR ready'))
+                .catch(err => console.error('❌ SignalR init failed:', err));
+        });
+
+        // Cleanup on unload
+        $(window).on('beforeunload', function() {
+            MwtChat.disconnect();
+        });
+    })();
+});
+</script>

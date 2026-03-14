@@ -1,0 +1,362 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (vAktifitasWithDokumenList.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = vAktifitasWithDokumenList.UseLayout ? "_Layout" : "";
+}
+@if (!vAktifitasWithDokumenList.IsExport()) {
+<script>
+var currentTable = @Html.Raw(ConvertToJson(vAktifitasWithDokumenList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { v_aktifitas_with_dokumen: currentTable } });
+var currentPageID = ew.PAGE_ID = "list";
+var currentForm;
+var @(vAktifitasWithDokumenList.FormName);
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("@(vAktifitasWithDokumenList.FormName)")
+        .setPageId("list")
+        .setSubmitWithFetch(@(vAktifitasWithDokumenList.UseAjaxActions ? "true" : "false"))
+        .setFormKeyCountName("@(vAktifitasWithDokumenList.FormKeyCountName)")
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Write your client script here, no need to add script tags.
+});
+</script>
+}
+@if (!vAktifitasWithDokumenList.IsExport()) {
+<div class="btn-toolbar ew-toolbar">
+@if (vAktifitasWithDokumenList.TotalRecords > 0 && vAktifitasWithDokumenList.ExportOptions.Visible) {
+    vAktifitasWithDokumenList.ExportOptions.Render("body");
+}
+@if (vAktifitasWithDokumenList.ImportOptions.Visible) {
+    vAktifitasWithDokumenList.ImportOptions.Render("body");
+}
+@if (vAktifitasWithDokumenList.SearchOptions.Visible) {
+    vAktifitasWithDokumenList.SearchOptions.Render("body");
+}
+@if (vAktifitasWithDokumenList.FilterOptions.Visible) {
+    vAktifitasWithDokumenList.FilterOptions.Render("body");
+}
+</div>
+}
+@if (!vAktifitasWithDokumenList.IsModal) {
+<form name="fv_aktifitas_with_dokumensrch" id="fv_aktifitas_with_dokumensrch" class="ew-form ew-ext-search-form" action="@AppPath(CurrentPageName())" novalidate autocomplete="off">
+<div id="fv_aktifitas_with_dokumensrch_search_panel" class="mb-2 mb-sm-0 @(vAktifitasWithDokumenList.SearchPanelClass)"><!-- .ew-search-panel -->
+<script>
+var currentTable = @Html.Raw(ConvertToJson(vAktifitasWithDokumenList.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { v_aktifitas_with_dokumen: currentTable } });
+var currentForm;
+var fv_aktifitas_with_dokumensrch, currentSearchForm, currentAdvancedSearchForm;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery,
+        fields = currentTable.fields;
+
+    // Form object for search
+    let form = new ew.FormBuilder()
+        .setId("fv_aktifitas_with_dokumensrch")
+        .setPageId("list")
+@if (vAktifitasWithDokumenList.UseAjaxActions) {
+        <text>.setSubmitWithFetch(true)</text>
+}
+
+        // Dynamic selection lists
+        .setLists({
+        })
+
+        // Filters
+        .setFilterList(@Html.Raw(vAktifitasWithDokumenList.GetFilterList()))
+        .build();
+    window[form.id] = form;
+    currentSearchForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<input type="hidden" name="cmd" value="search">
+@if (Security.CanSearch) {
+if (!vAktifitasWithDokumenList.IsExport() && Empty(vAktifitasWithDokumenList.CurrentAction) && vAktifitasWithDokumenList.HasSearchFields()) { @* Show search form (begin) *@
+<div class="ew-extended-search container-fluid ps-2">
+<div class="row mb-0">
+    <div class="col-sm-auto px-0 pe-sm-2">
+        <div class="ew-basic-search input-group">
+            <input type="search" name="@(Config.TableBasicSearch)" id="@(Config.TableBasicSearch)" class="form-control ew-basic-search-keyword" value="@Html.Raw(HtmlEncode(vAktifitasWithDokumenList.BasicSearch.SessionKeyword))" placeholder="@(HtmlEncode(Language.Phrase("Search")))" aria-label="@(HtmlEncode(Language.Phrase("Search")))">
+            <input type="hidden" name="@(Config.TableBasicSearchType)" id="@(Config.TableBasicSearchType)" class="ew-basic-search-type" value="@(HtmlEncode(vAktifitasWithDokumenList.BasicSearch.SessionType))">
+            <button type="button" data-bs-toggle="dropdown" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split" aria-haspopup="true" aria-expanded="false">
+                <span id="searchtype">@Html.Raw(vAktifitasWithDokumenList.BasicSearch.TypeNameShort)</span>
+            </button>
+            <div class="dropdown-menu dropdown-menu-end">
+                <button type="button" class="dropdown-item@(vAktifitasWithDokumenList.BasicSearch.SessionType == "" ? " active" : "")" form="fv_aktifitas_with_dokumensrch" data-ew-action="search-type">@Html.Raw(Language.Phrase("QuickSearchAuto"))</button>
+                <button type="button" class="dropdown-item@(vAktifitasWithDokumenList.BasicSearch.SessionType == "=" ? " active" : "")" form="fv_aktifitas_with_dokumensrch" data-ew-action="search-type" data-search-type="=">@Html.Raw(Language.Phrase("QuickSearchExact"))</button>
+                <button type="button" class="dropdown-item@(vAktifitasWithDokumenList.BasicSearch.SessionType == "AND" ? " active" : "")" form="fv_aktifitas_with_dokumensrch" data-ew-action="search-type" data-search-type="AND">@Html.Raw(Language.Phrase("QuickSearchAll"))</button>
+                <button type="button" class="dropdown-item@(vAktifitasWithDokumenList.BasicSearch.SessionType == "OR" ? " active" : "")" form="fv_aktifitas_with_dokumensrch" data-ew-action="search-type" data-search-type="OR">@Html.Raw(Language.Phrase("QuickSearchAny"))</button>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-auto mb-3">
+        <button class="btn btn-primary" name="btn-submit" id="btn-submit" type="submit">@Html.Raw(Language.Phrase("SearchBtn"))</button>
+    </div>
+</div>
+</div><!-- /.ew-extended-search -->
+} @* Show search form (end) *@
+}
+</div><!-- /.ew-search-panel -->
+</form>
+}
+@vAktifitasWithDokumenList.ShowPageHeader()
+@vAktifitasWithDokumenList.ShowMessages()
+<main class="list @(vAktifitasWithDokumenList.TotalRecords == 0 && !vAktifitasWithDokumenList.IsAdd ? " ew-no-record" : "")">
+<div id="ew-header-options">
+    @vAktifitasWithDokumenList.HeaderOptions.RenderBody()
+</div>
+<div id="ew-list">
+@if (vAktifitasWithDokumenList.TotalRecords > 0 || !Empty(vAktifitasWithDokumenList.CurrentAction)) {
+<div class="card ew-card ew-grid@(vAktifitasWithDokumenList.IsAddOrEdit ? " ew-grid-add-edit" : "") @(vAktifitasWithDokumenList.TableGridClass)">
+<form name="@(vAktifitasWithDokumenList.FormName)" id="@(vAktifitasWithDokumenList.FormName)" class="ew-form ew-list-form" action="@AppPath(vAktifitasWithDokumenList.PageName)" method="post" novalidate autocomplete="off">
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+@if (vAktifitasWithDokumenList.IsModal) {
+<input type="hidden" name="modal" value="1">
+}
+<div id="gmp_v_aktifitas_with_dokumen" class="card-body ew-grid-middle-panel @(vAktifitasWithDokumenList.TableContainerClass)" style="@(vAktifitasWithDokumenList.TableContainerStyle)">
+@if (vAktifitasWithDokumenList.TotalRecords > 0 || vAktifitasWithDokumenList.IsGridEdit || vAktifitasWithDokumenList.IsMultiEdit) {
+<table id="tbl_v_aktifitas_with_dokumenlist" class="@(vAktifitasWithDokumenList.TableClass)"><!-- .ew-table -->
+<thead>
+    <tr class="ew-table-header">
+@{
+    // Header row
+    vAktifitasWithDokumenList.RowType = RowType.Header;
+
+    // Render list options
+    await vAktifitasWithDokumenList.RenderListOptions();
+}
+@* Render list options (header, left) *@
+@vAktifitasWithDokumenList.ListOptions.RenderHeader("left")
+@if (vAktifitasWithDokumenList.IdAktivitas.Visible) { // vAktifitasWithDokumenList.IdAktivitas.Visible (begin)
+        <th data-name="IdAktivitas" class="@(vAktifitasWithDokumenList.IdAktivitas.HeaderCellClass)"><div id="elh_v_aktifitas_with_dokumen_IdAktivitas" class="v_aktifitas_with_dokumen_IdAktivitas">@Html.Raw(vAktifitasWithDokumenList.RenderFieldHeader(vAktifitasWithDokumenList.IdAktivitas))</div></th>
+} @* vAktifitasWithDokumenList.IdAktivitas.Visible (end) *@
+@if (vAktifitasWithDokumenList.Nama_Proses.Visible) { // vAktifitasWithDokumenList.Nama_Proses.Visible (begin)
+        <th data-name="Nama_Proses" class="@(vAktifitasWithDokumenList.Nama_Proses.HeaderCellClass)"><div id="elh_v_aktifitas_with_dokumen_Nama_Proses" class="v_aktifitas_with_dokumen_Nama_Proses">@Html.Raw(vAktifitasWithDokumenList.RenderFieldHeader(vAktifitasWithDokumenList.Nama_Proses))</div></th>
+} @* vAktifitasWithDokumenList.Nama_Proses.Visible (end) *@
+@if (vAktifitasWithDokumenList.No_referensi.Visible) { // vAktifitasWithDokumenList.No_referensi.Visible (begin)
+        <th data-name="No_referensi" class="@(vAktifitasWithDokumenList.No_referensi.HeaderCellClass)"><div id="elh_v_aktifitas_with_dokumen_No_referensi" class="v_aktifitas_with_dokumen_No_referensi">@Html.Raw(vAktifitasWithDokumenList.RenderFieldHeader(vAktifitasWithDokumenList.No_referensi))</div></th>
+} @* vAktifitasWithDokumenList.No_referensi.Visible (end) *@
+@if (vAktifitasWithDokumenList.Shipment.Visible) { // vAktifitasWithDokumenList.Shipment.Visible (begin)
+        <th data-name="Shipment" class="@(vAktifitasWithDokumenList.Shipment.HeaderCellClass)"><div id="elh_v_aktifitas_with_dokumen_Shipment" class="v_aktifitas_with_dokumen_Shipment">@Html.Raw(vAktifitasWithDokumenList.RenderFieldHeader(vAktifitasWithDokumenList.Shipment))</div></th>
+} @* vAktifitasWithDokumenList.Shipment.Visible (end) *@
+@if (vAktifitasWithDokumenList.Produk.Visible) { // vAktifitasWithDokumenList.Produk.Visible (begin)
+        <th data-name="Produk" class="@(vAktifitasWithDokumenList.Produk.HeaderCellClass)"><div id="elh_v_aktifitas_with_dokumen_Produk" class="v_aktifitas_with_dokumen_Produk">@Html.Raw(vAktifitasWithDokumenList.RenderFieldHeader(vAktifitasWithDokumenList.Produk))</div></th>
+} @* vAktifitasWithDokumenList.Produk.Visible (end) *@
+@if (vAktifitasWithDokumenList.StatusAktivitas.Visible) { // vAktifitasWithDokumenList.StatusAktivitas.Visible (begin)
+        <th data-name="StatusAktivitas" class="@(vAktifitasWithDokumenList.StatusAktivitas.HeaderCellClass)"><div id="elh_v_aktifitas_with_dokumen_StatusAktivitas" class="v_aktifitas_with_dokumen_StatusAktivitas">@Html.Raw(vAktifitasWithDokumenList.RenderFieldHeader(vAktifitasWithDokumenList.StatusAktivitas))</div></th>
+} @* vAktifitasWithDokumenList.StatusAktivitas.Visible (end) *@
+@if (vAktifitasWithDokumenList.IdDokumen.Visible) { // vAktifitasWithDokumenList.IdDokumen.Visible (begin)
+        <th data-name="IdDokumen" class="@(vAktifitasWithDokumenList.IdDokumen.HeaderCellClass)"><div id="elh_v_aktifitas_with_dokumen_IdDokumen" class="v_aktifitas_with_dokumen_IdDokumen">@Html.Raw(vAktifitasWithDokumenList.RenderFieldHeader(vAktifitasWithDokumenList.IdDokumen))</div></th>
+} @* vAktifitasWithDokumenList.IdDokumen.Visible (end) *@
+@if (vAktifitasWithDokumenList.NamaDokumen.Visible) { // vAktifitasWithDokumenList.NamaDokumen.Visible (begin)
+        <th data-name="NamaDokumen" class="@(vAktifitasWithDokumenList.NamaDokumen.HeaderCellClass)"><div id="elh_v_aktifitas_with_dokumen_NamaDokumen" class="v_aktifitas_with_dokumen_NamaDokumen">@Html.Raw(vAktifitasWithDokumenList.RenderFieldHeader(vAktifitasWithDokumenList.NamaDokumen))</div></th>
+} @* vAktifitasWithDokumenList.NamaDokumen.Visible (end) *@
+@if (vAktifitasWithDokumenList.PathFile.Visible) { // vAktifitasWithDokumenList.PathFile.Visible (begin)
+        <th data-name="PathFile" class="@(vAktifitasWithDokumenList.PathFile.HeaderCellClass)"><div id="elh_v_aktifitas_with_dokumen_PathFile" class="v_aktifitas_with_dokumen_PathFile">@Html.Raw(vAktifitasWithDokumenList.RenderFieldHeader(vAktifitasWithDokumenList.PathFile))</div></th>
+} @* vAktifitasWithDokumenList.PathFile.Visible (end) *@
+@if (vAktifitasWithDokumenList.TanggalUploadDok.Visible) { // vAktifitasWithDokumenList.TanggalUploadDok.Visible (begin)
+        <th data-name="TanggalUploadDok" class="@(vAktifitasWithDokumenList.TanggalUploadDok.HeaderCellClass)"><div id="elh_v_aktifitas_with_dokumen_TanggalUploadDok" class="v_aktifitas_with_dokumen_TanggalUploadDok">@Html.Raw(vAktifitasWithDokumenList.RenderFieldHeader(vAktifitasWithDokumenList.TanggalUploadDok))</div></th>
+} @* vAktifitasWithDokumenList.TanggalUploadDok.Visible (end) *@
+@if (vAktifitasWithDokumenList.UserUploadDok.Visible) { // vAktifitasWithDokumenList.UserUploadDok.Visible (begin)
+        <th data-name="UserUploadDok" class="@(vAktifitasWithDokumenList.UserUploadDok.HeaderCellClass)"><div id="elh_v_aktifitas_with_dokumen_UserUploadDok" class="v_aktifitas_with_dokumen_UserUploadDok">@Html.Raw(vAktifitasWithDokumenList.RenderFieldHeader(vAktifitasWithDokumenList.UserUploadDok))</div></th>
+} @* vAktifitasWithDokumenList.UserUploadDok.Visible (end) *@
+@if (vAktifitasWithDokumenList.IdProses.Visible) { // vAktifitasWithDokumenList.IdProses.Visible (begin)
+        <th data-name="IdProses" class="@(vAktifitasWithDokumenList.IdProses.HeaderCellClass)"><div id="elh_v_aktifitas_with_dokumen_IdProses" class="v_aktifitas_with_dokumen_IdProses">@Html.Raw(vAktifitasWithDokumenList.RenderFieldHeader(vAktifitasWithDokumenList.IdProses))</div></th>
+} @* vAktifitasWithDokumenList.IdProses.Visible (end) *@
+@* Render list options (header, right) *@
+@vAktifitasWithDokumenList.ListOptions.RenderHeader("right")
+    </tr>
+</thead>
+<tbody data-page="@(vAktifitasWithDokumenList.PageNumber)">
+@{
+    await vAktifitasWithDokumenList.SetupGrid();
+    bool eof = vAktifitasWithDokumenList.Recordset == null; // DN
+}
+@while (vAktifitasWithDokumenList.RecordCount < vAktifitasWithDokumenList.StopRecord || SameString(vAktifitasWithDokumenList.RowIndex, "$rowindex$")) { // Begin While
+    if (!eof && !SameString(vAktifitasWithDokumenList.RowIndex, "$rowindex$") &&
+        (!vAktifitasWithDokumenList.IsGridAdd || vAktifitasWithDokumenList.CurrentMode == "copy") &&
+        (!((vAktifitasWithDokumenList.IsCopy || vAktifitasWithDokumenList.IsAdd) && vAktifitasWithDokumenList.RowIndex is int rowIndex && rowIndex == 0))) // DN
+        eof = !await vAktifitasWithDokumenList.Recordset.ReadAsync();
+    vAktifitasWithDokumenList.RecordCount++;
+    if (vAktifitasWithDokumenList.RecordCount >= vAktifitasWithDokumenList.StartRecord) {
+        await vAktifitasWithDokumenList.SetupRow();
+    <tr @Html.Raw(vAktifitasWithDokumenList.RowAttributes)>
+    @* Render list options (body, left) *@
+    @vAktifitasWithDokumenList.ListOptions.RenderBody("left", vAktifitasWithDokumenList.RowCount)
+    @if (vAktifitasWithDokumenList.IdAktivitas.Visible) { // vAktifitasWithDokumenList.IdAktivitas.Visible (begin)
+        <td data-name="IdAktivitas" @Html.Raw(vAktifitasWithDokumenList.IdAktivitas.CellAttributes)>
+<span id="el@(vAktifitasWithDokumenList.RowIndex == "$rowindex$" ? "$rowindex$" : vAktifitasWithDokumenList.RowCount)_v_aktifitas_with_dokumen_IdAktivitas" class="el_v_aktifitas_with_dokumen_IdAktivitas">
+<span @Html.Raw(vAktifitasWithDokumenList.IdAktivitas.ViewAttributes)>
+@Html.Raw(vAktifitasWithDokumenList.IdAktivitas.GetViewValue())</span>
+</span>
+</td>
+    } @* vAktifitasWithDokumenList.IdAktivitas.Visible (end) *@
+    @if (vAktifitasWithDokumenList.Nama_Proses.Visible) { // vAktifitasWithDokumenList.Nama_Proses.Visible (begin)
+        <td data-name="Nama_Proses" @Html.Raw(vAktifitasWithDokumenList.Nama_Proses.CellAttributes)>
+<span id="el@(vAktifitasWithDokumenList.RowIndex == "$rowindex$" ? "$rowindex$" : vAktifitasWithDokumenList.RowCount)_v_aktifitas_with_dokumen_Nama_Proses" class="el_v_aktifitas_with_dokumen_Nama_Proses">
+<span @Html.Raw(vAktifitasWithDokumenList.Nama_Proses.ViewAttributes)>
+@Html.Raw(vAktifitasWithDokumenList.Nama_Proses.GetViewValue())</span>
+</span>
+</td>
+    } @* vAktifitasWithDokumenList.Nama_Proses.Visible (end) *@
+    @if (vAktifitasWithDokumenList.No_referensi.Visible) { // vAktifitasWithDokumenList.No_referensi.Visible (begin)
+        <td data-name="No_referensi" @Html.Raw(vAktifitasWithDokumenList.No_referensi.CellAttributes)>
+<span id="el@(vAktifitasWithDokumenList.RowIndex == "$rowindex$" ? "$rowindex$" : vAktifitasWithDokumenList.RowCount)_v_aktifitas_with_dokumen_No_referensi" class="el_v_aktifitas_with_dokumen_No_referensi">
+<span @Html.Raw(vAktifitasWithDokumenList.No_referensi.ViewAttributes)>
+@Html.Raw(vAktifitasWithDokumenList.No_referensi.GetViewValue())</span>
+</span>
+</td>
+    } @* vAktifitasWithDokumenList.No_referensi.Visible (end) *@
+    @if (vAktifitasWithDokumenList.Shipment.Visible) { // vAktifitasWithDokumenList.Shipment.Visible (begin)
+        <td data-name="Shipment" @Html.Raw(vAktifitasWithDokumenList.Shipment.CellAttributes)>
+<span id="el@(vAktifitasWithDokumenList.RowIndex == "$rowindex$" ? "$rowindex$" : vAktifitasWithDokumenList.RowCount)_v_aktifitas_with_dokumen_Shipment" class="el_v_aktifitas_with_dokumen_Shipment">
+<span @Html.Raw(vAktifitasWithDokumenList.Shipment.ViewAttributes)>
+@Html.Raw(vAktifitasWithDokumenList.Shipment.GetViewValue())</span>
+</span>
+</td>
+    } @* vAktifitasWithDokumenList.Shipment.Visible (end) *@
+    @if (vAktifitasWithDokumenList.Produk.Visible) { // vAktifitasWithDokumenList.Produk.Visible (begin)
+        <td data-name="Produk" @Html.Raw(vAktifitasWithDokumenList.Produk.CellAttributes)>
+<span id="el@(vAktifitasWithDokumenList.RowIndex == "$rowindex$" ? "$rowindex$" : vAktifitasWithDokumenList.RowCount)_v_aktifitas_with_dokumen_Produk" class="el_v_aktifitas_with_dokumen_Produk">
+<span @Html.Raw(vAktifitasWithDokumenList.Produk.ViewAttributes)>
+@Html.Raw(vAktifitasWithDokumenList.Produk.GetViewValue())</span>
+</span>
+</td>
+    } @* vAktifitasWithDokumenList.Produk.Visible (end) *@
+    @if (vAktifitasWithDokumenList.StatusAktivitas.Visible) { // vAktifitasWithDokumenList.StatusAktivitas.Visible (begin)
+        <td data-name="StatusAktivitas" @Html.Raw(vAktifitasWithDokumenList.StatusAktivitas.CellAttributes)>
+<span id="el@(vAktifitasWithDokumenList.RowIndex == "$rowindex$" ? "$rowindex$" : vAktifitasWithDokumenList.RowCount)_v_aktifitas_with_dokumen_StatusAktivitas" class="el_v_aktifitas_with_dokumen_StatusAktivitas">
+<span @Html.Raw(vAktifitasWithDokumenList.StatusAktivitas.ViewAttributes)>
+@Html.Raw(vAktifitasWithDokumenList.StatusAktivitas.GetViewValue())</span>
+</span>
+</td>
+    } @* vAktifitasWithDokumenList.StatusAktivitas.Visible (end) *@
+    @if (vAktifitasWithDokumenList.IdDokumen.Visible) { // vAktifitasWithDokumenList.IdDokumen.Visible (begin)
+        <td data-name="IdDokumen" @Html.Raw(vAktifitasWithDokumenList.IdDokumen.CellAttributes)>
+<span id="el@(vAktifitasWithDokumenList.RowIndex == "$rowindex$" ? "$rowindex$" : vAktifitasWithDokumenList.RowCount)_v_aktifitas_with_dokumen_IdDokumen" class="el_v_aktifitas_with_dokumen_IdDokumen">
+<span @Html.Raw(vAktifitasWithDokumenList.IdDokumen.ViewAttributes)>
+@Html.Raw(vAktifitasWithDokumenList.IdDokumen.GetViewValue())</span>
+</span>
+</td>
+    } @* vAktifitasWithDokumenList.IdDokumen.Visible (end) *@
+    @if (vAktifitasWithDokumenList.NamaDokumen.Visible) { // vAktifitasWithDokumenList.NamaDokumen.Visible (begin)
+        <td data-name="NamaDokumen" @Html.Raw(vAktifitasWithDokumenList.NamaDokumen.CellAttributes)>
+<span id="el@(vAktifitasWithDokumenList.RowIndex == "$rowindex$" ? "$rowindex$" : vAktifitasWithDokumenList.RowCount)_v_aktifitas_with_dokumen_NamaDokumen" class="el_v_aktifitas_with_dokumen_NamaDokumen">
+<span @Html.Raw(vAktifitasWithDokumenList.NamaDokumen.ViewAttributes)>
+@Html.Raw(vAktifitasWithDokumenList.NamaDokumen.GetViewValue())</span>
+</span>
+</td>
+    } @* vAktifitasWithDokumenList.NamaDokumen.Visible (end) *@
+    @if (vAktifitasWithDokumenList.PathFile.Visible) { // vAktifitasWithDokumenList.PathFile.Visible (begin)
+        <td data-name="PathFile" @Html.Raw(vAktifitasWithDokumenList.PathFile.CellAttributes)>
+<span id="el@(vAktifitasWithDokumenList.RowIndex == "$rowindex$" ? "$rowindex$" : vAktifitasWithDokumenList.RowCount)_v_aktifitas_with_dokumen_PathFile" class="el_v_aktifitas_with_dokumen_PathFile">
+<span @Html.Raw(vAktifitasWithDokumenList.PathFile.ViewAttributes)>
+@Html.Raw(await GetFileViewTag((DbField)vAktifitasWithDokumenList.PathFile, ConvertToString(vAktifitasWithDokumenList.PathFile.GetViewValue()), false))
+</span>
+</span>
+</td>
+    } @* vAktifitasWithDokumenList.PathFile.Visible (end) *@
+    @if (vAktifitasWithDokumenList.TanggalUploadDok.Visible) { // vAktifitasWithDokumenList.TanggalUploadDok.Visible (begin)
+        <td data-name="TanggalUploadDok" @Html.Raw(vAktifitasWithDokumenList.TanggalUploadDok.CellAttributes)>
+<span id="el@(vAktifitasWithDokumenList.RowIndex == "$rowindex$" ? "$rowindex$" : vAktifitasWithDokumenList.RowCount)_v_aktifitas_with_dokumen_TanggalUploadDok" class="el_v_aktifitas_with_dokumen_TanggalUploadDok">
+<span @Html.Raw(vAktifitasWithDokumenList.TanggalUploadDok.ViewAttributes)>
+@Html.Raw(vAktifitasWithDokumenList.TanggalUploadDok.GetViewValue())</span>
+</span>
+</td>
+    } @* vAktifitasWithDokumenList.TanggalUploadDok.Visible (end) *@
+    @if (vAktifitasWithDokumenList.UserUploadDok.Visible) { // vAktifitasWithDokumenList.UserUploadDok.Visible (begin)
+        <td data-name="UserUploadDok" @Html.Raw(vAktifitasWithDokumenList.UserUploadDok.CellAttributes)>
+<span id="el@(vAktifitasWithDokumenList.RowIndex == "$rowindex$" ? "$rowindex$" : vAktifitasWithDokumenList.RowCount)_v_aktifitas_with_dokumen_UserUploadDok" class="el_v_aktifitas_with_dokumen_UserUploadDok">
+<span @Html.Raw(vAktifitasWithDokumenList.UserUploadDok.ViewAttributes)>
+@Html.Raw(vAktifitasWithDokumenList.UserUploadDok.GetViewValue())</span>
+</span>
+</td>
+    } @* vAktifitasWithDokumenList.UserUploadDok.Visible (end) *@
+    @if (vAktifitasWithDokumenList.IdProses.Visible) { // vAktifitasWithDokumenList.IdProses.Visible (begin)
+        <td data-name="IdProses" @Html.Raw(vAktifitasWithDokumenList.IdProses.CellAttributes)>
+<span id="el@(vAktifitasWithDokumenList.RowIndex == "$rowindex$" ? "$rowindex$" : vAktifitasWithDokumenList.RowCount)_v_aktifitas_with_dokumen_IdProses" class="el_v_aktifitas_with_dokumen_IdProses">
+<span @Html.Raw(vAktifitasWithDokumenList.IdProses.ViewAttributes)>
+@Html.Raw(vAktifitasWithDokumenList.IdProses.GetViewValue())</span>
+</span>
+</td>
+    } @* vAktifitasWithDokumenList.IdProses.Visible (end) *@
+    @* Render list options (body, right) *@
+    @vAktifitasWithDokumenList.ListOptions.RenderBody("right", vAktifitasWithDokumenList.RowCount)
+    </tr>
+    } @* End if *@
+
+    // Reset for template row
+    if (SameString(vAktifitasWithDokumenList.RowIndex, "$rowindex$"))
+        vAktifitasWithDokumenList.RowIndex = 0;
+
+    // Reset inline add/copy row
+    if ((vAktifitasWithDokumenList.IsCopy || vAktifitasWithDokumenList.IsAdd) && vAktifitasWithDokumenList.RowIndex is int rowIndex2 && rowIndex2 == 0)
+        vAktifitasWithDokumenList.RowIndex = 1;
+} @* End While *@
+</tbody>
+</table><!-- /.ew-table -->
+} @* End If TotalRecords > 0 *@
+</div><!-- /.ew-grid-middle-panel -->
+@if (Empty(vAktifitasWithDokumenList.CurrentAction) && !vAktifitasWithDokumenList.UseAjaxActions) {
+<input type="hidden" name="action" id="action" value="">
+}
+</form><!-- /.ew-list-form -->
+@{ vAktifitasWithDokumenList.CloseRecordset(); }
+@if (!vAktifitasWithDokumenList.IsExport()) {
+<div class="card-footer ew-grid-lower-panel">
+@if (!vAktifitasWithDokumenList.IsGridAdd && !(vAktifitasWithDokumenList.IsGridEdit && vAktifitasWithDokumenList.ModalGridEdit) && !vAktifitasWithDokumenList.IsMultiEdit) {
+@Html.Raw(vAktifitasWithDokumenList.Pager.Render())
+}
+<div class="ew-list-other-options">
+@vAktifitasWithDokumenList.OtherOptions.RenderBody("bottom")
+</div>
+</div>
+}
+</div><!-- /.ew-grid -->
+} else { // Show other options
+<div class="ew-list-other-options">
+@vAktifitasWithDokumenList.OtherOptions.ForEach(opt => opt.ButtonClass = "").RenderBody()
+</div>
+}
+</div>
+<div id="ew-footer-options">
+    @vAktifitasWithDokumenList.FooterOptions.RenderBody()
+</div>
+</main>
+@vAktifitasWithDokumenList.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+@if (!vAktifitasWithDokumenList.IsExport()) {
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("v_aktifitas_with_dokumen");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Write your table-specific startup script here
+    // document.write("page loaded");
+});
+</script>
+}

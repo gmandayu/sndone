@@ -1,0 +1,111 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (masterAreaAdd.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = masterAreaAdd.UseLayout ? "_Layout" : "";
+}
+<script>
+var currentTable = @Html.Raw(ConvertToJson(masterAreaAdd.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { MasterArea: currentTable } });
+var currentPageID = ew.PAGE_ID = "add";
+var currentForm;
+var fMasterAreaadd;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("fMasterAreaadd")
+        .setPageId("add")
+
+        // Add fields
+        .setFields([
+
+            ["Area", [fields.Area.visible && fields.Area.required ? ew.Validators.required(fields.Area.caption) : null], fields.Area.isInvalid]
+        ])
+
+        // Form_CustomValidate
+        .setCustomValidate(
+            function(fobj) { // DO NOT CHANGE THIS LINE!
+                    // Your custom validation code here, return false if invalid.
+                    return true;
+                }
+        )
+
+        // Use JavaScript validation or not
+        .setValidateRequired(ew.CLIENT_VALIDATE)
+
+        // Dynamic selection lists
+        .setLists({
+        })
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Write your client script here, no need to add script tags.
+});
+</script>
+@masterAreaAdd.ShowPageHeader()
+@masterAreaAdd.ShowMessages()
+<form name="fMasterAreaadd" id="fMasterAreaadd" class="@(masterAreaAdd.FormClassName)" action="@AppPath(CurrentPageName())" method="post" novalidate autocomplete="off">
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+<input type="hidden" name="action" id="action" value="insert">
+<input type="hidden" name="modal" value="@ConvertToInt(masterAreaAdd.IsModal)">
+@if (IsJsonResponse()) {
+<input type="hidden" name="json" value="1">
+}
+<input type="hidden" name="@(masterAreaAdd.OldKeyName)" value="@Html.Raw(masterAreaAdd.OldKey)">
+<div class="ew-add-div"><!-- page* -->
+@if (masterAreaAdd.Area.Visible) { // masterAreaAdd.Area.Visible (begin)
+    <div id="r_Area" @Html.Raw(masterAreaAdd.Area.RowAttributes)>
+        <label id="elh_MasterArea_Area" for="x_Area" class="@(masterAreaAdd.LeftColumnClass)">@Html.Raw(masterAreaAdd.Area.Caption)@Html.Raw(masterAreaAdd.Area.Required ? Language.Phrase("FieldRequiredIndicator") : "")</label>
+        <div class="@(masterAreaAdd.RightColumnClass)"><div @Html.Raw(masterAreaAdd.Area.CellAttributes)>
+<span id="el_MasterArea_Area">
+<input type="@(masterAreaAdd.Area.InputTextType)" name="x_Area" id="x_Area" data-table="MasterArea" data-field="x_Area" value="@Html.Raw(masterAreaAdd.Area.EditValue)" size="30" maxlength="50" placeholder="@Html.Raw(HtmlEncode(masterAreaAdd.Area.PlaceHolder))" data-format-pattern="@(masterAreaAdd.Area.FormatPattern)"@Html.Raw(masterAreaAdd.Area.EditAttributes) aria-describedby="x_Area_help">
+@Html.Raw(masterAreaAdd.Area.GetCustomMessage)
+<div class="invalid-feedback">@Html.Raw(masterAreaAdd.Area.GetErrorMessage())</div>
+</span>
+</div></div>
+    </div>
+} @* masterAreaAdd.Area.Visible (end) *@
+</div><!-- /page* -->
+@{ masterAreaAdd.CloseRecordset(); }
+@Html.Raw(masterAreaAdd.IsModal ? "<template class=\"ew-modal-buttons\">" : "<div class=\"row ew-buttons\">")<!-- buttons .row -->
+    <div class="@(masterAreaAdd.OffsetColumnClass)"><!-- buttons offset -->
+    <button class="btn btn-primary ew-btn" name="btn-action" id="btn-action" type="submit" form="fMasterAreaadd">@Html.Raw(Language.Phrase("AddBtn"))</button>
+@if (IsJsonResponse()) {
+    <button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" data-bs-dismiss="modal">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+} else {
+    <button class="btn btn-default ew-btn" name="btn-cancel" id="btn-cancel" type="button" form="fMasterAreaadd" data-href="@AppPath(masterAreaAdd.ReturnUrl)">@Html.Raw(Language.Phrase("CancelBtn"))</button>
+}
+    </div><!-- /buttons offset -->
+@Html.Raw(masterAreaAdd.IsModal ? "</template>" : "</div>")<!-- /buttons .row -->
+</form>
+@masterAreaAdd.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("MasterArea");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Write your table-specific startup script here
+    // document.write("page loaded");
+});
+</script>

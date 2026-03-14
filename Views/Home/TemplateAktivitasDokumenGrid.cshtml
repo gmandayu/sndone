@@ -1,0 +1,435 @@
+@{
+    // View
+    View = this;
+
+    // Set up CurrentGrid
+    CurrentGrid = templateAktivitasDokumenGrid;
+
+    // Run
+    await templateAktivitasDokumenGrid.Run();
+
+    // Check action result
+    if (templateAktivitasDokumenGrid.ActionResult is EmptyResult) // Terminate page
+        return;
+}
+@if (!templateAktivitasDokumenGrid.IsExport()) {
+<script>
+var fTemplateAktivitasDokumengrid;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let currentTable = @Html.Raw(ConvertToJson(templateAktivitasDokumenGrid.ToClientVar()));
+    ew.deepAssign(ew.vars, { tables: { TemplateAktivitasDokumen: currentTable } });
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("fTemplateAktivitasDokumengrid")
+        .setPageId("grid")
+        .setFormKeyCountName("@(templateAktivitasDokumenGrid.FormKeyCountName)")
+
+        // Add fields
+        .setFields([
+
+            ["IdTemplateAktivitas", [fields.IdTemplateAktivitas.visible && fields.IdTemplateAktivitas.required ? ew.Validators.required(fields.IdTemplateAktivitas.caption) : null], fields.IdTemplateAktivitas.isInvalid],
+            ["IdDokumen", [fields.IdDokumen.visible && fields.IdDokumen.required ? ew.Validators.required(fields.IdDokumen.caption) : null], fields.IdDokumen.isInvalid],
+            ["WajibUpload", [fields.WajibUpload.visible && fields.WajibUpload.required ? ew.Validators.required(fields.WajibUpload.caption) : null], fields.WajibUpload.isInvalid]
+        ])
+
+        // Check empty row
+        .setEmptyRow(
+            function (rowIndex) {
+                let fobj = this.getForm(),
+                    fields = [["IdTemplateAktivitas",false],["IdDokumen",false],["WajibUpload",true]];
+                if (fields.some(field => ew.valueChanged(fobj, rowIndex, ...field)))
+                    return false;
+                return true;
+            }
+        )
+
+        // Form_CustomValidate
+        .setCustomValidate(
+            function(fobj) { // DO NOT CHANGE THIS LINE!
+                    // Your custom validation code here, return false if invalid.
+                    return true;
+                }
+        )
+
+        // Use JavaScript validation or not
+        .setValidateRequired(ew.CLIENT_VALIDATE)
+
+        // Dynamic selection lists
+        .setLists({
+            "IdTemplateAktivitas": @Html.Raw(templateAktivitasDokumenGrid.IdTemplateAktivitas.ToClientList(templateAktivitasDokumenGrid)),
+            "IdDokumen": @Html.Raw(templateAktivitasDokumenGrid.IdDokumen.ToClientList(templateAktivitasDokumenGrid)),
+            "WajibUpload": @Html.Raw(templateAktivitasDokumenGrid.WajibUpload.ToClientList(templateAktivitasDokumenGrid)),
+        })
+        .build();
+    window[form.id] = form;
+    loadjs.done(form.id);
+});
+</script>
+}
+<main class="list">
+<div id="ew-header-options">
+    @templateAktivitasDokumenGrid.HeaderOptions.RenderBody()
+</div>
+<div id="ew-list">
+@if (templateAktivitasDokumenGrid.TotalRecords > 0 || !Empty(templateAktivitasDokumenGrid.CurrentAction)) {
+<div class="card ew-card ew-grid@(templateAktivitasDokumenGrid.IsAddOrEdit ? " ew-grid-add-edit" : "") @(templateAktivitasDokumenGrid.TableGridClass)">
+<div id="fTemplateAktivitasDokumengrid" class="ew-form ew-list-form">
+<div id="gmp_TemplateAktivitasDokumen" class="card-body ew-grid-middle-panel @(templateAktivitasDokumenGrid.TableContainerClass)" style="@(templateAktivitasDokumenGrid.TableContainerStyle)">
+<table id="tbl_TemplateAktivitasDokumengrid" class="@(templateAktivitasDokumenGrid.TableClass)"><!-- .ew-table -->
+<thead>
+    <tr class="ew-table-header">
+@{
+    // Header row
+    templateAktivitasDokumenGrid.RowType = RowType.Header;
+
+    // Render list options
+    await templateAktivitasDokumenGrid.RenderListOptions();
+}
+@* Render list options (header, left) *@
+@templateAktivitasDokumenGrid.ListOptions.RenderHeader("left")
+@if (templateAktivitasDokumenGrid.IdTemplateAktivitas.Visible) { // templateAktivitasDokumenGrid.IdTemplateAktivitas.Visible (begin)
+        <th data-name="IdTemplateAktivitas" class="@(templateAktivitasDokumenGrid.IdTemplateAktivitas.HeaderCellClass)"><div id="elh_TemplateAktivitasDokumen_IdTemplateAktivitas" class="TemplateAktivitasDokumen_IdTemplateAktivitas">@Html.Raw(templateAktivitasDokumenGrid.RenderFieldHeader(templateAktivitasDokumenGrid.IdTemplateAktivitas))</div></th>
+} @* templateAktivitasDokumenGrid.IdTemplateAktivitas.Visible (end) *@
+@if (templateAktivitasDokumenGrid.IdDokumen.Visible) { // templateAktivitasDokumenGrid.IdDokumen.Visible (begin)
+        <th data-name="IdDokumen" class="@(templateAktivitasDokumenGrid.IdDokumen.HeaderCellClass)"><div id="elh_TemplateAktivitasDokumen_IdDokumen" class="TemplateAktivitasDokumen_IdDokumen">@Html.Raw(templateAktivitasDokumenGrid.RenderFieldHeader(templateAktivitasDokumenGrid.IdDokumen))</div></th>
+} @* templateAktivitasDokumenGrid.IdDokumen.Visible (end) *@
+@if (templateAktivitasDokumenGrid.WajibUpload.Visible) { // templateAktivitasDokumenGrid.WajibUpload.Visible (begin)
+        <th data-name="WajibUpload" class="@(templateAktivitasDokumenGrid.WajibUpload.HeaderCellClass)"><div id="elh_TemplateAktivitasDokumen_WajibUpload" class="TemplateAktivitasDokumen_WajibUpload">@Html.Raw(templateAktivitasDokumenGrid.RenderFieldHeader(templateAktivitasDokumenGrid.WajibUpload))</div></th>
+} @* templateAktivitasDokumenGrid.WajibUpload.Visible (end) *@
+@* Render list options (header, right) *@
+@templateAktivitasDokumenGrid.ListOptions.RenderHeader("right")
+    </tr>
+</thead>
+<tbody data-page="@(templateAktivitasDokumenGrid.PageNumber)">
+@{
+    await templateAktivitasDokumenGrid.SetupGrid();
+    bool eof = templateAktivitasDokumenGrid.Recordset == null; // DN
+}
+@while (templateAktivitasDokumenGrid.RecordCount < templateAktivitasDokumenGrid.StopRecord || SameString(templateAktivitasDokumenGrid.RowIndex, "$rowindex$")) { // Begin While
+    if (!eof && !SameString(templateAktivitasDokumenGrid.RowIndex, "$rowindex$") &&
+        (!templateAktivitasDokumenGrid.IsGridAdd || templateAktivitasDokumenGrid.CurrentMode == "copy") &&
+        (!((templateAktivitasDokumenGrid.IsCopy || templateAktivitasDokumenGrid.IsAdd) && templateAktivitasDokumenGrid.RowIndex is int rowIndex && rowIndex == 0))) // DN
+        eof = !await templateAktivitasDokumenGrid.Recordset.ReadAsync();
+    templateAktivitasDokumenGrid.RecordCount++;
+    if (templateAktivitasDokumenGrid.RecordCount >= templateAktivitasDokumenGrid.StartRecord) {
+        await templateAktivitasDokumenGrid.SetupRow();
+
+        // Skip 1) delete row / empty row for confirm page, 2) hidden row
+        if (templateAktivitasDokumenGrid.RowAction != "delete" &&
+            templateAktivitasDokumenGrid.RowAction != "insertdelete" &&
+            !(templateAktivitasDokumenGrid.RowAction == "insert" && templateAktivitasDokumenGrid.IsConfirm && templateAktivitasDokumenGrid.EmptyRow()) &&
+            templateAktivitasDokumenGrid.RowAction != "hide") {
+    <tr @Html.Raw(templateAktivitasDokumenGrid.RowAttributes)>
+    @* Render list options (body, left) *@
+    @templateAktivitasDokumenGrid.ListOptions.RenderBody("left", templateAktivitasDokumenGrid.RowCount)
+    @if (templateAktivitasDokumenGrid.IdTemplateAktivitas.Visible) { // templateAktivitasDokumenGrid.IdTemplateAktivitas.Visible (begin)
+        <td data-name="IdTemplateAktivitas" @Html.Raw(templateAktivitasDokumenGrid.IdTemplateAktivitas.CellAttributes)>
+@if (templateAktivitasDokumenGrid.RowType == RowType.Add) { // Add (begin)
+    @* IdTemplateAktivitas (begin) *@
+    @if (!Empty(templateAktivitasDokumenGrid.IdTemplateAktivitas.SessionValue)) {
+    <span @Html.Raw(templateAktivitasDokumenGrid.IdTemplateAktivitas.ViewAttributes)>
+    <span class="form-control-plaintext">@Html.Raw(templateAktivitasDokumenGrid.IdTemplateAktivitas.DisplayValue(templateAktivitasDokumenGrid.IdTemplateAktivitas.ViewValue))</span></span>
+    <input type="hidden" id="x@(templateAktivitasDokumenGrid.RowIndex)_IdTemplateAktivitas" name="x@(templateAktivitasDokumenGrid.RowIndex)_IdTemplateAktivitas" value="@(HtmlEncode(templateAktivitasDokumenGrid.IdTemplateAktivitas.CurrentValue))" data-hidden="1">
+    } else {
+    <span id="el@(templateAktivitasDokumenGrid.RowIndex == "$rowindex$" ? "$rowindex$" : templateAktivitasDokumenGrid.RowCount)_TemplateAktivitasDokumen_IdTemplateAktivitas" class="el_TemplateAktivitasDokumen_IdTemplateAktivitas">
+        <select
+            id="x@(templateAktivitasDokumenGrid.RowIndex)_IdTemplateAktivitas"
+            name="x@(templateAktivitasDokumenGrid.RowIndex)_IdTemplateAktivitas"
+            class="form-select ew-select@(templateAktivitasDokumenGrid.IdTemplateAktivitas.IsInvalidClass)"
+            data-select2-id="fTemplateAktivitasDokumengrid_x@(templateAktivitasDokumenGrid.RowIndex)_IdTemplateAktivitas"
+            data-table="TemplateAktivitasDokumen"
+            data-field="x_IdTemplateAktivitas"
+            data-value-separator="@(templateAktivitasDokumenGrid.IdTemplateAktivitas.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(templateAktivitasDokumenGrid.IdTemplateAktivitas.PlaceHolder))"
+            @Html.Raw(templateAktivitasDokumenGrid.IdTemplateAktivitas.EditAttributes)>
+            @(templateAktivitasDokumenGrid.IdTemplateAktivitas.SelectOptionListHtml("x" + templateAktivitasDokumenGrid.RowIndex + "_IdTemplateAktivitas"))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(templateAktivitasDokumenGrid.IdTemplateAktivitas.GetErrorMessage())</div>
+    @Html.Raw(templateAktivitasDokumenGrid.IdTemplateAktivitas.Lookup.GetParamTag(templateAktivitasDokumenGrid, "p_x" + templateAktivitasDokumenGrid.RowIndex + "_IdTemplateAktivitas"))
+    <script>
+    loadjs.ready("fTemplateAktivitasDokumengrid", function() {
+        var options = { name: "x@(templateAktivitasDokumenGrid.RowIndex)_IdTemplateAktivitas", selectId: "fTemplateAktivitasDokumengrid_x@(templateAktivitasDokumenGrid.RowIndex)_IdTemplateAktivitas" },
+            el = document.querySelector("select[data-select2-id='" + options.selectId + "']");
+        if (!el)
+            return;
+        options.closeOnSelect = !options.multiple;
+        options.dropdownParent = el.closest("#ew-modal-dialog, #ew-add-opt-dialog");
+        if (fTemplateAktivitasDokumengrid.lists.IdTemplateAktivitas?.lookupOptions.length) {
+            options.data = { id: "x@(templateAktivitasDokumenGrid.RowIndex)_IdTemplateAktivitas", form: "fTemplateAktivitasDokumengrid" };
+        } else {
+            options.ajax = { id: "x@(templateAktivitasDokumenGrid.RowIndex)_IdTemplateAktivitas", form: "fTemplateAktivitasDokumengrid", limit: ew.LOOKUP_PAGE_SIZE };
+        }
+        options.minimumInputLength = ew.selectMinimumInputLength;
+        options = Object.assign({}, ew.selectOptions, options, ew.vars.tables.TemplateAktivitasDokumen.fields.IdTemplateAktivitas.selectOptions);
+        ew.createSelect(options);
+    });
+    </script>
+    </span>
+    }
+    <input type="hidden" data-table="TemplateAktivitasDokumen" data-field="x_IdTemplateAktivitas" data-hidden="1" data-old name="o@(templateAktivitasDokumenGrid.RowIndex)_IdTemplateAktivitas" id="o@(templateAktivitasDokumenGrid.RowIndex)_IdTemplateAktivitas" value="@Html.Raw(HtmlEncode(templateAktivitasDokumenGrid.IdTemplateAktivitas.OldValue))">
+    @* IdTemplateAktivitas (end) *@
+} @* Add (end) *@
+@if (templateAktivitasDokumenGrid.RowType == RowType.Edit) { // Edit (begin)
+    @* IdTemplateAktivitas (begin) *@
+    @if (!Empty(templateAktivitasDokumenGrid.IdTemplateAktivitas.SessionValue)) {
+    <span @Html.Raw(templateAktivitasDokumenGrid.IdTemplateAktivitas.ViewAttributes)>
+    <span class="form-control-plaintext">@Html.Raw(templateAktivitasDokumenGrid.IdTemplateAktivitas.DisplayValue(templateAktivitasDokumenGrid.IdTemplateAktivitas.ViewValue))</span></span>
+    <input type="hidden" id="x@(templateAktivitasDokumenGrid.RowIndex)_IdTemplateAktivitas" name="x@(templateAktivitasDokumenGrid.RowIndex)_IdTemplateAktivitas" value="@(HtmlEncode(templateAktivitasDokumenGrid.IdTemplateAktivitas.CurrentValue))" data-hidden="1">
+    } else {
+    <span id="el@(templateAktivitasDokumenGrid.RowIndex == "$rowindex$" ? "$rowindex$" : templateAktivitasDokumenGrid.RowCount)_TemplateAktivitasDokumen_IdTemplateAktivitas" class="el_TemplateAktivitasDokumen_IdTemplateAktivitas">
+        <select
+            id="x@(templateAktivitasDokumenGrid.RowIndex)_IdTemplateAktivitas"
+            name="x@(templateAktivitasDokumenGrid.RowIndex)_IdTemplateAktivitas"
+            class="form-select ew-select@(templateAktivitasDokumenGrid.IdTemplateAktivitas.IsInvalidClass)"
+            data-select2-id="fTemplateAktivitasDokumengrid_x@(templateAktivitasDokumenGrid.RowIndex)_IdTemplateAktivitas"
+            data-table="TemplateAktivitasDokumen"
+            data-field="x_IdTemplateAktivitas"
+            data-value-separator="@(templateAktivitasDokumenGrid.IdTemplateAktivitas.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(templateAktivitasDokumenGrid.IdTemplateAktivitas.PlaceHolder))"
+            @Html.Raw(templateAktivitasDokumenGrid.IdTemplateAktivitas.EditAttributes)>
+            @(templateAktivitasDokumenGrid.IdTemplateAktivitas.SelectOptionListHtml("x" + templateAktivitasDokumenGrid.RowIndex + "_IdTemplateAktivitas"))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(templateAktivitasDokumenGrid.IdTemplateAktivitas.GetErrorMessage())</div>
+    @Html.Raw(templateAktivitasDokumenGrid.IdTemplateAktivitas.Lookup.GetParamTag(templateAktivitasDokumenGrid, "p_x" + templateAktivitasDokumenGrid.RowIndex + "_IdTemplateAktivitas"))
+    <script>
+    loadjs.ready("fTemplateAktivitasDokumengrid", function() {
+        var options = { name: "x@(templateAktivitasDokumenGrid.RowIndex)_IdTemplateAktivitas", selectId: "fTemplateAktivitasDokumengrid_x@(templateAktivitasDokumenGrid.RowIndex)_IdTemplateAktivitas" },
+            el = document.querySelector("select[data-select2-id='" + options.selectId + "']");
+        if (!el)
+            return;
+        options.closeOnSelect = !options.multiple;
+        options.dropdownParent = el.closest("#ew-modal-dialog, #ew-add-opt-dialog");
+        if (fTemplateAktivitasDokumengrid.lists.IdTemplateAktivitas?.lookupOptions.length) {
+            options.data = { id: "x@(templateAktivitasDokumenGrid.RowIndex)_IdTemplateAktivitas", form: "fTemplateAktivitasDokumengrid" };
+        } else {
+            options.ajax = { id: "x@(templateAktivitasDokumenGrid.RowIndex)_IdTemplateAktivitas", form: "fTemplateAktivitasDokumengrid", limit: ew.LOOKUP_PAGE_SIZE };
+        }
+        options.minimumInputLength = ew.selectMinimumInputLength;
+        options = Object.assign({}, ew.selectOptions, options, ew.vars.tables.TemplateAktivitasDokumen.fields.IdTemplateAktivitas.selectOptions);
+        ew.createSelect(options);
+    });
+    </script>
+    </span>
+    }
+    @* IdTemplateAktivitas (end) *@
+} @* Edit (end) *@
+@if (templateAktivitasDokumenGrid.RowType == RowType.View) { // View (begin)
+    @* IdTemplateAktivitas (begin) *@
+    <span id="el@(templateAktivitasDokumenGrid.RowIndex == "$rowindex$" ? "$rowindex$" : templateAktivitasDokumenGrid.RowCount)_TemplateAktivitasDokumen_IdTemplateAktivitas" class="el_TemplateAktivitasDokumen_IdTemplateAktivitas">
+    <span @Html.Raw(templateAktivitasDokumenGrid.IdTemplateAktivitas.ViewAttributes)>
+    @Html.Raw(templateAktivitasDokumenGrid.IdTemplateAktivitas.GetViewValue())</span>
+    </span>
+    if (templateAktivitasDokumenGrid.IsConfirm) {
+    <input type="hidden" data-table="TemplateAktivitasDokumen" data-field="x_IdTemplateAktivitas" data-hidden="1" name="fTemplateAktivitasDokumengrid$x@(templateAktivitasDokumenGrid.RowIndex)_IdTemplateAktivitas" id="fTemplateAktivitasDokumengrid$x@(templateAktivitasDokumenGrid.RowIndex)_IdTemplateAktivitas" value="@Html.Raw(HtmlEncode(templateAktivitasDokumenGrid.IdTemplateAktivitas.FormValue))">
+    <input type="hidden" data-table="TemplateAktivitasDokumen" data-field="x_IdTemplateAktivitas" data-hidden="1" data-old name="fTemplateAktivitasDokumengrid$o@(templateAktivitasDokumenGrid.RowIndex)_IdTemplateAktivitas" id="fTemplateAktivitasDokumengrid$o@(templateAktivitasDokumenGrid.RowIndex)_IdTemplateAktivitas" value="@Html.Raw(HtmlEncode(templateAktivitasDokumenGrid.IdTemplateAktivitas.OldValue))">
+    }
+    @* IdTemplateAktivitas (end) *@
+} @* View (end) *@
+</td>
+    } @* templateAktivitasDokumenGrid.IdTemplateAktivitas.Visible (end) *@
+    @if (templateAktivitasDokumenGrid.IdDokumen.Visible) { // templateAktivitasDokumenGrid.IdDokumen.Visible (begin)
+        <td data-name="IdDokumen" @Html.Raw(templateAktivitasDokumenGrid.IdDokumen.CellAttributes)>
+@if (templateAktivitasDokumenGrid.RowType == RowType.Add) { // Add (begin)
+    @* IdDokumen (begin) *@
+    <span id="el@(templateAktivitasDokumenGrid.RowIndex == "$rowindex$" ? "$rowindex$" : templateAktivitasDokumenGrid.RowCount)_TemplateAktivitasDokumen_IdDokumen" class="el_TemplateAktivitasDokumen_IdDokumen">
+        <select
+            id="x@(templateAktivitasDokumenGrid.RowIndex)_IdDokumen"
+            name="x@(templateAktivitasDokumenGrid.RowIndex)_IdDokumen"
+            class="form-select ew-select@(templateAktivitasDokumenGrid.IdDokumen.IsInvalidClass)"
+            data-select2-id="fTemplateAktivitasDokumengrid_x@(templateAktivitasDokumenGrid.RowIndex)_IdDokumen"
+            data-table="TemplateAktivitasDokumen"
+            data-field="x_IdDokumen"
+            data-value-separator="@(templateAktivitasDokumenGrid.IdDokumen.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(templateAktivitasDokumenGrid.IdDokumen.PlaceHolder))"
+            @Html.Raw(templateAktivitasDokumenGrid.IdDokumen.EditAttributes)>
+            @(templateAktivitasDokumenGrid.IdDokumen.SelectOptionListHtml("x" + templateAktivitasDokumenGrid.RowIndex + "_IdDokumen"))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(templateAktivitasDokumenGrid.IdDokumen.GetErrorMessage())</div>
+    @Html.Raw(templateAktivitasDokumenGrid.IdDokumen.Lookup.GetParamTag(templateAktivitasDokumenGrid, "p_x" + templateAktivitasDokumenGrid.RowIndex + "_IdDokumen"))
+    <script>
+    loadjs.ready("fTemplateAktivitasDokumengrid", function() {
+        var options = { name: "x@(templateAktivitasDokumenGrid.RowIndex)_IdDokumen", selectId: "fTemplateAktivitasDokumengrid_x@(templateAktivitasDokumenGrid.RowIndex)_IdDokumen" },
+            el = document.querySelector("select[data-select2-id='" + options.selectId + "']");
+        if (!el)
+            return;
+        options.closeOnSelect = !options.multiple;
+        options.dropdownParent = el.closest("#ew-modal-dialog, #ew-add-opt-dialog");
+        if (fTemplateAktivitasDokumengrid.lists.IdDokumen?.lookupOptions.length) {
+            options.data = { id: "x@(templateAktivitasDokumenGrid.RowIndex)_IdDokumen", form: "fTemplateAktivitasDokumengrid" };
+        } else {
+            options.ajax = { id: "x@(templateAktivitasDokumenGrid.RowIndex)_IdDokumen", form: "fTemplateAktivitasDokumengrid", limit: ew.LOOKUP_PAGE_SIZE };
+        }
+        options.minimumInputLength = ew.selectMinimumInputLength;
+        options = Object.assign({}, ew.selectOptions, options, ew.vars.tables.TemplateAktivitasDokumen.fields.IdDokumen.selectOptions);
+        ew.createSelect(options);
+    });
+    </script>
+    </span>
+    <input type="hidden" data-table="TemplateAktivitasDokumen" data-field="x_IdDokumen" data-hidden="1" data-old name="o@(templateAktivitasDokumenGrid.RowIndex)_IdDokumen" id="o@(templateAktivitasDokumenGrid.RowIndex)_IdDokumen" value="@Html.Raw(HtmlEncode(templateAktivitasDokumenGrid.IdDokumen.OldValue))">
+    @* IdDokumen (end) *@
+} @* Add (end) *@
+@if (templateAktivitasDokumenGrid.RowType == RowType.Edit) { // Edit (begin)
+    @* IdDokumen (begin) *@
+    <span id="el@(templateAktivitasDokumenGrid.RowIndex == "$rowindex$" ? "$rowindex$" : templateAktivitasDokumenGrid.RowCount)_TemplateAktivitasDokumen_IdDokumen" class="el_TemplateAktivitasDokumen_IdDokumen">
+        <select
+            id="x@(templateAktivitasDokumenGrid.RowIndex)_IdDokumen"
+            name="x@(templateAktivitasDokumenGrid.RowIndex)_IdDokumen"
+            class="form-select ew-select@(templateAktivitasDokumenGrid.IdDokumen.IsInvalidClass)"
+            data-select2-id="fTemplateAktivitasDokumengrid_x@(templateAktivitasDokumenGrid.RowIndex)_IdDokumen"
+            data-table="TemplateAktivitasDokumen"
+            data-field="x_IdDokumen"
+            data-value-separator="@(templateAktivitasDokumenGrid.IdDokumen.DisplayValueSeparatorAttribute)"
+            data-placeholder="@(HtmlEncode(templateAktivitasDokumenGrid.IdDokumen.PlaceHolder))"
+            @Html.Raw(templateAktivitasDokumenGrid.IdDokumen.EditAttributes)>
+            @(templateAktivitasDokumenGrid.IdDokumen.SelectOptionListHtml("x" + templateAktivitasDokumenGrid.RowIndex + "_IdDokumen"))
+        </select>
+        <div class="invalid-feedback">@Html.Raw(templateAktivitasDokumenGrid.IdDokumen.GetErrorMessage())</div>
+    @Html.Raw(templateAktivitasDokumenGrid.IdDokumen.Lookup.GetParamTag(templateAktivitasDokumenGrid, "p_x" + templateAktivitasDokumenGrid.RowIndex + "_IdDokumen"))
+    <script>
+    loadjs.ready("fTemplateAktivitasDokumengrid", function() {
+        var options = { name: "x@(templateAktivitasDokumenGrid.RowIndex)_IdDokumen", selectId: "fTemplateAktivitasDokumengrid_x@(templateAktivitasDokumenGrid.RowIndex)_IdDokumen" },
+            el = document.querySelector("select[data-select2-id='" + options.selectId + "']");
+        if (!el)
+            return;
+        options.closeOnSelect = !options.multiple;
+        options.dropdownParent = el.closest("#ew-modal-dialog, #ew-add-opt-dialog");
+        if (fTemplateAktivitasDokumengrid.lists.IdDokumen?.lookupOptions.length) {
+            options.data = { id: "x@(templateAktivitasDokumenGrid.RowIndex)_IdDokumen", form: "fTemplateAktivitasDokumengrid" };
+        } else {
+            options.ajax = { id: "x@(templateAktivitasDokumenGrid.RowIndex)_IdDokumen", form: "fTemplateAktivitasDokumengrid", limit: ew.LOOKUP_PAGE_SIZE };
+        }
+        options.minimumInputLength = ew.selectMinimumInputLength;
+        options = Object.assign({}, ew.selectOptions, options, ew.vars.tables.TemplateAktivitasDokumen.fields.IdDokumen.selectOptions);
+        ew.createSelect(options);
+    });
+    </script>
+    </span>
+    @* IdDokumen (end) *@
+} @* Edit (end) *@
+@if (templateAktivitasDokumenGrid.RowType == RowType.View) { // View (begin)
+    @* IdDokumen (begin) *@
+    <span id="el@(templateAktivitasDokumenGrid.RowIndex == "$rowindex$" ? "$rowindex$" : templateAktivitasDokumenGrid.RowCount)_TemplateAktivitasDokumen_IdDokumen" class="el_TemplateAktivitasDokumen_IdDokumen">
+    <span @Html.Raw(templateAktivitasDokumenGrid.IdDokumen.ViewAttributes)>
+    @Html.Raw(templateAktivitasDokumenGrid.IdDokumen.GetViewValue())</span>
+    </span>
+    if (templateAktivitasDokumenGrid.IsConfirm) {
+    <input type="hidden" data-table="TemplateAktivitasDokumen" data-field="x_IdDokumen" data-hidden="1" name="fTemplateAktivitasDokumengrid$x@(templateAktivitasDokumenGrid.RowIndex)_IdDokumen" id="fTemplateAktivitasDokumengrid$x@(templateAktivitasDokumenGrid.RowIndex)_IdDokumen" value="@Html.Raw(HtmlEncode(templateAktivitasDokumenGrid.IdDokumen.FormValue))">
+    <input type="hidden" data-table="TemplateAktivitasDokumen" data-field="x_IdDokumen" data-hidden="1" data-old name="fTemplateAktivitasDokumengrid$o@(templateAktivitasDokumenGrid.RowIndex)_IdDokumen" id="fTemplateAktivitasDokumengrid$o@(templateAktivitasDokumenGrid.RowIndex)_IdDokumen" value="@Html.Raw(HtmlEncode(templateAktivitasDokumenGrid.IdDokumen.OldValue))">
+    }
+    @* IdDokumen (end) *@
+} @* View (end) *@
+</td>
+    } @* templateAktivitasDokumenGrid.IdDokumen.Visible (end) *@
+    @if (templateAktivitasDokumenGrid.WajibUpload.Visible) { // templateAktivitasDokumenGrid.WajibUpload.Visible (begin)
+        <td data-name="WajibUpload" @Html.Raw(templateAktivitasDokumenGrid.WajibUpload.CellAttributes)>
+@if (templateAktivitasDokumenGrid.RowType == RowType.Add) { // Add (begin)
+    @* WajibUpload (begin) *@
+    <span id="el@(templateAktivitasDokumenGrid.RowIndex == "$rowindex$" ? "$rowindex$" : templateAktivitasDokumenGrid.RowCount)_TemplateAktivitasDokumen_WajibUpload" class="el_TemplateAktivitasDokumen_WajibUpload">
+    <div class="form-check d-inline-block">
+        <input type="checkbox" class="form-check-input@(templateAktivitasDokumenGrid.WajibUpload.IsInvalidClass)" data-table="TemplateAktivitasDokumen" data-field="x_WajibUpload" data-boolean name="x@(templateAktivitasDokumenGrid.RowIndex)_WajibUpload" id="x@(templateAktivitasDokumenGrid.RowIndex)_WajibUpload" value="1" checked="@ConvertToBool(templateAktivitasDokumenGrid.WajibUpload.CurrentValue)" @Html.Raw(templateAktivitasDokumenGrid.WajibUpload.EditAttributes)>
+        <div class="invalid-feedback">@Html.Raw(templateAktivitasDokumenGrid.WajibUpload.GetErrorMessage())</div>
+    </div>
+    </span>
+    <input type="hidden" data-table="TemplateAktivitasDokumen" data-field="x_WajibUpload" data-hidden="1" data-old name="o@(templateAktivitasDokumenGrid.RowIndex)_WajibUpload" id="o@(templateAktivitasDokumenGrid.RowIndex)_WajibUpload" value="@Html.Raw(HtmlEncode(templateAktivitasDokumenGrid.WajibUpload.OldValue))">
+    @* WajibUpload (end) *@
+} @* Add (end) *@
+@if (templateAktivitasDokumenGrid.RowType == RowType.Edit) { // Edit (begin)
+    @* WajibUpload (begin) *@
+    <span id="el@(templateAktivitasDokumenGrid.RowIndex == "$rowindex$" ? "$rowindex$" : templateAktivitasDokumenGrid.RowCount)_TemplateAktivitasDokumen_WajibUpload" class="el_TemplateAktivitasDokumen_WajibUpload">
+    <div class="form-check d-inline-block">
+        <input type="checkbox" class="form-check-input@(templateAktivitasDokumenGrid.WajibUpload.IsInvalidClass)" data-table="TemplateAktivitasDokumen" data-field="x_WajibUpload" data-boolean name="x@(templateAktivitasDokumenGrid.RowIndex)_WajibUpload" id="x@(templateAktivitasDokumenGrid.RowIndex)_WajibUpload" value="1" checked="@ConvertToBool(templateAktivitasDokumenGrid.WajibUpload.CurrentValue)" @Html.Raw(templateAktivitasDokumenGrid.WajibUpload.EditAttributes)>
+        <div class="invalid-feedback">@Html.Raw(templateAktivitasDokumenGrid.WajibUpload.GetErrorMessage())</div>
+    </div>
+    </span>
+    @* WajibUpload (end) *@
+} @* Edit (end) *@
+@if (templateAktivitasDokumenGrid.RowType == RowType.View) { // View (begin)
+    @* WajibUpload (begin) *@
+    <span id="el@(templateAktivitasDokumenGrid.RowIndex == "$rowindex$" ? "$rowindex$" : templateAktivitasDokumenGrid.RowCount)_TemplateAktivitasDokumen_WajibUpload" class="el_TemplateAktivitasDokumen_WajibUpload">
+    <span @Html.Raw(templateAktivitasDokumenGrid.WajibUpload.ViewAttributes)>
+    <i class="fa-regular @(ConvertToBool(templateAktivitasDokumenGrid.WajibUpload.CurrentValue) ? "fa-square-check" : "fa-square") ew-icon ew-boolean"></i>
+    </span>
+    </span>
+    if (templateAktivitasDokumenGrid.IsConfirm) {
+    <input type="hidden" data-table="TemplateAktivitasDokumen" data-field="x_WajibUpload" data-hidden="1" name="fTemplateAktivitasDokumengrid$x@(templateAktivitasDokumenGrid.RowIndex)_WajibUpload" id="fTemplateAktivitasDokumengrid$x@(templateAktivitasDokumenGrid.RowIndex)_WajibUpload" value="@Html.Raw(HtmlEncode(templateAktivitasDokumenGrid.WajibUpload.FormValue))">
+    <input type="hidden" data-table="TemplateAktivitasDokumen" data-field="x_WajibUpload" data-hidden="1" data-old name="fTemplateAktivitasDokumengrid$o@(templateAktivitasDokumenGrid.RowIndex)_WajibUpload" id="fTemplateAktivitasDokumengrid$o@(templateAktivitasDokumenGrid.RowIndex)_WajibUpload" value="@Html.Raw(HtmlEncode(templateAktivitasDokumenGrid.WajibUpload.OldValue))">
+    }
+    @* WajibUpload (end) *@
+} @* View (end) *@
+</td>
+    } @* templateAktivitasDokumenGrid.WajibUpload.Visible (end) *@
+    @* Render list options (body, right) *@
+    @templateAktivitasDokumenGrid.ListOptions.RenderBody("right", templateAktivitasDokumenGrid.RowCount)
+    </tr>
+if (templateAktivitasDokumenGrid.RowType == RowType.Add || templateAktivitasDokumenGrid.RowType == RowType.Edit) {
+<script>
+loadjs.ready(["fTemplateAktivitasDokumengrid","load"], () => fTemplateAktivitasDokumengrid.updateLists(@(templateAktivitasDokumenGrid.RowIndex)@(templateAktivitasDokumenGrid.IsAdd || templateAktivitasDokumenGrid.IsEdit || templateAktivitasDokumenGrid.IsCopy || SameString(templateAktivitasDokumenGrid.RowIndex, "$rowindex$") ? ", true" : "")));
+</script>
+}
+    } @* End delete row checking *@
+    } @* End if *@
+
+    // Reset for template row
+    if (SameString(templateAktivitasDokumenGrid.RowIndex, "$rowindex$"))
+        templateAktivitasDokumenGrid.RowIndex = 0;
+
+    // Reset inline add/copy row
+    if ((templateAktivitasDokumenGrid.IsCopy || templateAktivitasDokumenGrid.IsAdd) && templateAktivitasDokumenGrid.RowIndex is int rowIndex2 && rowIndex2 == 0)
+        templateAktivitasDokumenGrid.RowIndex = 1;
+} @* End While *@
+</tbody>
+</table><!-- /.ew-table -->
+@if (templateAktivitasDokumenGrid.CurrentMode == "add" || templateAktivitasDokumenGrid.CurrentMode == "copy") {
+<input type="hidden" name="@(templateAktivitasDokumenGrid.FormKeyCountName)" id="@(templateAktivitasDokumenGrid.FormKeyCountName)" value="@(templateAktivitasDokumenGrid.KeyCount)">
+@Html.Raw(templateAktivitasDokumenGrid.MultiSelectKey)
+}
+@if (templateAktivitasDokumenGrid.CurrentMode == "edit") {
+<input type="hidden" name="@(templateAktivitasDokumenGrid.FormKeyCountName)" id="@(templateAktivitasDokumenGrid.FormKeyCountName)" value="@(templateAktivitasDokumenGrid.KeyCount)">
+@Html.Raw(templateAktivitasDokumenGrid.MultiSelectKey)
+}
+</div><!-- /.ew-grid-middle-panel -->
+@if (Empty(templateAktivitasDokumenGrid.CurrentMode)) {
+<input type="hidden" name="action" id="action" value="">
+}
+<input type="hidden" name="detailpage" value="fTemplateAktivitasDokumengrid">
+</div><!-- /.ew-list-form -->
+@{ templateAktivitasDokumenGrid.CloseRecordset(); }
+@if (templateAktivitasDokumenGrid.ShowOtherOptions) {
+<div class="card-footer ew-grid-lower-panel">
+    @templateAktivitasDokumenGrid.OtherOptions.RenderBody("bottom")
+</div>
+}
+</div><!-- /.ew-grid -->
+} else { // Show other options
+<div class="ew-list-other-options">
+@templateAktivitasDokumenGrid.OtherOptions.ForEach(opt => opt.ButtonClass = "").RenderBody()
+</div>
+}
+</div>
+<div id="ew-footer-options">
+    @templateAktivitasDokumenGrid.FooterOptions.RenderBody()
+</div>
+</main>
+@if (!templateAktivitasDokumenGrid.IsExport()) {
+<script>
+// Field event handlers
+loadjs.ready("head", function() {
+    ew.addEventHandlers("TemplateAktivitasDokumen");
+});
+</script>
+<script>
+loadjs.ready("load", function() {
+    // Write your table-specific startup script here
+    // document.write("page loaded");
+});
+</script>
+}
+@{
+    // Close Recordset
+    templateAktivitasDokumenGrid.CloseRecordset(); // DN
+    // Clear CurrentGrid
+    CurrentGrid = null;
+}

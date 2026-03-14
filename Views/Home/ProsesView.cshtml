@@ -1,0 +1,206 @@
+@{
+    // View
+    View = this;
+
+    // Check action result
+    if (prosesView.ActionResult is EmptyResult) // Terminate page
+        return;
+
+    // Layout
+    Layout = prosesView.UseLayout ? "_Layout" : "";
+}
+@if (!prosesView.IsExport()) {
+<div class="btn-toolbar ew-toolbar">
+    @prosesView.ExportOptions.RenderBody()
+    @prosesView.OtherOptions.RenderBody()
+</div>
+}
+@prosesView.ShowPageHeader()
+@prosesView.ShowMessages()
+<main class="view">
+<form name="fProsesview" id="fProsesview" class="ew-form ew-view-form overlay-wrapper" action="@AppPath(CurrentPageName())" method="post" novalidate autocomplete="off">
+@if (!prosesView.IsExport()) {
+<script>
+var currentTable = @Html.Raw(ConvertToJson(prosesView.ToClientVar()));
+ew.deepAssign(ew.vars, { tables: { Proses: currentTable } });
+var currentPageID = ew.PAGE_ID = "view";
+var currentForm;
+var fProsesview;
+loadjs.ready(["wrapper", "head"], function () {
+    let $ = jQuery;
+    let fields = currentTable.fields;
+
+    // Form object
+    let form = new ew.FormBuilder()
+        .setId("fProsesview")
+        .setPageId("view")
+        .build();
+    window[form.id] = form;
+    currentForm = form;
+    loadjs.done(form.id);
+});
+</script>
+<script>
+loadjs.ready("head", function() {
+    // Write your client script here, no need to add script tags.
+});
+</script>
+}
+@if (CurrentPage?.CheckToken ?? false) {
+    <input type="hidden" name="@Config.TokenNameKey" value="@Config.TokenName"><!-- CSRF token name -->
+    @Html.AntiForgeryToken()
+}
+<input type="hidden" name="modal" value="@ConvertToInt(prosesView.IsModal)">
+<table class="@(prosesView.TableClass)">
+@if (prosesView.IdProses.Visible) { // prosesView.IdProses.Visible (begin)
+    <tr id="r_IdProses" @Html.Raw(prosesView.IdProses.RowAttributes)>
+        <td class="@(prosesView.TableLeftColumnClass)"><span id="elh_Proses_IdProses">@Html.Raw(prosesView.IdProses.Caption)</span></td>
+        <td data-name="IdProses" @Html.Raw(prosesView.IdProses.CellAttributes)>
+<span id="el_Proses_IdProses">
+<span @Html.Raw(prosesView.IdProses.ViewAttributes)>
+@Html.Raw(prosesView.IdProses.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* prosesView.IdProses.Visible (end) *@
+@if (prosesView.IdReferensi.Visible) { // prosesView.IdReferensi.Visible (begin)
+    <tr id="r_IdReferensi" @Html.Raw(prosesView.IdReferensi.RowAttributes)>
+        <td class="@(prosesView.TableLeftColumnClass)"><span id="elh_Proses_IdReferensi">@Html.Raw(prosesView.IdReferensi.Caption)</span></td>
+        <td data-name="IdReferensi" @Html.Raw(prosesView.IdReferensi.CellAttributes)>
+<span id="el_Proses_IdReferensi">
+<span @Html.Raw(prosesView.IdReferensi.ViewAttributes)>
+@Html.Raw(prosesView.IdReferensi.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* prosesView.IdReferensi.Visible (end) *@
+@if (prosesView.IdTemplateProses.Visible) { // prosesView.IdTemplateProses.Visible (begin)
+    <tr id="r_IdTemplateProses" @Html.Raw(prosesView.IdTemplateProses.RowAttributes)>
+        <td class="@(prosesView.TableLeftColumnClass)"><span id="elh_Proses_IdTemplateProses">@Html.Raw(prosesView.IdTemplateProses.Caption)</span></td>
+        <td data-name="IdTemplateProses" @Html.Raw(prosesView.IdTemplateProses.CellAttributes)>
+<span id="el_Proses_IdTemplateProses">
+<span @Html.Raw(prosesView.IdTemplateProses.ViewAttributes)>
+@Html.Raw(prosesView.IdTemplateProses.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* prosesView.IdTemplateProses.Visible (end) *@
+@if (prosesView.Aktivitas2.Visible) { // prosesView.Aktivitas2.Visible (begin)
+    <tr id="r_Aktivitas2" @Html.Raw(prosesView.Aktivitas2.RowAttributes)>
+        <td class="@(prosesView.TableLeftColumnClass)"><span id="elh_Proses_Aktivitas2">@Html.Raw(prosesView.Aktivitas2.Caption)</span></td>
+        <td data-name="Aktivitas2" @Html.Raw(prosesView.Aktivitas2.CellAttributes)>
+<span id="el_Proses_Aktivitas2">
+<span @Html.Raw(prosesView.Aktivitas2.ViewAttributes)>
+@Html.Raw(prosesView.Aktivitas2.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* prosesView.Aktivitas2.Visible (end) *@
+@if (prosesView.TanggalMulai.Visible) { // prosesView.TanggalMulai.Visible (begin)
+    <tr id="r_TanggalMulai" @Html.Raw(prosesView.TanggalMulai.RowAttributes)>
+        <td class="@(prosesView.TableLeftColumnClass)"><span id="elh_Proses_TanggalMulai">@Html.Raw(prosesView.TanggalMulai.Caption)</span></td>
+        <td data-name="TanggalMulai" @Html.Raw(prosesView.TanggalMulai.CellAttributes)>
+<span id="el_Proses_TanggalMulai">
+<span @Html.Raw(prosesView.TanggalMulai.ViewAttributes)>
+@Html.Raw(prosesView.TanggalMulai.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* prosesView.TanggalMulai.Visible (end) *@
+@if (prosesView.TanggalSelesai.Visible) { // prosesView.TanggalSelesai.Visible (begin)
+    <tr id="r_TanggalSelesai" @Html.Raw(prosesView.TanggalSelesai.RowAttributes)>
+        <td class="@(prosesView.TableLeftColumnClass)"><span id="elh_Proses_TanggalSelesai">@Html.Raw(prosesView.TanggalSelesai.Caption)</span></td>
+        <td data-name="TanggalSelesai" @Html.Raw(prosesView.TanggalSelesai.CellAttributes)>
+<span id="el_Proses_TanggalSelesai">
+<span @Html.Raw(prosesView.TanggalSelesai.ViewAttributes)>
+@Html.Raw(prosesView.TanggalSelesai.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* prosesView.TanggalSelesai.Visible (end) *@
+@if (prosesView.StatusProses.Visible) { // prosesView.StatusProses.Visible (begin)
+    <tr id="r_StatusProses" @Html.Raw(prosesView.StatusProses.RowAttributes)>
+        <td class="@(prosesView.TableLeftColumnClass)"><span id="elh_Proses_StatusProses">@Html.Raw(prosesView.StatusProses.Caption)</span></td>
+        <td data-name="StatusProses" @Html.Raw(prosesView.StatusProses.CellAttributes)>
+<span id="el_Proses_StatusProses">
+<span @Html.Raw(prosesView.StatusProses.ViewAttributes)>
+@Html.Raw(prosesView.StatusProses.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* prosesView.StatusProses.Visible (end) *@
+@if (prosesView.TipeProses.Visible) { // prosesView.TipeProses.Visible (begin)
+    <tr id="r_TipeProses" @Html.Raw(prosesView.TipeProses.RowAttributes)>
+        <td class="@(prosesView.TableLeftColumnClass)"><span id="elh_Proses_TipeProses">@Html.Raw(prosesView.TipeProses.Caption)</span></td>
+        <td data-name="TipeProses" @Html.Raw(prosesView.TipeProses.CellAttributes)>
+<span id="el_Proses_TipeProses">
+<span @Html.Raw(prosesView.TipeProses.ViewAttributes)>
+@Html.Raw(prosesView.TipeProses.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* prosesView.TipeProses.Visible (end) *@
+@if (prosesView.Catatan.Visible) { // prosesView.Catatan.Visible (begin)
+    <tr id="r_Catatan" @Html.Raw(prosesView.Catatan.RowAttributes)>
+        <td class="@(prosesView.TableLeftColumnClass)"><span id="elh_Proses_Catatan">@Html.Raw(prosesView.Catatan.Caption)</span></td>
+        <td data-name="Catatan" @Html.Raw(prosesView.Catatan.CellAttributes)>
+<span id="el_Proses_Catatan">
+<span @Html.Raw(prosesView.Catatan.ViewAttributes)>
+@Html.Raw(prosesView.Catatan.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* prosesView.Catatan.Visible (end) *@
+@if (prosesView.DibuatOleh.Visible) { // prosesView.DibuatOleh.Visible (begin)
+    <tr id="r_DibuatOleh" @Html.Raw(prosesView.DibuatOleh.RowAttributes)>
+        <td class="@(prosesView.TableLeftColumnClass)"><span id="elh_Proses_DibuatOleh">@Html.Raw(prosesView.DibuatOleh.Caption)</span></td>
+        <td data-name="DibuatOleh" @Html.Raw(prosesView.DibuatOleh.CellAttributes)>
+<span id="el_Proses_DibuatOleh">
+<span @Html.Raw(prosesView.DibuatOleh.ViewAttributes)>
+@Html.Raw(prosesView.DibuatOleh.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* prosesView.DibuatOleh.Visible (end) *@
+@if (prosesView.TanggalDibuat.Visible) { // prosesView.TanggalDibuat.Visible (begin)
+    <tr id="r_TanggalDibuat" @Html.Raw(prosesView.TanggalDibuat.RowAttributes)>
+        <td class="@(prosesView.TableLeftColumnClass)"><span id="elh_Proses_TanggalDibuat">@Html.Raw(prosesView.TanggalDibuat.Caption)</span></td>
+        <td data-name="TanggalDibuat" @Html.Raw(prosesView.TanggalDibuat.CellAttributes)>
+<span id="el_Proses_TanggalDibuat">
+<span @Html.Raw(prosesView.TanggalDibuat.ViewAttributes)>
+@Html.Raw(prosesView.TanggalDibuat.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* prosesView.TanggalDibuat.Visible (end) *@
+@if (prosesView.DiperbaruiOleh.Visible) { // prosesView.DiperbaruiOleh.Visible (begin)
+    <tr id="r_DiperbaruiOleh" @Html.Raw(prosesView.DiperbaruiOleh.RowAttributes)>
+        <td class="@(prosesView.TableLeftColumnClass)"><span id="elh_Proses_DiperbaruiOleh">@Html.Raw(prosesView.DiperbaruiOleh.Caption)</span></td>
+        <td data-name="DiperbaruiOleh" @Html.Raw(prosesView.DiperbaruiOleh.CellAttributes)>
+<span id="el_Proses_DiperbaruiOleh">
+<span @Html.Raw(prosesView.DiperbaruiOleh.ViewAttributes)>
+@Html.Raw(prosesView.DiperbaruiOleh.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* prosesView.DiperbaruiOleh.Visible (end) *@
+@if (prosesView.TanggalDiperbarui.Visible) { // prosesView.TanggalDiperbarui.Visible (begin)
+    <tr id="r_TanggalDiperbarui" @Html.Raw(prosesView.TanggalDiperbarui.RowAttributes)>
+        <td class="@(prosesView.TableLeftColumnClass)"><span id="elh_Proses_TanggalDiperbarui">@Html.Raw(prosesView.TanggalDiperbarui.Caption)</span></td>
+        <td data-name="TanggalDiperbarui" @Html.Raw(prosesView.TanggalDiperbarui.CellAttributes)>
+<span id="el_Proses_TanggalDiperbarui">
+<span @Html.Raw(prosesView.TanggalDiperbarui.ViewAttributes)>
+@Html.Raw(prosesView.TanggalDiperbarui.GetViewValue())</span>
+</span></td>
+    </tr>
+} @* prosesView.TanggalDiperbarui.Visible (end) *@
+</table>
+@{ prosesView.CloseRecordset(); }
+</form>
+</main>
+@prosesView.ShowPageFooter()
+@Html.Raw(GetDebugMessage())
+@ElapsedTime()
+@if (!prosesView.IsExport()) {
+<script>
+loadjs.ready("load", function() {
+    // Startup script
+    // Write your table-specific startup script here
+    // document.write("page loaded");
+    $("<style>")
+        .prop("type", "text/css")
+        .html(``)
+        .appendTo("head");
+    $(document).ready(function () {
+    });
+});
+</script>
+}

@@ -531,7 +531,7 @@ public partial class LookUpListController : ApiController
                 => "Penimbunan",
             "PenimbunanPenyaluranLPG" or "PenyimpananPenyaluranSalesSTSBBM" or "PenyimpananPenyaluranKonsinyasiSTSBBM" or
             "PenyimpananPenyaluranSalesSTSLPG" or "PenyimpananPenyaluranKonsinyasiSTSLPG" or "PenyimpananPenyaluranSalesPipa" or
-            "PenyimpananPenyaluranKonsinyasiPipa" or "PenyimpananPenyaluranSalesRTW" or "PenyimpananPenyaluranKonsinyasiRTW" or "PenyimpananPenyaluranKonsinyasi"
+            "PenyimpananPenyaluranKonsinyasiPipa" or "PenyimpananPenyaluranSalesRTW" or "PenyimpananPenyaluranKonsinyasiRTW" or "PenyimpananPenyaluranKonsinyasi" or "PenyimpananPenyaluranKonsinyasiPipaJarakDekat"
                 => "PenimbunanPenyaluran",
             "ClosingStockSTSBBM" or "ClosingStockSTSLPG" 
                 => "ClosingStock",

@@ -13,6 +13,11 @@ public partial class HomeController : Controller
         subAktivitasNilaiSfbdrtwList.Cache = _cache;
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["id"];
+
+        // Run the page
         return await subAktivitasNilaiSfbdrtwList.Run();
     }
 
@@ -23,6 +28,11 @@ public partial class HomeController : Controller
     {
         // Create page object
         subAktivitasNilaiSfbdrtwAdd = new GLOBALS.SubAktivitasNilaiSfbdrtwAdd(this);
+
+        // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["id"];
 
         // Run the page
         return await subAktivitasNilaiSfbdrtwAdd.Run();
@@ -37,6 +47,11 @@ public partial class HomeController : Controller
         subAktivitasNilaiSfbdrtwView = new GLOBALS.SubAktivitasNilaiSfbdrtwView(this);
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["id"];
+
+        // Run the page
         return await subAktivitasNilaiSfbdrtwView.Run();
     }
 
@@ -49,6 +64,11 @@ public partial class HomeController : Controller
         subAktivitasNilaiSfbdrtwEdit = new GLOBALS.SubAktivitasNilaiSfbdrtwEdit(this);
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["id"];
+
+        // Run the page
         return await subAktivitasNilaiSfbdrtwEdit.Run();
     }
 
@@ -59,6 +79,11 @@ public partial class HomeController : Controller
     {
         // Create page object
         subAktivitasNilaiSfbdrtwDelete = new GLOBALS.SubAktivitasNilaiSfbdrtwDelete(this);
+
+        // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["id"];
 
         // Run the page
         return await subAktivitasNilaiSfbdrtwDelete.Run();

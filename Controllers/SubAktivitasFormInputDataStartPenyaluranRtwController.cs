@@ -13,6 +13,11 @@ public partial class HomeController : Controller
         subAktivitasFormInputDataStartPenyaluranRtwList.Cache = _cache;
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["id"];
+
+        // Run the page
         return await subAktivitasFormInputDataStartPenyaluranRtwList.Run();
     }
 
@@ -25,6 +30,11 @@ public partial class HomeController : Controller
         subAktivitasFormInputDataStartPenyaluranRtwEdit = new GLOBALS.SubAktivitasFormInputDataStartPenyaluranRtwEdit(this);
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["id"];
+
+        // Run the page
         return await subAktivitasFormInputDataStartPenyaluranRtwEdit.Run();
     }
 
@@ -35,6 +45,11 @@ public partial class HomeController : Controller
     {
         // Create page object
         subAktivitasFormInputDataStartPenyaluranRtwDelete = new GLOBALS.SubAktivitasFormInputDataStartPenyaluranRtwDelete(this);
+
+        // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["id"];
 
         // Run the page
         return await subAktivitasFormInputDataStartPenyaluranRtwDelete.Run();

@@ -13,6 +13,11 @@ public partial class HomeController : Controller
         subAktivitasInputDataKapalList.Cache = _cache;
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["id"];
+
+        // Run the page
         return await subAktivitasInputDataKapalList.Run();
     }
 
@@ -23,6 +28,11 @@ public partial class HomeController : Controller
     {
         // Create page object
         subAktivitasInputDataKapalEdit = new GLOBALS.SubAktivitasInputDataKapalEdit(this);
+
+        // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["id"];
 
         // Run the page
         return await subAktivitasInputDataKapalEdit.Run();

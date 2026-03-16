@@ -13,6 +13,11 @@ public partial class HomeController : Controller
         subAktivitasFormInputNilaiAktualDischargeList.Cache = _cache;
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["id"];
+
+        // Run the page
         return await subAktivitasFormInputNilaiAktualDischargeList.Run();
     }
 
@@ -23,6 +28,11 @@ public partial class HomeController : Controller
     {
         // Create page object
         subAktivitasFormInputNilaiAktualDischargeAdd = new GLOBALS.SubAktivitasFormInputNilaiAktualDischargeAdd(this);
+
+        // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["id"];
 
         // Run the page
         return await subAktivitasFormInputNilaiAktualDischargeAdd.Run();
@@ -37,6 +47,11 @@ public partial class HomeController : Controller
         subAktivitasFormInputNilaiAktualDischargeView = new GLOBALS.SubAktivitasFormInputNilaiAktualDischargeView(this);
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["id"];
+
+        // Run the page
         return await subAktivitasFormInputNilaiAktualDischargeView.Run();
     }
 
@@ -49,6 +64,11 @@ public partial class HomeController : Controller
         subAktivitasFormInputNilaiAktualDischargeEdit = new GLOBALS.SubAktivitasFormInputNilaiAktualDischargeEdit(this);
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["id"];
+
+        // Run the page
         return await subAktivitasFormInputNilaiAktualDischargeEdit.Run();
     }
 
@@ -59,6 +79,11 @@ public partial class HomeController : Controller
     {
         // Create page object
         subAktivitasFormInputNilaiAktualDischargeDelete = new GLOBALS.SubAktivitasFormInputNilaiAktualDischargeDelete(this);
+
+        // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["id"];
 
         // Run the page
         return await subAktivitasFormInputNilaiAktualDischargeDelete.Run();

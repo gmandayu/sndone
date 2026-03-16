@@ -1,3 +1,8 @@
+using System.Collections.Generic;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+
 namespace SnDOne.Models;
 
 // Partial class
@@ -89,12 +94,14 @@ public partial class SnDOne {
         private string _pageUrl = "";
 
         // Constructor
-        public SubAktivitasInputDataRtwEditBase()
+        public SubAktivitasInputDataRtwEditBase(Controller? controller)
         {
             TableName = "SubAktivitasInputDataRTW";
 
             // Initialize
             CurrentPage = this;
+        if (controller != null)
+            Controller = controller;
 
             // Table CSS class
             TableClass = "table table-striped table-bordered table-hover table-sm ew-desktop-table ew-edit-table";
@@ -226,81 +233,87 @@ public partial class SnDOne {
         }
 
         // Constructor
-        public SubAktivitasInputDataRtwEditBase(Controller? controller = null): this() { // DN
-            if (controller != null)
-                Controller = controller;
-        }
+        public SubAktivitasInputDataRtwEditBase() : this(null) { }
 
         /// <summary>
         /// Terminate page
         /// </summary>
         /// <param name="url">URL to rediect to</param>
         /// <returns>Page result</returns>
-        public override IActionResult Terminate(string url = "") { // DN
-            if (_terminated) // DN
-                return new EmptyResult();
-
-            // Page Unload event
-            PageUnload();
-
-            // Global Page Unloaded event
-            PageUnloaded();
-            PageUnloadedEventHandler?.Invoke(this, EventArgs.Empty);
-            if (!IsApi())
-                PageRedirecting(ref url);
-
-            // Gargage collection
-            Collect(); // DN
-
-            // Terminate
-            _terminated = true; // DN
-
-            // Return for API
-            if (IsApi()) {
-                var result = new Dictionary<string, string> { { "version", Config.ProductVersion } };
-                if (!Empty(url)) // Add url
-                    result.Add("url", GetUrl(url));
-                foreach (var (key, value) in GetMessages()) // Add messages
-                    result.Add(key, value);
-                return Controller.Json(result);
-            } else if (ActionResult != null) { // Check action result
-                return ActionResult;
-            }
-
-            // Go to URL if specified
-            if (!Empty(url)) {
-                if (!Config.Debug)
-                    ResponseClear();
-                if (Response != null && !Response.HasStarted) {
-                    // Handle modal response
-                    if (IsModal) { // Show as modal
-                        string pageName = GetPageName(url);
-                        var result = new Dictionary<string, string> { {"url", GetUrl(url)}, {"modal", "1"} }; // Assume return to modal for simplicity
-                        if (SameString(pageName, GetPageName(ListUrl)) ||
-                            SameString(pageName, GetPageName(ViewUrl)) ||
-                            SameString(pageName, GetPageName(GetCurrentMasterTable()?.ViewUrl ?? ""))
-                        ) { // List / View / Master View page
-                            if (!SameString(pageName, ListUrl)) { // Not List page
-                                result.Add("caption", GetModalCaption(pageName));
-                                result.Add("view", pageName == "SubAktivitasInputDataRtwView" ? "1" : "0"); // If View page, no primary button
-                            } else { // List page
-                                // result.Add("list", PageID == "search" ? "1" : "0"); // Refresh List page if current page is Search page
-                                result.Add("error", FailureMessage); // List page should not be shown as modal => error
-                                ClearFailureMessage();
-                            }
-                        } else { // Other pages (add messages and then clear messages)
-                            result = GetMessages();
-                            result.Add("modal", "1");
-                            ClearMessages();
-                        }
-                        return Controller.Json(result);
-                    } else {
-                        SaveDebugMessage();
-                        return Controller.LocalRedirect(AppPath(url));
-                    }
-                }
-            }
+        public override IActionResult Terminate(string url = "")
+        { // DN
+            if (_terminated) return new EmptyResult();
+            InvokeUnloadHooks();
+            if (!IsApi()) PageRedirecting(ref url);
+            Collect();                // DN
+            _terminated = true;       // DN
+            if (IsApi()) return BuildApiTerminateResult(url);
+            if (ActionResult != null) return ActionResult;
+            if (Empty(url)) return new EmptyResult();
+            if (!Config.Debug) ResponseClear();
+            if (Response != null && !Response.HasStarted)
+                return HandleRedirect(url);
             return new EmptyResult();
+        }
+
+        // ================= HELPER METHODS =================
+        private void InvokeUnloadHooks()
+        {
+                    // Page Unload event
+                    PageUnload();
+
+                // Global Page Unloaded event
+                PageUnloaded();
+            PageUnloadedEventHandler?.Invoke(null, EventArgs.Empty);
+        }
+
+        private IActionResult BuildApiTerminateResult(string url)
+        {
+            var result = new Dictionary<string, string> { { "version", Config.ProductVersion } };
+            if (!Empty(url)) result.Add("url", GetUrl(url));
+            foreach (var (key, value) in GetMessages()) result.Add(key, value);
+            return Controller.Json(result);
+        }
+
+        private IActionResult HandleRedirect(string url)
+        {
+            if (IsModal) return BuildModalResult_ListAddEditUpdateViewSearch(url);
+            SaveDebugMessage();
+            return RedirectCore(url);
+        }
+
+        private IActionResult RedirectCore(string url)
+        {
+            return Controller.LocalRedirect(AppPath(url));
+        }
+
+        private IActionResult BuildModalResult_ListAddEditUpdateViewSearch(string url)
+        {
+            string pageName = GetPageName(url);
+                var result = new Dictionary<string, string> { { "url", GetUrl(url) }, { "modal", "1" } }; // modal=1
+                    if (SameString(pageName, GetPageName(ListUrl)) ||
+                        SameString(pageName, GetPageName(ViewUrl)) ||
+                        SameString(pageName, GetPageName(GetCurrentMasterTable()?.ViewUrl ?? "")))
+                    {
+                // List / View / Master View page
+                    if (!SameString(pageName, ListUrl))
+                    {
+                        result.Add("caption", GetModalCaption(pageName));
+                        result.Add("view", pageName == "SubAktivitasInputDataRtwView" ? "1" : "0"); // If View page, no primary button
+                    }
+                    else
+                    {
+                        result.Add("error", FailureMessage); // List page should not be shown as modal => error
+                        ClearFailureMessage();
+                    }
+                    }
+                    else
+                    { // Other pages (add messages and then clear messages)
+                        result = GetMessages();
+                        result.Add("modal", "1");
+                        ClearMessages();
+                    }
+                return Controller.Json(result);
         }
 
         // Get all records from datareader
@@ -347,43 +360,72 @@ public partial class SnDOne {
         protected Dictionary<string, object>? GetRecordFromRecordset(List<Dictionary<string, object>>? list) =>
             list != null && list.Count > 0 ? GetRecordFromDictionary(list[0]) : null;
 
-        // Get record from Dictionary
-        protected Dictionary<string, object>? GetRecordFromDictionary(Dictionary<string, object>? dict) {
-            if (dict == null)
-                return null;
+        // Get record from Dictionary (refactor: low cognitive complexity)
+        protected Dictionary<string, object>? GetRecordFromDictionary(Dictionary<string, object>? dict)
+        {
+            if (dict is null) return null;
             var row = new Dictionary<string, object>();
-            foreach (var (key, value) in dict) {
-                if (Fields.TryGetValue(key, out DbField? fld) && fld != null) {
-                    if (fld.Visible || fld.IsPrimaryKey) { // Primary key or Visible
-                        if (fld.HtmlTag == "FILE") { // Upload field
-                            if (Empty(value)) {
-                                // row[key] = null;
-                            } else {
-                                if (fld.DataType == DataType.Blob) {
-                                    string url = FullUrl(GetPageName(Config.ApiUrl) + "/" + Config.ApiFileAction + "/" + fld.TableVar + "/" + fld.Param + "/" + GetRecordKeyValue(dict)); // Query string format
-                                    row[key] = new Dictionary<string, object> { { "type", ContentType((byte[])value) }, { "url", url }, { "name", fld.Param + ContentExtension((byte[])value) } };
-                                } else if (!fld.UploadMultiple || !ConvertToString(value).Contains(Config.MultipleUploadSeparator)) { // Single file
-                                    string url = FullUrl(GetPageName(Config.ApiUrl) + "/" + Config.ApiFileAction + "/" + fld.TableVar + "/" + Encrypt(fld.PhysicalUploadPath + ConvertToString(value))); // Query string format
-                                    row[key] = new Dictionary<string, object> { { "type", ContentType(ConvertToString(value)) }, { "url", url }, { "name", ConvertToString(value) } };
-                                } else { // Multiple files
-                                    var files = ConvertToString(value).Split(Config.MultipleUploadSeparator);
-                                    row[key] = files.Where(file => !Empty(file)).Select(file => new Dictionary<string, object> { { "type", ContentType(file) }, { "url", FullUrl(GetPageName(Config.ApiUrl) + "/" + Config.ApiFileAction + "/" + fld.TableVar + "/" + Encrypt(fld.PhysicalUploadPath + file)) }, { "name", file } });
-                                }
-                            }
-                        } else {
-                            string val = ConvertToString(value);
-                            if (fld.DataType == DataType.Date && value is DateTime dt)
-                                val = dt.ToString("s");
-                            row[key] = ConvertToString(val);
-                        }
-                    }
-                }
+            foreach (var (key, value) in dict)
+            {
+                if (!Fields.TryGetValue(key, out DbField? fld) || fld is null) continue;
+                if (!ShouldIncludeField(fld)) continue;
+                var cell = fld.HtmlTag == "FILE"
+                    ? BuildFileCell(fld, value, dict)
+                    : BuildScalarCell(fld, value);
+                if (cell is not null)
+                    row[key] = cell;
             }
             return row;
         }
 
-        // Get record key value from array
-        protected string GetRecordKeyValue(Dictionary<string, object> dict) {
+        // ---- Helpers ----
+        private static bool ShouldIncludeField(DbField fld)
+            => fld.Visible || fld.IsPrimaryKey;
+
+        private object? BuildFileCell(DbField fld, object value, Dictionary<string, object> srcRow)
+        {
+            if (Empty(value)) return null; // (sesuai kode asli: tidak menambahkan key)
+
+            // Blob
+            if (fld.DataType == DataType.Blob)
+            {
+                var bytes = (byte[])value;
+                var url = FullUrl($"{GetPageName(Config.ApiUrl)}/{Config.ApiFileAction}/{fld.TableVar}/{fld.Param}/{GetRecordKeyValue(srcRow)}");
+                return FileMeta(ContentType(bytes), url, fld.Param + ContentExtension(bytes));
+            }
+
+            // Non-blob
+            var s = ConvertToString(value);
+            if (!fld.UploadMultiple || !s.Contains(Config.MultipleUploadSeparator))
+            {
+                var url = FullUrl($"{GetPageName(Config.ApiUrl)}/{Config.ApiFileAction}/{fld.TableVar}/{Encrypt(fld.PhysicalUploadPath + s)}");
+                return FileMeta(ContentType(s), url, s);
+            }
+
+            // Multiple files
+            var files = s.Split(Config.MultipleUploadSeparator);
+            return files
+                .Where(f => !Empty(f))
+                .Select(f =>
+                {
+                    var url = FullUrl($"{GetPageName(Config.ApiUrl)}/{Config.ApiFileAction}/{fld.TableVar}/{Encrypt(fld.PhysicalUploadPath + f)}");
+                    return FileMeta(ContentType(f), url, f);
+                });
+        }
+
+        private static Dictionary<string, object> FileMeta(string type, string url, string name) =>
+            new Dictionary<string, object> { { "type", type }, { "url", url }, { "name", name } };
+
+        private object BuildScalarCell(DbField fld, object value)
+        {
+            var s = ConvertToString(value);
+            if (fld.DataType == DataType.Date && value is DateTime dt)
+                s = dt.ToString("s");
+            return ConvertToString(s);
+        }
+
+// Get record key value from array
+protected string GetRecordKeyValue(Dictionary<string, object> dict) {
             string key = "";
             key += UrlEncode(ConvertToString(dict.ContainsKey("id") ? dict["id"] : id.CurrentValue));
             return key;
@@ -396,78 +438,147 @@ public partial class SnDOne {
         }
 
         #pragma warning disable 219
-        /// <summary>
-        /// Lookup data from table
-        /// </summary>
+/// <summary>
+/// Lookup data from table
+/// </summary>
         public async Task<Dictionary<string, object>> Lookup(Dictionary<string, string>? dict = null)
+{
+    Language = ResolveLanguage();
+    Security = ResolveSecurity();
+    var lookupField = FieldByName(GetFieldName(dict));
+    var lookup = lookupField?.Lookup;
+    if (lookup == null)
+        return new Dictionary<string, object>();
+            string lookupType = GetLookupType(dict);
+    var (searchValue, pageSize) = GetSearchAndPageSize(dict, lookupType);
+    int offset = CalculateOffset(dict, pageSize);
+    ApplyUserSettings(dict, lookup);
+    ApplyFilterValues(dict, lookup);
+    lookup.LookupType = lookupType;
+    lookup.SearchValue = searchValue;
+    lookup.PageSize = pageSize;
+    lookup.Offset = offset;
+    return await lookup.ToJson(this);
+}
+
+private string GetFieldName(Dictionary<string, string>? dict)
+{
+    return GetValue(dict, "field", Post("field"));
+}
+
+private string GetLookupType(Dictionary<string, string>? dict)
+{
+    return GetValue(dict, "ajax", Post("ajax") ?? "unknown");
+}
+
+private (string searchValue, int pageSize) GetSearchAndPageSize(Dictionary<string, string>? dict, string lookupType)
+{
+    string searchValue = "";
+    int pageSize = -1;
+    if (SameText(lookupType, "modal") || SameText(lookupType, "filter"))
+    {
+        searchValue = GetValue(dict, new[] { "q", "sv" }, Param("q") ?? Post("sv"));
+        int fallback = 10;
+        if (IsNumeric(Param("n")))
         {
-            Language = ResolveLanguage();
-            Security = ResolveSecurity();
-            string? v;
-
-            // Get lookup object
-            string fieldName = IsDictionary(dict) && dict.TryGetValue("field", out v) && v != null ? v : Post("field");
-            var lookupField = FieldByName(fieldName);
-            var lookup = lookupField?.Lookup;
-            if (lookup == null) // DN
-                return new Dictionary<string, object>();
-            string lookupType = IsDictionary(dict) && dict.TryGetValue("ajax", out v) && v != null ? v : (Post("ajax") ?? "unknown");
-            int pageSize = -1;
-            int offset = -1;
-            string searchValue = "";
-            if (SameText(lookupType, "modal") || SameText(lookupType, "filter")) {
-                searchValue = IsDictionary(dict) && (dict.TryGetValue("q", out v) && v != null || dict.TryGetValue("sv", out v) && v != null)
-                    ? v
-                    : (Param("q") ?? Post("sv"));
-                pageSize = IsDictionary(dict) && (dict.TryGetValue("n", out v) || dict.TryGetValue("recperpage", out v))
-                    ? ConvertToInt(v)
-                    : (IsNumeric(Param("n")) ? Param<int>("n") : (Post("recperpage", out StringValues rpp) ? ConvertToInt(rpp.ToString()) : 10));
-            } else if (SameText(lookupType, "autosuggest")) {
-                searchValue = IsDictionary(dict) && dict.TryGetValue("q", out v) && v != null ? v : Param("q");
-                pageSize = IsDictionary(dict) && dict.TryGetValue("n", out v) ? ConvertToInt(v) : (IsNumeric(Param("n")) ? Param<int>("n") : -1);
-                if (pageSize <= 0)
-                    pageSize = Config.AutoSuggestMaxEntries;
-            }
-            int start = IsDictionary(dict) && dict.TryGetValue("start", out v) ? ConvertToInt(v) : (IsNumeric(Param("start")) ? Param<int>("start") : -1);
-            int page = IsDictionary(dict) && dict.TryGetValue("page", out v) ? ConvertToInt(v) : (IsNumeric(Param("page")) ? Param<int>("page") : -1);
-            offset = start >= 0 ? start : (page > 0 && pageSize > 0 ? (page - 1) * pageSize : 0);
-            string userSelect = Decrypt(IsDictionary(dict) && dict.TryGetValue("s", out v) && v != null ? v : Post("s"));
-            string userFilter = Decrypt(IsDictionary(dict) && dict.TryGetValue("f", out v) && v != null ? v : Post("f"));
-            string userOrderBy = Decrypt(IsDictionary(dict) && dict.TryGetValue("o", out v) && v != null ? v : Post("o"));
-
-            // Selected records from modal, skip parent/filter fields and show all records
-            lookup.LookupType = lookupType; // Lookup type
-            lookup.FilterValues.Clear(); // Clear filter values first
-            StringValues keys = IsDictionary(dict) && dict.TryGetValue("keys", out v) && !Empty(v)
-                ? (StringValues)v
-                : (Post("keys[]", out StringValues k) ? (StringValues)k : StringValues.Empty);
-            if (!Empty(keys)) { // Selected records from modal
-                lookup.FilterFields = new(); // Skip parent fields if any
-                pageSize = -1; // Show all records
-                lookup.FilterValues.Add(String.Join(",", keys.ToArray()));
-            } else { // Lookup values
-                string lookupValue = IsDictionary(dict) && (dict.TryGetValue("v0", out v) && v != null || dict.TryGetValue("lookupValue", out v) && v != null)
-                    ? v
-                    : (Post<string>("v0") ?? Post("lookupValue"));
-                lookup.FilterValues.Add(lookupValue);
-            }
-            int cnt = IsDictionary(lookup.FilterFields) ? lookup.FilterFields.Count : 0;
-            for (int i = 1; i <= cnt; i++) {
-                var val = UrlDecode(IsDictionary(dict) && dict.TryGetValue("v" + i, out v) ? v : Post("v" + i));
-                if (val != null) // DN
-                    lookup.FilterValues.Add(val);
-            }
-            lookup.SearchValue = searchValue;
-            lookup.PageSize = pageSize;
-            lookup.Offset = offset;
-            if (userSelect != "")
-                lookup.UserSelect = userSelect;
-            if (userFilter != "")
-                lookup.UserFilter = userFilter;
-            if (userOrderBy != "")
-                lookup.UserOrderBy = userOrderBy;
-            return await lookup.ToJson(this);
+            fallback = Param<int>("n");
         }
+        else if (Post("recperpage", out StringValues rpp))
+        {
+            fallback = ConvertToInt(rpp.ToString());
+        }
+        pageSize = GetInt(dict, new[] { "n", "recperpage" }, fallback);
+    }
+    else if (SameText(lookupType, "autosuggest"))
+    {
+        searchValue = GetValue(dict, "q", Param("q"));
+        pageSize = GetInt(dict, "n", IsNumeric(Param("n")) ? Param<int>("n") : -1);
+        if (pageSize <= 0)
+            pageSize = Config.AutoSuggestMaxEntries;
+    }
+    return (searchValue, pageSize);
+}
+
+private int CalculateOffset(Dictionary<string, string>? dict, int pageSize)
+{
+    int start = GetInt(dict, "start", IsNumeric(Param("start")) ? Param<int>("start") : -1);
+    int page = GetInt(dict, "page", IsNumeric(Param("page")) ? Param<int>("page") : -1);
+    if (start >= 0)
+        return start;
+    return (page > 0 && pageSize > 0)
+        ? (page - 1) * pageSize
+        : 0;
+}
+
+private void ApplyUserSettings(Dictionary<string, string>? dict, dynamic lookup)
+{
+    string userSelect = Decrypt(GetValue(dict, "s", Post("s")));
+    string userFilter = Decrypt(GetValue(dict, "f", Post("f")));
+    string userOrderBy = Decrypt(GetValue(dict, "o", Post("o")));
+    if (!string.IsNullOrEmpty(userSelect)) lookup.UserSelect = userSelect;
+    if (!string.IsNullOrEmpty(userFilter)) lookup.UserFilter = userFilter;
+    if (!string.IsNullOrEmpty(userOrderBy)) lookup.UserOrderBy = userOrderBy;
+}
+
+private void ApplyFilterValues(Dictionary<string, string>? dict, dynamic lookup)
+{
+    lookup.FilterValues.Clear();
+    StringValues keys = GetKeys(dict);
+    if (!Empty(keys))
+    {
+        lookup.FilterFields = new List<string>(); // Skip parent fields if any
+        lookup.FilterValues.Add(string.Join(",", keys.ToArray()));
+    }
+    else
+    {
+        string lookupValue = GetValue(dict, new[] { "v0", "lookupValue" }, Post<string>("v0") ?? Post("lookupValue"));
+        lookup.FilterValues.Add(lookupValue);
+        int cnt = lookup.FilterFields?.Count ?? 0;
+        for (int i = 1; i <= cnt; i++)
+        {
+            var val = UrlDecode(GetValue(dict, $"v{i}", Post($"v{i}")));
+            if (val != null)
+                lookup.FilterValues.Add(val);
+        }
+    }
+}
+
+private string GetValue(Dictionary<string, string>? dict, string key, string? fallback = null)
+{
+    return IsDictionary(dict) && dict.TryGetValue(key, out var v) && v != null ? v : fallback ?? "";
+}
+
+private string GetValue(Dictionary<string, string>? dict, string[] keys, string? fallback = null)
+{
+    foreach (var key in keys)
+    {
+        if (IsDictionary(dict) && dict.TryGetValue(key, out var v) && v != null)
+            return v;
+    }
+    return fallback ?? "";
+}
+
+private int GetInt(Dictionary<string, string>? dict, string key, int fallback)
+{
+    return IsDictionary(dict) && dict.TryGetValue(key, out var v) ? ConvertToInt(v) : fallback;
+}
+
+private int GetInt(Dictionary<string, string>? dict, string[] keys, int fallback)
+{
+    foreach (var key in keys)
+    {
+        if (IsDictionary(dict) && dict.TryGetValue(key, out var v))
+            return ConvertToInt(v);
+    }
+    return fallback;
+}
+
+private StringValues GetKeys(Dictionary<string, string>? dict)
+{
+    if (IsDictionary(dict) && dict.TryGetValue("keys", out var v) && !Empty(v))
+        return (StringValues)v;
+    return Post("keys[]", out StringValues k) ? k : StringValues.Empty;
+}
         #pragma warning restore 219
 
         public int DisplayRecords = 1; // Number of display records
@@ -503,86 +614,61 @@ public partial class SnDOne {
         /// <returns>Page result</returns>
         public override async Task<IActionResult> Run()
         {
-            // Is modal
-            IsModal = Param<bool>("modal");
-            UseLayout = UseLayout && !IsModal;
+            var beginResult = await PageRunBeginAsync();
+            if (beginResult != null) return beginResult;
 
-            // Use layout
-            if (!Empty(Param("layout")) && !Param<bool>("layout"))
-                UseLayout = false;
+            // === VARIABLES YANG DIAKSES MULTI-SECTION ===
+            bool loaded = false;
+            bool postBack = false;
 
-            // User profile
-            Profile = ResolveProfile();
-
-            // Security
-            Security = ResolveSecurity();
-            if (TableVar != "")
-                Security.LoadTablePermissions(TableVar);
-
-            // Load user profile
-            if (IsLoggedIn()) {
-                await Profile.SetUserName(CurrentUserName()).LoadFromStorageAsync();
+            // === HELPER METHOD CALLS ===
+            PrepareInitialSettings();
+            var actionSetup = await SetupCurrentAction();
+            loaded = actionSetup.Loaded;
+            postBack = actionSetup.PostBack;
+            if (postBack) {
+                await LoadFormValues();
+                await HandleApiFormKeys();
             }
+            await SetupCaptchaAndDetails(postBack);
+            if (postBack && !await ValidateForm()) {
+                EventCancelled = true;
+                RestoreFormValues();
+                if (IsApi())
+                    return Terminate();
+                else
+                    CurrentAction = "";
+            }
+            var actionResult = await ExecuteCurrentAction(loaded);
+            if (actionResult != null) return actionResult;
+            await PrepareForRender();
+            PageRunEnd();
+            return PageResult();
+        }
 
-            // Create form object
-            CurrentForm ??= new();
-            await CurrentForm.Init();
-            CurrentAction = Param("action"); // Set up current action
-            SetVisibility();
-
-            // Do not use lookup cache
-            if (!Config.LookupCachePageIds.Contains(PageID))
-                SetUseLookupCache(false);
-
-            // Global Page Loading event
-            PageLoading();
-            PageLoadingEventHandler?.Invoke(this, EventArgs.Empty);
-
-            // Page Load event
-            PageLoad();
-
-            // Check token
-            if (!await ValidPost())
-                End(Language.Phrase("InvalidPostRequest"));
-
-            // Check action result
-            if (ActionResult != null) // Action result set by server event // DN
-                return ActionResult;
-
-            // Create token
-            CreateToken();
-
-            // Hide fields for add/edit
-            if (!UseAjaxActions)
-                HideFieldsForAddEdit();
-            // Use inline delete
-            if (UseAjaxActions)
-                InlineDelete = true;
-
-            // Set up lookup cache
-            await SetupLookupOptions(idAktifitas);
-            await SetupLookupOptions(idProses);
-            await SetupLookupOptions(StatusAktivitas);
-
-            // Check modal
-            if (IsModal)
-                SkipHeaderFooter = true;
+        // === HELPER METHODS ===
+        private void PrepareInitialSettings()
+        {
+            if (IsModal) SkipHeaderFooter = true;
             IsMobileOrModal = IsMobile() || IsModal;
+        }
+
+        private async Task<ActionSetupResult> SetupCurrentAction()
+        {
+            await Task.CompletedTask; // Satisfy async requirement
+            // If null, the conditions aren't fulfilled
+            var result = new ActionSetupResult();
             bool loaded = false;
             bool postBack = false;
             StringValues sv;
             object? rv;
-
-            // Set up current action and primary key
             if (IsApi()) {
                 loaded = true;
-
-                // Load key from form
                 string[] keyValues = {};
                 if (RouteValues.TryGetValue("key", out object? k))
                     keyValues = ConvertToString(k).Split('/');
-                if (RouteValues.TryGetValue("id", out rv)) { // DN
-                    id.FormValue = UrlDecode(rv); // DN
+                if (RouteValues.TryGetValue("id", out rv)) {
+                    id.FormValue = UrlDecode(rv);
                     id.OldValue = id.FormValue;
                 } else if (CurrentForm.HasValue("x_id")) {
                     id.FormValue = CurrentForm.GetValue("x_id");
@@ -590,35 +676,28 @@ public partial class SnDOne {
                 } else if (!Empty(keyValues)) {
                     id.OldValue = ConvertToString(keyValues[0]);
                 } else {
-                    loaded = false; // Unable to load key
+                    loaded = false;
                 }
-
-                // Load record
                 if (loaded)
                     loaded = await LoadRow();
                 if (!loaded) {
-                    FailureMessage = Language.Phrase("NoRecord"); // Set no record message
-                    return Terminate();
+                    FailureMessage = Language.Phrase("NoRecord");
+                    return new ActionSetupResult { ActionResult = Terminate() };
                 }
-                CurrentAction = "update"; // Update record directly
-                OldKey = GetKey(true); // Get from CurrentValue
+                CurrentAction = "update";
+                OldKey = GetKey(true);
                 postBack = true;
             } else {
                 if (!Empty(Post("action"))) {
-                    CurrentAction = Post("action"); // Get action code
-                    if (!IsShow) // Not reload record, handle as postback
-                        postBack = true;
-
-                    // Get key from Form
+                    CurrentAction = Post("action");
+                    if (!IsShow) postBack = true;
                     if (Post(OldKeyName, out sv))
                         SetKey(sv.ToString(), IsShow);
                 } else {
-                    CurrentAction = "show"; // Default action is display
-
-                    // Load key from QueryString
+                    CurrentAction = "show";
                     bool loadByQuery = false;
-                    if (RouteValues.TryGetValue("id", out rv)) { // DN
-                        id.QueryValue = UrlDecode(rv); // DN
+                    if (RouteValues.TryGetValue("id", out rv)) {
+                        id.QueryValue = UrlDecode(rv);
                         loadByQuery = true;
                     } else if (Get("id", out sv)) {
                         id.QueryValue = sv.ToString();
@@ -627,108 +706,262 @@ public partial class SnDOne {
                         id.CurrentValue = DbNullValue;
                     }
                 }
-
-                // Load recordset
                 if (IsShow) {
-                    // Load current record
                     loaded = await LoadRow();
-                OldKey = loaded ? GetKey(true) : ""; // Get from CurrentValue
+                    OldKey = loaded ? GetKey(true) : "";
+                }
             }
+            result.Loaded = loaded;
+            result.PostBack = postBack;
+            return result;
         }
 
-        // Process form if post back
-        if (postBack) {
-            await LoadFormValues(); // Get form values
+        private async Task HandleApiFormKeys()
+        {
+            await Task.CompletedTask; // Satisfy async requirement
+            // If null, the conditions aren't fulfilled
             if (IsApi() && RouteValues.TryGetValue("key", out object? k)) {
                 var keyValues = ConvertToString(k).Split('/');
                 id.FormValue = ConvertToString(keyValues[0]);
             }
         }
 
-        // Validate form if post back
-        if (postBack) {
-            if (!await ValidateForm()) {
-                EventCancelled = true; // Event cancelled
+        private async Task SetupCaptchaAndDetails(bool postBack)
+        {
+            await Task.CompletedTask; // Satisfy async requirement
+            // If null, the conditions aren't fulfilled
+        }
+
+        private async Task<IActionResult?> ExecuteCurrentAction(bool loaded)
+        {
+            await Task.CompletedTask; // Satisfy async requirement
+            switch (CurrentAction) {
+                case "show":
+                    return await HandleShowAction(loaded);
+                case "update":
+                    return await HandleUpdateAction();
+            }
+            return null;
+        }
+
+        private async Task<IActionResult?> HandleShowAction(bool loaded)
+        {
+            await Task.CompletedTask; // Satisfy async requirement
+            // If null, the conditions aren't fulfilled
+            if (!loaded) {
+                if (Empty(FailureMessage))
+                    FailureMessage = Language.Phrase("NoRecord");
+                return Terminate("SubAktivitasInputDataRtwList");
+            }
+            return null;
+        }
+
+        private async Task<IActionResult?> HandleUpdateAction()
+        {
+            await Task.CompletedTask; // Satisfy async requirement
+            // If null, the conditions aren't fulfilled
+            CloseRecordset();
+            string returnUrl = DetermineReturnUrl();
+            SendEmail = true;
+            var res = await EditRow();
+            if (res) {
+                if (Empty(SuccessMessage))
+                    SuccessMessage = Language.Phrase("UpdateSuccess");
+                if (IsModal && UseAjaxActions) {
+                    IsModal = false;
+                    if (GetPageName(returnUrl) != "SubAktivitasInputDataRtwList") {
+                        TempData["Return-Url"] = returnUrl;
+                        returnUrl = "SubAktivitasInputDataRtwList";
+                    }
+                }
+                if (IsJsonResponse()) {
+                    ClearMessages();
+                    return res;
+                } else {
+                    return Terminate(returnUrl);
+                }
+            } else if (IsApi()) {
+                return Terminate();
+            } else if (IsModal && UseAjaxActions) {
+                return Controller.Json(new { success = false, error = GetFailureMessage() });
+            } else if (FailureMessage == Language.Phrase("NoRecord")) {
+                return Terminate(returnUrl);
+            } else {
+                EventCancelled = true;
                 RestoreFormValues();
-                if (IsApi())
-                    return Terminate();
-                else
-                    CurrentAction = ""; // Form error, reset action
+                return null;
             }
         }
 
-        // Perform current action
-        switch (CurrentAction) {
-                case "show": // Get a record to display
-                        if (!loaded) { // Load record based on key
-                            if (Empty(FailureMessage))
-                                FailureMessage = Language.Phrase("NoRecord"); // No record found
-                            return Terminate("SubAktivitasInputDataRtwList"); // No matching record, return to list
-                        }
-                    break;
-                case "update": // Update // DN
-                    CloseRecordset(); // DN
-                    string returnUrl = ReturnUrl;
-                    if (GetPageName(returnUrl) == "SubAktivitasInputDataRtwList")
-                        returnUrl = AddMasterUrl(ListUrl); // List page, return to List page with correct master key if necessary
-                    SendEmail = true; // Send email on update success
-                    var res = await EditRow();
-                    if (res) { // Update record based on key
-                        if (Empty(SuccessMessage))
-                            SuccessMessage = Language.Phrase("UpdateSuccess"); // Update success
+        private string DetermineReturnUrl()
+        {
+            string returnUrl = "";
+            returnUrl = ReturnUrl;
+            if (GetPageName(returnUrl) == "SubAktivitasInputDataRtwList")
+                returnUrl = AddMasterUrl(ListUrl);
+            return returnUrl;
+        }
 
-                        // Handle UseAjaxActions with return page
-                        if (IsModal && UseAjaxActions) {
-                            IsModal = false;
-                            if (GetPageName(returnUrl) != "SubAktivitasInputDataRtwList") {
-                                TempData["Return-Url"] = returnUrl; // Save return URL
-                                returnUrl = "SubAktivitasInputDataRtwList"; // Return list page content
-                            }
-                        }
-                        if (IsJsonResponse()) {
-                            ClearMessages(); // Clear messages for Json response
-                            return res;
-                        } else {
-                            return Terminate(returnUrl); // Return to caller
-                        }
-                    } else if (IsApi()) { // API request, return
-                        return Terminate();
-                    } else if (IsModal && UseAjaxActions) { // Return JSON error message
-                        return Controller.Json(new { success = false, error = GetFailureMessage() });
-                    } else if (FailureMessage == Language.Phrase("NoRecord")) {
-                        return Terminate(returnUrl); // Return to caller
-                    } else {
-                        EventCancelled = true; // Event cancelled
-                        RestoreFormValues(); // Restore form values if update failed
-                    }
-                    break;
-            }
-
-            // Set up Breadcrumb
+        private async Task PrepareForRender()
+        {
+            await Task.CompletedTask; // Satisfy async requirement
+            // If null, the conditions aren't fulfilled
             SetupBreadcrumb();
-
-            // Render the record
-            RowType = RowType.Edit; // Render as Edit
+            RowType = RowType.Edit;
             ResetAttributes();
             await RenderRow();
+        }
 
-            // Set LoginStatus, Page Rendering and Page Render
-            if (!IsApi() && !IsTerminated) {
-                SetupLoginStatus(); // Setup login status
+        private async Task<IActionResult?> PageRunBeginAsync()
+        {
+            await Task.CompletedTask; // Satisfy async requirement
+            // If null, the conditions aren't fulfilled
 
-                // Pass login status to client side
-                SetClientVar("login", LoginStatus);
+                    // Is modal
+                    IsModal = Param<bool>("modal");
+                    UseLayout = UseLayout && !IsModal;
 
-                // Global Page Rendering event
-                PageRendering();
-                PageRenderingEventHandler?.Invoke(this, EventArgs.Empty);
+                    // Use layout
+                    if (!Empty(Param("layout")) && !Param<bool>("layout"))
+                        UseLayout = false;
 
-                // Page Render event
-                subAktivitasInputDataRtwEdit?.PageRender();
-            }
-            return PageResult();
+                    // User profile
+                    Profile = ResolveProfile();
+
+                    // Security
+                    Security = ResolveSecurity();
+                    if (TableVar != "")
+                        Security.LoadTablePermissions(TableVar);
+
+                    // Load user profile
+                    if (IsLoggedIn()) {
+                        await Profile.SetUserName(CurrentUserName()).LoadFromStorageAsync();
+                    }
+
+                    // Create form object
+                    CurrentForm ??= new();
+                    await CurrentForm.Init();
+                    CurrentAction = Param("action"); // Set up current action
+                    SetVisibility();
+
+                    // Do not use lookup cache
+                    if (!Config.LookupCachePageIds.Contains(PageID))
+                        SetUseLookupCache(false);
+
+                    // Global Page Loading event
+                    PageLoading();
+                    PageLoadingEventHandler?.Invoke(null, EventArgs.Empty);
+
+                    // Page Load event
+                    PageLoad();
+
+                    // Check token
+                    if (!await ValidPost())
+                        End(Language.Phrase("InvalidPostRequest"));
+
+                    // Check action result
+                    if (ActionResult != null) // Action result set by server event // DN
+                        return ActionResult;
+
+                    // Create token
+                    CreateToken();
+
+                    // Hide fields for add/edit
+                    if (!UseAjaxActions) {
+                        HideFieldsForAddEdit();
+                    }
+                    else { // Use inline delete
+                        InlineDelete = true;
+                    }
+
+                    // Set up lookup cache
+                    await SetupLookupOptions(idAktifitas);
+                    await SetupLookupOptions(idProses);
+                    await SetupLookupOptions(StatusAktivitas);
+            return null;
+        }
+
+        private void PageRunEnd()
+        {
+                    // Set LoginStatus, Page Rendering and Page Render
+                    if (!IsApi() && !IsTerminated) {
+                        SetupLoginStatus(); // Setup login status
+
+                        // Pass login status to client side
+                        SetClientVar("login", LoginStatus);
+
+                        // Global Page Rendering event
+                        PageRendering();
+                        PageRenderingEventHandler?.Invoke(null, EventArgs.Empty);
+
+                        // Page Render event
+                        subAktivitasInputDataRtwEdit?.PageRender();
+                    }
+        }
+
+        // Support class
+        private sealed class ActionSetupResult
+        {
+            public bool Loaded { get; set; }
+
+            public bool PostBack { get; set; }
+
+            public bool LoadByPosition { get; set; }
+
+            public IActionResult? ActionResult { get; set; }
         }
         #pragma warning restore 219
+// ================== GENERATED HELPERS ==================
+private void ResolveLookupView(dynamic fld, string keyFieldName, string fallbackType = "auto")
+{
+    string curVal = ConvertToString(fld.CurrentValue);
+
+    // kosong → DbNullValue lalu selesai
+    if (Empty(curVal))
+    {
+        fld.ViewValue = DbNullValue;
+        return;
+    }
+
+    // siapkan fallback awal (kalau cache/DB tidak dapat)
+    if (fallbackType == "number")
+    {
+        fld.ViewValue = FormatNumber(fld.CurrentValue, fld.FormatPattern);
+    }
+    else if (fallbackType == "date")
+    {
+        var tmp = fld.CurrentValue;
+        fld.ViewValue = FormatDateTime(tmp, fld.FormatPattern);
+    }
+    else if (fallbackType == "string")
+    {
+        fld.ViewValue = ConvertToString(fld.CurrentValue);
+    }
+    else
+    { // auto
+        fld.ViewValue = IsNumeric(fld.CurrentValue)
+            ? FormatNumber(fld.CurrentValue, fld.FormatPattern)
+            : ConvertToString(fld.CurrentValue);
+    }
+
+    // coba dari cache
+    if (fld.Lookup != null && IsDictionary(fld.Lookup?.Options) && fld.Lookup?.Options.Values.Count > 0)
+    {
+        fld.ViewValue = fld.LookupCacheOption(curVal);
+        return;
+    }
+
+    // fallback: query DB
+    var keyField = fld.Lookup?.GetTable()?.Fields[keyFieldName];
+    string filterWrk = SearchFilter(keyField?.SearchExpression, "=", fld.CurrentValue, keyField?.SearchDataType, "");
+    string? sqlWrk = fld.Lookup?.GetSql(false, filterWrk, null, this, true, true);
+    List<Dictionary<string, object>>? rswrk = sqlWrk != null ? Connection.GetRows(sqlWrk) : null;
+    if (rswrk?.Count > 0 && fld.Lookup != null)
+    {
+        var listwrk = fld.Lookup?.RenderViewRow(rswrk[0]);
+        fld.ViewValue = fld.DisplayValue(listwrk);
+    }
+}
 
         // Confirm page
         public bool ConfirmPage = false; // DN
@@ -742,225 +975,135 @@ public partial class SnDOne {
         #pragma warning restore 1998
 
         #pragma warning disable 1998
-        // Load form values
+        // Helper methods (placed inside the same partial class as LoadFormValues)
+        private void SetNormalField(dynamic fld, string fldName, string fldVar, bool includeValidate = false, bool validateFlag = false, bool unformatDate = false) {
+            // Determine value once
+            string val = CurrentForm.HasValue(fldName) ? CurrentForm.GetValue(fldName) : CurrentForm.GetValue(fldVar);
+            if (!fld.IsDetailKey) {
+                // API: if field not present in request, disable update
+                if (IsApi() && !CurrentForm.HasValue(fldName) && !CurrentForm.HasValue(fldVar))
+                    fld.Visible = false; // Disable update for API request
+                else {
+                    // Call appropriate SetFormValue overload
+                    if (includeValidate)
+                        fld.SetFormValue(val, true, validateFlag);
+                    else
+                        fld.SetFormValue(val);
+                }
+                if (unformatDate)
+                    fld.CurrentValue = UnformatDateTime(fld.CurrentValue, fld.FormatPattern);
+            }
+        }
+
+        private void SetFieldValueWithRaw(dynamic fld, string rawValue) {
+            // Helper in case caller wants to set from a raw form object call rather than val computed here
+            if (!fld.IsDetailKey) {
+                if (IsApi() && string.IsNullOrEmpty(rawValue)) // rawValue empty simulates missing
+                    fld.Visible = false;
+                else
+                    fld.SetFormValue(rawValue);
+            }
+        }
+
         protected async Task LoadFormValues() {
             if (CurrentForm == null)
                 return;
             bool validate = !Config.ServerValidate;
-            string val;
 
-            // Check field name 'idAktifitas' before field var 'x_idAktifitas'
-            val = CurrentForm.HasValue("idAktifitas") ? CurrentForm.GetValue("idAktifitas") : CurrentForm.GetValue("x_idAktifitas");
-            if (!idAktifitas.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("idAktifitas") && !CurrentForm.HasValue("x_idAktifitas")) // DN
-                    idAktifitas.Visible = false; // Disable update for API request
-                else
-                    idAktifitas.SetFormValue(val);
+            // Standard handling for 'idAktifitas'
+            idAktifitas.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(idAktifitas, "idAktifitas", "x_idAktifitas");
+
+            // Standard handling for 'idProses'
+            idProses.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(idProses, "idProses", "x_idProses");
+
+            // Standard handling for 'NoReferensi'
+            NoReferensi.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(NoReferensi, "NoReferensi", "x_NoReferensi");
+
+            // Standard handling for 'Produk'
+            Produk.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(Produk, "Produk", "x_Produk");
+
+            // Standard handling for 'StatusAktivitas'
+            StatusAktivitas.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(StatusAktivitas, "StatusAktivitas", "x_StatusAktivitas");
+
+            // Standard handling for 'LastUpdatedBy'
+            LastUpdatedBy.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(LastUpdatedBy, "LastUpdatedBy", "x_LastUpdatedBy");
+
+            // Standard handling for 'lastUpdatedDate'
+            lastUpdatedDate.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(lastUpdatedDate, "lastUpdatedDate", "x_lastUpdatedDate", false, false, true);
+
+            // Standard handling for 'NomorGerbongKertel'
+            NomorGerbongKertel.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(NomorGerbongKertel, "NomorGerbongKertel", "x_NomorGerbongKertel");
+
+            // Standard handling for 'MeterAwal'
+            MeterAwal.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(MeterAwal, "MeterAwal", "x_MeterAwal");
+
+            // Standard handling for 'MeterAkhir'
+            MeterAkhir.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(MeterAkhir, "MeterAkhir", "x_MeterAkhir");
+
+            // Standard handling for 'Total'
+            Total.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(Total, "Total", "x_Total");
+
+            // Standard handling for 'NoMeter'
+            NoMeter.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(NoMeter, "NoMeter", "x_NoMeter");
+
+            // Standard handling for 'Quantity'
+            Quantity.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(Quantity, "Quantity", "x_Quantity");
+
+            // Standard handling for 'HasilPengukuranT2'
+            HasilPengukuranT2.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(HasilPengukuranT2, "HasilPengukuranT2", "x_HasilPengukuranT2");
+
+            // Standard handling for 'PICPengisian'
+            PICPengisian.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(PICPengisian, "PICPengisian", "x_PICPengisian");
+
+            // Standard handling for 'NomorGerbongKertel2'
+            NomorGerbongKertel2.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(NomorGerbongKertel2, "NomorGerbongKertel2", "x_NomorGerbongKertel2");
+
+            // Standard handling for 'NomorGerbongKertel3'
+            NomorGerbongKertel3.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(NomorGerbongKertel3, "NomorGerbongKertel3", "x_NomorGerbongKertel3");
+
+            // Standard handling for 'Quantity2'
+            Quantity2.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(Quantity2, "Quantity2", "x_Quantity2");
+
+            // Standard handling for 'Quantity3'
+            Quantity3.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(Quantity3, "Quantity3", "x_Quantity3");
+
+            // Standard handling for 'HasilPengukuranT2_2'
+            HasilPengukuranT2_2.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(HasilPengukuranT2_2, "HasilPengukuranT2_2", "x_HasilPengukuranT2_2");
+
+            // Standard handling for 'HasilPengukuranT2_3'
+            HasilPengukuranT2_3.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(HasilPengukuranT2_3, "HasilPengukuranT2_3", "x_HasilPengukuranT2_3");
+
+            // Standard handling for 'TotalGK'
+            TotalGK.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(TotalGK, "TotalGK", "x_TotalGK");
+
+            // Standard handling for 'Selisih'
+            Selisih.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(Selisih, "Selisih", "x_Selisih");
+            if (!id.IsDetailKey) {
+                SetNormalField(id, "id", "x_id");
             }
-
-            // Check field name 'idProses' before field var 'x_idProses'
-            val = CurrentForm.HasValue("idProses") ? CurrentForm.GetValue("idProses") : CurrentForm.GetValue("x_idProses");
-            if (!idProses.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("idProses") && !CurrentForm.HasValue("x_idProses")) // DN
-                    idProses.Visible = false; // Disable update for API request
-                else
-                    idProses.SetFormValue(val);
-            }
-
-            // Check field name 'NoReferensi' before field var 'x_NoReferensi'
-            val = CurrentForm.HasValue("NoReferensi") ? CurrentForm.GetValue("NoReferensi") : CurrentForm.GetValue("x_NoReferensi");
-            if (!NoReferensi.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("NoReferensi") && !CurrentForm.HasValue("x_NoReferensi")) // DN
-                    NoReferensi.Visible = false; // Disable update for API request
-                else
-                    NoReferensi.SetFormValue(val);
-            }
-
-            // Check field name 'Produk' before field var 'x_Produk'
-            val = CurrentForm.HasValue("Produk") ? CurrentForm.GetValue("Produk") : CurrentForm.GetValue("x_Produk");
-            if (!Produk.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("Produk") && !CurrentForm.HasValue("x_Produk")) // DN
-                    Produk.Visible = false; // Disable update for API request
-                else
-                    Produk.SetFormValue(val);
-            }
-
-            // Check field name 'StatusAktivitas' before field var 'x_StatusAktivitas'
-            val = CurrentForm.HasValue("StatusAktivitas") ? CurrentForm.GetValue("StatusAktivitas") : CurrentForm.GetValue("x_StatusAktivitas");
-            if (!StatusAktivitas.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("StatusAktivitas") && !CurrentForm.HasValue("x_StatusAktivitas")) // DN
-                    StatusAktivitas.Visible = false; // Disable update for API request
-                else
-                    StatusAktivitas.SetFormValue(val);
-            }
-
-            // Check field name 'LastUpdatedBy' before field var 'x_LastUpdatedBy'
-            val = CurrentForm.HasValue("LastUpdatedBy") ? CurrentForm.GetValue("LastUpdatedBy") : CurrentForm.GetValue("x_LastUpdatedBy");
-            if (!LastUpdatedBy.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("LastUpdatedBy") && !CurrentForm.HasValue("x_LastUpdatedBy")) // DN
-                    LastUpdatedBy.Visible = false; // Disable update for API request
-                else
-                    LastUpdatedBy.SetFormValue(val);
-            }
-
-            // Check field name 'lastUpdatedDate' before field var 'x_lastUpdatedDate'
-            val = CurrentForm.HasValue("lastUpdatedDate") ? CurrentForm.GetValue("lastUpdatedDate") : CurrentForm.GetValue("x_lastUpdatedDate");
-            if (!lastUpdatedDate.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("lastUpdatedDate") && !CurrentForm.HasValue("x_lastUpdatedDate")) // DN
-                    lastUpdatedDate.Visible = false; // Disable update for API request
-                else
-                    lastUpdatedDate.SetFormValue(val);
-                lastUpdatedDate.CurrentValue = UnformatDateTime(lastUpdatedDate.CurrentValue, lastUpdatedDate.FormatPattern);
-            }
-
-            // Check field name 'NomorGerbongKertel' before field var 'x_NomorGerbongKertel'
-            val = CurrentForm.HasValue("NomorGerbongKertel") ? CurrentForm.GetValue("NomorGerbongKertel") : CurrentForm.GetValue("x_NomorGerbongKertel");
-            if (!NomorGerbongKertel.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("NomorGerbongKertel") && !CurrentForm.HasValue("x_NomorGerbongKertel")) // DN
-                    NomorGerbongKertel.Visible = false; // Disable update for API request
-                else
-                    NomorGerbongKertel.SetFormValue(val);
-            }
-
-            // Check field name 'MeterAwal' before field var 'x_MeterAwal'
-            val = CurrentForm.HasValue("MeterAwal") ? CurrentForm.GetValue("MeterAwal") : CurrentForm.GetValue("x_MeterAwal");
-            if (!MeterAwal.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("MeterAwal") && !CurrentForm.HasValue("x_MeterAwal")) // DN
-                    MeterAwal.Visible = false; // Disable update for API request
-                else
-                    MeterAwal.SetFormValue(val);
-            }
-
-            // Check field name 'MeterAkhir' before field var 'x_MeterAkhir'
-            val = CurrentForm.HasValue("MeterAkhir") ? CurrentForm.GetValue("MeterAkhir") : CurrentForm.GetValue("x_MeterAkhir");
-            if (!MeterAkhir.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("MeterAkhir") && !CurrentForm.HasValue("x_MeterAkhir")) // DN
-                    MeterAkhir.Visible = false; // Disable update for API request
-                else
-                    MeterAkhir.SetFormValue(val);
-            }
-
-            // Check field name 'Total' before field var 'x_Total'
-            val = CurrentForm.HasValue("Total") ? CurrentForm.GetValue("Total") : CurrentForm.GetValue("x_Total");
-            if (!Total.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("Total") && !CurrentForm.HasValue("x_Total")) // DN
-                    Total.Visible = false; // Disable update for API request
-                else
-                    Total.SetFormValue(val);
-            }
-
-            // Check field name 'NoMeter' before field var 'x_NoMeter'
-            val = CurrentForm.HasValue("NoMeter") ? CurrentForm.GetValue("NoMeter") : CurrentForm.GetValue("x_NoMeter");
-            if (!NoMeter.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("NoMeter") && !CurrentForm.HasValue("x_NoMeter")) // DN
-                    NoMeter.Visible = false; // Disable update for API request
-                else
-                    NoMeter.SetFormValue(val);
-            }
-
-            // Check field name 'Quantity' before field var 'x_Quantity'
-            val = CurrentForm.HasValue("Quantity") ? CurrentForm.GetValue("Quantity") : CurrentForm.GetValue("x_Quantity");
-            if (!Quantity.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("Quantity") && !CurrentForm.HasValue("x_Quantity")) // DN
-                    Quantity.Visible = false; // Disable update for API request
-                else
-                    Quantity.SetFormValue(val);
-            }
-
-            // Check field name 'HasilPengukuranT2' before field var 'x_HasilPengukuranT2'
-            val = CurrentForm.HasValue("HasilPengukuranT2") ? CurrentForm.GetValue("HasilPengukuranT2") : CurrentForm.GetValue("x_HasilPengukuranT2");
-            if (!HasilPengukuranT2.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("HasilPengukuranT2") && !CurrentForm.HasValue("x_HasilPengukuranT2")) // DN
-                    HasilPengukuranT2.Visible = false; // Disable update for API request
-                else
-                    HasilPengukuranT2.SetFormValue(val);
-            }
-
-            // Check field name 'PICPengisian' before field var 'x_PICPengisian'
-            val = CurrentForm.HasValue("PICPengisian") ? CurrentForm.GetValue("PICPengisian") : CurrentForm.GetValue("x_PICPengisian");
-            if (!PICPengisian.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("PICPengisian") && !CurrentForm.HasValue("x_PICPengisian")) // DN
-                    PICPengisian.Visible = false; // Disable update for API request
-                else
-                    PICPengisian.SetFormValue(val);
-            }
-
-            // Check field name 'NomorGerbongKertel2' before field var 'x_NomorGerbongKertel2'
-            val = CurrentForm.HasValue("NomorGerbongKertel2") ? CurrentForm.GetValue("NomorGerbongKertel2") : CurrentForm.GetValue("x_NomorGerbongKertel2");
-            if (!NomorGerbongKertel2.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("NomorGerbongKertel2") && !CurrentForm.HasValue("x_NomorGerbongKertel2")) // DN
-                    NomorGerbongKertel2.Visible = false; // Disable update for API request
-                else
-                    NomorGerbongKertel2.SetFormValue(val);
-            }
-
-            // Check field name 'NomorGerbongKertel3' before field var 'x_NomorGerbongKertel3'
-            val = CurrentForm.HasValue("NomorGerbongKertel3") ? CurrentForm.GetValue("NomorGerbongKertel3") : CurrentForm.GetValue("x_NomorGerbongKertel3");
-            if (!NomorGerbongKertel3.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("NomorGerbongKertel3") && !CurrentForm.HasValue("x_NomorGerbongKertel3")) // DN
-                    NomorGerbongKertel3.Visible = false; // Disable update for API request
-                else
-                    NomorGerbongKertel3.SetFormValue(val);
-            }
-
-            // Check field name 'Quantity2' before field var 'x_Quantity2'
-            val = CurrentForm.HasValue("Quantity2") ? CurrentForm.GetValue("Quantity2") : CurrentForm.GetValue("x_Quantity2");
-            if (!Quantity2.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("Quantity2") && !CurrentForm.HasValue("x_Quantity2")) // DN
-                    Quantity2.Visible = false; // Disable update for API request
-                else
-                    Quantity2.SetFormValue(val);
-            }
-
-            // Check field name 'Quantity3' before field var 'x_Quantity3'
-            val = CurrentForm.HasValue("Quantity3") ? CurrentForm.GetValue("Quantity3") : CurrentForm.GetValue("x_Quantity3");
-            if (!Quantity3.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("Quantity3") && !CurrentForm.HasValue("x_Quantity3")) // DN
-                    Quantity3.Visible = false; // Disable update for API request
-                else
-                    Quantity3.SetFormValue(val);
-            }
-
-            // Check field name 'HasilPengukuranT2_2' before field var 'x_HasilPengukuranT2_2'
-            val = CurrentForm.HasValue("HasilPengukuranT2_2") ? CurrentForm.GetValue("HasilPengukuranT2_2") : CurrentForm.GetValue("x_HasilPengukuranT2_2");
-            if (!HasilPengukuranT2_2.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("HasilPengukuranT2_2") && !CurrentForm.HasValue("x_HasilPengukuranT2_2")) // DN
-                    HasilPengukuranT2_2.Visible = false; // Disable update for API request
-                else
-                    HasilPengukuranT2_2.SetFormValue(val);
-            }
-
-            // Check field name 'HasilPengukuranT2_3' before field var 'x_HasilPengukuranT2_3'
-            val = CurrentForm.HasValue("HasilPengukuranT2_3") ? CurrentForm.GetValue("HasilPengukuranT2_3") : CurrentForm.GetValue("x_HasilPengukuranT2_3");
-            if (!HasilPengukuranT2_3.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("HasilPengukuranT2_3") && !CurrentForm.HasValue("x_HasilPengukuranT2_3")) // DN
-                    HasilPengukuranT2_3.Visible = false; // Disable update for API request
-                else
-                    HasilPengukuranT2_3.SetFormValue(val);
-            }
-
-            // Check field name 'TotalGK' before field var 'x_TotalGK'
-            val = CurrentForm.HasValue("TotalGK") ? CurrentForm.GetValue("TotalGK") : CurrentForm.GetValue("x_TotalGK");
-            if (!TotalGK.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("TotalGK") && !CurrentForm.HasValue("x_TotalGK")) // DN
-                    TotalGK.Visible = false; // Disable update for API request
-                else
-                    TotalGK.SetFormValue(val);
-            }
-
-            // Check field name 'Selisih' before field var 'x_Selisih'
-            val = CurrentForm.HasValue("Selisih") ? CurrentForm.GetValue("Selisih") : CurrentForm.GetValue("x_Selisih");
-            if (!Selisih.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("Selisih") && !CurrentForm.HasValue("x_Selisih")) // DN
-                    Selisih.Visible = false; // Disable update for API request
-                else
-                    Selisih.SetFormValue(val);
-            }
-
-            // Check field name 'id' before field var 'x_id'
-            val = CurrentForm.HasValue("id") ? CurrentForm.GetValue("id") : CurrentForm.GetValue("x_id");
-            if (!id.IsDetailKey)
-                id.SetFormValue(val);
         }
         #pragma warning restore 1998
 
@@ -1203,165 +1346,176 @@ public partial class SnDOne {
 
             // View row
             if (RowType == RowType.View) {
-                // id
-                id.ViewValue = id.CurrentValue;
-                id.ViewCustomAttributes = "";
-
                 // idAktifitas
-                idAktifitas.ViewValue = idAktifitas.CurrentValue;
-                string curVal = ConvertToString(idAktifitas.CurrentValue);
-                if (!Empty(curVal)) {
-                    if (idAktifitas.Lookup != null && IsDictionary(idAktifitas.Lookup?.Options) && idAktifitas.Lookup?.Options.Values.Count > 0) { // Load from cache // DN
-                        idAktifitas.ViewValue = idAktifitas.LookupCacheOption(curVal);
-                    } else { // Lookup from database // DN
-                        string filterWrk = SearchFilter(idAktifitas.Lookup?.GetTable()?.Fields["IdAktivitas"].SearchExpression, "=", idAktifitas.CurrentValue, idAktifitas.Lookup?.GetTable()?.Fields["IdAktivitas"].SearchDataType, "");
-                        string? sqlWrk = idAktifitas.Lookup?.GetSql(false, filterWrk, null, this, true, true);
-                        List<Dictionary<string, object>>? rswrk = sqlWrk != null ? Connection.GetRows(sqlWrk) : null; // Must use Sync to avoid overwriting ViewValue in RenderViewRow
-                        if (rswrk?.Count > 0 && idAktifitas.Lookup != null) { // Lookup values found
-                            var listwrk = idAktifitas.Lookup?.RenderViewRow(rswrk[0]);
-                            idAktifitas.ViewValue = idAktifitas.DisplayValue(listwrk);
-                        } else {
-                            idAktifitas.ViewValue = FormatNumber(idAktifitas.CurrentValue, idAktifitas.FormatPattern);
-                        }
-                    }
-                } else {
-                    idAktifitas.ViewValue = DbNullValue;
-                }
-                idAktifitas.ViewCustomAttributes = "";
 
                 // idProses
-                idProses.ViewValue = idProses.CurrentValue;
-                string curVal2 = ConvertToString(idProses.CurrentValue);
-                if (!Empty(curVal2)) {
-                    if (idProses.Lookup != null && IsDictionary(idProses.Lookup?.Options) && idProses.Lookup?.Options.Values.Count > 0) { // Load from cache // DN
-                        idProses.ViewValue = idProses.LookupCacheOption(curVal2);
-                    } else { // Lookup from database // DN
-                        string filterWrk2 = SearchFilter(idProses.Lookup?.GetTable()?.Fields["IdProses"].SearchExpression, "=", idProses.CurrentValue, idProses.Lookup?.GetTable()?.Fields["IdProses"].SearchDataType, "");
-                        string? sqlWrk2 = idProses.Lookup?.GetSql(false, filterWrk2, null, this, true, true);
-                        List<Dictionary<string, object>>? rswrk2 = sqlWrk2 != null ? Connection.GetRows(sqlWrk2) : null; // Must use Sync to avoid overwriting ViewValue in RenderViewRow
-                        if (rswrk2?.Count > 0 && idProses.Lookup != null) { // Lookup values found
-                            var listwrk = idProses.Lookup?.RenderViewRow(rswrk2[0]);
-                            idProses.ViewValue = idProses.DisplayValue(listwrk);
-                        } else {
-                            idProses.ViewValue = FormatNumber(idProses.CurrentValue, idProses.FormatPattern);
-                        }
-                    }
-                } else {
-                    idProses.ViewValue = DbNullValue;
-                }
-                idProses.ViewCustomAttributes = "";
 
                 // NoReferensi
-                NoReferensi.ViewValue = ConvertToString(NoReferensi.CurrentValue); // DN
-                NoReferensi.ViewCustomAttributes = "";
 
                 // Produk
-                Produk.ViewValue = ConvertToString(Produk.CurrentValue); // DN
-                Produk.ViewCustomAttributes = "";
 
                 // StatusAktivitas
-                StatusAktivitas.ViewValue = StatusAktivitas.CurrentValue;
-                string curVal3 = ConvertToString(StatusAktivitas.CurrentValue);
-                if (!Empty(curVal3)) {
-                    if (StatusAktivitas.Lookup != null && IsDictionary(StatusAktivitas.Lookup?.Options) && StatusAktivitas.Lookup?.Options.Values.Count > 0) { // Load from cache // DN
-                        StatusAktivitas.ViewValue = StatusAktivitas.LookupCacheOption(curVal3);
-                    } else { // Lookup from database // DN
-                        string filterWrk3 = SearchFilter(StatusAktivitas.Lookup?.GetTable()?.Fields["IdAktivitas"].SearchExpression, "=", StatusAktivitas.CurrentValue, StatusAktivitas.Lookup?.GetTable()?.Fields["IdAktivitas"].SearchDataType, "");
-                        string? sqlWrk3 = StatusAktivitas.Lookup?.GetSql(false, filterWrk3, null, this, true, true);
-                        List<Dictionary<string, object>>? rswrk3 = sqlWrk3 != null ? Connection.GetRows(sqlWrk3) : null; // Must use Sync to avoid overwriting ViewValue in RenderViewRow
-                        if (rswrk3?.Count > 0 && StatusAktivitas.Lookup != null) { // Lookup values found
-                            var listwrk = StatusAktivitas.Lookup?.RenderViewRow(rswrk3[0]);
-                            StatusAktivitas.ViewValue = StatusAktivitas.DisplayValue(listwrk);
-                        } else {
-                            StatusAktivitas.ViewValue = FormatNumber(StatusAktivitas.CurrentValue, StatusAktivitas.FormatPattern);
-                        }
-                    }
-                } else {
-                    StatusAktivitas.ViewValue = DbNullValue;
-                }
-                StatusAktivitas.ViewCustomAttributes = "";
 
                 // LastUpdatedBy
-                LastUpdatedBy.ViewValue = ConvertToString(LastUpdatedBy.CurrentValue); // DN
-                LastUpdatedBy.ViewCustomAttributes = "";
 
                 // lastUpdatedDate
-                lastUpdatedDate.ViewValue = lastUpdatedDate.CurrentValue;
-                lastUpdatedDate.ViewValue = FormatDateTime(lastUpdatedDate.ViewValue, lastUpdatedDate.FormatPattern);
-                lastUpdatedDate.ViewCustomAttributes = "";
 
                 // NomorGerbongKertel
-                NomorGerbongKertel.ViewValue = ConvertToString(NomorGerbongKertel.CurrentValue); // DN
-                NomorGerbongKertel.ViewCustomAttributes = "";
 
                 // MeterAwal
-                MeterAwal.ViewValue = ConvertToString(MeterAwal.CurrentValue); // DN
-                MeterAwal.ViewCustomAttributes = "";
 
                 // MeterAkhir
-                MeterAkhir.ViewValue = ConvertToString(MeterAkhir.CurrentValue); // DN
-                MeterAkhir.ViewCustomAttributes = "";
 
                 // Total
-                Total.ViewValue = ConvertToString(Total.CurrentValue); // DN
-                Total.ViewCustomAttributes = "";
 
                 // userInput
-                userInput.ViewValue = ConvertToString(userInput.CurrentValue); // DN
-                userInput.ViewCustomAttributes = "";
 
                 // etlDate
-                etlDate.ViewValue = etlDate.CurrentValue;
-                etlDate.ViewValue = FormatDateTime(etlDate.ViewValue, etlDate.FormatPattern);
-                etlDate.ViewCustomAttributes = "";
 
                 // NoMeter
-                NoMeter.ViewValue = ConvertToString(NoMeter.CurrentValue); // DN
-                NoMeter.ViewCustomAttributes = "";
 
                 // Quantity
-                Quantity.ViewValue = ConvertToString(Quantity.CurrentValue); // DN
-                Quantity.ViewCustomAttributes = "";
 
                 // HasilPengukuranT2
-                HasilPengukuranT2.ViewValue = ConvertToString(HasilPengukuranT2.CurrentValue); // DN
-                HasilPengukuranT2.ViewCustomAttributes = "";
 
                 // PICPengisian
-                PICPengisian.ViewValue = ConvertToString(PICPengisian.CurrentValue); // DN
-                PICPengisian.ViewCustomAttributes = "";
 
                 // NomorGerbongKertel2
-                NomorGerbongKertel2.ViewValue = ConvertToString(NomorGerbongKertel2.CurrentValue); // DN
-                NomorGerbongKertel2.ViewCustomAttributes = "";
 
                 // NomorGerbongKertel3
-                NomorGerbongKertel3.ViewValue = ConvertToString(NomorGerbongKertel3.CurrentValue); // DN
-                NomorGerbongKertel3.ViewCustomAttributes = "";
 
                 // Quantity2
-                Quantity2.ViewValue = ConvertToString(Quantity2.CurrentValue); // DN
-                Quantity2.ViewCustomAttributes = "";
 
                 // Quantity3
-                Quantity3.ViewValue = ConvertToString(Quantity3.CurrentValue); // DN
-                Quantity3.ViewCustomAttributes = "";
 
                 // HasilPengukuranT2_2
-                HasilPengukuranT2_2.ViewValue = ConvertToString(HasilPengukuranT2_2.CurrentValue); // DN
-                HasilPengukuranT2_2.ViewCustomAttributes = "";
 
                 // HasilPengukuranT2_3
-                HasilPengukuranT2_3.ViewValue = ConvertToString(HasilPengukuranT2_3.CurrentValue); // DN
-                HasilPengukuranT2_3.ViewCustomAttributes = "";
 
                 // TotalGK
-                TotalGK.ViewValue = ConvertToString(TotalGK.CurrentValue); // DN
-                TotalGK.ViewCustomAttributes = "";
 
                 // Selisih
-                Selisih.ViewValue = ConvertToString(Selisih.CurrentValue); // DN
-                Selisih.ViewCustomAttributes = "";
+
+                    // id
+                    id.ViewValue = id.CurrentValue;
+                    id.ViewCustomAttributes = "";
+
+                    // idAktifitas
+                    idAktifitas.ViewValue = idAktifitas.CurrentValue;
+
+                    // awallookupbung
+                    // idAktifitas
+                    ResolveLookupView(idAktifitas, "IdAktivitas", "number");
+                    // akhirlookupbung
+                    idAktifitas.ViewCustomAttributes = "";
+
+                    // idProses
+                    idProses.ViewValue = idProses.CurrentValue;
+
+                    // awallookupbung
+                    // idProses
+                    ResolveLookupView(idProses, "IdProses", "number");
+                    // akhirlookupbung
+                    idProses.ViewCustomAttributes = "";
+
+                    // NoReferensi
+                    NoReferensi.ViewValue = ConvertToString(NoReferensi.CurrentValue); // DN
+                    NoReferensi.ViewCustomAttributes = "";
+
+                    // Produk
+                    Produk.ViewValue = ConvertToString(Produk.CurrentValue); // DN
+                    Produk.ViewCustomAttributes = "";
+
+                    // StatusAktivitas
+                    StatusAktivitas.ViewValue = StatusAktivitas.CurrentValue;
+
+                    // awallookupbung
+                    // StatusAktivitas
+                    ResolveLookupView(StatusAktivitas, "IdAktivitas", "number");
+                    // akhirlookupbung
+                    StatusAktivitas.ViewCustomAttributes = "";
+
+                    // LastUpdatedBy
+                    LastUpdatedBy.ViewValue = ConvertToString(LastUpdatedBy.CurrentValue); // DN
+                    LastUpdatedBy.ViewCustomAttributes = "";
+
+                    // lastUpdatedDate
+                    lastUpdatedDate.ViewValue = lastUpdatedDate.CurrentValue;
+                    lastUpdatedDate.ViewValue = FormatDateTime(lastUpdatedDate.ViewValue, lastUpdatedDate.FormatPattern);
+                    lastUpdatedDate.ViewCustomAttributes = "";
+
+                    // NomorGerbongKertel
+                    NomorGerbongKertel.ViewValue = ConvertToString(NomorGerbongKertel.CurrentValue); // DN
+                    NomorGerbongKertel.ViewCustomAttributes = "";
+
+                    // MeterAwal
+                    MeterAwal.ViewValue = ConvertToString(MeterAwal.CurrentValue); // DN
+                    MeterAwal.ViewCustomAttributes = "";
+
+                    // MeterAkhir
+                    MeterAkhir.ViewValue = ConvertToString(MeterAkhir.CurrentValue); // DN
+                    MeterAkhir.ViewCustomAttributes = "";
+
+                    // Total
+                    Total.ViewValue = ConvertToString(Total.CurrentValue); // DN
+                    Total.ViewCustomAttributes = "";
+
+                    // userInput
+                    userInput.ViewValue = ConvertToString(userInput.CurrentValue); // DN
+                    userInput.ViewCustomAttributes = "";
+
+                    // etlDate
+                    etlDate.ViewValue = etlDate.CurrentValue;
+                    etlDate.ViewValue = FormatDateTime(etlDate.ViewValue, etlDate.FormatPattern);
+                    etlDate.ViewCustomAttributes = "";
+
+                    // NoMeter
+                    NoMeter.ViewValue = ConvertToString(NoMeter.CurrentValue); // DN
+                    NoMeter.ViewCustomAttributes = "";
+
+                    // Quantity
+                    Quantity.ViewValue = ConvertToString(Quantity.CurrentValue); // DN
+                    Quantity.ViewCustomAttributes = "";
+
+                    // HasilPengukuranT2
+                    HasilPengukuranT2.ViewValue = ConvertToString(HasilPengukuranT2.CurrentValue); // DN
+                    HasilPengukuranT2.ViewCustomAttributes = "";
+
+                    // PICPengisian
+                    PICPengisian.ViewValue = ConvertToString(PICPengisian.CurrentValue); // DN
+                    PICPengisian.ViewCustomAttributes = "";
+
+                    // NomorGerbongKertel2
+                    NomorGerbongKertel2.ViewValue = ConvertToString(NomorGerbongKertel2.CurrentValue); // DN
+                    NomorGerbongKertel2.ViewCustomAttributes = "";
+
+                    // NomorGerbongKertel3
+                    NomorGerbongKertel3.ViewValue = ConvertToString(NomorGerbongKertel3.CurrentValue); // DN
+                    NomorGerbongKertel3.ViewCustomAttributes = "";
+
+                    // Quantity2
+                    Quantity2.ViewValue = ConvertToString(Quantity2.CurrentValue); // DN
+                    Quantity2.ViewCustomAttributes = "";
+
+                    // Quantity3
+                    Quantity3.ViewValue = ConvertToString(Quantity3.CurrentValue); // DN
+                    Quantity3.ViewCustomAttributes = "";
+
+                    // HasilPengukuranT2_2
+                    HasilPengukuranT2_2.ViewValue = ConvertToString(HasilPengukuranT2_2.CurrentValue); // DN
+                    HasilPengukuranT2_2.ViewCustomAttributes = "";
+
+                    // HasilPengukuranT2_3
+                    HasilPengukuranT2_3.ViewValue = ConvertToString(HasilPengukuranT2_3.CurrentValue); // DN
+                    HasilPengukuranT2_3.ViewCustomAttributes = "";
+
+                    // TotalGK
+                    TotalGK.ViewValue = ConvertToString(TotalGK.CurrentValue); // DN
+                    TotalGK.ViewCustomAttributes = "";
+
+                    // Selisih
+                    Selisih.ViewValue = ConvertToString(Selisih.CurrentValue); // DN
+                    Selisih.ViewCustomAttributes = "";
 
                 // idAktifitas
                 idAktifitas.HrefValue = "";
@@ -1441,7 +1595,10 @@ public partial class SnDOne {
                 // idAktifitas
                 idAktifitas.SetupEditAttributes();
                 idAktifitas.EditValue = idAktifitas.CurrentValue;
+
+                // awallookupbung
                 string curVal = ConvertToString(idAktifitas.CurrentValue);
+                idAktifitas.EditValue = Empty(curVal) ? DbNullValue : FormatNumber(idAktifitas.CurrentValue, idAktifitas.FormatPattern);
                 if (!Empty(curVal)) {
                     if (idAktifitas.Lookup != null && IsDictionary(idAktifitas.Lookup?.Options) && idAktifitas.Lookup?.Options.Values.Count > 0) { // Load from cache // DN
                         idAktifitas.EditValue = idAktifitas.LookupCacheOption(curVal);
@@ -1452,19 +1609,20 @@ public partial class SnDOne {
                         if (rswrk?.Count > 0 && idAktifitas.Lookup != null) { // Lookup values found
                             var listwrk = idAktifitas.Lookup?.RenderViewRow(rswrk[0]);
                             idAktifitas.EditValue = idAktifitas.DisplayValue(listwrk);
-                        } else {
-                            idAktifitas.EditValue = FormatNumber(idAktifitas.CurrentValue, idAktifitas.FormatPattern);
                         }
                     }
-                } else {
-                    idAktifitas.EditValue = DbNullValue;
                 }
+
+                // akhirlookupbung
                 idAktifitas.ViewCustomAttributes = "";
 
                 // idProses
                 idProses.SetupEditAttributes();
                 idProses.EditValue = idProses.CurrentValue;
+
+                // awallookupbung
                 string curVal2 = ConvertToString(idProses.CurrentValue);
+                idProses.EditValue = Empty(curVal2) ? DbNullValue : FormatNumber(idProses.CurrentValue, idProses.FormatPattern);
                 if (!Empty(curVal2)) {
                     if (idProses.Lookup != null && IsDictionary(idProses.Lookup?.Options) && idProses.Lookup?.Options.Values.Count > 0) { // Load from cache // DN
                         idProses.EditValue = idProses.LookupCacheOption(curVal2);
@@ -1475,13 +1633,11 @@ public partial class SnDOne {
                         if (rswrk2?.Count > 0 && idProses.Lookup != null) { // Lookup values found
                             var listwrk = idProses.Lookup?.RenderViewRow(rswrk2[0]);
                             idProses.EditValue = idProses.DisplayValue(listwrk);
-                        } else {
-                            idProses.EditValue = FormatNumber(idProses.CurrentValue, idProses.FormatPattern);
                         }
                     }
-                } else {
-                    idProses.EditValue = DbNullValue;
                 }
+
+                // akhirlookupbung
                 idProses.ViewCustomAttributes = "";
 
                 // NoReferensi
@@ -1499,7 +1655,10 @@ public partial class SnDOne {
                 // StatusAktivitas
                 StatusAktivitas.SetupEditAttributes();
                 StatusAktivitas.EditValue = StatusAktivitas.CurrentValue;
+
+                // awallookupbung
                 string curVal3 = ConvertToString(StatusAktivitas.CurrentValue);
+                StatusAktivitas.EditValue = Empty(curVal3) ? DbNullValue : FormatNumber(StatusAktivitas.CurrentValue, StatusAktivitas.FormatPattern);
                 if (!Empty(curVal3)) {
                     if (StatusAktivitas.Lookup != null && IsDictionary(StatusAktivitas.Lookup?.Options) && StatusAktivitas.Lookup?.Options.Values.Count > 0) { // Load from cache // DN
                         StatusAktivitas.EditValue = StatusAktivitas.LookupCacheOption(curVal3);
@@ -1510,13 +1669,11 @@ public partial class SnDOne {
                         if (rswrk3?.Count > 0 && StatusAktivitas.Lookup != null) { // Lookup values found
                             var listwrk = StatusAktivitas.Lookup?.RenderViewRow(rswrk3[0]);
                             StatusAktivitas.EditValue = StatusAktivitas.DisplayValue(listwrk);
-                        } else {
-                            StatusAktivitas.EditValue = FormatNumber(StatusAktivitas.CurrentValue, StatusAktivitas.FormatPattern);
                         }
                     }
-                } else {
-                    StatusAktivitas.EditValue = DbNullValue;
                 }
+
+                // akhirlookupbung
                 StatusAktivitas.ViewCustomAttributes = "";
 
                 // LastUpdatedBy
@@ -1729,127 +1886,220 @@ public partial class SnDOne {
         #pragma warning restore 1998
 
         #pragma warning disable 1998
+
+        private void ValidateCustomidAktifitas() {
+            if (idAktifitas.Visible && idAktifitas.Required) {
+                if (!idAktifitas.IsDetailKey && Empty(idAktifitas.FormValue)) {
+                    idAktifitas.AddErrorMessage(ConvertToString(Selisih.RequiredErrorMessage).Replace("%s", Selisih.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomidProses() {
+            if (idProses.Visible && idProses.Required) {
+                if (!idProses.IsDetailKey && Empty(idProses.FormValue)) {
+                    idProses.AddErrorMessage(ConvertToString(Selisih.RequiredErrorMessage).Replace("%s", Selisih.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomNoReferensi() {
+            if (NoReferensi.Visible && NoReferensi.Required) {
+                if (!NoReferensi.IsDetailKey && Empty(NoReferensi.FormValue)) {
+                    NoReferensi.AddErrorMessage(ConvertToString(Selisih.RequiredErrorMessage).Replace("%s", Selisih.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomProduk() {
+            if (Produk.Visible && Produk.Required) {
+                if (!Produk.IsDetailKey && Empty(Produk.FormValue)) {
+                    Produk.AddErrorMessage(ConvertToString(Selisih.RequiredErrorMessage).Replace("%s", Selisih.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomStatusAktivitas() {
+            if (StatusAktivitas.Visible && StatusAktivitas.Required) {
+                if (!StatusAktivitas.IsDetailKey && Empty(StatusAktivitas.FormValue)) {
+                    StatusAktivitas.AddErrorMessage(ConvertToString(Selisih.RequiredErrorMessage).Replace("%s", Selisih.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomLastUpdatedBy() {
+            if (LastUpdatedBy.Visible && LastUpdatedBy.Required) {
+                if (!LastUpdatedBy.IsDetailKey && Empty(LastUpdatedBy.FormValue)) {
+                    LastUpdatedBy.AddErrorMessage(ConvertToString(Selisih.RequiredErrorMessage).Replace("%s", Selisih.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomlastUpdatedDate() {
+            if (lastUpdatedDate.Visible && lastUpdatedDate.Required) {
+                if (!lastUpdatedDate.IsDetailKey && Empty(lastUpdatedDate.FormValue)) {
+                    lastUpdatedDate.AddErrorMessage(ConvertToString(Selisih.RequiredErrorMessage).Replace("%s", Selisih.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomNomorGerbongKertel() {
+            if (NomorGerbongKertel.Visible && NomorGerbongKertel.Required) {
+                if (!NomorGerbongKertel.IsDetailKey && Empty(NomorGerbongKertel.FormValue)) {
+                    NomorGerbongKertel.AddErrorMessage(ConvertToString(Selisih.RequiredErrorMessage).Replace("%s", Selisih.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomMeterAwal() {
+            if (MeterAwal.Visible && MeterAwal.Required) {
+                if (!MeterAwal.IsDetailKey && Empty(MeterAwal.FormValue)) {
+                    MeterAwal.AddErrorMessage(ConvertToString(Selisih.RequiredErrorMessage).Replace("%s", Selisih.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomMeterAkhir() {
+            if (MeterAkhir.Visible && MeterAkhir.Required) {
+                if (!MeterAkhir.IsDetailKey && Empty(MeterAkhir.FormValue)) {
+                    MeterAkhir.AddErrorMessage(ConvertToString(Selisih.RequiredErrorMessage).Replace("%s", Selisih.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomTotal() {
+            if (Total.Visible && Total.Required) {
+                if (!Total.IsDetailKey && Empty(Total.FormValue)) {
+                    Total.AddErrorMessage(ConvertToString(Selisih.RequiredErrorMessage).Replace("%s", Selisih.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomNoMeter() {
+            if (NoMeter.Visible && NoMeter.Required) {
+                if (!NoMeter.IsDetailKey && Empty(NoMeter.FormValue)) {
+                    NoMeter.AddErrorMessage(ConvertToString(Selisih.RequiredErrorMessage).Replace("%s", Selisih.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomQuantity() {
+            if (Quantity.Visible && Quantity.Required) {
+                if (!Quantity.IsDetailKey && Empty(Quantity.FormValue)) {
+                    Quantity.AddErrorMessage(ConvertToString(Selisih.RequiredErrorMessage).Replace("%s", Selisih.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomHasilPengukuranT2() {
+            if (HasilPengukuranT2.Visible && HasilPengukuranT2.Required) {
+                if (!HasilPengukuranT2.IsDetailKey && Empty(HasilPengukuranT2.FormValue)) {
+                    HasilPengukuranT2.AddErrorMessage(ConvertToString(Selisih.RequiredErrorMessage).Replace("%s", Selisih.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomPICPengisian() {
+            if (PICPengisian.Visible && PICPengisian.Required) {
+                if (!PICPengisian.IsDetailKey && Empty(PICPengisian.FormValue)) {
+                    PICPengisian.AddErrorMessage(ConvertToString(Selisih.RequiredErrorMessage).Replace("%s", Selisih.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomNomorGerbongKertel2() {
+            if (NomorGerbongKertel2.Visible && NomorGerbongKertel2.Required) {
+                if (!NomorGerbongKertel2.IsDetailKey && Empty(NomorGerbongKertel2.FormValue)) {
+                    NomorGerbongKertel2.AddErrorMessage(ConvertToString(Selisih.RequiredErrorMessage).Replace("%s", Selisih.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomNomorGerbongKertel3() {
+            if (NomorGerbongKertel3.Visible && NomorGerbongKertel3.Required) {
+                if (!NomorGerbongKertel3.IsDetailKey && Empty(NomorGerbongKertel3.FormValue)) {
+                    NomorGerbongKertel3.AddErrorMessage(ConvertToString(Selisih.RequiredErrorMessage).Replace("%s", Selisih.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomQuantity2() {
+            if (Quantity2.Visible && Quantity2.Required) {
+                if (!Quantity2.IsDetailKey && Empty(Quantity2.FormValue)) {
+                    Quantity2.AddErrorMessage(ConvertToString(Selisih.RequiredErrorMessage).Replace("%s", Selisih.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomQuantity3() {
+            if (Quantity3.Visible && Quantity3.Required) {
+                if (!Quantity3.IsDetailKey && Empty(Quantity3.FormValue)) {
+                    Quantity3.AddErrorMessage(ConvertToString(Selisih.RequiredErrorMessage).Replace("%s", Selisih.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomHasilPengukuranT2_2() {
+            if (HasilPengukuranT2_2.Visible && HasilPengukuranT2_2.Required) {
+                if (!HasilPengukuranT2_2.IsDetailKey && Empty(HasilPengukuranT2_2.FormValue)) {
+                    HasilPengukuranT2_2.AddErrorMessage(ConvertToString(Selisih.RequiredErrorMessage).Replace("%s", Selisih.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomHasilPengukuranT2_3() {
+            if (HasilPengukuranT2_3.Visible && HasilPengukuranT2_3.Required) {
+                if (!HasilPengukuranT2_3.IsDetailKey && Empty(HasilPengukuranT2_3.FormValue)) {
+                    HasilPengukuranT2_3.AddErrorMessage(ConvertToString(Selisih.RequiredErrorMessage).Replace("%s", Selisih.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomTotalGK() {
+            if (TotalGK.Visible && TotalGK.Required) {
+                if (!TotalGK.IsDetailKey && Empty(TotalGK.FormValue)) {
+                    TotalGK.AddErrorMessage(ConvertToString(Selisih.RequiredErrorMessage).Replace("%s", Selisih.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomSelisih() {
+            if (Selisih.Visible && Selisih.Required) {
+                if (!Selisih.IsDetailKey && Empty(Selisih.FormValue)) {
+                    Selisih.AddErrorMessage(ConvertToString(Selisih.RequiredErrorMessage).Replace("%s", Selisih.Caption));
+                }
+            }
+        }
+
         // Validate form
         protected async Task<bool> ValidateForm() {
             // Check if validation required
             if (!Config.ServerValidate)
                 return true;
             bool validateForm = true;
-                if (idAktifitas.Visible && idAktifitas.Required) {
-                    if (!idAktifitas.IsDetailKey && Empty(idAktifitas.FormValue)) {
-                        idAktifitas.AddErrorMessage(ConvertToString(idAktifitas.RequiredErrorMessage).Replace("%s", idAktifitas.Caption));
-                    }
-                }
-                if (idProses.Visible && idProses.Required) {
-                    if (!idProses.IsDetailKey && Empty(idProses.FormValue)) {
-                        idProses.AddErrorMessage(ConvertToString(idProses.RequiredErrorMessage).Replace("%s", idProses.Caption));
-                    }
-                }
-                if (NoReferensi.Visible && NoReferensi.Required) {
-                    if (!NoReferensi.IsDetailKey && Empty(NoReferensi.FormValue)) {
-                        NoReferensi.AddErrorMessage(ConvertToString(NoReferensi.RequiredErrorMessage).Replace("%s", NoReferensi.Caption));
-                    }
-                }
-                if (Produk.Visible && Produk.Required) {
-                    if (!Produk.IsDetailKey && Empty(Produk.FormValue)) {
-                        Produk.AddErrorMessage(ConvertToString(Produk.RequiredErrorMessage).Replace("%s", Produk.Caption));
-                    }
-                }
-                if (StatusAktivitas.Visible && StatusAktivitas.Required) {
-                    if (!StatusAktivitas.IsDetailKey && Empty(StatusAktivitas.FormValue)) {
-                        StatusAktivitas.AddErrorMessage(ConvertToString(StatusAktivitas.RequiredErrorMessage).Replace("%s", StatusAktivitas.Caption));
-                    }
-                }
-                if (LastUpdatedBy.Visible && LastUpdatedBy.Required) {
-                    if (!LastUpdatedBy.IsDetailKey && Empty(LastUpdatedBy.FormValue)) {
-                        LastUpdatedBy.AddErrorMessage(ConvertToString(LastUpdatedBy.RequiredErrorMessage).Replace("%s", LastUpdatedBy.Caption));
-                    }
-                }
-                if (lastUpdatedDate.Visible && lastUpdatedDate.Required) {
-                    if (!lastUpdatedDate.IsDetailKey && Empty(lastUpdatedDate.FormValue)) {
-                        lastUpdatedDate.AddErrorMessage(ConvertToString(lastUpdatedDate.RequiredErrorMessage).Replace("%s", lastUpdatedDate.Caption));
-                    }
-                }
-                if (NomorGerbongKertel.Visible && NomorGerbongKertel.Required) {
-                    if (!NomorGerbongKertel.IsDetailKey && Empty(NomorGerbongKertel.FormValue)) {
-                        NomorGerbongKertel.AddErrorMessage(ConvertToString(NomorGerbongKertel.RequiredErrorMessage).Replace("%s", NomorGerbongKertel.Caption));
-                    }
-                }
-                if (MeterAwal.Visible && MeterAwal.Required) {
-                    if (!MeterAwal.IsDetailKey && Empty(MeterAwal.FormValue)) {
-                        MeterAwal.AddErrorMessage(ConvertToString(MeterAwal.RequiredErrorMessage).Replace("%s", MeterAwal.Caption));
-                    }
-                }
-                if (MeterAkhir.Visible && MeterAkhir.Required) {
-                    if (!MeterAkhir.IsDetailKey && Empty(MeterAkhir.FormValue)) {
-                        MeterAkhir.AddErrorMessage(ConvertToString(MeterAkhir.RequiredErrorMessage).Replace("%s", MeterAkhir.Caption));
-                    }
-                }
-                if (Total.Visible && Total.Required) {
-                    if (!Total.IsDetailKey && Empty(Total.FormValue)) {
-                        Total.AddErrorMessage(ConvertToString(Total.RequiredErrorMessage).Replace("%s", Total.Caption));
-                    }
-                }
-                if (NoMeter.Visible && NoMeter.Required) {
-                    if (!NoMeter.IsDetailKey && Empty(NoMeter.FormValue)) {
-                        NoMeter.AddErrorMessage(ConvertToString(NoMeter.RequiredErrorMessage).Replace("%s", NoMeter.Caption));
-                    }
-                }
-                if (Quantity.Visible && Quantity.Required) {
-                    if (!Quantity.IsDetailKey && Empty(Quantity.FormValue)) {
-                        Quantity.AddErrorMessage(ConvertToString(Quantity.RequiredErrorMessage).Replace("%s", Quantity.Caption));
-                    }
-                }
-                if (HasilPengukuranT2.Visible && HasilPengukuranT2.Required) {
-                    if (!HasilPengukuranT2.IsDetailKey && Empty(HasilPengukuranT2.FormValue)) {
-                        HasilPengukuranT2.AddErrorMessage(ConvertToString(HasilPengukuranT2.RequiredErrorMessage).Replace("%s", HasilPengukuranT2.Caption));
-                    }
-                }
-                if (PICPengisian.Visible && PICPengisian.Required) {
-                    if (!PICPengisian.IsDetailKey && Empty(PICPengisian.FormValue)) {
-                        PICPengisian.AddErrorMessage(ConvertToString(PICPengisian.RequiredErrorMessage).Replace("%s", PICPengisian.Caption));
-                    }
-                }
-                if (NomorGerbongKertel2.Visible && NomorGerbongKertel2.Required) {
-                    if (!NomorGerbongKertel2.IsDetailKey && Empty(NomorGerbongKertel2.FormValue)) {
-                        NomorGerbongKertel2.AddErrorMessage(ConvertToString(NomorGerbongKertel2.RequiredErrorMessage).Replace("%s", NomorGerbongKertel2.Caption));
-                    }
-                }
-                if (NomorGerbongKertel3.Visible && NomorGerbongKertel3.Required) {
-                    if (!NomorGerbongKertel3.IsDetailKey && Empty(NomorGerbongKertel3.FormValue)) {
-                        NomorGerbongKertel3.AddErrorMessage(ConvertToString(NomorGerbongKertel3.RequiredErrorMessage).Replace("%s", NomorGerbongKertel3.Caption));
-                    }
-                }
-                if (Quantity2.Visible && Quantity2.Required) {
-                    if (!Quantity2.IsDetailKey && Empty(Quantity2.FormValue)) {
-                        Quantity2.AddErrorMessage(ConvertToString(Quantity2.RequiredErrorMessage).Replace("%s", Quantity2.Caption));
-                    }
-                }
-                if (Quantity3.Visible && Quantity3.Required) {
-                    if (!Quantity3.IsDetailKey && Empty(Quantity3.FormValue)) {
-                        Quantity3.AddErrorMessage(ConvertToString(Quantity3.RequiredErrorMessage).Replace("%s", Quantity3.Caption));
-                    }
-                }
-                if (HasilPengukuranT2_2.Visible && HasilPengukuranT2_2.Required) {
-                    if (!HasilPengukuranT2_2.IsDetailKey && Empty(HasilPengukuranT2_2.FormValue)) {
-                        HasilPengukuranT2_2.AddErrorMessage(ConvertToString(HasilPengukuranT2_2.RequiredErrorMessage).Replace("%s", HasilPengukuranT2_2.Caption));
-                    }
-                }
-                if (HasilPengukuranT2_3.Visible && HasilPengukuranT2_3.Required) {
-                    if (!HasilPengukuranT2_3.IsDetailKey && Empty(HasilPengukuranT2_3.FormValue)) {
-                        HasilPengukuranT2_3.AddErrorMessage(ConvertToString(HasilPengukuranT2_3.RequiredErrorMessage).Replace("%s", HasilPengukuranT2_3.Caption));
-                    }
-                }
-                if (TotalGK.Visible && TotalGK.Required) {
-                    if (!TotalGK.IsDetailKey && Empty(TotalGK.FormValue)) {
-                        TotalGK.AddErrorMessage(ConvertToString(TotalGK.RequiredErrorMessage).Replace("%s", TotalGK.Caption));
-                    }
-                }
-                if (Selisih.Visible && Selisih.Required) {
-                    if (!Selisih.IsDetailKey && Empty(Selisih.FormValue)) {
-                        Selisih.AddErrorMessage(ConvertToString(Selisih.RequiredErrorMessage).Replace("%s", Selisih.Caption));
-                    }
-                }
+                ValidateCustomidAktifitas();
+                ValidateCustomidProses();
+                ValidateCustomNoReferensi();
+                ValidateCustomProduk();
+                ValidateCustomStatusAktivitas();
+                ValidateCustomLastUpdatedBy();
+                ValidateCustomlastUpdatedDate();
+                ValidateCustomNomorGerbongKertel();
+                ValidateCustomMeterAwal();
+                ValidateCustomMeterAkhir();
+                ValidateCustomTotal();
+                ValidateCustomNoMeter();
+                ValidateCustomQuantity();
+                ValidateCustomHasilPengukuranT2();
+                ValidateCustomPICPengisian();
+                ValidateCustomNomorGerbongKertel2();
+                ValidateCustomNomorGerbongKertel3();
+                ValidateCustomQuantity2();
+                ValidateCustomQuantity3();
+                ValidateCustomHasilPengukuranT2_2();
+                ValidateCustomHasilPengukuranT2_3();
+                ValidateCustomTotalGK();
+                ValidateCustomSelisih();
 
             // Return validate result
             validateForm = validateForm && !HasInvalidFields();
@@ -2063,32 +2313,39 @@ public partial class SnDOne {
         {
             if (fld.Lookup == null)
                 return;
+            if (fld.Lookup.Options.Count is int opt && opt > 0) 
+                return;
             Func<string>? lookupFilter = null;
             dynamic conn = Connection;
-            if (fld.Lookup.Options.Count is int c && c == 0) {
+
+                // Set up lookup SQL
+
                 // Always call to Lookup.GetSql so that user can setup Lookup.Options in Lookup Selecting server event
                 var sql = fld.Lookup.GetSql(false, "", lookupFilter, this);
 
                 // Set up lookup cache
-                if (!fld.HasLookupOptions && fld.UseLookupCache && !Empty(sql) && fld.Lookup.ParentFields.Count == 0 && fld.Lookup.Options.Count == 0) {
-                    int totalCnt = await TryGetRecordCountAsync(sql, conn);
-                    if (totalCnt > fld.LookupCacheCount) // Total count > cache count, do not cache
-                        return;
-                    var dict = new Dictionary<string, Dictionary<string, object>>();
-                    List<object> values = [];
-                    List<Dictionary<string, object>> rs = await conn.GetRowsAsync(sql);
-                    if (rs != null) {
-                        for (int i = 0; i < rs.Count; i++) {
-                            var row = rs[i];
-                            row = fld.Lookup?.RenderViewRow(row, Resolve(fld.Lookup.LinkTable));
-                            string key = row?.Values.First()?.ToString() ?? String.Empty;
-                            if (!dict.ContainsKey(key) && row != null)
-                                dict.Add(key, row);
-                        }
+                if (fld.HasLookupOptions ||
+                    !fld.UseLookupCache ||
+                    Empty(sql) ||
+                    fld.Lookup.ParentFields.Count != 0 ||
+                    fld.Lookup.Options.Count != 0)
+                            return;
+                int totalCnt = await TryGetRecordCountAsync(sql, conn);
+                if (totalCnt > fld.LookupCacheCount) // Total count > cache count, do not cache
+                    return;
+                var dict = new Dictionary<string, Dictionary<string, object>>();
+                List<object> values = [];
+                List<Dictionary<string, object>> rs = await conn.GetRowsAsync(sql);
+                if (rs != null) {
+                    for (int i = 0; i < rs.Count; i++) {
+                        var row = rs[i];
+                        row = fld.Lookup?.RenderViewRow(row, Resolve(fld.Lookup.LinkTable));
+                        string key = row?.Values.First()?.ToString() ?? String.Empty;
+                        if (!dict.ContainsKey(key) && row != null)
+                            dict.Add(key, row);
                     }
-                    fld.Lookup?.SetOptions(dict);
                 }
-            }
+                fld.Lookup?.SetOptions(dict);
         }
 
         // Close recordset

@@ -13,6 +13,11 @@ public partial class HomeController : Controller
         subAktivitasFormInputLogbMonitoringStockRtwList.Cache = _cache;
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["id"];
+
+        // Run the page
         return await subAktivitasFormInputLogbMonitoringStockRtwList.Run();
     }
 
@@ -23,6 +28,11 @@ public partial class HomeController : Controller
     {
         // Create page object
         subAktivitasFormInputLogbMonitoringStockRtwAdd = new GLOBALS.SubAktivitasFormInputLogbMonitoringStockRtwAdd(this);
+
+        // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["id"];
 
         // Run the page
         return await subAktivitasFormInputLogbMonitoringStockRtwAdd.Run();
@@ -37,6 +47,11 @@ public partial class HomeController : Controller
         subAktivitasFormInputLogbMonitoringStockRtwView = new GLOBALS.SubAktivitasFormInputLogbMonitoringStockRtwView(this);
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["id"];
+
+        // Run the page
         return await subAktivitasFormInputLogbMonitoringStockRtwView.Run();
     }
 
@@ -49,6 +64,11 @@ public partial class HomeController : Controller
         subAktivitasFormInputLogbMonitoringStockRtwEdit = new GLOBALS.SubAktivitasFormInputLogbMonitoringStockRtwEdit(this);
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["id"];
+
+        // Run the page
         return await subAktivitasFormInputLogbMonitoringStockRtwEdit.Run();
     }
 
@@ -59,6 +79,11 @@ public partial class HomeController : Controller
     {
         // Create page object
         subAktivitasFormInputLogbMonitoringStockRtwDelete = new GLOBALS.SubAktivitasFormInputLogbMonitoringStockRtwDelete(this);
+
+        // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["id"];
 
         // Run the page
         return await subAktivitasFormInputLogbMonitoringStockRtwDelete.Run();

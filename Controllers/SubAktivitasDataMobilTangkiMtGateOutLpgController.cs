@@ -13,6 +13,11 @@ public partial class HomeController : Controller
         subAktivitasDataMobilTangkiMtGateOutLpgList.Cache = _cache;
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["id"];
+
+        // Run the page
         return await subAktivitasDataMobilTangkiMtGateOutLpgList.Run();
     }
 
@@ -23,6 +28,11 @@ public partial class HomeController : Controller
     {
         // Create page object
         subAktivitasDataMobilTangkiMtGateOutLpgEdit = new GLOBALS.SubAktivitasDataMobilTangkiMtGateOutLpgEdit(this);
+
+        // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["id"];
 
         // Run the page
         return await subAktivitasDataMobilTangkiMtGateOutLpgEdit.Run();

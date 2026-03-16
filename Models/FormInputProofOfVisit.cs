@@ -1604,7 +1604,10 @@ public partial class SnDOne {
             Tanggal.ViewCustomAttributes = "";
 
             // Lokasi
+
+            // awallookupbung
             string curVal = ConvertToString(Lokasi.CurrentValue);
+            Lokasi.ViewValue = Empty(curVal) ? DbNullValue : Lokasi.CurrentValue;
             if (!Empty(curVal)) {
                 if (Lokasi.Lookup != null && IsDictionary(Lokasi.Lookup?.Options) && Lokasi.Lookup?.Options.Values.Count > 0) { // Load from cache // DN
                     Lokasi.ViewValue = Lokasi.LookupCacheOption(curVal);
@@ -1615,13 +1618,11 @@ public partial class SnDOne {
                     if (rswrk?.Count > 0 && Lokasi.Lookup != null) { // Lookup values found
                         var listwrk = Lokasi.Lookup?.RenderViewRow(rswrk[0]);
                         Lokasi.ViewValue = Lokasi.DisplayValue(listwrk);
-                    } else {
-                        Lokasi.ViewValue = Lokasi.CurrentValue;
                     }
                 }
-            } else {
-                Lokasi.ViewValue = DbNullValue;
             }
+
+            // akhirlookupbung
             Lokasi.ViewCustomAttributes = "";
 
             // DownloadDokumen

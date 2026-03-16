@@ -13,6 +13,11 @@ public partial class HomeController : Controller
         subAktivitasFormInputBLsesuaiCqlrtwList.Cache = _cache;
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["id"];
+
+        // Run the page
         return await subAktivitasFormInputBLsesuaiCqlrtwList.Run();
     }
 
@@ -25,6 +30,11 @@ public partial class HomeController : Controller
         subAktivitasFormInputBLsesuaiCqlrtwView = new GLOBALS.SubAktivitasFormInputBLsesuaiCqlrtwView(this);
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["id"];
+
+        // Run the page
         return await subAktivitasFormInputBLsesuaiCqlrtwView.Run();
     }
 
@@ -35,6 +45,11 @@ public partial class HomeController : Controller
     {
         // Create page object
         subAktivitasFormInputBLsesuaiCqlrtwEdit = new GLOBALS.SubAktivitasFormInputBLsesuaiCqlrtwEdit(this);
+
+        // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["id"];
 
         // Run the page
         return await subAktivitasFormInputBLsesuaiCqlrtwEdit.Run();

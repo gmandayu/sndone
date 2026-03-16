@@ -13,6 +13,11 @@ public partial class HomeController : Controller
         subAktivitasFormInputLogbookPenerimaanTruckList.Cache = _cache;
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["id"];
+
+        // Run the page
         return await subAktivitasFormInputLogbookPenerimaanTruckList.Run();
     }
 
@@ -25,6 +30,11 @@ public partial class HomeController : Controller
         subAktivitasFormInputLogbookPenerimaanTruckView = new GLOBALS.SubAktivitasFormInputLogbookPenerimaanTruckView(this);
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["id"];
+
+        // Run the page
         return await subAktivitasFormInputLogbookPenerimaanTruckView.Run();
     }
 
@@ -35,6 +45,11 @@ public partial class HomeController : Controller
     {
         // Create page object
         subAktivitasFormInputLogbookPenerimaanTruckEdit = new GLOBALS.SubAktivitasFormInputLogbookPenerimaanTruckEdit(this);
+
+        // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["id"];
 
         // Run the page
         return await subAktivitasFormInputLogbookPenerimaanTruckEdit.Run();

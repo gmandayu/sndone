@@ -1,3 +1,7 @@
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+
 namespace SnDOne.Models;
 
 // Partial class
@@ -91,10 +95,12 @@ public partial class SnDOne {
         private string _pageUrl = "";
 
         // Constructor
-        public ErrorBase()
+        public ErrorBase(Controller? controller)
         {
             // Initialize
             CurrentPage = this;
+        if (controller != null)
+            Controller = controller;
 
             // Language object
             Language = ResolveLanguage();
@@ -164,52 +170,53 @@ public partial class SnDOne {
         }
 
         // Constructor
-        public ErrorBase(Controller? controller = null): this() { // DN
-            if (controller != null)
-                Controller = controller;
-        }
+        public ErrorBase() : this(null) { }
 
         /// <summary>
         /// Terminate page
         /// </summary>
         /// <param name="url">URL to rediect to</param>
         /// <returns>Page result</returns>
-        public override IActionResult Terminate(string url = "") { // DN
-            if (_terminated) // DN
-                return new EmptyResult();
-
-            // Global Page Unloaded event
-            PageUnloaded();
-            PageUnloadedEventHandler?.Invoke(this, EventArgs.Empty);
-
-            // Gargage collection
-            Collect(); // DN
-
-            // Terminate
-            _terminated = true; // DN
-
-            // Return for API
-            if (IsApi()) {
-                var result = new Dictionary<string, string> { { "version", Config.ProductVersion } };
-                if (!Empty(url)) // Add url
-                    result.Add("url", GetUrl(url));
-                foreach (var (key, value) in GetMessages()) // Add messages
-                    result.Add(key, value);
-                return Controller.Json(result);
-            } else if (ActionResult != null) { // Check action result
-                return ActionResult;
-            }
-
-            // Go to URL if specified
-            if (!Empty(url)) {
-                if (!Config.Debug)
-                    ResponseClear();
-                if (Response != null && !Response.HasStarted) {
-                    SaveDebugMessage();
-                    return Controller.LocalRedirect(AppPath(url));
-                }
-            }
+        public override IActionResult Terminate(string url = "")
+        { // DN
+            if (_terminated) return new EmptyResult();
+            InvokeUnloadHooks();
+            Collect();                // DN
+            _terminated = true;       // DN
+            if (IsApi()) return BuildApiTerminateResult(url);
+            if (ActionResult != null) return ActionResult;
+            if (Empty(url)) return new EmptyResult();
+            if (!Config.Debug) ResponseClear();
+            if (Response != null && !Response.HasStarted)
+                return HandleRedirect(url);
             return new EmptyResult();
+        }
+
+        // ================= HELPER METHODS =================
+        private void InvokeUnloadHooks()
+        {
+                // Global Page Unloaded event
+                PageUnloaded();
+            PageUnloadedEventHandler?.Invoke(null, EventArgs.Empty);
+        }
+
+        private IActionResult BuildApiTerminateResult(string url)
+        {
+            var result = new Dictionary<string, string> { { "version", Config.ProductVersion } };
+            if (!Empty(url)) result.Add("url", GetUrl(url));
+            foreach (var (key, value) in GetMessages()) result.Add(key, value);
+            return Controller.Json(result);
+        }
+
+        private IActionResult HandleRedirect(string url)
+        {
+            SaveDebugMessage();
+            return RedirectCore(url);
+        }
+
+        private IActionResult RedirectCore(string url)
+        {
+            return Controller.LocalRedirect(AppPath(url));
         }
 
         public string? RequestId { get; set; }

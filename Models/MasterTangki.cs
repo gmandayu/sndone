@@ -1685,7 +1685,10 @@ public partial class SnDOne {
             NamaTerminal.ViewCustomAttributes = "";
 
             // Plant
+
+            // awallookupbung
             string curVal = ConvertToString(Plant.CurrentValue);
+            Plant.ViewValue = Empty(curVal) ? DbNullValue : Plant.CurrentValue;
             if (!Empty(curVal)) {
                 if (Plant.Lookup != null && IsDictionary(Plant.Lookup?.Options) && Plant.Lookup?.Options.Values.Count > 0) { // Load from cache // DN
                     Plant.ViewValue = Plant.LookupCacheOption(curVal);
@@ -1696,13 +1699,11 @@ public partial class SnDOne {
                     if (rswrk?.Count > 0 && Plant.Lookup != null) { // Lookup values found
                         var listwrk = Plant.Lookup?.RenderViewRow(rswrk[0]);
                         Plant.ViewValue = Plant.DisplayValue(listwrk);
-                    } else {
-                        Plant.ViewValue = Plant.CurrentValue;
                     }
                 }
-            } else {
-                Plant.ViewValue = DbNullValue;
             }
+
+            // akhirlookupbung
             Plant.ViewCustomAttributes = "";
 
             // Sloc

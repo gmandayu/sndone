@@ -253,8 +253,8 @@ public partial class SnDOne {
             if (exportPdf || exportWord || exportExcel) {
                 try {
                     MagickImage img = new(data);
-                    width = Convert.ToInt32(img.Width) > 0 ? Math.Min(Convert.ToInt32(img.Width), maxWidth) : maxWidth;
-                    height = Convert.ToInt32(img.Height) > 0 ? Math.Min(Convert.ToInt32(img.Height), maxHeight) : maxHeight;
+                    width = img.Width > 0 ? Math.Min(img.Width, maxWidth) : maxWidth;
+                    height = img.Height > 0 ? Math.Min(img.Height, maxHeight) : maxHeight;
                 } catch { }
             }
             return new Dictionary<string, int> {
@@ -304,7 +304,7 @@ public partial class SnDOne {
                 }
             }
             svgdata = doc.DocumentElement?.OuterXml ?? "";
-            MagickNET.SetLogEvents(LogEventTypes.All);
+            MagickNET.SetLogEvents(LogEvents.All);
             MagickReadSettings settings = new();
             settings.ColorSpace = ColorSpace.RGB;
             settings.Format = MagickFormat.Svg;

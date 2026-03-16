@@ -1539,7 +1539,10 @@ public partial class SnDOne {
 
             // IdPosition
             IdPosition.ViewValue = IdPosition.CurrentValue;
+
+            // awallookupbung
             string curVal = ConvertToString(IdPosition.CurrentValue);
+            IdPosition.ViewValue = Empty(curVal) ? DbNullValue : FormatNumber(IdPosition.CurrentValue, IdPosition.FormatPattern);
             if (!Empty(curVal)) {
                 if (IdPosition.Lookup != null && IsDictionary(IdPosition.Lookup?.Options) && IdPosition.Lookup?.Options.Values.Count > 0) { // Load from cache // DN
                     IdPosition.ViewValue = IdPosition.LookupCacheOption(curVal);
@@ -1550,13 +1553,11 @@ public partial class SnDOne {
                     if (rswrk?.Count > 0 && IdPosition.Lookup != null) { // Lookup values found
                         var listwrk = IdPosition.Lookup?.RenderViewRow(rswrk[0]);
                         IdPosition.ViewValue = IdPosition.DisplayValue(listwrk);
-                    } else {
-                        IdPosition.ViewValue = FormatNumber(IdPosition.CurrentValue, IdPosition.FormatPattern);
                     }
                 }
-            } else {
-                IdPosition.ViewValue = DbNullValue;
             }
+
+            // akhirlookupbung
             IdPosition.ViewCustomAttributes = "";
 
             // Jabatan

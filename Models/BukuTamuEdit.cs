@@ -1,3 +1,8 @@
+using System.Collections.Generic;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+
 namespace SnDOne.Models;
 
 // Partial class
@@ -94,7 +99,7 @@ public partial class SnDOne {
         private string _pageUrl = "";
 
         // Constructor
-        public BukuTamuEditBase()
+        public BukuTamuEditBase(Controller? controller)
         {
             TableName = "BukuTamu";
 
@@ -103,6 +108,8 @@ public partial class SnDOne {
 
             // Initialize
             CurrentPage = this;
+        if (controller != null)
+            Controller = controller;
 
             // Table CSS class
             TableClass = "table table-striped table-bordered table-hover table-sm ew-desktop-table ew-edit-table d-none";
@@ -256,81 +263,87 @@ public partial class SnDOne {
         }
 
         // Constructor
-        public BukuTamuEditBase(Controller? controller = null): this() { // DN
-            if (controller != null)
-                Controller = controller;
-        }
+        public BukuTamuEditBase() : this(null) { }
 
         /// <summary>
         /// Terminate page
         /// </summary>
         /// <param name="url">URL to rediect to</param>
         /// <returns>Page result</returns>
-        public override IActionResult Terminate(string url = "") { // DN
-            if (_terminated) // DN
-                return new EmptyResult();
-
-            // Page Unload event
-            PageUnload();
-
-            // Global Page Unloaded event
-            PageUnloaded();
-            PageUnloadedEventHandler?.Invoke(this, EventArgs.Empty);
-            if (!IsApi())
-                PageRedirecting(ref url);
-
-            // Gargage collection
-            Collect(); // DN
-
-            // Terminate
-            _terminated = true; // DN
-
-            // Return for API
-            if (IsApi()) {
-                var result = new Dictionary<string, string> { { "version", Config.ProductVersion } };
-                if (!Empty(url)) // Add url
-                    result.Add("url", GetUrl(url));
-                foreach (var (key, value) in GetMessages()) // Add messages
-                    result.Add(key, value);
-                return Controller.Json(result);
-            } else if (ActionResult != null) { // Check action result
-                return ActionResult;
-            }
-
-            // Go to URL if specified
-            if (!Empty(url)) {
-                if (!Config.Debug)
-                    ResponseClear();
-                if (Response != null && !Response.HasStarted) {
-                    // Handle modal response
-                    if (IsModal) { // Show as modal
-                        string pageName = GetPageName(url);
-                        var result = new Dictionary<string, string> { {"url", GetUrl(url)}, {"modal", "1"} }; // Assume return to modal for simplicity
-                        if (SameString(pageName, GetPageName(ListUrl)) ||
-                            SameString(pageName, GetPageName(ViewUrl)) ||
-                            SameString(pageName, GetPageName(GetCurrentMasterTable()?.ViewUrl ?? ""))
-                        ) { // List / View / Master View page
-                            if (!SameString(pageName, ListUrl)) { // Not List page
-                                result.Add("caption", GetModalCaption(pageName));
-                                result.Add("view", pageName == "BukuTamuView" ? "1" : "0"); // If View page, no primary button
-                            } else { // List page
-                                // result.Add("list", PageID == "search" ? "1" : "0"); // Refresh List page if current page is Search page
-                                result.Add("error", FailureMessage); // List page should not be shown as modal => error
-                                ClearFailureMessage();
-                            }
-                        } else { // Other pages (add messages and then clear messages)
-                            result = GetMessages();
-                            result.Add("modal", "1");
-                            ClearMessages();
-                        }
-                        return Controller.Json(result);
-                    } else {
-                        SaveDebugMessage();
-                        return Controller.LocalRedirect(AppPath(url));
-                    }
-                }
-            }
+        public override IActionResult Terminate(string url = "")
+        { // DN
+            if (_terminated) return new EmptyResult();
+            InvokeUnloadHooks();
+            if (!IsApi()) PageRedirecting(ref url);
+            Collect();                // DN
+            _terminated = true;       // DN
+            if (IsApi()) return BuildApiTerminateResult(url);
+            if (ActionResult != null) return ActionResult;
+            if (Empty(url)) return new EmptyResult();
+            if (!Config.Debug) ResponseClear();
+            if (Response != null && !Response.HasStarted)
+                return HandleRedirect(url);
             return new EmptyResult();
+        }
+
+        // ================= HELPER METHODS =================
+        private void InvokeUnloadHooks()
+        {
+                    // Page Unload event
+                    PageUnload();
+
+                // Global Page Unloaded event
+                PageUnloaded();
+            PageUnloadedEventHandler?.Invoke(null, EventArgs.Empty);
+        }
+
+        private IActionResult BuildApiTerminateResult(string url)
+        {
+            var result = new Dictionary<string, string> { { "version", Config.ProductVersion } };
+            if (!Empty(url)) result.Add("url", GetUrl(url));
+            foreach (var (key, value) in GetMessages()) result.Add(key, value);
+            return Controller.Json(result);
+        }
+
+        private IActionResult HandleRedirect(string url)
+        {
+            if (IsModal) return BuildModalResult_ListAddEditUpdateViewSearch(url);
+            SaveDebugMessage();
+            return RedirectCore(url);
+        }
+
+        private IActionResult RedirectCore(string url)
+        {
+            return Controller.LocalRedirect(AppPath(url));
+        }
+
+        private IActionResult BuildModalResult_ListAddEditUpdateViewSearch(string url)
+        {
+            string pageName = GetPageName(url);
+                var result = new Dictionary<string, string> { { "url", GetUrl(url) }, { "modal", "1" } }; // modal=1
+                    if (SameString(pageName, GetPageName(ListUrl)) ||
+                        SameString(pageName, GetPageName(ViewUrl)) ||
+                        SameString(pageName, GetPageName(GetCurrentMasterTable()?.ViewUrl ?? "")))
+                    {
+                // List / View / Master View page
+                    if (!SameString(pageName, ListUrl))
+                    {
+                        result.Add("caption", GetModalCaption(pageName));
+                        result.Add("view", pageName == "BukuTamuView" ? "1" : "0"); // If View page, no primary button
+                    }
+                    else
+                    {
+                        result.Add("error", FailureMessage); // List page should not be shown as modal => error
+                        ClearFailureMessage();
+                    }
+                    }
+                    else
+                    { // Other pages (add messages and then clear messages)
+                        result = GetMessages();
+                        result.Add("modal", "1");
+                        ClearMessages();
+                    }
+                return Controller.Json(result);
         }
 
         // Get all records from datareader
@@ -377,43 +390,72 @@ public partial class SnDOne {
         protected Dictionary<string, object>? GetRecordFromRecordset(List<Dictionary<string, object>>? list) =>
             list != null && list.Count > 0 ? GetRecordFromDictionary(list[0]) : null;
 
-        // Get record from Dictionary
-        protected Dictionary<string, object>? GetRecordFromDictionary(Dictionary<string, object>? dict) {
-            if (dict == null)
-                return null;
+        // Get record from Dictionary (refactor: low cognitive complexity)
+        protected Dictionary<string, object>? GetRecordFromDictionary(Dictionary<string, object>? dict)
+        {
+            if (dict is null) return null;
             var row = new Dictionary<string, object>();
-            foreach (var (key, value) in dict) {
-                if (Fields.TryGetValue(key, out DbField? fld) && fld != null) {
-                    if (fld.Visible || fld.IsPrimaryKey) { // Primary key or Visible
-                        if (fld.HtmlTag == "FILE") { // Upload field
-                            if (Empty(value)) {
-                                // row[key] = null;
-                            } else {
-                                if (fld.DataType == DataType.Blob) {
-                                    string url = FullUrl(GetPageName(Config.ApiUrl) + "/" + Config.ApiFileAction + "/" + fld.TableVar + "/" + fld.Param + "/" + GetRecordKeyValue(dict)); // Query string format
-                                    row[key] = new Dictionary<string, object> { { "type", ContentType((byte[])value) }, { "url", url }, { "name", fld.Param + ContentExtension((byte[])value) } };
-                                } else if (!fld.UploadMultiple || !ConvertToString(value).Contains(Config.MultipleUploadSeparator)) { // Single file
-                                    string url = FullUrl(GetPageName(Config.ApiUrl) + "/" + Config.ApiFileAction + "/" + fld.TableVar + "/" + Encrypt(fld.PhysicalUploadPath + ConvertToString(value))); // Query string format
-                                    row[key] = new Dictionary<string, object> { { "type", ContentType(ConvertToString(value)) }, { "url", url }, { "name", ConvertToString(value) } };
-                                } else { // Multiple files
-                                    var files = ConvertToString(value).Split(Config.MultipleUploadSeparator);
-                                    row[key] = files.Where(file => !Empty(file)).Select(file => new Dictionary<string, object> { { "type", ContentType(file) }, { "url", FullUrl(GetPageName(Config.ApiUrl) + "/" + Config.ApiFileAction + "/" + fld.TableVar + "/" + Encrypt(fld.PhysicalUploadPath + file)) }, { "name", file } });
-                                }
-                            }
-                        } else {
-                            string val = ConvertToString(value);
-                            if (fld.DataType == DataType.Date && value is DateTime dt)
-                                val = dt.ToString("s");
-                            row[key] = ConvertToString(val);
-                        }
-                    }
-                }
+            foreach (var (key, value) in dict)
+            {
+                if (!Fields.TryGetValue(key, out DbField? fld) || fld is null) continue;
+                if (!ShouldIncludeField(fld)) continue;
+                var cell = fld.HtmlTag == "FILE"
+                    ? BuildFileCell(fld, value, dict)
+                    : BuildScalarCell(fld, value);
+                if (cell is not null)
+                    row[key] = cell;
             }
             return row;
         }
 
-        // Get record key value from array
-        protected string GetRecordKeyValue(Dictionary<string, object> dict) {
+        // ---- Helpers ----
+        private static bool ShouldIncludeField(DbField fld)
+            => fld.Visible || fld.IsPrimaryKey;
+
+        private object? BuildFileCell(DbField fld, object value, Dictionary<string, object> srcRow)
+        {
+            if (Empty(value)) return null; // (sesuai kode asli: tidak menambahkan key)
+
+            // Blob
+            if (fld.DataType == DataType.Blob)
+            {
+                var bytes = (byte[])value;
+                var url = FullUrl($"{GetPageName(Config.ApiUrl)}/{Config.ApiFileAction}/{fld.TableVar}/{fld.Param}/{GetRecordKeyValue(srcRow)}");
+                return FileMeta(ContentType(bytes), url, fld.Param + ContentExtension(bytes));
+            }
+
+            // Non-blob
+            var s = ConvertToString(value);
+            if (!fld.UploadMultiple || !s.Contains(Config.MultipleUploadSeparator))
+            {
+                var url = FullUrl($"{GetPageName(Config.ApiUrl)}/{Config.ApiFileAction}/{fld.TableVar}/{Encrypt(fld.PhysicalUploadPath + s)}");
+                return FileMeta(ContentType(s), url, s);
+            }
+
+            // Multiple files
+            var files = s.Split(Config.MultipleUploadSeparator);
+            return files
+                .Where(f => !Empty(f))
+                .Select(f =>
+                {
+                    var url = FullUrl($"{GetPageName(Config.ApiUrl)}/{Config.ApiFileAction}/{fld.TableVar}/{Encrypt(fld.PhysicalUploadPath + f)}");
+                    return FileMeta(ContentType(f), url, f);
+                });
+        }
+
+        private static Dictionary<string, object> FileMeta(string type, string url, string name) =>
+            new Dictionary<string, object> { { "type", type }, { "url", url }, { "name", name } };
+
+        private object BuildScalarCell(DbField fld, object value)
+        {
+            var s = ConvertToString(value);
+            if (fld.DataType == DataType.Date && value is DateTime dt)
+                s = dt.ToString("s");
+            return ConvertToString(s);
+        }
+
+// Get record key value from array
+protected string GetRecordKeyValue(Dictionary<string, object> dict) {
             string key = "";
             key += UrlEncode(ConvertToString(dict.ContainsKey("id") ? dict["id"] : id.CurrentValue));
             return key;
@@ -424,78 +466,147 @@ public partial class SnDOne {
         }
 
         #pragma warning disable 219
-        /// <summary>
-        /// Lookup data from table
-        /// </summary>
+/// <summary>
+/// Lookup data from table
+/// </summary>
         public async Task<Dictionary<string, object>> Lookup(Dictionary<string, string>? dict = null)
+{
+    Language = ResolveLanguage();
+    Security = ResolveSecurity();
+    var lookupField = FieldByName(GetFieldName(dict));
+    var lookup = lookupField?.Lookup;
+    if (lookup == null)
+        return new Dictionary<string, object>();
+            string lookupType = GetLookupType(dict);
+    var (searchValue, pageSize) = GetSearchAndPageSize(dict, lookupType);
+    int offset = CalculateOffset(dict, pageSize);
+    ApplyUserSettings(dict, lookup);
+    ApplyFilterValues(dict, lookup);
+    lookup.LookupType = lookupType;
+    lookup.SearchValue = searchValue;
+    lookup.PageSize = pageSize;
+    lookup.Offset = offset;
+    return await lookup.ToJson(this);
+}
+
+private string GetFieldName(Dictionary<string, string>? dict)
+{
+    return GetValue(dict, "field", Post("field"));
+}
+
+private string GetLookupType(Dictionary<string, string>? dict)
+{
+    return GetValue(dict, "ajax", Post("ajax") ?? "unknown");
+}
+
+private (string searchValue, int pageSize) GetSearchAndPageSize(Dictionary<string, string>? dict, string lookupType)
+{
+    string searchValue = "";
+    int pageSize = -1;
+    if (SameText(lookupType, "modal") || SameText(lookupType, "filter"))
+    {
+        searchValue = GetValue(dict, new[] { "q", "sv" }, Param("q") ?? Post("sv"));
+        int fallback = 10;
+        if (IsNumeric(Param("n")))
         {
-            Language = ResolveLanguage();
-            Security = ResolveSecurity();
-            string? v;
-
-            // Get lookup object
-            string fieldName = IsDictionary(dict) && dict.TryGetValue("field", out v) && v != null ? v : Post("field");
-            var lookupField = FieldByName(fieldName);
-            var lookup = lookupField?.Lookup;
-            if (lookup == null) // DN
-                return new Dictionary<string, object>();
-            string lookupType = IsDictionary(dict) && dict.TryGetValue("ajax", out v) && v != null ? v : (Post("ajax") ?? "unknown");
-            int pageSize = -1;
-            int offset = -1;
-            string searchValue = "";
-            if (SameText(lookupType, "modal") || SameText(lookupType, "filter")) {
-                searchValue = IsDictionary(dict) && (dict.TryGetValue("q", out v) && v != null || dict.TryGetValue("sv", out v) && v != null)
-                    ? v
-                    : (Param("q") ?? Post("sv"));
-                pageSize = IsDictionary(dict) && (dict.TryGetValue("n", out v) || dict.TryGetValue("recperpage", out v))
-                    ? ConvertToInt(v)
-                    : (IsNumeric(Param("n")) ? Param<int>("n") : (Post("recperpage", out StringValues rpp) ? ConvertToInt(rpp.ToString()) : 10));
-            } else if (SameText(lookupType, "autosuggest")) {
-                searchValue = IsDictionary(dict) && dict.TryGetValue("q", out v) && v != null ? v : Param("q");
-                pageSize = IsDictionary(dict) && dict.TryGetValue("n", out v) ? ConvertToInt(v) : (IsNumeric(Param("n")) ? Param<int>("n") : -1);
-                if (pageSize <= 0)
-                    pageSize = Config.AutoSuggestMaxEntries;
-            }
-            int start = IsDictionary(dict) && dict.TryGetValue("start", out v) ? ConvertToInt(v) : (IsNumeric(Param("start")) ? Param<int>("start") : -1);
-            int page = IsDictionary(dict) && dict.TryGetValue("page", out v) ? ConvertToInt(v) : (IsNumeric(Param("page")) ? Param<int>("page") : -1);
-            offset = start >= 0 ? start : (page > 0 && pageSize > 0 ? (page - 1) * pageSize : 0);
-            string userSelect = Decrypt(IsDictionary(dict) && dict.TryGetValue("s", out v) && v != null ? v : Post("s"));
-            string userFilter = Decrypt(IsDictionary(dict) && dict.TryGetValue("f", out v) && v != null ? v : Post("f"));
-            string userOrderBy = Decrypt(IsDictionary(dict) && dict.TryGetValue("o", out v) && v != null ? v : Post("o"));
-
-            // Selected records from modal, skip parent/filter fields and show all records
-            lookup.LookupType = lookupType; // Lookup type
-            lookup.FilterValues.Clear(); // Clear filter values first
-            StringValues keys = IsDictionary(dict) && dict.TryGetValue("keys", out v) && !Empty(v)
-                ? (StringValues)v
-                : (Post("keys[]", out StringValues k) ? (StringValues)k : StringValues.Empty);
-            if (!Empty(keys)) { // Selected records from modal
-                lookup.FilterFields = new(); // Skip parent fields if any
-                pageSize = -1; // Show all records
-                lookup.FilterValues.Add(String.Join(",", keys.ToArray()));
-            } else { // Lookup values
-                string lookupValue = IsDictionary(dict) && (dict.TryGetValue("v0", out v) && v != null || dict.TryGetValue("lookupValue", out v) && v != null)
-                    ? v
-                    : (Post<string>("v0") ?? Post("lookupValue"));
-                lookup.FilterValues.Add(lookupValue);
-            }
-            int cnt = IsDictionary(lookup.FilterFields) ? lookup.FilterFields.Count : 0;
-            for (int i = 1; i <= cnt; i++) {
-                var val = UrlDecode(IsDictionary(dict) && dict.TryGetValue("v" + i, out v) ? v : Post("v" + i));
-                if (val != null) // DN
-                    lookup.FilterValues.Add(val);
-            }
-            lookup.SearchValue = searchValue;
-            lookup.PageSize = pageSize;
-            lookup.Offset = offset;
-            if (userSelect != "")
-                lookup.UserSelect = userSelect;
-            if (userFilter != "")
-                lookup.UserFilter = userFilter;
-            if (userOrderBy != "")
-                lookup.UserOrderBy = userOrderBy;
-            return await lookup.ToJson(this);
+            fallback = Param<int>("n");
         }
+        else if (Post("recperpage", out StringValues rpp))
+        {
+            fallback = ConvertToInt(rpp.ToString());
+        }
+        pageSize = GetInt(dict, new[] { "n", "recperpage" }, fallback);
+    }
+    else if (SameText(lookupType, "autosuggest"))
+    {
+        searchValue = GetValue(dict, "q", Param("q"));
+        pageSize = GetInt(dict, "n", IsNumeric(Param("n")) ? Param<int>("n") : -1);
+        if (pageSize <= 0)
+            pageSize = Config.AutoSuggestMaxEntries;
+    }
+    return (searchValue, pageSize);
+}
+
+private int CalculateOffset(Dictionary<string, string>? dict, int pageSize)
+{
+    int start = GetInt(dict, "start", IsNumeric(Param("start")) ? Param<int>("start") : -1);
+    int page = GetInt(dict, "page", IsNumeric(Param("page")) ? Param<int>("page") : -1);
+    if (start >= 0)
+        return start;
+    return (page > 0 && pageSize > 0)
+        ? (page - 1) * pageSize
+        : 0;
+}
+
+private void ApplyUserSettings(Dictionary<string, string>? dict, dynamic lookup)
+{
+    string userSelect = Decrypt(GetValue(dict, "s", Post("s")));
+    string userFilter = Decrypt(GetValue(dict, "f", Post("f")));
+    string userOrderBy = Decrypt(GetValue(dict, "o", Post("o")));
+    if (!string.IsNullOrEmpty(userSelect)) lookup.UserSelect = userSelect;
+    if (!string.IsNullOrEmpty(userFilter)) lookup.UserFilter = userFilter;
+    if (!string.IsNullOrEmpty(userOrderBy)) lookup.UserOrderBy = userOrderBy;
+}
+
+private void ApplyFilterValues(Dictionary<string, string>? dict, dynamic lookup)
+{
+    lookup.FilterValues.Clear();
+    StringValues keys = GetKeys(dict);
+    if (!Empty(keys))
+    {
+        lookup.FilterFields = new List<string>(); // Skip parent fields if any
+        lookup.FilterValues.Add(string.Join(",", keys.ToArray()));
+    }
+    else
+    {
+        string lookupValue = GetValue(dict, new[] { "v0", "lookupValue" }, Post<string>("v0") ?? Post("lookupValue"));
+        lookup.FilterValues.Add(lookupValue);
+        int cnt = lookup.FilterFields?.Count ?? 0;
+        for (int i = 1; i <= cnt; i++)
+        {
+            var val = UrlDecode(GetValue(dict, $"v{i}", Post($"v{i}")));
+            if (val != null)
+                lookup.FilterValues.Add(val);
+        }
+    }
+}
+
+private string GetValue(Dictionary<string, string>? dict, string key, string? fallback = null)
+{
+    return IsDictionary(dict) && dict.TryGetValue(key, out var v) && v != null ? v : fallback ?? "";
+}
+
+private string GetValue(Dictionary<string, string>? dict, string[] keys, string? fallback = null)
+{
+    foreach (var key in keys)
+    {
+        if (IsDictionary(dict) && dict.TryGetValue(key, out var v) && v != null)
+            return v;
+    }
+    return fallback ?? "";
+}
+
+private int GetInt(Dictionary<string, string>? dict, string key, int fallback)
+{
+    return IsDictionary(dict) && dict.TryGetValue(key, out var v) ? ConvertToInt(v) : fallback;
+}
+
+private int GetInt(Dictionary<string, string>? dict, string[] keys, int fallback)
+{
+    foreach (var key in keys)
+    {
+        if (IsDictionary(dict) && dict.TryGetValue(key, out var v))
+            return ConvertToInt(v);
+    }
+    return fallback;
+}
+
+private StringValues GetKeys(Dictionary<string, string>? dict)
+{
+    if (IsDictionary(dict) && dict.TryGetValue("keys", out var v) && !Empty(v))
+        return (StringValues)v;
+    return Post("keys[]", out StringValues k) ? k : StringValues.Empty;
+}
         #pragma warning restore 219
 
         public int DisplayRecords = 1; // Number of display records
@@ -531,88 +642,61 @@ public partial class SnDOne {
         /// <returns>Page result</returns>
         public override async Task<IActionResult> Run()
         {
-            // Is modal
-            IsModal = Param<bool>("modal");
-            UseLayout = UseLayout && !IsModal;
+            var beginResult = await PageRunBeginAsync();
+            if (beginResult != null) return beginResult;
 
-            // Use layout
-            if (!Empty(Param("layout")) && !Param<bool>("layout"))
-                UseLayout = false;
+            // === VARIABLES YANG DIAKSES MULTI-SECTION ===
+            bool loaded = false;
+            bool postBack = false;
 
-            // User profile
-            Profile = ResolveProfile();
-
-            // Security
-            Security = ResolveSecurity();
-            if (TableVar != "")
-                Security.LoadTablePermissions(TableVar);
-
-            // Load user profile
-            if (IsLoggedIn()) {
-                await Profile.SetUserName(CurrentUserName()).LoadFromStorageAsync();
+            // === HELPER METHOD CALLS ===
+            PrepareInitialSettings();
+            var actionSetup = await SetupCurrentAction();
+            loaded = actionSetup.Loaded;
+            postBack = actionSetup.PostBack;
+            if (postBack) {
+                await LoadFormValues();
+                await HandleApiFormKeys();
             }
+            await SetupCaptchaAndDetails(postBack);
+            if (postBack && !await ValidateForm()) {
+                EventCancelled = true;
+                RestoreFormValues();
+                if (IsApi())
+                    return Terminate();
+                else
+                    CurrentAction = "";
+            }
+            var actionResult = await ExecuteCurrentAction(loaded);
+            if (actionResult != null) return actionResult;
+            await PrepareForRender();
+            PageRunEnd();
+            return PageResult();
+        }
 
-            // Create form object
-            CurrentForm ??= new();
-            await CurrentForm.Init();
-            CurrentAction = Param("action"); // Set up current action
-            SetVisibility();
-            Plant.Required = false;
-
-            // Do not use lookup cache
-            if (!Config.LookupCachePageIds.Contains(PageID))
-                SetUseLookupCache(false);
-
-            // Global Page Loading event
-            PageLoading();
-            PageLoadingEventHandler?.Invoke(this, EventArgs.Empty);
-
-            // Page Load event
-            PageLoad();
-
-            // Check token
-            if (!await ValidPost())
-                End(Language.Phrase("InvalidPostRequest"));
-
-            // Check action result
-            if (ActionResult != null) // Action result set by server event // DN
-                return ActionResult;
-
-            // Create token
-            CreateToken();
-
-            // Hide fields for add/edit
-            if (!UseAjaxActions)
-                HideFieldsForAddEdit();
-            // Use inline delete
-            if (UseAjaxActions)
-                InlineDelete = true;
-
-            // Set up lookup cache
-            await SetupLookupOptions(LookupPlant);
-            await SetupLookupOptions(Plant);
-            await SetupLookupOptions(FungsiygDikunjungi);
-            await SetupLookupOptions(TandaPengenal);
-
-            // Check modal
-            if (IsModal)
-                SkipHeaderFooter = true;
+        // === HELPER METHODS ===
+        private void PrepareInitialSettings()
+        {
+            if (IsModal) SkipHeaderFooter = true;
             IsMobileOrModal = IsMobile() || IsModal;
+        }
+
+        private async Task<ActionSetupResult> SetupCurrentAction()
+        {
+            await Task.CompletedTask; // Satisfy async requirement
+            // If null, the conditions aren't fulfilled
+            var result = new ActionSetupResult();
             bool loaded = false;
             bool postBack = false;
             StringValues sv;
             object? rv;
-
-            // Set up current action and primary key
             if (IsApi()) {
                 loaded = true;
-
-                // Load key from form
                 string[] keyValues = {};
                 if (RouteValues.TryGetValue("key", out object? k))
                     keyValues = ConvertToString(k).Split('/');
-                if (RouteValues.TryGetValue("id", out rv)) { // DN
-                    id.FormValue = UrlDecode(rv); // DN
+                if (RouteValues.TryGetValue("id", out rv)) {
+                    id.FormValue = UrlDecode(rv);
                     id.OldValue = id.FormValue;
                 } else if (CurrentForm.HasValue("x_id")) {
                     id.FormValue = CurrentForm.GetValue("x_id");
@@ -620,35 +704,28 @@ public partial class SnDOne {
                 } else if (!Empty(keyValues)) {
                     id.OldValue = ConvertToString(keyValues[0]);
                 } else {
-                    loaded = false; // Unable to load key
+                    loaded = false;
                 }
-
-                // Load record
                 if (loaded)
                     loaded = await LoadRow();
                 if (!loaded) {
-                    FailureMessage = Language.Phrase("NoRecord"); // Set no record message
-                    return Terminate();
+                    FailureMessage = Language.Phrase("NoRecord");
+                    return new ActionSetupResult { ActionResult = Terminate() };
                 }
-                CurrentAction = "update"; // Update record directly
-                OldKey = GetKey(true); // Get from CurrentValue
+                CurrentAction = "update";
+                OldKey = GetKey(true);
                 postBack = true;
             } else {
                 if (!Empty(Post("action"))) {
-                    CurrentAction = Post("action"); // Get action code
-                    if (!IsShow) // Not reload record, handle as postback
-                        postBack = true;
-
-                    // Get key from Form
+                    CurrentAction = Post("action");
+                    if (!IsShow) postBack = true;
                     if (Post(OldKeyName, out sv))
                         SetKey(sv.ToString(), IsShow);
                 } else {
-                    CurrentAction = "show"; // Default action is display
-
-                    // Load key from QueryString
+                    CurrentAction = "show";
                     bool loadByQuery = false;
-                    if (RouteValues.TryGetValue("id", out rv)) { // DN
-                        id.QueryValue = UrlDecode(rv); // DN
+                    if (RouteValues.TryGetValue("id", out rv)) {
+                        id.QueryValue = UrlDecode(rv);
                         loadByQuery = true;
                     } else if (Get("id", out sv)) {
                         id.QueryValue = sv.ToString();
@@ -657,108 +734,264 @@ public partial class SnDOne {
                         id.CurrentValue = DbNullValue;
                     }
                 }
-
-                // Load recordset
                 if (IsShow) {
-                    // Load current record
                     loaded = await LoadRow();
-                OldKey = loaded ? GetKey(true) : ""; // Get from CurrentValue
+                    OldKey = loaded ? GetKey(true) : "";
+                }
             }
+            result.Loaded = loaded;
+            result.PostBack = postBack;
+            return result;
         }
 
-        // Process form if post back
-        if (postBack) {
-            await LoadFormValues(); // Get form values
+        private async Task HandleApiFormKeys()
+        {
+            await Task.CompletedTask; // Satisfy async requirement
+            // If null, the conditions aren't fulfilled
             if (IsApi() && RouteValues.TryGetValue("key", out object? k)) {
                 var keyValues = ConvertToString(k).Split('/');
                 id.FormValue = ConvertToString(keyValues[0]);
             }
         }
 
-        // Validate form if post back
-        if (postBack) {
-            if (!await ValidateForm()) {
-                EventCancelled = true; // Event cancelled
+        private async Task SetupCaptchaAndDetails(bool postBack)
+        {
+            await Task.CompletedTask; // Satisfy async requirement
+            // If null, the conditions aren't fulfilled
+        }
+
+        private async Task<IActionResult?> ExecuteCurrentAction(bool loaded)
+        {
+            await Task.CompletedTask; // Satisfy async requirement
+            switch (CurrentAction) {
+                case "show":
+                    return await HandleShowAction(loaded);
+                case "update":
+                    return await HandleUpdateAction();
+            }
+            return null;
+        }
+
+        private async Task<IActionResult?> HandleShowAction(bool loaded)
+        {
+            await Task.CompletedTask; // Satisfy async requirement
+            // If null, the conditions aren't fulfilled
+            if (!loaded) {
+                if (Empty(FailureMessage))
+                    FailureMessage = Language.Phrase("NoRecord");
+                return Terminate("BukuTamuList");
+            }
+            return null;
+        }
+
+        private async Task<IActionResult?> HandleUpdateAction()
+        {
+            await Task.CompletedTask; // Satisfy async requirement
+            // If null, the conditions aren't fulfilled
+            CloseRecordset();
+            string returnUrl = DetermineReturnUrl();
+            SendEmail = true;
+            var res = await EditRow();
+            if (res) {
+                if (Empty(SuccessMessage))
+                    SuccessMessage = Language.Phrase("UpdateSuccess");
+                if (IsModal && UseAjaxActions) {
+                    IsModal = false;
+                    if (GetPageName(returnUrl) != "BukuTamuList") {
+                        TempData["Return-Url"] = returnUrl;
+                        returnUrl = "BukuTamuList";
+                    }
+                }
+                if (IsJsonResponse()) {
+                    ClearMessages();
+                    return res;
+                } else {
+                    return Terminate(returnUrl);
+                }
+            } else if (IsApi()) {
+                return Terminate();
+            } else if (IsModal && UseAjaxActions) {
+                return Controller.Json(new { success = false, error = GetFailureMessage() });
+            } else if (FailureMessage == Language.Phrase("NoRecord")) {
+                return Terminate(returnUrl);
+            } else {
+                EventCancelled = true;
                 RestoreFormValues();
-                if (IsApi())
-                    return Terminate();
-                else
-                    CurrentAction = ""; // Form error, reset action
+                return null;
             }
         }
 
-        // Perform current action
-        switch (CurrentAction) {
-                case "show": // Get a record to display
-                        if (!loaded) { // Load record based on key
-                            if (Empty(FailureMessage))
-                                FailureMessage = Language.Phrase("NoRecord"); // No record found
-                            return Terminate("BukuTamuList"); // No matching record, return to list
-                        }
-                    break;
-                case "update": // Update // DN
-                    CloseRecordset(); // DN
-                    string returnUrl = "BukuTamuList";
-                    if (GetPageName(returnUrl) == "BukuTamuList")
-                        returnUrl = AddMasterUrl(ListUrl); // List page, return to List page with correct master key if necessary
-                    SendEmail = true; // Send email on update success
-                    var res = await EditRow();
-                    if (res) { // Update record based on key
-                        if (Empty(SuccessMessage))
-                            SuccessMessage = Language.Phrase("UpdateSuccess"); // Update success
+        private string DetermineReturnUrl()
+        {
+            string returnUrl = "";
+            returnUrl = "BukuTamuList";
+            if (GetPageName(returnUrl) == "BukuTamuList")
+                returnUrl = AddMasterUrl(ListUrl);
+            return returnUrl;
+        }
 
-                        // Handle UseAjaxActions with return page
-                        if (IsModal && UseAjaxActions) {
-                            IsModal = false;
-                            if (GetPageName(returnUrl) != "BukuTamuList") {
-                                TempData["Return-Url"] = returnUrl; // Save return URL
-                                returnUrl = "BukuTamuList"; // Return list page content
-                            }
-                        }
-                        if (IsJsonResponse()) {
-                            ClearMessages(); // Clear messages for Json response
-                            return res;
-                        } else {
-                            return Terminate(returnUrl); // Return to caller
-                        }
-                    } else if (IsApi()) { // API request, return
-                        return Terminate();
-                    } else if (IsModal && UseAjaxActions) { // Return JSON error message
-                        return Controller.Json(new { success = false, error = GetFailureMessage() });
-                    } else if (FailureMessage == Language.Phrase("NoRecord")) {
-                        return Terminate(returnUrl); // Return to caller
-                    } else {
-                        EventCancelled = true; // Event cancelled
-                        RestoreFormValues(); // Restore form values if update failed
-                    }
-                    break;
-            }
-
-            // Set up Breadcrumb
+        private async Task PrepareForRender()
+        {
+            await Task.CompletedTask; // Satisfy async requirement
+            // If null, the conditions aren't fulfilled
             SetupBreadcrumb();
-
-            // Render the record
-            RowType = RowType.Edit; // Render as Edit
+            RowType = RowType.Edit;
             ResetAttributes();
             await RenderRow();
+        }
 
-            // Set LoginStatus, Page Rendering and Page Render
-            if (!IsApi() && !IsTerminated) {
-                SetupLoginStatus(); // Setup login status
+        private async Task<IActionResult?> PageRunBeginAsync()
+        {
+            await Task.CompletedTask; // Satisfy async requirement
+            // If null, the conditions aren't fulfilled
 
-                // Pass login status to client side
-                SetClientVar("login", LoginStatus);
+                    // Is modal
+                    IsModal = Param<bool>("modal");
+                    UseLayout = UseLayout && !IsModal;
 
-                // Global Page Rendering event
-                PageRendering();
-                PageRenderingEventHandler?.Invoke(this, EventArgs.Empty);
+                    // Use layout
+                    if (!Empty(Param("layout")) && !Param<bool>("layout"))
+                        UseLayout = false;
 
-                // Page Render event
-                bukuTamuEdit?.PageRender();
-            }
-            return PageResult();
+                    // User profile
+                    Profile = ResolveProfile();
+
+                    // Security
+                    Security = ResolveSecurity();
+                    if (TableVar != "")
+                        Security.LoadTablePermissions(TableVar);
+
+                    // Load user profile
+                    if (IsLoggedIn()) {
+                        await Profile.SetUserName(CurrentUserName()).LoadFromStorageAsync();
+                    }
+
+                    // Create form object
+                    CurrentForm ??= new();
+                    await CurrentForm.Init();
+                    CurrentAction = Param("action"); // Set up current action
+                    SetVisibility();
+                    Plant.Required = false;
+
+                    // Do not use lookup cache
+                    if (!Config.LookupCachePageIds.Contains(PageID))
+                        SetUseLookupCache(false);
+
+                    // Global Page Loading event
+                    PageLoading();
+                    PageLoadingEventHandler?.Invoke(null, EventArgs.Empty);
+
+                    // Page Load event
+                    PageLoad();
+
+                    // Check token
+                    if (!await ValidPost())
+                        End(Language.Phrase("InvalidPostRequest"));
+
+                    // Check action result
+                    if (ActionResult != null) // Action result set by server event // DN
+                        return ActionResult;
+
+                    // Create token
+                    CreateToken();
+
+                    // Hide fields for add/edit
+                    if (!UseAjaxActions) {
+                        HideFieldsForAddEdit();
+                    }
+                    else { // Use inline delete
+                        InlineDelete = true;
+                    }
+
+                    // Set up lookup cache
+                    await SetupLookupOptions(LookupPlant);
+                    await SetupLookupOptions(Plant);
+                    await SetupLookupOptions(FungsiygDikunjungi);
+                    await SetupLookupOptions(TandaPengenal);
+            return null;
+        }
+
+        private void PageRunEnd()
+        {
+                    // Set LoginStatus, Page Rendering and Page Render
+                    if (!IsApi() && !IsTerminated) {
+                        SetupLoginStatus(); // Setup login status
+
+                        // Pass login status to client side
+                        SetClientVar("login", LoginStatus);
+
+                        // Global Page Rendering event
+                        PageRendering();
+                        PageRenderingEventHandler?.Invoke(null, EventArgs.Empty);
+
+                        // Page Render event
+                        bukuTamuEdit?.PageRender();
+                    }
+        }
+
+        // Support class
+        private sealed class ActionSetupResult
+        {
+            public bool Loaded { get; set; }
+
+            public bool PostBack { get; set; }
+
+            public bool LoadByPosition { get; set; }
+
+            public IActionResult? ActionResult { get; set; }
         }
         #pragma warning restore 219
+// ================== GENERATED HELPERS ==================
+private void ResolveLookupView(dynamic fld, string keyFieldName, string fallbackType = "auto")
+{
+    string curVal = ConvertToString(fld.CurrentValue);
+
+    // kosong → DbNullValue lalu selesai
+    if (Empty(curVal))
+    {
+        fld.ViewValue = DbNullValue;
+        return;
+    }
+
+    // siapkan fallback awal (kalau cache/DB tidak dapat)
+    if (fallbackType == "number")
+    {
+        fld.ViewValue = FormatNumber(fld.CurrentValue, fld.FormatPattern);
+    }
+    else if (fallbackType == "date")
+    {
+        var tmp = fld.CurrentValue;
+        fld.ViewValue = FormatDateTime(tmp, fld.FormatPattern);
+    }
+    else if (fallbackType == "string")
+    {
+        fld.ViewValue = ConvertToString(fld.CurrentValue);
+    }
+    else
+    { // auto
+        fld.ViewValue = IsNumeric(fld.CurrentValue)
+            ? FormatNumber(fld.CurrentValue, fld.FormatPattern)
+            : ConvertToString(fld.CurrentValue);
+    }
+
+    // coba dari cache
+    if (fld.Lookup != null && IsDictionary(fld.Lookup?.Options) && fld.Lookup?.Options.Values.Count > 0)
+    {
+        fld.ViewValue = fld.LookupCacheOption(curVal);
+        return;
+    }
+
+    // fallback: query DB
+    var keyField = fld.Lookup?.GetTable()?.Fields[keyFieldName];
+    string filterWrk = SearchFilter(keyField?.SearchExpression, "=", fld.CurrentValue, keyField?.SearchDataType, "");
+    string? sqlWrk = fld.Lookup?.GetSql(false, filterWrk, null, this, true, true);
+    List<Dictionary<string, object>>? rswrk = sqlWrk != null ? Connection.GetRows(sqlWrk) : null;
+    if (rswrk?.Count > 0 && fld.Lookup != null)
+    {
+        var listwrk = fld.Lookup?.RenderViewRow(rswrk[0]);
+        fld.ViewValue = fld.DisplayValue(listwrk);
+    }
+}
 
         // Confirm page
         public bool ConfirmPage = false; // DN
@@ -772,440 +1005,227 @@ public partial class SnDOne {
         #pragma warning restore 1998
 
         #pragma warning disable 1998
-        // Load form values
+        // Helper methods (placed inside the same partial class as LoadFormValues)
+        private void SetNormalField(dynamic fld, string fldName, string fldVar, bool includeValidate = false, bool validateFlag = false, bool unformatDate = false) {
+            // Determine value once
+            string val = CurrentForm.HasValue(fldName) ? CurrentForm.GetValue(fldName) : CurrentForm.GetValue(fldVar);
+            if (!fld.IsDetailKey) {
+                // API: if field not present in request, disable update
+                if (IsApi() && !CurrentForm.HasValue(fldName) && !CurrentForm.HasValue(fldVar))
+                    fld.Visible = false; // Disable update for API request
+                else {
+                    // Call appropriate SetFormValue overload
+                    if (includeValidate)
+                        fld.SetFormValue(val, true, validateFlag);
+                    else
+                        fld.SetFormValue(val);
+                }
+                if (unformatDate)
+                    fld.CurrentValue = UnformatDateTime(fld.CurrentValue, fld.FormatPattern);
+            }
+        }
+
+        private void SetFieldValueWithRaw(dynamic fld, string rawValue) {
+            // Helper in case caller wants to set from a raw form object call rather than val computed here
+            if (!fld.IsDetailKey) {
+                if (IsApi() && string.IsNullOrEmpty(rawValue)) // rawValue empty simulates missing
+                    fld.Visible = false;
+                else
+                    fld.SetFormValue(rawValue);
+            }
+        }
+
         protected async Task LoadFormValues() {
             if (CurrentForm == null)
                 return;
             bool validate = !Config.ServerValidate;
-            string val;
-
-            // Check field name 'id' before field var 'x_id'
-            val = CurrentForm.HasValue("id") ? CurrentForm.GetValue("id") : CurrentForm.GetValue("x_id");
-            if (!id.IsDetailKey)
-                id.SetFormValue(val);
-
-            // Check field name 'NomorBukuTamu' before field var 'x_NomorBukuTamu'
-            val = CurrentForm.HasValue("NomorBukuTamu") ? CurrentForm.GetValue("NomorBukuTamu") : CurrentForm.GetValue("x_NomorBukuTamu");
-            if (!NomorBukuTamu.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("NomorBukuTamu") && !CurrentForm.HasValue("x_NomorBukuTamu")) // DN
-                    NomorBukuTamu.Visible = false; // Disable update for API request
-                else
-                    NomorBukuTamu.SetFormValue(val);
+            if (!id.IsDetailKey) {
+                SetNormalField(id, "id", "x_id");
             }
 
-            // Check field name 'LinkRedirect' before field var 'x_LinkRedirect'
-            val = CurrentForm.HasValue("LinkRedirect") ? CurrentForm.GetValue("LinkRedirect") : CurrentForm.GetValue("x_LinkRedirect");
-            if (!LinkRedirect.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("LinkRedirect") && !CurrentForm.HasValue("x_LinkRedirect")) // DN
-                    LinkRedirect.Visible = false; // Disable update for API request
-                else
-                    LinkRedirect.SetFormValue(val);
-            }
+            // Standard handling for 'NomorBukuTamu'
+            NomorBukuTamu.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(NomorBukuTamu, "NomorBukuTamu", "x_NomorBukuTamu");
 
-            // Check field name 'Plant' before field var 'x_Plant'
-            val = CurrentForm.HasValue("Plant") ? CurrentForm.GetValue("Plant") : CurrentForm.GetValue("x_Plant");
-            if (!Plant.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("Plant") && !CurrentForm.HasValue("x_Plant")) // DN
-                    Plant.Visible = false; // Disable update for API request
-                else
-                    Plant.SetFormValue(val);
-            }
+            // Standard handling for 'LinkRedirect'
+            LinkRedirect.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(LinkRedirect, "LinkRedirect", "x_LinkRedirect");
 
-            // Check field name 'Tanggal' before field var 'x_Tanggal'
-            val = CurrentForm.HasValue("Tanggal") ? CurrentForm.GetValue("Tanggal") : CurrentForm.GetValue("x_Tanggal");
-            if (!Tanggal.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("Tanggal") && !CurrentForm.HasValue("x_Tanggal")) // DN
-                    Tanggal.Visible = false; // Disable update for API request
-                else
-                    Tanggal.SetFormValue(val);
-                Tanggal.CurrentValue = UnformatDateTime(Tanggal.CurrentValue, Tanggal.FormatPattern);
-            }
+            // Standard handling for 'Plant'
+            Plant.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(Plant, "Plant", "x_Plant");
 
-            // Check field name 'StatusZona' before field var 'x_StatusZona'
-            val = CurrentForm.HasValue("StatusZona") ? CurrentForm.GetValue("StatusZona") : CurrentForm.GetValue("x_StatusZona");
-            if (!StatusZona.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("StatusZona") && !CurrentForm.HasValue("x_StatusZona")) // DN
-                    StatusZona.Visible = false; // Disable update for API request
-                else
-                    StatusZona.SetFormValue(val);
-            }
+            // Standard handling for 'Tanggal'
+            Tanggal.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(Tanggal, "Tanggal", "x_Tanggal", false, false, true);
 
-            // Check field name 'Nama' before field var 'x_Nama'
-            val = CurrentForm.HasValue("Nama") ? CurrentForm.GetValue("Nama") : CurrentForm.GetValue("x_Nama");
-            if (!Nama.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("Nama") && !CurrentForm.HasValue("x_Nama")) // DN
-                    Nama.Visible = false; // Disable update for API request
-                else
-                    Nama.SetFormValue(val);
-            }
+            // Standard handling for 'StatusZona'
+            StatusZona.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(StatusZona, "StatusZona", "x_StatusZona");
 
-            // Check field name 'AsalPerusahaan' before field var 'x_AsalPerusahaan'
-            val = CurrentForm.HasValue("AsalPerusahaan") ? CurrentForm.GetValue("AsalPerusahaan") : CurrentForm.GetValue("x_AsalPerusahaan");
-            if (!AsalPerusahaan.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("AsalPerusahaan") && !CurrentForm.HasValue("x_AsalPerusahaan")) // DN
-                    AsalPerusahaan.Visible = false; // Disable update for API request
-                else
-                    AsalPerusahaan.SetFormValue(val);
-            }
+            // Standard handling for 'Nama'
+            Nama.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(Nama, "Nama", "x_Nama");
 
-            // Check field name 'Jabatan' before field var 'x_Jabatan'
-            val = CurrentForm.HasValue("Jabatan") ? CurrentForm.GetValue("Jabatan") : CurrentForm.GetValue("x_Jabatan");
-            if (!Jabatan.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("Jabatan") && !CurrentForm.HasValue("x_Jabatan")) // DN
-                    Jabatan.Visible = false; // Disable update for API request
-                else
-                    Jabatan.SetFormValue(val);
-            }
+            // Standard handling for 'AsalPerusahaan'
+            AsalPerusahaan.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(AsalPerusahaan, "AsalPerusahaan", "x_AsalPerusahaan");
 
-            // Check field name 'FungsiygDikunjungi' before field var 'x_FungsiygDikunjungi'
-            val = CurrentForm.HasValue("FungsiygDikunjungi") ? CurrentForm.GetValue("FungsiygDikunjungi") : CurrentForm.GetValue("x_FungsiygDikunjungi");
-            if (!FungsiygDikunjungi.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("FungsiygDikunjungi") && !CurrentForm.HasValue("x_FungsiygDikunjungi")) // DN
-                    FungsiygDikunjungi.Visible = false; // Disable update for API request
-                else
-                    FungsiygDikunjungi.SetFormValue(val);
-            }
+            // Standard handling for 'Jabatan'
+            Jabatan.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(Jabatan, "Jabatan", "x_Jabatan");
 
-            // Check field name 'MaksudKunjungan' before field var 'x_MaksudKunjungan'
-            val = CurrentForm.HasValue("MaksudKunjungan") ? CurrentForm.GetValue("MaksudKunjungan") : CurrentForm.GetValue("x_MaksudKunjungan");
-            if (!MaksudKunjungan.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("MaksudKunjungan") && !CurrentForm.HasValue("x_MaksudKunjungan")) // DN
-                    MaksudKunjungan.Visible = false; // Disable update for API request
-                else
-                    MaksudKunjungan.SetFormValue(val);
-            }
+            // Standard handling for 'FungsiygDikunjungi'
+            FungsiygDikunjungi.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(FungsiygDikunjungi, "FungsiygDikunjungi", "x_FungsiygDikunjungi");
 
-            // Check field name 'TandaPengenal' before field var 'x_TandaPengenal'
-            val = CurrentForm.HasValue("TandaPengenal") ? CurrentForm.GetValue("TandaPengenal") : CurrentForm.GetValue("x_TandaPengenal");
-            if (!TandaPengenal.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("TandaPengenal") && !CurrentForm.HasValue("x_TandaPengenal")) // DN
-                    TandaPengenal.Visible = false; // Disable update for API request
-                else
-                    TandaPengenal.SetFormValue(val);
-            }
+            // Standard handling for 'MaksudKunjungan'
+            MaksudKunjungan.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(MaksudKunjungan, "MaksudKunjungan", "x_MaksudKunjungan");
 
-            // Check field name 'TandaTangan' before field var 'x_TandaTangan'
-            val = CurrentForm.HasValue("TandaTangan") ? CurrentForm.GetValue("TandaTangan") : CurrentForm.GetValue("x_TandaTangan");
-            if (!TandaTangan.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("TandaTangan") && !CurrentForm.HasValue("x_TandaTangan")) // DN
-                    TandaTangan.Visible = false; // Disable update for API request
-                else
-                    TandaTangan.SetFormValue(val);
-            }
+            // Standard handling for 'TandaPengenal'
+            TandaPengenal.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(TandaPengenal, "TandaPengenal", "x_TandaPengenal");
 
-            // Check field name 'TandaTanganDownload' before field var 'x_TandaTanganDownload'
-            val = CurrentForm.HasValue("TandaTanganDownload") ? CurrentForm.GetValue("TandaTanganDownload") : CurrentForm.GetValue("x_TandaTanganDownload");
-            if (!TandaTanganDownload.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("TandaTanganDownload") && !CurrentForm.HasValue("x_TandaTanganDownload")) // DN
-                    TandaTanganDownload.Visible = false; // Disable update for API request
-                else
-                    TandaTanganDownload.SetFormValue(val);
-            }
+            // Standard handling for 'TandaTangan'
+            TandaTangan.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(TandaTangan, "TandaTangan", "x_TandaTangan");
 
-            // Check field name 'Keterangan' before field var 'x_Keterangan'
-            val = CurrentForm.HasValue("Keterangan") ? CurrentForm.GetValue("Keterangan") : CurrentForm.GetValue("x_Keterangan");
-            if (!Keterangan.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("Keterangan") && !CurrentForm.HasValue("x_Keterangan")) // DN
-                    Keterangan.Visible = false; // Disable update for API request
-                else
-                    Keterangan.SetFormValue(val);
-            }
+            // Standard handling for 'TandaTanganDownload'
+            TandaTanganDownload.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(TandaTanganDownload, "TandaTanganDownload", "x_TandaTanganDownload");
 
-            // Check field name 'PintuUtamaId' before field var 'x_PintuUtamaId'
-            val = CurrentForm.HasValue("PintuUtamaId") ? CurrentForm.GetValue("PintuUtamaId") : CurrentForm.GetValue("x_PintuUtamaId");
-            if (!PintuUtamaId.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("PintuUtamaId") && !CurrentForm.HasValue("x_PintuUtamaId")) // DN
-                    PintuUtamaId.Visible = false; // Disable update for API request
-                else
-                    PintuUtamaId.SetFormValue(val, true, validate);
-            }
+            // Standard handling for 'Keterangan'
+            Keterangan.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(Keterangan, "Keterangan", "x_Keterangan");
 
-            // Check field name 'PintuUtamaInTanggal' before field var 'x_PintuUtamaInTanggal'
-            val = CurrentForm.HasValue("PintuUtamaInTanggal") ? CurrentForm.GetValue("PintuUtamaInTanggal") : CurrentForm.GetValue("x_PintuUtamaInTanggal");
-            if (!PintuUtamaInTanggal.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("PintuUtamaInTanggal") && !CurrentForm.HasValue("x_PintuUtamaInTanggal")) // DN
-                    PintuUtamaInTanggal.Visible = false; // Disable update for API request
-                else
-                    PintuUtamaInTanggal.SetFormValue(val, true, validate);
-                PintuUtamaInTanggal.CurrentValue = UnformatDateTime(PintuUtamaInTanggal.CurrentValue, PintuUtamaInTanggal.FormatPattern);
-            }
+            // Standard handling for 'PintuUtamaId'
+            PintuUtamaId.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(PintuUtamaId, "PintuUtamaId", "x_PintuUtamaId", true, validate, false);
 
-            // Check field name 'PintuUtamaInFoto' before field var 'x_PintuUtamaInFoto'
-            val = CurrentForm.HasValue("PintuUtamaInFoto") ? CurrentForm.GetValue("PintuUtamaInFoto") : CurrentForm.GetValue("x_PintuUtamaInFoto");
-            if (!PintuUtamaInFoto.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("PintuUtamaInFoto") && !CurrentForm.HasValue("x_PintuUtamaInFoto")) // DN
-                    PintuUtamaInFoto.Visible = false; // Disable update for API request
-                else
-                    PintuUtamaInFoto.SetFormValue(val);
-            }
+            // Standard handling for 'PintuUtamaInTanggal'
+            PintuUtamaInTanggal.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(PintuUtamaInTanggal, "PintuUtamaInTanggal", "x_PintuUtamaInTanggal", true, validate, true);
 
-            // Check field name 'PintuUtamaInFotoDownload' before field var 'x_PintuUtamaInFotoDownload'
-            val = CurrentForm.HasValue("PintuUtamaInFotoDownload") ? CurrentForm.GetValue("PintuUtamaInFotoDownload") : CurrentForm.GetValue("x_PintuUtamaInFotoDownload");
-            if (!PintuUtamaInFotoDownload.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("PintuUtamaInFotoDownload") && !CurrentForm.HasValue("x_PintuUtamaInFotoDownload")) // DN
-                    PintuUtamaInFotoDownload.Visible = false; // Disable update for API request
-                else
-                    PintuUtamaInFotoDownload.SetFormValue(val);
-            }
+            // Standard handling for 'PintuUtamaInFoto'
+            PintuUtamaInFoto.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(PintuUtamaInFoto, "PintuUtamaInFoto", "x_PintuUtamaInFoto");
 
-            // Check field name 'PintuUtamaInUser' before field var 'x_PintuUtamaInUser'
-            val = CurrentForm.HasValue("PintuUtamaInUser") ? CurrentForm.GetValue("PintuUtamaInUser") : CurrentForm.GetValue("x_PintuUtamaInUser");
-            if (!PintuUtamaInUser.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("PintuUtamaInUser") && !CurrentForm.HasValue("x_PintuUtamaInUser")) // DN
-                    PintuUtamaInUser.Visible = false; // Disable update for API request
-                else
-                    PintuUtamaInUser.SetFormValue(val);
-            }
+            // Standard handling for 'PintuUtamaInFotoDownload'
+            PintuUtamaInFotoDownload.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(PintuUtamaInFotoDownload, "PintuUtamaInFotoDownload", "x_PintuUtamaInFotoDownload");
 
-            // Check field name 'CustomPilihPintu' before field var 'x_CustomPilihPintu'
-            val = CurrentForm.HasValue("CustomPilihPintu") ? CurrentForm.GetValue("CustomPilihPintu") : CurrentForm.GetValue("x_CustomPilihPintu");
-            if (!CustomPilihPintu.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("CustomPilihPintu") && !CurrentForm.HasValue("x_CustomPilihPintu")) // DN
-                    CustomPilihPintu.Visible = false; // Disable update for API request
-                else
-                    CustomPilihPintu.SetFormValue(val);
-            }
+            // Standard handling for 'PintuUtamaInUser'
+            PintuUtamaInUser.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(PintuUtamaInUser, "PintuUtamaInUser", "x_PintuUtamaInUser");
 
-            // Check field name 'PintuUtamaOutTanggal' before field var 'x_PintuUtamaOutTanggal'
-            val = CurrentForm.HasValue("PintuUtamaOutTanggal") ? CurrentForm.GetValue("PintuUtamaOutTanggal") : CurrentForm.GetValue("x_PintuUtamaOutTanggal");
-            if (!PintuUtamaOutTanggal.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("PintuUtamaOutTanggal") && !CurrentForm.HasValue("x_PintuUtamaOutTanggal")) // DN
-                    PintuUtamaOutTanggal.Visible = false; // Disable update for API request
-                else
-                    PintuUtamaOutTanggal.SetFormValue(val, true, validate);
-                PintuUtamaOutTanggal.CurrentValue = UnformatDateTime(PintuUtamaOutTanggal.CurrentValue, PintuUtamaOutTanggal.FormatPattern);
-            }
+            // Standard handling for 'CustomPilihPintu'
+            CustomPilihPintu.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(CustomPilihPintu, "CustomPilihPintu", "x_CustomPilihPintu");
 
-            // Check field name 'PintuUtamaOutFoto' before field var 'x_PintuUtamaOutFoto'
-            val = CurrentForm.HasValue("PintuUtamaOutFoto") ? CurrentForm.GetValue("PintuUtamaOutFoto") : CurrentForm.GetValue("x_PintuUtamaOutFoto");
-            if (!PintuUtamaOutFoto.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("PintuUtamaOutFoto") && !CurrentForm.HasValue("x_PintuUtamaOutFoto")) // DN
-                    PintuUtamaOutFoto.Visible = false; // Disable update for API request
-                else
-                    PintuUtamaOutFoto.SetFormValue(val);
-            }
+            // Standard handling for 'PintuUtamaOutTanggal'
+            PintuUtamaOutTanggal.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(PintuUtamaOutTanggal, "PintuUtamaOutTanggal", "x_PintuUtamaOutTanggal", true, validate, true);
 
-            // Check field name 'PintuUtamaOutFotoDownload' before field var 'x_PintuUtamaOutFotoDownload'
-            val = CurrentForm.HasValue("PintuUtamaOutFotoDownload") ? CurrentForm.GetValue("PintuUtamaOutFotoDownload") : CurrentForm.GetValue("x_PintuUtamaOutFotoDownload");
-            if (!PintuUtamaOutFotoDownload.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("PintuUtamaOutFotoDownload") && !CurrentForm.HasValue("x_PintuUtamaOutFotoDownload")) // DN
-                    PintuUtamaOutFotoDownload.Visible = false; // Disable update for API request
-                else
-                    PintuUtamaOutFotoDownload.SetFormValue(val);
-            }
+            // Standard handling for 'PintuUtamaOutFoto'
+            PintuUtamaOutFoto.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(PintuUtamaOutFoto, "PintuUtamaOutFoto", "x_PintuUtamaOutFoto");
 
-            // Check field name 'PintuUtamaOutUser' before field var 'x_PintuUtamaOutUser'
-            val = CurrentForm.HasValue("PintuUtamaOutUser") ? CurrentForm.GetValue("PintuUtamaOutUser") : CurrentForm.GetValue("x_PintuUtamaOutUser");
-            if (!PintuUtamaOutUser.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("PintuUtamaOutUser") && !CurrentForm.HasValue("x_PintuUtamaOutUser")) // DN
-                    PintuUtamaOutUser.Visible = false; // Disable update for API request
-                else
-                    PintuUtamaOutUser.SetFormValue(val);
-            }
+            // Standard handling for 'PintuUtamaOutFotoDownload'
+            PintuUtamaOutFotoDownload.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(PintuUtamaOutFotoDownload, "PintuUtamaOutFotoDownload", "x_PintuUtamaOutFotoDownload");
 
-            // Check field name 'LobbyUtamaId' before field var 'x_LobbyUtamaId'
-            val = CurrentForm.HasValue("LobbyUtamaId") ? CurrentForm.GetValue("LobbyUtamaId") : CurrentForm.GetValue("x_LobbyUtamaId");
-            if (!LobbyUtamaId.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("LobbyUtamaId") && !CurrentForm.HasValue("x_LobbyUtamaId")) // DN
-                    LobbyUtamaId.Visible = false; // Disable update for API request
-                else
-                    LobbyUtamaId.SetFormValue(val, true, validate);
-            }
+            // Standard handling for 'PintuUtamaOutUser'
+            PintuUtamaOutUser.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(PintuUtamaOutUser, "PintuUtamaOutUser", "x_PintuUtamaOutUser");
 
-            // Check field name 'LobbyUtamaInTanggal' before field var 'x_LobbyUtamaInTanggal'
-            val = CurrentForm.HasValue("LobbyUtamaInTanggal") ? CurrentForm.GetValue("LobbyUtamaInTanggal") : CurrentForm.GetValue("x_LobbyUtamaInTanggal");
-            if (!LobbyUtamaInTanggal.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("LobbyUtamaInTanggal") && !CurrentForm.HasValue("x_LobbyUtamaInTanggal")) // DN
-                    LobbyUtamaInTanggal.Visible = false; // Disable update for API request
-                else
-                    LobbyUtamaInTanggal.SetFormValue(val, true, validate);
-                LobbyUtamaInTanggal.CurrentValue = UnformatDateTime(LobbyUtamaInTanggal.CurrentValue, LobbyUtamaInTanggal.FormatPattern);
-            }
+            // Standard handling for 'LobbyUtamaId'
+            LobbyUtamaId.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(LobbyUtamaId, "LobbyUtamaId", "x_LobbyUtamaId", true, validate, false);
 
-            // Check field name 'LobbyUtamaInFoto' before field var 'x_LobbyUtamaInFoto'
-            val = CurrentForm.HasValue("LobbyUtamaInFoto") ? CurrentForm.GetValue("LobbyUtamaInFoto") : CurrentForm.GetValue("x_LobbyUtamaInFoto");
-            if (!LobbyUtamaInFoto.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("LobbyUtamaInFoto") && !CurrentForm.HasValue("x_LobbyUtamaInFoto")) // DN
-                    LobbyUtamaInFoto.Visible = false; // Disable update for API request
-                else
-                    LobbyUtamaInFoto.SetFormValue(val);
-            }
+            // Standard handling for 'LobbyUtamaInTanggal'
+            LobbyUtamaInTanggal.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(LobbyUtamaInTanggal, "LobbyUtamaInTanggal", "x_LobbyUtamaInTanggal", true, validate, true);
 
-            // Check field name 'LobbyUtamaInFotoDownload' before field var 'x_LobbyUtamaInFotoDownload'
-            val = CurrentForm.HasValue("LobbyUtamaInFotoDownload") ? CurrentForm.GetValue("LobbyUtamaInFotoDownload") : CurrentForm.GetValue("x_LobbyUtamaInFotoDownload");
-            if (!LobbyUtamaInFotoDownload.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("LobbyUtamaInFotoDownload") && !CurrentForm.HasValue("x_LobbyUtamaInFotoDownload")) // DN
-                    LobbyUtamaInFotoDownload.Visible = false; // Disable update for API request
-                else
-                    LobbyUtamaInFotoDownload.SetFormValue(val);
-            }
+            // Standard handling for 'LobbyUtamaInFoto'
+            LobbyUtamaInFoto.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(LobbyUtamaInFoto, "LobbyUtamaInFoto", "x_LobbyUtamaInFoto");
 
-            // Check field name 'LobbyUtamaInUser' before field var 'x_LobbyUtamaInUser'
-            val = CurrentForm.HasValue("LobbyUtamaInUser") ? CurrentForm.GetValue("LobbyUtamaInUser") : CurrentForm.GetValue("x_LobbyUtamaInUser");
-            if (!LobbyUtamaInUser.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("LobbyUtamaInUser") && !CurrentForm.HasValue("x_LobbyUtamaInUser")) // DN
-                    LobbyUtamaInUser.Visible = false; // Disable update for API request
-                else
-                    LobbyUtamaInUser.SetFormValue(val);
-            }
+            // Standard handling for 'LobbyUtamaInFotoDownload'
+            LobbyUtamaInFotoDownload.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(LobbyUtamaInFotoDownload, "LobbyUtamaInFotoDownload", "x_LobbyUtamaInFotoDownload");
 
-            // Check field name 'LobbyUtamaOutTanggal' before field var 'x_LobbyUtamaOutTanggal'
-            val = CurrentForm.HasValue("LobbyUtamaOutTanggal") ? CurrentForm.GetValue("LobbyUtamaOutTanggal") : CurrentForm.GetValue("x_LobbyUtamaOutTanggal");
-            if (!LobbyUtamaOutTanggal.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("LobbyUtamaOutTanggal") && !CurrentForm.HasValue("x_LobbyUtamaOutTanggal")) // DN
-                    LobbyUtamaOutTanggal.Visible = false; // Disable update for API request
-                else
-                    LobbyUtamaOutTanggal.SetFormValue(val, true, validate);
-                LobbyUtamaOutTanggal.CurrentValue = UnformatDateTime(LobbyUtamaOutTanggal.CurrentValue, LobbyUtamaOutTanggal.FormatPattern);
-            }
+            // Standard handling for 'LobbyUtamaInUser'
+            LobbyUtamaInUser.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(LobbyUtamaInUser, "LobbyUtamaInUser", "x_LobbyUtamaInUser");
 
-            // Check field name 'LobbyUtamaOutFoto' before field var 'x_LobbyUtamaOutFoto'
-            val = CurrentForm.HasValue("LobbyUtamaOutFoto") ? CurrentForm.GetValue("LobbyUtamaOutFoto") : CurrentForm.GetValue("x_LobbyUtamaOutFoto");
-            if (!LobbyUtamaOutFoto.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("LobbyUtamaOutFoto") && !CurrentForm.HasValue("x_LobbyUtamaOutFoto")) // DN
-                    LobbyUtamaOutFoto.Visible = false; // Disable update for API request
-                else
-                    LobbyUtamaOutFoto.SetFormValue(val);
-            }
+            // Standard handling for 'LobbyUtamaOutTanggal'
+            LobbyUtamaOutTanggal.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(LobbyUtamaOutTanggal, "LobbyUtamaOutTanggal", "x_LobbyUtamaOutTanggal", true, validate, true);
 
-            // Check field name 'LobbyUtamaOutFotoDownload' before field var 'x_LobbyUtamaOutFotoDownload'
-            val = CurrentForm.HasValue("LobbyUtamaOutFotoDownload") ? CurrentForm.GetValue("LobbyUtamaOutFotoDownload") : CurrentForm.GetValue("x_LobbyUtamaOutFotoDownload");
-            if (!LobbyUtamaOutFotoDownload.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("LobbyUtamaOutFotoDownload") && !CurrentForm.HasValue("x_LobbyUtamaOutFotoDownload")) // DN
-                    LobbyUtamaOutFotoDownload.Visible = false; // Disable update for API request
-                else
-                    LobbyUtamaOutFotoDownload.SetFormValue(val);
-            }
+            // Standard handling for 'LobbyUtamaOutFoto'
+            LobbyUtamaOutFoto.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(LobbyUtamaOutFoto, "LobbyUtamaOutFoto", "x_LobbyUtamaOutFoto");
 
-            // Check field name 'LobbyUtamaOutUser' before field var 'x_LobbyUtamaOutUser'
-            val = CurrentForm.HasValue("LobbyUtamaOutUser") ? CurrentForm.GetValue("LobbyUtamaOutUser") : CurrentForm.GetValue("x_LobbyUtamaOutUser");
-            if (!LobbyUtamaOutUser.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("LobbyUtamaOutUser") && !CurrentForm.HasValue("x_LobbyUtamaOutUser")) // DN
-                    LobbyUtamaOutUser.Visible = false; // Disable update for API request
-                else
-                    LobbyUtamaOutUser.SetFormValue(val);
-            }
+            // Standard handling for 'LobbyUtamaOutFotoDownload'
+            LobbyUtamaOutFotoDownload.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(LobbyUtamaOutFotoDownload, "LobbyUtamaOutFotoDownload", "x_LobbyUtamaOutFotoDownload");
 
-            // Check field name 'AreaTerlarangId' before field var 'x_AreaTerlarangId'
-            val = CurrentForm.HasValue("AreaTerlarangId") ? CurrentForm.GetValue("AreaTerlarangId") : CurrentForm.GetValue("x_AreaTerlarangId");
-            if (!AreaTerlarangId.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("AreaTerlarangId") && !CurrentForm.HasValue("x_AreaTerlarangId")) // DN
-                    AreaTerlarangId.Visible = false; // Disable update for API request
-                else
-                    AreaTerlarangId.SetFormValue(val, true, validate);
-            }
+            // Standard handling for 'LobbyUtamaOutUser'
+            LobbyUtamaOutUser.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(LobbyUtamaOutUser, "LobbyUtamaOutUser", "x_LobbyUtamaOutUser");
 
-            // Check field name 'AreaTerlarangInTanggal' before field var 'x_AreaTerlarangInTanggal'
-            val = CurrentForm.HasValue("AreaTerlarangInTanggal") ? CurrentForm.GetValue("AreaTerlarangInTanggal") : CurrentForm.GetValue("x_AreaTerlarangInTanggal");
-            if (!AreaTerlarangInTanggal.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("AreaTerlarangInTanggal") && !CurrentForm.HasValue("x_AreaTerlarangInTanggal")) // DN
-                    AreaTerlarangInTanggal.Visible = false; // Disable update for API request
-                else
-                    AreaTerlarangInTanggal.SetFormValue(val, true, validate);
-                AreaTerlarangInTanggal.CurrentValue = UnformatDateTime(AreaTerlarangInTanggal.CurrentValue, AreaTerlarangInTanggal.FormatPattern);
-            }
+            // Standard handling for 'AreaTerlarangId'
+            AreaTerlarangId.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(AreaTerlarangId, "AreaTerlarangId", "x_AreaTerlarangId", true, validate, false);
 
-            // Check field name 'AreaTerlarangInFoto' before field var 'x_AreaTerlarangInFoto'
-            val = CurrentForm.HasValue("AreaTerlarangInFoto") ? CurrentForm.GetValue("AreaTerlarangInFoto") : CurrentForm.GetValue("x_AreaTerlarangInFoto");
-            if (!AreaTerlarangInFoto.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("AreaTerlarangInFoto") && !CurrentForm.HasValue("x_AreaTerlarangInFoto")) // DN
-                    AreaTerlarangInFoto.Visible = false; // Disable update for API request
-                else
-                    AreaTerlarangInFoto.SetFormValue(val);
-            }
+            // Standard handling for 'AreaTerlarangInTanggal'
+            AreaTerlarangInTanggal.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(AreaTerlarangInTanggal, "AreaTerlarangInTanggal", "x_AreaTerlarangInTanggal", true, validate, true);
 
-            // Check field name 'AreaTerlarangInFotoDownload' before field var 'x_AreaTerlarangInFotoDownload'
-            val = CurrentForm.HasValue("AreaTerlarangInFotoDownload") ? CurrentForm.GetValue("AreaTerlarangInFotoDownload") : CurrentForm.GetValue("x_AreaTerlarangInFotoDownload");
-            if (!AreaTerlarangInFotoDownload.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("AreaTerlarangInFotoDownload") && !CurrentForm.HasValue("x_AreaTerlarangInFotoDownload")) // DN
-                    AreaTerlarangInFotoDownload.Visible = false; // Disable update for API request
-                else
-                    AreaTerlarangInFotoDownload.SetFormValue(val);
-            }
+            // Standard handling for 'AreaTerlarangInFoto'
+            AreaTerlarangInFoto.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(AreaTerlarangInFoto, "AreaTerlarangInFoto", "x_AreaTerlarangInFoto");
 
-            // Check field name 'AreaTerlarangInUser' before field var 'x_AreaTerlarangInUser'
-            val = CurrentForm.HasValue("AreaTerlarangInUser") ? CurrentForm.GetValue("AreaTerlarangInUser") : CurrentForm.GetValue("x_AreaTerlarangInUser");
-            if (!AreaTerlarangInUser.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("AreaTerlarangInUser") && !CurrentForm.HasValue("x_AreaTerlarangInUser")) // DN
-                    AreaTerlarangInUser.Visible = false; // Disable update for API request
-                else
-                    AreaTerlarangInUser.SetFormValue(val);
-            }
+            // Standard handling for 'AreaTerlarangInFotoDownload'
+            AreaTerlarangInFotoDownload.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(AreaTerlarangInFotoDownload, "AreaTerlarangInFotoDownload", "x_AreaTerlarangInFotoDownload");
 
-            // Check field name 'AreaTerlarangOutTanggal' before field var 'x_AreaTerlarangOutTanggal'
-            val = CurrentForm.HasValue("AreaTerlarangOutTanggal") ? CurrentForm.GetValue("AreaTerlarangOutTanggal") : CurrentForm.GetValue("x_AreaTerlarangOutTanggal");
-            if (!AreaTerlarangOutTanggal.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("AreaTerlarangOutTanggal") && !CurrentForm.HasValue("x_AreaTerlarangOutTanggal")) // DN
-                    AreaTerlarangOutTanggal.Visible = false; // Disable update for API request
-                else
-                    AreaTerlarangOutTanggal.SetFormValue(val, true, validate);
-                AreaTerlarangOutTanggal.CurrentValue = UnformatDateTime(AreaTerlarangOutTanggal.CurrentValue, AreaTerlarangOutTanggal.FormatPattern);
-            }
+            // Standard handling for 'AreaTerlarangInUser'
+            AreaTerlarangInUser.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(AreaTerlarangInUser, "AreaTerlarangInUser", "x_AreaTerlarangInUser");
 
-            // Check field name 'AreaTerlarangOutFoto' before field var 'x_AreaTerlarangOutFoto'
-            val = CurrentForm.HasValue("AreaTerlarangOutFoto") ? CurrentForm.GetValue("AreaTerlarangOutFoto") : CurrentForm.GetValue("x_AreaTerlarangOutFoto");
-            if (!AreaTerlarangOutFoto.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("AreaTerlarangOutFoto") && !CurrentForm.HasValue("x_AreaTerlarangOutFoto")) // DN
-                    AreaTerlarangOutFoto.Visible = false; // Disable update for API request
-                else
-                    AreaTerlarangOutFoto.SetFormValue(val);
-            }
+            // Standard handling for 'AreaTerlarangOutTanggal'
+            AreaTerlarangOutTanggal.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(AreaTerlarangOutTanggal, "AreaTerlarangOutTanggal", "x_AreaTerlarangOutTanggal", true, validate, true);
 
-            // Check field name 'AreaTerlarangOutFotoDownload' before field var 'x_AreaTerlarangOutFotoDownload'
-            val = CurrentForm.HasValue("AreaTerlarangOutFotoDownload") ? CurrentForm.GetValue("AreaTerlarangOutFotoDownload") : CurrentForm.GetValue("x_AreaTerlarangOutFotoDownload");
-            if (!AreaTerlarangOutFotoDownload.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("AreaTerlarangOutFotoDownload") && !CurrentForm.HasValue("x_AreaTerlarangOutFotoDownload")) // DN
-                    AreaTerlarangOutFotoDownload.Visible = false; // Disable update for API request
-                else
-                    AreaTerlarangOutFotoDownload.SetFormValue(val);
-            }
+            // Standard handling for 'AreaTerlarangOutFoto'
+            AreaTerlarangOutFoto.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(AreaTerlarangOutFoto, "AreaTerlarangOutFoto", "x_AreaTerlarangOutFoto");
 
-            // Check field name 'AreaTerlarangOutUser' before field var 'x_AreaTerlarangOutUser'
-            val = CurrentForm.HasValue("AreaTerlarangOutUser") ? CurrentForm.GetValue("AreaTerlarangOutUser") : CurrentForm.GetValue("x_AreaTerlarangOutUser");
-            if (!AreaTerlarangOutUser.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("AreaTerlarangOutUser") && !CurrentForm.HasValue("x_AreaTerlarangOutUser")) // DN
-                    AreaTerlarangOutUser.Visible = false; // Disable update for API request
-                else
-                    AreaTerlarangOutUser.SetFormValue(val);
-            }
+            // Standard handling for 'AreaTerlarangOutFotoDownload'
+            AreaTerlarangOutFotoDownload.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(AreaTerlarangOutFotoDownload, "AreaTerlarangOutFotoDownload", "x_AreaTerlarangOutFotoDownload");
 
-            // Check field name 'etlDate' before field var 'x_etlDate'
-            val = CurrentForm.HasValue("etlDate") ? CurrentForm.GetValue("etlDate") : CurrentForm.GetValue("x_etlDate");
-            if (!etlDate.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("etlDate") && !CurrentForm.HasValue("x_etlDate")) // DN
-                    etlDate.Visible = false; // Disable update for API request
-                else
-                    etlDate.SetFormValue(val);
-                etlDate.CurrentValue = UnformatDateTime(etlDate.CurrentValue, etlDate.FormatPattern);
-            }
+            // Standard handling for 'AreaTerlarangOutUser'
+            AreaTerlarangOutUser.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(AreaTerlarangOutUser, "AreaTerlarangOutUser", "x_AreaTerlarangOutUser");
 
-            // Check field name 'LastUpdatedBy' before field var 'x_LastUpdatedBy'
-            val = CurrentForm.HasValue("LastUpdatedBy") ? CurrentForm.GetValue("LastUpdatedBy") : CurrentForm.GetValue("x_LastUpdatedBy");
-            if (!LastUpdatedBy.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("LastUpdatedBy") && !CurrentForm.HasValue("x_LastUpdatedBy")) // DN
-                    LastUpdatedBy.Visible = false; // Disable update for API request
-                else
-                    LastUpdatedBy.SetFormValue(val);
-            }
+            // Standard handling for 'etlDate'
+            etlDate.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(etlDate, "etlDate", "x_etlDate", false, false, true);
 
-            // Check field name 'lastUpdatedDate' before field var 'x_lastUpdatedDate'
-            val = CurrentForm.HasValue("lastUpdatedDate") ? CurrentForm.GetValue("lastUpdatedDate") : CurrentForm.GetValue("x_lastUpdatedDate");
-            if (!lastUpdatedDate.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("lastUpdatedDate") && !CurrentForm.HasValue("x_lastUpdatedDate")) // DN
-                    lastUpdatedDate.Visible = false; // Disable update for API request
-                else
-                    lastUpdatedDate.SetFormValue(val);
-                lastUpdatedDate.CurrentValue = UnformatDateTime(lastUpdatedDate.CurrentValue, lastUpdatedDate.FormatPattern);
-            }
+            // Standard handling for 'LastUpdatedBy'
+            LastUpdatedBy.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(LastUpdatedBy, "LastUpdatedBy", "x_LastUpdatedBy");
 
-            // Check field name 'StatusZonaPrev' before field var 'x_StatusZonaPrev'
-            val = CurrentForm.HasValue("StatusZonaPrev") ? CurrentForm.GetValue("StatusZonaPrev") : CurrentForm.GetValue("x_StatusZonaPrev");
-            if (!StatusZonaPrev.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("StatusZonaPrev") && !CurrentForm.HasValue("x_StatusZonaPrev")) // DN
-                    StatusZonaPrev.Visible = false; // Disable update for API request
-                else
-                    StatusZonaPrev.SetFormValue(val);
-            }
+            // Standard handling for 'lastUpdatedDate'
+            lastUpdatedDate.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(lastUpdatedDate, "lastUpdatedDate", "x_lastUpdatedDate", false, false, true);
+
+            // Standard handling for 'StatusZonaPrev'
+            StatusZonaPrev.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(StatusZonaPrev, "StatusZonaPrev", "x_StatusZonaPrev");
         }
         #pragma warning restore 1998
 
@@ -1589,249 +1609,317 @@ public partial class SnDOne {
 
             // View row
             if (RowType == RowType.View) {
-                // id
-                id.ViewValue = id.CurrentValue;
-                id.ViewCustomAttributes = "";
-
                 // NomorBukuTamu
-                NomorBukuTamu.ViewValue = ConvertToString(NomorBukuTamu.CurrentValue); // DN
-                NomorBukuTamu.ViewCustomAttributes = "";
 
                 // LinkRedirect
-                LinkRedirect.ViewValue = ConvertToString(LinkRedirect.CurrentValue); // DN
-                LinkRedirect.ViewCustomAttributes = "";
 
                 // LookupPlant
-                if (!Empty(LookupPlant.CurrentValue)) {
-                    LookupPlant.ViewValue = LookupPlant.OptionCaption(ConvertToString(LookupPlant.CurrentValue));
-                } else {
-                    LookupPlant.ViewValue = DbNullValue;
-                }
-                LookupPlant.ViewCustomAttributes = "";
 
                 // Plant
-                Plant.ViewValue = Plant.CurrentValue;
-                string curVal2 = ConvertToString(Plant.CurrentValue);
-                if (!Empty(curVal2)) {
-                    if (Plant.Lookup != null && IsDictionary(Plant.Lookup?.Options) && Plant.Lookup?.Options.Values.Count > 0) { // Load from cache // DN
-                        Plant.ViewValue = Plant.LookupCacheOption(curVal2);
-                    } else { // Lookup from database // DN
-                        string filterWrk2 = SearchFilter(Plant.Lookup?.GetTable()?.Fields["IdPlant"].SearchExpression, "=", Plant.CurrentValue, Plant.Lookup?.GetTable()?.Fields["IdPlant"].SearchDataType, "");
-                        string? sqlWrk2 = Plant.Lookup?.GetSql(false, filterWrk2, null, this, true, true);
-                        List<Dictionary<string, object>>? rswrk2 = sqlWrk2 != null ? Connection.GetRows(sqlWrk2) : null; // Must use Sync to avoid overwriting ViewValue in RenderViewRow
-                        if (rswrk2?.Count > 0 && Plant.Lookup != null) { // Lookup values found
-                            var listwrk = Plant.Lookup?.RenderViewRow(rswrk2[0]);
-                            Plant.ViewValue = Plant.DisplayValue(listwrk);
-                        } else {
-                            Plant.ViewValue = Plant.CurrentValue;
-                        }
-                    }
-                } else {
-                    Plant.ViewValue = DbNullValue;
-                }
-                Plant.ViewCustomAttributes = "";
 
                 // Tanggal
-                Tanggal.ViewValue = Tanggal.CurrentValue;
-                Tanggal.ViewValue = FormatDateTime(Tanggal.ViewValue, Tanggal.FormatPattern);
-                Tanggal.ViewCustomAttributes = "";
 
                 // StatusZona
-                StatusZona.ViewValue = ConvertToString(StatusZona.CurrentValue); // DN
-                StatusZona.ViewCustomAttributes = "";
 
                 // Nama
-                Nama.ViewValue = ConvertToString(Nama.CurrentValue); // DN
-                Nama.ViewCustomAttributes = "";
 
                 // AsalPerusahaan
-                AsalPerusahaan.ViewValue = ConvertToString(AsalPerusahaan.CurrentValue); // DN
-                AsalPerusahaan.ViewCustomAttributes = "";
 
                 // Jabatan
-                Jabatan.ViewValue = ConvertToString(Jabatan.CurrentValue); // DN
-                Jabatan.ViewCustomAttributes = "";
 
                 // FungsiygDikunjungi
-                string curVal3 = ConvertToString(FungsiygDikunjungi.CurrentValue);
-                if (!Empty(curVal3)) {
-                    if (FungsiygDikunjungi.Lookup != null && IsDictionary(FungsiygDikunjungi.Lookup?.Options) && FungsiygDikunjungi.Lookup?.Options.Values.Count > 0) { // Load from cache // DN
-                        FungsiygDikunjungi.ViewValue = FungsiygDikunjungi.LookupCacheOption(curVal3);
-                    } else { // Lookup from database // DN
-                        string filterWrk3 = SearchFilter(FungsiygDikunjungi.Lookup?.GetTable()?.Fields["ID"].SearchExpression, "=", FungsiygDikunjungi.CurrentValue, FungsiygDikunjungi.Lookup?.GetTable()?.Fields["ID"].SearchDataType, "");
-                        string? sqlWrk3 = FungsiygDikunjungi.Lookup?.GetSql(false, filterWrk3, null, this, true, true);
-                        List<Dictionary<string, object>>? rswrk3 = sqlWrk3 != null ? Connection.GetRows(sqlWrk3) : null; // Must use Sync to avoid overwriting ViewValue in RenderViewRow
-                        if (rswrk3?.Count > 0 && FungsiygDikunjungi.Lookup != null) { // Lookup values found
-                            var listwrk = FungsiygDikunjungi.Lookup?.RenderViewRow(rswrk3[0]);
-                            FungsiygDikunjungi.ViewValue = FungsiygDikunjungi.DisplayValue(listwrk);
-                        } else {
-                            FungsiygDikunjungi.ViewValue = FungsiygDikunjungi.CurrentValue;
-                        }
-                    }
-                } else {
-                    FungsiygDikunjungi.ViewValue = DbNullValue;
-                }
-                FungsiygDikunjungi.ViewCustomAttributes = "";
 
                 // MaksudKunjungan
-                MaksudKunjungan.ViewValue = ConvertToString(MaksudKunjungan.CurrentValue); // DN
-                MaksudKunjungan.ViewCustomAttributes = "";
 
                 // TandaPengenal
-                if (!Empty(TandaPengenal.CurrentValue)) {
-                    TandaPengenal.ViewValue = TandaPengenal.OptionCaption(ConvertToString(TandaPengenal.CurrentValue));
-                } else {
-                    TandaPengenal.ViewValue = DbNullValue;
-                }
-                TandaPengenal.ViewCustomAttributes = "";
 
                 // TandaTangan
-                TandaTangan.ViewValue = TandaTangan.CurrentValue;
-                TandaTangan.ViewCustomAttributes = "";
 
                 // TandaTanganDownload
-                TandaTanganDownload.ViewValue = TandaTanganDownload.CurrentValue;
-                TandaTanganDownload.ViewCustomAttributes = "";
 
                 // Keterangan
-                Keterangan.ViewValue = Keterangan.CurrentValue;
-                Keterangan.ViewCustomAttributes = "";
 
                 // PintuUtamaId
-                PintuUtamaId.ViewValue = ConvertToString(PintuUtamaId.CurrentValue); // DN
-                PintuUtamaId.ViewCustomAttributes = "";
 
                 // PintuUtamaInTanggal
-                PintuUtamaInTanggal.ViewValue = PintuUtamaInTanggal.CurrentValue;
-                PintuUtamaInTanggal.ViewValue = FormatDateTime(PintuUtamaInTanggal.ViewValue, PintuUtamaInTanggal.FormatPattern);
-                PintuUtamaInTanggal.ViewCustomAttributes = "";
 
                 // PintuUtamaInFoto
-                PintuUtamaInFoto.ViewValue = PintuUtamaInFoto.CurrentValue;
-                PintuUtamaInFoto.ViewCustomAttributes = "";
 
                 // PintuUtamaInFotoDownload
-                PintuUtamaInFotoDownload.ViewValue = PintuUtamaInFotoDownload.CurrentValue;
-                PintuUtamaInFotoDownload.ViewCustomAttributes = "";
 
                 // PintuUtamaInUser
-                PintuUtamaInUser.ViewValue = ConvertToString(PintuUtamaInUser.CurrentValue); // DN
-                PintuUtamaInUser.ViewCustomAttributes = "";
 
                 // CustomPilihPintu
-                CustomPilihPintu.ViewValue = ConvertToString(CustomPilihPintu.CurrentValue); // DN
-                CustomPilihPintu.ViewCustomAttributes = "";
 
                 // PintuUtamaOutTanggal
-                PintuUtamaOutTanggal.ViewValue = PintuUtamaOutTanggal.CurrentValue;
-                PintuUtamaOutTanggal.ViewValue = FormatDateTime(PintuUtamaOutTanggal.ViewValue, PintuUtamaOutTanggal.FormatPattern);
-                PintuUtamaOutTanggal.ViewCustomAttributes = "";
 
                 // PintuUtamaOutFoto
-                PintuUtamaOutFoto.ViewValue = PintuUtamaOutFoto.CurrentValue;
-                PintuUtamaOutFoto.ViewCustomAttributes = "";
 
                 // PintuUtamaOutFotoDownload
-                PintuUtamaOutFotoDownload.ViewValue = PintuUtamaOutFotoDownload.CurrentValue;
-                PintuUtamaOutFotoDownload.ViewCustomAttributes = "";
 
                 // PintuUtamaOutUser
-                PintuUtamaOutUser.ViewValue = ConvertToString(PintuUtamaOutUser.CurrentValue); // DN
-                PintuUtamaOutUser.ViewCustomAttributes = "";
 
                 // LobbyUtamaId
-                LobbyUtamaId.ViewValue = ConvertToString(LobbyUtamaId.CurrentValue); // DN
-                LobbyUtamaId.ViewCustomAttributes = "";
 
                 // LobbyUtamaInTanggal
-                LobbyUtamaInTanggal.ViewValue = LobbyUtamaInTanggal.CurrentValue;
-                LobbyUtamaInTanggal.ViewValue = FormatDateTime(LobbyUtamaInTanggal.ViewValue, LobbyUtamaInTanggal.FormatPattern);
-                LobbyUtamaInTanggal.ViewCustomAttributes = "";
 
                 // LobbyUtamaInFoto
-                LobbyUtamaInFoto.ViewValue = LobbyUtamaInFoto.CurrentValue;
-                LobbyUtamaInFoto.ViewCustomAttributes = "";
 
                 // LobbyUtamaInFotoDownload
-                LobbyUtamaInFotoDownload.ViewValue = LobbyUtamaInFotoDownload.CurrentValue;
-                LobbyUtamaInFotoDownload.ViewCustomAttributes = "";
 
                 // LobbyUtamaInUser
-                LobbyUtamaInUser.ViewValue = ConvertToString(LobbyUtamaInUser.CurrentValue); // DN
-                LobbyUtamaInUser.ViewCustomAttributes = "";
 
                 // LobbyUtamaOutTanggal
-                LobbyUtamaOutTanggal.ViewValue = LobbyUtamaOutTanggal.CurrentValue;
-                LobbyUtamaOutTanggal.ViewValue = FormatDateTime(LobbyUtamaOutTanggal.ViewValue, LobbyUtamaOutTanggal.FormatPattern);
-                LobbyUtamaOutTanggal.ViewCustomAttributes = "";
 
                 // LobbyUtamaOutFoto
-                LobbyUtamaOutFoto.ViewValue = LobbyUtamaOutFoto.CurrentValue;
-                LobbyUtamaOutFoto.ViewCustomAttributes = "";
 
                 // LobbyUtamaOutFotoDownload
-                LobbyUtamaOutFotoDownload.ViewValue = LobbyUtamaOutFotoDownload.CurrentValue;
-                LobbyUtamaOutFotoDownload.ViewCustomAttributes = "";
 
                 // LobbyUtamaOutUser
-                LobbyUtamaOutUser.ViewValue = ConvertToString(LobbyUtamaOutUser.CurrentValue); // DN
-                LobbyUtamaOutUser.ViewCustomAttributes = "";
 
                 // AreaTerlarangId
-                AreaTerlarangId.ViewValue = ConvertToString(AreaTerlarangId.CurrentValue); // DN
-                AreaTerlarangId.ViewCustomAttributes = "";
 
                 // AreaTerlarangInTanggal
-                AreaTerlarangInTanggal.ViewValue = AreaTerlarangInTanggal.CurrentValue;
-                AreaTerlarangInTanggal.ViewValue = FormatDateTime(AreaTerlarangInTanggal.ViewValue, AreaTerlarangInTanggal.FormatPattern);
-                AreaTerlarangInTanggal.ViewCustomAttributes = "";
 
                 // AreaTerlarangInFoto
-                AreaTerlarangInFoto.ViewValue = AreaTerlarangInFoto.CurrentValue;
-                AreaTerlarangInFoto.ViewCustomAttributes = "";
 
                 // AreaTerlarangInFotoDownload
-                AreaTerlarangInFotoDownload.ViewValue = AreaTerlarangInFotoDownload.CurrentValue;
-                AreaTerlarangInFotoDownload.ViewCustomAttributes = "";
 
                 // AreaTerlarangInUser
-                AreaTerlarangInUser.ViewValue = ConvertToString(AreaTerlarangInUser.CurrentValue); // DN
-                AreaTerlarangInUser.ViewCustomAttributes = "";
 
                 // AreaTerlarangOutTanggal
-                AreaTerlarangOutTanggal.ViewValue = AreaTerlarangOutTanggal.CurrentValue;
-                AreaTerlarangOutTanggal.ViewValue = FormatDateTime(AreaTerlarangOutTanggal.ViewValue, AreaTerlarangOutTanggal.FormatPattern);
-                AreaTerlarangOutTanggal.ViewCustomAttributes = "";
 
                 // AreaTerlarangOutFoto
-                AreaTerlarangOutFoto.ViewValue = AreaTerlarangOutFoto.CurrentValue;
-                AreaTerlarangOutFoto.ViewCustomAttributes = "";
 
                 // AreaTerlarangOutFotoDownload
-                AreaTerlarangOutFotoDownload.ViewValue = AreaTerlarangOutFotoDownload.CurrentValue;
-                AreaTerlarangOutFotoDownload.ViewCustomAttributes = "";
 
                 // AreaTerlarangOutUser
-                AreaTerlarangOutUser.ViewValue = ConvertToString(AreaTerlarangOutUser.CurrentValue); // DN
-                AreaTerlarangOutUser.ViewCustomAttributes = "";
 
                 // etlDate
-                etlDate.ViewValue = etlDate.CurrentValue;
-                etlDate.ViewValue = FormatDateTime(etlDate.ViewValue, etlDate.FormatPattern);
-                etlDate.ViewCustomAttributes = "";
 
                 // LastUpdatedBy
-                LastUpdatedBy.ViewValue = ConvertToString(LastUpdatedBy.CurrentValue); // DN
-                LastUpdatedBy.ViewCustomAttributes = "";
 
                 // lastUpdatedDate
-                lastUpdatedDate.ViewValue = lastUpdatedDate.CurrentValue;
-                lastUpdatedDate.ViewValue = FormatDateTime(lastUpdatedDate.ViewValue, lastUpdatedDate.FormatPattern);
-                lastUpdatedDate.ViewCustomAttributes = "";
 
                 // StatusZonaPrev
-                StatusZonaPrev.ViewValue = ConvertToString(StatusZonaPrev.CurrentValue); // DN
-                StatusZonaPrev.ViewCustomAttributes = "";
+
+                    // id
+                    id.ViewValue = id.CurrentValue;
+                    id.ViewCustomAttributes = "";
+
+                    // NomorBukuTamu
+                    NomorBukuTamu.ViewValue = ConvertToString(NomorBukuTamu.CurrentValue); // DN
+                    NomorBukuTamu.ViewCustomAttributes = "";
+
+                    // LinkRedirect
+                    LinkRedirect.ViewValue = ConvertToString(LinkRedirect.CurrentValue); // DN
+                    LinkRedirect.ViewCustomAttributes = "";
+
+                    // LookupPlant
+                    if (!Empty(LookupPlant.CurrentValue)) {
+                        LookupPlant.ViewValue = LookupPlant.OptionCaption(ConvertToString(LookupPlant.CurrentValue));
+                    } else {
+                        LookupPlant.ViewValue = DbNullValue;
+                    }
+                    LookupPlant.ViewCustomAttributes = "";
+
+                    // Plant
+                    Plant.ViewValue = Plant.CurrentValue;
+
+                    // awallookupbung
+                    // Plant (jaga leading zero)
+                    ResolveLookupView(Plant, "IdPlant", "string");
+                    // akhirlookupbung
+                    Plant.ViewCustomAttributes = "";
+
+                    // Tanggal
+                    Tanggal.ViewValue = Tanggal.CurrentValue;
+                    Tanggal.ViewValue = FormatDateTime(Tanggal.ViewValue, Tanggal.FormatPattern);
+                    Tanggal.ViewCustomAttributes = "";
+
+                    // StatusZona
+                    StatusZona.ViewValue = ConvertToString(StatusZona.CurrentValue); // DN
+                    StatusZona.ViewCustomAttributes = "";
+
+                    // Nama
+                    Nama.ViewValue = ConvertToString(Nama.CurrentValue); // DN
+                    Nama.ViewCustomAttributes = "";
+
+                    // AsalPerusahaan
+                    AsalPerusahaan.ViewValue = ConvertToString(AsalPerusahaan.CurrentValue); // DN
+                    AsalPerusahaan.ViewCustomAttributes = "";
+
+                    // Jabatan
+                    Jabatan.ViewValue = ConvertToString(Jabatan.CurrentValue); // DN
+                    Jabatan.ViewCustomAttributes = "";
+
+                    // FungsiygDikunjungi
+
+                    // awallookupbung
+                    // FungsiygDikunjungi (jaga leading zero)
+                    ResolveLookupView(FungsiygDikunjungi, "ID", "string");
+                    // akhirlookupbung
+                    FungsiygDikunjungi.ViewCustomAttributes = "";
+
+                    // MaksudKunjungan
+                    MaksudKunjungan.ViewValue = ConvertToString(MaksudKunjungan.CurrentValue); // DN
+                    MaksudKunjungan.ViewCustomAttributes = "";
+
+                    // TandaPengenal
+                    if (!Empty(TandaPengenal.CurrentValue)) {
+                        TandaPengenal.ViewValue = TandaPengenal.OptionCaption(ConvertToString(TandaPengenal.CurrentValue));
+                    } else {
+                        TandaPengenal.ViewValue = DbNullValue;
+                    }
+                    TandaPengenal.ViewCustomAttributes = "";
+
+                    // TandaTangan
+                    TandaTangan.ViewValue = TandaTangan.CurrentValue;
+                    TandaTangan.ViewCustomAttributes = "";
+
+                    // TandaTanganDownload
+                    TandaTanganDownload.ViewValue = TandaTanganDownload.CurrentValue;
+                    TandaTanganDownload.ViewCustomAttributes = "";
+
+                    // Keterangan
+                    Keterangan.ViewValue = Keterangan.CurrentValue;
+                    Keterangan.ViewCustomAttributes = "";
+
+                    // PintuUtamaId
+                    PintuUtamaId.ViewValue = ConvertToString(PintuUtamaId.CurrentValue); // DN
+                    PintuUtamaId.ViewCustomAttributes = "";
+
+                    // PintuUtamaInTanggal
+                    PintuUtamaInTanggal.ViewValue = PintuUtamaInTanggal.CurrentValue;
+                    PintuUtamaInTanggal.ViewValue = FormatDateTime(PintuUtamaInTanggal.ViewValue, PintuUtamaInTanggal.FormatPattern);
+                    PintuUtamaInTanggal.ViewCustomAttributes = "";
+
+                    // PintuUtamaInFoto
+                    PintuUtamaInFoto.ViewValue = PintuUtamaInFoto.CurrentValue;
+                    PintuUtamaInFoto.ViewCustomAttributes = "";
+
+                    // PintuUtamaInFotoDownload
+                    PintuUtamaInFotoDownload.ViewValue = PintuUtamaInFotoDownload.CurrentValue;
+                    PintuUtamaInFotoDownload.ViewCustomAttributes = "";
+
+                    // PintuUtamaInUser
+                    PintuUtamaInUser.ViewValue = ConvertToString(PintuUtamaInUser.CurrentValue); // DN
+                    PintuUtamaInUser.ViewCustomAttributes = "";
+
+                    // CustomPilihPintu
+                    CustomPilihPintu.ViewValue = ConvertToString(CustomPilihPintu.CurrentValue); // DN
+                    CustomPilihPintu.ViewCustomAttributes = "";
+
+                    // PintuUtamaOutTanggal
+                    PintuUtamaOutTanggal.ViewValue = PintuUtamaOutTanggal.CurrentValue;
+                    PintuUtamaOutTanggal.ViewValue = FormatDateTime(PintuUtamaOutTanggal.ViewValue, PintuUtamaOutTanggal.FormatPattern);
+                    PintuUtamaOutTanggal.ViewCustomAttributes = "";
+
+                    // PintuUtamaOutFoto
+                    PintuUtamaOutFoto.ViewValue = PintuUtamaOutFoto.CurrentValue;
+                    PintuUtamaOutFoto.ViewCustomAttributes = "";
+
+                    // PintuUtamaOutFotoDownload
+                    PintuUtamaOutFotoDownload.ViewValue = PintuUtamaOutFotoDownload.CurrentValue;
+                    PintuUtamaOutFotoDownload.ViewCustomAttributes = "";
+
+                    // PintuUtamaOutUser
+                    PintuUtamaOutUser.ViewValue = ConvertToString(PintuUtamaOutUser.CurrentValue); // DN
+                    PintuUtamaOutUser.ViewCustomAttributes = "";
+
+                    // LobbyUtamaId
+                    LobbyUtamaId.ViewValue = ConvertToString(LobbyUtamaId.CurrentValue); // DN
+                    LobbyUtamaId.ViewCustomAttributes = "";
+
+                    // LobbyUtamaInTanggal
+                    LobbyUtamaInTanggal.ViewValue = LobbyUtamaInTanggal.CurrentValue;
+                    LobbyUtamaInTanggal.ViewValue = FormatDateTime(LobbyUtamaInTanggal.ViewValue, LobbyUtamaInTanggal.FormatPattern);
+                    LobbyUtamaInTanggal.ViewCustomAttributes = "";
+
+                    // LobbyUtamaInFoto
+                    LobbyUtamaInFoto.ViewValue = LobbyUtamaInFoto.CurrentValue;
+                    LobbyUtamaInFoto.ViewCustomAttributes = "";
+
+                    // LobbyUtamaInFotoDownload
+                    LobbyUtamaInFotoDownload.ViewValue = LobbyUtamaInFotoDownload.CurrentValue;
+                    LobbyUtamaInFotoDownload.ViewCustomAttributes = "";
+
+                    // LobbyUtamaInUser
+                    LobbyUtamaInUser.ViewValue = ConvertToString(LobbyUtamaInUser.CurrentValue); // DN
+                    LobbyUtamaInUser.ViewCustomAttributes = "";
+
+                    // LobbyUtamaOutTanggal
+                    LobbyUtamaOutTanggal.ViewValue = LobbyUtamaOutTanggal.CurrentValue;
+                    LobbyUtamaOutTanggal.ViewValue = FormatDateTime(LobbyUtamaOutTanggal.ViewValue, LobbyUtamaOutTanggal.FormatPattern);
+                    LobbyUtamaOutTanggal.ViewCustomAttributes = "";
+
+                    // LobbyUtamaOutFoto
+                    LobbyUtamaOutFoto.ViewValue = LobbyUtamaOutFoto.CurrentValue;
+                    LobbyUtamaOutFoto.ViewCustomAttributes = "";
+
+                    // LobbyUtamaOutFotoDownload
+                    LobbyUtamaOutFotoDownload.ViewValue = LobbyUtamaOutFotoDownload.CurrentValue;
+                    LobbyUtamaOutFotoDownload.ViewCustomAttributes = "";
+
+                    // LobbyUtamaOutUser
+                    LobbyUtamaOutUser.ViewValue = ConvertToString(LobbyUtamaOutUser.CurrentValue); // DN
+                    LobbyUtamaOutUser.ViewCustomAttributes = "";
+
+                    // AreaTerlarangId
+                    AreaTerlarangId.ViewValue = ConvertToString(AreaTerlarangId.CurrentValue); // DN
+                    AreaTerlarangId.ViewCustomAttributes = "";
+
+                    // AreaTerlarangInTanggal
+                    AreaTerlarangInTanggal.ViewValue = AreaTerlarangInTanggal.CurrentValue;
+                    AreaTerlarangInTanggal.ViewValue = FormatDateTime(AreaTerlarangInTanggal.ViewValue, AreaTerlarangInTanggal.FormatPattern);
+                    AreaTerlarangInTanggal.ViewCustomAttributes = "";
+
+                    // AreaTerlarangInFoto
+                    AreaTerlarangInFoto.ViewValue = AreaTerlarangInFoto.CurrentValue;
+                    AreaTerlarangInFoto.ViewCustomAttributes = "";
+
+                    // AreaTerlarangInFotoDownload
+                    AreaTerlarangInFotoDownload.ViewValue = AreaTerlarangInFotoDownload.CurrentValue;
+                    AreaTerlarangInFotoDownload.ViewCustomAttributes = "";
+
+                    // AreaTerlarangInUser
+                    AreaTerlarangInUser.ViewValue = ConvertToString(AreaTerlarangInUser.CurrentValue); // DN
+                    AreaTerlarangInUser.ViewCustomAttributes = "";
+
+                    // AreaTerlarangOutTanggal
+                    AreaTerlarangOutTanggal.ViewValue = AreaTerlarangOutTanggal.CurrentValue;
+                    AreaTerlarangOutTanggal.ViewValue = FormatDateTime(AreaTerlarangOutTanggal.ViewValue, AreaTerlarangOutTanggal.FormatPattern);
+                    AreaTerlarangOutTanggal.ViewCustomAttributes = "";
+
+                    // AreaTerlarangOutFoto
+                    AreaTerlarangOutFoto.ViewValue = AreaTerlarangOutFoto.CurrentValue;
+                    AreaTerlarangOutFoto.ViewCustomAttributes = "";
+
+                    // AreaTerlarangOutFotoDownload
+                    AreaTerlarangOutFotoDownload.ViewValue = AreaTerlarangOutFotoDownload.CurrentValue;
+                    AreaTerlarangOutFotoDownload.ViewCustomAttributes = "";
+
+                    // AreaTerlarangOutUser
+                    AreaTerlarangOutUser.ViewValue = ConvertToString(AreaTerlarangOutUser.CurrentValue); // DN
+                    AreaTerlarangOutUser.ViewCustomAttributes = "";
+
+                    // etlDate
+                    etlDate.ViewValue = etlDate.CurrentValue;
+                    etlDate.ViewValue = FormatDateTime(etlDate.ViewValue, etlDate.FormatPattern);
+                    etlDate.ViewCustomAttributes = "";
+
+                    // LastUpdatedBy
+                    LastUpdatedBy.ViewValue = ConvertToString(LastUpdatedBy.CurrentValue); // DN
+                    LastUpdatedBy.ViewCustomAttributes = "";
+
+                    // lastUpdatedDate
+                    lastUpdatedDate.ViewValue = lastUpdatedDate.CurrentValue;
+                    lastUpdatedDate.ViewValue = FormatDateTime(lastUpdatedDate.ViewValue, lastUpdatedDate.FormatPattern);
+                    lastUpdatedDate.ViewCustomAttributes = "";
+
+                    // StatusZonaPrev
+                    StatusZonaPrev.ViewValue = ConvertToString(StatusZonaPrev.CurrentValue); // DN
+                    StatusZonaPrev.ViewCustomAttributes = "";
 
                 // id
                 id.HrefValue = "";
@@ -2012,7 +2100,10 @@ public partial class SnDOne {
                 // Plant
                 Plant.SetupEditAttributes();
                 Plant.EditValue = Plant.CurrentValue;
+
+                // awallookupbung
                 string curVal2 = ConvertToString(Plant.CurrentValue);
+                Plant.EditValue = Empty(curVal2) ? DbNullValue : Plant.CurrentValue;
                 if (!Empty(curVal2)) {
                     if (Plant.Lookup != null && IsDictionary(Plant.Lookup?.Options) && Plant.Lookup?.Options.Values.Count > 0) { // Load from cache // DN
                         Plant.EditValue = Plant.LookupCacheOption(curVal2);
@@ -2023,13 +2114,11 @@ public partial class SnDOne {
                         if (rswrk2?.Count > 0 && Plant.Lookup != null) { // Lookup values found
                             var listwrk = Plant.Lookup?.RenderViewRow(rswrk2[0]);
                             Plant.EditValue = Plant.DisplayValue(listwrk);
-                        } else {
-                            Plant.EditValue = Plant.CurrentValue;
                         }
                     }
-                } else {
-                    Plant.EditValue = DbNullValue;
                 }
+
+                // akhirlookupbung
                 Plant.ViewCustomAttributes = "";
 
                 // Tanggal
@@ -2060,7 +2149,10 @@ public partial class SnDOne {
 
                 // FungsiygDikunjungi
                 FungsiygDikunjungi.SetupEditAttributes();
+
+                // awallookupbung
                 string curVal3 = ConvertToString(FungsiygDikunjungi.CurrentValue);
+                FungsiygDikunjungi.EditValue = Empty(curVal3) ? DbNullValue : FungsiygDikunjungi.CurrentValue;
                 if (!Empty(curVal3)) {
                     if (FungsiygDikunjungi.Lookup != null && IsDictionary(FungsiygDikunjungi.Lookup?.Options) && FungsiygDikunjungi.Lookup?.Options.Values.Count > 0) { // Load from cache // DN
                         FungsiygDikunjungi.EditValue = FungsiygDikunjungi.LookupCacheOption(curVal3);
@@ -2071,13 +2163,11 @@ public partial class SnDOne {
                         if (rswrk3?.Count > 0 && FungsiygDikunjungi.Lookup != null) { // Lookup values found
                             var listwrk = FungsiygDikunjungi.Lookup?.RenderViewRow(rswrk3[0]);
                             FungsiygDikunjungi.EditValue = FungsiygDikunjungi.DisplayValue(listwrk);
-                        } else {
-                            FungsiygDikunjungi.EditValue = FungsiygDikunjungi.CurrentValue;
                         }
                     }
-                } else {
-                    FungsiygDikunjungi.EditValue = DbNullValue;
                 }
+
+                // akhirlookupbung
                 FungsiygDikunjungi.ViewCustomAttributes = "";
 
                 // MaksudKunjungan
@@ -2458,274 +2548,463 @@ public partial class SnDOne {
         #pragma warning restore 1998
 
         #pragma warning disable 1998
+
+        private void ValidateCustomid() {
+            if (id.Visible && id.Required) {
+                if (!id.IsDetailKey && Empty(id.FormValue)) {
+                    id.AddErrorMessage(ConvertToString(StatusZonaPrev.RequiredErrorMessage).Replace("%s", StatusZonaPrev.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomNomorBukuTamu() {
+            if (NomorBukuTamu.Visible && NomorBukuTamu.Required) {
+                if (!NomorBukuTamu.IsDetailKey && Empty(NomorBukuTamu.FormValue)) {
+                    NomorBukuTamu.AddErrorMessage(ConvertToString(StatusZonaPrev.RequiredErrorMessage).Replace("%s", StatusZonaPrev.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomLinkRedirect() {
+            if (LinkRedirect.Visible && LinkRedirect.Required) {
+                if (!LinkRedirect.IsDetailKey && Empty(LinkRedirect.FormValue)) {
+                    LinkRedirect.AddErrorMessage(ConvertToString(StatusZonaPrev.RequiredErrorMessage).Replace("%s", StatusZonaPrev.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomPlant() {
+            if (Plant.Visible && Plant.Required) {
+                if (!Plant.IsDetailKey && Empty(Plant.FormValue)) {
+                    Plant.AddErrorMessage(ConvertToString(StatusZonaPrev.RequiredErrorMessage).Replace("%s", StatusZonaPrev.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomTanggal() {
+            if (Tanggal.Visible && Tanggal.Required) {
+                if (!Tanggal.IsDetailKey && Empty(Tanggal.FormValue)) {
+                    Tanggal.AddErrorMessage(ConvertToString(StatusZonaPrev.RequiredErrorMessage).Replace("%s", StatusZonaPrev.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomStatusZona() {
+            if (StatusZona.Visible && StatusZona.Required) {
+                if (!StatusZona.IsDetailKey && Empty(StatusZona.FormValue)) {
+                    StatusZona.AddErrorMessage(ConvertToString(StatusZonaPrev.RequiredErrorMessage).Replace("%s", StatusZonaPrev.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomNama() {
+            if (Nama.Visible && Nama.Required) {
+                if (!Nama.IsDetailKey && Empty(Nama.FormValue)) {
+                    Nama.AddErrorMessage(ConvertToString(StatusZonaPrev.RequiredErrorMessage).Replace("%s", StatusZonaPrev.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomAsalPerusahaan() {
+            if (AsalPerusahaan.Visible && AsalPerusahaan.Required) {
+                if (!AsalPerusahaan.IsDetailKey && Empty(AsalPerusahaan.FormValue)) {
+                    AsalPerusahaan.AddErrorMessage(ConvertToString(StatusZonaPrev.RequiredErrorMessage).Replace("%s", StatusZonaPrev.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomJabatan() {
+            if (Jabatan.Visible && Jabatan.Required) {
+                if (!Jabatan.IsDetailKey && Empty(Jabatan.FormValue)) {
+                    Jabatan.AddErrorMessage(ConvertToString(StatusZonaPrev.RequiredErrorMessage).Replace("%s", StatusZonaPrev.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomFungsiygDikunjungi() {
+            if (FungsiygDikunjungi.Visible && FungsiygDikunjungi.Required) {
+                if (!FungsiygDikunjungi.IsDetailKey && Empty(FungsiygDikunjungi.FormValue)) {
+                    FungsiygDikunjungi.AddErrorMessage(ConvertToString(StatusZonaPrev.RequiredErrorMessage).Replace("%s", StatusZonaPrev.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomMaksudKunjungan() {
+            if (MaksudKunjungan.Visible && MaksudKunjungan.Required) {
+                if (!MaksudKunjungan.IsDetailKey && Empty(MaksudKunjungan.FormValue)) {
+                    MaksudKunjungan.AddErrorMessage(ConvertToString(StatusZonaPrev.RequiredErrorMessage).Replace("%s", StatusZonaPrev.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomTandaPengenal() {
+            if (TandaPengenal.Visible && TandaPengenal.Required) {
+                if (!TandaPengenal.IsDetailKey && Empty(TandaPengenal.FormValue)) {
+                    TandaPengenal.AddErrorMessage(ConvertToString(StatusZonaPrev.RequiredErrorMessage).Replace("%s", StatusZonaPrev.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomTandaTangan() {
+            if (TandaTangan.Visible && TandaTangan.Required) {
+                if (!TandaTangan.IsDetailKey && Empty(TandaTangan.FormValue)) {
+                    TandaTangan.AddErrorMessage(ConvertToString(StatusZonaPrev.RequiredErrorMessage).Replace("%s", StatusZonaPrev.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomTandaTanganDownload() {
+            if (TandaTanganDownload.Visible && TandaTanganDownload.Required) {
+                if (!TandaTanganDownload.IsDetailKey && Empty(TandaTanganDownload.FormValue)) {
+                    TandaTanganDownload.AddErrorMessage(ConvertToString(StatusZonaPrev.RequiredErrorMessage).Replace("%s", StatusZonaPrev.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomKeterangan() {
+            if (Keterangan.Visible && Keterangan.Required) {
+                if (!Keterangan.IsDetailKey && Empty(Keterangan.FormValue)) {
+                    Keterangan.AddErrorMessage(ConvertToString(StatusZonaPrev.RequiredErrorMessage).Replace("%s", StatusZonaPrev.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomPintuUtamaId() {
+            if (PintuUtamaId.Visible && PintuUtamaId.Required) {
+                if (!PintuUtamaId.IsDetailKey && Empty(PintuUtamaId.FormValue)) {
+                    PintuUtamaId.AddErrorMessage(ConvertToString(StatusZonaPrev.RequiredErrorMessage).Replace("%s", StatusZonaPrev.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomPintuUtamaInTanggal() {
+            if (PintuUtamaInTanggal.Visible && PintuUtamaInTanggal.Required) {
+                if (!PintuUtamaInTanggal.IsDetailKey && Empty(PintuUtamaInTanggal.FormValue)) {
+                    PintuUtamaInTanggal.AddErrorMessage(ConvertToString(StatusZonaPrev.RequiredErrorMessage).Replace("%s", StatusZonaPrev.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomPintuUtamaInFoto() {
+            if (PintuUtamaInFoto.Visible && PintuUtamaInFoto.Required) {
+                if (!PintuUtamaInFoto.IsDetailKey && Empty(PintuUtamaInFoto.FormValue)) {
+                    PintuUtamaInFoto.AddErrorMessage(ConvertToString(StatusZonaPrev.RequiredErrorMessage).Replace("%s", StatusZonaPrev.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomPintuUtamaInFotoDownload() {
+            if (PintuUtamaInFotoDownload.Visible && PintuUtamaInFotoDownload.Required) {
+                if (!PintuUtamaInFotoDownload.IsDetailKey && Empty(PintuUtamaInFotoDownload.FormValue)) {
+                    PintuUtamaInFotoDownload.AddErrorMessage(ConvertToString(StatusZonaPrev.RequiredErrorMessage).Replace("%s", StatusZonaPrev.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomPintuUtamaInUser() {
+            if (PintuUtamaInUser.Visible && PintuUtamaInUser.Required) {
+                if (!PintuUtamaInUser.IsDetailKey && Empty(PintuUtamaInUser.FormValue)) {
+                    PintuUtamaInUser.AddErrorMessage(ConvertToString(StatusZonaPrev.RequiredErrorMessage).Replace("%s", StatusZonaPrev.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomCustomPilihPintu() {
+            if (CustomPilihPintu.Visible && CustomPilihPintu.Required) {
+                if (!CustomPilihPintu.IsDetailKey && Empty(CustomPilihPintu.FormValue)) {
+                    CustomPilihPintu.AddErrorMessage(ConvertToString(StatusZonaPrev.RequiredErrorMessage).Replace("%s", StatusZonaPrev.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomPintuUtamaOutTanggal() {
+            if (PintuUtamaOutTanggal.Visible && PintuUtamaOutTanggal.Required) {
+                if (!PintuUtamaOutTanggal.IsDetailKey && Empty(PintuUtamaOutTanggal.FormValue)) {
+                    PintuUtamaOutTanggal.AddErrorMessage(ConvertToString(StatusZonaPrev.RequiredErrorMessage).Replace("%s", StatusZonaPrev.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomPintuUtamaOutFoto() {
+            if (PintuUtamaOutFoto.Visible && PintuUtamaOutFoto.Required) {
+                if (!PintuUtamaOutFoto.IsDetailKey && Empty(PintuUtamaOutFoto.FormValue)) {
+                    PintuUtamaOutFoto.AddErrorMessage(ConvertToString(StatusZonaPrev.RequiredErrorMessage).Replace("%s", StatusZonaPrev.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomPintuUtamaOutFotoDownload() {
+            if (PintuUtamaOutFotoDownload.Visible && PintuUtamaOutFotoDownload.Required) {
+                if (!PintuUtamaOutFotoDownload.IsDetailKey && Empty(PintuUtamaOutFotoDownload.FormValue)) {
+                    PintuUtamaOutFotoDownload.AddErrorMessage(ConvertToString(StatusZonaPrev.RequiredErrorMessage).Replace("%s", StatusZonaPrev.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomPintuUtamaOutUser() {
+            if (PintuUtamaOutUser.Visible && PintuUtamaOutUser.Required) {
+                if (!PintuUtamaOutUser.IsDetailKey && Empty(PintuUtamaOutUser.FormValue)) {
+                    PintuUtamaOutUser.AddErrorMessage(ConvertToString(StatusZonaPrev.RequiredErrorMessage).Replace("%s", StatusZonaPrev.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomLobbyUtamaId() {
+            if (LobbyUtamaId.Visible && LobbyUtamaId.Required) {
+                if (!LobbyUtamaId.IsDetailKey && Empty(LobbyUtamaId.FormValue)) {
+                    LobbyUtamaId.AddErrorMessage(ConvertToString(StatusZonaPrev.RequiredErrorMessage).Replace("%s", StatusZonaPrev.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomLobbyUtamaInTanggal() {
+            if (LobbyUtamaInTanggal.Visible && LobbyUtamaInTanggal.Required) {
+                if (!LobbyUtamaInTanggal.IsDetailKey && Empty(LobbyUtamaInTanggal.FormValue)) {
+                    LobbyUtamaInTanggal.AddErrorMessage(ConvertToString(StatusZonaPrev.RequiredErrorMessage).Replace("%s", StatusZonaPrev.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomLobbyUtamaInFoto() {
+            if (LobbyUtamaInFoto.Visible && LobbyUtamaInFoto.Required) {
+                if (!LobbyUtamaInFoto.IsDetailKey && Empty(LobbyUtamaInFoto.FormValue)) {
+                    LobbyUtamaInFoto.AddErrorMessage(ConvertToString(StatusZonaPrev.RequiredErrorMessage).Replace("%s", StatusZonaPrev.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomLobbyUtamaInFotoDownload() {
+            if (LobbyUtamaInFotoDownload.Visible && LobbyUtamaInFotoDownload.Required) {
+                if (!LobbyUtamaInFotoDownload.IsDetailKey && Empty(LobbyUtamaInFotoDownload.FormValue)) {
+                    LobbyUtamaInFotoDownload.AddErrorMessage(ConvertToString(StatusZonaPrev.RequiredErrorMessage).Replace("%s", StatusZonaPrev.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomLobbyUtamaInUser() {
+            if (LobbyUtamaInUser.Visible && LobbyUtamaInUser.Required) {
+                if (!LobbyUtamaInUser.IsDetailKey && Empty(LobbyUtamaInUser.FormValue)) {
+                    LobbyUtamaInUser.AddErrorMessage(ConvertToString(StatusZonaPrev.RequiredErrorMessage).Replace("%s", StatusZonaPrev.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomLobbyUtamaOutTanggal() {
+            if (LobbyUtamaOutTanggal.Visible && LobbyUtamaOutTanggal.Required) {
+                if (!LobbyUtamaOutTanggal.IsDetailKey && Empty(LobbyUtamaOutTanggal.FormValue)) {
+                    LobbyUtamaOutTanggal.AddErrorMessage(ConvertToString(StatusZonaPrev.RequiredErrorMessage).Replace("%s", StatusZonaPrev.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomLobbyUtamaOutFoto() {
+            if (LobbyUtamaOutFoto.Visible && LobbyUtamaOutFoto.Required) {
+                if (!LobbyUtamaOutFoto.IsDetailKey && Empty(LobbyUtamaOutFoto.FormValue)) {
+                    LobbyUtamaOutFoto.AddErrorMessage(ConvertToString(StatusZonaPrev.RequiredErrorMessage).Replace("%s", StatusZonaPrev.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomLobbyUtamaOutFotoDownload() {
+            if (LobbyUtamaOutFotoDownload.Visible && LobbyUtamaOutFotoDownload.Required) {
+                if (!LobbyUtamaOutFotoDownload.IsDetailKey && Empty(LobbyUtamaOutFotoDownload.FormValue)) {
+                    LobbyUtamaOutFotoDownload.AddErrorMessage(ConvertToString(StatusZonaPrev.RequiredErrorMessage).Replace("%s", StatusZonaPrev.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomLobbyUtamaOutUser() {
+            if (LobbyUtamaOutUser.Visible && LobbyUtamaOutUser.Required) {
+                if (!LobbyUtamaOutUser.IsDetailKey && Empty(LobbyUtamaOutUser.FormValue)) {
+                    LobbyUtamaOutUser.AddErrorMessage(ConvertToString(StatusZonaPrev.RequiredErrorMessage).Replace("%s", StatusZonaPrev.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomAreaTerlarangId() {
+            if (AreaTerlarangId.Visible && AreaTerlarangId.Required) {
+                if (!AreaTerlarangId.IsDetailKey && Empty(AreaTerlarangId.FormValue)) {
+                    AreaTerlarangId.AddErrorMessage(ConvertToString(StatusZonaPrev.RequiredErrorMessage).Replace("%s", StatusZonaPrev.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomAreaTerlarangInTanggal() {
+            if (AreaTerlarangInTanggal.Visible && AreaTerlarangInTanggal.Required) {
+                if (!AreaTerlarangInTanggal.IsDetailKey && Empty(AreaTerlarangInTanggal.FormValue)) {
+                    AreaTerlarangInTanggal.AddErrorMessage(ConvertToString(StatusZonaPrev.RequiredErrorMessage).Replace("%s", StatusZonaPrev.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomAreaTerlarangInFoto() {
+            if (AreaTerlarangInFoto.Visible && AreaTerlarangInFoto.Required) {
+                if (!AreaTerlarangInFoto.IsDetailKey && Empty(AreaTerlarangInFoto.FormValue)) {
+                    AreaTerlarangInFoto.AddErrorMessage(ConvertToString(StatusZonaPrev.RequiredErrorMessage).Replace("%s", StatusZonaPrev.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomAreaTerlarangInFotoDownload() {
+            if (AreaTerlarangInFotoDownload.Visible && AreaTerlarangInFotoDownload.Required) {
+                if (!AreaTerlarangInFotoDownload.IsDetailKey && Empty(AreaTerlarangInFotoDownload.FormValue)) {
+                    AreaTerlarangInFotoDownload.AddErrorMessage(ConvertToString(StatusZonaPrev.RequiredErrorMessage).Replace("%s", StatusZonaPrev.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomAreaTerlarangInUser() {
+            if (AreaTerlarangInUser.Visible && AreaTerlarangInUser.Required) {
+                if (!AreaTerlarangInUser.IsDetailKey && Empty(AreaTerlarangInUser.FormValue)) {
+                    AreaTerlarangInUser.AddErrorMessage(ConvertToString(StatusZonaPrev.RequiredErrorMessage).Replace("%s", StatusZonaPrev.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomAreaTerlarangOutTanggal() {
+            if (AreaTerlarangOutTanggal.Visible && AreaTerlarangOutTanggal.Required) {
+                if (!AreaTerlarangOutTanggal.IsDetailKey && Empty(AreaTerlarangOutTanggal.FormValue)) {
+                    AreaTerlarangOutTanggal.AddErrorMessage(ConvertToString(StatusZonaPrev.RequiredErrorMessage).Replace("%s", StatusZonaPrev.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomAreaTerlarangOutFoto() {
+            if (AreaTerlarangOutFoto.Visible && AreaTerlarangOutFoto.Required) {
+                if (!AreaTerlarangOutFoto.IsDetailKey && Empty(AreaTerlarangOutFoto.FormValue)) {
+                    AreaTerlarangOutFoto.AddErrorMessage(ConvertToString(StatusZonaPrev.RequiredErrorMessage).Replace("%s", StatusZonaPrev.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomAreaTerlarangOutFotoDownload() {
+            if (AreaTerlarangOutFotoDownload.Visible && AreaTerlarangOutFotoDownload.Required) {
+                if (!AreaTerlarangOutFotoDownload.IsDetailKey && Empty(AreaTerlarangOutFotoDownload.FormValue)) {
+                    AreaTerlarangOutFotoDownload.AddErrorMessage(ConvertToString(StatusZonaPrev.RequiredErrorMessage).Replace("%s", StatusZonaPrev.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomAreaTerlarangOutUser() {
+            if (AreaTerlarangOutUser.Visible && AreaTerlarangOutUser.Required) {
+                if (!AreaTerlarangOutUser.IsDetailKey && Empty(AreaTerlarangOutUser.FormValue)) {
+                    AreaTerlarangOutUser.AddErrorMessage(ConvertToString(StatusZonaPrev.RequiredErrorMessage).Replace("%s", StatusZonaPrev.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustometlDate() {
+            if (etlDate.Visible && etlDate.Required) {
+                if (!etlDate.IsDetailKey && Empty(etlDate.FormValue)) {
+                    etlDate.AddErrorMessage(ConvertToString(StatusZonaPrev.RequiredErrorMessage).Replace("%s", StatusZonaPrev.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomLastUpdatedBy() {
+            if (LastUpdatedBy.Visible && LastUpdatedBy.Required) {
+                if (!LastUpdatedBy.IsDetailKey && Empty(LastUpdatedBy.FormValue)) {
+                    LastUpdatedBy.AddErrorMessage(ConvertToString(StatusZonaPrev.RequiredErrorMessage).Replace("%s", StatusZonaPrev.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomlastUpdatedDate() {
+            if (lastUpdatedDate.Visible && lastUpdatedDate.Required) {
+                if (!lastUpdatedDate.IsDetailKey && Empty(lastUpdatedDate.FormValue)) {
+                    lastUpdatedDate.AddErrorMessage(ConvertToString(StatusZonaPrev.RequiredErrorMessage).Replace("%s", StatusZonaPrev.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomStatusZonaPrev() {
+            if (StatusZonaPrev.Visible && StatusZonaPrev.Required) {
+                if (!StatusZonaPrev.IsDetailKey && Empty(StatusZonaPrev.FormValue)) {
+                    StatusZonaPrev.AddErrorMessage(ConvertToString(StatusZonaPrev.RequiredErrorMessage).Replace("%s", StatusZonaPrev.Caption));
+                }
+            }
+        }
+
         // Validate form
         protected async Task<bool> ValidateForm() {
             // Check if validation required
             if (!Config.ServerValidate)
                 return true;
             bool validateForm = true;
-                if (id.Visible && id.Required) {
-                    if (!id.IsDetailKey && Empty(id.FormValue)) {
-                        id.AddErrorMessage(ConvertToString(id.RequiredErrorMessage).Replace("%s", id.Caption));
-                    }
-                }
-                if (NomorBukuTamu.Visible && NomorBukuTamu.Required) {
-                    if (!NomorBukuTamu.IsDetailKey && Empty(NomorBukuTamu.FormValue)) {
-                        NomorBukuTamu.AddErrorMessage(ConvertToString(NomorBukuTamu.RequiredErrorMessage).Replace("%s", NomorBukuTamu.Caption));
-                    }
-                }
-                if (LinkRedirect.Visible && LinkRedirect.Required) {
-                    if (!LinkRedirect.IsDetailKey && Empty(LinkRedirect.FormValue)) {
-                        LinkRedirect.AddErrorMessage(ConvertToString(LinkRedirect.RequiredErrorMessage).Replace("%s", LinkRedirect.Caption));
-                    }
-                }
-                if (Plant.Visible && Plant.Required) {
-                    if (!Plant.IsDetailKey && Empty(Plant.FormValue)) {
-                        Plant.AddErrorMessage(ConvertToString(Plant.RequiredErrorMessage).Replace("%s", Plant.Caption));
-                    }
-                }
-                if (Tanggal.Visible && Tanggal.Required) {
-                    if (!Tanggal.IsDetailKey && Empty(Tanggal.FormValue)) {
-                        Tanggal.AddErrorMessage(ConvertToString(Tanggal.RequiredErrorMessage).Replace("%s", Tanggal.Caption));
-                    }
-                }
-                if (StatusZona.Visible && StatusZona.Required) {
-                    if (!StatusZona.IsDetailKey && Empty(StatusZona.FormValue)) {
-                        StatusZona.AddErrorMessage(ConvertToString(StatusZona.RequiredErrorMessage).Replace("%s", StatusZona.Caption));
-                    }
-                }
-                if (Nama.Visible && Nama.Required) {
-                    if (!Nama.IsDetailKey && Empty(Nama.FormValue)) {
-                        Nama.AddErrorMessage(ConvertToString(Nama.RequiredErrorMessage).Replace("%s", Nama.Caption));
-                    }
-                }
-                if (AsalPerusahaan.Visible && AsalPerusahaan.Required) {
-                    if (!AsalPerusahaan.IsDetailKey && Empty(AsalPerusahaan.FormValue)) {
-                        AsalPerusahaan.AddErrorMessage(ConvertToString(AsalPerusahaan.RequiredErrorMessage).Replace("%s", AsalPerusahaan.Caption));
-                    }
-                }
-                if (Jabatan.Visible && Jabatan.Required) {
-                    if (!Jabatan.IsDetailKey && Empty(Jabatan.FormValue)) {
-                        Jabatan.AddErrorMessage(ConvertToString(Jabatan.RequiredErrorMessage).Replace("%s", Jabatan.Caption));
-                    }
-                }
-                if (FungsiygDikunjungi.Visible && FungsiygDikunjungi.Required) {
-                    if (!FungsiygDikunjungi.IsDetailKey && Empty(FungsiygDikunjungi.FormValue)) {
-                        FungsiygDikunjungi.AddErrorMessage(ConvertToString(FungsiygDikunjungi.RequiredErrorMessage).Replace("%s", FungsiygDikunjungi.Caption));
-                    }
-                }
-                if (MaksudKunjungan.Visible && MaksudKunjungan.Required) {
-                    if (!MaksudKunjungan.IsDetailKey && Empty(MaksudKunjungan.FormValue)) {
-                        MaksudKunjungan.AddErrorMessage(ConvertToString(MaksudKunjungan.RequiredErrorMessage).Replace("%s", MaksudKunjungan.Caption));
-                    }
-                }
-                if (TandaPengenal.Visible && TandaPengenal.Required) {
-                    if (!TandaPengenal.IsDetailKey && Empty(TandaPengenal.FormValue)) {
-                        TandaPengenal.AddErrorMessage(ConvertToString(TandaPengenal.RequiredErrorMessage).Replace("%s", TandaPengenal.Caption));
-                    }
-                }
-                if (TandaTangan.Visible && TandaTangan.Required) {
-                    if (!TandaTangan.IsDetailKey && Empty(TandaTangan.FormValue)) {
-                        TandaTangan.AddErrorMessage(ConvertToString(TandaTangan.RequiredErrorMessage).Replace("%s", TandaTangan.Caption));
-                    }
-                }
-                if (TandaTanganDownload.Visible && TandaTanganDownload.Required) {
-                    if (!TandaTanganDownload.IsDetailKey && Empty(TandaTanganDownload.FormValue)) {
-                        TandaTanganDownload.AddErrorMessage(ConvertToString(TandaTanganDownload.RequiredErrorMessage).Replace("%s", TandaTanganDownload.Caption));
-                    }
-                }
-                if (Keterangan.Visible && Keterangan.Required) {
-                    if (!Keterangan.IsDetailKey && Empty(Keterangan.FormValue)) {
-                        Keterangan.AddErrorMessage(ConvertToString(Keterangan.RequiredErrorMessage).Replace("%s", Keterangan.Caption));
-                    }
-                }
-                if (PintuUtamaId.Visible && PintuUtamaId.Required) {
-                    if (!PintuUtamaId.IsDetailKey && Empty(PintuUtamaId.FormValue)) {
-                        PintuUtamaId.AddErrorMessage(ConvertToString(PintuUtamaId.RequiredErrorMessage).Replace("%s", PintuUtamaId.Caption));
-                    }
-                }
+                ValidateCustomid();
+                ValidateCustomNomorBukuTamu();
+                ValidateCustomLinkRedirect();
+                ValidateCustomPlant();
+                ValidateCustomTanggal();
+                ValidateCustomStatusZona();
+                ValidateCustomNama();
+                ValidateCustomAsalPerusahaan();
+                ValidateCustomJabatan();
+                ValidateCustomFungsiygDikunjungi();
+                ValidateCustomMaksudKunjungan();
+                ValidateCustomTandaPengenal();
+                ValidateCustomTandaTangan();
+                ValidateCustomTandaTanganDownload();
+                ValidateCustomKeterangan();
+                ValidateCustomPintuUtamaId();
                 if (!CheckInteger(PintuUtamaId.FormValue)) {
                     PintuUtamaId.AddErrorMessage(PintuUtamaId.GetErrorMessage(false));
                 }
-                if (PintuUtamaInTanggal.Visible && PintuUtamaInTanggal.Required) {
-                    if (!PintuUtamaInTanggal.IsDetailKey && Empty(PintuUtamaInTanggal.FormValue)) {
-                        PintuUtamaInTanggal.AddErrorMessage(ConvertToString(PintuUtamaInTanggal.RequiredErrorMessage).Replace("%s", PintuUtamaInTanggal.Caption));
-                    }
-                }
+                ValidateCustomPintuUtamaInTanggal();
                 if (!CheckDate(PintuUtamaInTanggal.FormValue, PintuUtamaInTanggal.FormatPattern)) {
                     PintuUtamaInTanggal.AddErrorMessage(PintuUtamaInTanggal.GetErrorMessage(false));
                 }
-                if (PintuUtamaInFoto.Visible && PintuUtamaInFoto.Required) {
-                    if (!PintuUtamaInFoto.IsDetailKey && Empty(PintuUtamaInFoto.FormValue)) {
-                        PintuUtamaInFoto.AddErrorMessage(ConvertToString(PintuUtamaInFoto.RequiredErrorMessage).Replace("%s", PintuUtamaInFoto.Caption));
-                    }
-                }
-                if (PintuUtamaInFotoDownload.Visible && PintuUtamaInFotoDownload.Required) {
-                    if (!PintuUtamaInFotoDownload.IsDetailKey && Empty(PintuUtamaInFotoDownload.FormValue)) {
-                        PintuUtamaInFotoDownload.AddErrorMessage(ConvertToString(PintuUtamaInFotoDownload.RequiredErrorMessage).Replace("%s", PintuUtamaInFotoDownload.Caption));
-                    }
-                }
-                if (PintuUtamaInUser.Visible && PintuUtamaInUser.Required) {
-                    if (!PintuUtamaInUser.IsDetailKey && Empty(PintuUtamaInUser.FormValue)) {
-                        PintuUtamaInUser.AddErrorMessage(ConvertToString(PintuUtamaInUser.RequiredErrorMessage).Replace("%s", PintuUtamaInUser.Caption));
-                    }
-                }
-                if (CustomPilihPintu.Visible && CustomPilihPintu.Required) {
-                    if (!CustomPilihPintu.IsDetailKey && Empty(CustomPilihPintu.FormValue)) {
-                        CustomPilihPintu.AddErrorMessage(ConvertToString(CustomPilihPintu.RequiredErrorMessage).Replace("%s", CustomPilihPintu.Caption));
-                    }
-                }
-                if (PintuUtamaOutTanggal.Visible && PintuUtamaOutTanggal.Required) {
-                    if (!PintuUtamaOutTanggal.IsDetailKey && Empty(PintuUtamaOutTanggal.FormValue)) {
-                        PintuUtamaOutTanggal.AddErrorMessage(ConvertToString(PintuUtamaOutTanggal.RequiredErrorMessage).Replace("%s", PintuUtamaOutTanggal.Caption));
-                    }
-                }
+                ValidateCustomPintuUtamaInFoto();
+                ValidateCustomPintuUtamaInFotoDownload();
+                ValidateCustomPintuUtamaInUser();
+                ValidateCustomCustomPilihPintu();
+                ValidateCustomPintuUtamaOutTanggal();
                 if (!CheckDate(PintuUtamaOutTanggal.FormValue, PintuUtamaOutTanggal.FormatPattern)) {
                     PintuUtamaOutTanggal.AddErrorMessage(PintuUtamaOutTanggal.GetErrorMessage(false));
                 }
-                if (PintuUtamaOutFoto.Visible && PintuUtamaOutFoto.Required) {
-                    if (!PintuUtamaOutFoto.IsDetailKey && Empty(PintuUtamaOutFoto.FormValue)) {
-                        PintuUtamaOutFoto.AddErrorMessage(ConvertToString(PintuUtamaOutFoto.RequiredErrorMessage).Replace("%s", PintuUtamaOutFoto.Caption));
-                    }
-                }
-                if (PintuUtamaOutFotoDownload.Visible && PintuUtamaOutFotoDownload.Required) {
-                    if (!PintuUtamaOutFotoDownload.IsDetailKey && Empty(PintuUtamaOutFotoDownload.FormValue)) {
-                        PintuUtamaOutFotoDownload.AddErrorMessage(ConvertToString(PintuUtamaOutFotoDownload.RequiredErrorMessage).Replace("%s", PintuUtamaOutFotoDownload.Caption));
-                    }
-                }
-                if (PintuUtamaOutUser.Visible && PintuUtamaOutUser.Required) {
-                    if (!PintuUtamaOutUser.IsDetailKey && Empty(PintuUtamaOutUser.FormValue)) {
-                        PintuUtamaOutUser.AddErrorMessage(ConvertToString(PintuUtamaOutUser.RequiredErrorMessage).Replace("%s", PintuUtamaOutUser.Caption));
-                    }
-                }
-                if (LobbyUtamaId.Visible && LobbyUtamaId.Required) {
-                    if (!LobbyUtamaId.IsDetailKey && Empty(LobbyUtamaId.FormValue)) {
-                        LobbyUtamaId.AddErrorMessage(ConvertToString(LobbyUtamaId.RequiredErrorMessage).Replace("%s", LobbyUtamaId.Caption));
-                    }
-                }
+                ValidateCustomPintuUtamaOutFoto();
+                ValidateCustomPintuUtamaOutFotoDownload();
+                ValidateCustomPintuUtamaOutUser();
+                ValidateCustomLobbyUtamaId();
                 if (!CheckInteger(LobbyUtamaId.FormValue)) {
                     LobbyUtamaId.AddErrorMessage(LobbyUtamaId.GetErrorMessage(false));
                 }
-                if (LobbyUtamaInTanggal.Visible && LobbyUtamaInTanggal.Required) {
-                    if (!LobbyUtamaInTanggal.IsDetailKey && Empty(LobbyUtamaInTanggal.FormValue)) {
-                        LobbyUtamaInTanggal.AddErrorMessage(ConvertToString(LobbyUtamaInTanggal.RequiredErrorMessage).Replace("%s", LobbyUtamaInTanggal.Caption));
-                    }
-                }
+                ValidateCustomLobbyUtamaInTanggal();
                 if (!CheckDate(LobbyUtamaInTanggal.FormValue, LobbyUtamaInTanggal.FormatPattern)) {
                     LobbyUtamaInTanggal.AddErrorMessage(LobbyUtamaInTanggal.GetErrorMessage(false));
                 }
-                if (LobbyUtamaInFoto.Visible && LobbyUtamaInFoto.Required) {
-                    if (!LobbyUtamaInFoto.IsDetailKey && Empty(LobbyUtamaInFoto.FormValue)) {
-                        LobbyUtamaInFoto.AddErrorMessage(ConvertToString(LobbyUtamaInFoto.RequiredErrorMessage).Replace("%s", LobbyUtamaInFoto.Caption));
-                    }
-                }
-                if (LobbyUtamaInFotoDownload.Visible && LobbyUtamaInFotoDownload.Required) {
-                    if (!LobbyUtamaInFotoDownload.IsDetailKey && Empty(LobbyUtamaInFotoDownload.FormValue)) {
-                        LobbyUtamaInFotoDownload.AddErrorMessage(ConvertToString(LobbyUtamaInFotoDownload.RequiredErrorMessage).Replace("%s", LobbyUtamaInFotoDownload.Caption));
-                    }
-                }
-                if (LobbyUtamaInUser.Visible && LobbyUtamaInUser.Required) {
-                    if (!LobbyUtamaInUser.IsDetailKey && Empty(LobbyUtamaInUser.FormValue)) {
-                        LobbyUtamaInUser.AddErrorMessage(ConvertToString(LobbyUtamaInUser.RequiredErrorMessage).Replace("%s", LobbyUtamaInUser.Caption));
-                    }
-                }
-                if (LobbyUtamaOutTanggal.Visible && LobbyUtamaOutTanggal.Required) {
-                    if (!LobbyUtamaOutTanggal.IsDetailKey && Empty(LobbyUtamaOutTanggal.FormValue)) {
-                        LobbyUtamaOutTanggal.AddErrorMessage(ConvertToString(LobbyUtamaOutTanggal.RequiredErrorMessage).Replace("%s", LobbyUtamaOutTanggal.Caption));
-                    }
-                }
+                ValidateCustomLobbyUtamaInFoto();
+                ValidateCustomLobbyUtamaInFotoDownload();
+                ValidateCustomLobbyUtamaInUser();
+                ValidateCustomLobbyUtamaOutTanggal();
                 if (!CheckDate(LobbyUtamaOutTanggal.FormValue, LobbyUtamaOutTanggal.FormatPattern)) {
                     LobbyUtamaOutTanggal.AddErrorMessage(LobbyUtamaOutTanggal.GetErrorMessage(false));
                 }
-                if (LobbyUtamaOutFoto.Visible && LobbyUtamaOutFoto.Required) {
-                    if (!LobbyUtamaOutFoto.IsDetailKey && Empty(LobbyUtamaOutFoto.FormValue)) {
-                        LobbyUtamaOutFoto.AddErrorMessage(ConvertToString(LobbyUtamaOutFoto.RequiredErrorMessage).Replace("%s", LobbyUtamaOutFoto.Caption));
-                    }
-                }
-                if (LobbyUtamaOutFotoDownload.Visible && LobbyUtamaOutFotoDownload.Required) {
-                    if (!LobbyUtamaOutFotoDownload.IsDetailKey && Empty(LobbyUtamaOutFotoDownload.FormValue)) {
-                        LobbyUtamaOutFotoDownload.AddErrorMessage(ConvertToString(LobbyUtamaOutFotoDownload.RequiredErrorMessage).Replace("%s", LobbyUtamaOutFotoDownload.Caption));
-                    }
-                }
-                if (LobbyUtamaOutUser.Visible && LobbyUtamaOutUser.Required) {
-                    if (!LobbyUtamaOutUser.IsDetailKey && Empty(LobbyUtamaOutUser.FormValue)) {
-                        LobbyUtamaOutUser.AddErrorMessage(ConvertToString(LobbyUtamaOutUser.RequiredErrorMessage).Replace("%s", LobbyUtamaOutUser.Caption));
-                    }
-                }
-                if (AreaTerlarangId.Visible && AreaTerlarangId.Required) {
-                    if (!AreaTerlarangId.IsDetailKey && Empty(AreaTerlarangId.FormValue)) {
-                        AreaTerlarangId.AddErrorMessage(ConvertToString(AreaTerlarangId.RequiredErrorMessage).Replace("%s", AreaTerlarangId.Caption));
-                    }
-                }
+                ValidateCustomLobbyUtamaOutFoto();
+                ValidateCustomLobbyUtamaOutFotoDownload();
+                ValidateCustomLobbyUtamaOutUser();
+                ValidateCustomAreaTerlarangId();
                 if (!CheckInteger(AreaTerlarangId.FormValue)) {
                     AreaTerlarangId.AddErrorMessage(AreaTerlarangId.GetErrorMessage(false));
                 }
-                if (AreaTerlarangInTanggal.Visible && AreaTerlarangInTanggal.Required) {
-                    if (!AreaTerlarangInTanggal.IsDetailKey && Empty(AreaTerlarangInTanggal.FormValue)) {
-                        AreaTerlarangInTanggal.AddErrorMessage(ConvertToString(AreaTerlarangInTanggal.RequiredErrorMessage).Replace("%s", AreaTerlarangInTanggal.Caption));
-                    }
-                }
+                ValidateCustomAreaTerlarangInTanggal();
                 if (!CheckDate(AreaTerlarangInTanggal.FormValue, AreaTerlarangInTanggal.FormatPattern)) {
                     AreaTerlarangInTanggal.AddErrorMessage(AreaTerlarangInTanggal.GetErrorMessage(false));
                 }
-                if (AreaTerlarangInFoto.Visible && AreaTerlarangInFoto.Required) {
-                    if (!AreaTerlarangInFoto.IsDetailKey && Empty(AreaTerlarangInFoto.FormValue)) {
-                        AreaTerlarangInFoto.AddErrorMessage(ConvertToString(AreaTerlarangInFoto.RequiredErrorMessage).Replace("%s", AreaTerlarangInFoto.Caption));
-                    }
-                }
-                if (AreaTerlarangInFotoDownload.Visible && AreaTerlarangInFotoDownload.Required) {
-                    if (!AreaTerlarangInFotoDownload.IsDetailKey && Empty(AreaTerlarangInFotoDownload.FormValue)) {
-                        AreaTerlarangInFotoDownload.AddErrorMessage(ConvertToString(AreaTerlarangInFotoDownload.RequiredErrorMessage).Replace("%s", AreaTerlarangInFotoDownload.Caption));
-                    }
-                }
-                if (AreaTerlarangInUser.Visible && AreaTerlarangInUser.Required) {
-                    if (!AreaTerlarangInUser.IsDetailKey && Empty(AreaTerlarangInUser.FormValue)) {
-                        AreaTerlarangInUser.AddErrorMessage(ConvertToString(AreaTerlarangInUser.RequiredErrorMessage).Replace("%s", AreaTerlarangInUser.Caption));
-                    }
-                }
-                if (AreaTerlarangOutTanggal.Visible && AreaTerlarangOutTanggal.Required) {
-                    if (!AreaTerlarangOutTanggal.IsDetailKey && Empty(AreaTerlarangOutTanggal.FormValue)) {
-                        AreaTerlarangOutTanggal.AddErrorMessage(ConvertToString(AreaTerlarangOutTanggal.RequiredErrorMessage).Replace("%s", AreaTerlarangOutTanggal.Caption));
-                    }
-                }
+                ValidateCustomAreaTerlarangInFoto();
+                ValidateCustomAreaTerlarangInFotoDownload();
+                ValidateCustomAreaTerlarangInUser();
+                ValidateCustomAreaTerlarangOutTanggal();
                 if (!CheckDate(AreaTerlarangOutTanggal.FormValue, AreaTerlarangOutTanggal.FormatPattern)) {
                     AreaTerlarangOutTanggal.AddErrorMessage(AreaTerlarangOutTanggal.GetErrorMessage(false));
                 }
-                if (AreaTerlarangOutFoto.Visible && AreaTerlarangOutFoto.Required) {
-                    if (!AreaTerlarangOutFoto.IsDetailKey && Empty(AreaTerlarangOutFoto.FormValue)) {
-                        AreaTerlarangOutFoto.AddErrorMessage(ConvertToString(AreaTerlarangOutFoto.RequiredErrorMessage).Replace("%s", AreaTerlarangOutFoto.Caption));
-                    }
-                }
-                if (AreaTerlarangOutFotoDownload.Visible && AreaTerlarangOutFotoDownload.Required) {
-                    if (!AreaTerlarangOutFotoDownload.IsDetailKey && Empty(AreaTerlarangOutFotoDownload.FormValue)) {
-                        AreaTerlarangOutFotoDownload.AddErrorMessage(ConvertToString(AreaTerlarangOutFotoDownload.RequiredErrorMessage).Replace("%s", AreaTerlarangOutFotoDownload.Caption));
-                    }
-                }
-                if (AreaTerlarangOutUser.Visible && AreaTerlarangOutUser.Required) {
-                    if (!AreaTerlarangOutUser.IsDetailKey && Empty(AreaTerlarangOutUser.FormValue)) {
-                        AreaTerlarangOutUser.AddErrorMessage(ConvertToString(AreaTerlarangOutUser.RequiredErrorMessage).Replace("%s", AreaTerlarangOutUser.Caption));
-                    }
-                }
-                if (etlDate.Visible && etlDate.Required) {
-                    if (!etlDate.IsDetailKey && Empty(etlDate.FormValue)) {
-                        etlDate.AddErrorMessage(ConvertToString(etlDate.RequiredErrorMessage).Replace("%s", etlDate.Caption));
-                    }
-                }
-                if (LastUpdatedBy.Visible && LastUpdatedBy.Required) {
-                    if (!LastUpdatedBy.IsDetailKey && Empty(LastUpdatedBy.FormValue)) {
-                        LastUpdatedBy.AddErrorMessage(ConvertToString(LastUpdatedBy.RequiredErrorMessage).Replace("%s", LastUpdatedBy.Caption));
-                    }
-                }
-                if (lastUpdatedDate.Visible && lastUpdatedDate.Required) {
-                    if (!lastUpdatedDate.IsDetailKey && Empty(lastUpdatedDate.FormValue)) {
-                        lastUpdatedDate.AddErrorMessage(ConvertToString(lastUpdatedDate.RequiredErrorMessage).Replace("%s", lastUpdatedDate.Caption));
-                    }
-                }
-                if (StatusZonaPrev.Visible && StatusZonaPrev.Required) {
-                    if (!StatusZonaPrev.IsDetailKey && Empty(StatusZonaPrev.FormValue)) {
-                        StatusZonaPrev.AddErrorMessage(ConvertToString(StatusZonaPrev.RequiredErrorMessage).Replace("%s", StatusZonaPrev.Caption));
-                    }
-                }
+                ValidateCustomAreaTerlarangOutFoto();
+                ValidateCustomAreaTerlarangOutFotoDownload();
+                ValidateCustomAreaTerlarangOutUser();
+                ValidateCustometlDate();
+                ValidateCustomLastUpdatedBy();
+                ValidateCustomlastUpdatedDate();
+                ValidateCustomStatusZonaPrev();
 
             // Return validate result
             validateForm = validateForm && !HasInvalidFields();
@@ -2984,32 +3263,39 @@ public partial class SnDOne {
         {
             if (fld.Lookup == null)
                 return;
+            if (fld.Lookup.Options.Count is int opt && opt > 0) 
+                return;
             Func<string>? lookupFilter = null;
             dynamic conn = Connection;
-            if (fld.Lookup.Options.Count is int c && c == 0) {
+
+                // Set up lookup SQL
+
                 // Always call to Lookup.GetSql so that user can setup Lookup.Options in Lookup Selecting server event
                 var sql = fld.Lookup.GetSql(false, "", lookupFilter, this);
 
                 // Set up lookup cache
-                if (!fld.HasLookupOptions && fld.UseLookupCache && !Empty(sql) && fld.Lookup.ParentFields.Count == 0 && fld.Lookup.Options.Count == 0) {
-                    int totalCnt = await TryGetRecordCountAsync(sql, conn);
-                    if (totalCnt > fld.LookupCacheCount) // Total count > cache count, do not cache
-                        return;
-                    var dict = new Dictionary<string, Dictionary<string, object>>();
-                    List<object> values = [];
-                    List<Dictionary<string, object>> rs = await conn.GetRowsAsync(sql);
-                    if (rs != null) {
-                        for (int i = 0; i < rs.Count; i++) {
-                            var row = rs[i];
-                            row = fld.Lookup?.RenderViewRow(row, Resolve(fld.Lookup.LinkTable));
-                            string key = row?.Values.First()?.ToString() ?? String.Empty;
-                            if (!dict.ContainsKey(key) && row != null)
-                                dict.Add(key, row);
-                        }
+                if (fld.HasLookupOptions ||
+                    !fld.UseLookupCache ||
+                    Empty(sql) ||
+                    fld.Lookup.ParentFields.Count != 0 ||
+                    fld.Lookup.Options.Count != 0)
+                            return;
+                int totalCnt = await TryGetRecordCountAsync(sql, conn);
+                if (totalCnt > fld.LookupCacheCount) // Total count > cache count, do not cache
+                    return;
+                var dict = new Dictionary<string, Dictionary<string, object>>();
+                List<object> values = [];
+                List<Dictionary<string, object>> rs = await conn.GetRowsAsync(sql);
+                if (rs != null) {
+                    for (int i = 0; i < rs.Count; i++) {
+                        var row = rs[i];
+                        row = fld.Lookup?.RenderViewRow(row, Resolve(fld.Lookup.LinkTable));
+                        string key = row?.Values.First()?.ToString() ?? String.Empty;
+                        if (!dict.ContainsKey(key) && row != null)
+                            dict.Add(key, row);
                     }
-                    fld.Lookup?.SetOptions(dict);
                 }
-            }
+                fld.Lookup?.SetOptions(dict);
         }
 
         // Close recordset

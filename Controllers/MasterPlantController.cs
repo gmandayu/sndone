@@ -13,6 +13,11 @@ public partial class HomeController : Controller
         masterPlantList.Cache = _cache;
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["IdPlant"];
+
+        // Run the page
         return await masterPlantList.Run();
     }
 
@@ -23,6 +28,11 @@ public partial class HomeController : Controller
     {
         // Create page object
         masterPlantAdd = new GLOBALS.MasterPlantAdd(this);
+
+        // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["IdPlant"];
 
         // Run the page
         return await masterPlantAdd.Run();
@@ -37,6 +47,11 @@ public partial class HomeController : Controller
         masterPlantView = new GLOBALS.MasterPlantView(this);
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["IdPlant"];
+
+        // Run the page
         return await masterPlantView.Run();
     }
 
@@ -49,6 +64,11 @@ public partial class HomeController : Controller
         masterPlantEdit = new GLOBALS.MasterPlantEdit(this);
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["IdPlant"];
+
+        // Run the page
         return await masterPlantEdit.Run();
     }
 
@@ -59,6 +79,11 @@ public partial class HomeController : Controller
     {
         // Create page object
         masterPlantDelete = new GLOBALS.MasterPlantDelete(this);
+
+        // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["IdPlant"];
 
         // Run the page
         return await masterPlantDelete.Run();

@@ -13,6 +13,11 @@ public partial class HomeController : Controller
         masterDokumenList.Cache = _cache;
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["IdDokumen"];
+
+        // Run the page
         return await masterDokumenList.Run();
     }
 
@@ -23,6 +28,11 @@ public partial class HomeController : Controller
     {
         // Create page object
         masterDokumenAdd = new GLOBALS.MasterDokumenAdd(this);
+
+        // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["IdDokumen"];
 
         // Run the page
         return await masterDokumenAdd.Run();
@@ -37,6 +47,11 @@ public partial class HomeController : Controller
         masterDokumenView = new GLOBALS.MasterDokumenView(this);
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["IdDokumen"];
+
+        // Run the page
         return await masterDokumenView.Run();
     }
 
@@ -49,6 +64,11 @@ public partial class HomeController : Controller
         masterDokumenEdit = new GLOBALS.MasterDokumenEdit(this);
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["IdDokumen"];
+
+        // Run the page
         return await masterDokumenEdit.Run();
     }
 
@@ -59,6 +79,11 @@ public partial class HomeController : Controller
     {
         // Create page object
         masterDokumenDelete = new GLOBALS.MasterDokumenDelete(this);
+
+        // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["IdDokumen"];
 
         // Run the page
         return await masterDokumenDelete.Run();

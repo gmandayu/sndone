@@ -1483,7 +1483,10 @@ public partial class SnDOne {
 
             // IdAktivitas
             IdAktivitas.ViewValue = IdAktivitas.CurrentValue;
+
+            // awallookupbung
             string curVal = ConvertToString(IdAktivitas.CurrentValue);
+            IdAktivitas.ViewValue = Empty(curVal) ? DbNullValue : FormatNumber(IdAktivitas.CurrentValue, IdAktivitas.FormatPattern);
             if (!Empty(curVal)) {
                 if (IdAktivitas.Lookup != null && IsDictionary(IdAktivitas.Lookup?.Options) && IdAktivitas.Lookup?.Options.Values.Count > 0) { // Load from cache // DN
                     IdAktivitas.ViewValue = IdAktivitas.LookupCacheOption(curVal);
@@ -1494,13 +1497,11 @@ public partial class SnDOne {
                     if (rswrk?.Count > 0 && IdAktivitas.Lookup != null) { // Lookup values found
                         var listwrk = IdAktivitas.Lookup?.RenderViewRow(rswrk[0]);
                         IdAktivitas.ViewValue = IdAktivitas.DisplayValue(listwrk);
-                    } else {
-                        IdAktivitas.ViewValue = FormatNumber(IdAktivitas.CurrentValue, IdAktivitas.FormatPattern);
                     }
                 }
-            } else {
-                IdAktivitas.ViewValue = DbNullValue;
             }
+
+            // akhirlookupbung
             IdAktivitas.ViewCustomAttributes = "";
 
             // NamaAktivitas
@@ -1607,7 +1608,10 @@ public partial class SnDOne {
             // IdAktivitas
             IdAktivitas.SetupEditAttributes();
             IdAktivitas.EditValue = IdAktivitas.CurrentValue;
+
+            // awallookupbung
             string curVal = ConvertToString(IdAktivitas.CurrentValue);
+            IdAktivitas.EditValue = Empty(curVal) ? DbNullValue : FormatNumber(IdAktivitas.CurrentValue, IdAktivitas.FormatPattern);
             if (!Empty(curVal)) {
                 if (IdAktivitas.Lookup != null && IsDictionary(IdAktivitas.Lookup?.Options) && IdAktivitas.Lookup?.Options.Values.Count > 0) { // Load from cache // DN
                     IdAktivitas.EditValue = IdAktivitas.LookupCacheOption(curVal);
@@ -1618,13 +1622,11 @@ public partial class SnDOne {
                     if (rswrk?.Count > 0 && IdAktivitas.Lookup != null) { // Lookup values found
                         var listwrk = IdAktivitas.Lookup?.RenderViewRow(rswrk[0]);
                         IdAktivitas.EditValue = IdAktivitas.DisplayValue(listwrk);
-                    } else {
-                        IdAktivitas.EditValue = FormatNumber(IdAktivitas.CurrentValue, IdAktivitas.FormatPattern);
                     }
                 }
-            } else {
-                IdAktivitas.EditValue = DbNullValue;
             }
+
+            // akhirlookupbung
             IdAktivitas.ViewCustomAttributes = "";
 
             // NamaAktivitas

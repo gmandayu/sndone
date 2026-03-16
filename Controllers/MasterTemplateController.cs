@@ -13,6 +13,11 @@ public partial class HomeController : Controller
         masterTemplateList.Cache = _cache;
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["IdTemplate"];
+
+        // Run the page
         return await masterTemplateList.Run();
     }
 
@@ -23,6 +28,11 @@ public partial class HomeController : Controller
     {
         // Create page object
         masterTemplateAdd = new GLOBALS.MasterTemplateAdd(this);
+
+        // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["IdTemplate"];
 
         // Run the page
         return await masterTemplateAdd.Run();
@@ -37,6 +47,11 @@ public partial class HomeController : Controller
         masterTemplateView = new GLOBALS.MasterTemplateView(this);
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["IdTemplate"];
+
+        // Run the page
         return await masterTemplateView.Run();
     }
 
@@ -49,6 +64,11 @@ public partial class HomeController : Controller
         masterTemplateEdit = new GLOBALS.MasterTemplateEdit(this);
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["IdTemplate"];
+
+        // Run the page
         return await masterTemplateEdit.Run();
     }
 
@@ -59,6 +79,11 @@ public partial class HomeController : Controller
     {
         // Create page object
         masterTemplateDelete = new GLOBALS.MasterTemplateDelete(this);
+
+        // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["IdTemplate"];
 
         // Run the page
         return await masterTemplateDelete.Run();

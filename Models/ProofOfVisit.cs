@@ -1553,7 +1553,10 @@ public partial class SnDOne {
 
             // Plant
             Plant.ViewValue = Plant.CurrentValue;
+
+            // awallookupbung
             string curVal2 = ConvertToString(Plant.CurrentValue);
+            Plant.ViewValue = Empty(curVal2) ? DbNullValue : Plant.CurrentValue;
             if (!Empty(curVal2)) {
                 if (Plant.Lookup != null && IsDictionary(Plant.Lookup?.Options) && Plant.Lookup?.Options.Values.Count > 0) { // Load from cache // DN
                     Plant.ViewValue = Plant.LookupCacheOption(curVal2);
@@ -1564,13 +1567,11 @@ public partial class SnDOne {
                     if (rswrk2?.Count > 0 && Plant.Lookup != null) { // Lookup values found
                         var listwrk = Plant.Lookup?.RenderViewRow(rswrk2[0]);
                         Plant.ViewValue = Plant.DisplayValue(listwrk);
-                    } else {
-                        Plant.ViewValue = Plant.CurrentValue;
                     }
                 }
-            } else {
-                Plant.ViewValue = DbNullValue;
             }
+
+            // akhirlookupbung
             Plant.ViewCustomAttributes = "";
 
             // JumlahKetidaksesuaiaan
@@ -1693,7 +1694,10 @@ public partial class SnDOne {
             // Plant
             Plant.SetupEditAttributes();
             Plant.EditValue = Plant.CurrentValue;
+
+            // awallookupbung
             string curVal2 = ConvertToString(Plant.CurrentValue);
+            Plant.EditValue = Empty(curVal2) ? DbNullValue : Plant.CurrentValue;
             if (!Empty(curVal2)) {
                 if (Plant.Lookup != null && IsDictionary(Plant.Lookup?.Options) && Plant.Lookup?.Options.Values.Count > 0) { // Load from cache // DN
                     Plant.EditValue = Plant.LookupCacheOption(curVal2);
@@ -1704,13 +1708,11 @@ public partial class SnDOne {
                     if (rswrk2?.Count > 0 && Plant.Lookup != null) { // Lookup values found
                         var listwrk = Plant.Lookup?.RenderViewRow(rswrk2[0]);
                         Plant.EditValue = Plant.DisplayValue(listwrk);
-                    } else {
-                        Plant.EditValue = Plant.CurrentValue;
                     }
                 }
-            } else {
-                Plant.EditValue = DbNullValue;
             }
+
+            // akhirlookupbung
             Plant.ViewCustomAttributes = "";
 
             // JumlahKetidaksesuaiaan

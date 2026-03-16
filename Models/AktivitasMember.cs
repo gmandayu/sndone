@@ -1424,7 +1424,10 @@ public partial class SnDOne {
             IdAktivitasMember.ViewCustomAttributes = "";
 
             // IdAktivitas
+
+            // awallookupbung
             string curVal = ConvertToString(IdAktivitas.CurrentValue);
+            IdAktivitas.ViewValue = Empty(curVal) ? DbNullValue : FormatNumber(IdAktivitas.CurrentValue, IdAktivitas.FormatPattern);
             if (!Empty(curVal)) {
                 if (IdAktivitas.Lookup != null && IsDictionary(IdAktivitas.Lookup?.Options) && IdAktivitas.Lookup?.Options.Values.Count > 0) { // Load from cache // DN
                     IdAktivitas.ViewValue = IdAktivitas.LookupCacheOption(curVal);
@@ -1435,13 +1438,11 @@ public partial class SnDOne {
                     if (rswrk?.Count > 0 && IdAktivitas.Lookup != null) { // Lookup values found
                         var listwrk = IdAktivitas.Lookup?.RenderViewRow(rswrk[0]);
                         IdAktivitas.ViewValue = IdAktivitas.DisplayValue(listwrk);
-                    } else {
-                        IdAktivitas.ViewValue = FormatNumber(IdAktivitas.CurrentValue, IdAktivitas.FormatPattern);
                     }
                 }
-            } else {
-                IdAktivitas.ViewValue = DbNullValue;
             }
+
+            // akhirlookupbung
             IdAktivitas.ViewCustomAttributes = "";
 
             // Username
@@ -1453,6 +1454,8 @@ public partial class SnDOne {
             string? dispVal2 = _Username.DisplayValue(listWrk2);
             if (!Empty(dispVal2))
                 _Username.ViewValue = dispVal2;
+
+            // akhirlookupbung
             _Username.ViewCustomAttributes = "";
 
             // Peran

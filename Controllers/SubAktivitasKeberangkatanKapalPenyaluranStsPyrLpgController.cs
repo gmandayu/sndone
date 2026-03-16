@@ -13,6 +13,11 @@ public partial class HomeController : Controller
         subAktivitasKeberangkatanKapalPenyaluranStsPyrLpgList.Cache = _cache;
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["id"];
+
+        // Run the page
         return await subAktivitasKeberangkatanKapalPenyaluranStsPyrLpgList.Run();
     }
 
@@ -23,6 +28,11 @@ public partial class HomeController : Controller
     {
         // Create page object
         subAktivitasKeberangkatanKapalPenyaluranStsPyrLpgEdit = new GLOBALS.SubAktivitasKeberangkatanKapalPenyaluranStsPyrLpgEdit(this);
+
+        // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["id"];
 
         // Run the page
         return await subAktivitasKeberangkatanKapalPenyaluranStsPyrLpgEdit.Run();

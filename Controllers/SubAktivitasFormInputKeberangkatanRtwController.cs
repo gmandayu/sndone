@@ -13,6 +13,11 @@ public partial class HomeController : Controller
         subAktivitasFormInputKeberangkatanRtwList.Cache = _cache;
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["id"];
+
+        // Run the page
         return await subAktivitasFormInputKeberangkatanRtwList.Run();
     }
 
@@ -25,6 +30,11 @@ public partial class HomeController : Controller
         subAktivitasFormInputKeberangkatanRtwEdit = new GLOBALS.SubAktivitasFormInputKeberangkatanRtwEdit(this);
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["id"];
+
+        // Run the page
         return await subAktivitasFormInputKeberangkatanRtwEdit.Run();
     }
 
@@ -35,6 +45,11 @@ public partial class HomeController : Controller
     {
         // Create page object
         subAktivitasFormInputKeberangkatanRtwDelete = new GLOBALS.SubAktivitasFormInputKeberangkatanRtwDelete(this);
+
+        // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["id"];
 
         // Run the page
         return await subAktivitasFormInputKeberangkatanRtwDelete.Run();

@@ -1480,7 +1480,10 @@ public partial class SnDOne {
             id.ViewCustomAttributes = "";
 
             // idPipa
+
+            // awallookupbung
             string curVal = ConvertToString(idPipa.CurrentValue);
+            idPipa.ViewValue = Empty(curVal) ? DbNullValue : FormatNumber(idPipa.CurrentValue, idPipa.FormatPattern);
             if (!Empty(curVal)) {
                 if (idPipa.Lookup != null && IsDictionary(idPipa.Lookup?.Options) && idPipa.Lookup?.Options.Values.Count > 0) { // Load from cache // DN
                     idPipa.ViewValue = idPipa.LookupCacheOption(curVal);
@@ -1491,17 +1494,18 @@ public partial class SnDOne {
                     if (rswrk?.Count > 0 && idPipa.Lookup != null) { // Lookup values found
                         var listwrk = idPipa.Lookup?.RenderViewRow(rswrk[0]);
                         idPipa.ViewValue = idPipa.DisplayValue(listwrk);
-                    } else {
-                        idPipa.ViewValue = FormatNumber(idPipa.CurrentValue, idPipa.FormatPattern);
                     }
                 }
-            } else {
-                idPipa.ViewValue = DbNullValue;
             }
+
+            // akhirlookupbung
             idPipa.ViewCustomAttributes = "";
 
             // idPlantTujuan
+
+            // awallookupbung
             string curVal2 = ConvertToString(idPlantTujuan.CurrentValue);
+            idPlantTujuan.ViewValue = Empty(curVal2) ? DbNullValue : FormatNumber(idPlantTujuan.CurrentValue, idPlantTujuan.FormatPattern);
             if (!Empty(curVal2)) {
                 if (idPlantTujuan.Lookup != null && IsDictionary(idPlantTujuan.Lookup?.Options) && idPlantTujuan.Lookup?.Options.Values.Count > 0) { // Load from cache // DN
                     idPlantTujuan.ViewValue = idPlantTujuan.LookupCacheOption(curVal2);
@@ -1512,13 +1516,11 @@ public partial class SnDOne {
                     if (rswrk2?.Count > 0 && idPlantTujuan.Lookup != null) { // Lookup values found
                         var listwrk = idPlantTujuan.Lookup?.RenderViewRow(rswrk2[0]);
                         idPlantTujuan.ViewValue = idPlantTujuan.DisplayValue(listwrk);
-                    } else {
-                        idPlantTujuan.ViewValue = FormatNumber(idPlantTujuan.CurrentValue, idPlantTujuan.FormatPattern);
                     }
                 }
-            } else {
-                idPlantTujuan.ViewValue = DbNullValue;
             }
+
+            // akhirlookupbung
             idPlantTujuan.ViewCustomAttributes = "";
 
             // Panjang

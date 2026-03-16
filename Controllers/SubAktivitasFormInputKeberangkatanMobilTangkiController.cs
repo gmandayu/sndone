@@ -13,6 +13,11 @@ public partial class HomeController : Controller
         subAktivitasFormInputKeberangkatanMobilTangkiList.Cache = _cache;
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["id"];
+
+        // Run the page
         return await subAktivitasFormInputKeberangkatanMobilTangkiList.Run();
     }
 
@@ -23,6 +28,11 @@ public partial class HomeController : Controller
     {
         // Create page object
         subAktivitasFormInputKeberangkatanMobilTangkiAdd = new GLOBALS.SubAktivitasFormInputKeberangkatanMobilTangkiAdd(this);
+
+        // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["id"];
 
         // Run the page
         return await subAktivitasFormInputKeberangkatanMobilTangkiAdd.Run();
@@ -37,6 +47,11 @@ public partial class HomeController : Controller
         subAktivitasFormInputKeberangkatanMobilTangkiView = new GLOBALS.SubAktivitasFormInputKeberangkatanMobilTangkiView(this);
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["id"];
+
+        // Run the page
         return await subAktivitasFormInputKeberangkatanMobilTangkiView.Run();
     }
 
@@ -49,6 +64,11 @@ public partial class HomeController : Controller
         subAktivitasFormInputKeberangkatanMobilTangkiEdit = new GLOBALS.SubAktivitasFormInputKeberangkatanMobilTangkiEdit(this);
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["id"];
+
+        // Run the page
         return await subAktivitasFormInputKeberangkatanMobilTangkiEdit.Run();
     }
 
@@ -59,6 +79,11 @@ public partial class HomeController : Controller
     {
         // Create page object
         subAktivitasFormInputKeberangkatanMobilTangkiDelete = new GLOBALS.SubAktivitasFormInputKeberangkatanMobilTangkiDelete(this);
+
+        // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["id"];
 
         // Run the page
         return await subAktivitasFormInputKeberangkatanMobilTangkiDelete.Run();

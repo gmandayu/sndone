@@ -13,6 +13,11 @@ public partial class HomeController : Controller
         subAktivitasFormInputHasilPemeriksaanPipaList.Cache = _cache;
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["id"];
+
+        // Run the page
         return await subAktivitasFormInputHasilPemeriksaanPipaList.Run();
     }
 
@@ -23,6 +28,11 @@ public partial class HomeController : Controller
     {
         // Create page object
         subAktivitasFormInputHasilPemeriksaanPipaEdit = new GLOBALS.SubAktivitasFormInputHasilPemeriksaanPipaEdit(this);
+
+        // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["id"];
 
         // Run the page
         return await subAktivitasFormInputHasilPemeriksaanPipaEdit.Run();

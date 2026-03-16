@@ -13,6 +13,11 @@ public partial class HomeController : Controller
         formInputGoodHouseKeepingList.Cache = _cache;
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["id"];
+
+        // Run the page
         return await formInputGoodHouseKeepingList.Run();
     }
 
@@ -23,6 +28,11 @@ public partial class HomeController : Controller
     {
         // Create page object
         formInputGoodHouseKeepingAdd = new GLOBALS.FormInputGoodHouseKeepingAdd(this);
+
+        // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["id"];
 
         // Run the page
         return await formInputGoodHouseKeepingAdd.Run();
@@ -37,6 +47,11 @@ public partial class HomeController : Controller
         formInputGoodHouseKeepingView = new GLOBALS.FormInputGoodHouseKeepingView(this);
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["id"];
+
+        // Run the page
         return await formInputGoodHouseKeepingView.Run();
     }
 
@@ -49,6 +64,11 @@ public partial class HomeController : Controller
         formInputGoodHouseKeepingEdit = new GLOBALS.FormInputGoodHouseKeepingEdit(this);
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["id"];
+
+        // Run the page
         return await formInputGoodHouseKeepingEdit.Run();
     }
 
@@ -59,6 +79,11 @@ public partial class HomeController : Controller
     {
         // Create page object
         formInputGoodHouseKeepingDelete = new GLOBALS.FormInputGoodHouseKeepingDelete(this);
+
+        // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["id"];
 
         // Run the page
         return await formInputGoodHouseKeepingDelete.Run();

@@ -13,6 +13,11 @@ public partial class HomeController : Controller
         masterRegionList.Cache = _cache;
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["IdRegion"];
+
+        // Run the page
         return await masterRegionList.Run();
     }
 
@@ -23,6 +28,11 @@ public partial class HomeController : Controller
     {
         // Create page object
         masterRegionAdd = new GLOBALS.MasterRegionAdd(this);
+
+        // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["IdRegion"];
 
         // Run the page
         return await masterRegionAdd.Run();
@@ -37,6 +47,11 @@ public partial class HomeController : Controller
         masterRegionView = new GLOBALS.MasterRegionView(this);
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["IdRegion"];
+
+        // Run the page
         return await masterRegionView.Run();
     }
 
@@ -49,6 +64,11 @@ public partial class HomeController : Controller
         masterRegionEdit = new GLOBALS.MasterRegionEdit(this);
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["IdRegion"];
+
+        // Run the page
         return await masterRegionEdit.Run();
     }
 
@@ -59,6 +79,11 @@ public partial class HomeController : Controller
     {
         // Create page object
         masterRegionDelete = new GLOBALS.MasterRegionDelete(this);
+
+        // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["IdRegion"];
 
         // Run the page
         return await masterRegionDelete.Run();

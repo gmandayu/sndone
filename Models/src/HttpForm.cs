@@ -117,7 +117,7 @@ public partial class SnDOne {
                 try {
                     using var readStream = file.OpenReadStream();
                     var info = new MagickImageInfo(readStream);
-                    return (width: Convert.ToInt32(info.Width), height: Convert.ToInt32(info.Height));
+                    return (width: info.Width, height: info.Height);
                 } catch {}
             }
             return (width: -1, height: -1);

@@ -13,6 +13,11 @@ public partial class HomeController : Controller
         subAktivitasNilaiNewBlsfadsfbllpgList.Cache = _cache;
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["id"];
+
+        // Run the page
         return await subAktivitasNilaiNewBlsfadsfbllpgList.Run();
     }
 
@@ -23,6 +28,11 @@ public partial class HomeController : Controller
     {
         // Create page object
         subAktivitasNilaiNewBlsfadsfbllpgEdit = new GLOBALS.SubAktivitasNilaiNewBlsfadsfbllpgEdit(this);
+
+        // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["id"];
 
         // Run the page
         return await subAktivitasNilaiNewBlsfadsfbllpgEdit.Run();

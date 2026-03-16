@@ -430,7 +430,7 @@ public partial class SnDOne {
     {
         if (Config.Debug)
             SetDebugMessage(sql);
-        if (Config.LogSql)
+        if (Config.LogSqlEnabled)
             LogDebug(sql, args);
         return sql;
     }
@@ -1265,7 +1265,7 @@ public partial class SnDOne {
     {
         if (Empty(html))
             return "";
-        if (Config.RemoveXss)
+        if (Config.RemoveXssEnabled)
             return Sanitizer.Sanitize(ConvertToString(html));
         return ConvertToString(html);
     }
@@ -1527,7 +1527,7 @@ public partial class SnDOne {
     {
         if (Security != null) {
             return Security.CurrentUserInfo(fldname);
-        } else if (!Empty(Config.UserTable) && !IsSysAdmin() && UserTableConn != null) {
+        } else if (!Empty(Config.UserTableDefault) && !IsSysAdmin() && UserTableConn != null) {
             object? info = null;
             string filter = GetUserFilter(Config.LoginUsernameFieldName, CurrentUserName());
             if (!Empty(filter)) {
@@ -2374,17 +2374,17 @@ public partial class SnDOne {
     {
         try {
             MagickImage img = new(filedata);
-            GetResizeDimension(Convert.ToInt32(img.Width), Convert.ToInt32(img.Height), ref width, ref height);
+            GetResizeDimension(img.Width, img.Height, ref width, ref height);
             if (width > 0 && height > 0) {
-                MagickGeometry size = new(Convert.ToUInt32(width), Convert.ToUInt32(height));
+                MagickGeometry size = new(width, height);
                 size.IgnoreAspectRatio = resizeIgnoreAspectRatio ?? Config.ResizeIgnoreAspectRatio;
                 size.Less = Config.ResizeLess;
                 img.Resize(size);
             }
             plugins?.ForEach(p => p(img));
             filedata = img.ToByteArray();
-            width = Convert.ToInt32(img.Width);
-            height = Convert.ToInt32(img.Height);
+            width = img.Width;
+            height = img.Height;
             return true;
         } catch {
             return false;
@@ -2421,15 +2421,15 @@ public partial class SnDOne {
         try {
             var data = (byte[])FileReadAllBytesAsync(fn).GetAwaiter().GetResult();
             MagickImage img = new(data);
-            GetResizeDimension(Convert.ToInt32(img.Width), Convert.ToInt32(img.Height), ref width, ref height);
+            GetResizeDimension(img.Width, img.Height, ref width, ref height);
             if (width > 0 && height > 0) {
-                MagickGeometry size = new(Convert.ToUInt32(width), Convert.ToUInt32(height));
+                MagickGeometry size = new(width, height);
                 size.IgnoreAspectRatio = resizeIgnoreAspectRatio ?? Config.ResizeIgnoreAspectRatio;
                 size.Less = Config.ResizeLess;
                 img.Resize(size);
                 img.Write(tn);
-                width = Convert.ToInt32(img.Width);
-                height = Convert.ToInt32(img.Height);
+                width = img.Width;
+                height = img.Height;
             } else { // No resize, just use the original file
                 FileWriteAllBytesAsync(tn, data).GetAwaiter().GetResult();
             }
@@ -2452,12 +2452,12 @@ public partial class SnDOne {
         MagickImage img = new(data);
         if (width > 0 || height > 0) {
             try {
-                MagickGeometry size = new(Convert.ToUInt32(width), Convert.ToUInt32(height));
+                MagickGeometry size = new(width, height);
                 size.IgnoreAspectRatio = resizeIgnoreAspectRatio ?? Config.ResizeIgnoreAspectRatio;
                 size.Less = Config.ResizeLess;
                 img.Resize(size);
-                width = Convert.ToInt32(img.Width);
-                height = Convert.ToInt32(img.Height);
+                width = img.Width;
+                height = img.Height;
             } catch {
                 if (Config.Debug)
                     throw;
@@ -2475,7 +2475,7 @@ public partial class SnDOne {
         MagickImage img = new(data);
         if (width > 0 || height > 0) {
             try {
-                MagickGeometry size = new(Convert.ToUInt32(width), Convert.ToUInt32(height));
+                MagickGeometry size = new(width, height);
                 size.IgnoreAspectRatio = resizeIgnoreAspectRatio ?? Config.ResizeIgnoreAspectRatio;
                 size.Less = Config.ResizeLess;
                 img.Resize(size);
@@ -3179,7 +3179,7 @@ public partial class SnDOne {
             bool writeAuditTrail = AuditTrailInserting(rsnew);
             if (writeAuditTrail) {
                 if (!Config.AuditTrailToDatabase) { // Write audit trail to log file
-                    string folder = ServerMapPath(Config.LogPath);
+                    string folder = ServerMapPath(Config.LogPathDefault);
                     string file = folder + pfx + "_" + DateTime.Now.ToString("yyyyMMdd") + ".txt";
                     if (CreateFolder(folder)) {
                         bool writeHeader = !FileExists(file);
@@ -3265,8 +3265,8 @@ public partial class SnDOne {
     /// <returns>Export path</returns>
     public static string ExportPath(bool physical = false)
         =>physical
-            ? IncludeTrailingDelimiter(UploadPath(true) + Config.ExportPath, true)
-            : IncludeTrailingDelimiter(FullUrl(UploadPath(false) + Config.ExportPath), false); // Full URL
+            ? IncludeTrailingDelimiter(UploadPath(true) + Config.ExportPathEnable, true)
+            : IncludeTrailingDelimiter(FullUrl(UploadPath(false) + Config.ExportPathEnable), false); // Full URL
 
     /// <summary>
     /// Unformat date time
@@ -3815,8 +3815,8 @@ public partial class SnDOne {
     /// <returns>Temp upload path root</returns>
     public static string UploadTempPathRoot(bool physical = true)
         => physical
-            ? !Empty(Config.UploadTempPath) && !Empty(Config.UploadTempHrefPath) ? IncludeTrailingDelimiter(Config.UploadTempPath, true) : UploadPath(true)
-            : !Empty(Config.UploadTempPath) && !Empty(Config.UploadTempHrefPath) ? IncludeTrailingDelimiter(Config.UploadTempHrefPath, false) : UploadPath(false);
+            ? !Empty(Config.UploadTempPathDefault) && !Empty(Config.UploadTempHrefPath) ? IncludeTrailingDelimiter(Config.UploadTempPathDefault, true) : UploadPath(true)
+            : !Empty(Config.UploadTempPathDefault) && !Empty(Config.UploadTempHrefPath) ? IncludeTrailingDelimiter(Config.UploadTempHrefPath, false) : UploadPath(false);
 
     /// <summary>
     /// Get temp upload path
@@ -4550,7 +4550,7 @@ public partial class SnDOne {
     /// Log path (physical)
     /// </summary>
     /// <returns>Log path</returns>
-    public static string LogPath() => MapPath(true, Config.LogPath);
+    public static string LogPath() => MapPath(true, Config.LogPathDefault);
 
     /// <summary>
     /// Get physical path (folder with trailing delimiter or file) relative to wwwroot
@@ -4819,7 +4819,7 @@ public partial class SnDOne {
     /// <returns></returns>
     public static Tuple<string, string, string>? GetBlobPathInfo(string fullPath)
     {
-        //***fullPath = IncludeTrailingDelimiter(fullPath, false); //??? fullPath may be aws.s3//bucket/file.jpg
+        fullPath = IncludeTrailingDelimiter(fullPath, false);
         var m = Regex.Match(fullPath, @"(.+?)://([^/]+)(/(.+))?");
         if (m.Success) { // Remote
             string prefix = m.Groups[1].Value;
@@ -5198,16 +5198,16 @@ public partial class SnDOne {
     public static void Collect()
     {
         // Force garbage collection
-        GC.Collect();
+        //GC.Collect();
         // Wait for all finalizers to complete before continuing.
         // Without this call to GC.WaitForPendingFinalizers,
         // the worker loop below might execute at the same time
         // as the finalizers.
         // With this call, the worker loop executes only after
         // all finalizers have been called.
-        GC.WaitForPendingFinalizers();
+        //GC.WaitForPendingFinalizers();
         // Do another garbage collection
-        GC.Collect();
+        //GC.Collect();
     }
 
     /// <summary>
@@ -6169,10 +6169,10 @@ public partial class SnDOne {
     public static byte[]? GetUserImage(byte[]? image, int width = 0, int height = 0, bool crop = false)
     {
         if (image != null && width > 0) {
-            MagickGeometry geometry = new(Convert.ToUInt32(width), Convert.ToUInt32(height)) {
+            MagickGeometry geometry = new(width, height) {
                 FillArea = true
             };
-            List<Action<MagickImage>> plugins = crop ? [mi => mi.Crop(Convert.ToUInt32(width), Convert.ToUInt32(height), Gravity.Center)] : [];
+            List<Action<MagickImage>> plugins = crop ? [mi => mi.Crop(width, height, Gravity.Center)] : [];
             ResizeBinary(ref image, geometry, plugins);
         }
         return image;
@@ -8575,7 +8575,7 @@ public partial class SnDOne {
     /// <param name="timeout">Timeout period</param>
     /// <param name="main">Use main connection or not</param>
     /// <returns>The ID of the inserted entity</returns>
-    public static T InsertGetId<TEntity, T>(TEntity entity, IDbTransaction? transaction = null, int? timeout = null, bool main = false)
+    public static new T InsertGetId<TEntity, T>(TEntity entity, IDbTransaction? transaction = null, int? timeout = null, bool main = false)
         where TEntity : class
         => ResolveTable<TEntity>().InsertGetId<TEntity, T>(entity, transaction, timeout, main);
 

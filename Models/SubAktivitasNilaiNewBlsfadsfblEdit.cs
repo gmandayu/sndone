@@ -1,3 +1,8 @@
+using System.Collections.Generic;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+
 namespace SnDOne.Models;
 
 // Partial class
@@ -89,7 +94,7 @@ public partial class SnDOne {
         private string _pageUrl = "";
 
         // Constructor
-        public SubAktivitasNilaiNewBlsfadsfblEditBase()
+        public SubAktivitasNilaiNewBlsfadsfblEditBase(Controller? controller)
         {
             TableName = "SubAktivitasNilaiNewBLSFADSFBL";
 
@@ -98,6 +103,8 @@ public partial class SnDOne {
 
             // Initialize
             CurrentPage = this;
+        if (controller != null)
+            Controller = controller;
 
             // Table CSS class
             TableClass = "table table-striped table-bordered table-hover table-sm ew-desktop-table ew-edit-table d-none";
@@ -229,81 +236,87 @@ public partial class SnDOne {
         }
 
         // Constructor
-        public SubAktivitasNilaiNewBlsfadsfblEditBase(Controller? controller = null): this() { // DN
-            if (controller != null)
-                Controller = controller;
-        }
+        public SubAktivitasNilaiNewBlsfadsfblEditBase() : this(null) { }
 
         /// <summary>
         /// Terminate page
         /// </summary>
         /// <param name="url">URL to rediect to</param>
         /// <returns>Page result</returns>
-        public override IActionResult Terminate(string url = "") { // DN
-            if (_terminated) // DN
-                return new EmptyResult();
-
-            // Page Unload event
-            PageUnload();
-
-            // Global Page Unloaded event
-            PageUnloaded();
-            PageUnloadedEventHandler?.Invoke(this, EventArgs.Empty);
-            if (!IsApi())
-                PageRedirecting(ref url);
-
-            // Gargage collection
-            Collect(); // DN
-
-            // Terminate
-            _terminated = true; // DN
-
-            // Return for API
-            if (IsApi()) {
-                var result = new Dictionary<string, string> { { "version", Config.ProductVersion } };
-                if (!Empty(url)) // Add url
-                    result.Add("url", GetUrl(url));
-                foreach (var (key, value) in GetMessages()) // Add messages
-                    result.Add(key, value);
-                return Controller.Json(result);
-            } else if (ActionResult != null) { // Check action result
-                return ActionResult;
-            }
-
-            // Go to URL if specified
-            if (!Empty(url)) {
-                if (!Config.Debug)
-                    ResponseClear();
-                if (Response != null && !Response.HasStarted) {
-                    // Handle modal response
-                    if (IsModal) { // Show as modal
-                        string pageName = GetPageName(url);
-                        var result = new Dictionary<string, string> { {"url", GetUrl(url)}, {"modal", "1"} }; // Assume return to modal for simplicity
-                        if (SameString(pageName, GetPageName(ListUrl)) ||
-                            SameString(pageName, GetPageName(ViewUrl)) ||
-                            SameString(pageName, GetPageName(GetCurrentMasterTable()?.ViewUrl ?? ""))
-                        ) { // List / View / Master View page
-                            if (!SameString(pageName, ListUrl)) { // Not List page
-                                result.Add("caption", GetModalCaption(pageName));
-                                result.Add("view", pageName == "SubAktivitasNilaiNewBlsfadsfblView" ? "1" : "0"); // If View page, no primary button
-                            } else { // List page
-                                // result.Add("list", PageID == "search" ? "1" : "0"); // Refresh List page if current page is Search page
-                                result.Add("error", FailureMessage); // List page should not be shown as modal => error
-                                ClearFailureMessage();
-                            }
-                        } else { // Other pages (add messages and then clear messages)
-                            result = GetMessages();
-                            result.Add("modal", "1");
-                            ClearMessages();
-                        }
-                        return Controller.Json(result);
-                    } else {
-                        SaveDebugMessage();
-                        return Controller.LocalRedirect(AppPath(url));
-                    }
-                }
-            }
+        public override IActionResult Terminate(string url = "")
+        { // DN
+            if (_terminated) return new EmptyResult();
+            InvokeUnloadHooks();
+            if (!IsApi()) PageRedirecting(ref url);
+            Collect();                // DN
+            _terminated = true;       // DN
+            if (IsApi()) return BuildApiTerminateResult(url);
+            if (ActionResult != null) return ActionResult;
+            if (Empty(url)) return new EmptyResult();
+            if (!Config.Debug) ResponseClear();
+            if (Response != null && !Response.HasStarted)
+                return HandleRedirect(url);
             return new EmptyResult();
+        }
+
+        // ================= HELPER METHODS =================
+        private void InvokeUnloadHooks()
+        {
+                    // Page Unload event
+                    PageUnload();
+
+                // Global Page Unloaded event
+                PageUnloaded();
+            PageUnloadedEventHandler?.Invoke(null, EventArgs.Empty);
+        }
+
+        private IActionResult BuildApiTerminateResult(string url)
+        {
+            var result = new Dictionary<string, string> { { "version", Config.ProductVersion } };
+            if (!Empty(url)) result.Add("url", GetUrl(url));
+            foreach (var (key, value) in GetMessages()) result.Add(key, value);
+            return Controller.Json(result);
+        }
+
+        private IActionResult HandleRedirect(string url)
+        {
+            if (IsModal) return BuildModalResult_ListAddEditUpdateViewSearch(url);
+            SaveDebugMessage();
+            return RedirectCore(url);
+        }
+
+        private IActionResult RedirectCore(string url)
+        {
+            return Controller.LocalRedirect(AppPath(url));
+        }
+
+        private IActionResult BuildModalResult_ListAddEditUpdateViewSearch(string url)
+        {
+            string pageName = GetPageName(url);
+                var result = new Dictionary<string, string> { { "url", GetUrl(url) }, { "modal", "1" } }; // modal=1
+                    if (SameString(pageName, GetPageName(ListUrl)) ||
+                        SameString(pageName, GetPageName(ViewUrl)) ||
+                        SameString(pageName, GetPageName(GetCurrentMasterTable()?.ViewUrl ?? "")))
+                    {
+                // List / View / Master View page
+                    if (!SameString(pageName, ListUrl))
+                    {
+                        result.Add("caption", GetModalCaption(pageName));
+                        result.Add("view", pageName == "SubAktivitasNilaiNewBlsfadsfblView" ? "1" : "0"); // If View page, no primary button
+                    }
+                    else
+                    {
+                        result.Add("error", FailureMessage); // List page should not be shown as modal => error
+                        ClearFailureMessage();
+                    }
+                    }
+                    else
+                    { // Other pages (add messages and then clear messages)
+                        result = GetMessages();
+                        result.Add("modal", "1");
+                        ClearMessages();
+                    }
+                return Controller.Json(result);
         }
 
         // Get all records from datareader
@@ -350,43 +363,72 @@ public partial class SnDOne {
         protected Dictionary<string, object>? GetRecordFromRecordset(List<Dictionary<string, object>>? list) =>
             list != null && list.Count > 0 ? GetRecordFromDictionary(list[0]) : null;
 
-        // Get record from Dictionary
-        protected Dictionary<string, object>? GetRecordFromDictionary(Dictionary<string, object>? dict) {
-            if (dict == null)
-                return null;
+        // Get record from Dictionary (refactor: low cognitive complexity)
+        protected Dictionary<string, object>? GetRecordFromDictionary(Dictionary<string, object>? dict)
+        {
+            if (dict is null) return null;
             var row = new Dictionary<string, object>();
-            foreach (var (key, value) in dict) {
-                if (Fields.TryGetValue(key, out DbField? fld) && fld != null) {
-                    if (fld.Visible || fld.IsPrimaryKey) { // Primary key or Visible
-                        if (fld.HtmlTag == "FILE") { // Upload field
-                            if (Empty(value)) {
-                                // row[key] = null;
-                            } else {
-                                if (fld.DataType == DataType.Blob) {
-                                    string url = FullUrl(GetPageName(Config.ApiUrl) + "/" + Config.ApiFileAction + "/" + fld.TableVar + "/" + fld.Param + "/" + GetRecordKeyValue(dict)); // Query string format
-                                    row[key] = new Dictionary<string, object> { { "type", ContentType((byte[])value) }, { "url", url }, { "name", fld.Param + ContentExtension((byte[])value) } };
-                                } else if (!fld.UploadMultiple || !ConvertToString(value).Contains(Config.MultipleUploadSeparator)) { // Single file
-                                    string url = FullUrl(GetPageName(Config.ApiUrl) + "/" + Config.ApiFileAction + "/" + fld.TableVar + "/" + Encrypt(fld.PhysicalUploadPath + ConvertToString(value))); // Query string format
-                                    row[key] = new Dictionary<string, object> { { "type", ContentType(ConvertToString(value)) }, { "url", url }, { "name", ConvertToString(value) } };
-                                } else { // Multiple files
-                                    var files = ConvertToString(value).Split(Config.MultipleUploadSeparator);
-                                    row[key] = files.Where(file => !Empty(file)).Select(file => new Dictionary<string, object> { { "type", ContentType(file) }, { "url", FullUrl(GetPageName(Config.ApiUrl) + "/" + Config.ApiFileAction + "/" + fld.TableVar + "/" + Encrypt(fld.PhysicalUploadPath + file)) }, { "name", file } });
-                                }
-                            }
-                        } else {
-                            string val = ConvertToString(value);
-                            if (fld.DataType == DataType.Date && value is DateTime dt)
-                                val = dt.ToString("s");
-                            row[key] = ConvertToString(val);
-                        }
-                    }
-                }
+            foreach (var (key, value) in dict)
+            {
+                if (!Fields.TryGetValue(key, out DbField? fld) || fld is null) continue;
+                if (!ShouldIncludeField(fld)) continue;
+                var cell = fld.HtmlTag == "FILE"
+                    ? BuildFileCell(fld, value, dict)
+                    : BuildScalarCell(fld, value);
+                if (cell is not null)
+                    row[key] = cell;
             }
             return row;
         }
 
-        // Get record key value from array
-        protected string GetRecordKeyValue(Dictionary<string, object> dict) {
+        // ---- Helpers ----
+        private static bool ShouldIncludeField(DbField fld)
+            => fld.Visible || fld.IsPrimaryKey;
+
+        private object? BuildFileCell(DbField fld, object value, Dictionary<string, object> srcRow)
+        {
+            if (Empty(value)) return null; // (sesuai kode asli: tidak menambahkan key)
+
+            // Blob
+            if (fld.DataType == DataType.Blob)
+            {
+                var bytes = (byte[])value;
+                var url = FullUrl($"{GetPageName(Config.ApiUrl)}/{Config.ApiFileAction}/{fld.TableVar}/{fld.Param}/{GetRecordKeyValue(srcRow)}");
+                return FileMeta(ContentType(bytes), url, fld.Param + ContentExtension(bytes));
+            }
+
+            // Non-blob
+            var s = ConvertToString(value);
+            if (!fld.UploadMultiple || !s.Contains(Config.MultipleUploadSeparator))
+            {
+                var url = FullUrl($"{GetPageName(Config.ApiUrl)}/{Config.ApiFileAction}/{fld.TableVar}/{Encrypt(fld.PhysicalUploadPath + s)}");
+                return FileMeta(ContentType(s), url, s);
+            }
+
+            // Multiple files
+            var files = s.Split(Config.MultipleUploadSeparator);
+            return files
+                .Where(f => !Empty(f))
+                .Select(f =>
+                {
+                    var url = FullUrl($"{GetPageName(Config.ApiUrl)}/{Config.ApiFileAction}/{fld.TableVar}/{Encrypt(fld.PhysicalUploadPath + f)}");
+                    return FileMeta(ContentType(f), url, f);
+                });
+        }
+
+        private static Dictionary<string, object> FileMeta(string type, string url, string name) =>
+            new Dictionary<string, object> { { "type", type }, { "url", url }, { "name", name } };
+
+        private object BuildScalarCell(DbField fld, object value)
+        {
+            var s = ConvertToString(value);
+            if (fld.DataType == DataType.Date && value is DateTime dt)
+                s = dt.ToString("s");
+            return ConvertToString(s);
+        }
+
+// Get record key value from array
+protected string GetRecordKeyValue(Dictionary<string, object> dict) {
             string key = "";
             key += UrlEncode(ConvertToString(dict.ContainsKey("id") ? dict["id"] : id.CurrentValue));
             return key;
@@ -397,78 +439,147 @@ public partial class SnDOne {
         }
 
         #pragma warning disable 219
-        /// <summary>
-        /// Lookup data from table
-        /// </summary>
+/// <summary>
+/// Lookup data from table
+/// </summary>
         public async Task<Dictionary<string, object>> Lookup(Dictionary<string, string>? dict = null)
+{
+    Language = ResolveLanguage();
+    Security = ResolveSecurity();
+    var lookupField = FieldByName(GetFieldName(dict));
+    var lookup = lookupField?.Lookup;
+    if (lookup == null)
+        return new Dictionary<string, object>();
+            string lookupType = GetLookupType(dict);
+    var (searchValue, pageSize) = GetSearchAndPageSize(dict, lookupType);
+    int offset = CalculateOffset(dict, pageSize);
+    ApplyUserSettings(dict, lookup);
+    ApplyFilterValues(dict, lookup);
+    lookup.LookupType = lookupType;
+    lookup.SearchValue = searchValue;
+    lookup.PageSize = pageSize;
+    lookup.Offset = offset;
+    return await lookup.ToJson(this);
+}
+
+private string GetFieldName(Dictionary<string, string>? dict)
+{
+    return GetValue(dict, "field", Post("field"));
+}
+
+private string GetLookupType(Dictionary<string, string>? dict)
+{
+    return GetValue(dict, "ajax", Post("ajax") ?? "unknown");
+}
+
+private (string searchValue, int pageSize) GetSearchAndPageSize(Dictionary<string, string>? dict, string lookupType)
+{
+    string searchValue = "";
+    int pageSize = -1;
+    if (SameText(lookupType, "modal") || SameText(lookupType, "filter"))
+    {
+        searchValue = GetValue(dict, new[] { "q", "sv" }, Param("q") ?? Post("sv"));
+        int fallback = 10;
+        if (IsNumeric(Param("n")))
         {
-            Language = ResolveLanguage();
-            Security = ResolveSecurity();
-            string? v;
-
-            // Get lookup object
-            string fieldName = IsDictionary(dict) && dict.TryGetValue("field", out v) && v != null ? v : Post("field");
-            var lookupField = FieldByName(fieldName);
-            var lookup = lookupField?.Lookup;
-            if (lookup == null) // DN
-                return new Dictionary<string, object>();
-            string lookupType = IsDictionary(dict) && dict.TryGetValue("ajax", out v) && v != null ? v : (Post("ajax") ?? "unknown");
-            int pageSize = -1;
-            int offset = -1;
-            string searchValue = "";
-            if (SameText(lookupType, "modal") || SameText(lookupType, "filter")) {
-                searchValue = IsDictionary(dict) && (dict.TryGetValue("q", out v) && v != null || dict.TryGetValue("sv", out v) && v != null)
-                    ? v
-                    : (Param("q") ?? Post("sv"));
-                pageSize = IsDictionary(dict) && (dict.TryGetValue("n", out v) || dict.TryGetValue("recperpage", out v))
-                    ? ConvertToInt(v)
-                    : (IsNumeric(Param("n")) ? Param<int>("n") : (Post("recperpage", out StringValues rpp) ? ConvertToInt(rpp.ToString()) : 10));
-            } else if (SameText(lookupType, "autosuggest")) {
-                searchValue = IsDictionary(dict) && dict.TryGetValue("q", out v) && v != null ? v : Param("q");
-                pageSize = IsDictionary(dict) && dict.TryGetValue("n", out v) ? ConvertToInt(v) : (IsNumeric(Param("n")) ? Param<int>("n") : -1);
-                if (pageSize <= 0)
-                    pageSize = Config.AutoSuggestMaxEntries;
-            }
-            int start = IsDictionary(dict) && dict.TryGetValue("start", out v) ? ConvertToInt(v) : (IsNumeric(Param("start")) ? Param<int>("start") : -1);
-            int page = IsDictionary(dict) && dict.TryGetValue("page", out v) ? ConvertToInt(v) : (IsNumeric(Param("page")) ? Param<int>("page") : -1);
-            offset = start >= 0 ? start : (page > 0 && pageSize > 0 ? (page - 1) * pageSize : 0);
-            string userSelect = Decrypt(IsDictionary(dict) && dict.TryGetValue("s", out v) && v != null ? v : Post("s"));
-            string userFilter = Decrypt(IsDictionary(dict) && dict.TryGetValue("f", out v) && v != null ? v : Post("f"));
-            string userOrderBy = Decrypt(IsDictionary(dict) && dict.TryGetValue("o", out v) && v != null ? v : Post("o"));
-
-            // Selected records from modal, skip parent/filter fields and show all records
-            lookup.LookupType = lookupType; // Lookup type
-            lookup.FilterValues.Clear(); // Clear filter values first
-            StringValues keys = IsDictionary(dict) && dict.TryGetValue("keys", out v) && !Empty(v)
-                ? (StringValues)v
-                : (Post("keys[]", out StringValues k) ? (StringValues)k : StringValues.Empty);
-            if (!Empty(keys)) { // Selected records from modal
-                lookup.FilterFields = new(); // Skip parent fields if any
-                pageSize = -1; // Show all records
-                lookup.FilterValues.Add(String.Join(",", keys.ToArray()));
-            } else { // Lookup values
-                string lookupValue = IsDictionary(dict) && (dict.TryGetValue("v0", out v) && v != null || dict.TryGetValue("lookupValue", out v) && v != null)
-                    ? v
-                    : (Post<string>("v0") ?? Post("lookupValue"));
-                lookup.FilterValues.Add(lookupValue);
-            }
-            int cnt = IsDictionary(lookup.FilterFields) ? lookup.FilterFields.Count : 0;
-            for (int i = 1; i <= cnt; i++) {
-                var val = UrlDecode(IsDictionary(dict) && dict.TryGetValue("v" + i, out v) ? v : Post("v" + i));
-                if (val != null) // DN
-                    lookup.FilterValues.Add(val);
-            }
-            lookup.SearchValue = searchValue;
-            lookup.PageSize = pageSize;
-            lookup.Offset = offset;
-            if (userSelect != "")
-                lookup.UserSelect = userSelect;
-            if (userFilter != "")
-                lookup.UserFilter = userFilter;
-            if (userOrderBy != "")
-                lookup.UserOrderBy = userOrderBy;
-            return await lookup.ToJson(this);
+            fallback = Param<int>("n");
         }
+        else if (Post("recperpage", out StringValues rpp))
+        {
+            fallback = ConvertToInt(rpp.ToString());
+        }
+        pageSize = GetInt(dict, new[] { "n", "recperpage" }, fallback);
+    }
+    else if (SameText(lookupType, "autosuggest"))
+    {
+        searchValue = GetValue(dict, "q", Param("q"));
+        pageSize = GetInt(dict, "n", IsNumeric(Param("n")) ? Param<int>("n") : -1);
+        if (pageSize <= 0)
+            pageSize = Config.AutoSuggestMaxEntries;
+    }
+    return (searchValue, pageSize);
+}
+
+private int CalculateOffset(Dictionary<string, string>? dict, int pageSize)
+{
+    int start = GetInt(dict, "start", IsNumeric(Param("start")) ? Param<int>("start") : -1);
+    int page = GetInt(dict, "page", IsNumeric(Param("page")) ? Param<int>("page") : -1);
+    if (start >= 0)
+        return start;
+    return (page > 0 && pageSize > 0)
+        ? (page - 1) * pageSize
+        : 0;
+}
+
+private void ApplyUserSettings(Dictionary<string, string>? dict, dynamic lookup)
+{
+    string userSelect = Decrypt(GetValue(dict, "s", Post("s")));
+    string userFilter = Decrypt(GetValue(dict, "f", Post("f")));
+    string userOrderBy = Decrypt(GetValue(dict, "o", Post("o")));
+    if (!string.IsNullOrEmpty(userSelect)) lookup.UserSelect = userSelect;
+    if (!string.IsNullOrEmpty(userFilter)) lookup.UserFilter = userFilter;
+    if (!string.IsNullOrEmpty(userOrderBy)) lookup.UserOrderBy = userOrderBy;
+}
+
+private void ApplyFilterValues(Dictionary<string, string>? dict, dynamic lookup)
+{
+    lookup.FilterValues.Clear();
+    StringValues keys = GetKeys(dict);
+    if (!Empty(keys))
+    {
+        lookup.FilterFields = new List<string>(); // Skip parent fields if any
+        lookup.FilterValues.Add(string.Join(",", keys.ToArray()));
+    }
+    else
+    {
+        string lookupValue = GetValue(dict, new[] { "v0", "lookupValue" }, Post<string>("v0") ?? Post("lookupValue"));
+        lookup.FilterValues.Add(lookupValue);
+        int cnt = lookup.FilterFields?.Count ?? 0;
+        for (int i = 1; i <= cnt; i++)
+        {
+            var val = UrlDecode(GetValue(dict, $"v{i}", Post($"v{i}")));
+            if (val != null)
+                lookup.FilterValues.Add(val);
+        }
+    }
+}
+
+private string GetValue(Dictionary<string, string>? dict, string key, string? fallback = null)
+{
+    return IsDictionary(dict) && dict.TryGetValue(key, out var v) && v != null ? v : fallback ?? "";
+}
+
+private string GetValue(Dictionary<string, string>? dict, string[] keys, string? fallback = null)
+{
+    foreach (var key in keys)
+    {
+        if (IsDictionary(dict) && dict.TryGetValue(key, out var v) && v != null)
+            return v;
+    }
+    return fallback ?? "";
+}
+
+private int GetInt(Dictionary<string, string>? dict, string key, int fallback)
+{
+    return IsDictionary(dict) && dict.TryGetValue(key, out var v) ? ConvertToInt(v) : fallback;
+}
+
+private int GetInt(Dictionary<string, string>? dict, string[] keys, int fallback)
+{
+    foreach (var key in keys)
+    {
+        if (IsDictionary(dict) && dict.TryGetValue(key, out var v))
+            return ConvertToInt(v);
+    }
+    return fallback;
+}
+
+private StringValues GetKeys(Dictionary<string, string>? dict)
+{
+    if (IsDictionary(dict) && dict.TryGetValue("keys", out var v) && !Empty(v))
+        return (StringValues)v;
+    return Post("keys[]", out StringValues k) ? k : StringValues.Empty;
+}
         #pragma warning restore 219
 
         public int DisplayRecords = 1; // Number of display records
@@ -504,88 +615,61 @@ public partial class SnDOne {
         /// <returns>Page result</returns>
         public override async Task<IActionResult> Run()
         {
-            // Is modal
-            IsModal = Param<bool>("modal");
-            UseLayout = UseLayout && !IsModal;
+            var beginResult = await PageRunBeginAsync();
+            if (beginResult != null) return beginResult;
 
-            // Use layout
-            if (!Empty(Param("layout")) && !Param<bool>("layout"))
-                UseLayout = false;
+            // === VARIABLES YANG DIAKSES MULTI-SECTION ===
+            bool loaded = false;
+            bool postBack = false;
 
-            // User profile
-            Profile = ResolveProfile();
-
-            // Security
-            Security = ResolveSecurity();
-            if (TableVar != "")
-                Security.LoadTablePermissions(TableVar);
-
-            // Load user profile
-            if (IsLoggedIn()) {
-                await Profile.SetUserName(CurrentUserName()).LoadFromStorageAsync();
+            // === HELPER METHOD CALLS ===
+            PrepareInitialSettings();
+            var actionSetup = await SetupCurrentAction();
+            loaded = actionSetup.Loaded;
+            postBack = actionSetup.PostBack;
+            if (postBack) {
+                await LoadFormValues();
+                await HandleApiFormKeys();
             }
+            await SetupCaptchaAndDetails(postBack);
+            if (postBack && !await ValidateForm()) {
+                EventCancelled = true;
+                RestoreFormValues();
+                if (IsApi())
+                    return Terminate();
+                else
+                    CurrentAction = "";
+            }
+            var actionResult = await ExecuteCurrentAction(loaded);
+            if (actionResult != null) return actionResult;
+            await PrepareForRender();
+            PageRunEnd();
+            return PageResult();
+        }
 
-            // Create form object
-            CurrentForm ??= new();
-            await CurrentForm.Init();
-            CurrentAction = Param("action"); // Set up current action
-            SetVisibility();
-
-            // Do not use lookup cache
-            if (!Config.LookupCachePageIds.Contains(PageID))
-                SetUseLookupCache(false);
-
-            // Global Page Loading event
-            PageLoading();
-            PageLoadingEventHandler?.Invoke(this, EventArgs.Empty);
-
-            // Page Load event
-            PageLoad();
-
-            // Check token
-            if (!await ValidPost())
-                End(Language.Phrase("InvalidPostRequest"));
-
-            // Check action result
-            if (ActionResult != null) // Action result set by server event // DN
-                return ActionResult;
-
-            // Create token
-            CreateToken();
-
-            // Hide fields for add/edit
-            if (!UseAjaxActions)
-                HideFieldsForAddEdit();
-            // Use inline delete
-            if (UseAjaxActions)
-                InlineDelete = true;
-
-            // Set up lookup cache
-            await SetupLookupOptions(idProses);
-            await SetupLookupOptions(idAktifitas);
-            await SetupLookupOptions(ExROB);
-            await SetupLookupOptions(NoPenerimaan);
-            await SetupLookupOptions(StatusAktivitas);
-
-            // Check modal
-            if (IsModal)
-                SkipHeaderFooter = true;
+        // === HELPER METHODS ===
+        private void PrepareInitialSettings()
+        {
+            if (IsModal) SkipHeaderFooter = true;
             IsMobileOrModal = IsMobile() || IsModal;
+        }
+
+        private async Task<ActionSetupResult> SetupCurrentAction()
+        {
+            await Task.CompletedTask; // Satisfy async requirement
+            // If null, the conditions aren't fulfilled
+            var result = new ActionSetupResult();
             bool loaded = false;
             bool postBack = false;
             StringValues sv;
             object? rv;
-
-            // Set up current action and primary key
             if (IsApi()) {
                 loaded = true;
-
-                // Load key from form
                 string[] keyValues = {};
                 if (RouteValues.TryGetValue("key", out object? k))
                     keyValues = ConvertToString(k).Split('/');
-                if (RouteValues.TryGetValue("id", out rv)) { // DN
-                    id.FormValue = UrlDecode(rv); // DN
+                if (RouteValues.TryGetValue("id", out rv)) {
+                    id.FormValue = UrlDecode(rv);
                     id.OldValue = id.FormValue;
                 } else if (CurrentForm.HasValue("x_id")) {
                     id.FormValue = CurrentForm.GetValue("x_id");
@@ -593,35 +677,28 @@ public partial class SnDOne {
                 } else if (!Empty(keyValues)) {
                     id.OldValue = ConvertToString(keyValues[0]);
                 } else {
-                    loaded = false; // Unable to load key
+                    loaded = false;
                 }
-
-                // Load record
                 if (loaded)
                     loaded = await LoadRow();
                 if (!loaded) {
-                    FailureMessage = Language.Phrase("NoRecord"); // Set no record message
-                    return Terminate();
+                    FailureMessage = Language.Phrase("NoRecord");
+                    return new ActionSetupResult { ActionResult = Terminate() };
                 }
-                CurrentAction = "update"; // Update record directly
-                OldKey = GetKey(true); // Get from CurrentValue
+                CurrentAction = "update";
+                OldKey = GetKey(true);
                 postBack = true;
             } else {
                 if (!Empty(Post("action"))) {
-                    CurrentAction = Post("action"); // Get action code
-                    if (!IsShow) // Not reload record, handle as postback
-                        postBack = true;
-
-                    // Get key from Form
+                    CurrentAction = Post("action");
+                    if (!IsShow) postBack = true;
                     if (Post(OldKeyName, out sv))
                         SetKey(sv.ToString(), IsShow);
                 } else {
-                    CurrentAction = "show"; // Default action is display
-
-                    // Load key from QueryString
+                    CurrentAction = "show";
                     bool loadByQuery = false;
-                    if (RouteValues.TryGetValue("id", out rv)) { // DN
-                        id.QueryValue = UrlDecode(rv); // DN
+                    if (RouteValues.TryGetValue("id", out rv)) {
+                        id.QueryValue = UrlDecode(rv);
                         loadByQuery = true;
                     } else if (Get("id", out sv)) {
                         id.QueryValue = sv.ToString();
@@ -630,108 +707,264 @@ public partial class SnDOne {
                         id.CurrentValue = DbNullValue;
                     }
                 }
-
-                // Load recordset
                 if (IsShow) {
-                    // Load current record
                     loaded = await LoadRow();
-                OldKey = loaded ? GetKey(true) : ""; // Get from CurrentValue
+                    OldKey = loaded ? GetKey(true) : "";
+                }
             }
+            result.Loaded = loaded;
+            result.PostBack = postBack;
+            return result;
         }
 
-        // Process form if post back
-        if (postBack) {
-            await LoadFormValues(); // Get form values
+        private async Task HandleApiFormKeys()
+        {
+            await Task.CompletedTask; // Satisfy async requirement
+            // If null, the conditions aren't fulfilled
             if (IsApi() && RouteValues.TryGetValue("key", out object? k)) {
                 var keyValues = ConvertToString(k).Split('/');
                 id.FormValue = ConvertToString(keyValues[0]);
             }
         }
 
-        // Validate form if post back
-        if (postBack) {
-            if (!await ValidateForm()) {
-                EventCancelled = true; // Event cancelled
+        private async Task SetupCaptchaAndDetails(bool postBack)
+        {
+            await Task.CompletedTask; // Satisfy async requirement
+            // If null, the conditions aren't fulfilled
+        }
+
+        private async Task<IActionResult?> ExecuteCurrentAction(bool loaded)
+        {
+            await Task.CompletedTask; // Satisfy async requirement
+            switch (CurrentAction) {
+                case "show":
+                    return await HandleShowAction(loaded);
+                case "update":
+                    return await HandleUpdateAction();
+            }
+            return null;
+        }
+
+        private async Task<IActionResult?> HandleShowAction(bool loaded)
+        {
+            await Task.CompletedTask; // Satisfy async requirement
+            // If null, the conditions aren't fulfilled
+            if (!loaded) {
+                if (Empty(FailureMessage))
+                    FailureMessage = Language.Phrase("NoRecord");
+                return Terminate("SubAktivitasNilaiNewBlsfadsfblList");
+            }
+            return null;
+        }
+
+        private async Task<IActionResult?> HandleUpdateAction()
+        {
+            await Task.CompletedTask; // Satisfy async requirement
+            // If null, the conditions aren't fulfilled
+            CloseRecordset();
+            string returnUrl = DetermineReturnUrl();
+            SendEmail = true;
+            var res = await EditRow();
+            if (res) {
+                if (Empty(SuccessMessage))
+                    SuccessMessage = Language.Phrase("UpdateSuccess");
+                if (IsModal && UseAjaxActions) {
+                    IsModal = false;
+                    if (GetPageName(returnUrl) != "SubAktivitasNilaiNewBlsfadsfblList") {
+                        TempData["Return-Url"] = returnUrl;
+                        returnUrl = "SubAktivitasNilaiNewBlsfadsfblList";
+                    }
+                }
+                if (IsJsonResponse()) {
+                    ClearMessages();
+                    return res;
+                } else {
+                    return Terminate(returnUrl);
+                }
+            } else if (IsApi()) {
+                return Terminate();
+            } else if (IsModal && UseAjaxActions) {
+                return Controller.Json(new { success = false, error = GetFailureMessage() });
+            } else if (FailureMessage == Language.Phrase("NoRecord")) {
+                return Terminate(returnUrl);
+            } else {
+                EventCancelled = true;
                 RestoreFormValues();
-                if (IsApi())
-                    return Terminate();
-                else
-                    CurrentAction = ""; // Form error, reset action
+                return null;
             }
         }
 
-        // Perform current action
-        switch (CurrentAction) {
-                case "show": // Get a record to display
-                        if (!loaded) { // Load record based on key
-                            if (Empty(FailureMessage))
-                                FailureMessage = Language.Phrase("NoRecord"); // No record found
-                            return Terminate("SubAktivitasNilaiNewBlsfadsfblList"); // No matching record, return to list
-                        }
-                    break;
-                case "update": // Update // DN
-                    CloseRecordset(); // DN
-                    string returnUrl = ReturnUrl;
-                    if (GetPageName(returnUrl) == "SubAktivitasNilaiNewBlsfadsfblList")
-                        returnUrl = AddMasterUrl(ListUrl); // List page, return to List page with correct master key if necessary
-                    SendEmail = true; // Send email on update success
-                    var res = await EditRow();
-                    if (res) { // Update record based on key
-                        if (Empty(SuccessMessage))
-                            SuccessMessage = Language.Phrase("UpdateSuccess"); // Update success
+        private string DetermineReturnUrl()
+        {
+            string returnUrl = "";
+            returnUrl = ReturnUrl;
+            if (GetPageName(returnUrl) == "SubAktivitasNilaiNewBlsfadsfblList")
+                returnUrl = AddMasterUrl(ListUrl);
+            return returnUrl;
+        }
 
-                        // Handle UseAjaxActions with return page
-                        if (IsModal && UseAjaxActions) {
-                            IsModal = false;
-                            if (GetPageName(returnUrl) != "SubAktivitasNilaiNewBlsfadsfblList") {
-                                TempData["Return-Url"] = returnUrl; // Save return URL
-                                returnUrl = "SubAktivitasNilaiNewBlsfadsfblList"; // Return list page content
-                            }
-                        }
-                        if (IsJsonResponse()) {
-                            ClearMessages(); // Clear messages for Json response
-                            return res;
-                        } else {
-                            return Terminate(returnUrl); // Return to caller
-                        }
-                    } else if (IsApi()) { // API request, return
-                        return Terminate();
-                    } else if (IsModal && UseAjaxActions) { // Return JSON error message
-                        return Controller.Json(new { success = false, error = GetFailureMessage() });
-                    } else if (FailureMessage == Language.Phrase("NoRecord")) {
-                        return Terminate(returnUrl); // Return to caller
-                    } else {
-                        EventCancelled = true; // Event cancelled
-                        RestoreFormValues(); // Restore form values if update failed
-                    }
-                    break;
-            }
-
-            // Set up Breadcrumb
+        private async Task PrepareForRender()
+        {
+            await Task.CompletedTask; // Satisfy async requirement
+            // If null, the conditions aren't fulfilled
             SetupBreadcrumb();
-
-            // Render the record
-            RowType = RowType.Edit; // Render as Edit
+            RowType = RowType.Edit;
             ResetAttributes();
             await RenderRow();
+        }
 
-            // Set LoginStatus, Page Rendering and Page Render
-            if (!IsApi() && !IsTerminated) {
-                SetupLoginStatus(); // Setup login status
+        private async Task<IActionResult?> PageRunBeginAsync()
+        {
+            await Task.CompletedTask; // Satisfy async requirement
+            // If null, the conditions aren't fulfilled
 
-                // Pass login status to client side
-                SetClientVar("login", LoginStatus);
+                    // Is modal
+                    IsModal = Param<bool>("modal");
+                    UseLayout = UseLayout && !IsModal;
 
-                // Global Page Rendering event
-                PageRendering();
-                PageRenderingEventHandler?.Invoke(this, EventArgs.Empty);
+                    // Use layout
+                    if (!Empty(Param("layout")) && !Param<bool>("layout"))
+                        UseLayout = false;
 
-                // Page Render event
-                subAktivitasNilaiNewBlsfadsfblEdit?.PageRender();
-            }
-            return PageResult();
+                    // User profile
+                    Profile = ResolveProfile();
+
+                    // Security
+                    Security = ResolveSecurity();
+                    if (TableVar != "")
+                        Security.LoadTablePermissions(TableVar);
+
+                    // Load user profile
+                    if (IsLoggedIn()) {
+                        await Profile.SetUserName(CurrentUserName()).LoadFromStorageAsync();
+                    }
+
+                    // Create form object
+                    CurrentForm ??= new();
+                    await CurrentForm.Init();
+                    CurrentAction = Param("action"); // Set up current action
+                    SetVisibility();
+
+                    // Do not use lookup cache
+                    if (!Config.LookupCachePageIds.Contains(PageID))
+                        SetUseLookupCache(false);
+
+                    // Global Page Loading event
+                    PageLoading();
+                    PageLoadingEventHandler?.Invoke(null, EventArgs.Empty);
+
+                    // Page Load event
+                    PageLoad();
+
+                    // Check token
+                    if (!await ValidPost())
+                        End(Language.Phrase("InvalidPostRequest"));
+
+                    // Check action result
+                    if (ActionResult != null) // Action result set by server event // DN
+                        return ActionResult;
+
+                    // Create token
+                    CreateToken();
+
+                    // Hide fields for add/edit
+                    if (!UseAjaxActions) {
+                        HideFieldsForAddEdit();
+                    }
+                    else { // Use inline delete
+                        InlineDelete = true;
+                    }
+
+                    // Set up lookup cache
+                    await SetupLookupOptions(idProses);
+                    await SetupLookupOptions(idAktifitas);
+                    await SetupLookupOptions(ExROB);
+                    await SetupLookupOptions(NoPenerimaan);
+                    await SetupLookupOptions(StatusAktivitas);
+            return null;
+        }
+
+        private void PageRunEnd()
+        {
+                    // Set LoginStatus, Page Rendering and Page Render
+                    if (!IsApi() && !IsTerminated) {
+                        SetupLoginStatus(); // Setup login status
+
+                        // Pass login status to client side
+                        SetClientVar("login", LoginStatus);
+
+                        // Global Page Rendering event
+                        PageRendering();
+                        PageRenderingEventHandler?.Invoke(null, EventArgs.Empty);
+
+                        // Page Render event
+                        subAktivitasNilaiNewBlsfadsfblEdit?.PageRender();
+                    }
+        }
+
+        // Support class
+        private sealed class ActionSetupResult
+        {
+            public bool Loaded { get; set; }
+
+            public bool PostBack { get; set; }
+
+            public bool LoadByPosition { get; set; }
+
+            public IActionResult? ActionResult { get; set; }
         }
         #pragma warning restore 219
+// ================== GENERATED HELPERS ==================
+private void ResolveLookupView(dynamic fld, string keyFieldName, string fallbackType = "auto")
+{
+    string curVal = ConvertToString(fld.CurrentValue);
+
+    // kosong → DbNullValue lalu selesai
+    if (Empty(curVal))
+    {
+        fld.ViewValue = DbNullValue;
+        return;
+    }
+
+    // siapkan fallback awal (kalau cache/DB tidak dapat)
+    if (fallbackType == "number")
+    {
+        fld.ViewValue = FormatNumber(fld.CurrentValue, fld.FormatPattern);
+    }
+    else if (fallbackType == "date")
+    {
+        var tmp = fld.CurrentValue;
+        fld.ViewValue = FormatDateTime(tmp, fld.FormatPattern);
+    }
+    else if (fallbackType == "string")
+    {
+        fld.ViewValue = ConvertToString(fld.CurrentValue);
+    }
+    else
+    { // auto
+        fld.ViewValue = IsNumeric(fld.CurrentValue)
+            ? FormatNumber(fld.CurrentValue, fld.FormatPattern)
+            : ConvertToString(fld.CurrentValue);
+    }
+
+    // coba dari cache
+    if (fld.Lookup != null && IsDictionary(fld.Lookup?.Options) && fld.Lookup?.Options.Values.Count > 0)
+    {
+        fld.ViewValue = fld.LookupCacheOption(curVal);
+        return;
+    }
+
+    // fallback: query DB
+    var keyField = fld.Lookup?.GetTable()?.Fields[keyFieldName];
+    string filterWrk = SearchFilter(keyField?.SearchExpression, "=", fld.CurrentValue, keyField?.SearchDataType, "");
+    string? sqlWrk = fld.Lookup?.GetSql(false, filterWrk, null, this, true, true);
+    List<Dictionary<string, object>>? rswrk = sqlWrk != null ? Connection.GetRows(sqlWrk) : null;
+    if (rswrk?.Count > 0 && fld.Lookup != null)
+    {
+        var listwrk = fld.Lookup?.RenderViewRow(rswrk[0]);
+        fld.ViewValue = fld.DisplayValue(listwrk);
+    }
+}
 
         // Confirm page
         public bool ConfirmPage = false; // DN
@@ -745,244 +978,143 @@ public partial class SnDOne {
         #pragma warning restore 1998
 
         #pragma warning disable 1998
-        // Load form values
+        // Helper methods (placed inside the same partial class as LoadFormValues)
+        private void SetNormalField(dynamic fld, string fldName, string fldVar, bool includeValidate = false, bool validateFlag = false, bool unformatDate = false) {
+            // Determine value once
+            string val = CurrentForm.HasValue(fldName) ? CurrentForm.GetValue(fldName) : CurrentForm.GetValue(fldVar);
+            if (!fld.IsDetailKey) {
+                // API: if field not present in request, disable update
+                if (IsApi() && !CurrentForm.HasValue(fldName) && !CurrentForm.HasValue(fldVar))
+                    fld.Visible = false; // Disable update for API request
+                else {
+                    // Call appropriate SetFormValue overload
+                    if (includeValidate)
+                        fld.SetFormValue(val, true, validateFlag);
+                    else
+                        fld.SetFormValue(val);
+                }
+                if (unformatDate)
+                    fld.CurrentValue = UnformatDateTime(fld.CurrentValue, fld.FormatPattern);
+            }
+        }
+
+        private void SetFieldValueWithRaw(dynamic fld, string rawValue) {
+            // Helper in case caller wants to set from a raw form object call rather than val computed here
+            if (!fld.IsDetailKey) {
+                if (IsApi() && string.IsNullOrEmpty(rawValue)) // rawValue empty simulates missing
+                    fld.Visible = false;
+                else
+                    fld.SetFormValue(rawValue);
+            }
+        }
+
         protected async Task LoadFormValues() {
             if (CurrentForm == null)
                 return;
             bool validate = !Config.ServerValidate;
-            string val;
-
-            // Check field name 'id' before field var 'x_id'
-            val = CurrentForm.HasValue("id") ? CurrentForm.GetValue("id") : CurrentForm.GetValue("x_id");
-            if (!id.IsDetailKey)
-                id.SetFormValue(val);
-
-            // Check field name 'idProses' before field var 'x_idProses'
-            val = CurrentForm.HasValue("idProses") ? CurrentForm.GetValue("idProses") : CurrentForm.GetValue("x_idProses");
-            if (!idProses.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("idProses") && !CurrentForm.HasValue("x_idProses")) // DN
-                    idProses.Visible = false; // Disable update for API request
-                else
-                    idProses.SetFormValue(val);
+            if (!id.IsDetailKey) {
+                SetNormalField(id, "id", "x_id");
             }
 
-            // Check field name 'idAktifitas' before field var 'x_idAktifitas'
-            val = CurrentForm.HasValue("idAktifitas") ? CurrentForm.GetValue("idAktifitas") : CurrentForm.GetValue("x_idAktifitas");
-            if (!idAktifitas.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("idAktifitas") && !CurrentForm.HasValue("x_idAktifitas")) // DN
-                    idAktifitas.Visible = false; // Disable update for API request
-                else
-                    idAktifitas.SetFormValue(val);
-            }
+            // Standard handling for 'idProses'
+            idProses.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(idProses, "idProses", "x_idProses");
 
-            // Check field name 'NoReferensi' before field var 'x_NoReferensi'
-            val = CurrentForm.HasValue("NoReferensi") ? CurrentForm.GetValue("NoReferensi") : CurrentForm.GetValue("x_NoReferensi");
-            if (!NoReferensi.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("NoReferensi") && !CurrentForm.HasValue("x_NoReferensi")) // DN
-                    NoReferensi.Visible = false; // Disable update for API request
-                else
-                    NoReferensi.SetFormValue(val);
-            }
+            // Standard handling for 'idAktifitas'
+            idAktifitas.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(idAktifitas, "idAktifitas", "x_idAktifitas");
 
-            // Check field name 'NewBL_KLObs' before field var 'x_NewBL_KLObs'
-            val = CurrentForm.HasValue("NewBL_KLObs") ? CurrentForm.GetValue("NewBL_KLObs") : CurrentForm.GetValue("x_NewBL_KLObs");
-            if (!NewBL_KLObs.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("NewBL_KLObs") && !CurrentForm.HasValue("x_NewBL_KLObs")) // DN
-                    NewBL_KLObs.Visible = false; // Disable update for API request
-                else
-                    NewBL_KLObs.SetFormValue(val);
-            }
+            // Standard handling for 'NoReferensi'
+            NoReferensi.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(NoReferensi, "NoReferensi", "x_NoReferensi");
 
-            // Check field name 'NewBL_KL15' before field var 'x_NewBL_KL15'
-            val = CurrentForm.HasValue("NewBL_KL15") ? CurrentForm.GetValue("NewBL_KL15") : CurrentForm.GetValue("x_NewBL_KL15");
-            if (!NewBL_KL15.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("NewBL_KL15") && !CurrentForm.HasValue("x_NewBL_KL15")) // DN
-                    NewBL_KL15.Visible = false; // Disable update for API request
-                else
-                    NewBL_KL15.SetFormValue(val);
-            }
+            // Standard handling for 'NewBL_KLObs'
+            NewBL_KLObs.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(NewBL_KLObs, "NewBL_KLObs", "x_NewBL_KLObs");
 
-            // Check field name 'NewBL_Barrels' before field var 'x_NewBL_Barrels'
-            val = CurrentForm.HasValue("NewBL_Barrels") ? CurrentForm.GetValue("NewBL_Barrels") : CurrentForm.GetValue("x_NewBL_Barrels");
-            if (!NewBL_Barrels.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("NewBL_Barrels") && !CurrentForm.HasValue("x_NewBL_Barrels")) // DN
-                    NewBL_Barrels.Visible = false; // Disable update for API request
-                else
-                    NewBL_Barrels.SetFormValue(val);
-            }
+            // Standard handling for 'NewBL_KL15'
+            NewBL_KL15.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(NewBL_KL15, "NewBL_KL15", "x_NewBL_KL15");
 
-            // Check field name 'NewBL_LT' before field var 'x_NewBL_LT'
-            val = CurrentForm.HasValue("NewBL_LT") ? CurrentForm.GetValue("NewBL_LT") : CurrentForm.GetValue("x_NewBL_LT");
-            if (!NewBL_LT.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("NewBL_LT") && !CurrentForm.HasValue("x_NewBL_LT")) // DN
-                    NewBL_LT.Visible = false; // Disable update for API request
-                else
-                    NewBL_LT.SetFormValue(val);
-            }
+            // Standard handling for 'NewBL_Barrels'
+            NewBL_Barrels.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(NewBL_Barrels, "NewBL_Barrels", "x_NewBL_Barrels");
 
-            // Check field name 'NewBL_MT' before field var 'x_NewBL_MT'
-            val = CurrentForm.HasValue("NewBL_MT") ? CurrentForm.GetValue("NewBL_MT") : CurrentForm.GetValue("x_NewBL_MT");
-            if (!NewBL_MT.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("NewBL_MT") && !CurrentForm.HasValue("x_NewBL_MT")) // DN
-                    NewBL_MT.Visible = false; // Disable update for API request
-                else
-                    NewBL_MT.SetFormValue(val);
-            }
+            // Standard handling for 'NewBL_LT'
+            NewBL_LT.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(NewBL_LT, "NewBL_LT", "x_NewBL_LT");
 
-            // Check field name 'SFAD_KLObs' before field var 'x_SFAD_KLObs'
-            val = CurrentForm.HasValue("SFAD_KLObs") ? CurrentForm.GetValue("SFAD_KLObs") : CurrentForm.GetValue("x_SFAD_KLObs");
-            if (!SFAD_KLObs.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("SFAD_KLObs") && !CurrentForm.HasValue("x_SFAD_KLObs")) // DN
-                    SFAD_KLObs.Visible = false; // Disable update for API request
-                else
-                    SFAD_KLObs.SetFormValue(val);
-            }
+            // Standard handling for 'NewBL_MT'
+            NewBL_MT.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(NewBL_MT, "NewBL_MT", "x_NewBL_MT");
 
-            // Check field name 'SFAD_KL15' before field var 'x_SFAD_KL15'
-            val = CurrentForm.HasValue("SFAD_KL15") ? CurrentForm.GetValue("SFAD_KL15") : CurrentForm.GetValue("x_SFAD_KL15");
-            if (!SFAD_KL15.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("SFAD_KL15") && !CurrentForm.HasValue("x_SFAD_KL15")) // DN
-                    SFAD_KL15.Visible = false; // Disable update for API request
-                else
-                    SFAD_KL15.SetFormValue(val);
-            }
+            // Standard handling for 'SFAD_KLObs'
+            SFAD_KLObs.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(SFAD_KLObs, "SFAD_KLObs", "x_SFAD_KLObs");
 
-            // Check field name 'SFAD_Barrels' before field var 'x_SFAD_Barrels'
-            val = CurrentForm.HasValue("SFAD_Barrels") ? CurrentForm.GetValue("SFAD_Barrels") : CurrentForm.GetValue("x_SFAD_Barrels");
-            if (!SFAD_Barrels.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("SFAD_Barrels") && !CurrentForm.HasValue("x_SFAD_Barrels")) // DN
-                    SFAD_Barrels.Visible = false; // Disable update for API request
-                else
-                    SFAD_Barrels.SetFormValue(val);
-            }
+            // Standard handling for 'SFAD_KL15'
+            SFAD_KL15.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(SFAD_KL15, "SFAD_KL15", "x_SFAD_KL15");
 
-            // Check field name 'SFAD_MT' before field var 'x_SFAD_MT'
-            val = CurrentForm.HasValue("SFAD_MT") ? CurrentForm.GetValue("SFAD_MT") : CurrentForm.GetValue("x_SFAD_MT");
-            if (!SFAD_MT.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("SFAD_MT") && !CurrentForm.HasValue("x_SFAD_MT")) // DN
-                    SFAD_MT.Visible = false; // Disable update for API request
-                else
-                    SFAD_MT.SetFormValue(val);
-            }
+            // Standard handling for 'SFAD_Barrels'
+            SFAD_Barrels.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(SFAD_Barrels, "SFAD_Barrels", "x_SFAD_Barrels");
 
-            // Check field name 'SFAD_LT' before field var 'x_SFAD_LT'
-            val = CurrentForm.HasValue("SFAD_LT") ? CurrentForm.GetValue("SFAD_LT") : CurrentForm.GetValue("x_SFAD_LT");
-            if (!SFAD_LT.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("SFAD_LT") && !CurrentForm.HasValue("x_SFAD_LT")) // DN
-                    SFAD_LT.Visible = false; // Disable update for API request
-                else
-                    SFAD_LT.SetFormValue(val);
-            }
+            // Standard handling for 'SFAD_MT'
+            SFAD_MT.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(SFAD_MT, "SFAD_MT", "x_SFAD_MT");
 
-            // Check field name 'SFBL_KLObs' before field var 'x_SFBL_KLObs'
-            val = CurrentForm.HasValue("SFBL_KLObs") ? CurrentForm.GetValue("SFBL_KLObs") : CurrentForm.GetValue("x_SFBL_KLObs");
-            if (!SFBL_KLObs.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("SFBL_KLObs") && !CurrentForm.HasValue("x_SFBL_KLObs")) // DN
-                    SFBL_KLObs.Visible = false; // Disable update for API request
-                else
-                    SFBL_KLObs.SetFormValue(val);
-            }
+            // Standard handling for 'SFAD_LT'
+            SFAD_LT.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(SFAD_LT, "SFAD_LT", "x_SFAD_LT");
 
-            // Check field name 'SFBL_KL15' before field var 'x_SFBL_KL15'
-            val = CurrentForm.HasValue("SFBL_KL15") ? CurrentForm.GetValue("SFBL_KL15") : CurrentForm.GetValue("x_SFBL_KL15");
-            if (!SFBL_KL15.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("SFBL_KL15") && !CurrentForm.HasValue("x_SFBL_KL15")) // DN
-                    SFBL_KL15.Visible = false; // Disable update for API request
-                else
-                    SFBL_KL15.SetFormValue(val);
-            }
+            // Standard handling for 'SFBL_KLObs'
+            SFBL_KLObs.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(SFBL_KLObs, "SFBL_KLObs", "x_SFBL_KLObs");
 
-            // Check field name 'SFBL_Barrels' before field var 'x_SFBL_Barrels'
-            val = CurrentForm.HasValue("SFBL_Barrels") ? CurrentForm.GetValue("SFBL_Barrels") : CurrentForm.GetValue("x_SFBL_Barrels");
-            if (!SFBL_Barrels.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("SFBL_Barrels") && !CurrentForm.HasValue("x_SFBL_Barrels")) // DN
-                    SFBL_Barrels.Visible = false; // Disable update for API request
-                else
-                    SFBL_Barrels.SetFormValue(val);
-            }
+            // Standard handling for 'SFBL_KL15'
+            SFBL_KL15.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(SFBL_KL15, "SFBL_KL15", "x_SFBL_KL15");
 
-            // Check field name 'SFBL_LT' before field var 'x_SFBL_LT'
-            val = CurrentForm.HasValue("SFBL_LT") ? CurrentForm.GetValue("SFBL_LT") : CurrentForm.GetValue("x_SFBL_LT");
-            if (!SFBL_LT.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("SFBL_LT") && !CurrentForm.HasValue("x_SFBL_LT")) // DN
-                    SFBL_LT.Visible = false; // Disable update for API request
-                else
-                    SFBL_LT.SetFormValue(val);
-            }
+            // Standard handling for 'SFBL_Barrels'
+            SFBL_Barrels.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(SFBL_Barrels, "SFBL_Barrels", "x_SFBL_Barrels");
 
-            // Check field name 'SFBL_MT' before field var 'x_SFBL_MT'
-            val = CurrentForm.HasValue("SFBL_MT") ? CurrentForm.GetValue("SFBL_MT") : CurrentForm.GetValue("x_SFBL_MT");
-            if (!SFBL_MT.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("SFBL_MT") && !CurrentForm.HasValue("x_SFBL_MT")) // DN
-                    SFBL_MT.Visible = false; // Disable update for API request
-                else
-                    SFBL_MT.SetFormValue(val);
-            }
+            // Standard handling for 'SFBL_LT'
+            SFBL_LT.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(SFBL_LT, "SFBL_LT", "x_SFBL_LT");
 
-            // Check field name 'userInput' before field var 'x_userInput'
-            val = CurrentForm.HasValue("userInput") ? CurrentForm.GetValue("userInput") : CurrentForm.GetValue("x_userInput");
-            if (!userInput.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("userInput") && !CurrentForm.HasValue("x_userInput")) // DN
-                    userInput.Visible = false; // Disable update for API request
-                else
-                    userInput.SetFormValue(val);
-            }
+            // Standard handling for 'SFBL_MT'
+            SFBL_MT.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(SFBL_MT, "SFBL_MT", "x_SFBL_MT");
 
-            // Check field name 'etlDate' before field var 'x_etlDate'
-            val = CurrentForm.HasValue("etlDate") ? CurrentForm.GetValue("etlDate") : CurrentForm.GetValue("x_etlDate");
-            if (!etlDate.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("etlDate") && !CurrentForm.HasValue("x_etlDate")) // DN
-                    etlDate.Visible = false; // Disable update for API request
-                else
-                    etlDate.SetFormValue(val, true, validate);
-                etlDate.CurrentValue = UnformatDateTime(etlDate.CurrentValue, etlDate.FormatPattern);
-            }
+            // Standard handling for 'userInput'
+            userInput.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(userInput, "userInput", "x_userInput");
 
-            // Check field name 'LastUpdatedBy' before field var 'x_LastUpdatedBy'
-            val = CurrentForm.HasValue("LastUpdatedBy") ? CurrentForm.GetValue("LastUpdatedBy") : CurrentForm.GetValue("x_LastUpdatedBy");
-            if (!LastUpdatedBy.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("LastUpdatedBy") && !CurrentForm.HasValue("x_LastUpdatedBy")) // DN
-                    LastUpdatedBy.Visible = false; // Disable update for API request
-                else
-                    LastUpdatedBy.SetFormValue(val);
-            }
+            // Standard handling for 'etlDate'
+            etlDate.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(etlDate, "etlDate", "x_etlDate", true, validate, true);
 
-            // Check field name 'lastUpdatedDate' before field var 'x_lastUpdatedDate'
-            val = CurrentForm.HasValue("lastUpdatedDate") ? CurrentForm.GetValue("lastUpdatedDate") : CurrentForm.GetValue("x_lastUpdatedDate");
-            if (!lastUpdatedDate.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("lastUpdatedDate") && !CurrentForm.HasValue("x_lastUpdatedDate")) // DN
-                    lastUpdatedDate.Visible = false; // Disable update for API request
-                else
-                    lastUpdatedDate.SetFormValue(val);
-                lastUpdatedDate.CurrentValue = UnformatDateTime(lastUpdatedDate.CurrentValue, lastUpdatedDate.FormatPattern);
-            }
+            // Standard handling for 'LastUpdatedBy'
+            LastUpdatedBy.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(LastUpdatedBy, "LastUpdatedBy", "x_LastUpdatedBy");
 
-            // Check field name 'ExROB' before field var 'x_ExROB'
-            val = CurrentForm.HasValue("ExROB") ? CurrentForm.GetValue("ExROB") : CurrentForm.GetValue("x_ExROB");
-            if (!ExROB.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("ExROB") && !CurrentForm.HasValue("x_ExROB")) // DN
-                    ExROB.Visible = false; // Disable update for API request
-                else
-                    ExROB.SetFormValue(val);
-            }
+            // Standard handling for 'lastUpdatedDate'
+            lastUpdatedDate.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(lastUpdatedDate, "lastUpdatedDate", "x_lastUpdatedDate", false, false, true);
 
-            // Check field name 'NoPenerimaan' before field var 'x_NoPenerimaan'
-            val = CurrentForm.HasValue("NoPenerimaan") ? CurrentForm.GetValue("NoPenerimaan") : CurrentForm.GetValue("x_NoPenerimaan");
-            if (!NoPenerimaan.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("NoPenerimaan") && !CurrentForm.HasValue("x_NoPenerimaan")) // DN
-                    NoPenerimaan.Visible = false; // Disable update for API request
-                else
-                    NoPenerimaan.SetFormValue(val);
-            }
+            // Standard handling for 'ExROB'
+            ExROB.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(ExROB, "ExROB", "x_ExROB");
 
-            // Check field name 'StatusAktivitas' before field var 'x_StatusAktivitas'
-            val = CurrentForm.HasValue("StatusAktivitas") ? CurrentForm.GetValue("StatusAktivitas") : CurrentForm.GetValue("x_StatusAktivitas");
-            if (!StatusAktivitas.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("StatusAktivitas") && !CurrentForm.HasValue("x_StatusAktivitas")) // DN
-                    StatusAktivitas.Visible = false; // Disable update for API request
-                else
-                    StatusAktivitas.SetFormValue(val);
-            }
+            // Standard handling for 'NoPenerimaan'
+            NoPenerimaan.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(NoPenerimaan, "NoPenerimaan", "x_NoPenerimaan");
+
+            // Standard handling for 'StatusAktivitas'
+            StatusAktivitas.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(StatusAktivitas, "StatusAktivitas", "x_StatusAktivitas");
         }
         #pragma warning restore 1998
 
@@ -1228,176 +1360,189 @@ public partial class SnDOne {
 
             // View row
             if (RowType == RowType.View) {
-                // id
-                id.ViewValue = id.CurrentValue;
-                id.ViewCustomAttributes = "";
-
                 // idProses
-                idProses.ViewValue = idProses.CurrentValue;
-                string curVal = ConvertToString(idProses.CurrentValue);
-                if (!Empty(curVal)) {
-                    if (idProses.Lookup != null && IsDictionary(idProses.Lookup?.Options) && idProses.Lookup?.Options.Values.Count > 0) { // Load from cache // DN
-                        idProses.ViewValue = idProses.LookupCacheOption(curVal);
-                    } else { // Lookup from database // DN
-                        string filterWrk = SearchFilter(idProses.Lookup?.GetTable()?.Fields["IdProses"].SearchExpression, "=", idProses.CurrentValue, idProses.Lookup?.GetTable()?.Fields["IdProses"].SearchDataType, "");
-                        string? sqlWrk = idProses.Lookup?.GetSql(false, filterWrk, null, this, true, true);
-                        List<Dictionary<string, object>>? rswrk = sqlWrk != null ? Connection.GetRows(sqlWrk) : null; // Must use Sync to avoid overwriting ViewValue in RenderViewRow
-                        if (rswrk?.Count > 0 && idProses.Lookup != null) { // Lookup values found
-                            var listwrk = idProses.Lookup?.RenderViewRow(rswrk[0]);
-                            idProses.ViewValue = idProses.DisplayValue(listwrk);
-                        } else {
-                            idProses.ViewValue = FormatNumber(idProses.CurrentValue, idProses.FormatPattern);
-                        }
-                    }
-                } else {
-                    idProses.ViewValue = DbNullValue;
-                }
-                idProses.ViewCustomAttributes = "";
 
                 // idAktifitas
-                idAktifitas.ViewValue = idAktifitas.CurrentValue;
-                string curVal2 = ConvertToString(idAktifitas.CurrentValue);
-                if (!Empty(curVal2)) {
-                    if (idAktifitas.Lookup != null && IsDictionary(idAktifitas.Lookup?.Options) && idAktifitas.Lookup?.Options.Values.Count > 0) { // Load from cache // DN
-                        idAktifitas.ViewValue = idAktifitas.LookupCacheOption(curVal2);
-                    } else { // Lookup from database // DN
-                        string filterWrk2 = SearchFilter(idAktifitas.Lookup?.GetTable()?.Fields["IdAktivitas"].SearchExpression, "=", idAktifitas.CurrentValue, idAktifitas.Lookup?.GetTable()?.Fields["IdAktivitas"].SearchDataType, "");
-                        string? sqlWrk2 = idAktifitas.Lookup?.GetSql(false, filterWrk2, null, this, true, true);
-                        List<Dictionary<string, object>>? rswrk2 = sqlWrk2 != null ? Connection.GetRows(sqlWrk2) : null; // Must use Sync to avoid overwriting ViewValue in RenderViewRow
-                        if (rswrk2?.Count > 0 && idAktifitas.Lookup != null) { // Lookup values found
-                            var listwrk = idAktifitas.Lookup?.RenderViewRow(rswrk2[0]);
-                            idAktifitas.ViewValue = idAktifitas.DisplayValue(listwrk);
-                        } else {
-                            idAktifitas.ViewValue = FormatNumber(idAktifitas.CurrentValue, idAktifitas.FormatPattern);
-                        }
-                    }
-                } else {
-                    idAktifitas.ViewValue = DbNullValue;
-                }
-                idAktifitas.ViewCustomAttributes = "";
 
                 // NoReferensi
-                NoReferensi.ViewValue = ConvertToString(NoReferensi.CurrentValue); // DN
-                NoReferensi.ViewCustomAttributes = "";
 
                 // NewBL_KLObs
-                NewBL_KLObs.ViewValue = ConvertToString(NewBL_KLObs.CurrentValue); // DN
-                NewBL_KLObs.ViewCustomAttributes = "";
 
                 // NewBL_KL15
-                NewBL_KL15.ViewValue = ConvertToString(NewBL_KL15.CurrentValue); // DN
-                NewBL_KL15.ViewCustomAttributes = "";
 
                 // NewBL_Barrels
-                NewBL_Barrels.ViewValue = ConvertToString(NewBL_Barrels.CurrentValue); // DN
-                NewBL_Barrels.ViewCustomAttributes = "";
 
                 // NewBL_LT
-                NewBL_LT.ViewValue = ConvertToString(NewBL_LT.CurrentValue); // DN
-                NewBL_LT.ViewCustomAttributes = "";
 
                 // NewBL_MT
-                NewBL_MT.ViewValue = ConvertToString(NewBL_MT.CurrentValue); // DN
-                NewBL_MT.ViewCustomAttributes = "";
 
                 // SFAD_KLObs
-                SFAD_KLObs.ViewValue = ConvertToString(SFAD_KLObs.CurrentValue); // DN
-                SFAD_KLObs.ViewCustomAttributes = "";
 
                 // SFAD_KL15
-                SFAD_KL15.ViewValue = ConvertToString(SFAD_KL15.CurrentValue); // DN
-                SFAD_KL15.ViewCustomAttributes = "";
 
                 // SFAD_Barrels
-                SFAD_Barrels.ViewValue = ConvertToString(SFAD_Barrels.CurrentValue); // DN
-                SFAD_Barrels.ViewCustomAttributes = "";
 
                 // SFAD_MT
-                SFAD_MT.ViewValue = ConvertToString(SFAD_MT.CurrentValue); // DN
-                SFAD_MT.ViewCustomAttributes = "";
 
                 // SFAD_LT
-                SFAD_LT.ViewValue = ConvertToString(SFAD_LT.CurrentValue); // DN
-                SFAD_LT.ViewCustomAttributes = "";
 
                 // SFBL_KLObs
-                SFBL_KLObs.ViewValue = ConvertToString(SFBL_KLObs.CurrentValue); // DN
-                SFBL_KLObs.ViewCustomAttributes = "";
 
                 // SFBL_KL15
-                SFBL_KL15.ViewValue = ConvertToString(SFBL_KL15.CurrentValue); // DN
-                SFBL_KL15.ViewCustomAttributes = "";
 
                 // SFBL_Barrels
-                SFBL_Barrels.ViewValue = ConvertToString(SFBL_Barrels.CurrentValue); // DN
-                SFBL_Barrels.ViewCustomAttributes = "";
 
                 // SFBL_LT
-                SFBL_LT.ViewValue = ConvertToString(SFBL_LT.CurrentValue); // DN
-                SFBL_LT.ViewCustomAttributes = "";
 
                 // SFBL_MT
-                SFBL_MT.ViewValue = ConvertToString(SFBL_MT.CurrentValue); // DN
-                SFBL_MT.ViewCustomAttributes = "";
 
                 // userInput
-                userInput.ViewValue = ConvertToString(userInput.CurrentValue); // DN
-                userInput.ViewCustomAttributes = "";
 
                 // etlDate
-                etlDate.ViewValue = etlDate.CurrentValue;
-                etlDate.ViewValue = FormatDateTime(etlDate.ViewValue, etlDate.FormatPattern);
-                etlDate.ViewCustomAttributes = "";
 
                 // LastUpdatedBy
-                LastUpdatedBy.ViewValue = ConvertToString(LastUpdatedBy.CurrentValue); // DN
-                LastUpdatedBy.ViewCustomAttributes = "";
 
                 // lastUpdatedDate
-                lastUpdatedDate.ViewValue = lastUpdatedDate.CurrentValue;
-                lastUpdatedDate.ViewValue = FormatDateTime(lastUpdatedDate.ViewValue, lastUpdatedDate.FormatPattern);
-                lastUpdatedDate.ViewCustomAttributes = "";
 
                 // ExROB
-                if (ConvertToBool(ExROB.CurrentValue)) {
-                    ExROB.ViewValue = ExROB.TagCaption(1) != "" ? ExROB.TagCaption(1) : "Yes";
-                } else {
-                    ExROB.ViewValue = ExROB.TagCaption(2) != "" ? ExROB.TagCaption(2) : "No";
-                }
-                ExROB.ViewCustomAttributes = "";
 
                 // NoPenerimaan
-                List<object?>? listWrk4 = [ // DN
-                    NoPenerimaan.CurrentValue,
-                    NoPenerimaan.CurrentValue,
-                ];
-                listWrk4 = NoPenerimaan.Lookup?.RenderViewRow(listWrk4, this);
-                string? dispVal4 = NoPenerimaan.DisplayValue(listWrk4);
-                if (!Empty(dispVal4))
-                    NoPenerimaan.ViewValue = dispVal4;
-                NoPenerimaan.ViewCustomAttributes = "";
 
                 // StatusAktivitas
-                StatusAktivitas.ViewValue = StatusAktivitas.CurrentValue;
-                string curVal5 = ConvertToString(StatusAktivitas.CurrentValue);
-                if (!Empty(curVal5)) {
-                    if (StatusAktivitas.Lookup != null && IsDictionary(StatusAktivitas.Lookup?.Options) && StatusAktivitas.Lookup?.Options.Values.Count > 0) { // Load from cache // DN
-                        StatusAktivitas.ViewValue = StatusAktivitas.LookupCacheOption(curVal5);
-                    } else { // Lookup from database // DN
-                        string filterWrk5 = SearchFilter(StatusAktivitas.Lookup?.GetTable()?.Fields["IdAktivitas"].SearchExpression, "=", StatusAktivitas.CurrentValue, StatusAktivitas.Lookup?.GetTable()?.Fields["IdAktivitas"].SearchDataType, "");
-                        string? sqlWrk5 = StatusAktivitas.Lookup?.GetSql(false, filterWrk5, null, this, true, true);
-                        List<Dictionary<string, object>>? rswrk5 = sqlWrk5 != null ? Connection.GetRows(sqlWrk5) : null; // Must use Sync to avoid overwriting ViewValue in RenderViewRow
-                        if (rswrk5?.Count > 0 && StatusAktivitas.Lookup != null) { // Lookup values found
-                            var listwrk = StatusAktivitas.Lookup?.RenderViewRow(rswrk5[0]);
-                            StatusAktivitas.ViewValue = StatusAktivitas.DisplayValue(listwrk);
-                        } else {
-                            StatusAktivitas.ViewValue = FormatNumber(StatusAktivitas.CurrentValue, StatusAktivitas.FormatPattern);
-                        }
+
+                    // id
+                    id.ViewValue = id.CurrentValue;
+                    id.ViewCustomAttributes = "";
+
+                    // idProses
+                    idProses.ViewValue = idProses.CurrentValue;
+
+                    // awallookupbung
+                    // idProses
+                    ResolveLookupView(idProses, "IdProses", "number");
+                    // akhirlookupbung
+                    idProses.ViewCustomAttributes = "";
+
+                    // idAktifitas
+                    idAktifitas.ViewValue = idAktifitas.CurrentValue;
+
+                    // awallookupbung
+                    // idAktifitas
+                    ResolveLookupView(idAktifitas, "IdAktivitas", "number");
+                    // akhirlookupbung
+                    idAktifitas.ViewCustomAttributes = "";
+
+                    // NoReferensi
+                    NoReferensi.ViewValue = ConvertToString(NoReferensi.CurrentValue); // DN
+                    NoReferensi.ViewCustomAttributes = "";
+
+                    // NewBL_KLObs
+                    NewBL_KLObs.ViewValue = ConvertToString(NewBL_KLObs.CurrentValue); // DN
+                    NewBL_KLObs.ViewCustomAttributes = "";
+
+                    // NewBL_KL15
+                    NewBL_KL15.ViewValue = ConvertToString(NewBL_KL15.CurrentValue); // DN
+                    NewBL_KL15.ViewCustomAttributes = "";
+
+                    // NewBL_Barrels
+                    NewBL_Barrels.ViewValue = ConvertToString(NewBL_Barrels.CurrentValue); // DN
+                    NewBL_Barrels.ViewCustomAttributes = "";
+
+                    // NewBL_LT
+                    NewBL_LT.ViewValue = ConvertToString(NewBL_LT.CurrentValue); // DN
+                    NewBL_LT.ViewCustomAttributes = "";
+
+                    // NewBL_MT
+                    NewBL_MT.ViewValue = ConvertToString(NewBL_MT.CurrentValue); // DN
+                    NewBL_MT.ViewCustomAttributes = "";
+
+                    // SFAD_KLObs
+                    SFAD_KLObs.ViewValue = ConvertToString(SFAD_KLObs.CurrentValue); // DN
+                    SFAD_KLObs.ViewCustomAttributes = "";
+
+                    // SFAD_KL15
+                    SFAD_KL15.ViewValue = ConvertToString(SFAD_KL15.CurrentValue); // DN
+                    SFAD_KL15.ViewCustomAttributes = "";
+
+                    // SFAD_Barrels
+                    SFAD_Barrels.ViewValue = ConvertToString(SFAD_Barrels.CurrentValue); // DN
+                    SFAD_Barrels.ViewCustomAttributes = "";
+
+                    // SFAD_MT
+                    SFAD_MT.ViewValue = ConvertToString(SFAD_MT.CurrentValue); // DN
+                    SFAD_MT.ViewCustomAttributes = "";
+
+                    // SFAD_LT
+                    SFAD_LT.ViewValue = ConvertToString(SFAD_LT.CurrentValue); // DN
+                    SFAD_LT.ViewCustomAttributes = "";
+
+                    // SFBL_KLObs
+                    SFBL_KLObs.ViewValue = ConvertToString(SFBL_KLObs.CurrentValue); // DN
+                    SFBL_KLObs.ViewCustomAttributes = "";
+
+                    // SFBL_KL15
+                    SFBL_KL15.ViewValue = ConvertToString(SFBL_KL15.CurrentValue); // DN
+                    SFBL_KL15.ViewCustomAttributes = "";
+
+                    // SFBL_Barrels
+                    SFBL_Barrels.ViewValue = ConvertToString(SFBL_Barrels.CurrentValue); // DN
+                    SFBL_Barrels.ViewCustomAttributes = "";
+
+                    // SFBL_LT
+                    SFBL_LT.ViewValue = ConvertToString(SFBL_LT.CurrentValue); // DN
+                    SFBL_LT.ViewCustomAttributes = "";
+
+                    // SFBL_MT
+                    SFBL_MT.ViewValue = ConvertToString(SFBL_MT.CurrentValue); // DN
+                    SFBL_MT.ViewCustomAttributes = "";
+
+                    // userInput
+                    userInput.ViewValue = ConvertToString(userInput.CurrentValue); // DN
+                    userInput.ViewCustomAttributes = "";
+
+                    // etlDate
+                    etlDate.ViewValue = etlDate.CurrentValue;
+                    etlDate.ViewValue = FormatDateTime(etlDate.ViewValue, etlDate.FormatPattern);
+                    etlDate.ViewCustomAttributes = "";
+
+                    // LastUpdatedBy
+                    LastUpdatedBy.ViewValue = ConvertToString(LastUpdatedBy.CurrentValue); // DN
+                    LastUpdatedBy.ViewCustomAttributes = "";
+
+                    // lastUpdatedDate
+                    lastUpdatedDate.ViewValue = lastUpdatedDate.CurrentValue;
+                    lastUpdatedDate.ViewValue = FormatDateTime(lastUpdatedDate.ViewValue, lastUpdatedDate.FormatPattern);
+                    lastUpdatedDate.ViewCustomAttributes = "";
+
+                    // ExROB
+                    if (ConvertToBool(ExROB.CurrentValue)) {
+                        ExROB.ViewValue = ExROB.TagCaption(1) != "" ? ExROB.TagCaption(1) : "Yes";
+                    } else {
+                        ExROB.ViewValue = ExROB.TagCaption(2) != "" ? ExROB.TagCaption(2) : "No";
                     }
-                } else {
-                    StatusAktivitas.ViewValue = DbNullValue;
-                }
-                StatusAktivitas.ViewCustomAttributes = "";
+                    ExROB.ViewCustomAttributes = "";
+
+                    // NoPenerimaan
+                    List<object?>? listWrk4 = [ // DN
+                        NoPenerimaan.CurrentValue,
+                        NoPenerimaan.CurrentValue,
+                    ];
+                    listWrk4 = NoPenerimaan.Lookup?.RenderViewRow(listWrk4, this);
+                    string? dispVal4 = NoPenerimaan.DisplayValue(listWrk4);
+                    if (!Empty(dispVal4))
+                        NoPenerimaan.ViewValue = dispVal4;
+
+                    // akhirlookupbung
+                    NoPenerimaan.ViewCustomAttributes = "";
+
+                    // StatusAktivitas
+                    StatusAktivitas.ViewValue = StatusAktivitas.CurrentValue;
+
+                    // awallookupbung
+                    // StatusAktivitas
+                    ResolveLookupView(StatusAktivitas, "IdAktivitas", "number");
+                    // akhirlookupbung
+                    StatusAktivitas.ViewCustomAttributes = "";
 
                 // id
                 id.HrefValue = "";
@@ -1491,7 +1636,10 @@ public partial class SnDOne {
                 // idProses
                 idProses.SetupEditAttributes();
                 idProses.EditValue = idProses.CurrentValue;
+
+                // awallookupbung
                 string curVal = ConvertToString(idProses.CurrentValue);
+                idProses.EditValue = Empty(curVal) ? DbNullValue : FormatNumber(idProses.CurrentValue, idProses.FormatPattern);
                 if (!Empty(curVal)) {
                     if (idProses.Lookup != null && IsDictionary(idProses.Lookup?.Options) && idProses.Lookup?.Options.Values.Count > 0) { // Load from cache // DN
                         idProses.EditValue = idProses.LookupCacheOption(curVal);
@@ -1502,19 +1650,20 @@ public partial class SnDOne {
                         if (rswrk?.Count > 0 && idProses.Lookup != null) { // Lookup values found
                             var listwrk = idProses.Lookup?.RenderViewRow(rswrk[0]);
                             idProses.EditValue = idProses.DisplayValue(listwrk);
-                        } else {
-                            idProses.EditValue = FormatNumber(idProses.CurrentValue, idProses.FormatPattern);
                         }
                     }
-                } else {
-                    idProses.EditValue = DbNullValue;
                 }
+
+                // akhirlookupbung
                 idProses.ViewCustomAttributes = "";
 
                 // idAktifitas
                 idAktifitas.SetupEditAttributes();
                 idAktifitas.EditValue = idAktifitas.CurrentValue;
+
+                // awallookupbung
                 string curVal2 = ConvertToString(idAktifitas.CurrentValue);
+                idAktifitas.EditValue = Empty(curVal2) ? DbNullValue : FormatNumber(idAktifitas.CurrentValue, idAktifitas.FormatPattern);
                 if (!Empty(curVal2)) {
                     if (idAktifitas.Lookup != null && IsDictionary(idAktifitas.Lookup?.Options) && idAktifitas.Lookup?.Options.Values.Count > 0) { // Load from cache // DN
                         idAktifitas.EditValue = idAktifitas.LookupCacheOption(curVal2);
@@ -1525,13 +1674,11 @@ public partial class SnDOne {
                         if (rswrk2?.Count > 0 && idAktifitas.Lookup != null) { // Lookup values found
                             var listwrk = idAktifitas.Lookup?.RenderViewRow(rswrk2[0]);
                             idAktifitas.EditValue = idAktifitas.DisplayValue(listwrk);
-                        } else {
-                            idAktifitas.EditValue = FormatNumber(idAktifitas.CurrentValue, idAktifitas.FormatPattern);
                         }
                     }
-                } else {
-                    idAktifitas.EditValue = DbNullValue;
                 }
+
+                // akhirlookupbung
                 idAktifitas.ViewCustomAttributes = "";
 
                 // NoReferensi
@@ -1693,7 +1840,10 @@ public partial class SnDOne {
                 // StatusAktivitas
                 StatusAktivitas.SetupEditAttributes();
                 StatusAktivitas.EditValue = StatusAktivitas.CurrentValue;
+
+                // awallookupbung
                 string curVal5 = ConvertToString(StatusAktivitas.CurrentValue);
+                StatusAktivitas.EditValue = Empty(curVal5) ? DbNullValue : FormatNumber(StatusAktivitas.CurrentValue, StatusAktivitas.FormatPattern);
                 if (!Empty(curVal5)) {
                     if (StatusAktivitas.Lookup != null && IsDictionary(StatusAktivitas.Lookup?.Options) && StatusAktivitas.Lookup?.Options.Values.Count > 0) { // Load from cache // DN
                         StatusAktivitas.EditValue = StatusAktivitas.LookupCacheOption(curVal5);
@@ -1704,13 +1854,11 @@ public partial class SnDOne {
                         if (rswrk5?.Count > 0 && StatusAktivitas.Lookup != null) { // Lookup values found
                             var listwrk = StatusAktivitas.Lookup?.RenderViewRow(rswrk5[0]);
                             StatusAktivitas.EditValue = StatusAktivitas.DisplayValue(listwrk);
-                        } else {
-                            StatusAktivitas.EditValue = FormatNumber(StatusAktivitas.CurrentValue, StatusAktivitas.FormatPattern);
                         }
                     }
-                } else {
-                    StatusAktivitas.EditValue = DbNullValue;
                 }
+
+                // akhirlookupbung
                 StatusAktivitas.ViewCustomAttributes = "";
 
                 // Edit refer script
@@ -1813,145 +1961,250 @@ public partial class SnDOne {
         #pragma warning restore 1998
 
         #pragma warning disable 1998
+
+        private void ValidateCustomid() {
+            if (id.Visible && id.Required) {
+                if (!id.IsDetailKey && Empty(id.FormValue)) {
+                    id.AddErrorMessage(ConvertToString(StatusAktivitas.RequiredErrorMessage).Replace("%s", StatusAktivitas.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomidProses() {
+            if (idProses.Visible && idProses.Required) {
+                if (!idProses.IsDetailKey && Empty(idProses.FormValue)) {
+                    idProses.AddErrorMessage(ConvertToString(StatusAktivitas.RequiredErrorMessage).Replace("%s", StatusAktivitas.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomidAktifitas() {
+            if (idAktifitas.Visible && idAktifitas.Required) {
+                if (!idAktifitas.IsDetailKey && Empty(idAktifitas.FormValue)) {
+                    idAktifitas.AddErrorMessage(ConvertToString(StatusAktivitas.RequiredErrorMessage).Replace("%s", StatusAktivitas.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomNoReferensi() {
+            if (NoReferensi.Visible && NoReferensi.Required) {
+                if (!NoReferensi.IsDetailKey && Empty(NoReferensi.FormValue)) {
+                    NoReferensi.AddErrorMessage(ConvertToString(StatusAktivitas.RequiredErrorMessage).Replace("%s", StatusAktivitas.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomNewBL_KLObs() {
+            if (NewBL_KLObs.Visible && NewBL_KLObs.Required) {
+                if (!NewBL_KLObs.IsDetailKey && Empty(NewBL_KLObs.FormValue)) {
+                    NewBL_KLObs.AddErrorMessage(ConvertToString(StatusAktivitas.RequiredErrorMessage).Replace("%s", StatusAktivitas.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomNewBL_KL15() {
+            if (NewBL_KL15.Visible && NewBL_KL15.Required) {
+                if (!NewBL_KL15.IsDetailKey && Empty(NewBL_KL15.FormValue)) {
+                    NewBL_KL15.AddErrorMessage(ConvertToString(StatusAktivitas.RequiredErrorMessage).Replace("%s", StatusAktivitas.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomNewBL_Barrels() {
+            if (NewBL_Barrels.Visible && NewBL_Barrels.Required) {
+                if (!NewBL_Barrels.IsDetailKey && Empty(NewBL_Barrels.FormValue)) {
+                    NewBL_Barrels.AddErrorMessage(ConvertToString(StatusAktivitas.RequiredErrorMessage).Replace("%s", StatusAktivitas.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomNewBL_LT() {
+            if (NewBL_LT.Visible && NewBL_LT.Required) {
+                if (!NewBL_LT.IsDetailKey && Empty(NewBL_LT.FormValue)) {
+                    NewBL_LT.AddErrorMessage(ConvertToString(StatusAktivitas.RequiredErrorMessage).Replace("%s", StatusAktivitas.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomNewBL_MT() {
+            if (NewBL_MT.Visible && NewBL_MT.Required) {
+                if (!NewBL_MT.IsDetailKey && Empty(NewBL_MT.FormValue)) {
+                    NewBL_MT.AddErrorMessage(ConvertToString(StatusAktivitas.RequiredErrorMessage).Replace("%s", StatusAktivitas.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomSFAD_KLObs() {
+            if (SFAD_KLObs.Visible && SFAD_KLObs.Required) {
+                if (!SFAD_KLObs.IsDetailKey && Empty(SFAD_KLObs.FormValue)) {
+                    SFAD_KLObs.AddErrorMessage(ConvertToString(StatusAktivitas.RequiredErrorMessage).Replace("%s", StatusAktivitas.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomSFAD_KL15() {
+            if (SFAD_KL15.Visible && SFAD_KL15.Required) {
+                if (!SFAD_KL15.IsDetailKey && Empty(SFAD_KL15.FormValue)) {
+                    SFAD_KL15.AddErrorMessage(ConvertToString(StatusAktivitas.RequiredErrorMessage).Replace("%s", StatusAktivitas.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomSFAD_Barrels() {
+            if (SFAD_Barrels.Visible && SFAD_Barrels.Required) {
+                if (!SFAD_Barrels.IsDetailKey && Empty(SFAD_Barrels.FormValue)) {
+                    SFAD_Barrels.AddErrorMessage(ConvertToString(StatusAktivitas.RequiredErrorMessage).Replace("%s", StatusAktivitas.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomSFAD_MT() {
+            if (SFAD_MT.Visible && SFAD_MT.Required) {
+                if (!SFAD_MT.IsDetailKey && Empty(SFAD_MT.FormValue)) {
+                    SFAD_MT.AddErrorMessage(ConvertToString(StatusAktivitas.RequiredErrorMessage).Replace("%s", StatusAktivitas.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomSFAD_LT() {
+            if (SFAD_LT.Visible && SFAD_LT.Required) {
+                if (!SFAD_LT.IsDetailKey && Empty(SFAD_LT.FormValue)) {
+                    SFAD_LT.AddErrorMessage(ConvertToString(StatusAktivitas.RequiredErrorMessage).Replace("%s", StatusAktivitas.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomSFBL_KLObs() {
+            if (SFBL_KLObs.Visible && SFBL_KLObs.Required) {
+                if (!SFBL_KLObs.IsDetailKey && Empty(SFBL_KLObs.FormValue)) {
+                    SFBL_KLObs.AddErrorMessage(ConvertToString(StatusAktivitas.RequiredErrorMessage).Replace("%s", StatusAktivitas.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomSFBL_KL15() {
+            if (SFBL_KL15.Visible && SFBL_KL15.Required) {
+                if (!SFBL_KL15.IsDetailKey && Empty(SFBL_KL15.FormValue)) {
+                    SFBL_KL15.AddErrorMessage(ConvertToString(StatusAktivitas.RequiredErrorMessage).Replace("%s", StatusAktivitas.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomSFBL_Barrels() {
+            if (SFBL_Barrels.Visible && SFBL_Barrels.Required) {
+                if (!SFBL_Barrels.IsDetailKey && Empty(SFBL_Barrels.FormValue)) {
+                    SFBL_Barrels.AddErrorMessage(ConvertToString(StatusAktivitas.RequiredErrorMessage).Replace("%s", StatusAktivitas.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomSFBL_LT() {
+            if (SFBL_LT.Visible && SFBL_LT.Required) {
+                if (!SFBL_LT.IsDetailKey && Empty(SFBL_LT.FormValue)) {
+                    SFBL_LT.AddErrorMessage(ConvertToString(StatusAktivitas.RequiredErrorMessage).Replace("%s", StatusAktivitas.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomSFBL_MT() {
+            if (SFBL_MT.Visible && SFBL_MT.Required) {
+                if (!SFBL_MT.IsDetailKey && Empty(SFBL_MT.FormValue)) {
+                    SFBL_MT.AddErrorMessage(ConvertToString(StatusAktivitas.RequiredErrorMessage).Replace("%s", StatusAktivitas.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomuserInput() {
+            if (userInput.Visible && userInput.Required) {
+                if (!userInput.IsDetailKey && Empty(userInput.FormValue)) {
+                    userInput.AddErrorMessage(ConvertToString(StatusAktivitas.RequiredErrorMessage).Replace("%s", StatusAktivitas.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustometlDate() {
+            if (etlDate.Visible && etlDate.Required) {
+                if (!etlDate.IsDetailKey && Empty(etlDate.FormValue)) {
+                    etlDate.AddErrorMessage(ConvertToString(StatusAktivitas.RequiredErrorMessage).Replace("%s", StatusAktivitas.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomLastUpdatedBy() {
+            if (LastUpdatedBy.Visible && LastUpdatedBy.Required) {
+                if (!LastUpdatedBy.IsDetailKey && Empty(LastUpdatedBy.FormValue)) {
+                    LastUpdatedBy.AddErrorMessage(ConvertToString(StatusAktivitas.RequiredErrorMessage).Replace("%s", StatusAktivitas.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomlastUpdatedDate() {
+            if (lastUpdatedDate.Visible && lastUpdatedDate.Required) {
+                if (!lastUpdatedDate.IsDetailKey && Empty(lastUpdatedDate.FormValue)) {
+                    lastUpdatedDate.AddErrorMessage(ConvertToString(StatusAktivitas.RequiredErrorMessage).Replace("%s", StatusAktivitas.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomExROB() {
+            if (ExROB.Visible && ExROB.Required) {
+                if (Empty(ExROB.FormValue)) {
+                    ExROB.AddErrorMessage(ConvertToString(StatusAktivitas.RequiredErrorMessage).Replace("%s", StatusAktivitas.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomNoPenerimaan() {
+            if (NoPenerimaan.Visible && NoPenerimaan.Required) {
+                if (!NoPenerimaan.IsDetailKey && Empty(NoPenerimaan.FormValue)) {
+                    NoPenerimaan.AddErrorMessage(ConvertToString(StatusAktivitas.RequiredErrorMessage).Replace("%s", StatusAktivitas.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomStatusAktivitas() {
+            if (StatusAktivitas.Visible && StatusAktivitas.Required) {
+                if (!StatusAktivitas.IsDetailKey && Empty(StatusAktivitas.FormValue)) {
+                    StatusAktivitas.AddErrorMessage(ConvertToString(StatusAktivitas.RequiredErrorMessage).Replace("%s", StatusAktivitas.Caption));
+                }
+            }
+        }
+
         // Validate form
         protected async Task<bool> ValidateForm() {
             // Check if validation required
             if (!Config.ServerValidate)
                 return true;
             bool validateForm = true;
-                if (id.Visible && id.Required) {
-                    if (!id.IsDetailKey && Empty(id.FormValue)) {
-                        id.AddErrorMessage(ConvertToString(id.RequiredErrorMessage).Replace("%s", id.Caption));
-                    }
-                }
-                if (idProses.Visible && idProses.Required) {
-                    if (!idProses.IsDetailKey && Empty(idProses.FormValue)) {
-                        idProses.AddErrorMessage(ConvertToString(idProses.RequiredErrorMessage).Replace("%s", idProses.Caption));
-                    }
-                }
-                if (idAktifitas.Visible && idAktifitas.Required) {
-                    if (!idAktifitas.IsDetailKey && Empty(idAktifitas.FormValue)) {
-                        idAktifitas.AddErrorMessage(ConvertToString(idAktifitas.RequiredErrorMessage).Replace("%s", idAktifitas.Caption));
-                    }
-                }
-                if (NoReferensi.Visible && NoReferensi.Required) {
-                    if (!NoReferensi.IsDetailKey && Empty(NoReferensi.FormValue)) {
-                        NoReferensi.AddErrorMessage(ConvertToString(NoReferensi.RequiredErrorMessage).Replace("%s", NoReferensi.Caption));
-                    }
-                }
-                if (NewBL_KLObs.Visible && NewBL_KLObs.Required) {
-                    if (!NewBL_KLObs.IsDetailKey && Empty(NewBL_KLObs.FormValue)) {
-                        NewBL_KLObs.AddErrorMessage(ConvertToString(NewBL_KLObs.RequiredErrorMessage).Replace("%s", NewBL_KLObs.Caption));
-                    }
-                }
-                if (NewBL_KL15.Visible && NewBL_KL15.Required) {
-                    if (!NewBL_KL15.IsDetailKey && Empty(NewBL_KL15.FormValue)) {
-                        NewBL_KL15.AddErrorMessage(ConvertToString(NewBL_KL15.RequiredErrorMessage).Replace("%s", NewBL_KL15.Caption));
-                    }
-                }
-                if (NewBL_Barrels.Visible && NewBL_Barrels.Required) {
-                    if (!NewBL_Barrels.IsDetailKey && Empty(NewBL_Barrels.FormValue)) {
-                        NewBL_Barrels.AddErrorMessage(ConvertToString(NewBL_Barrels.RequiredErrorMessage).Replace("%s", NewBL_Barrels.Caption));
-                    }
-                }
-                if (NewBL_LT.Visible && NewBL_LT.Required) {
-                    if (!NewBL_LT.IsDetailKey && Empty(NewBL_LT.FormValue)) {
-                        NewBL_LT.AddErrorMessage(ConvertToString(NewBL_LT.RequiredErrorMessage).Replace("%s", NewBL_LT.Caption));
-                    }
-                }
-                if (NewBL_MT.Visible && NewBL_MT.Required) {
-                    if (!NewBL_MT.IsDetailKey && Empty(NewBL_MT.FormValue)) {
-                        NewBL_MT.AddErrorMessage(ConvertToString(NewBL_MT.RequiredErrorMessage).Replace("%s", NewBL_MT.Caption));
-                    }
-                }
-                if (SFAD_KLObs.Visible && SFAD_KLObs.Required) {
-                    if (!SFAD_KLObs.IsDetailKey && Empty(SFAD_KLObs.FormValue)) {
-                        SFAD_KLObs.AddErrorMessage(ConvertToString(SFAD_KLObs.RequiredErrorMessage).Replace("%s", SFAD_KLObs.Caption));
-                    }
-                }
-                if (SFAD_KL15.Visible && SFAD_KL15.Required) {
-                    if (!SFAD_KL15.IsDetailKey && Empty(SFAD_KL15.FormValue)) {
-                        SFAD_KL15.AddErrorMessage(ConvertToString(SFAD_KL15.RequiredErrorMessage).Replace("%s", SFAD_KL15.Caption));
-                    }
-                }
-                if (SFAD_Barrels.Visible && SFAD_Barrels.Required) {
-                    if (!SFAD_Barrels.IsDetailKey && Empty(SFAD_Barrels.FormValue)) {
-                        SFAD_Barrels.AddErrorMessage(ConvertToString(SFAD_Barrels.RequiredErrorMessage).Replace("%s", SFAD_Barrels.Caption));
-                    }
-                }
-                if (SFAD_MT.Visible && SFAD_MT.Required) {
-                    if (!SFAD_MT.IsDetailKey && Empty(SFAD_MT.FormValue)) {
-                        SFAD_MT.AddErrorMessage(ConvertToString(SFAD_MT.RequiredErrorMessage).Replace("%s", SFAD_MT.Caption));
-                    }
-                }
-                if (SFAD_LT.Visible && SFAD_LT.Required) {
-                    if (!SFAD_LT.IsDetailKey && Empty(SFAD_LT.FormValue)) {
-                        SFAD_LT.AddErrorMessage(ConvertToString(SFAD_LT.RequiredErrorMessage).Replace("%s", SFAD_LT.Caption));
-                    }
-                }
-                if (SFBL_KLObs.Visible && SFBL_KLObs.Required) {
-                    if (!SFBL_KLObs.IsDetailKey && Empty(SFBL_KLObs.FormValue)) {
-                        SFBL_KLObs.AddErrorMessage(ConvertToString(SFBL_KLObs.RequiredErrorMessage).Replace("%s", SFBL_KLObs.Caption));
-                    }
-                }
-                if (SFBL_KL15.Visible && SFBL_KL15.Required) {
-                    if (!SFBL_KL15.IsDetailKey && Empty(SFBL_KL15.FormValue)) {
-                        SFBL_KL15.AddErrorMessage(ConvertToString(SFBL_KL15.RequiredErrorMessage).Replace("%s", SFBL_KL15.Caption));
-                    }
-                }
-                if (SFBL_Barrels.Visible && SFBL_Barrels.Required) {
-                    if (!SFBL_Barrels.IsDetailKey && Empty(SFBL_Barrels.FormValue)) {
-                        SFBL_Barrels.AddErrorMessage(ConvertToString(SFBL_Barrels.RequiredErrorMessage).Replace("%s", SFBL_Barrels.Caption));
-                    }
-                }
-                if (SFBL_LT.Visible && SFBL_LT.Required) {
-                    if (!SFBL_LT.IsDetailKey && Empty(SFBL_LT.FormValue)) {
-                        SFBL_LT.AddErrorMessage(ConvertToString(SFBL_LT.RequiredErrorMessage).Replace("%s", SFBL_LT.Caption));
-                    }
-                }
-                if (SFBL_MT.Visible && SFBL_MT.Required) {
-                    if (!SFBL_MT.IsDetailKey && Empty(SFBL_MT.FormValue)) {
-                        SFBL_MT.AddErrorMessage(ConvertToString(SFBL_MT.RequiredErrorMessage).Replace("%s", SFBL_MT.Caption));
-                    }
-                }
-                if (userInput.Visible && userInput.Required) {
-                    if (!userInput.IsDetailKey && Empty(userInput.FormValue)) {
-                        userInput.AddErrorMessage(ConvertToString(userInput.RequiredErrorMessage).Replace("%s", userInput.Caption));
-                    }
-                }
-                if (etlDate.Visible && etlDate.Required) {
-                    if (!etlDate.IsDetailKey && Empty(etlDate.FormValue)) {
-                        etlDate.AddErrorMessage(ConvertToString(etlDate.RequiredErrorMessage).Replace("%s", etlDate.Caption));
-                    }
-                }
+                ValidateCustomid();
+                ValidateCustomidProses();
+                ValidateCustomidAktifitas();
+                ValidateCustomNoReferensi();
+                ValidateCustomNewBL_KLObs();
+                ValidateCustomNewBL_KL15();
+                ValidateCustomNewBL_Barrels();
+                ValidateCustomNewBL_LT();
+                ValidateCustomNewBL_MT();
+                ValidateCustomSFAD_KLObs();
+                ValidateCustomSFAD_KL15();
+                ValidateCustomSFAD_Barrels();
+                ValidateCustomSFAD_MT();
+                ValidateCustomSFAD_LT();
+                ValidateCustomSFBL_KLObs();
+                ValidateCustomSFBL_KL15();
+                ValidateCustomSFBL_Barrels();
+                ValidateCustomSFBL_LT();
+                ValidateCustomSFBL_MT();
+                ValidateCustomuserInput();
+                ValidateCustometlDate();
                 if (!CheckDate(etlDate.FormValue, etlDate.FormatPattern)) {
                     etlDate.AddErrorMessage(etlDate.GetErrorMessage(false));
                 }
-                if (LastUpdatedBy.Visible && LastUpdatedBy.Required) {
-                    if (!LastUpdatedBy.IsDetailKey && Empty(LastUpdatedBy.FormValue)) {
-                        LastUpdatedBy.AddErrorMessage(ConvertToString(LastUpdatedBy.RequiredErrorMessage).Replace("%s", LastUpdatedBy.Caption));
-                    }
-                }
-                if (lastUpdatedDate.Visible && lastUpdatedDate.Required) {
-                    if (!lastUpdatedDate.IsDetailKey && Empty(lastUpdatedDate.FormValue)) {
-                        lastUpdatedDate.AddErrorMessage(ConvertToString(lastUpdatedDate.RequiredErrorMessage).Replace("%s", lastUpdatedDate.Caption));
-                    }
-                }
-                if (ExROB.Visible && ExROB.Required) {
-                    if (Empty(ExROB.FormValue)) {
-                        ExROB.AddErrorMessage(ConvertToString(ExROB.RequiredErrorMessage).Replace("%s", ExROB.Caption));
-                    }
-                }
-                if (NoPenerimaan.Visible && NoPenerimaan.Required) {
-                    if (!NoPenerimaan.IsDetailKey && Empty(NoPenerimaan.FormValue)) {
-                        NoPenerimaan.AddErrorMessage(ConvertToString(NoPenerimaan.RequiredErrorMessage).Replace("%s", NoPenerimaan.Caption));
-                    }
-                }
-                if (StatusAktivitas.Visible && StatusAktivitas.Required) {
-                    if (!StatusAktivitas.IsDetailKey && Empty(StatusAktivitas.FormValue)) {
-                        StatusAktivitas.AddErrorMessage(ConvertToString(StatusAktivitas.RequiredErrorMessage).Replace("%s", StatusAktivitas.Caption));
-                    }
-                }
+                ValidateCustomLastUpdatedBy();
+                ValidateCustomlastUpdatedDate();
+                ValidateCustomExROB();
+                ValidateCustomNoPenerimaan();
+                ValidateCustomStatusAktivitas();
 
             // Return validate result
             validateForm = validateForm && !HasInvalidFields();
@@ -2175,9 +2428,11 @@ public partial class SnDOne {
         {
             if (fld.Lookup == null)
                 return;
+            if (fld.Lookup.Options.Count is int opt && opt > 0) 
+                return;
             Func<string>? lookupFilter = null;
             dynamic conn = Connection;
-            if (fld.Lookup.Options.Count is int c && c == 0) {
+
                 // Set up lookup SQL
                 switch (fld.FieldVar) {
                     case "x_NoPenerimaan":
@@ -2189,25 +2444,28 @@ public partial class SnDOne {
                 var sql = fld.Lookup.GetSql(false, "", lookupFilter, this);
 
                 // Set up lookup cache
-                if (!fld.HasLookupOptions && fld.UseLookupCache && !Empty(sql) && fld.Lookup.ParentFields.Count == 0 && fld.Lookup.Options.Count == 0) {
-                    int totalCnt = await TryGetRecordCountAsync(sql, conn);
-                    if (totalCnt > fld.LookupCacheCount) // Total count > cache count, do not cache
-                        return;
-                    var dict = new Dictionary<string, Dictionary<string, object>>();
-                    List<object> values = [];
-                    List<Dictionary<string, object>> rs = await conn.GetRowsAsync(sql);
-                    if (rs != null) {
-                        for (int i = 0; i < rs.Count; i++) {
-                            var row = rs[i];
-                            row = fld.Lookup?.RenderViewRow(row, Resolve(fld.Lookup.LinkTable));
-                            string key = row?.Values.First()?.ToString() ?? String.Empty;
-                            if (!dict.ContainsKey(key) && row != null)
-                                dict.Add(key, row);
-                        }
+                if (fld.HasLookupOptions ||
+                    !fld.UseLookupCache ||
+                    Empty(sql) ||
+                    fld.Lookup.ParentFields.Count != 0 ||
+                    fld.Lookup.Options.Count != 0)
+                            return;
+                int totalCnt = await TryGetRecordCountAsync(sql, conn);
+                if (totalCnt > fld.LookupCacheCount) // Total count > cache count, do not cache
+                    return;
+                var dict = new Dictionary<string, Dictionary<string, object>>();
+                List<object> values = [];
+                List<Dictionary<string, object>> rs = await conn.GetRowsAsync(sql);
+                if (rs != null) {
+                    for (int i = 0; i < rs.Count; i++) {
+                        var row = rs[i];
+                        row = fld.Lookup?.RenderViewRow(row, Resolve(fld.Lookup.LinkTable));
+                        string key = row?.Values.First()?.ToString() ?? String.Empty;
+                        if (!dict.ContainsKey(key) && row != null)
+                            dict.Add(key, row);
                     }
-                    fld.Lookup?.SetOptions(dict);
                 }
-            }
+                fld.Lookup?.SetOptions(dict);
         }
 
         // Close recordset

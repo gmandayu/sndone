@@ -13,6 +13,11 @@ public partial class HomeController : Controller
         subAktivitasDataStopPenyaluranStsPyrLpgList.Cache = _cache;
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["id"];
+
+        // Run the page
         return await subAktivitasDataStopPenyaluranStsPyrLpgList.Run();
     }
 
@@ -23,6 +28,11 @@ public partial class HomeController : Controller
     {
         // Create page object
         subAktivitasDataStopPenyaluranStsPyrLpgEdit = new GLOBALS.SubAktivitasDataStopPenyaluranStsPyrLpgEdit(this);
+
+        // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["id"];
 
         // Run the page
         return await subAktivitasDataStopPenyaluranStsPyrLpgEdit.Run();

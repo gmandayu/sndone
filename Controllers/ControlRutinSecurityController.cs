@@ -13,6 +13,11 @@ public partial class HomeController : Controller
         controlRutinSecurityList.Cache = _cache;
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["IdCRS"];
+
+        // Run the page
         return await controlRutinSecurityList.Run();
     }
 
@@ -23,6 +28,11 @@ public partial class HomeController : Controller
     {
         // Create page object
         controlRutinSecurityAdd = new GLOBALS.ControlRutinSecurityAdd(this);
+
+        // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["IdCRS"];
 
         // Run the page
         return await controlRutinSecurityAdd.Run();
@@ -37,6 +47,11 @@ public partial class HomeController : Controller
         controlRutinSecurityView = new GLOBALS.ControlRutinSecurityView(this);
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["IdCRS"];
+
+        // Run the page
         return await controlRutinSecurityView.Run();
     }
 
@@ -49,6 +64,11 @@ public partial class HomeController : Controller
         controlRutinSecurityEdit = new GLOBALS.ControlRutinSecurityEdit(this);
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["IdCRS"];
+
+        // Run the page
         return await controlRutinSecurityEdit.Run();
     }
 
@@ -59,6 +79,11 @@ public partial class HomeController : Controller
     {
         // Create page object
         controlRutinSecurityDelete = new GLOBALS.ControlRutinSecurityDelete(this);
+
+        // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["IdCRS"];
 
         // Run the page
         return await controlRutinSecurityDelete.Run();

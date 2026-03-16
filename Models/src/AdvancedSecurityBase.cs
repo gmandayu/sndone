@@ -1148,7 +1148,7 @@ public partial class SnDOne {
         public async Task<object?> CurrentUserInfoAsync(string fldname)
         {
             object? info = null;
-            if (!Empty(Config.UserTable) && !IsSysAdmin) {
+            if (!Empty(Config.UserTableDefault) && !IsSysAdmin) {
                 try {
                     string filter = GetUserFilter(Config.LoginUsernameFieldName, CurrentUserName);
                     if (!Empty(filter)) {

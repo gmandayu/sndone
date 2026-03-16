@@ -1,3 +1,8 @@
+using System.Collections.Generic;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+
 namespace SnDOne.Models;
 
 // Partial class
@@ -126,7 +131,7 @@ public partial class SnDOne {
         private string _pageUrl = "";
 
         // Constructor
-        public PenyimpananSampleEditBase()
+        public PenyimpananSampleEditBase(Controller? controller)
         {
             TableName = "PenyimpananSample";
 
@@ -135,6 +140,8 @@ public partial class SnDOne {
 
             // Initialize
             CurrentPage = this;
+        if (controller != null)
+            Controller = controller;
 
             // Table CSS class
             TableClass = "table table-striped table-bordered table-hover table-sm ew-desktop-table ew-edit-table d-none";
@@ -257,81 +264,87 @@ public partial class SnDOne {
         }
 
         // Constructor
-        public PenyimpananSampleEditBase(Controller? controller = null): this() { // DN
-            if (controller != null)
-                Controller = controller;
-        }
+        public PenyimpananSampleEditBase() : this(null) { }
 
         /// <summary>
         /// Terminate page
         /// </summary>
         /// <param name="url">URL to rediect to</param>
         /// <returns>Page result</returns>
-        public override IActionResult Terminate(string url = "") { // DN
-            if (_terminated) // DN
-                return new EmptyResult();
-
-            // Page Unload event
-            PageUnload();
-
-            // Global Page Unloaded event
-            PageUnloaded();
-            PageUnloadedEventHandler?.Invoke(this, EventArgs.Empty);
-            if (!IsApi())
-                PageRedirecting(ref url);
-
-            // Gargage collection
-            Collect(); // DN
-
-            // Terminate
-            _terminated = true; // DN
-
-            // Return for API
-            if (IsApi()) {
-                var result = new Dictionary<string, string> { { "version", Config.ProductVersion } };
-                if (!Empty(url)) // Add url
-                    result.Add("url", GetUrl(url));
-                foreach (var (key, value) in GetMessages()) // Add messages
-                    result.Add(key, value);
-                return Controller.Json(result);
-            } else if (ActionResult != null) { // Check action result
-                return ActionResult;
-            }
-
-            // Go to URL if specified
-            if (!Empty(url)) {
-                if (!Config.Debug)
-                    ResponseClear();
-                if (Response != null && !Response.HasStarted) {
-                    // Handle modal response
-                    if (IsModal) { // Show as modal
-                        string pageName = GetPageName(url);
-                        var result = new Dictionary<string, string> { {"url", GetUrl(url)}, {"modal", "1"} }; // Assume return to modal for simplicity
-                        if (SameString(pageName, GetPageName(ListUrl)) ||
-                            SameString(pageName, GetPageName(ViewUrl)) ||
-                            SameString(pageName, GetPageName(GetCurrentMasterTable()?.ViewUrl ?? ""))
-                        ) { // List / View / Master View page
-                            if (!SameString(pageName, ListUrl)) { // Not List page
-                                result.Add("caption", GetModalCaption(pageName));
-                                result.Add("view", pageName == "PenyimpananSampleView" ? "1" : "0"); // If View page, no primary button
-                            } else { // List page
-                                // result.Add("list", PageID == "search" ? "1" : "0"); // Refresh List page if current page is Search page
-                                result.Add("error", FailureMessage); // List page should not be shown as modal => error
-                                ClearFailureMessage();
-                            }
-                        } else { // Other pages (add messages and then clear messages)
-                            result = GetMessages();
-                            result.Add("modal", "1");
-                            ClearMessages();
-                        }
-                        return Controller.Json(result);
-                    } else {
-                        SaveDebugMessage();
-                        return Controller.LocalRedirect(AppPath(url));
-                    }
-                }
-            }
+        public override IActionResult Terminate(string url = "")
+        { // DN
+            if (_terminated) return new EmptyResult();
+            InvokeUnloadHooks();
+            if (!IsApi()) PageRedirecting(ref url);
+            Collect();                // DN
+            _terminated = true;       // DN
+            if (IsApi()) return BuildApiTerminateResult(url);
+            if (ActionResult != null) return ActionResult;
+            if (Empty(url)) return new EmptyResult();
+            if (!Config.Debug) ResponseClear();
+            if (Response != null && !Response.HasStarted)
+                return HandleRedirect(url);
             return new EmptyResult();
+        }
+
+        // ================= HELPER METHODS =================
+        private void InvokeUnloadHooks()
+        {
+                    // Page Unload event
+                    PageUnload();
+
+                // Global Page Unloaded event
+                PageUnloaded();
+            PageUnloadedEventHandler?.Invoke(null, EventArgs.Empty);
+        }
+
+        private IActionResult BuildApiTerminateResult(string url)
+        {
+            var result = new Dictionary<string, string> { { "version", Config.ProductVersion } };
+            if (!Empty(url)) result.Add("url", GetUrl(url));
+            foreach (var (key, value) in GetMessages()) result.Add(key, value);
+            return Controller.Json(result);
+        }
+
+        private IActionResult HandleRedirect(string url)
+        {
+            if (IsModal) return BuildModalResult_ListAddEditUpdateViewSearch(url);
+            SaveDebugMessage();
+            return RedirectCore(url);
+        }
+
+        private IActionResult RedirectCore(string url)
+        {
+            return Controller.LocalRedirect(AppPath(url));
+        }
+
+        private IActionResult BuildModalResult_ListAddEditUpdateViewSearch(string url)
+        {
+            string pageName = GetPageName(url);
+                var result = new Dictionary<string, string> { { "url", GetUrl(url) }, { "modal", "1" } }; // modal=1
+                    if (SameString(pageName, GetPageName(ListUrl)) ||
+                        SameString(pageName, GetPageName(ViewUrl)) ||
+                        SameString(pageName, GetPageName(GetCurrentMasterTable()?.ViewUrl ?? "")))
+                    {
+                // List / View / Master View page
+                    if (!SameString(pageName, ListUrl))
+                    {
+                        result.Add("caption", GetModalCaption(pageName));
+                        result.Add("view", pageName == "PenyimpananSampleView" ? "1" : "0"); // If View page, no primary button
+                    }
+                    else
+                    {
+                        result.Add("error", FailureMessage); // List page should not be shown as modal => error
+                        ClearFailureMessage();
+                    }
+                    }
+                    else
+                    { // Other pages (add messages and then clear messages)
+                        result = GetMessages();
+                        result.Add("modal", "1");
+                        ClearMessages();
+                    }
+                return Controller.Json(result);
         }
 
         // Get all records from datareader
@@ -378,43 +391,72 @@ public partial class SnDOne {
         protected Dictionary<string, object>? GetRecordFromRecordset(List<Dictionary<string, object>>? list) =>
             list != null && list.Count > 0 ? GetRecordFromDictionary(list[0]) : null;
 
-        // Get record from Dictionary
-        protected Dictionary<string, object>? GetRecordFromDictionary(Dictionary<string, object>? dict) {
-            if (dict == null)
-                return null;
+        // Get record from Dictionary (refactor: low cognitive complexity)
+        protected Dictionary<string, object>? GetRecordFromDictionary(Dictionary<string, object>? dict)
+        {
+            if (dict is null) return null;
             var row = new Dictionary<string, object>();
-            foreach (var (key, value) in dict) {
-                if (Fields.TryGetValue(key, out DbField? fld) && fld != null) {
-                    if (fld.Visible || fld.IsPrimaryKey) { // Primary key or Visible
-                        if (fld.HtmlTag == "FILE") { // Upload field
-                            if (Empty(value)) {
-                                // row[key] = null;
-                            } else {
-                                if (fld.DataType == DataType.Blob) {
-                                    string url = FullUrl(GetPageName(Config.ApiUrl) + "/" + Config.ApiFileAction + "/" + fld.TableVar + "/" + fld.Param + "/" + GetRecordKeyValue(dict)); // Query string format
-                                    row[key] = new Dictionary<string, object> { { "type", ContentType((byte[])value) }, { "url", url }, { "name", fld.Param + ContentExtension((byte[])value) } };
-                                } else if (!fld.UploadMultiple || !ConvertToString(value).Contains(Config.MultipleUploadSeparator)) { // Single file
-                                    string url = FullUrl(GetPageName(Config.ApiUrl) + "/" + Config.ApiFileAction + "/" + fld.TableVar + "/" + Encrypt(fld.PhysicalUploadPath + ConvertToString(value))); // Query string format
-                                    row[key] = new Dictionary<string, object> { { "type", ContentType(ConvertToString(value)) }, { "url", url }, { "name", ConvertToString(value) } };
-                                } else { // Multiple files
-                                    var files = ConvertToString(value).Split(Config.MultipleUploadSeparator);
-                                    row[key] = files.Where(file => !Empty(file)).Select(file => new Dictionary<string, object> { { "type", ContentType(file) }, { "url", FullUrl(GetPageName(Config.ApiUrl) + "/" + Config.ApiFileAction + "/" + fld.TableVar + "/" + Encrypt(fld.PhysicalUploadPath + file)) }, { "name", file } });
-                                }
-                            }
-                        } else {
-                            string val = ConvertToString(value);
-                            if (fld.DataType == DataType.Date && value is DateTime dt)
-                                val = dt.ToString("s");
-                            row[key] = ConvertToString(val);
-                        }
-                    }
-                }
+            foreach (var (key, value) in dict)
+            {
+                if (!Fields.TryGetValue(key, out DbField? fld) || fld is null) continue;
+                if (!ShouldIncludeField(fld)) continue;
+                var cell = fld.HtmlTag == "FILE"
+                    ? BuildFileCell(fld, value, dict)
+                    : BuildScalarCell(fld, value);
+                if (cell is not null)
+                    row[key] = cell;
             }
             return row;
         }
 
-        // Get record key value from array
-        protected string GetRecordKeyValue(Dictionary<string, object> dict) {
+        // ---- Helpers ----
+        private static bool ShouldIncludeField(DbField fld)
+            => fld.Visible || fld.IsPrimaryKey;
+
+        private object? BuildFileCell(DbField fld, object value, Dictionary<string, object> srcRow)
+        {
+            if (Empty(value)) return null; // (sesuai kode asli: tidak menambahkan key)
+
+            // Blob
+            if (fld.DataType == DataType.Blob)
+            {
+                var bytes = (byte[])value;
+                var url = FullUrl($"{GetPageName(Config.ApiUrl)}/{Config.ApiFileAction}/{fld.TableVar}/{fld.Param}/{GetRecordKeyValue(srcRow)}");
+                return FileMeta(ContentType(bytes), url, fld.Param + ContentExtension(bytes));
+            }
+
+            // Non-blob
+            var s = ConvertToString(value);
+            if (!fld.UploadMultiple || !s.Contains(Config.MultipleUploadSeparator))
+            {
+                var url = FullUrl($"{GetPageName(Config.ApiUrl)}/{Config.ApiFileAction}/{fld.TableVar}/{Encrypt(fld.PhysicalUploadPath + s)}");
+                return FileMeta(ContentType(s), url, s);
+            }
+
+            // Multiple files
+            var files = s.Split(Config.MultipleUploadSeparator);
+            return files
+                .Where(f => !Empty(f))
+                .Select(f =>
+                {
+                    var url = FullUrl($"{GetPageName(Config.ApiUrl)}/{Config.ApiFileAction}/{fld.TableVar}/{Encrypt(fld.PhysicalUploadPath + f)}");
+                    return FileMeta(ContentType(f), url, f);
+                });
+        }
+
+        private static Dictionary<string, object> FileMeta(string type, string url, string name) =>
+            new Dictionary<string, object> { { "type", type }, { "url", url }, { "name", name } };
+
+        private object BuildScalarCell(DbField fld, object value)
+        {
+            var s = ConvertToString(value);
+            if (fld.DataType == DataType.Date && value is DateTime dt)
+                s = dt.ToString("s");
+            return ConvertToString(s);
+        }
+
+// Get record key value from array
+protected string GetRecordKeyValue(Dictionary<string, object> dict) {
             string key = "";
             key += UrlEncode(ConvertToString(dict.ContainsKey("id") ? dict["id"] : id.CurrentValue));
             return key;
@@ -425,78 +467,147 @@ public partial class SnDOne {
         }
 
         #pragma warning disable 219
-        /// <summary>
-        /// Lookup data from table
-        /// </summary>
+/// <summary>
+/// Lookup data from table
+/// </summary>
         public async Task<Dictionary<string, object>> Lookup(Dictionary<string, string>? dict = null)
+{
+    Language = ResolveLanguage();
+    Security = ResolveSecurity();
+    var lookupField = FieldByName(GetFieldName(dict));
+    var lookup = lookupField?.Lookup;
+    if (lookup == null)
+        return new Dictionary<string, object>();
+            string lookupType = GetLookupType(dict);
+    var (searchValue, pageSize) = GetSearchAndPageSize(dict, lookupType);
+    int offset = CalculateOffset(dict, pageSize);
+    ApplyUserSettings(dict, lookup);
+    ApplyFilterValues(dict, lookup);
+    lookup.LookupType = lookupType;
+    lookup.SearchValue = searchValue;
+    lookup.PageSize = pageSize;
+    lookup.Offset = offset;
+    return await lookup.ToJson(this);
+}
+
+private string GetFieldName(Dictionary<string, string>? dict)
+{
+    return GetValue(dict, "field", Post("field"));
+}
+
+private string GetLookupType(Dictionary<string, string>? dict)
+{
+    return GetValue(dict, "ajax", Post("ajax") ?? "unknown");
+}
+
+private (string searchValue, int pageSize) GetSearchAndPageSize(Dictionary<string, string>? dict, string lookupType)
+{
+    string searchValue = "";
+    int pageSize = -1;
+    if (SameText(lookupType, "modal") || SameText(lookupType, "filter"))
+    {
+        searchValue = GetValue(dict, new[] { "q", "sv" }, Param("q") ?? Post("sv"));
+        int fallback = 10;
+        if (IsNumeric(Param("n")))
         {
-            Language = ResolveLanguage();
-            Security = ResolveSecurity();
-            string? v;
-
-            // Get lookup object
-            string fieldName = IsDictionary(dict) && dict.TryGetValue("field", out v) && v != null ? v : Post("field");
-            var lookupField = FieldByName(fieldName);
-            var lookup = lookupField?.Lookup;
-            if (lookup == null) // DN
-                return new Dictionary<string, object>();
-            string lookupType = IsDictionary(dict) && dict.TryGetValue("ajax", out v) && v != null ? v : (Post("ajax") ?? "unknown");
-            int pageSize = -1;
-            int offset = -1;
-            string searchValue = "";
-            if (SameText(lookupType, "modal") || SameText(lookupType, "filter")) {
-                searchValue = IsDictionary(dict) && (dict.TryGetValue("q", out v) && v != null || dict.TryGetValue("sv", out v) && v != null)
-                    ? v
-                    : (Param("q") ?? Post("sv"));
-                pageSize = IsDictionary(dict) && (dict.TryGetValue("n", out v) || dict.TryGetValue("recperpage", out v))
-                    ? ConvertToInt(v)
-                    : (IsNumeric(Param("n")) ? Param<int>("n") : (Post("recperpage", out StringValues rpp) ? ConvertToInt(rpp.ToString()) : 10));
-            } else if (SameText(lookupType, "autosuggest")) {
-                searchValue = IsDictionary(dict) && dict.TryGetValue("q", out v) && v != null ? v : Param("q");
-                pageSize = IsDictionary(dict) && dict.TryGetValue("n", out v) ? ConvertToInt(v) : (IsNumeric(Param("n")) ? Param<int>("n") : -1);
-                if (pageSize <= 0)
-                    pageSize = Config.AutoSuggestMaxEntries;
-            }
-            int start = IsDictionary(dict) && dict.TryGetValue("start", out v) ? ConvertToInt(v) : (IsNumeric(Param("start")) ? Param<int>("start") : -1);
-            int page = IsDictionary(dict) && dict.TryGetValue("page", out v) ? ConvertToInt(v) : (IsNumeric(Param("page")) ? Param<int>("page") : -1);
-            offset = start >= 0 ? start : (page > 0 && pageSize > 0 ? (page - 1) * pageSize : 0);
-            string userSelect = Decrypt(IsDictionary(dict) && dict.TryGetValue("s", out v) && v != null ? v : Post("s"));
-            string userFilter = Decrypt(IsDictionary(dict) && dict.TryGetValue("f", out v) && v != null ? v : Post("f"));
-            string userOrderBy = Decrypt(IsDictionary(dict) && dict.TryGetValue("o", out v) && v != null ? v : Post("o"));
-
-            // Selected records from modal, skip parent/filter fields and show all records
-            lookup.LookupType = lookupType; // Lookup type
-            lookup.FilterValues.Clear(); // Clear filter values first
-            StringValues keys = IsDictionary(dict) && dict.TryGetValue("keys", out v) && !Empty(v)
-                ? (StringValues)v
-                : (Post("keys[]", out StringValues k) ? (StringValues)k : StringValues.Empty);
-            if (!Empty(keys)) { // Selected records from modal
-                lookup.FilterFields = new(); // Skip parent fields if any
-                pageSize = -1; // Show all records
-                lookup.FilterValues.Add(String.Join(",", keys.ToArray()));
-            } else { // Lookup values
-                string lookupValue = IsDictionary(dict) && (dict.TryGetValue("v0", out v) && v != null || dict.TryGetValue("lookupValue", out v) && v != null)
-                    ? v
-                    : (Post<string>("v0") ?? Post("lookupValue"));
-                lookup.FilterValues.Add(lookupValue);
-            }
-            int cnt = IsDictionary(lookup.FilterFields) ? lookup.FilterFields.Count : 0;
-            for (int i = 1; i <= cnt; i++) {
-                var val = UrlDecode(IsDictionary(dict) && dict.TryGetValue("v" + i, out v) ? v : Post("v" + i));
-                if (val != null) // DN
-                    lookup.FilterValues.Add(val);
-            }
-            lookup.SearchValue = searchValue;
-            lookup.PageSize = pageSize;
-            lookup.Offset = offset;
-            if (userSelect != "")
-                lookup.UserSelect = userSelect;
-            if (userFilter != "")
-                lookup.UserFilter = userFilter;
-            if (userOrderBy != "")
-                lookup.UserOrderBy = userOrderBy;
-            return await lookup.ToJson(this);
+            fallback = Param<int>("n");
         }
+        else if (Post("recperpage", out StringValues rpp))
+        {
+            fallback = ConvertToInt(rpp.ToString());
+        }
+        pageSize = GetInt(dict, new[] { "n", "recperpage" }, fallback);
+    }
+    else if (SameText(lookupType, "autosuggest"))
+    {
+        searchValue = GetValue(dict, "q", Param("q"));
+        pageSize = GetInt(dict, "n", IsNumeric(Param("n")) ? Param<int>("n") : -1);
+        if (pageSize <= 0)
+            pageSize = Config.AutoSuggestMaxEntries;
+    }
+    return (searchValue, pageSize);
+}
+
+private int CalculateOffset(Dictionary<string, string>? dict, int pageSize)
+{
+    int start = GetInt(dict, "start", IsNumeric(Param("start")) ? Param<int>("start") : -1);
+    int page = GetInt(dict, "page", IsNumeric(Param("page")) ? Param<int>("page") : -1);
+    if (start >= 0)
+        return start;
+    return (page > 0 && pageSize > 0)
+        ? (page - 1) * pageSize
+        : 0;
+}
+
+private void ApplyUserSettings(Dictionary<string, string>? dict, dynamic lookup)
+{
+    string userSelect = Decrypt(GetValue(dict, "s", Post("s")));
+    string userFilter = Decrypt(GetValue(dict, "f", Post("f")));
+    string userOrderBy = Decrypt(GetValue(dict, "o", Post("o")));
+    if (!string.IsNullOrEmpty(userSelect)) lookup.UserSelect = userSelect;
+    if (!string.IsNullOrEmpty(userFilter)) lookup.UserFilter = userFilter;
+    if (!string.IsNullOrEmpty(userOrderBy)) lookup.UserOrderBy = userOrderBy;
+}
+
+private void ApplyFilterValues(Dictionary<string, string>? dict, dynamic lookup)
+{
+    lookup.FilterValues.Clear();
+    StringValues keys = GetKeys(dict);
+    if (!Empty(keys))
+    {
+        lookup.FilterFields = new List<string>(); // Skip parent fields if any
+        lookup.FilterValues.Add(string.Join(",", keys.ToArray()));
+    }
+    else
+    {
+        string lookupValue = GetValue(dict, new[] { "v0", "lookupValue" }, Post<string>("v0") ?? Post("lookupValue"));
+        lookup.FilterValues.Add(lookupValue);
+        int cnt = lookup.FilterFields?.Count ?? 0;
+        for (int i = 1; i <= cnt; i++)
+        {
+            var val = UrlDecode(GetValue(dict, $"v{i}", Post($"v{i}")));
+            if (val != null)
+                lookup.FilterValues.Add(val);
+        }
+    }
+}
+
+private string GetValue(Dictionary<string, string>? dict, string key, string? fallback = null)
+{
+    return IsDictionary(dict) && dict.TryGetValue(key, out var v) && v != null ? v : fallback ?? "";
+}
+
+private string GetValue(Dictionary<string, string>? dict, string[] keys, string? fallback = null)
+{
+    foreach (var key in keys)
+    {
+        if (IsDictionary(dict) && dict.TryGetValue(key, out var v) && v != null)
+            return v;
+    }
+    return fallback ?? "";
+}
+
+private int GetInt(Dictionary<string, string>? dict, string key, int fallback)
+{
+    return IsDictionary(dict) && dict.TryGetValue(key, out var v) ? ConvertToInt(v) : fallback;
+}
+
+private int GetInt(Dictionary<string, string>? dict, string[] keys, int fallback)
+{
+    foreach (var key in keys)
+    {
+        if (IsDictionary(dict) && dict.TryGetValue(key, out var v))
+            return ConvertToInt(v);
+    }
+    return fallback;
+}
+
+private StringValues GetKeys(Dictionary<string, string>? dict)
+{
+    if (IsDictionary(dict) && dict.TryGetValue("keys", out var v) && !Empty(v))
+        return (StringValues)v;
+    return Post("keys[]", out StringValues k) ? k : StringValues.Empty;
+}
         #pragma warning restore 219
 
         public int DisplayRecords = 1; // Number of display records
@@ -532,85 +643,61 @@ public partial class SnDOne {
         /// <returns>Page result</returns>
         public override async Task<IActionResult> Run()
         {
-            // Is modal
-            IsModal = Param<bool>("modal");
-            UseLayout = UseLayout && !IsModal;
+            var beginResult = await PageRunBeginAsync();
+            if (beginResult != null) return beginResult;
 
-            // Use layout
-            if (!Empty(Param("layout")) && !Param<bool>("layout"))
-                UseLayout = false;
+            // === VARIABLES YANG DIAKSES MULTI-SECTION ===
+            bool loaded = false;
+            bool postBack = false;
 
-            // User profile
-            Profile = ResolveProfile();
-
-            // Security
-            Security = ResolveSecurity();
-            if (TableVar != "")
-                Security.LoadTablePermissions(TableVar);
-
-            // Load user profile
-            if (IsLoggedIn()) {
-                await Profile.SetUserName(CurrentUserName()).LoadFromStorageAsync();
+            // === HELPER METHOD CALLS ===
+            PrepareInitialSettings();
+            var actionSetup = await SetupCurrentAction();
+            loaded = actionSetup.Loaded;
+            postBack = actionSetup.PostBack;
+            if (postBack) {
+                await LoadFormValues();
+                await HandleApiFormKeys();
             }
+            await SetupCaptchaAndDetails(postBack);
+            if (postBack && !await ValidateForm()) {
+                EventCancelled = true;
+                RestoreFormValues();
+                if (IsApi())
+                    return Terminate();
+                else
+                    CurrentAction = "";
+            }
+            var actionResult = await ExecuteCurrentAction(loaded);
+            if (actionResult != null) return actionResult;
+            await PrepareForRender();
+            PageRunEnd();
+            return PageResult();
+        }
 
-            // Create form object
-            CurrentForm ??= new();
-            await CurrentForm.Init();
-            CurrentAction = Param("action"); // Set up current action
-            SetVisibility();
-
-            // Do not use lookup cache
-            if (!Config.LookupCachePageIds.Contains(PageID))
-                SetUseLookupCache(false);
-
-            // Global Page Loading event
-            PageLoading();
-            PageLoadingEventHandler?.Invoke(this, EventArgs.Empty);
-
-            // Page Load event
-            PageLoad();
-
-            // Check token
-            if (!await ValidPost())
-                End(Language.Phrase("InvalidPostRequest"));
-
-            // Check action result
-            if (ActionResult != null) // Action result set by server event // DN
-                return ActionResult;
-
-            // Create token
-            CreateToken();
-
-            // Hide fields for add/edit
-            if (!UseAjaxActions)
-                HideFieldsForAddEdit();
-            // Use inline delete
-            if (UseAjaxActions)
-                InlineDelete = true;
-
-            // Set up lookup cache
-            await SetupLookupOptions(JenisSample);
-            await SetupLookupOptions(IdPlant);
-
-            // Check modal
-            if (IsModal)
-                SkipHeaderFooter = true;
+        // === HELPER METHODS ===
+        private void PrepareInitialSettings()
+        {
+            if (IsModal) SkipHeaderFooter = true;
             IsMobileOrModal = IsMobile() || IsModal;
+        }
+
+        private async Task<ActionSetupResult> SetupCurrentAction()
+        {
+            await Task.CompletedTask; // Satisfy async requirement
+            // If null, the conditions aren't fulfilled
+            var result = new ActionSetupResult();
             bool loaded = false;
             bool postBack = false;
             StringValues sv;
             object? rv;
-
-            // Set up current action and primary key
             if (IsApi()) {
                 loaded = true;
-
-                // Load key from form
                 string[] keyValues = {};
                 if (RouteValues.TryGetValue("key", out object? k))
                     keyValues = ConvertToString(k).Split('/');
-                if (RouteValues.TryGetValue("id", out rv)) { // DN
-                    id.FormValue = UrlDecode(rv); // DN
+                if (RouteValues.TryGetValue("id", out rv)) {
+                    id.FormValue = UrlDecode(rv);
                     id.OldValue = id.FormValue;
                 } else if (CurrentForm.HasValue("x_id")) {
                     id.FormValue = CurrentForm.GetValue("x_id");
@@ -618,35 +705,28 @@ public partial class SnDOne {
                 } else if (!Empty(keyValues)) {
                     id.OldValue = ConvertToString(keyValues[0]);
                 } else {
-                    loaded = false; // Unable to load key
+                    loaded = false;
                 }
-
-                // Load record
                 if (loaded)
                     loaded = await LoadRow();
                 if (!loaded) {
-                    FailureMessage = Language.Phrase("NoRecord"); // Set no record message
-                    return Terminate();
+                    FailureMessage = Language.Phrase("NoRecord");
+                    return new ActionSetupResult { ActionResult = Terminate() };
                 }
-                CurrentAction = "update"; // Update record directly
-                OldKey = GetKey(true); // Get from CurrentValue
+                CurrentAction = "update";
+                OldKey = GetKey(true);
                 postBack = true;
             } else {
                 if (!Empty(Post("action"))) {
-                    CurrentAction = Post("action"); // Get action code
-                    if (!IsShow) // Not reload record, handle as postback
-                        postBack = true;
-
-                    // Get key from Form
+                    CurrentAction = Post("action");
+                    if (!IsShow) postBack = true;
                     if (Post(OldKeyName, out sv))
                         SetKey(sv.ToString(), IsShow);
                 } else {
-                    CurrentAction = "show"; // Default action is display
-
-                    // Load key from QueryString
+                    CurrentAction = "show";
                     bool loadByQuery = false;
-                    if (RouteValues.TryGetValue("id", out rv)) { // DN
-                        id.QueryValue = UrlDecode(rv); // DN
+                    if (RouteValues.TryGetValue("id", out rv)) {
+                        id.QueryValue = UrlDecode(rv);
                         loadByQuery = true;
                     } else if (Get("id", out sv)) {
                         id.QueryValue = sv.ToString();
@@ -655,108 +735,261 @@ public partial class SnDOne {
                         id.CurrentValue = DbNullValue;
                     }
                 }
-
-                // Load recordset
                 if (IsShow) {
-                    // Load current record
                     loaded = await LoadRow();
-                OldKey = loaded ? GetKey(true) : ""; // Get from CurrentValue
+                    OldKey = loaded ? GetKey(true) : "";
+                }
             }
+            result.Loaded = loaded;
+            result.PostBack = postBack;
+            return result;
         }
 
-        // Process form if post back
-        if (postBack) {
-            await LoadFormValues(); // Get form values
+        private async Task HandleApiFormKeys()
+        {
+            await Task.CompletedTask; // Satisfy async requirement
+            // If null, the conditions aren't fulfilled
             if (IsApi() && RouteValues.TryGetValue("key", out object? k)) {
                 var keyValues = ConvertToString(k).Split('/');
                 id.FormValue = ConvertToString(keyValues[0]);
             }
         }
 
-        // Validate form if post back
-        if (postBack) {
-            if (!await ValidateForm()) {
-                EventCancelled = true; // Event cancelled
+        private async Task SetupCaptchaAndDetails(bool postBack)
+        {
+            await Task.CompletedTask; // Satisfy async requirement
+            // If null, the conditions aren't fulfilled
+        }
+
+        private async Task<IActionResult?> ExecuteCurrentAction(bool loaded)
+        {
+            await Task.CompletedTask; // Satisfy async requirement
+            switch (CurrentAction) {
+                case "show":
+                    return await HandleShowAction(loaded);
+                case "update":
+                    return await HandleUpdateAction();
+            }
+            return null;
+        }
+
+        private async Task<IActionResult?> HandleShowAction(bool loaded)
+        {
+            await Task.CompletedTask; // Satisfy async requirement
+            // If null, the conditions aren't fulfilled
+            if (!loaded) {
+                if (Empty(FailureMessage))
+                    FailureMessage = Language.Phrase("NoRecord");
+                return Terminate("PenyimpananSampleList");
+            }
+            return null;
+        }
+
+        private async Task<IActionResult?> HandleUpdateAction()
+        {
+            await Task.CompletedTask; // Satisfy async requirement
+            // If null, the conditions aren't fulfilled
+            CloseRecordset();
+            string returnUrl = DetermineReturnUrl();
+            SendEmail = true;
+            var res = await EditRow();
+            if (res) {
+                if (Empty(SuccessMessage))
+                    SuccessMessage = Language.Phrase("UpdateSuccess");
+                if (IsModal && UseAjaxActions) {
+                    IsModal = false;
+                    if (GetPageName(returnUrl) != "PenyimpananSampleList") {
+                        TempData["Return-Url"] = returnUrl;
+                        returnUrl = "PenyimpananSampleList";
+                    }
+                }
+                if (IsJsonResponse()) {
+                    ClearMessages();
+                    return res;
+                } else {
+                    return Terminate(returnUrl);
+                }
+            } else if (IsApi()) {
+                return Terminate();
+            } else if (IsModal && UseAjaxActions) {
+                return Controller.Json(new { success = false, error = GetFailureMessage() });
+            } else if (FailureMessage == Language.Phrase("NoRecord")) {
+                return Terminate(returnUrl);
+            } else {
+                EventCancelled = true;
                 RestoreFormValues();
-                if (IsApi())
-                    return Terminate();
-                else
-                    CurrentAction = ""; // Form error, reset action
+                return null;
             }
         }
 
-        // Perform current action
-        switch (CurrentAction) {
-                case "show": // Get a record to display
-                        if (!loaded) { // Load record based on key
-                            if (Empty(FailureMessage))
-                                FailureMessage = Language.Phrase("NoRecord"); // No record found
-                            return Terminate("PenyimpananSampleList"); // No matching record, return to list
-                        }
-                    break;
-                case "update": // Update // DN
-                    CloseRecordset(); // DN
-                    string returnUrl = ReturnUrl;
-                    if (GetPageName(returnUrl) == "PenyimpananSampleList")
-                        returnUrl = AddMasterUrl(ListUrl); // List page, return to List page with correct master key if necessary
-                    SendEmail = true; // Send email on update success
-                    var res = await EditRow();
-                    if (res) { // Update record based on key
-                        if (Empty(SuccessMessage))
-                            SuccessMessage = Language.Phrase("UpdateSuccess"); // Update success
+        private string DetermineReturnUrl()
+        {
+            string returnUrl = "";
+            returnUrl = ReturnUrl;
+            if (GetPageName(returnUrl) == "PenyimpananSampleList")
+                returnUrl = AddMasterUrl(ListUrl);
+            return returnUrl;
+        }
 
-                        // Handle UseAjaxActions with return page
-                        if (IsModal && UseAjaxActions) {
-                            IsModal = false;
-                            if (GetPageName(returnUrl) != "PenyimpananSampleList") {
-                                TempData["Return-Url"] = returnUrl; // Save return URL
-                                returnUrl = "PenyimpananSampleList"; // Return list page content
-                            }
-                        }
-                        if (IsJsonResponse()) {
-                            ClearMessages(); // Clear messages for Json response
-                            return res;
-                        } else {
-                            return Terminate(returnUrl); // Return to caller
-                        }
-                    } else if (IsApi()) { // API request, return
-                        return Terminate();
-                    } else if (IsModal && UseAjaxActions) { // Return JSON error message
-                        return Controller.Json(new { success = false, error = GetFailureMessage() });
-                    } else if (FailureMessage == Language.Phrase("NoRecord")) {
-                        return Terminate(returnUrl); // Return to caller
-                    } else {
-                        EventCancelled = true; // Event cancelled
-                        RestoreFormValues(); // Restore form values if update failed
-                    }
-                    break;
-            }
-
-            // Set up Breadcrumb
+        private async Task PrepareForRender()
+        {
+            await Task.CompletedTask; // Satisfy async requirement
+            // If null, the conditions aren't fulfilled
             SetupBreadcrumb();
-
-            // Render the record
-            RowType = RowType.Edit; // Render as Edit
+            RowType = RowType.Edit;
             ResetAttributes();
             await RenderRow();
+        }
 
-            // Set LoginStatus, Page Rendering and Page Render
-            if (!IsApi() && !IsTerminated) {
-                SetupLoginStatus(); // Setup login status
+        private async Task<IActionResult?> PageRunBeginAsync()
+        {
+            await Task.CompletedTask; // Satisfy async requirement
+            // If null, the conditions aren't fulfilled
 
-                // Pass login status to client side
-                SetClientVar("login", LoginStatus);
+                    // Is modal
+                    IsModal = Param<bool>("modal");
+                    UseLayout = UseLayout && !IsModal;
 
-                // Global Page Rendering event
-                PageRendering();
-                PageRenderingEventHandler?.Invoke(this, EventArgs.Empty);
+                    // Use layout
+                    if (!Empty(Param("layout")) && !Param<bool>("layout"))
+                        UseLayout = false;
 
-                // Page Render event
-                penyimpananSampleEdit?.PageRender();
-            }
-            return PageResult();
+                    // User profile
+                    Profile = ResolveProfile();
+
+                    // Security
+                    Security = ResolveSecurity();
+                    if (TableVar != "")
+                        Security.LoadTablePermissions(TableVar);
+
+                    // Load user profile
+                    if (IsLoggedIn()) {
+                        await Profile.SetUserName(CurrentUserName()).LoadFromStorageAsync();
+                    }
+
+                    // Create form object
+                    CurrentForm ??= new();
+                    await CurrentForm.Init();
+                    CurrentAction = Param("action"); // Set up current action
+                    SetVisibility();
+
+                    // Do not use lookup cache
+                    if (!Config.LookupCachePageIds.Contains(PageID))
+                        SetUseLookupCache(false);
+
+                    // Global Page Loading event
+                    PageLoading();
+                    PageLoadingEventHandler?.Invoke(null, EventArgs.Empty);
+
+                    // Page Load event
+                    PageLoad();
+
+                    // Check token
+                    if (!await ValidPost())
+                        End(Language.Phrase("InvalidPostRequest"));
+
+                    // Check action result
+                    if (ActionResult != null) // Action result set by server event // DN
+                        return ActionResult;
+
+                    // Create token
+                    CreateToken();
+
+                    // Hide fields for add/edit
+                    if (!UseAjaxActions) {
+                        HideFieldsForAddEdit();
+                    }
+                    else { // Use inline delete
+                        InlineDelete = true;
+                    }
+
+                    // Set up lookup cache
+                    await SetupLookupOptions(JenisSample);
+                    await SetupLookupOptions(IdPlant);
+            return null;
+        }
+
+        private void PageRunEnd()
+        {
+                    // Set LoginStatus, Page Rendering and Page Render
+                    if (!IsApi() && !IsTerminated) {
+                        SetupLoginStatus(); // Setup login status
+
+                        // Pass login status to client side
+                        SetClientVar("login", LoginStatus);
+
+                        // Global Page Rendering event
+                        PageRendering();
+                        PageRenderingEventHandler?.Invoke(null, EventArgs.Empty);
+
+                        // Page Render event
+                        penyimpananSampleEdit?.PageRender();
+                    }
+        }
+
+        // Support class
+        private sealed class ActionSetupResult
+        {
+            public bool Loaded { get; set; }
+
+            public bool PostBack { get; set; }
+
+            public bool LoadByPosition { get; set; }
+
+            public IActionResult? ActionResult { get; set; }
         }
         #pragma warning restore 219
+// ================== GENERATED HELPERS ==================
+private void ResolveLookupView(dynamic fld, string keyFieldName, string fallbackType = "auto")
+{
+    string curVal = ConvertToString(fld.CurrentValue);
+
+    // kosong → DbNullValue lalu selesai
+    if (Empty(curVal))
+    {
+        fld.ViewValue = DbNullValue;
+        return;
+    }
+
+    // siapkan fallback awal (kalau cache/DB tidak dapat)
+    if (fallbackType == "number")
+    {
+        fld.ViewValue = FormatNumber(fld.CurrentValue, fld.FormatPattern);
+    }
+    else if (fallbackType == "date")
+    {
+        var tmp = fld.CurrentValue;
+        fld.ViewValue = FormatDateTime(tmp, fld.FormatPattern);
+    }
+    else if (fallbackType == "string")
+    {
+        fld.ViewValue = ConvertToString(fld.CurrentValue);
+    }
+    else
+    { // auto
+        fld.ViewValue = IsNumeric(fld.CurrentValue)
+            ? FormatNumber(fld.CurrentValue, fld.FormatPattern)
+            : ConvertToString(fld.CurrentValue);
+    }
+
+    // coba dari cache
+    if (fld.Lookup != null && IsDictionary(fld.Lookup?.Options) && fld.Lookup?.Options.Values.Count > 0)
+    {
+        fld.ViewValue = fld.LookupCacheOption(curVal);
+        return;
+    }
+
+    // fallback: query DB
+    var keyField = fld.Lookup?.GetTable()?.Fields[keyFieldName];
+    string filterWrk = SearchFilter(keyField?.SearchExpression, "=", fld.CurrentValue, keyField?.SearchDataType, "");
+    string? sqlWrk = fld.Lookup?.GetSql(false, filterWrk, null, this, true, true);
+    List<Dictionary<string, object>>? rswrk = sqlWrk != null ? Connection.GetRows(sqlWrk) : null;
+    if (rswrk?.Count > 0 && fld.Lookup != null)
+    {
+        var listwrk = fld.Lookup?.RenderViewRow(rswrk[0]);
+        fld.ViewValue = fld.DisplayValue(listwrk);
+    }
+}
 
         // Confirm page
         public bool ConfirmPage = false; // DN
@@ -770,119 +1003,87 @@ public partial class SnDOne {
         #pragma warning restore 1998
 
         #pragma warning disable 1998
-        // Load form values
+        // Helper methods (placed inside the same partial class as LoadFormValues)
+        private void SetNormalField(dynamic fld, string fldName, string fldVar, bool includeValidate = false, bool validateFlag = false, bool unformatDate = false) {
+            // Determine value once
+            string val = CurrentForm.HasValue(fldName) ? CurrentForm.GetValue(fldName) : CurrentForm.GetValue(fldVar);
+            if (!fld.IsDetailKey) {
+                // API: if field not present in request, disable update
+                if (IsApi() && !CurrentForm.HasValue(fldName) && !CurrentForm.HasValue(fldVar))
+                    fld.Visible = false; // Disable update for API request
+                else {
+                    // Call appropriate SetFormValue overload
+                    if (includeValidate)
+                        fld.SetFormValue(val, true, validateFlag);
+                    else
+                        fld.SetFormValue(val);
+                }
+                if (unformatDate)
+                    fld.CurrentValue = UnformatDateTime(fld.CurrentValue, fld.FormatPattern);
+            }
+        }
+
+        private void SetFieldValueWithRaw(dynamic fld, string rawValue) {
+            // Helper in case caller wants to set from a raw form object call rather than val computed here
+            if (!fld.IsDetailKey) {
+                if (IsApi() && string.IsNullOrEmpty(rawValue)) // rawValue empty simulates missing
+                    fld.Visible = false;
+                else
+                    fld.SetFormValue(rawValue);
+            }
+        }
+
         protected async Task LoadFormValues() {
             if (CurrentForm == null)
                 return;
             bool validate = !Config.ServerValidate;
-            string val;
 
-            // Check field name 'NomorPenyimpananSample' before field var 'x_NomorPenyimpananSample'
-            val = CurrentForm.HasValue("NomorPenyimpananSample") ? CurrentForm.GetValue("NomorPenyimpananSample") : CurrentForm.GetValue("x_NomorPenyimpananSample");
-            if (!NomorPenyimpananSample.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("NomorPenyimpananSample") && !CurrentForm.HasValue("x_NomorPenyimpananSample")) // DN
-                    NomorPenyimpananSample.Visible = false; // Disable update for API request
-                else
-                    NomorPenyimpananSample.SetFormValue(val);
+            // Standard handling for 'NomorPenyimpananSample'
+            NomorPenyimpananSample.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(NomorPenyimpananSample, "NomorPenyimpananSample", "x_NomorPenyimpananSample");
+
+            // Standard handling for 'JenisSample'
+            JenisSample.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(JenisSample, "JenisSample", "x_JenisSample");
+
+            // Standard handling for 'IdPlant'
+            IdPlant.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(IdPlant, "IdPlant", "x_IdPlant");
+
+            // Standard handling for 'Tanggal'
+            Tanggal.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(Tanggal, "Tanggal", "x_Tanggal", false, false, true);
+
+            // Standard handling for 'NamaMasterSample'
+            NamaMasterSample.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(NamaMasterSample, "NamaMasterSample", "x_NamaMasterSample");
+
+            // Standard handling for 'NomorSegel'
+            NomorSegel.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(NomorSegel, "NomorSegel", "x_NomorSegel");
+
+            // Standard handling for 'Status'
+            Status.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(Status, "Status", "x_Status");
+
+            // Standard handling for 'Foto'
+            Foto.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(Foto, "Foto", "x_Foto");
+
+            // Standard handling for 'ExpiredEst'
+            ExpiredEst.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(ExpiredEst, "ExpiredEst", "x_ExpiredEst", false, false, true);
+
+            // Standard handling for 'TanggalDimusnahkan'
+            TanggalDimusnahkan.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(TanggalDimusnahkan, "TanggalDimusnahkan", "x_TanggalDimusnahkan", true, validate, true);
+
+            // Standard handling for 'LokasiPemusnahan'
+            LokasiPemusnahan.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(LokasiPemusnahan, "LokasiPemusnahan", "x_LokasiPemusnahan");
+            if (!id.IsDetailKey) {
+                SetNormalField(id, "id", "x_id");
             }
-
-            // Check field name 'JenisSample' before field var 'x_JenisSample'
-            val = CurrentForm.HasValue("JenisSample") ? CurrentForm.GetValue("JenisSample") : CurrentForm.GetValue("x_JenisSample");
-            if (!JenisSample.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("JenisSample") && !CurrentForm.HasValue("x_JenisSample")) // DN
-                    JenisSample.Visible = false; // Disable update for API request
-                else
-                    JenisSample.SetFormValue(val);
-            }
-
-            // Check field name 'IdPlant' before field var 'x_IdPlant'
-            val = CurrentForm.HasValue("IdPlant") ? CurrentForm.GetValue("IdPlant") : CurrentForm.GetValue("x_IdPlant");
-            if (!IdPlant.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("IdPlant") && !CurrentForm.HasValue("x_IdPlant")) // DN
-                    IdPlant.Visible = false; // Disable update for API request
-                else
-                    IdPlant.SetFormValue(val);
-            }
-
-            // Check field name 'Tanggal' before field var 'x_Tanggal'
-            val = CurrentForm.HasValue("Tanggal") ? CurrentForm.GetValue("Tanggal") : CurrentForm.GetValue("x_Tanggal");
-            if (!Tanggal.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("Tanggal") && !CurrentForm.HasValue("x_Tanggal")) // DN
-                    Tanggal.Visible = false; // Disable update for API request
-                else
-                    Tanggal.SetFormValue(val);
-                Tanggal.CurrentValue = UnformatDateTime(Tanggal.CurrentValue, Tanggal.FormatPattern);
-            }
-
-            // Check field name 'NamaMasterSample' before field var 'x_NamaMasterSample'
-            val = CurrentForm.HasValue("NamaMasterSample") ? CurrentForm.GetValue("NamaMasterSample") : CurrentForm.GetValue("x_NamaMasterSample");
-            if (!NamaMasterSample.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("NamaMasterSample") && !CurrentForm.HasValue("x_NamaMasterSample")) // DN
-                    NamaMasterSample.Visible = false; // Disable update for API request
-                else
-                    NamaMasterSample.SetFormValue(val);
-            }
-
-            // Check field name 'NomorSegel' before field var 'x_NomorSegel'
-            val = CurrentForm.HasValue("NomorSegel") ? CurrentForm.GetValue("NomorSegel") : CurrentForm.GetValue("x_NomorSegel");
-            if (!NomorSegel.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("NomorSegel") && !CurrentForm.HasValue("x_NomorSegel")) // DN
-                    NomorSegel.Visible = false; // Disable update for API request
-                else
-                    NomorSegel.SetFormValue(val);
-            }
-
-            // Check field name 'Status' before field var 'x_Status'
-            val = CurrentForm.HasValue("Status") ? CurrentForm.GetValue("Status") : CurrentForm.GetValue("x_Status");
-            if (!Status.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("Status") && !CurrentForm.HasValue("x_Status")) // DN
-                    Status.Visible = false; // Disable update for API request
-                else
-                    Status.SetFormValue(val);
-            }
-
-            // Check field name 'Foto' before field var 'x_Foto'
-            val = CurrentForm.HasValue("Foto") ? CurrentForm.GetValue("Foto") : CurrentForm.GetValue("x_Foto");
-            if (!Foto.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("Foto") && !CurrentForm.HasValue("x_Foto")) // DN
-                    Foto.Visible = false; // Disable update for API request
-                else
-                    Foto.SetFormValue(val);
-            }
-
-            // Check field name 'ExpiredEst' before field var 'x_ExpiredEst'
-            val = CurrentForm.HasValue("ExpiredEst") ? CurrentForm.GetValue("ExpiredEst") : CurrentForm.GetValue("x_ExpiredEst");
-            if (!ExpiredEst.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("ExpiredEst") && !CurrentForm.HasValue("x_ExpiredEst")) // DN
-                    ExpiredEst.Visible = false; // Disable update for API request
-                else
-                    ExpiredEst.SetFormValue(val);
-                ExpiredEst.CurrentValue = UnformatDateTime(ExpiredEst.CurrentValue, ExpiredEst.FormatPattern);
-            }
-
-            // Check field name 'TanggalDimusnahkan' before field var 'x_TanggalDimusnahkan'
-            val = CurrentForm.HasValue("TanggalDimusnahkan") ? CurrentForm.GetValue("TanggalDimusnahkan") : CurrentForm.GetValue("x_TanggalDimusnahkan");
-            if (!TanggalDimusnahkan.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("TanggalDimusnahkan") && !CurrentForm.HasValue("x_TanggalDimusnahkan")) // DN
-                    TanggalDimusnahkan.Visible = false; // Disable update for API request
-                else
-                    TanggalDimusnahkan.SetFormValue(val, true, validate);
-                TanggalDimusnahkan.CurrentValue = UnformatDateTime(TanggalDimusnahkan.CurrentValue, TanggalDimusnahkan.FormatPattern);
-            }
-
-            // Check field name 'LokasiPemusnahan' before field var 'x_LokasiPemusnahan'
-            val = CurrentForm.HasValue("LokasiPemusnahan") ? CurrentForm.GetValue("LokasiPemusnahan") : CurrentForm.GetValue("x_LokasiPemusnahan");
-            if (!LokasiPemusnahan.IsDetailKey) {
-                if (IsApi() && !CurrentForm.HasValue("LokasiPemusnahan") && !CurrentForm.HasValue("x_LokasiPemusnahan")) // DN
-                    LokasiPemusnahan.Visible = false; // Disable update for API request
-                else
-                    LokasiPemusnahan.SetFormValue(val);
-            }
-
-            // Check field name 'id' before field var 'x_id'
-            val = CurrentForm.HasValue("id") ? CurrentForm.GetValue("id") : CurrentForm.GetValue("x_id");
-            if (!id.IsDetailKey)
-                id.SetFormValue(val);
         }
         #pragma warning restore 1998
 
@@ -1070,91 +1271,106 @@ public partial class SnDOne {
 
             // View row
             if (RowType == RowType.View) {
-                // NomorPenyimpananSample
-                NomorPenyimpananSample.ViewValue = ConvertToString(NomorPenyimpananSample.CurrentValue); // DN
-                NomorPenyimpananSample.ViewCustomAttributes = "";
-
                 // JenisSample
-                if (!Empty(JenisSample.CurrentValue)) {
-                    JenisSample.ViewValue = JenisSample.OptionCaption(ConvertToString(JenisSample.CurrentValue));
-                } else {
-                    JenisSample.ViewValue = DbNullValue;
-                }
-                JenisSample.ViewCustomAttributes = "";
 
                 // IdPlant
-                string curVal2 = ConvertToString(IdPlant.CurrentValue);
-                if (!Empty(curVal2)) {
-                    if (IdPlant.Lookup != null && IsDictionary(IdPlant.Lookup?.Options) && IdPlant.Lookup?.Options.Values.Count > 0) { // Load from cache // DN
-                        IdPlant.ViewValue = IdPlant.LookupCacheOption(curVal2);
-                    } else { // Lookup from database // DN
-                        string filterWrk2 = SearchFilter(IdPlant.Lookup?.GetTable()?.Fields["IdPlant"].SearchExpression, "=", IdPlant.CurrentValue, IdPlant.Lookup?.GetTable()?.Fields["IdPlant"].SearchDataType, "");
-                        string? sqlWrk2 = IdPlant.Lookup?.GetSql(false, filterWrk2, null, this, true, true);
-                        List<Dictionary<string, object>>? rswrk2 = sqlWrk2 != null ? Connection.GetRows(sqlWrk2) : null; // Must use Sync to avoid overwriting ViewValue in RenderViewRow
-                        if (rswrk2?.Count > 0 && IdPlant.Lookup != null) { // Lookup values found
-                            var listwrk = IdPlant.Lookup?.RenderViewRow(rswrk2[0]);
-                            IdPlant.ViewValue = IdPlant.DisplayValue(listwrk);
-                        } else {
-                            IdPlant.ViewValue = FormatNumber(IdPlant.CurrentValue, IdPlant.FormatPattern);
-                        }
-                    }
-                } else {
-                    IdPlant.ViewValue = DbNullValue;
-                }
-                IdPlant.ViewCustomAttributes = "";
 
                 // Tanggal
-                Tanggal.ViewValue = Tanggal.CurrentValue;
-                Tanggal.ViewValue = FormatDateTime(Tanggal.ViewValue, Tanggal.FormatPattern);
-                Tanggal.ViewCustomAttributes = "";
 
                 // NamaMasterSample
-                NamaMasterSample.ViewValue = ConvertToString(NamaMasterSample.CurrentValue); // DN
-                NamaMasterSample.ViewCustomAttributes = "";
 
                 // NomorSegel
-                NomorSegel.ViewValue = ConvertToString(NomorSegel.CurrentValue); // DN
-                NomorSegel.ViewCustomAttributes = "";
 
                 // Status
-                Status.ViewValue = ConvertToString(Status.CurrentValue); // DN
-                Status.ViewCustomAttributes = "";
 
                 // Foto
-                Foto.ViewValue = Foto.CurrentValue;
-                Foto.ViewCustomAttributes = "";
 
                 // ExpiredEst
-                ExpiredEst.ViewValue = ExpiredEst.CurrentValue;
-                ExpiredEst.ViewValue = FormatDateTime(ExpiredEst.ViewValue, ExpiredEst.FormatPattern);
-                ExpiredEst.ViewCustomAttributes = "";
 
                 // TanggalDimusnahkan
-                TanggalDimusnahkan.ViewValue = TanggalDimusnahkan.CurrentValue;
-                TanggalDimusnahkan.ViewValue = FormatDateTime(TanggalDimusnahkan.ViewValue, TanggalDimusnahkan.FormatPattern);
-                TanggalDimusnahkan.ViewCustomAttributes = "";
 
                 // LokasiPemusnahan
-                LokasiPemusnahan.ViewValue = ConvertToString(LokasiPemusnahan.CurrentValue); // DN
-                LokasiPemusnahan.ViewCustomAttributes = "";
 
                 // CreatedBy
-                CreatedBy.ViewValue = ConvertToString(CreatedBy.CurrentValue); // DN
-                CreatedBy.ViewCustomAttributes = "";
 
                 // etlDate
-                etlDate.ViewValue = etlDate.CurrentValue;
-                etlDate.ViewValue = FormatDateTime(etlDate.ViewValue, etlDate.FormatPattern);
-                etlDate.ViewCustomAttributes = "";
 
                 // LastUpdatedBy
-                LastUpdatedBy.ViewValue = ConvertToString(LastUpdatedBy.CurrentValue); // DN
-                LastUpdatedBy.ViewCustomAttributes = "";
 
                 // lastUpdatedDate
-                lastUpdatedDate.ViewValue = lastUpdatedDate.CurrentValue;
-                lastUpdatedDate.ViewValue = FormatDateTime(lastUpdatedDate.ViewValue, lastUpdatedDate.FormatPattern);
-                lastUpdatedDate.ViewCustomAttributes = "";
+
+                    // NomorPenyimpananSample
+                    NomorPenyimpananSample.ViewValue = ConvertToString(NomorPenyimpananSample.CurrentValue); // DN
+                    NomorPenyimpananSample.ViewCustomAttributes = "";
+
+                    // JenisSample
+                    if (!Empty(JenisSample.CurrentValue)) {
+                        JenisSample.ViewValue = JenisSample.OptionCaption(ConvertToString(JenisSample.CurrentValue));
+                    } else {
+                        JenisSample.ViewValue = DbNullValue;
+                    }
+                    JenisSample.ViewCustomAttributes = "";
+
+                    // IdPlant
+
+                    // awallookupbung
+                    // IdPlant
+                    ResolveLookupView(IdPlant, "IdPlant", "number");
+                    // akhirlookupbung
+                    IdPlant.ViewCustomAttributes = "";
+
+                    // Tanggal
+                    Tanggal.ViewValue = Tanggal.CurrentValue;
+                    Tanggal.ViewValue = FormatDateTime(Tanggal.ViewValue, Tanggal.FormatPattern);
+                    Tanggal.ViewCustomAttributes = "";
+
+                    // NamaMasterSample
+                    NamaMasterSample.ViewValue = ConvertToString(NamaMasterSample.CurrentValue); // DN
+                    NamaMasterSample.ViewCustomAttributes = "";
+
+                    // NomorSegel
+                    NomorSegel.ViewValue = ConvertToString(NomorSegel.CurrentValue); // DN
+                    NomorSegel.ViewCustomAttributes = "";
+
+                    // Status
+                    Status.ViewValue = ConvertToString(Status.CurrentValue); // DN
+                    Status.ViewCustomAttributes = "";
+
+                    // Foto
+                    Foto.ViewValue = Foto.CurrentValue;
+                    Foto.ViewCustomAttributes = "";
+
+                    // ExpiredEst
+                    ExpiredEst.ViewValue = ExpiredEst.CurrentValue;
+                    ExpiredEst.ViewValue = FormatDateTime(ExpiredEst.ViewValue, ExpiredEst.FormatPattern);
+                    ExpiredEst.ViewCustomAttributes = "";
+
+                    // TanggalDimusnahkan
+                    TanggalDimusnahkan.ViewValue = TanggalDimusnahkan.CurrentValue;
+                    TanggalDimusnahkan.ViewValue = FormatDateTime(TanggalDimusnahkan.ViewValue, TanggalDimusnahkan.FormatPattern);
+                    TanggalDimusnahkan.ViewCustomAttributes = "";
+
+                    // LokasiPemusnahan
+                    LokasiPemusnahan.ViewValue = ConvertToString(LokasiPemusnahan.CurrentValue); // DN
+                    LokasiPemusnahan.ViewCustomAttributes = "";
+
+                    // CreatedBy
+                    CreatedBy.ViewValue = ConvertToString(CreatedBy.CurrentValue); // DN
+                    CreatedBy.ViewCustomAttributes = "";
+
+                    // etlDate
+                    etlDate.ViewValue = etlDate.CurrentValue;
+                    etlDate.ViewValue = FormatDateTime(etlDate.ViewValue, etlDate.FormatPattern);
+                    etlDate.ViewCustomAttributes = "";
+
+                    // LastUpdatedBy
+                    LastUpdatedBy.ViewValue = ConvertToString(LastUpdatedBy.CurrentValue); // DN
+                    LastUpdatedBy.ViewCustomAttributes = "";
+
+                    // lastUpdatedDate
+                    lastUpdatedDate.ViewValue = lastUpdatedDate.CurrentValue;
+                    lastUpdatedDate.ViewValue = FormatDateTime(lastUpdatedDate.ViewValue, lastUpdatedDate.FormatPattern);
+                    lastUpdatedDate.ViewCustomAttributes = "";
 
                 // NomorPenyimpananSample
                 NomorPenyimpananSample.HrefValue = "";
@@ -1214,7 +1430,10 @@ public partial class SnDOne {
 
                 // IdPlant
                 IdPlant.SetupEditAttributes();
+
+                // awallookupbung
                 string curVal2 = ConvertToString(IdPlant.CurrentValue);
+                IdPlant.EditValue = Empty(curVal2) ? DbNullValue : FormatNumber(IdPlant.CurrentValue, IdPlant.FormatPattern);
                 if (!Empty(curVal2)) {
                     if (IdPlant.Lookup != null && IsDictionary(IdPlant.Lookup?.Options) && IdPlant.Lookup?.Options.Values.Count > 0) { // Load from cache // DN
                         IdPlant.EditValue = IdPlant.LookupCacheOption(curVal2);
@@ -1225,13 +1444,11 @@ public partial class SnDOne {
                         if (rswrk2?.Count > 0 && IdPlant.Lookup != null) { // Lookup values found
                             var listwrk = IdPlant.Lookup?.RenderViewRow(rswrk2[0]);
                             IdPlant.EditValue = IdPlant.DisplayValue(listwrk);
-                        } else {
-                            IdPlant.EditValue = FormatNumber(IdPlant.CurrentValue, IdPlant.FormatPattern);
                         }
                     }
-                } else {
-                    IdPlant.EditValue = DbNullValue;
                 }
+
+                // akhirlookupbung
                 IdPlant.ViewCustomAttributes = "";
 
                 // Tanggal
@@ -1336,70 +1553,115 @@ public partial class SnDOne {
         #pragma warning restore 1998
 
         #pragma warning disable 1998
+
+        private void ValidateCustomNomorPenyimpananSample() {
+            if (NomorPenyimpananSample.Visible && NomorPenyimpananSample.Required) {
+                if (!NomorPenyimpananSample.IsDetailKey && Empty(NomorPenyimpananSample.FormValue)) {
+                    NomorPenyimpananSample.AddErrorMessage(ConvertToString(LokasiPemusnahan.RequiredErrorMessage).Replace("%s", LokasiPemusnahan.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomJenisSample() {
+            if (JenisSample.Visible && JenisSample.Required) {
+                if (!JenisSample.IsDetailKey && Empty(JenisSample.FormValue)) {
+                    JenisSample.AddErrorMessage(ConvertToString(LokasiPemusnahan.RequiredErrorMessage).Replace("%s", LokasiPemusnahan.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomIdPlant() {
+            if (IdPlant.Visible && IdPlant.Required) {
+                if (!IdPlant.IsDetailKey && Empty(IdPlant.FormValue)) {
+                    IdPlant.AddErrorMessage(ConvertToString(LokasiPemusnahan.RequiredErrorMessage).Replace("%s", LokasiPemusnahan.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomTanggal() {
+            if (Tanggal.Visible && Tanggal.Required) {
+                if (!Tanggal.IsDetailKey && Empty(Tanggal.FormValue)) {
+                    Tanggal.AddErrorMessage(ConvertToString(LokasiPemusnahan.RequiredErrorMessage).Replace("%s", LokasiPemusnahan.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomNamaMasterSample() {
+            if (NamaMasterSample.Visible && NamaMasterSample.Required) {
+                if (!NamaMasterSample.IsDetailKey && Empty(NamaMasterSample.FormValue)) {
+                    NamaMasterSample.AddErrorMessage(ConvertToString(LokasiPemusnahan.RequiredErrorMessage).Replace("%s", LokasiPemusnahan.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomNomorSegel() {
+            if (NomorSegel.Visible && NomorSegel.Required) {
+                if (!NomorSegel.IsDetailKey && Empty(NomorSegel.FormValue)) {
+                    NomorSegel.AddErrorMessage(ConvertToString(LokasiPemusnahan.RequiredErrorMessage).Replace("%s", LokasiPemusnahan.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomStatus() {
+            if (Status.Visible && Status.Required) {
+                if (!Status.IsDetailKey && Empty(Status.FormValue)) {
+                    Status.AddErrorMessage(ConvertToString(LokasiPemusnahan.RequiredErrorMessage).Replace("%s", LokasiPemusnahan.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomFoto() {
+            if (Foto.Visible && Foto.Required) {
+                if (!Foto.IsDetailKey && Empty(Foto.FormValue)) {
+                    Foto.AddErrorMessage(ConvertToString(LokasiPemusnahan.RequiredErrorMessage).Replace("%s", LokasiPemusnahan.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomExpiredEst() {
+            if (ExpiredEst.Visible && ExpiredEst.Required) {
+                if (!ExpiredEst.IsDetailKey && Empty(ExpiredEst.FormValue)) {
+                    ExpiredEst.AddErrorMessage(ConvertToString(LokasiPemusnahan.RequiredErrorMessage).Replace("%s", LokasiPemusnahan.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomTanggalDimusnahkan() {
+            if (TanggalDimusnahkan.Visible && TanggalDimusnahkan.Required) {
+                if (!TanggalDimusnahkan.IsDetailKey && Empty(TanggalDimusnahkan.FormValue)) {
+                    TanggalDimusnahkan.AddErrorMessage(ConvertToString(LokasiPemusnahan.RequiredErrorMessage).Replace("%s", LokasiPemusnahan.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomLokasiPemusnahan() {
+            if (LokasiPemusnahan.Visible && LokasiPemusnahan.Required) {
+                if (!LokasiPemusnahan.IsDetailKey && Empty(LokasiPemusnahan.FormValue)) {
+                    LokasiPemusnahan.AddErrorMessage(ConvertToString(LokasiPemusnahan.RequiredErrorMessage).Replace("%s", LokasiPemusnahan.Caption));
+                }
+            }
+        }
+
         // Validate form
         protected async Task<bool> ValidateForm() {
             // Check if validation required
             if (!Config.ServerValidate)
                 return true;
             bool validateForm = true;
-                if (NomorPenyimpananSample.Visible && NomorPenyimpananSample.Required) {
-                    if (!NomorPenyimpananSample.IsDetailKey && Empty(NomorPenyimpananSample.FormValue)) {
-                        NomorPenyimpananSample.AddErrorMessage(ConvertToString(NomorPenyimpananSample.RequiredErrorMessage).Replace("%s", NomorPenyimpananSample.Caption));
-                    }
-                }
-                if (JenisSample.Visible && JenisSample.Required) {
-                    if (!JenisSample.IsDetailKey && Empty(JenisSample.FormValue)) {
-                        JenisSample.AddErrorMessage(ConvertToString(JenisSample.RequiredErrorMessage).Replace("%s", JenisSample.Caption));
-                    }
-                }
-                if (IdPlant.Visible && IdPlant.Required) {
-                    if (!IdPlant.IsDetailKey && Empty(IdPlant.FormValue)) {
-                        IdPlant.AddErrorMessage(ConvertToString(IdPlant.RequiredErrorMessage).Replace("%s", IdPlant.Caption));
-                    }
-                }
-                if (Tanggal.Visible && Tanggal.Required) {
-                    if (!Tanggal.IsDetailKey && Empty(Tanggal.FormValue)) {
-                        Tanggal.AddErrorMessage(ConvertToString(Tanggal.RequiredErrorMessage).Replace("%s", Tanggal.Caption));
-                    }
-                }
-                if (NamaMasterSample.Visible && NamaMasterSample.Required) {
-                    if (!NamaMasterSample.IsDetailKey && Empty(NamaMasterSample.FormValue)) {
-                        NamaMasterSample.AddErrorMessage(ConvertToString(NamaMasterSample.RequiredErrorMessage).Replace("%s", NamaMasterSample.Caption));
-                    }
-                }
-                if (NomorSegel.Visible && NomorSegel.Required) {
-                    if (!NomorSegel.IsDetailKey && Empty(NomorSegel.FormValue)) {
-                        NomorSegel.AddErrorMessage(ConvertToString(NomorSegel.RequiredErrorMessage).Replace("%s", NomorSegel.Caption));
-                    }
-                }
-                if (Status.Visible && Status.Required) {
-                    if (!Status.IsDetailKey && Empty(Status.FormValue)) {
-                        Status.AddErrorMessage(ConvertToString(Status.RequiredErrorMessage).Replace("%s", Status.Caption));
-                    }
-                }
-                if (Foto.Visible && Foto.Required) {
-                    if (!Foto.IsDetailKey && Empty(Foto.FormValue)) {
-                        Foto.AddErrorMessage(ConvertToString(Foto.RequiredErrorMessage).Replace("%s", Foto.Caption));
-                    }
-                }
-                if (ExpiredEst.Visible && ExpiredEst.Required) {
-                    if (!ExpiredEst.IsDetailKey && Empty(ExpiredEst.FormValue)) {
-                        ExpiredEst.AddErrorMessage(ConvertToString(ExpiredEst.RequiredErrorMessage).Replace("%s", ExpiredEst.Caption));
-                    }
-                }
-                if (TanggalDimusnahkan.Visible && TanggalDimusnahkan.Required) {
-                    if (!TanggalDimusnahkan.IsDetailKey && Empty(TanggalDimusnahkan.FormValue)) {
-                        TanggalDimusnahkan.AddErrorMessage(ConvertToString(TanggalDimusnahkan.RequiredErrorMessage).Replace("%s", TanggalDimusnahkan.Caption));
-                    }
-                }
+                ValidateCustomNomorPenyimpananSample();
+                ValidateCustomJenisSample();
+                ValidateCustomIdPlant();
+                ValidateCustomTanggal();
+                ValidateCustomNamaMasterSample();
+                ValidateCustomNomorSegel();
+                ValidateCustomStatus();
+                ValidateCustomFoto();
+                ValidateCustomExpiredEst();
+                ValidateCustomTanggalDimusnahkan();
                 if (!CheckDate(TanggalDimusnahkan.FormValue, TanggalDimusnahkan.FormatPattern)) {
                     TanggalDimusnahkan.AddErrorMessage(TanggalDimusnahkan.GetErrorMessage(false));
                 }
-                if (LokasiPemusnahan.Visible && LokasiPemusnahan.Required) {
-                    if (!LokasiPemusnahan.IsDetailKey && Empty(LokasiPemusnahan.FormValue)) {
-                        LokasiPemusnahan.AddErrorMessage(ConvertToString(LokasiPemusnahan.RequiredErrorMessage).Replace("%s", LokasiPemusnahan.Caption));
-                    }
-                }
+                ValidateCustomLokasiPemusnahan();
 
             // Return validate result
             validateForm = validateForm && !HasInvalidFields();
@@ -1538,32 +1800,39 @@ public partial class SnDOne {
         {
             if (fld.Lookup == null)
                 return;
+            if (fld.Lookup.Options.Count is int opt && opt > 0) 
+                return;
             Func<string>? lookupFilter = null;
             dynamic conn = Connection;
-            if (fld.Lookup.Options.Count is int c && c == 0) {
+
+                // Set up lookup SQL
+
                 // Always call to Lookup.GetSql so that user can setup Lookup.Options in Lookup Selecting server event
                 var sql = fld.Lookup.GetSql(false, "", lookupFilter, this);
 
                 // Set up lookup cache
-                if (!fld.HasLookupOptions && fld.UseLookupCache && !Empty(sql) && fld.Lookup.ParentFields.Count == 0 && fld.Lookup.Options.Count == 0) {
-                    int totalCnt = await TryGetRecordCountAsync(sql, conn);
-                    if (totalCnt > fld.LookupCacheCount) // Total count > cache count, do not cache
-                        return;
-                    var dict = new Dictionary<string, Dictionary<string, object>>();
-                    List<object> values = [];
-                    List<Dictionary<string, object>> rs = await conn.GetRowsAsync(sql);
-                    if (rs != null) {
-                        for (int i = 0; i < rs.Count; i++) {
-                            var row = rs[i];
-                            row = fld.Lookup?.RenderViewRow(row, Resolve(fld.Lookup.LinkTable));
-                            string key = row?.Values.First()?.ToString() ?? String.Empty;
-                            if (!dict.ContainsKey(key) && row != null)
-                                dict.Add(key, row);
-                        }
+                if (fld.HasLookupOptions ||
+                    !fld.UseLookupCache ||
+                    Empty(sql) ||
+                    fld.Lookup.ParentFields.Count != 0 ||
+                    fld.Lookup.Options.Count != 0)
+                            return;
+                int totalCnt = await TryGetRecordCountAsync(sql, conn);
+                if (totalCnt > fld.LookupCacheCount) // Total count > cache count, do not cache
+                    return;
+                var dict = new Dictionary<string, Dictionary<string, object>>();
+                List<object> values = [];
+                List<Dictionary<string, object>> rs = await conn.GetRowsAsync(sql);
+                if (rs != null) {
+                    for (int i = 0; i < rs.Count; i++) {
+                        var row = rs[i];
+                        row = fld.Lookup?.RenderViewRow(row, Resolve(fld.Lookup.LinkTable));
+                        string key = row?.Values.First()?.ToString() ?? String.Empty;
+                        if (!dict.ContainsKey(key) && row != null)
+                            dict.Add(key, row);
                     }
-                    fld.Lookup?.SetOptions(dict);
                 }
-            }
+                fld.Lookup?.SetOptions(dict);
         }
 
         // Close recordset

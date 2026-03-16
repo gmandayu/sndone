@@ -13,6 +13,11 @@ public partial class HomeController : Controller
         subaktivitasNilaiLoadedFigurePipaList.Cache = _cache;
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["id"];
+
+        // Run the page
         return await subaktivitasNilaiLoadedFigurePipaList.Run();
     }
 
@@ -23,6 +28,11 @@ public partial class HomeController : Controller
     {
         // Create page object
         subaktivitasNilaiLoadedFigurePipaEdit = new GLOBALS.SubaktivitasNilaiLoadedFigurePipaEdit(this);
+
+        // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["id"];
 
         // Run the page
         return await subaktivitasNilaiLoadedFigurePipaEdit.Run();

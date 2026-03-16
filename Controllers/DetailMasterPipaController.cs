@@ -13,6 +13,11 @@ public partial class HomeController : Controller
         detailMasterPipaList.Cache = _cache;
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["id"];
+
+        // Run the page
         return await detailMasterPipaList.Run();
     }
 
@@ -23,6 +28,11 @@ public partial class HomeController : Controller
     {
         // Create page object
         detailMasterPipaAdd = new GLOBALS.DetailMasterPipaAdd(this);
+
+        // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["id"];
 
         // Run the page
         return await detailMasterPipaAdd.Run();
@@ -37,6 +47,11 @@ public partial class HomeController : Controller
         detailMasterPipaView = new GLOBALS.DetailMasterPipaView(this);
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["id"];
+
+        // Run the page
         return await detailMasterPipaView.Run();
     }
 
@@ -49,6 +64,11 @@ public partial class HomeController : Controller
         detailMasterPipaEdit = new GLOBALS.DetailMasterPipaEdit(this);
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["id"];
+
+        // Run the page
         return await detailMasterPipaEdit.Run();
     }
 
@@ -59,6 +79,11 @@ public partial class HomeController : Controller
     {
         // Create page object
         detailMasterPipaDelete = new GLOBALS.DetailMasterPipaDelete(this);
+
+        // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["id"];
 
         // Run the page
         return await detailMasterPipaDelete.Run();

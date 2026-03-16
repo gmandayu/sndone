@@ -13,6 +13,8 @@ public partial class HomeController : Controller
         mappingPositionList.Cache = _cache;
 
         // Run the page
+
+        // Run the page
         return await mappingPositionList.Run();
     }
 
@@ -23,6 +25,8 @@ public partial class HomeController : Controller
     {
         // Create page object
         mappingPositionAdd = new GLOBALS.MappingPositionAdd(this);
+
+        // Run the page
 
         // Run the page
         return await mappingPositionAdd.Run();

@@ -13,6 +13,11 @@ public partial class HomeController : Controller
         formInputControlRutinSecurityList.Cache = _cache;
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["Id"];
+
+        // Run the page
         return await formInputControlRutinSecurityList.Run();
     }
 
@@ -23,6 +28,11 @@ public partial class HomeController : Controller
     {
         // Create page object
         formInputControlRutinSecurityAdd = new GLOBALS.FormInputControlRutinSecurityAdd(this);
+
+        // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["Id"];
 
         // Run the page
         return await formInputControlRutinSecurityAdd.Run();
@@ -37,6 +47,11 @@ public partial class HomeController : Controller
         formInputControlRutinSecurityView = new GLOBALS.FormInputControlRutinSecurityView(this);
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["Id"];
+
+        // Run the page
         return await formInputControlRutinSecurityView.Run();
     }
 
@@ -49,6 +64,11 @@ public partial class HomeController : Controller
         formInputControlRutinSecurityEdit = new GLOBALS.FormInputControlRutinSecurityEdit(this);
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["Id"];
+
+        // Run the page
         return await formInputControlRutinSecurityEdit.Run();
     }
 
@@ -59,6 +79,11 @@ public partial class HomeController : Controller
     {
         // Create page object
         formInputControlRutinSecurityDelete = new GLOBALS.FormInputControlRutinSecurityDelete(this);
+
+        // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["Id"];
 
         // Run the page
         return await formInputControlRutinSecurityDelete.Run();

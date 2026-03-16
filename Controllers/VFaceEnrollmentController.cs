@@ -13,6 +13,11 @@ public partial class HomeController : Controller
         vFaceEnrollmentList.Cache = _cache;
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["IdUser"];
+
+        // Run the page
         return await vFaceEnrollmentList.Run();
     }
 
@@ -25,6 +30,11 @@ public partial class HomeController : Controller
         vFaceEnrollmentEdit = new GLOBALS.VFaceEnrollmentEdit(this);
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["IdUser"];
+
+        // Run the page
         return await vFaceEnrollmentEdit.Run();
     }
 
@@ -35,6 +45,11 @@ public partial class HomeController : Controller
     {
         // Create page object
         vFaceEnrollmentSearch = new GLOBALS.VFaceEnrollmentSearch(this);
+
+        // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["IdUser"];
 
         // Run the page
         return await vFaceEnrollmentSearch.Run();

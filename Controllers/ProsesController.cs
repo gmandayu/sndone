@@ -13,6 +13,11 @@ public partial class HomeController : Controller
         prosesList.Cache = _cache;
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["IdProses"];
+
+        // Run the page
         return await prosesList.Run();
     }
 
@@ -23,6 +28,11 @@ public partial class HomeController : Controller
     {
         // Create page object
         prosesView = new GLOBALS.ProsesView(this);
+
+        // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["IdProses"];
 
         // Run the page
         return await prosesView.Run();

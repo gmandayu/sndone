@@ -13,6 +13,11 @@ public partial class HomeController : Controller
         subAktivitasFormInputFlowrateList.Cache = _cache;
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["id"];
+
+        // Run the page
         return await subAktivitasFormInputFlowrateList.Run();
     }
 
@@ -23,6 +28,11 @@ public partial class HomeController : Controller
     {
         // Create page object
         subAktivitasFormInputFlowrateAdd = new GLOBALS.SubAktivitasFormInputFlowrateAdd(this);
+
+        // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["id"];
 
         // Run the page
         return await subAktivitasFormInputFlowrateAdd.Run();
@@ -37,6 +47,11 @@ public partial class HomeController : Controller
         subAktivitasFormInputFlowrateView = new GLOBALS.SubAktivitasFormInputFlowrateView(this);
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["id"];
+
+        // Run the page
         return await subAktivitasFormInputFlowrateView.Run();
     }
 
@@ -49,6 +64,11 @@ public partial class HomeController : Controller
         subAktivitasFormInputFlowrateEdit = new GLOBALS.SubAktivitasFormInputFlowrateEdit(this);
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["id"];
+
+        // Run the page
         return await subAktivitasFormInputFlowrateEdit.Run();
     }
 
@@ -59,6 +79,11 @@ public partial class HomeController : Controller
     {
         // Create page object
         subAktivitasFormInputFlowrateDelete = new GLOBALS.SubAktivitasFormInputFlowrateDelete(this);
+
+        // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["id"];
 
         // Run the page
         return await subAktivitasFormInputFlowrateDelete.Run();

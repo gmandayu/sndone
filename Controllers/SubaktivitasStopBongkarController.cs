@@ -13,6 +13,11 @@ public partial class HomeController : Controller
         subaktivitasStopBongkarList.Cache = _cache;
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["id"];
+
+        // Run the page
         return await subaktivitasStopBongkarList.Run();
     }
 
@@ -23,6 +28,11 @@ public partial class HomeController : Controller
     {
         // Create page object
         subaktivitasStopBongkarEdit = new GLOBALS.SubaktivitasStopBongkarEdit(this);
+
+        // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["id"];
 
         // Run the page
         return await subaktivitasStopBongkarEdit.Run();

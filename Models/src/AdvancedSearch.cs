@@ -45,7 +45,7 @@ public partial class SnDOne {
             Field = fld;
             _prefix = Config.ProjectName + "_" + Field.TableVar + "_" + Config.TableAdvancedSearch + "_";
             _suffix = "_" + Field.Param;
-            Raw = !Config.RemoveXss;
+            Raw = !Config.RemoveXssEnabled;
         }
 
         // Set SearchValue

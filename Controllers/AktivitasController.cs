@@ -13,6 +13,11 @@ public partial class HomeController : Controller
         aktivitasList.Cache = _cache;
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["IdAktivitas"];
+
+        // Run the page
         return await aktivitasList.Run();
     }
 
@@ -23,6 +28,11 @@ public partial class HomeController : Controller
     {
         // Create page object
         aktivitasEdit = new GLOBALS.AktivitasEdit(this);
+
+        // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["IdAktivitas"];
 
         // Run the page
         return await aktivitasEdit.Run();

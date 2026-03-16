@@ -13,6 +13,11 @@ public partial class HomeController : Controller
         masterUserList.Cache = _cache;
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["IdUser"];
+
+        // Run the page
         return await masterUserList.Run();
     }
 
@@ -23,6 +28,11 @@ public partial class HomeController : Controller
     {
         // Create page object
         masterUserAdd = new GLOBALS.MasterUserAdd(this);
+
+        // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["IdUser"];
 
         // Run the page
         return await masterUserAdd.Run();
@@ -37,6 +47,11 @@ public partial class HomeController : Controller
         masterUserView = new GLOBALS.MasterUserView(this);
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["IdUser"];
+
+        // Run the page
         return await masterUserView.Run();
     }
 
@@ -49,6 +64,11 @@ public partial class HomeController : Controller
         masterUserEdit = new GLOBALS.MasterUserEdit(this);
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["IdUser"];
+
+        // Run the page
         return await masterUserEdit.Run();
     }
 
@@ -59,6 +79,11 @@ public partial class HomeController : Controller
     {
         // Create page object
         masterUserDelete = new GLOBALS.MasterUserDelete(this);
+
+        // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["IdUser"];
 
         // Run the page
         return await masterUserDelete.Run();

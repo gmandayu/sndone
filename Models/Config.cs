@@ -59,24 +59,25 @@ public partial class SnDOne {
         public static string DebugMessageTemplate { get; set; } = @"<div class=""card card-danger ew-debug""><div class=""card-header""><h3 class=""card-title"">%t</h3><div class=""card-tools""><button type=""button"" class=""btn btn-tool"" data-card-widget=""collapse""><i class=""fa-solid fa-minus""></i></button></div></div><div class=""card-body"">%s</div></div>";
 
         // Log SQL to file
-        public static bool LogSql = false;
+        private static bool _logSqlEnabled = false;
 
-        // Product version
-        public const string ProductVersion = "24.11.0";
+        public static bool LogSqlEnabled
+        {
+            get => _logSqlEnabled;
+            set => _logSqlEnabled = value;
+        }
 
-        // Maintenance mode (settings in appsettings files) // DN
-        //public static bool MaintenanceMode = false;
-        //public static int MaitenanceRetryAfter = 300; // Retry-After (seconds)
-        //public static string MaitenanceTemplate = "Error.cshtml"; // Template
+    // Product version
+    public const string ProductVersion = "24.11.0";
 
         // Project
         public const string ProjectNamespace = "SnDOne";
 
         public const string ProjectClassName = "SnDOne.Models.SnDOne"; // DN
 
-        public static string PathDelimiter = ConvertToString(Path.DirectorySeparatorChar); // Physical path delimiter // DN
+        public static string PathDelimiter { get; set; } = ConvertToString(Path.DirectorySeparatorChar); // Physical path delimiter // DN
 
-        public static short UnformatYear = 50; // Unformat year
+        public static short UnformatYear { get; set; } = 50; // Unformat year
 
         public const string ProjectName = "SnDOne"; // Project name
 
@@ -84,25 +85,25 @@ public partial class SnDOne {
 
         public const string ProjectId = "{92B91853-0216-4B42-B097-FA7CDF2469EB}"; // Project ID (GUID)
 
-        public static string RandomKey = "iQDIMBMIpYArdgvp"; // Random key for encryption // DN
+        public static readonly string RandomKey = "wnhefSbM58xZiG4z"; // Random key for encryption // DN
 
-        public static string EncryptionKey = ""; // Encryption key for data protection
+        public static string EncryptionKey { get; set; } = ""; // Encryption key for data protection
 
-        public static string ProjectStylesheetFilename = "css/SnDOne.css"; // Project stylesheet file name (relative to wwwroot)
+        public static readonly string ProjectStylesheetFilename = "css/sndone.css"; // Project stylesheet file name (relative to wwwroot)
 
-        public static bool UseCompressedStylesheet = true; // Compressed stylesheet
+        public static bool UseCompressedStylesheet { get; set; } = true; // Compressed stylesheet
 
-        public static string FontAwesomeStylesheet = "plugins/fontawesome-free/css/all.min.css"; // Font Awesome Free stylesheet
+        public static string FontAwesomeStylesheet { get; set; } = "plugins/fontawesome-free/css/all.min.css"; // Font Awesome Free stylesheet
 
-        public static string Charset = "utf-8"; // Project charset
+        public static string Charset { get; set; } = "utf-8"; // Project charset
 
-        public static string EmailCharset = Charset; // Email charset
+        public static string EmailCharset { get; set; } = Charset; // Email charset
 
-        public static string EmailKeywordSeparator = ""; // Email keyword separator
+        public static string EmailKeywordSeparator { get; set; } = ""; // Email keyword separator
 
-        public static string CompositeKeySeparator = ","; // Composite key separator
+        public static string CompositeKeySeparator { get; set; } = ","; // Composite key separator
 
-        public static Dictionary<string, string> ExportTableCellSyles = new() // Export table cell CSS styles, use inline style for Gmail
+        public static Dictionary<string, string> ExportTableCellSyles { get; set; } = new() // Export table cell CSS styles, use inline style for Gmail
         {
             { "border", "1px solid #dddddd" },
             { "padding", "5px" }
@@ -110,48 +111,48 @@ public partial class SnDOne {
 
         public static bool HighlightCompare { get; set; } = true; // Case-insensitive
 
-        public static int FontSize = 14;
+        public static int FontSize { get; set; } = 14;
 
-        public static bool Cache = false; // Cache // DN
+        public static bool Cache { get; set; } = false; // Cache // DN
 
-        public static bool LazyLoad = true; // Lazy loading of images
+        public static bool LazyLoad { get; set; } = true; // Lazy loading of images
 
-        public static string RelatedProjectId = "";
+        public static string RelatedProjectId { get; set; } = "";
 
-        public static bool CheckOldUserLevels = false; // Check old Dynamic User Level Security settings
+        public static bool CheckOldUserLevels { get; set; } = false; // Check old Dynamic User Level Security settings
 
-        public static bool DeleteUploadFiles = false; // Delete uploaded file on deleting record
+        public static bool DeleteUploadFiles { get; set; } = false; // Delete uploaded file on deleting record
 
-        public static string FileNotFound = "/9j/4AAQSkZJRgABAQAAAQABAAD/7QAuUGhvdG9zaG9wIDMuMAA4QklNBAQAAAAAABIcAigADEZpbGVOb3RGb3VuZAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wgARCAABAAEDAREAAhEBAxEB/8QAFAABAAAAAAAAAAAAAAAAAAAACP/EABQBAQAAAAAAAAAAAAAAAAAAAAD/2gAMAwEAAhADEAAAAD+f/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPwB//8QAFBEBAAAAAAAAAAAAAAAAAAAAAP/aAAgBAgEBPwB//8QAFBEBAAAAAAAAAAAAAAAAAAAAAP/aAAgBAwEBPwB//9k="; // 1x1 jpeg with IPTC data "2#040"="FileNotFound"
+        public static string FileNotFound { get; set; } = "/9j/4AAQSkZJRgABAQAAAQABAAD/7QAuUGhvdG9zaG9wIDMuMAA4QklNBAQAAAAAABIcAigADEZpbGVOb3RGb3VuZAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wgARCAABAAEDAREAAhEBAxEB/8QAFAABAAAAAAAAAAAAAAAAAAAACP/EABQBAQAAAAAAAAAAAAAAAAAAAAD/2gAMAwEAAhADEAAAAD+f/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPwB//8QAFBEBAAAAAAAAAAAAAAAAAAAAAP/aAAgBAgEBPwB//8QAFBEBAAAAAAAAAAAAAAAAAAAAAP/aAAgBAwEBPwB//9k="; // 1x1 jpeg with IPTC data "2#040"="FileNotFound"
 
-        public static string BodyClass = "hold-transition layout-fixed"; // CSS class(es) for <body> tag
+        public static string BodyClass { get; set; } = "hold-transition layout-fixed"; // CSS class(es) for <body> tag
 
-        public static string BodyStyle = ""; // CSS style for <body> tag
+        public static string BodyStyle { get; set; } = ""; // CSS style for <body> tag
 
-        public static string SidebarClass = "main-sidebar sidebar-dark-primary"; // CSS class(es) for sidebar
+        public static string SidebarClass { get; set; } = "main-sidebar sidebar-dark-primary"; // CSS class(es) for sidebar
 
-        public static string NavbarClass = "main-header navbar navbar-expand navbar-primary navbar-dark border-bottom-0"; // CSS class(es) for navbar
+        public static string NavbarClass { get; set; } = "main-header navbar navbar-expand navbar-primary navbar-dark border-bottom-0"; // CSS class(es) for navbar
 
-        public static string ClassPrefix = "_"; // Prefix for invalid CSS class names
+        public static string ClassPrefix { get; set; } = "_"; // Prefix for invalid CSS class names
 
-        public static bool UseJavascriptMessage = true; // Use JavaScript message (toast)
+        public static bool UseJavascriptMessage { get; set; } = true; // Use JavaScript message (toast)
 
         // External JavaScripts
-        public static List<string> JavaScriptFiles = new()
+        public static List<string> JavaScriptFiles { get; set; } = new()
         {
         };
 
         // External StyleSheets
-        public static List<string> StylesheetFiles = new()
+        public static List<string> StylesheetFiles { get; set; } = new()
         {
         };
 
         // Authentication configuration for Google/Facebook
-        public static Dictionary<string, AuthenticationProvider> Authentications = new();
+        public static Dictionary<string, AuthenticationProvider> Authentications { get; set; } = new();
 
         // Database time zone
         // Difference to Greenwich time (GMT) with colon between hours and minutes, e.g. +02:00
-        public static string DbTimeZone = "";
+        public static string DbTimeZone { get; set; } = "";
 
         // Password (hashed and case-sensitivity)
         // Note: If you enable hashed password, make sure that the passwords in your
@@ -167,18 +168,18 @@ public partial class SnDOne {
 
         // Remove XSS use HtmlSanitizer
         // Note: If you want to allow these keywords, remove them from the following array at your own risks.
-        public static bool RemoveXss { get; set; } = true;
+        public static bool RemoveXssEnabled { get; set; } = true;
 
         // Check Token
-        public static bool CheckToken = true; // Check post token by AntiforgeryToken // DN
+        public static bool CheckToken { get; set; } = true; // Check post token by AntiforgeryToken // DN
 
         // Session timeout time
-        public static int SessionTimeout = 15; // Session timeout time (minutes)
+        public static int SessionTimeout { get; set; } = 15; // Session timeout time (minutes)
 
         // Session keep alive interval
-        public static int SessionKeepAliveInterval = 60; // Session keep alive interval (seconds)
+        public static int SessionKeepAliveInterval { get; set; } = 60; // Session keep alive interval (seconds)
 
-        public static int SessionTimeoutCountdown = 60; // Session timeout count down interval (seconds)
+        public static int SessionTimeoutCountdown { get; set; } = 60; // Session timeout count down interval (seconds)
 
         // Session names
         public const string SessionStatus = ProjectName + "_Status"; // Login status
@@ -256,17 +257,17 @@ public partial class SnDOne {
         public const string SessionCaptchaCode = ProjectName + "_Captcha"; // Captcha code
 
         // Language settings
-        public static List<string> Languages = ["en-US"];
+        public static List<string> Languages { get; set; } = ["en-US"];
 
-        public static string LanguagesFile = "languages.xml";
+        public static string LanguagesFile { get; set; } = "languages.xml";
 
-        public static string LanguageFolder = "lang/";
+        public static string LanguageFolder { get; set; } = "lang/";
 
-        public static string DefaultLanguageId = "en-US";
+        public static string DefaultLanguageId { get; set; } = "en-US";
 
         public const string SessionLanguageId = ProjectName + "_LanguageId"; // Language ID
 
-        public static string LocaleFolder = "locale/";
+        public static string LocaleFolder { get; set; } = "locale/";
 
         public const string SessionActiveUsers = ProjectName + "_ActiveUsers"; // Active Users
 
@@ -280,15 +281,15 @@ public partial class SnDOne {
         public const string SessionToken = ProjectName + "_Token";
 
         // Use database transaction
-        public static bool UseTransaction = true;
+        public static bool UseTransaction { get; set; } = true;
 
         // Query timeout for query factory // DN
-        public static int QueryTimeout = 30;
+        public static int QueryTimeout { get; set; } = 30;
 
         // Data types
-        public static List<DataType> CustomTemplateDataTypes = [DataType.Number, DataType.Date, DataType.String, DataType.Boolean, DataType.Time]; // Data to be passed to Custom Template
+        public static List<DataType> CustomTemplateDataTypes { get; set; } = [DataType.Number, DataType.Date, DataType.String, DataType.Boolean, DataType.Time]; // Data to be passed to Custom Template
 
-        public static int DataStringMaxLength = 1024;
+        public static int DataStringMaxLength { get; set; } = 1024;
 
         // Empty/all values
         public const string EmptyValue = "##empty##";
@@ -361,7 +362,7 @@ public partial class SnDOne {
         // Page layout
         public const string PageLayout = "layout"; // Page layout
 
-        public static List<string> PageLayouts = [ // Supported page layouts
+        public static List<string> PageLayouts { get; set; } = [ // Supported page layouts
             "table",
             "cards"
         ];
@@ -370,111 +371,111 @@ public partial class SnDOne {
         public const string PageDashboard = "dashboard"; // Page is dashboard
 
         // Log user ID or user name
-        public static bool LogUserId = true; // Log user ID
+        public static bool LogUserId { get; set; } = true; // Log user ID
 
         // Audit Trail
         public static bool AuditTrailToDatabase { get; set; } = true; // Write to database
 
-        public static string AuditTrailDbId = "DB"; // DB ID
+        public static string AuditTrailDbId { get; set; } = "DB"; // DB ID
 
-        public static string AuditTrailTableName = "AuditTrail"; // Table name
+        public static string AuditTrailTableName { get; set; } = "AuditTrail"; // Table name
 
-        public static string AuditTrailTableVar = "AuditTrail"; // Table var
+        public static string AuditTrailTableVar { get; set; } = "AuditTrail"; // Table var
 
-        public static string AuditTrailFieldNameDateTime = "DateTime"; // DateTime field name
+        public static string AuditTrailFieldNameDateTime { get; set; } = "DateTime"; // DateTime field name
 
-        public static string AuditTrailFieldNameScript = "Script"; // Script field name
+        public static string AuditTrailFieldNameScript { get; set; } = "Script"; // Script field name
 
-        public static string AuditTrailFieldNameUser = "User"; // User field name
+        public static string AuditTrailFieldNameUser { get; set; } = "User"; // User field name
 
-        public static string AuditTrailFieldNameAction = "Action"; // Action field name
+        public static string AuditTrailFieldNameAction { get; set; } = "Action"; // Action field name
 
-        public static string AuditTrailFieldNameTable = "Table"; // Table field name
+        public static string AuditTrailFieldNameTable { get; set; } = "Table"; // Table field name
 
-        public static string AuditTrailFieldNameField = "Field"; // Field field name
+        public static string AuditTrailFieldNameField { get; set; } = "Field"; // Field field name
 
-        public static string AuditTrailFieldNameKeyvalue = "KeyValue"; // Key Value field name
+        public static string AuditTrailFieldNameKeyvalue { get; set; } = "KeyValue"; // Key Value field name
 
-        public static string AuditTrailFieldNameOldvalue = "OldValue"; // Old Value field name
+        public static string AuditTrailFieldNameOldvalue { get; set; } = "OldValue"; // Old Value field name
 
-        public static string AuditTrailFieldNameNewvalue = "NewValue"; // New Value field name
+        public static string AuditTrailFieldNameNewvalue { get; set; } = "NewValue"; // New Value field name
 
         // Export Log
-        public static string ExportPath = "export-92b91853-0216-4b42-b097-fa7cdf2469eb"; // Export folder
+        public static string ExportPathEnable { get; set; } = "export-92b91853-0216-4b42-b097-fa7cdf2469eb"; // Export folder
 
-        public static string ExportLogDbId = "DB"; // DB ID
+        public static string ExportLogDbId { get; set; } = "DB"; // DB ID
 
-        public static string ExportLogTableName = ""; // Table name
+        public static string ExportLogTableName { get; set; } = ""; // Table name
 
-        public static string ExportLogTableVar = ""; // Table var
+        public static string ExportLogTableVar { get; set; } = ""; // Table var
 
-        public static string ExportLogFieldNameFileId = "undefined"; // File id (GUID) field name
+        public static string ExportLogFieldNameFileId { get; set; } = "undefined"; // File id (GUID) field name
 
-        public static string ExportLogFieldNameDateTime = "undefined"; // DateTime field name
+        public static string ExportLogFieldNameDateTime { get; set; } = "undefined"; // DateTime field name
 
-        public static string ExportLogFieldNameDateTimeAlias = "datetime"; // DateTime field name Alias
+        public static string ExportLogFieldNameDateTimeAlias { get; set; } = "datetime"; // DateTime field name Alias
 
-        public static string ExportLogFieldNameUser = "undefined"; // User field name
+        public static string ExportLogFieldNameUser { get; set; } = "undefined"; // User field name
 
-        public static string ExportLogFieldNameExportType = "undefined"; // Export Type field name
+        public static string ExportLogFieldNameExportType { get; set; } = "undefined"; // Export Type field name
 
-        public static string ExportLogFieldNameExportTypeAlias = "type"; // Export Type field name Alias
+        public static string ExportLogFieldNameExportTypeAlias { get; set; } = "type"; // Export Type field name Alias
 
-        public static string ExportLogFieldNameTable = "undefined"; // Table field name
+        public static string ExportLogFieldNameTable { get; set; } = "undefined"; // Table field name
 
-        public static string ExportLogFieldNameTableAlias = "tablename"; // Table field name Alias
+        public static string ExportLogFieldNameTableAlias { get; set; } = "tablename"; // Table field name Alias
 
-        public static string ExportLogFieldNameKeyValue = "undefined"; // Key Value field name
+        public static string ExportLogFieldNameKeyValue { get; set; } = "undefined"; // Key Value field name
 
-        public static string ExportLogFieldNameFileName = "undefined"; // File name field name
+        public static string ExportLogFieldNameFileName { get; set; } = "undefined"; // File name field name
 
-        public static string ExportLogFieldNameFileNameAlias = "filename"; // File name field name Alias
+        public static string ExportLogFieldNameFileNameAlias { get; set; } = "filename"; // File name field name Alias
 
-        public static string ExportLogFieldNameRequest = "undefined"; // Request field name
+        public static string ExportLogFieldNameRequest { get; set; } = "undefined"; // Request field name
 
-        public static int ExportFilesExpiryTime = 0; // Files expiry time (minutes)
+        public static int ExportFilesExpiryTime { get; set; } = 0; // Files expiry time (minutes)
 
-        public static string ExportLogSearch = "search"; // Export log search
+        public static string ExportLogSearch { get; set; } = "search"; // Export log search
 
-        public static string ExportLogLimit = "limit"; // Search by limit
+        public static string ExportLogLimit { get; set; } = "limit"; // Search by limit
 
-        public static string ExportLogArchivePrefix = "export"; // Export log archive prefix
+        public static string ExportLogArchivePrefix { get; set; } = "export"; // Export log archive prefix
 
-        public static bool LogAllExportRequests = false; // Log all export requests
+        public static readonly bool LogAllExportRequests = false; // Log all export requests
 
         // Push Notification keys
-        public static string PushServerPublicKey = ""; // Public Key
+        public static string PushServerPublicKey { get; set; } = ""; // Public Key
 
-        public static string PushServerPrivateKey = ""; // Private Key
+        public static string PushServerPrivateKey { get; set; } = ""; // Private Key
         // Subscription table for Push Notification
-        public static string SubscriptionDbId = "DB"; // Subscription DB ID
+        public static string SubscriptionDbId { get; set; } = "DB"; // Subscription DB ID
 
-        public static string SubscriptionTable = "undefined"; // Subscription table
+        public static string SubscriptionTable { get; set; } = "undefined"; // Subscription table
 
-        public static string SubscriptionTableName = ""; // Subscription table name
+        public static string SubscriptionTableName { get; set; } = ""; // Subscription table name
 
-        public static string SubscriptionTableVar = ""; // Subscription table var
+        public static string SubscriptionTableVar { get; set; } = ""; // Subscription table var
 
-        public static string SubscriptionFieldNameId = ""; // Subscription Id field name
+        public static string SubscriptionFieldNameId { get; set; } = ""; // Subscription Id field name
 
-        public static string SubscriptionFieldNameUser = ""; // Subscription User field name
+        public static string SubscriptionFieldNameUser { get; set; } = ""; // Subscription User field name
 
-        public static string SubscriptionFieldNameEndpoint = ""; // Subscription Endpoint field name
+        public static string SubscriptionFieldNameEndpoint { get; set; } = ""; // Subscription Endpoint field name
 
-        public static string SubscriptionFieldNamePublicKey = ""; // Subscription Public Key field name
+        public static string SubscriptionFieldNamePublicKey { get; set; } = ""; // Subscription Public Key field name
 
-        public static string SubscriptionFieldNameAuthToken = ""; // Subscription Auth Token field name
+        public static string SubscriptionFieldNameAuthToken { get; set; } = ""; // Subscription Auth Token field name
 
-        public static string SubscriptionFieldNameContentEncoding = ""; // Subscription Auth Token field name
+        public static string SubscriptionFieldNameContentEncoding { get; set; } = ""; // Subscription Auth Token field name
 
         // Security
-        public static bool EncryptionEnabled = false; // Encryption enabled
+        public static bool EncryptionEnabled { get; set; } = false; // Encryption enabled
 
-        public static bool EncryptUserNameAndPassword = false; // Encrypt user name / password
+        public static bool EncryptUserNameAndPassword { get; set; } = false; // Encrypt user name / password
 
-        public static string AdminUserName = "admin"; // Administrator user name
+        public static string AdminUserName { get; set; } = "admin"; // Administrator user name
 
-        public static string AdminPassword = "Pat@ad111!n?#"; // Administrator password
+        public static string AdminPassword { get; set; } = "Pat@ad111!n?#"; // Administrator password
 
         public static bool UseCustomLogin { get; set; } = true; // Use custom login (Windows/LDAP/User_CustomValidate)
 
@@ -484,217 +485,217 @@ public partial class SnDOne {
 
         public static bool UseModalLogin { get; set; } = false; // Use modal login
 
-        public static bool UseModalRegister = false; // Use modal register
+        public static bool UseModalRegister { get; set; } = false; // Use modal register
 
-        public static bool UseModalChangePassword = true; // Use modal change password
+        public static bool UseModalChangePassword { get; set; } = true; // Use modal change password
 
-        public static bool UseModalResetPassword = false; // Use modal reset password
+        public static readonly bool UseModalResetPassword = false; // Use modal reset password
 
-        public static int ResetPasswordTimeLimit = 60; // Reset password time limit (minutes)
+        public static int ResetPasswordTimeLimit { get; set; } = 60; // Reset password time limit (minutes)
 
-        public static bool IsWindowsAuthentication = false; // Windows Authentication // DN
+        public static bool IsWindowsAuthentication { get; set; } = false; // Windows Authentication // DN
 
-        public static string SamlAuthenticationType = "Federation"; // DN
+        public static string SamlAuthenticationType { get; set; } = "Federation"; // DN
 
         // User Level table/field
-        public static string UserLevelDbId = "DB"; // Database ID
+        public static string UserLevelDbId { get; set; } = "DB"; // Database ID
 
-        public static string UserLevelTableName = "UserLevels"; // User level (table name)
+        public static string UserLevelTableName { get; set; } = "UserLevels"; // User level (table name)
 
-        public static string UserLevelIdFieldName = "UserLevelID"; // Id (field name)
+        public static string UserLevelIdFieldName { get; set; } = "UserLevelID"; // Id (field name)
 
-        public static string UserLevelNameFieldName = "UserLevelName"; // Name (field name)
+        public static string UserLevelNameFieldName { get; set; } = "UserLevelName"; // Name (field name)
 
-        public static string UserLevelTable = "dbo.UserLevels"; // For SQL
+        public static string UserLevelTable { get; set; } = "dbo.UserLevels"; // For SQL
 
-        public static string UserLevelIdField = "UserLevelID"; // For SQL
+        public static string UserLevelIdField { get; set; } = "UserLevelID"; // For SQL
 
-        public static string UserLevelNameField = "UserLevelName"; // For SQL
+        public static string UserLevelNameField { get; set; } = "UserLevelName"; // For SQL
 
         // User Level Permissions table/field
-        public static string UserLevelPrivDbId = "DB"; // Database ID
+        public static string UserLevelPrivDbId { get; set; } = "DB"; // Database ID
 
-        public static string UserLevelPrivTableName = "UserLevelPermissions"; // User level permissions (table name)
+        public static string UserLevelPrivTableName { get; set; } = "UserLevelPermissions"; // User level permissions (table name)
 
-        public static string UserLevelPrivTableNameFieldName = "TableName"; // Table name (field name)
+        public static string UserLevelPrivTableNameFieldName { get; set; } = "TableName"; // Table name (field name)
 
-        public static string UserLevelPrivUserLevelIdFieldName = "UserLevelID"; // User level ID (field name)
+        public static string UserLevelPrivUserLevelIdFieldName { get; set; } = "UserLevelID"; // User level ID (field name)
 
-        public static string UserLevelPrivPrivFieldName = "Permission"; // Priv (field name)
+        public static string UserLevelPrivPrivFieldName { get; set; } = "Permission"; // Priv (field name)
 
-        public static string UserLevelPrivTable = "dbo.UserLevelPermissions"; // For SQL
+        public static string UserLevelPrivTable { get; set; } = "dbo.UserLevelPermissions"; // For SQL
 
-        public static string UserLevelPrivTableNameField = "TableName"; // For SQL
+        public static string UserLevelPrivTableNameField { get; set; } = "TableName"; // For SQL
 
-        public static string UserLevelPrivUserLevelIdField = "UserLevelID"; // For SQL
+        public static string UserLevelPrivUserLevelIdField { get; set; } = "UserLevelID"; // For SQL
 
-        public static string UserLevelPrivPrivField = "Permission"; // For SQL
+        public static string UserLevelPrivPrivField { get; set; } = "Permission"; // For SQL
 
-        public static int UserLevelPrivTableNameFieldSize = 255;
+        public static int UserLevelPrivTableNameFieldSize { get; set; } = 255;
 
         // User ID
-        public static int DefaultUserIdAllowSecurity = 360;
+        public static int DefaultUserIdAllowSecurity { get; set; } = 360;
 
         // User table/field names
-        public static string UserTableName = "MasterUser";
+        public static string UserTableName { get; set; } = "MasterUser";
 
-        public static string UserPrimaryKeyFieldName = "IdUser";
+        public static string UserPrimaryKeyFieldName { get; set; } = "IdUser";
 
-        public static string LoginUsernameFieldName = "Username";
+        public static string LoginUsernameFieldName { get; set; } = "Username";
 
-        public static string LoginPasswordFieldName = "PasswordHash";
+        public static string LoginPasswordFieldName { get; set; } = "PasswordHash";
 
-        public static string UserIdFieldName = "";
+        public static string UserIdFieldName { get; set; } = "";
 
-        public static string ParentUserIdFieldName = "";
+        public static string ParentUserIdFieldName { get; set; } = "";
 
-        public static string UserLevelFieldName = "UserLevel";
+        public static string UserLevelFieldName { get; set; } = "UserLevel";
 
-        public static string UserProfileFieldName = "";
+        public static string UserProfileFieldName { get; set; } = "";
 
-        public static bool RegisterActivate = false;
+        public static bool RegisterActivate { get; set; } = false;
 
-        public static bool RegisterAutoLogin = false;
+        public static bool RegisterAutoLogin { get; set; } = false;
 
-        public static string RegisterActivateFieldName = "";
+        public static string RegisterActivateFieldName { get; set; } = "";
 
-        public static string RegisterActivateFieldValue = "1";
+        public static string RegisterActivateFieldValue { get; set; } = "1";
 
-        public static string UserEmailFieldName = "Email";
+        public static readonly string UserEmailFieldName = "Email";
 
-        public static string UserPhoneFieldName = "";
+        public static string UserPhoneFieldName { get; set; } = "";
 
-        public static string UserImageFieldName = "";
+        public static string UserImageFieldName { get; set; } = "";
 
-        public static int UserImageSize = 40;
+        public static int UserImageSize { get; set; } = 40;
 
-        public static bool UserImageCrop = true;
+        public static bool UserImageCrop { get; set; } = true;
 
         // User table filters
-        public static string UserTableDbId = "DB";
+        public static string UserTableDbId { get; set; } = "DB";
 
-        public static string UserTable = "dbo.MasterUser";
+        public static string UserTableDefault { get; set; } = "dbo.MasterUser";
 
-        public static string UserNameFilter = "([Username] = '%u')";
+        public static string UserNameFilter { get; set; } = "([Username] = '%u')";
 
-        public static string UserIdFilter = "";
+        public static string UserIdFilter { get; set; } = "";
 
-        public static string UserEmailFilter = "([Email] = '%e')";
+        public static readonly string UserEmailFilter = "([Email] = '%e')";
 
-        public static string UserActivateFilter = "";
+        public static string UserActivateFilter { get; set; } = "";
 
-        public static string SearchFilterOption = "Client";
+        public static string SearchFilterOption { get; set; } = "Client";
 
         // Auto hide pager
-        public static bool AutoHidePager = false;
+        public static bool AutoHidePager { get; set; } = false;
 
-        public static bool AutoHidePageSizeSelector = false;
+        public static bool AutoHidePageSizeSelector { get; set; } = false;
 
         // Email
-        public static string EmailClass = "Email"; // Email class
+        public static string EmailClass { get; set; } = "Email"; // Email class
 
-        public static string SmtpServer = ""; // SMTP server
+        public static string SmtpServer { get; set; } = ""; // SMTP server
 
-        public static int SmtpServerPort = 0; // SMTP server port
+        public static int SmtpServerPort { get; set; } = 0; // SMTP server port
 
-        public static string SmtpSecureOption = "None"; // SMTP secure options
+        public static string SmtpSecureOption { get; set; } = "None"; // SMTP secure options
 
-        public static string SmtpServerUsername = ""; // SMTP server user name
+        public static string SmtpServerUsername { get; set; } = ""; // SMTP server user name
 
-        public static string SmtpServerPassword = ""; // SMTP server password
+        public static string SmtpServerPassword { get; set; } = ""; // SMTP server password
 
-        public static string SenderEmail = "anharkhoirun@gmail.com"; // Sender email
+        public static readonly string SenderEmail = "anharkhoirun@gmail.com"; // Sender email
 
-        public static string RecipientEmail = ""; // Recipient email
+        public static string RecipientEmail { get; set; } = ""; // Recipient email
 
-        public static int MaxEmailRecipient = 3;
+        public static int MaxEmailRecipient { get; set; } = 3;
 
-        public static int MaxEmailSentCount = 3;
+        public static int MaxEmailSentCount { get; set; } = 3;
 
-        public static string ExportEmailCounter = SessionStatus + "_EmailCounter";
+        public static string ExportEmailCounter { get; set; } = SessionStatus + "_EmailCounter";
 
         // Email/SMS Templates // DN
-        public static string EmailChangePasswordTemplate = "ChangePassword";
+        public static string EmailChangePasswordTemplate { get; set; } = "ChangePassword";
 
-        public static string EmailNotifyTemplate = "Notify";
+        public static string EmailNotifyTemplate { get; set; } = "Notify";
 
-        public static string EmailRegisterTemplate = "Register";
+        public static string EmailRegisterTemplate { get; set; } = "Register";
 
-        public static string EmailResetPasswordTemplate = "ResetPassword";
+        public static string EmailResetPasswordTemplate { get; set; } = "ResetPassword";
 
-        public static string EmailOneTimePasswordTemplate = "OneTimePassword";
+        public static string EmailOneTimePasswordTemplate { get; set; } = "OneTimePassword";
 
-        public static string SmsOneTimePasswordTemplate = "OneTimePasswordSms";
+        public static string SmsOneTimePasswordTemplate { get; set; } = "OneTimePasswordSms";
 
         // SMS
         public static string SmsClass { get; set; } = "Sms"; // Sms class // DN
 
-        public static string SmsTemplatePath = "_txt"; // Template path // DN
+        public static string SmsTemplatePath { get; set; } = "_txt"; // Template path // DN
 
         /// <summary>
         /// SMS region code
         /// https://github.com/twcclegg/libphonenumber-csharp
         /// - null => Use region code from locale (i.e. en-US => US)
         /// </summary>
-        public static string? SmsRegionCode = null;
+        public static string? SmsRegionCode { get; set; } = null;
 
         // Remote files (Azure/AWS/GCP)
-        public static string RemoteFilePattern = @"://";
+        public static string RemoteFilePattern { get; set; } = @"://";
 
-        public static string AzureUrlPattern = "https://{0}.blob.core.windows.net/{1}/{2}"; // e.g. https://<myaccount>.blob.core.windows.net/<mycontainer>/<myblob>
+        public static string AzureUrlPattern { get; set; } = "https://{0}.blob.core.windows.net/{1}/{2}"; // e.g. https://<myaccount>.blob.core.windows.net/<mycontainer>/<myblob>
 
-        public static string AwsUrlPattern = "https://{1}.s3.{0}.amazonaws.com/{2}"; // e.g.. https://<bucket-name>.s3.<region-code>.amazonaws.com/<key-name>
+        public static string AwsUrlPattern { get; set; } = "https://{1}.s3.{0}.amazonaws.com/{2}"; // e.g.. https://<bucket-name>.s3.<region-code>.amazonaws.com/<key-name>
 
-        public static string GcpUrlPattern = "https://storage.googleapis.com/{1}/{2}"; // e.g. https://storage.googleapis.com/<BUCKET_NAME>/<OBJECT_NAME>
+        public static string GcpUrlPattern { get; set; } = "https://storage.googleapis.com/{1}/{2}"; // e.g. https://storage.googleapis.com/<BUCKET_NAME>/<OBJECT_NAME>
 
         // File upload
-        public static string UploadType = "POST"; // HTTP request method for the file uploads, e.g. "POST", "PUT
+        public static string UploadType { get; set; } = "POST"; // HTTP request method for the file uploads, e.g. "POST", "PUT
 
         // File handler // DN
-        public static string FileUrl = "";
+        public static string FileUrl { get; set; } = "";
 
         // File upload
-        public static string UploadTempPath = ""; // Upload temp path
+        public static string UploadTempPathDefault { get; set; } = ""; // Upload temp path
 
-        public static string UploadTempHrefPath = ""; // Upload temp href path
+        public static string UploadTempHrefPath { get; set; } = ""; // Upload temp href path
 
-        public static string UploadDestPath = "files/"; // Upload destination path
+        public static string UploadDestPath { get; set; } = "files/"; // Upload destination path
 
-        public static string UploadTempFolderPrefix = "temp__"; // Upload temp folders prefix
+        public static string UploadTempFolderPrefix { get; set; } = "temp__"; // Upload temp folders prefix
 
-        public static int UploadTempFolderTimeLimit = 1440; // Upload temp folder time limit (minutes)
+        public static int UploadTempFolderTimeLimit { get; set; } = 1440; // Upload temp folder time limit (minutes)
 
-        public static string UploadThumbnailFolder = "thumbnail"; // Temporary thumbnail folder
+        public static string UploadThumbnailFolder { get; set; } = "thumbnail"; // Temporary thumbnail folder
 
-        public static int UploadThumbnailWidth = 200; // Temporary thumbnail max width
+        public static int UploadThumbnailWidth { get; set; } = 200; // Temporary thumbnail max width
 
-        public static int UploadThumbnailHeight = 0; // Temporary thumbnail max height
+        public static int UploadThumbnailHeight { get; set; } = 0; // Temporary thumbnail max height
 
-        public static int? MaxFileCount = null; // Max file count
+        public static int? MaxFileCount { get; set; } = null; // Max file count
 
-        public static bool ImageCropper = false; // Upload cropper
+        public static bool ImageCropper { get; set; } = false; // Upload cropper
 
-        public static string UploadAllowedFileExtensions = "gif,jpg,jpeg,bmp,png,doc,docx,xls,xlsx,pdf,zip"; // Allowed file extensions
+        public static string UploadAllowedFileExtensions { get; set; } = "gif,jpg,jpeg,bmp,png,doc,docx,xls,xlsx,pdf,zip"; // Allowed file extensions
 
-        public static List<string> ImageAllowedFileExtensions = ["gif","jpe","jpeg","jpg","png","bmp"]; // Allowed file extensions for images
+        public static List<string> ImageAllowedFileExtensions { get; set; } = ["gif","jpe","jpeg","jpg","png","bmp"]; // Allowed file extensions for images
 
-        public static List<string> DownloadAllowedFileExtensions = ["csv","pdf","xls","doc","xlsx","docx"]; // Allowed file extensions for download (non-image)
+        public static List<string> DownloadAllowedFileExtensions { get; set; } = ["csv","pdf","xls","doc","xlsx","docx"]; // Allowed file extensions for download (non-image)
 
-        public static bool EncryptFilePath = true; // Encrypt file path
+        public static bool EncryptFilePath { get; set; } = true; // Encrypt file path
 
-        public static int MaxFileSize = 2000000; // Max file size
+        public static int MaxFileSize { get; set; } = 2000000; // Max file size
 
-        public static int ThumbnailDefaultWidth = 100; // Thumbnail default width
+        public static int ThumbnailDefaultWidth { get; set; } = 100; // Thumbnail default width
 
-        public static int ThumbnailDefaultHeight = 0; // Thumbnail default height
+        public static int ThumbnailDefaultHeight { get; set; } = 0; // Thumbnail default height
 
         public static bool UploadConvertAccentedChars { get; set; } = false; // Convert accented chars in upload file name
 
         public static bool UseColorbox { get; set; } = true; // Use Colorbox
 
-        public static char MultipleUploadSeparator = ','; // Multiple upload separator
+        public static char MultipleUploadSeparator { get; set; } = ','; // Multiple upload separator
 
-        public static bool CreateUploadFileOnCopy = true; // Create upload file on copy
+        public static bool CreateUploadFileOnCopy { get; set; } = true; // Create upload file on copy
 
         // Image resize
         public static bool ResizeIgnoreAspectRatio { get; set; } = false;
@@ -702,109 +703,109 @@ public partial class SnDOne {
         public static bool ResizeLess { get; set; } = false;
 
         // Form hidden tag names (Note: DO NOT modify prefix "k_")
-        public static string FormKeyCountName = "key_count";
+        public static string FormKeyCountName { get; set; } = "key_count";
 
-        public static string FormRowActionName = "k_action";
+        public static string FormRowActionName { get; set; } = "k_action";
 
-        public static string FormBlankRowName = "k_blankrow";
+        public static string FormBlankRowName { get; set; } = "k_blankrow";
 
-        public static string FormOldKeyName = "k_oldkey";
+        public static string FormOldKeyName { get; set; } = "k_oldkey";
 
         // Table actions
-        public static string ListAction = "list"; // Table list action
+        public static string ListAction { get; set; } = "list"; // Table list action
 
-        public static string ViewAction = "view"; // Table view action
+        public static string ViewAction { get; set; } = "view"; // Table view action
 
-        public static string AddAction = "add"; // Table add action
+        public static string AddAction { get; set; } = "add"; // Table add action
 
-        public static string AddoptAction = "addopt"; // Table addopt action
+        public static string AddoptAction { get; set; } = "addopt"; // Table addopt action
 
-        public static string EditAction = "edit"; // Table edit action
+        public static string EditAction { get; set; } = "edit"; // Table edit action
 
-        public static string UpdateAction = "update"; // Table update action
+        public static string UpdateAction { get; set; } = "update"; // Table update action
 
-        public static string DeleteAction = "delete"; // Table delete action
+        public static string DeleteAction { get; set; } = "delete"; // Table delete action
 
-        public static string SearchAction = "search"; // Table search action
+        public static string SearchAction { get; set; } = "search"; // Table search action
 
-        public static string QueryAction = "query"; // Table search action
+        public static string QueryAction { get; set; } = "query"; // Table search action
 
-        public static string PreviewAction = "preview"; // Table preview action
+        public static string PreviewAction { get; set; } = "preview"; // Table preview action
 
-        public static string CustomReportAction = "custom"; // Custom report action
+        public static string CustomReportAction { get; set; } = "custom"; // Custom report action
 
-        public static string SummaryReportAction = "summary"; // Summary report action
+        public static string SummaryReportAction { get; set; } = "summary"; // Summary report action
 
-        public static string CrosstabReportAction = "crosstab"; // Crosstab report action
+        public static string CrosstabReportAction { get; set; } = "crosstab"; // Crosstab report action
 
-        public static string DashboardReportAction = "dashboard"; // Dashboard report action
+        public static string DashboardReportAction { get; set; } = "dashboard"; // Dashboard report action
 
-        public static string CalendarReportAction = "calendar"; // Calendar report action
+        public static string CalendarReportAction { get; set; } = "calendar"; // Calendar report action
 
         // API
-        public static string ApiUrl = "api/"; // API URL
+        public static string ApiUrl { get; set; } = "api/"; // API URL
 
-        public static string ApiActionName = "action"; // API action name
+        public static string ApiActionName { get; set; } = "action"; // API action name
 
-        public static string ApiObjectName = "table"; // API object name
+        public static string ApiObjectName { get; set; } = "table"; // API object name
         // export related (start)
-        public static string ApiExportName = "export"; // API export name
+        public static string ApiExportName { get; set; } = "export"; // API export name
 
-        public static string ApiExportSave = "save"; // API export save file
+        public static string ApiExportSave { get; set; } = "save"; // API export save file
 
-        public static string ApiExportOutput = "output"; // API export output file as inline/attachment
+        public static string ApiExportOutput { get; set; } = "output"; // API export output file as inline/attachment
 
-        public static string ApiExportDownload = "download"; // API export download file => disposition=attachment
+        public static string ApiExportDownload { get; set; } = "download"; // API export download file => disposition=attachment
 
-        public static string ApiExportFileName = "filename"; // API export file name
+        public static string ApiExportFileName { get; set; } = "filename"; // API export file name
 
-        public static string ApiExportContentType = "contenttype"; // API export content type
+        public static string ApiExportContentType { get; set; } = "contenttype"; // API export content type
 
-        public static string ApiExportUseCharset = "usecharset"; // API export use charset in content type header
+        public static string ApiExportUseCharset { get; set; } = "usecharset"; // API export use charset in content type header
 
-        public static string ApiExportUseBom = "usebom"; // API export use BOM
+        public static string ApiExportUseBom { get; set; } = "usebom"; // API export use BOM
 
-        public static string ApiExportCacheControl = "cachecontrol"; // API export cache control header
+        public static string ApiExportCacheControl { get; set; } = "cachecontrol"; // API export cache control header
 
-        public static string ApiExportDisposition = "disposition"; // API export disposition (inline/attachment)
+        public static string ApiExportDisposition { get; set; } = "disposition"; // API export disposition (inline/attachment)
         // export related (end)
-        public static string ApiFieldName = "field"; // API field name
+        public static string ApiFieldName { get; set; } = "field"; // API field name
 
-        public static string ApiKeyName = "key"; // API key name
+        public static string ApiKeyName { get; set; } = "key"; // API key name
 
-        public static string ApiFileTokenName = "filetoken"; // API upload file token name
+        public static string ApiFileTokenName { get; set; } = "filetoken"; // API upload file token name
 
-        public static string ApiLoginUsername = "username"; // API login user name
+        public static string ApiLoginUsername { get; set; } = "username"; // API login user name
 
-        public static string ApiLoginPassword = "password"; // API login password
+        public static string ApiLoginPassword { get; set; } = "password"; // API login password
 
-        public static string ApiLoginSecurityCode = "securitycode"; // API login security code
+        public static string ApiLoginSecurityCode { get; set; } = "securitycode"; // API login security code
 
-        public static string ApiLoginExpire = "expire"; // API login expire (hours)
+        public static string ApiLoginExpire { get; set; } = "expire"; // API login expire (hours)
 
-        public static string ApiLoginPermission = "permission"; // API login expire permission (hours)
+        public static string ApiLoginPermission { get; set; } = "permission"; // API login expire permission (hours)
 
-        public static string ApiLookupPage = "page"; // API lookup page name
+        public static string ApiLookupPage { get; set; } = "page"; // API lookup page name
 
-        public static string ApiUserlevelName = "userlevel"; // API userlevel name
+        public static string ApiUserlevelName { get; set; } = "userlevel"; // API userlevel name
 
-        public static string ApiPushNotificationSubscribe = "subscribe"; // API push notification subscribe
+        public static string ApiPushNotificationSubscribe { get; set; } = "subscribe"; // API push notification subscribe
 
-        public static string ApiPushNotificationSend = "send"; // API push notification send
+        public static string ApiPushNotificationSend { get; set; } = "send"; // API push notification send
 
-        public static string ApiPushNotificationDelete = "delete"; // API push notification delete
+        public static string ApiPushNotificationDelete { get; set; } = "delete"; // API push notification delete
 
-        public static string Api2FaShow = "show"; // API two factor authentication show
+        public static string Api2FaShow { get; set; } = "show"; // API two factor authentication show
 
-        public static string Api2FaVerify = "verify"; // API two factor authentication verify
+        public static string Api2FaVerify { get; set; } = "verify"; // API two factor authentication verify
 
-        public static string Api2FaReset = "reset"; // API two factor authentication reset
+        public static string Api2FaReset { get; set; } = "reset"; // API two factor authentication reset
 
-        public static string Api2FaBackupCodes = "codes"; // API two factor authentication backup codes
+        public static string Api2FaBackupCodes { get; set; } = "codes"; // API two factor authentication backup codes
 
-        public static string Api2FaNewBackupCodes = "newcodes"; // API two factor authentication new backup codes
+        public static string Api2FaNewBackupCodes { get; set; } = "newcodes"; // API two factor authentication new backup codes
 
-        public static string Api2FaSendOtp = "otp"; // API two factor authentication send one time password
+        public static string Api2FaSendOtp { get; set; } = "otp"; // API two factor authentication send one time password
 
         // API actions
         public const string ApiListAction = "list"; // API list action
@@ -839,13 +840,13 @@ public partial class SnDOne {
 
         public const string ApiPermissionsAction = "permissions"; // API permissions action
 
-        public static string ApiPushNotificationAction = "push"; // API push notification action
+        public static string ApiPushNotificationAction { get; set; } = "push"; // API push notification action
 
-        public static string Api2FaAction = "twofa"; // API two factor authentication action
+        public static string Api2FaAction { get; set; } = "twofa"; // API two factor authentication action
 
-        public static string ApiChatAction = "chat"; // API chat action
+        public static string ApiChatAction { get; set; } = "chat"; // API chat action
 
-        public static List<string> ApiPageActions = new()
+        public static List<string> ApiPageActions { get; set; } = new()
         {
             ApiListAction,
             ApiViewAction,
@@ -857,60 +858,60 @@ public partial class SnDOne {
         };
 
         // List page inline/grid/modal settings
-        public static bool UseAjaxActions = false;
+        public static bool UseAjaxActions { get; set; } = false;
 
         // Send push notification time limit
-        public static int SendPushNotificationTimeLimit = 300;
+        public static int SendPushNotificationTimeLimit { get; set; } = 300;
 
-        public static bool PushAnonymous = false;
+        public static bool PushAnonymous { get; set; } = false;
 
         // Use two factor Authentication
-        public static bool UseTwoFactorAuthentication = false;
+        public static bool UseTwoFactorAuthentication { get; set; } = false;
 
-        public static bool ForceTwoFactorAuthentication = false;
+        public static bool ForceTwoFactorAuthentication { get; set; } = false;
 
-        public static string TwoFactorAuthenticationType = "google";
+        public static string TwoFactorAuthenticationType { get; set; } = "google";
 
-        public static string TwoFactorAuthenticationIssuer = ProjectName;
+        public static string TwoFactorAuthenticationIssuer { get; set; } = ProjectName;
 
-        public static TimeSpan TwoFactorAuthenticationDiscrepancy = TimeSpan.FromMinutes(5);
+        public static TimeSpan TwoFactorAuthenticationDiscrepancy { get; set; } = TimeSpan.FromMinutes(5);
 
-        public static int TwoFactorAuthenticationQrcodeSize = 3; // Number of pixels per QR Module (2 = ~120x120px QRCode, should be 10 or less)
+        public static int TwoFactorAuthenticationQrcodeSize { get; set; } = 3; // Number of pixels per QR Module (2 = ~120x120px QRCode, should be 10 or less)
 
-        public static int TwoFactorAuthenticationPassCodeLength = 6;
+        public static int TwoFactorAuthenticationPassCodeLength { get; set; } = 6;
 
-        public static int TwoFactorAuthenticationBackupCodeLength = 8;
+        public static int TwoFactorAuthenticationBackupCodeLength { get; set; } = 8;
 
-        public static int TwoFactorAuthenticationBackupCodeCount = 10;
+        public static int TwoFactorAuthenticationBackupCodeCount { get; set; } = 10;
 
-        public static bool OtpOnly = false;
+        public static bool OtpOnly { get; set; } = false;
 
-        public static string AdminOtpAccount = "";
+        public static string AdminOtpAccount { get; set; } = "";
 
         // Import records
-        public static Encoding ImportCsvEncoding = Encoding.UTF8; // Import CSV encoding
+        public static Encoding ImportCsvEncoding { get; set; } = Encoding.UTF8; // Import CSV encoding
 
-        public static CultureInfo ImportCsvCulture = CultureInfo.InvariantCulture; // Import CSV culture
+        public static CultureInfo ImportCsvCulture { get; set; } = CultureInfo.InvariantCulture; // Import CSV culture
 
-        public static char ImportCsvDelimiter = ','; // Import CSV delimiter character
+        public static char ImportCsvDelimiter { get; set; } = ','; // Import CSV delimiter character
 
-        public static char ImportCsvTextQualifier = '"'; // Import CSV text qualifier character
+        public static char ImportCsvTextQualifier { get; set; } = '"'; // Import CSV text qualifier character
 
-        public static string ImportCsvEol = "\r\n"; // Import CSV end of line, default CRLF
+        public static string ImportCsvEol { get; set; } = "\r\n"; // Import CSV end of line, default CRLF
 
-        public static string ImportFileAllowedExtensions = "csv,xlsx"; // Import file allowed extensions
+        public static string ImportFileAllowedExtensions { get; set; } = "csv,xlsx"; // Import file allowed extensions
 
-        public static bool ImportInsertOnly = true; // Import by insert only
+        public static bool ImportInsertOnly { get; set; } = true; // Import by insert only
 
-        public static bool ImportUseTransaction = true; // Import use transaction
+        public static bool ImportUseTransaction { get; set; } = true; // Import use transaction
 
-        public static int ImportMaxFailures = 1; // Import maximum number of failures
+        public static int ImportMaxFailures { get; set; } = 1; // Import maximum number of failures
 
         // Logging and audit trail
-        public static string LogPath = "log/"; // Logging and audit trail path (relative to wwwroot)
+        public static string LogPathDefault { get; set; } = "log/"; // Logging and audit trail path (relative to wwwroot)
 
         // Export records
-        public static bool ExportAll = true; // Export all records
+        public static bool ExportAll { get; set; } = true; // Export all records
 
         public static bool ExportOriginalValue { get; set; } = false; // True to export original value
 
@@ -929,7 +930,7 @@ public partial class SnDOne {
         public static bool ExportDetailRecordsForCsv { get; set; } = false; // True to export detail records for CSV
 
         // Export classes
-        public static Dictionary<string, string> Export = new(StringComparer.OrdinalIgnoreCase)
+        public static Dictionary<string, string> Export { get; set; } = new(StringComparer.OrdinalIgnoreCase)
         {
             { "email", "ExportEmail" },
             { "html", "ExportHtml" },
@@ -942,7 +943,7 @@ public partial class SnDOne {
         };
 
         // Export report methods
-        public static Dictionary<string, string> ExportReport = new(StringComparer.OrdinalIgnoreCase)
+        public static Dictionary<string, string> ExportReport { get; set; } = new(StringComparer.OrdinalIgnoreCase)
         {
             { "email", "ExportEmail" },
             { "html", "ExportHtml" },
@@ -952,7 +953,7 @@ public partial class SnDOne {
         };
 
         // Full URL protocols ("http" or "https")
-        public static Dictionary<string, string?> FullUrlProtocols = new(StringComparer.OrdinalIgnoreCase)
+        public static Dictionary<string, string?> FullUrlProtocols { get; set; } = new(StringComparer.OrdinalIgnoreCase)
         {
             {"href", null},
             {"upload", null},
@@ -963,7 +964,7 @@ public partial class SnDOne {
         };
 
         // Named types // DN
-        public static Dictionary<string, Type> NamedTypes = new()
+        public static Dictionary<string, Type> NamedTypes { get; set; } = new()
         {
             {"Aktivitas", typeof(Aktivitas)},
             {"AktivitasDokumen", typeof(AktivitasDokumen)},
@@ -1187,7 +1188,7 @@ public partial class SnDOne {
         };
 
         // Database IDs // DN
-        public static Dictionary<string, string> DbIds = new()
+        public static Dictionary<string, string> DbIds { get; set; } = new()
         {
             {"Aktivitas", "DB"},
             {"AktivitasDokumen", "DB"},
@@ -1410,10 +1411,10 @@ public partial class SnDOne {
         };
 
         // Secondary connection name // DN
-        public static string SecondaryConnectionName = "_2";
+        public static string SecondaryConnectionName { get; set; } = "_2";
 
         // Boolean HTML attributes
-        public static List<string> BooleanHtmlAttributes = [
+        public static List<string> BooleanHtmlAttributes { get; set; } = [
             "allowfullscreen",
             "allowpaymentrequest",
             "async",
@@ -1442,7 +1443,7 @@ public partial class SnDOne {
         ];
 
         // HTML singleton tags
-        public static List<string> HtmlSingletonTags = [
+        public static List<string> HtmlSingletonTags { get; set; } = [
             "area",
             "base",
             "br",
@@ -1465,13 +1466,13 @@ public partial class SnDOne {
         public static bool UseIlikeForPostgresql { get; set; } = true;
 
         // Use collation for MySQL
-        public static string LikeCollationForMysql = "";
+        public static string LikeCollationForMysql { get; set; } = "";
 
         // Use collation for MsSQL
-        public static string LikeCollationForMssql = "";
+        public static string LikeCollationForMssql { get; set; } = "";
 
         // Use collation for MsSQL
-        public static string LikeCollationForSqlite = "";
+        public static string LikeCollationForSqlite { get; set; } = "";
 
         // Null / Not Null values
         public const string NullValue = "##null##";
@@ -1488,15 +1489,15 @@ public partial class SnDOne {
         public static short SearchMultiValueOption { get; set; } = 3;
 
         // Advanced search
-        public static string SearchOption = "AUTO";
+        public static string SearchOption { get; set; } = "AUTO";
 
         // Quick search
-        public static string BasicSearchIgnorePattern = @"[\?,\^\*\(\)\[\]\""]"; // Ignore special characters
+        public static string BasicSearchIgnorePattern { get; set; } = @"[\?,\^\*\(\)\[\]\""]"; // Ignore special characters
 
         public static bool BasicSearchAnyFields { get; set; } = false; // Search "All keywords" in any selected fields
 
         // Sort options
-        public static string SortOption = "Tristate"; // Sort option (toggle/tristate)
+        public static string SortOption { get; set; } = "Tristate"; // Sort option (toggle/tristate)
 
         // Validate option
         public static bool ClientValidate { get; set; } = true;
@@ -1514,91 +1515,91 @@ public partial class SnDOne {
         public static bool UseNativeSelectOne { get; set; } = false;
 
         // Auto suggest max entries
-        public static int AutoSuggestMaxEntries = 10;
+        public static int AutoSuggestMaxEntries { get; set; } = 10;
 
         // Auto suggest for all display fields
-        public static bool LookupAllDisplayFields = false;
+        public static bool LookupAllDisplayFields { get; set; } = false;
 
         // Lookup page size
-        public static int LookupPageSize = 100;
+        public static int LookupPageSize { get; set; } = 100;
 
         // Filter page size
-        public static int FilterPageSize = 100;
+        public static int FilterPageSize { get; set; } = 100;
 
         // Auto fill original value
-        public static bool AutoFillOriginalValue = false;
+        public static bool AutoFillOriginalValue { get; set; } = false;
 
         // Lookup filter value separator
-        public static char MultipleOptionSeparator = ',';
+        public static char MultipleOptionSeparator { get; set; } = ',';
 
-        public static char FilterOptionSeparator = '|';
+        public static char FilterOptionSeparator { get; set; } = '|';
 
-        public static bool UseLookupCache = true;
+        public static bool UseLookupCache { get; set; } = true;
 
-        public static int LookupCacheCount = 100;
+        public static int LookupCacheCount { get; set; } = 100;
 
-        public static List<string> LookupCachePageIds = ["list", "grid"];
+        public static List<string> LookupCachePageIds { get; set; } = ["list", "grid"];
 
         // Page Title Style
-        public static string PageTitleStyle = "Breadcrumbs";
+        public static string PageTitleStyle { get; set; } = "Breadcrumbs";
 
         // Responsive table
-        public static bool UseResponsiveTable = true;
+        public static bool UseResponsiveTable { get; set; } = true;
 
-        public static string ResponsiveTableClass = "table-responsive";
+        public static string ResponsiveTableClass { get; set; } = "table-responsive";
 
         // Fixed header table
-        public static string FixedHeaderTableClass = "table-head-fixed";
+        public static string FixedHeaderTableClass { get; set; } = "table-head-fixed";
 
-        public static bool UseFixedHeaderTable = false;
+        public static bool UseFixedHeaderTable { get; set; } = false;
 
-        public static string FixedHeaderTableHeight = "mh-400px"; // CSS class for fixed header table height
+        public static string FixedHeaderTableHeight { get; set; } = "mh-400px"; // CSS class for fixed header table height
 
         // Multi column list options position
-        public static string MultiColumnListOptionsPosition = "bottom-start";
+        public static string MultiColumnListOptionsPosition { get; set; } = "bottom-start";
 
         // RTL
-        public static List<string> RtlLanguages = ["ar", "fa", "he", "iw", "ug", "ur"];
+        public static List<string> RtlLanguages { get; set; } = ["ar", "fa", "he", "iw", "ug", "ur"];
 
         // Date/Time without seconds
-        public static bool DatetimeWithoutSeconds = false;
+        public static bool DatetimeWithoutSeconds { get; set; } = false;
 
         // Multiple selection
-        public static string OptionHtmlTemplate = "<span class=\"ew-option\">{value}</span>"; // Note: class="ew-option" must match CSS style in project stylesheet
+        public static string OptionHtmlTemplate { get; set; } = "<span class=\"ew-option\">{value}</span>"; // Note: class="ew-option" must match CSS style in project stylesheet
 
-        public static string OptionSeparator = ", ";
+        public static string OptionSeparator { get; set; } = ", ";
 
         // Cookies
-        public static int CookieExpires  = 365; // Cookie expiry in days
+        public static int CookieExpires { get; set; } = 365; // Cookie expiry in days
 
-        public static DateTime CookieExpiryTime = DateTime.Today.AddDays(CookieExpires);
+        public static DateTime CookieExpiryTime { get; set; } = DateTime.Today.AddDays(CookieExpires);
 
-        public static string CookieSameSite = "Unspecified";
+        public static string CookieSameSite { get; set; } = "Unspecified";
 
-        public static bool CookieHttpOnly = true;
+        public static bool CookieHttpOnly { get; set; } = true;
 
-        public static bool CookieSecure = false;
+        public static bool CookieSecure { get; set; } = false;
 
-        public static string CookieConsentClass = "text-bg-secondary"; // CSS class name for cookie consent
+        public static string CookieConsentClass { get; set; } = "text-bg-secondary"; // CSS class name for cookie consent
 
-        public static string CookieConsentButtonClass = "btn btn-dark btn-sm"; // CSS class name for cookie consent buttons
+        public static string CookieConsentButtonClass { get; set; } = "btn btn-dark btn-sm"; // CSS class name for cookie consent buttons
 
         // Token expiry time
-        public static int ActivateLinkExpiryTime = 30 * 60; // Activation token, 30 minutes by default
+        public static int ActivateLinkExpiryTime { get; set; } = 30 * 60; // Activation token, 30 minutes by default
 
-        public static int RememberMeExpiryTime = 365 * 24 * 60 * 60; // Remember me (Auto login) token, one year by default
+        public static int RememberMeExpiryTime { get; set; } = 365 * 24 * 60 * 60; // Remember me (Auto login) token, one year by default
 
         // Mime type // DN
-        public static string DefaultMimeType = "application/octet-stream";
+        public static string DefaultMimeType { get; set; } = "application/octet-stream";
 
         /// <summary>
         /// Reports
         /// </summary>
 
         // Chart
-        public static int ChartWidth = 600;
+        public static int ChartWidth { get; set; } = 600;
 
-        public static int ChartHeight = 500;
+        public static int ChartHeight { get; set; } = 500;
 
         public static bool ChartShowBlankSeries { get; set; } = false; // Show blank series
 
@@ -1612,9 +1613,9 @@ public partial class SnDOne {
 
         public static double ChartScaleMaximumValue { get; set; } = 0; // Chart scale maximum value
 
-        public static bool ChartShowPercentage = false; // Show percentage in Pie/Doughnut charts
+        public static bool ChartShowPercentage { get; set; } = false; // Show percentage in Pie/Doughnut charts
 
-        public static string ChartColorPalette = ""; // Color pallette (global)
+        public static string ChartColorPalette { get; set; } = ""; // Color pallette (global)
 
         // Drill down setting
         public static bool UseDrillDownPanel { get; set; } = true; // Use popup panel for drill down
@@ -1625,17 +1626,17 @@ public partial class SnDOne {
         public static bool ShowDrillDownFilter { get; set; } = true; // True to show drill down filter
 
         // Table level constants
-        public static string TableGroupPerPage = "recperpage";
+        public static string TableGroupPerPage { get; set; } = "recperpage";
 
-        public static string TableStartGroup = "start";
+        public static string TableStartGroup { get; set; } = "start";
 
-        public static string TableSortChart = "sortchart"; // Table sort chart
+        public static string TableSortChart { get; set; } = "sortchart"; // Table sort chart
 
         // Page break
-        public static string PageBreakHtml = "<div style=\"page-break-after:always;\"></div>";
+        public static string PageBreakHtml { get; set; } = "<div style=\"page-break-after:always;\"></div>";
 
         // User permissions
-        public static List<string> Privileges = [
+        public static List<string> Privileges { get; set; } = [
             "add",
             "delete",
             "edit",
@@ -1650,13 +1651,13 @@ public partial class SnDOne {
         ];
 
         // Download PDF file (instead of shown in browser)
-        public static bool DownloadPdfFile = false;
+        public static bool DownloadPdfFile { get; set; } = false;
 
         // Embed PDF documents
-        public static bool EmbedPdf = true;
+        public static bool EmbedPdf { get; set; } = true;
 
         // Advanced Filters
-        public static Dictionary<string, Dictionary<string, string>> ReportAdvancedFilters = new(StringComparer.OrdinalIgnoreCase)
+        public static Dictionary<string, Dictionary<string, string>> ReportAdvancedFilters { get; set; } = new(StringComparer.OrdinalIgnoreCase)
         {
             { "PastFuture", new() { { "Past", "IsPast" }, { "Future", "IsFuture" } } },
             { "RelativeDayPeriods", new() { { "Last30Days", "IsLast30Days" }, { "Last14Days", "IsLast14Days" }, { "Last7Days", "IsLast7Days" }, { "Next7Days", "IsNext7Days" }, { "Next14Days", "IsNext14Days" }, { "Next30Days", "IsNext30Days" } } },
@@ -1667,10 +1668,10 @@ public partial class SnDOne {
         };
 
         // Float fields default decimal position
-        public static int DefaultDecimalPrecision = 2;
+        public static int DefaultDecimalPrecision { get; set; } = 2;
 
         // Chart
-        public static string DefaultChartRenderer = "";
+        public static string DefaultChartRenderer { get; set; } = "";
 
         // Captcha class // DN
         public static string CaptchaClass { get; set; } = "CaptchaBase";
@@ -1882,7 +1883,7 @@ public partial class SnDOne {
         };
 
         // Query builder search operators settings
-        public static Dictionary<string, Dictionary<string, object>> QueryBuilderOperators = new()
+        public static Dictionary<string, Dictionary<string, object>> QueryBuilderOperators { get; set; } = new()
         {
             { "equal", new() {
                     { "type", "equal" },
@@ -2027,13 +2028,13 @@ public partial class SnDOne {
         };
 
         // Value separator for IN operator
-        public static string InOperatorValueSeparator = "|";
+        public static string InOperatorValueSeparator { get; set; } = "|";
 
         // Value separator for BETWEEN operator
-        public static string BetweenOperatorValueSeparator = "|";
+        public static string BetweenOperatorValueSeparator { get; set; } = "|";
 
         // Value separator for OR operator
-        public static string OrOperatorValueSeparator = "||";
+        public static string OrOperatorValueSeparator { get; set; } = "||";
 
         // Config client side variables
         public static List<string> ConfigClientVars { get; set; } = new()
@@ -2120,11 +2121,11 @@ public partial class SnDOne {
         /// e.g. Config_Init server event
         /// JsonFiles.Add(new { Path = "foobar.json", Optional = false, ReloadOnChange = true });
         /// </summary>
-        public static List<dynamic> JsonFiles = [];
+        public static List<dynamic> JsonFiles { get; set; } = [];
 
         /// <summary>
         /// Chat URL
         /// </summary>
-        public static string ChatUrl = "";
+        public static string ChatUrl { get; set; } = "";
     }
 } // End Partial class

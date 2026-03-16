@@ -1952,8 +1952,10 @@ public partial class SnDOne {
             NamaLengkap.ViewCustomAttributes = "";
 
             // UserLevel
-            if (Security.CanAdmin) { // System admin
+            if (Security.CanAdmin) {
+                // awallookupbung
                 string curVal = ConvertToString(_UserLevel.CurrentValue);
+                _UserLevel.ViewValue = Empty(curVal) ? DbNullValue : FormatNumber(_UserLevel.CurrentValue, _UserLevel.FormatPattern);
                 if (!Empty(curVal)) {
                     if (_UserLevel.Lookup != null && IsDictionary(_UserLevel.Lookup?.Options) && _UserLevel.Lookup?.Options.Values.Count > 0) { // Load from cache // DN
                         _UserLevel.ViewValue = _UserLevel.LookupCacheOption(curVal);
@@ -1964,20 +1966,21 @@ public partial class SnDOne {
                         if (rswrk?.Count > 0 && _UserLevel.Lookup != null) { // Lookup values found
                             var listwrk = _UserLevel.Lookup?.RenderViewRow(rswrk[0]);
                             _UserLevel.ViewValue = _UserLevel.DisplayValue(listwrk);
-                        } else {
-                            _UserLevel.ViewValue = FormatNumber(_UserLevel.CurrentValue, _UserLevel.FormatPattern);
                         }
                     }
-                } else {
-                    _UserLevel.ViewValue = DbNullValue;
                 }
+
+                // akhirlookupbung
             } else {
                 _UserLevel.ViewValue = Language.Phrase("PasswordMask");
             }
             _UserLevel.ViewCustomAttributes = "";
 
             // Rule
+
+            // awallookupbung
             string curVal2 = ConvertToString(Rule.CurrentValue);
+            Rule.ViewValue = Empty(curVal2) ? DbNullValue : Rule.CurrentValue;
             if (!Empty(curVal2)) {
                 if (Rule.Lookup != null && IsDictionary(Rule.Lookup?.Options) && Rule.Lookup?.Options.Values.Count > 0) { // Load from cache // DN
                     Rule.ViewValue = Rule.LookupCacheOption(curVal2);
@@ -1988,18 +1991,19 @@ public partial class SnDOne {
                     if (rswrk2?.Count > 0 && Rule.Lookup != null) { // Lookup values found
                         var listwrk = Rule.Lookup?.RenderViewRow(rswrk2[0]);
                         Rule.ViewValue = Rule.DisplayValue(listwrk);
-                    } else {
-                        Rule.ViewValue = Rule.CurrentValue;
                     }
                 }
-            } else {
-                Rule.ViewValue = DbNullValue;
             }
+
+            // akhirlookupbung
             Rule.ViewCustomAttributes = "";
 
             // IdPosition
             IdPosition.ViewValue = IdPosition.CurrentValue;
+
+            // awallookupbung
             string curVal3 = ConvertToString(IdPosition.CurrentValue);
+            IdPosition.ViewValue = Empty(curVal3) ? DbNullValue : FormatNumber(IdPosition.CurrentValue, IdPosition.FormatPattern);
             if (!Empty(curVal3)) {
                 if (IdPosition.Lookup != null && IsDictionary(IdPosition.Lookup?.Options) && IdPosition.Lookup?.Options.Values.Count > 0) { // Load from cache // DN
                     IdPosition.ViewValue = IdPosition.LookupCacheOption(curVal3);
@@ -2010,17 +2014,18 @@ public partial class SnDOne {
                     if (rswrk3?.Count > 0 && IdPosition.Lookup != null) { // Lookup values found
                         var listwrk = IdPosition.Lookup?.RenderViewRow(rswrk3[0]);
                         IdPosition.ViewValue = IdPosition.DisplayValue(listwrk);
-                    } else {
-                        IdPosition.ViewValue = FormatNumber(IdPosition.CurrentValue, IdPosition.FormatPattern);
                     }
                 }
-            } else {
-                IdPosition.ViewValue = DbNullValue;
             }
+
+            // akhirlookupbung
             IdPosition.ViewCustomAttributes = "";
 
             // Region
+
+            // awallookupbung
             string curVal4 = ConvertToString(Region.CurrentValue);
+            Region.ViewValue = Empty(curVal4) ? DbNullValue : Region.CurrentValue;
             if (!Empty(curVal4)) {
                 if (Region.Lookup != null && IsDictionary(Region.Lookup?.Options) && Region.Lookup?.Options.Values.Count > 0) { // Load from cache // DN
                     Region.ViewValue = Region.LookupCacheOption(curVal4);
@@ -2031,17 +2036,18 @@ public partial class SnDOne {
                     if (rswrk4?.Count > 0 && Region.Lookup != null) { // Lookup values found
                         var listwrk = Region.Lookup?.RenderViewRow(rswrk4[0]);
                         Region.ViewValue = Region.DisplayValue(listwrk);
-                    } else {
-                        Region.ViewValue = Region.CurrentValue;
                     }
                 }
-            } else {
-                Region.ViewValue = DbNullValue;
             }
+
+            // akhirlookupbung
             Region.ViewCustomAttributes = "";
 
             // Plant
+
+            // awallookupbung
             string curVal5 = ConvertToString(Plant.CurrentValue);
+            Plant.ViewValue = Empty(curVal5) ? DbNullValue : FormatNumber(Plant.CurrentValue, Plant.FormatPattern);
             if (!Empty(curVal5)) {
                 if (Plant.Lookup != null && IsDictionary(Plant.Lookup?.Options) && Plant.Lookup?.Options.Values.Count > 0) { // Load from cache // DN
                     Plant.ViewValue = Plant.LookupCacheOption(curVal5);
@@ -2052,13 +2058,11 @@ public partial class SnDOne {
                     if (rswrk5?.Count > 0 && Plant.Lookup != null) { // Lookup values found
                         var listwrk = Plant.Lookup?.RenderViewRow(rswrk5[0]);
                         Plant.ViewValue = Plant.DisplayValue(listwrk);
-                    } else {
-                        Plant.ViewValue = FormatNumber(Plant.CurrentValue, Plant.FormatPattern);
                     }
                 }
-            } else {
-                Plant.ViewValue = DbNullValue;
             }
+
+            // akhirlookupbung
             Plant.ViewCustomAttributes = "";
 
             // LookupPosition

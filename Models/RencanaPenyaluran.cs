@@ -1800,7 +1800,10 @@ public partial class SnDOne {
 
             // IdPenimbunan
             IdPenimbunan.ViewValue = IdPenimbunan.CurrentValue;
+
+            // awallookupbung
             string curVal = ConvertToString(IdPenimbunan.CurrentValue);
+            IdPenimbunan.ViewValue = Empty(curVal) ? DbNullValue : FormatNumber(IdPenimbunan.CurrentValue, IdPenimbunan.FormatPattern);
             if (!Empty(curVal)) {
                 if (IdPenimbunan.Lookup != null && IsDictionary(IdPenimbunan.Lookup?.Options) && IdPenimbunan.Lookup?.Options.Values.Count > 0) { // Load from cache // DN
                     IdPenimbunan.ViewValue = IdPenimbunan.LookupCacheOption(curVal);
@@ -1811,13 +1814,11 @@ public partial class SnDOne {
                     if (rswrk?.Count > 0 && IdPenimbunan.Lookup != null) { // Lookup values found
                         var listwrk = IdPenimbunan.Lookup?.RenderViewRow(rswrk[0]);
                         IdPenimbunan.ViewValue = IdPenimbunan.DisplayValue(listwrk);
-                    } else {
-                        IdPenimbunan.ViewValue = FormatNumber(IdPenimbunan.CurrentValue, IdPenimbunan.FormatPattern);
                     }
                 }
-            } else {
-                IdPenimbunan.ViewValue = DbNullValue;
             }
+
+            // akhirlookupbung
             IdPenimbunan.ViewCustomAttributes = "";
 
             // IdTemplate
@@ -1844,7 +1845,10 @@ public partial class SnDOne {
 
             // IdPlant
             IdPlant.ViewValue = IdPlant.CurrentValue;
+
+            // awallookupbung
             string curVal3 = ConvertToString(IdPlant.CurrentValue);
+            IdPlant.ViewValue = Empty(curVal3) ? DbNullValue : FormatNumber(IdPlant.CurrentValue, IdPlant.FormatPattern);
             if (!Empty(curVal3)) {
                 if (IdPlant.Lookup != null && IsDictionary(IdPlant.Lookup?.Options) && IdPlant.Lookup?.Options.Values.Count > 0) { // Load from cache // DN
                     IdPlant.ViewValue = IdPlant.LookupCacheOption(curVal3);
@@ -1855,13 +1859,11 @@ public partial class SnDOne {
                     if (rswrk3?.Count > 0 && IdPlant.Lookup != null) { // Lookup values found
                         var listwrk = IdPlant.Lookup?.RenderViewRow(rswrk3[0]);
                         IdPlant.ViewValue = IdPlant.DisplayValue(listwrk);
-                    } else {
-                        IdPlant.ViewValue = FormatNumber(IdPlant.CurrentValue, IdPlant.FormatPattern);
                     }
                 }
-            } else {
-                IdPlant.ViewValue = DbNullValue;
             }
+
+            // akhirlookupbung
             IdPlant.ViewCustomAttributes = "";
 
             // TipeProdukSTS
@@ -1873,10 +1875,15 @@ public partial class SnDOne {
             string? dispVal4 = TipeProdukSTS.DisplayValue(listWrk4);
             if (!Empty(dispVal4))
                 TipeProdukSTS.ViewValue = dispVal4;
+
+            // akhirlookupbung
             TipeProdukSTS.ViewCustomAttributes = "";
 
             // IdModa
+
+            // awallookupbung
             string curVal5 = ConvertToString(IdModa.CurrentValue);
+            IdModa.ViewValue = Empty(curVal5) ? DbNullValue : IdModa.CurrentValue;
             if (!Empty(curVal5)) {
                 if (IdModa.Lookup != null && IsDictionary(IdModa.Lookup?.Options) && IdModa.Lookup?.Options.Values.Count > 0) { // Load from cache // DN
                     IdModa.ViewValue = IdModa.LookupCacheOption(curVal5);
@@ -1887,13 +1894,11 @@ public partial class SnDOne {
                     if (rswrk5?.Count > 0 && IdModa.Lookup != null) { // Lookup values found
                         var listwrk = IdModa.Lookup?.RenderViewRow(rswrk5[0]);
                         IdModa.ViewValue = IdModa.DisplayValue(listwrk);
-                    } else {
-                        IdModa.ViewValue = IdModa.CurrentValue;
                     }
                 }
-            } else {
-                IdModa.ViewValue = DbNullValue;
             }
+
+            // akhirlookupbung
             IdModa.ViewCustomAttributes = "";
 
             // TipePenyaluran
@@ -2087,7 +2092,10 @@ public partial class SnDOne {
             // IdPlant
             IdPlant.SetupEditAttributes();
             IdPlant.EditValue = IdPlant.CurrentValue;
+
+            // awallookupbung
             string curVal3 = ConvertToString(IdPlant.CurrentValue);
+            IdPlant.EditValue = Empty(curVal3) ? DbNullValue : FormatNumber(IdPlant.CurrentValue, IdPlant.FormatPattern);
             if (!Empty(curVal3)) {
                 if (IdPlant.Lookup != null && IsDictionary(IdPlant.Lookup?.Options) && IdPlant.Lookup?.Options.Values.Count > 0) { // Load from cache // DN
                     IdPlant.EditValue = IdPlant.LookupCacheOption(curVal3);
@@ -2098,13 +2106,11 @@ public partial class SnDOne {
                     if (rswrk3?.Count > 0 && IdPlant.Lookup != null) { // Lookup values found
                         var listwrk = IdPlant.Lookup?.RenderViewRow(rswrk3[0]);
                         IdPlant.EditValue = IdPlant.DisplayValue(listwrk);
-                    } else {
-                        IdPlant.EditValue = FormatNumber(IdPlant.CurrentValue, IdPlant.FormatPattern);
                     }
                 }
-            } else {
-                IdPlant.EditValue = DbNullValue;
             }
+
+            // akhirlookupbung
             IdPlant.ViewCustomAttributes = "";
 
             // TipeProdukSTS
@@ -2117,11 +2123,16 @@ public partial class SnDOne {
             string? dispVal4 = TipeProdukSTS.DisplayValue(listWrk4);
             if (!Empty(dispVal4))
                 TipeProdukSTS.EditValue = dispVal4;
+
+            // akhirlookupbung
             TipeProdukSTS.ViewCustomAttributes = "";
 
             // IdModa
             IdModa.SetupEditAttributes();
+
+            // awallookupbung
             string curVal5 = ConvertToString(IdModa.CurrentValue);
+            IdModa.EditValue = Empty(curVal5) ? DbNullValue : IdModa.CurrentValue;
             if (!Empty(curVal5)) {
                 if (IdModa.Lookup != null && IsDictionary(IdModa.Lookup?.Options) && IdModa.Lookup?.Options.Values.Count > 0) { // Load from cache // DN
                     IdModa.EditValue = IdModa.LookupCacheOption(curVal5);
@@ -2132,13 +2143,11 @@ public partial class SnDOne {
                     if (rswrk5?.Count > 0 && IdModa.Lookup != null) { // Lookup values found
                         var listwrk = IdModa.Lookup?.RenderViewRow(rswrk5[0]);
                         IdModa.EditValue = IdModa.DisplayValue(listwrk);
-                    } else {
-                        IdModa.EditValue = IdModa.CurrentValue;
                     }
                 }
-            } else {
-                IdModa.EditValue = DbNullValue;
             }
+
+            // akhirlookupbung
             IdModa.ViewCustomAttributes = "";
 
             // TipePenyaluran

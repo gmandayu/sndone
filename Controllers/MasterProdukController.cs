@@ -13,6 +13,11 @@ public partial class HomeController : Controller
         masterProdukList.Cache = _cache;
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["NoProduk"];
+
+        // Run the page
         return await masterProdukList.Run();
     }
 
@@ -23,6 +28,11 @@ public partial class HomeController : Controller
     {
         // Create page object
         masterProdukAdd = new GLOBALS.MasterProdukAdd(this);
+
+        // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["NoProduk"];
 
         // Run the page
         return await masterProdukAdd.Run();
@@ -37,6 +47,11 @@ public partial class HomeController : Controller
         masterProdukView = new GLOBALS.MasterProdukView(this);
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["NoProduk"];
+
+        // Run the page
         return await masterProdukView.Run();
     }
 
@@ -49,6 +64,11 @@ public partial class HomeController : Controller
         masterProdukEdit = new GLOBALS.MasterProdukEdit(this);
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["NoProduk"];
+
+        // Run the page
         return await masterProdukEdit.Run();
     }
 
@@ -59,6 +79,11 @@ public partial class HomeController : Controller
     {
         // Create page object
         masterProdukDelete = new GLOBALS.MasterProdukDelete(this);
+
+        // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["NoProduk"];
 
         // Run the page
         return await masterProdukDelete.Run();

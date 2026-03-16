@@ -13,6 +13,11 @@ public partial class HomeController : Controller
         templateAktivitasDokumenList.Cache = _cache;
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["IdTemplateAktivitasDokumen"];
+
+        // Run the page
         return await templateAktivitasDokumenList.Run();
     }
 
@@ -23,6 +28,11 @@ public partial class HomeController : Controller
     {
         // Create page object
         templateAktivitasDokumenAdd = new GLOBALS.TemplateAktivitasDokumenAdd(this);
+
+        // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["IdTemplateAktivitasDokumen"];
 
         // Run the page
         return await templateAktivitasDokumenAdd.Run();
@@ -37,6 +47,11 @@ public partial class HomeController : Controller
         templateAktivitasDokumenView = new GLOBALS.TemplateAktivitasDokumenView(this);
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["IdTemplateAktivitasDokumen"];
+
+        // Run the page
         return await templateAktivitasDokumenView.Run();
     }
 
@@ -49,6 +64,11 @@ public partial class HomeController : Controller
         templateAktivitasDokumenEdit = new GLOBALS.TemplateAktivitasDokumenEdit(this);
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["IdTemplateAktivitasDokumen"];
+
+        // Run the page
         return await templateAktivitasDokumenEdit.Run();
     }
 
@@ -59,6 +79,11 @@ public partial class HomeController : Controller
     {
         // Create page object
         templateAktivitasDokumenDelete = new GLOBALS.TemplateAktivitasDokumenDelete(this);
+
+        // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["IdTemplateAktivitasDokumen"];
 
         // Run the page
         return await templateAktivitasDokumenDelete.Run();

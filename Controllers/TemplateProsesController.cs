@@ -13,6 +13,11 @@ public partial class HomeController : Controller
         templateProsesList.Cache = _cache;
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["IdTemplateProses"];
+
+        // Run the page
         return await templateProsesList.Run();
     }
 
@@ -23,6 +28,11 @@ public partial class HomeController : Controller
     {
         // Create page object
         templateProsesAdd = new GLOBALS.TemplateProsesAdd(this);
+
+        // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["IdTemplateProses"];
 
         // Run the page
         return await templateProsesAdd.Run();
@@ -37,6 +47,11 @@ public partial class HomeController : Controller
         templateProsesView = new GLOBALS.TemplateProsesView(this);
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["IdTemplateProses"];
+
+        // Run the page
         return await templateProsesView.Run();
     }
 
@@ -49,6 +64,11 @@ public partial class HomeController : Controller
         templateProsesEdit = new GLOBALS.TemplateProsesEdit(this);
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["IdTemplateProses"];
+
+        // Run the page
         return await templateProsesEdit.Run();
     }
 
@@ -59,6 +79,11 @@ public partial class HomeController : Controller
     {
         // Create page object
         templateProsesDelete = new GLOBALS.TemplateProsesDelete(this);
+
+        // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["IdTemplateProses"];
 
         // Run the page
         return await templateProsesDelete.Run();

@@ -1333,7 +1333,10 @@ public partial class SnDOne {
             Location.ViewCustomAttributes = "";
 
             // UserLevel
+
+            // awallookupbung
             string curVal = ConvertToString(_UserLevel.CurrentValue);
+            _UserLevel.ViewValue = Empty(curVal) ? DbNullValue : FormatNumber(_UserLevel.CurrentValue, _UserLevel.FormatPattern);
             if (!Empty(curVal)) {
                 if (_UserLevel.Lookup != null && IsDictionary(_UserLevel.Lookup?.Options) && _UserLevel.Lookup?.Options.Values.Count > 0) { // Load from cache // DN
                     _UserLevel.ViewValue = _UserLevel.LookupCacheOption(curVal);
@@ -1344,17 +1347,18 @@ public partial class SnDOne {
                     if (rswrk?.Count > 0 && _UserLevel.Lookup != null) { // Lookup values found
                         var listwrk = _UserLevel.Lookup?.RenderViewRow(rswrk[0]);
                         _UserLevel.ViewValue = _UserLevel.DisplayValue(listwrk);
-                    } else {
-                        _UserLevel.ViewValue = FormatNumber(_UserLevel.CurrentValue, _UserLevel.FormatPattern);
                     }
                 }
-            } else {
-                _UserLevel.ViewValue = DbNullValue;
             }
+
+            // akhirlookupbung
             _UserLevel.ViewCustomAttributes = "";
 
             // Role
+
+            // awallookupbung
             string curVal2 = ConvertToString(Role.CurrentValue);
+            Role.ViewValue = Empty(curVal2) ? DbNullValue : FormatNumber(Role.CurrentValue, Role.FormatPattern);
             if (!Empty(curVal2)) {
                 if (Role.Lookup != null && IsDictionary(Role.Lookup?.Options) && Role.Lookup?.Options.Values.Count > 0) { // Load from cache // DN
                     Role.ViewValue = Role.LookupCacheOption(curVal2);
@@ -1365,13 +1369,11 @@ public partial class SnDOne {
                     if (rswrk2?.Count > 0 && Role.Lookup != null) { // Lookup values found
                         var listwrk = Role.Lookup?.RenderViewRow(rswrk2[0]);
                         Role.ViewValue = Role.DisplayValue(listwrk);
-                    } else {
-                        Role.ViewValue = FormatNumber(Role.CurrentValue, Role.FormatPattern);
                     }
                 }
-            } else {
-                Role.ViewValue = DbNullValue;
             }
+
+            // akhirlookupbung
             Role.ViewCustomAttributes = "";
 
             // IdPosition

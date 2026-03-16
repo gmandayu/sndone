@@ -1680,7 +1680,10 @@ public partial class SnDOne {
             Region.ViewCustomAttributes = "";
 
             // Id_Plant
+
+            // awallookupbung
             string curVal = ConvertToString(Id_Plant.CurrentValue);
+            Id_Plant.ViewValue = Empty(curVal) ? DbNullValue : FormatNumber(Id_Plant.CurrentValue, Id_Plant.FormatPattern);
             if (!Empty(curVal)) {
                 if (Id_Plant.Lookup != null && IsDictionary(Id_Plant.Lookup?.Options) && Id_Plant.Lookup?.Options.Values.Count > 0) { // Load from cache // DN
                     Id_Plant.ViewValue = Id_Plant.LookupCacheOption(curVal);
@@ -1691,13 +1694,11 @@ public partial class SnDOne {
                     if (rswrk?.Count > 0 && Id_Plant.Lookup != null) { // Lookup values found
                         var listwrk = Id_Plant.Lookup?.RenderViewRow(rswrk[0]);
                         Id_Plant.ViewValue = Id_Plant.DisplayValue(listwrk);
-                    } else {
-                        Id_Plant.ViewValue = FormatNumber(Id_Plant.CurrentValue, Id_Plant.FormatPattern);
                     }
                 }
-            } else {
-                Id_Plant.ViewValue = DbNullValue;
             }
+
+            // akhirlookupbung
             Id_Plant.ViewCustomAttributes = "";
 
             // Plant

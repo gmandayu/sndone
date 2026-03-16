@@ -1614,7 +1614,10 @@ public partial class SnDOne {
             NamaTemplate.ViewCustomAttributes = "";
 
             // IdModa
+
+            // awallookupbung
             string curVal = ConvertToString(IdModa.CurrentValue);
+            IdModa.ViewValue = Empty(curVal) ? DbNullValue : FormatNumber(IdModa.CurrentValue, IdModa.FormatPattern);
             if (!Empty(curVal)) {
                 if (IdModa.Lookup != null && IsDictionary(IdModa.Lookup?.Options) && IdModa.Lookup?.Options.Values.Count > 0) { // Load from cache // DN
                     IdModa.ViewValue = IdModa.LookupCacheOption(curVal);
@@ -1625,13 +1628,11 @@ public partial class SnDOne {
                     if (rswrk?.Count > 0 && IdModa.Lookup != null) { // Lookup values found
                         var listwrk = IdModa.Lookup?.RenderViewRow(rswrk[0]);
                         IdModa.ViewValue = IdModa.DisplayValue(listwrk);
-                    } else {
-                        IdModa.ViewValue = FormatNumber(IdModa.CurrentValue, IdModa.FormatPattern);
                     }
                 }
-            } else {
-                IdModa.ViewValue = DbNullValue;
             }
+
+            // akhirlookupbung
             IdModa.ViewCustomAttributes = "";
 
             // JenisProses

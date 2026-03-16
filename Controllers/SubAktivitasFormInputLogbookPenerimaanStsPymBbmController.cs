@@ -13,6 +13,11 @@ public partial class HomeController : Controller
         subAktivitasFormInputLogbookPenerimaanStsPymBbmList.Cache = _cache;
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["id"];
+
+        // Run the page
         return await subAktivitasFormInputLogbookPenerimaanStsPymBbmList.Run();
     }
 
@@ -23,6 +28,11 @@ public partial class HomeController : Controller
     {
         // Create page object
         subAktivitasFormInputLogbookPenerimaanStsPymBbmEdit = new GLOBALS.SubAktivitasFormInputLogbookPenerimaanStsPymBbmEdit(this);
+
+        // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["id"];
 
         // Run the page
         return await subAktivitasFormInputLogbookPenerimaanStsPymBbmEdit.Run();

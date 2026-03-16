@@ -28,7 +28,7 @@ public partial class SnDOne {
         {
             Table = table;
             _prefix = Config.ProjectName + "_" + Table.TableVar + "_";
-            Raw = !Config.RemoveXss;
+            Raw = !Config.RemoveXssEnabled;
         }
 
         // Session variable name

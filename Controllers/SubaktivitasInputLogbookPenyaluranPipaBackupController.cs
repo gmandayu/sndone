@@ -13,6 +13,11 @@ public partial class HomeController : Controller
         subaktivitasInputLogbookPenyaluranPipaBackupList.Cache = _cache;
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["id"];
+
+        // Run the page
         return await subaktivitasInputLogbookPenyaluranPipaBackupList.Run();
     }
 
@@ -23,6 +28,11 @@ public partial class HomeController : Controller
     {
         // Create page object
         subaktivitasInputLogbookPenyaluranPipaBackupAdd = new GLOBALS.SubaktivitasInputLogbookPenyaluranPipaBackupAdd(this);
+
+        // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["id"];
 
         // Run the page
         return await subaktivitasInputLogbookPenyaluranPipaBackupAdd.Run();
@@ -37,6 +47,11 @@ public partial class HomeController : Controller
         subaktivitasInputLogbookPenyaluranPipaBackupView = new GLOBALS.SubaktivitasInputLogbookPenyaluranPipaBackupView(this);
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["id"];
+
+        // Run the page
         return await subaktivitasInputLogbookPenyaluranPipaBackupView.Run();
     }
 
@@ -49,6 +64,11 @@ public partial class HomeController : Controller
         subaktivitasInputLogbookPenyaluranPipaBackupEdit = new GLOBALS.SubaktivitasInputLogbookPenyaluranPipaBackupEdit(this);
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["id"];
+
+        // Run the page
         return await subaktivitasInputLogbookPenyaluranPipaBackupEdit.Run();
     }
 
@@ -59,6 +79,11 @@ public partial class HomeController : Controller
     {
         // Create page object
         subaktivitasInputLogbookPenyaluranPipaBackupDelete = new GLOBALS.SubaktivitasInputLogbookPenyaluranPipaBackupDelete(this);
+
+        // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["id"];
 
         // Run the page
         return await subaktivitasInputLogbookPenyaluranPipaBackupDelete.Run();

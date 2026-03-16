@@ -13,6 +13,11 @@ public partial class HomeController : Controller
         pengujianSampleLainnyaList.Cache = _cache;
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["id"];
+
+        // Run the page
         return await pengujianSampleLainnyaList.Run();
     }
 
@@ -23,6 +28,11 @@ public partial class HomeController : Controller
     {
         // Create page object
         pengujianSampleLainnyaAdd = new GLOBALS.PengujianSampleLainnyaAdd(this);
+
+        // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["id"];
 
         // Run the page
         return await pengujianSampleLainnyaAdd.Run();
@@ -37,6 +47,11 @@ public partial class HomeController : Controller
         pengujianSampleLainnyaView = new GLOBALS.PengujianSampleLainnyaView(this);
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["id"];
+
+        // Run the page
         return await pengujianSampleLainnyaView.Run();
     }
 
@@ -49,6 +64,11 @@ public partial class HomeController : Controller
         pengujianSampleLainnyaEdit = new GLOBALS.PengujianSampleLainnyaEdit(this);
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["id"];
+
+        // Run the page
         return await pengujianSampleLainnyaEdit.Run();
     }
 
@@ -59,6 +79,11 @@ public partial class HomeController : Controller
     {
         // Create page object
         pengujianSampleLainnyaDelete = new GLOBALS.PengujianSampleLainnyaDelete(this);
+
+        // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["id"];
 
         // Run the page
         return await pengujianSampleLainnyaDelete.Run();

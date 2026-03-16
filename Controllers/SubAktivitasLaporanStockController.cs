@@ -13,6 +13,11 @@ public partial class HomeController : Controller
         subAktivitasLaporanStockList.Cache = _cache;
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["id"];
+
+        // Run the page
         return await subAktivitasLaporanStockList.Run();
     }
 
@@ -23,6 +28,11 @@ public partial class HomeController : Controller
     {
         // Create page object
         subAktivitasLaporanStockEdit = new GLOBALS.SubAktivitasLaporanStockEdit(this);
+
+        // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["id"];
 
         // Run the page
         return await subAktivitasLaporanStockEdit.Run();

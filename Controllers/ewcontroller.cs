@@ -1,3 +1,4 @@
+using System.Linq;
 using ApplicationUser = SnDOne.Models.ApplicationUser;
 
 namespace SnDOne.Controllers;
@@ -6,6 +7,7 @@ namespace SnDOne.Controllers;
 [AutoValidateAntiforgeryToken]
 [Authorize(Policy = "UserLevel")]
 [ApiExplorerSettings(IgnoreApi=true)]
+[Route("")]
 public partial class HomeController : Controller
 {
     private IMemoryCache _cache;
@@ -20,16 +22,22 @@ public partial class HomeController : Controller
     // Destructor
     protected override void Dispose(bool disposing)
     {
-        if (disposing) {
+        if (disposing)
+        {
             // Clean up temp folder if not add/edit/export
             dynamic page = CurrentPage;
-            if (page != null) {
+            if (page != null)
+            {
                 string pageId = page.PageID;
                 if (GetProperty(page, "TableName") != null &&
-                    !(new [] { "add", "register", "edit", "update" }).Contains(pageId) &&
+                    !(new[] { "add", "register", "edit", "update" }).Contains(pageId) &&
                     !(pageId == "list" && page.IsAddOrEdit) &&
-                    !(!Empty(GetPropertyValue(page, "Export")) && page.Export != "print" && page.UseCustomTemplate))
-                CleanUploadTempPaths(Session.SessionId);
+                    !(!Empty(GetPropertyValue(page, "Export")) &&
+                      page.Export != "print" &&
+                      page.UseCustomTemplate))
+                {
+                    CleanUploadTempPaths(Session.SessionId);
+                }
             }
         }
         base.Dispose(disposing);
@@ -356,13 +364,4 @@ public partial class HomeController : Controller
     {
         return stringDictionary.ToDictionary(kvp => kvp.Key, kvp => (object)kvp.Value);
     }
-
-    // Dispose
-    // protected override void Dispose(bool disposing) {
-    //     try {
-    //         base.Dispose(disposing);
-    //     } finally {
-    //         CurrentPage?.Terminate();
-    //     }
-    // }
 }

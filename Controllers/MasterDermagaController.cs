@@ -13,6 +13,11 @@ public partial class HomeController : Controller
         masterDermagaList.Cache = _cache;
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["IdDermaga"];
+
+        // Run the page
         return await masterDermagaList.Run();
     }
 
@@ -23,6 +28,11 @@ public partial class HomeController : Controller
     {
         // Create page object
         masterDermagaAdd = new GLOBALS.MasterDermagaAdd(this);
+
+        // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["IdDermaga"];
 
         // Run the page
         return await masterDermagaAdd.Run();
@@ -37,6 +47,11 @@ public partial class HomeController : Controller
         masterDermagaView = new GLOBALS.MasterDermagaView(this);
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["IdDermaga"];
+
+        // Run the page
         return await masterDermagaView.Run();
     }
 
@@ -49,6 +64,11 @@ public partial class HomeController : Controller
         masterDermagaEdit = new GLOBALS.MasterDermagaEdit(this);
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["IdDermaga"];
+
+        // Run the page
         return await masterDermagaEdit.Run();
     }
 
@@ -59,6 +79,11 @@ public partial class HomeController : Controller
     {
         // Create page object
         masterDermagaDelete = new GLOBALS.MasterDermagaDelete(this);
+
+        // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["IdDermaga"];
 
         // Run the page
         return await masterDermagaDelete.Run();

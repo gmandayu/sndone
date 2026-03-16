@@ -13,6 +13,11 @@ public partial class HomeController : Controller
         subAktivitasDataStartPembongkaranRtwList.Cache = _cache;
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["id"];
+
+        // Run the page
         return await subAktivitasDataStartPembongkaranRtwList.Run();
     }
 
@@ -23,6 +28,11 @@ public partial class HomeController : Controller
     {
         // Create page object
         subAktivitasDataStartPembongkaranRtwAdd = new GLOBALS.SubAktivitasDataStartPembongkaranRtwAdd(this);
+
+        // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["id"];
 
         // Run the page
         return await subAktivitasDataStartPembongkaranRtwAdd.Run();
@@ -37,6 +47,11 @@ public partial class HomeController : Controller
         subAktivitasDataStartPembongkaranRtwView = new GLOBALS.SubAktivitasDataStartPembongkaranRtwView(this);
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["id"];
+
+        // Run the page
         return await subAktivitasDataStartPembongkaranRtwView.Run();
     }
 
@@ -49,6 +64,11 @@ public partial class HomeController : Controller
         subAktivitasDataStartPembongkaranRtwEdit = new GLOBALS.SubAktivitasDataStartPembongkaranRtwEdit(this);
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["id"];
+
+        // Run the page
         return await subAktivitasDataStartPembongkaranRtwEdit.Run();
     }
 
@@ -59,6 +79,11 @@ public partial class HomeController : Controller
     {
         // Create page object
         subAktivitasDataStartPembongkaranRtwDelete = new GLOBALS.SubAktivitasDataStartPembongkaranRtwDelete(this);
+
+        // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["id"];
 
         // Run the page
         return await subAktivitasDataStartPembongkaranRtwDelete.Run();

@@ -13,6 +13,8 @@ public partial class HomeController : Controller
         vSampleOperasionalList.Cache = _cache;
 
         // Run the page
+
+        // Run the page
         return await vSampleOperasionalList.Run();
     }
 }

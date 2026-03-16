@@ -1618,7 +1618,10 @@ public partial class SnDOne {
 
             // idProses
             idProses.ViewValue = idProses.CurrentValue;
+
+            // awallookupbung
             string curVal = ConvertToString(idProses.CurrentValue);
+            idProses.ViewValue = Empty(curVal) ? DbNullValue : FormatNumber(idProses.CurrentValue, idProses.FormatPattern);
             if (!Empty(curVal)) {
                 if (idProses.Lookup != null && IsDictionary(idProses.Lookup?.Options) && idProses.Lookup?.Options.Values.Count > 0) { // Load from cache // DN
                     idProses.ViewValue = idProses.LookupCacheOption(curVal);
@@ -1629,18 +1632,19 @@ public partial class SnDOne {
                     if (rswrk?.Count > 0 && idProses.Lookup != null) { // Lookup values found
                         var listwrk = idProses.Lookup?.RenderViewRow(rswrk[0]);
                         idProses.ViewValue = idProses.DisplayValue(listwrk);
-                    } else {
-                        idProses.ViewValue = FormatNumber(idProses.CurrentValue, idProses.FormatPattern);
                     }
                 }
-            } else {
-                idProses.ViewValue = DbNullValue;
             }
+
+            // akhirlookupbung
             idProses.ViewCustomAttributes = "";
 
             // idAktifitas
             idAktifitas.ViewValue = idAktifitas.CurrentValue;
+
+            // awallookupbung
             string curVal2 = ConvertToString(idAktifitas.CurrentValue);
+            idAktifitas.ViewValue = Empty(curVal2) ? DbNullValue : FormatNumber(idAktifitas.CurrentValue, idAktifitas.FormatPattern);
             if (!Empty(curVal2)) {
                 if (idAktifitas.Lookup != null && IsDictionary(idAktifitas.Lookup?.Options) && idAktifitas.Lookup?.Options.Values.Count > 0) { // Load from cache // DN
                     idAktifitas.ViewValue = idAktifitas.LookupCacheOption(curVal2);
@@ -1651,13 +1655,11 @@ public partial class SnDOne {
                     if (rswrk2?.Count > 0 && idAktifitas.Lookup != null) { // Lookup values found
                         var listwrk = idAktifitas.Lookup?.RenderViewRow(rswrk2[0]);
                         idAktifitas.ViewValue = idAktifitas.DisplayValue(listwrk);
-                    } else {
-                        idAktifitas.ViewValue = FormatNumber(idAktifitas.CurrentValue, idAktifitas.FormatPattern);
                     }
                 }
-            } else {
-                idAktifitas.ViewValue = DbNullValue;
             }
+
+            // akhirlookupbung
             idAktifitas.ViewCustomAttributes = "";
 
             // NoReferensi

@@ -99,7 +99,7 @@ public partial class SnDOne {
                 }
             }
             svgdata = doc.DocumentElement?.OuterXml ?? "";
-            MagickNET.SetLogEvents(LogEventTypes.All);
+            MagickNET.SetLogEvents(LogEvents.All);
             MagickReadSettings settings = new();
             settings.ColorSpace = ColorSpace.RGB;
             settings.Format = MagickFormat.Svg;

@@ -1527,7 +1527,10 @@ public partial class SnDOne {
             NomorPengujianSampelLainnya.ViewCustomAttributes = "";
 
             // idPlant
+
+            // awallookupbung
             string curVal = ConvertToString(idPlant.CurrentValue);
+            idPlant.ViewValue = Empty(curVal) ? DbNullValue : FormatNumber(idPlant.CurrentValue, idPlant.FormatPattern);
             if (!Empty(curVal)) {
                 if (idPlant.Lookup != null && IsDictionary(idPlant.Lookup?.Options) && idPlant.Lookup?.Options.Values.Count > 0) { // Load from cache // DN
                     idPlant.ViewValue = idPlant.LookupCacheOption(curVal);
@@ -1538,13 +1541,11 @@ public partial class SnDOne {
                     if (rswrk?.Count > 0 && idPlant.Lookup != null) { // Lookup values found
                         var listwrk = idPlant.Lookup?.RenderViewRow(rswrk[0]);
                         idPlant.ViewValue = idPlant.DisplayValue(listwrk);
-                    } else {
-                        idPlant.ViewValue = FormatNumber(idPlant.CurrentValue, idPlant.FormatPattern);
                     }
                 }
-            } else {
-                idPlant.ViewValue = DbNullValue;
             }
+
+            // akhirlookupbung
             idPlant.ViewCustomAttributes = "";
 
             // Tanggal
@@ -1553,7 +1554,10 @@ public partial class SnDOne {
             Tanggal.ViewCustomAttributes = "";
 
             // Produk
+
+            // awallookupbung
             string curVal2 = ConvertToString(Produk.CurrentValue);
+            Produk.ViewValue = Empty(curVal2) ? DbNullValue : Produk.CurrentValue;
             if (!Empty(curVal2)) {
                 if (Produk.Lookup != null && IsDictionary(Produk.Lookup?.Options) && Produk.Lookup?.Options.Values.Count > 0) { // Load from cache // DN
                     Produk.ViewValue = Produk.LookupCacheOption(curVal2);
@@ -1564,13 +1568,11 @@ public partial class SnDOne {
                     if (rswrk2?.Count > 0 && Produk.Lookup != null) { // Lookup values found
                         var listwrk = Produk.Lookup?.RenderViewRow(rswrk2[0]);
                         Produk.ViewValue = Produk.DisplayValue(listwrk);
-                    } else {
-                        Produk.ViewValue = Produk.CurrentValue;
                     }
                 }
-            } else {
-                Produk.ViewValue = DbNullValue;
             }
+
+            // akhirlookupbung
             Produk.ViewCustomAttributes = "";
 
             // UploadHasil
@@ -1678,7 +1680,10 @@ public partial class SnDOne {
 
             // idPlant
             idPlant.SetupEditAttributes();
+
+            // awallookupbung
             string curVal = ConvertToString(idPlant.CurrentValue);
+            idPlant.EditValue = Empty(curVal) ? DbNullValue : FormatNumber(idPlant.CurrentValue, idPlant.FormatPattern);
             if (!Empty(curVal)) {
                 if (idPlant.Lookup != null && IsDictionary(idPlant.Lookup?.Options) && idPlant.Lookup?.Options.Values.Count > 0) { // Load from cache // DN
                     idPlant.EditValue = idPlant.LookupCacheOption(curVal);
@@ -1689,13 +1694,11 @@ public partial class SnDOne {
                     if (rswrk?.Count > 0 && idPlant.Lookup != null) { // Lookup values found
                         var listwrk = idPlant.Lookup?.RenderViewRow(rswrk[0]);
                         idPlant.EditValue = idPlant.DisplayValue(listwrk);
-                    } else {
-                        idPlant.EditValue = FormatNumber(idPlant.CurrentValue, idPlant.FormatPattern);
                     }
                 }
-            } else {
-                idPlant.EditValue = DbNullValue;
             }
+
+            // akhirlookupbung
             idPlant.ViewCustomAttributes = "";
 
             // Tanggal
@@ -1706,7 +1709,10 @@ public partial class SnDOne {
 
             // Produk
             Produk.SetupEditAttributes();
+
+            // awallookupbung
             string curVal2 = ConvertToString(Produk.CurrentValue);
+            Produk.EditValue = Empty(curVal2) ? DbNullValue : Produk.CurrentValue;
             if (!Empty(curVal2)) {
                 if (Produk.Lookup != null && IsDictionary(Produk.Lookup?.Options) && Produk.Lookup?.Options.Values.Count > 0) { // Load from cache // DN
                     Produk.EditValue = Produk.LookupCacheOption(curVal2);
@@ -1717,13 +1723,11 @@ public partial class SnDOne {
                     if (rswrk2?.Count > 0 && Produk.Lookup != null) { // Lookup values found
                         var listwrk = Produk.Lookup?.RenderViewRow(rswrk2[0]);
                         Produk.EditValue = Produk.DisplayValue(listwrk);
-                    } else {
-                        Produk.EditValue = Produk.CurrentValue;
                     }
                 }
-            } else {
-                Produk.EditValue = DbNullValue;
             }
+
+            // akhirlookupbung
             Produk.ViewCustomAttributes = "";
 
             // UploadHasil

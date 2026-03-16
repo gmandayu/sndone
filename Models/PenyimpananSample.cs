@@ -1671,7 +1671,10 @@ public partial class SnDOne {
             JenisSample.ViewCustomAttributes = "";
 
             // IdPlant
+
+            // awallookupbung
             string curVal2 = ConvertToString(IdPlant.CurrentValue);
+            IdPlant.ViewValue = Empty(curVal2) ? DbNullValue : FormatNumber(IdPlant.CurrentValue, IdPlant.FormatPattern);
             if (!Empty(curVal2)) {
                 if (IdPlant.Lookup != null && IsDictionary(IdPlant.Lookup?.Options) && IdPlant.Lookup?.Options.Values.Count > 0) { // Load from cache // DN
                     IdPlant.ViewValue = IdPlant.LookupCacheOption(curVal2);
@@ -1682,13 +1685,11 @@ public partial class SnDOne {
                     if (rswrk2?.Count > 0 && IdPlant.Lookup != null) { // Lookup values found
                         var listwrk = IdPlant.Lookup?.RenderViewRow(rswrk2[0]);
                         IdPlant.ViewValue = IdPlant.DisplayValue(listwrk);
-                    } else {
-                        IdPlant.ViewValue = FormatNumber(IdPlant.CurrentValue, IdPlant.FormatPattern);
                     }
                 }
-            } else {
-                IdPlant.ViewValue = DbNullValue;
             }
+
+            // akhirlookupbung
             IdPlant.ViewCustomAttributes = "";
 
             // Tanggal
@@ -1852,7 +1853,10 @@ public partial class SnDOne {
 
             // IdPlant
             IdPlant.SetupEditAttributes();
+
+            // awallookupbung
             string curVal2 = ConvertToString(IdPlant.CurrentValue);
+            IdPlant.EditValue = Empty(curVal2) ? DbNullValue : FormatNumber(IdPlant.CurrentValue, IdPlant.FormatPattern);
             if (!Empty(curVal2)) {
                 if (IdPlant.Lookup != null && IsDictionary(IdPlant.Lookup?.Options) && IdPlant.Lookup?.Options.Values.Count > 0) { // Load from cache // DN
                     IdPlant.EditValue = IdPlant.LookupCacheOption(curVal2);
@@ -1863,13 +1867,11 @@ public partial class SnDOne {
                     if (rswrk2?.Count > 0 && IdPlant.Lookup != null) { // Lookup values found
                         var listwrk = IdPlant.Lookup?.RenderViewRow(rswrk2[0]);
                         IdPlant.EditValue = IdPlant.DisplayValue(listwrk);
-                    } else {
-                        IdPlant.EditValue = FormatNumber(IdPlant.CurrentValue, IdPlant.FormatPattern);
                     }
                 }
-            } else {
-                IdPlant.EditValue = DbNullValue;
             }
+
+            // akhirlookupbung
             IdPlant.ViewCustomAttributes = "";
 
             // Tanggal

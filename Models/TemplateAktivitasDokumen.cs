@@ -1378,7 +1378,10 @@ public partial class SnDOne {
             IdTemplateAktivitasDokumen.ViewCustomAttributes = "";
 
             // IdTemplateAktivitas
+
+            // awallookupbung
             string curVal = ConvertToString(IdTemplateAktivitas.CurrentValue);
+            IdTemplateAktivitas.ViewValue = Empty(curVal) ? DbNullValue : FormatNumber(IdTemplateAktivitas.CurrentValue, IdTemplateAktivitas.FormatPattern);
             if (!Empty(curVal)) {
                 if (IdTemplateAktivitas.Lookup != null && IsDictionary(IdTemplateAktivitas.Lookup?.Options) && IdTemplateAktivitas.Lookup?.Options.Values.Count > 0) { // Load from cache // DN
                     IdTemplateAktivitas.ViewValue = IdTemplateAktivitas.LookupCacheOption(curVal);
@@ -1390,17 +1393,18 @@ public partial class SnDOne {
                     if (rswrk?.Count > 0 && IdTemplateAktivitas.Lookup != null) { // Lookup values found
                         var listwrk = IdTemplateAktivitas.Lookup?.RenderViewRow(rswrk[0]);
                         IdTemplateAktivitas.ViewValue = IdTemplateAktivitas.DisplayValue(listwrk);
-                    } else {
-                        IdTemplateAktivitas.ViewValue = FormatNumber(IdTemplateAktivitas.CurrentValue, IdTemplateAktivitas.FormatPattern);
                     }
                 }
-            } else {
-                IdTemplateAktivitas.ViewValue = DbNullValue;
             }
+
+            // akhirlookupbung
             IdTemplateAktivitas.ViewCustomAttributes = "";
 
             // IdDokumen
+
+            // awallookupbung
             string curVal2 = ConvertToString(IdDokumen.CurrentValue);
+            IdDokumen.ViewValue = Empty(curVal2) ? DbNullValue : FormatNumber(IdDokumen.CurrentValue, IdDokumen.FormatPattern);
             if (!Empty(curVal2)) {
                 if (IdDokumen.Lookup != null && IsDictionary(IdDokumen.Lookup?.Options) && IdDokumen.Lookup?.Options.Values.Count > 0) { // Load from cache // DN
                     IdDokumen.ViewValue = IdDokumen.LookupCacheOption(curVal2);
@@ -1411,13 +1415,11 @@ public partial class SnDOne {
                     if (rswrk2?.Count > 0 && IdDokumen.Lookup != null) { // Lookup values found
                         var listwrk = IdDokumen.Lookup?.RenderViewRow(rswrk2[0]);
                         IdDokumen.ViewValue = IdDokumen.DisplayValue(listwrk);
-                    } else {
-                        IdDokumen.ViewValue = FormatNumber(IdDokumen.CurrentValue, IdDokumen.FormatPattern);
                     }
                 }
-            } else {
-                IdDokumen.ViewValue = DbNullValue;
             }
+
+            // akhirlookupbung
             IdDokumen.ViewCustomAttributes = "";
 
             // WajibUpload
@@ -1468,7 +1470,10 @@ public partial class SnDOne {
             IdTemplateAktivitas.SetupEditAttributes();
             if (!Empty(IdTemplateAktivitas.SessionValue)) {
                 IdTemplateAktivitas.CurrentValue = ForeignKeyValue(IdTemplateAktivitas.SessionValue);
+
+                // awallookupbung
                 string curVal = ConvertToString(IdTemplateAktivitas.CurrentValue);
+                IdTemplateAktivitas.ViewValue = Empty(curVal) ? DbNullValue : FormatNumber(IdTemplateAktivitas.CurrentValue, IdTemplateAktivitas.FormatPattern);
                 if (!Empty(curVal)) {
                     if (IdTemplateAktivitas.Lookup != null && IsDictionary(IdTemplateAktivitas.Lookup?.Options) && IdTemplateAktivitas.Lookup?.Options.Values.Count > 0) { // Load from cache // DN
                         IdTemplateAktivitas.ViewValue = IdTemplateAktivitas.LookupCacheOption(curVal);
@@ -1480,13 +1485,11 @@ public partial class SnDOne {
                         if (rswrk?.Count > 0 && IdTemplateAktivitas.Lookup != null) { // Lookup values found
                             var listwrk = IdTemplateAktivitas.Lookup?.RenderViewRow(rswrk[0]);
                             IdTemplateAktivitas.ViewValue = IdTemplateAktivitas.DisplayValue(listwrk);
-                        } else {
-                            IdTemplateAktivitas.ViewValue = FormatNumber(IdTemplateAktivitas.CurrentValue, IdTemplateAktivitas.FormatPattern);
                         }
                     }
-                } else {
-                    IdTemplateAktivitas.ViewValue = DbNullValue;
                 }
+
+                // akhirlookupbung
                 IdTemplateAktivitas.ViewCustomAttributes = "";
             } else {
                 IdTemplateAktivitas.PlaceHolder = RemoveHtml(IdTemplateAktivitas.Caption);

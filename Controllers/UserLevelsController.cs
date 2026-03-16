@@ -13,6 +13,11 @@ public partial class HomeController : Controller
         userLevelsList.Cache = _cache;
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["UserLevelID"];
+
+        // Run the page
         return await userLevelsList.Run();
     }
 
@@ -23,6 +28,11 @@ public partial class HomeController : Controller
     {
         // Create page object
         userLevelsAdd = new GLOBALS.UserLevelsAdd(this);
+
+        // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["UserLevelID"];
 
         // Run the page
         return await userLevelsAdd.Run();
@@ -37,6 +47,11 @@ public partial class HomeController : Controller
         userLevelsView = new GLOBALS.UserLevelsView(this);
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["UserLevelID"];
+
+        // Run the page
         return await userLevelsView.Run();
     }
 
@@ -49,6 +64,11 @@ public partial class HomeController : Controller
         userLevelsEdit = new GLOBALS.UserLevelsEdit(this);
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["UserLevelID"];
+
+        // Run the page
         return await userLevelsEdit.Run();
     }
 
@@ -59,6 +79,11 @@ public partial class HomeController : Controller
     {
         // Create page object
         userLevelsDelete = new GLOBALS.UserLevelsDelete(this);
+
+        // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["UserLevelID"];
 
         // Run the page
         return await userLevelsDelete.Run();

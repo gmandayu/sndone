@@ -13,6 +13,11 @@ public partial class HomeController : Controller
         subAktivitasRealisasiPenyaluranPerProdukList.Cache = _cache;
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["id"];
+
+        // Run the page
         return await subAktivitasRealisasiPenyaluranPerProdukList.Run();
     }
 
@@ -23,6 +28,11 @@ public partial class HomeController : Controller
     {
         // Create page object
         subAktivitasRealisasiPenyaluranPerProdukEdit = new GLOBALS.SubAktivitasRealisasiPenyaluranPerProdukEdit(this);
+
+        // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["id"];
 
         // Run the page
         return await subAktivitasRealisasiPenyaluranPerProdukEdit.Run();

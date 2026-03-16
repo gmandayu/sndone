@@ -1499,7 +1499,10 @@ public partial class SnDOne {
 
             // Plant
             Plant.ViewValue = Plant.CurrentValue;
+
+            // awallookupbung
             string curVal2 = ConvertToString(Plant.CurrentValue);
+            Plant.ViewValue = Empty(curVal2) ? DbNullValue : Plant.CurrentValue;
             if (!Empty(curVal2)) {
                 if (Plant.Lookup != null && IsDictionary(Plant.Lookup?.Options) && Plant.Lookup?.Options.Values.Count > 0) { // Load from cache // DN
                     Plant.ViewValue = Plant.LookupCacheOption(curVal2);
@@ -1510,13 +1513,11 @@ public partial class SnDOne {
                     if (rswrk2?.Count > 0 && Plant.Lookup != null) { // Lookup values found
                         var listwrk = Plant.Lookup?.RenderViewRow(rswrk2[0]);
                         Plant.ViewValue = Plant.DisplayValue(listwrk);
-                    } else {
-                        Plant.ViewValue = Plant.CurrentValue;
                     }
                 }
-            } else {
-                Plant.ViewValue = DbNullValue;
             }
+
+            // akhirlookupbung
             Plant.ViewCustomAttributes = "";
 
             // LookupUserMod
@@ -1529,7 +1530,10 @@ public partial class SnDOne {
 
             // UserMOD
             UserMOD.ViewValue = UserMOD.CurrentValue;
+
+            // awallookupbung
             string curVal4 = ConvertToString(UserMOD.CurrentValue);
+            UserMOD.ViewValue = Empty(curVal4) ? DbNullValue : UserMOD.CurrentValue;
             if (!Empty(curVal4)) {
                 if (UserMOD.Lookup != null && IsDictionary(UserMOD.Lookup?.Options) && UserMOD.Lookup?.Options.Values.Count > 0) { // Load from cache // DN
                     UserMOD.ViewValue = UserMOD.LookupCacheOption(curVal4);
@@ -1540,13 +1544,11 @@ public partial class SnDOne {
                     if (rswrk4?.Count > 0 && UserMOD.Lookup != null) { // Lookup values found
                         var listwrk = UserMOD.Lookup?.RenderViewRow(rswrk4[0]);
                         UserMOD.ViewValue = UserMOD.DisplayValue(listwrk);
-                    } else {
-                        UserMOD.ViewValue = UserMOD.CurrentValue;
                     }
                 }
-            } else {
-                UserMOD.ViewValue = DbNullValue;
             }
+
+            // akhirlookupbung
             UserMOD.ViewCustomAttributes = "";
 
             // userInput
@@ -1642,7 +1644,10 @@ public partial class SnDOne {
             // Plant
             Plant.SetupEditAttributes();
             Plant.EditValue = Plant.CurrentValue;
+
+            // awallookupbung
             string curVal2 = ConvertToString(Plant.CurrentValue);
+            Plant.EditValue = Empty(curVal2) ? DbNullValue : Plant.CurrentValue;
             if (!Empty(curVal2)) {
                 if (Plant.Lookup != null && IsDictionary(Plant.Lookup?.Options) && Plant.Lookup?.Options.Values.Count > 0) { // Load from cache // DN
                     Plant.EditValue = Plant.LookupCacheOption(curVal2);
@@ -1653,13 +1658,11 @@ public partial class SnDOne {
                     if (rswrk2?.Count > 0 && Plant.Lookup != null) { // Lookup values found
                         var listwrk = Plant.Lookup?.RenderViewRow(rswrk2[0]);
                         Plant.EditValue = Plant.DisplayValue(listwrk);
-                    } else {
-                        Plant.EditValue = Plant.CurrentValue;
                     }
                 }
-            } else {
-                Plant.EditValue = DbNullValue;
             }
+
+            // akhirlookupbung
             Plant.ViewCustomAttributes = "";
 
             // LookupUserMod

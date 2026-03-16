@@ -13,6 +13,11 @@ public partial class HomeController : Controller
         masterPositionList.Cache = _cache;
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["IdPosition"];
+
+        // Run the page
         return await masterPositionList.Run();
     }
 
@@ -23,6 +28,11 @@ public partial class HomeController : Controller
     {
         // Create page object
         masterPositionAdd = new GLOBALS.MasterPositionAdd(this);
+
+        // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["IdPosition"];
 
         // Run the page
         return await masterPositionAdd.Run();
@@ -37,6 +47,11 @@ public partial class HomeController : Controller
         masterPositionView = new GLOBALS.MasterPositionView(this);
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["IdPosition"];
+
+        // Run the page
         return await masterPositionView.Run();
     }
 
@@ -49,6 +64,11 @@ public partial class HomeController : Controller
         masterPositionEdit = new GLOBALS.MasterPositionEdit(this);
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["IdPosition"];
+
+        // Run the page
         return await masterPositionEdit.Run();
     }
 
@@ -59,6 +79,11 @@ public partial class HomeController : Controller
     {
         // Create page object
         masterPositionDelete = new GLOBALS.MasterPositionDelete(this);
+
+        // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["IdPosition"];
 
         // Run the page
         return await masterPositionDelete.Run();

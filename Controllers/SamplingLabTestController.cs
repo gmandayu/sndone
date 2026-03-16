@@ -13,6 +13,11 @@ public partial class HomeController : Controller
         samplingLabTestList.Cache = _cache;
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["IdSamplingLabTest"];
+
+        // Run the page
         return await samplingLabTestList.Run();
     }
 
@@ -23,6 +28,11 @@ public partial class HomeController : Controller
     {
         // Create page object
         samplingLabTestAdd = new GLOBALS.SamplingLabTestAdd(this);
+
+        // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["IdSamplingLabTest"];
 
         // Run the page
         return await samplingLabTestAdd.Run();
@@ -37,6 +47,11 @@ public partial class HomeController : Controller
         samplingLabTestView = new GLOBALS.SamplingLabTestView(this);
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["IdSamplingLabTest"];
+
+        // Run the page
         return await samplingLabTestView.Run();
     }
 
@@ -47,6 +62,11 @@ public partial class HomeController : Controller
     {
         // Create page object
         samplingLabTestEdit = new GLOBALS.SamplingLabTestEdit(this);
+
+        // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["IdSamplingLabTest"];
 
         // Run the page
         return await samplingLabTestEdit.Run();
@@ -61,6 +81,11 @@ public partial class HomeController : Controller
         samplingLabTestDelete = new GLOBALS.SamplingLabTestDelete(this);
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["IdSamplingLabTest"];
+
+        // Run the page
         return await samplingLabTestDelete.Run();
     }
 
@@ -71,6 +96,11 @@ public partial class HomeController : Controller
     {
         // Create page object
         samplingLabTestSearch = new GLOBALS.SamplingLabTestSearch(this);
+
+        // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["IdSamplingLabTest"];
 
         // Run the page
         return await samplingLabTestSearch.Run();

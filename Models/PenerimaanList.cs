@@ -1,3 +1,8 @@
+using System.Collections.Generic;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+
 namespace SnDOne.Models;
 
 // Partial class
@@ -105,7 +110,7 @@ public partial class SnDOne {
         private string _pageUrl = "";
 
         // Constructor
-        public PenerimaanListBase()
+        public PenerimaanListBase(Controller? controller)
         {
             TableName = "Penerimaan";
 
@@ -123,6 +128,8 @@ public partial class SnDOne {
 
             // Initialize
             CurrentPage = this;
+        if (controller != null)
+            Controller = controller;
 
             // Table CSS class
             TableClass = "table table-bordered table-hover table-sm ew-table";
@@ -304,72 +311,75 @@ public partial class SnDOne {
         }
 
         // Constructor
-        public PenerimaanListBase(Controller? controller = null): this() { // DN
-            if (controller != null)
-                Controller = controller;
-        }
+        public PenerimaanListBase() : this(null) { }
 
         /// <summary>
         /// Terminate page
         /// </summary>
         /// <param name="url">URL to rediect to</param>
         /// <returns>Page result</returns>
-        public override IActionResult Terminate(string url = "") { // DN
-            if (_terminated) // DN
-                return new EmptyResult();
-
-            // Page Unload event
-            PageUnload();
-
-            // Global Page Unloaded event
-            PageUnloaded();
-            PageUnloadedEventHandler?.Invoke(this, EventArgs.Empty);
-            if (!IsApi())
-                PageRedirecting(ref url);
-
-            // Gargage collection
-            Collect(); // DN
-
-            // Terminate
-            _terminated = true; // DN
-
-            // Return for API
-            if (IsApi()) {
-                var result = new Dictionary<string, string> { { "version", Config.ProductVersion } };
-                if (!Empty(url)) // Add url
-                    result.Add("url", GetUrl(url));
-                foreach (var (key, value) in GetMessages()) // Add messages
-                    result.Add(key, value);
-                return Controller.Json(result);
-            } else if (ActionResult != null) { // Check action result
-                return ActionResult;
-            }
-
-            // Go to URL if specified
-            if (!Empty(url)) {
-                if (!Config.Debug)
-                    ResponseClear();
-                if (Response != null && !Response.HasStarted) {
-                    // Handle modal response
-                    if (IsModal) { // Show as modal
-                        string pageName = GetPageName(url);
-                        var result = new Dictionary<string, string> { {"url", GetUrl(url)}, {"modal", "1"} }; // Assume return to modal for simplicity
-                            if (!SameString(pageName, ListUrl)) { // Not List page
-                                result.Add("caption", GetModalCaption(pageName));
-                                result.Add("view", pageName == "PenerimaanView" ? "1" : "0"); // If View page, no primary button
-                            } else { // List page
-                                // result.Add("list", PageID == "search" ? "1" : "0"); // Refresh List page if current page is Search page
-                                result.Add("error", FailureMessage); // List page should not be shown as modal => error
-                                ClearFailureMessage();
-                            }
-                        return Controller.Json(result);
-                    } else {
-                        SaveDebugMessage();
-                        return Controller.LocalRedirect(AppPath(url));
-                    }
-                }
-            }
+        public override IActionResult Terminate(string url = "")
+        { // DN
+            if (_terminated) return new EmptyResult();
+            InvokeUnloadHooks();
+            if (!IsApi()) PageRedirecting(ref url);
+            Collect();                // DN
+            _terminated = true;       // DN
+            if (IsApi()) return BuildApiTerminateResult(url);
+            if (ActionResult != null) return ActionResult;
+            if (Empty(url)) return new EmptyResult();
+            if (!Config.Debug) ResponseClear();
+            if (Response != null && !Response.HasStarted)
+                return HandleRedirect(url);
             return new EmptyResult();
+        }
+
+        // ================= HELPER METHODS =================
+        private void InvokeUnloadHooks()
+        {
+                    // Page Unload event
+                    PageUnload();
+
+                // Global Page Unloaded event
+                PageUnloaded();
+            PageUnloadedEventHandler?.Invoke(null, EventArgs.Empty);
+        }
+
+        private IActionResult BuildApiTerminateResult(string url)
+        {
+            var result = new Dictionary<string, string> { { "version", Config.ProductVersion } };
+            if (!Empty(url)) result.Add("url", GetUrl(url));
+            foreach (var (key, value) in GetMessages()) result.Add(key, value);
+            return Controller.Json(result);
+        }
+
+        private IActionResult HandleRedirect(string url)
+        {
+            if (IsModal) return BuildModalResult_ListAddEditUpdateViewSearch(url);
+            SaveDebugMessage();
+            return RedirectCore(url);
+        }
+
+        private IActionResult RedirectCore(string url)
+        {
+            return Controller.LocalRedirect(AppPath(url));
+        }
+
+        private IActionResult BuildModalResult_ListAddEditUpdateViewSearch(string url)
+        {
+            string pageName = GetPageName(url);
+                var result = new Dictionary<string, string> { { "url", GetUrl(url) }, { "modal", "1" } }; // modal=1
+                    if (!SameString(pageName, ListUrl))
+                    {
+                        result.Add("caption", GetModalCaption(pageName));
+                        result.Add("view", pageName == "PenerimaanView" ? "1" : "0"); // If View page, no primary button
+                    }
+                    else
+                    {
+                        result.Add("error", FailureMessage); // List page should not be shown as modal => error
+                        ClearFailureMessage();
+                    }
+                return Controller.Json(result);
         }
 
         /// <summary>
@@ -433,45 +443,72 @@ public partial class SnDOne {
         protected Dictionary<string, object>? GetRecordFromRecordset(List<Dictionary<string, object>>? list) =>
             list != null && list.Count > 0 ? GetRecordFromDictionary(list[0]) : null;
 
-        // Get record from Dictionary
-        protected Dictionary<string, object>? GetRecordFromDictionary(Dictionary<string, object>? dict) {
-            if (dict == null)
-                return null;
+        // Get record from Dictionary (refactor: low cognitive complexity)
+        protected Dictionary<string, object>? GetRecordFromDictionary(Dictionary<string, object>? dict)
+        {
+            if (dict is null) return null;
             var row = new Dictionary<string, object>();
-            foreach (var (key, value) in dict) {
-                if (Fields.TryGetValue(key, out DbField? fld) && fld != null) {
-                    if (fld.Visible || fld.IsPrimaryKey) { // Primary key or Visible
-                        if (fld.HtmlTag == "FILE") { // Upload field
-                            if (Empty(value)) {
-                                // row[key] = null;
-                            } else {
-                                if (fld.DataType == DataType.Blob) {
-                                    string url = FullUrl(GetPageName(Config.ApiUrl) + "/" + Config.ApiFileAction + "/" + fld.TableVar + "/" + fld.Param + "/" + GetRecordKeyValue(dict)); // Query string format
-                                    row[key] = new Dictionary<string, object> { { "type", ContentType((byte[])value) }, { "url", url }, { "name", fld.Param + ContentExtension((byte[])value) } };
-                                } else if (!fld.UploadMultiple || !ConvertToString(value).Contains(Config.MultipleUploadSeparator)) { // Single file
-                                    string url = FullUrl(GetPageName(Config.ApiUrl) + "/" + Config.ApiFileAction + "/" + fld.TableVar + "/" + Encrypt(fld.PhysicalUploadPath + ConvertToString(value))); // Query string format
-                                    row[key] = new Dictionary<string, object> { { "type", ContentType(ConvertToString(value)) }, { "url", url }, { "name", ConvertToString(value) } };
-                                } else { // Multiple files
-                                    var files = ConvertToString(value).Split(Config.MultipleUploadSeparator);
-                                    row[key] = files.Where(file => !Empty(file)).Select(file => new Dictionary<string, object> { { "type", ContentType(file) }, { "url", FullUrl(GetPageName(Config.ApiUrl) + "/" + Config.ApiFileAction + "/" + fld.TableVar + "/" + Encrypt(fld.PhysicalUploadPath + file)) }, { "name", file } });
-                                }
-                            }
-                        } else {
-                            string val = ConvertToString(value);
-                            if (fld.DataType == DataType.Date && value is DateTime dt)
-                                val = dt.ToString("s");
-                            if (fld.DataType == DataType.Memo && fld.MemoMaxLength > 0 && !Empty(val))
-                                val = TruncateMemo(val, fld.MemoMaxLength, fld.TruncateMemoRemoveHtml);
-                            row[key] = ConvertToString(val);
-                        }
-                    }
-                }
+            foreach (var (key, value) in dict)
+            {
+                if (!Fields.TryGetValue(key, out DbField? fld) || fld is null) continue;
+                if (!ShouldIncludeField(fld)) continue;
+                var cell = fld.HtmlTag == "FILE"
+                    ? BuildFileCell(fld, value, dict)
+                    : BuildScalarCell(fld, value);
+                if (cell is not null)
+                    row[key] = cell;
             }
             return row;
         }
 
-        // Get record key value from array
-        protected string GetRecordKeyValue(Dictionary<string, object> dict) {
+        // ---- Helpers ----
+        private static bool ShouldIncludeField(DbField fld)
+            => fld.Visible || fld.IsPrimaryKey;
+
+        private object? BuildFileCell(DbField fld, object value, Dictionary<string, object> srcRow)
+        {
+            if (Empty(value)) return null; // (sesuai kode asli: tidak menambahkan key)
+
+            // Blob
+            if (fld.DataType == DataType.Blob)
+            {
+                var bytes = (byte[])value;
+                var url = FullUrl($"{GetPageName(Config.ApiUrl)}/{Config.ApiFileAction}/{fld.TableVar}/{fld.Param}/{GetRecordKeyValue(srcRow)}");
+                return FileMeta(ContentType(bytes), url, fld.Param + ContentExtension(bytes));
+            }
+
+            // Non-blob
+            var s = ConvertToString(value);
+            if (!fld.UploadMultiple || !s.Contains(Config.MultipleUploadSeparator))
+            {
+                var url = FullUrl($"{GetPageName(Config.ApiUrl)}/{Config.ApiFileAction}/{fld.TableVar}/{Encrypt(fld.PhysicalUploadPath + s)}");
+                return FileMeta(ContentType(s), url, s);
+            }
+
+            // Multiple files
+            var files = s.Split(Config.MultipleUploadSeparator);
+            return files
+                .Where(f => !Empty(f))
+                .Select(f =>
+                {
+                    var url = FullUrl($"{GetPageName(Config.ApiUrl)}/{Config.ApiFileAction}/{fld.TableVar}/{Encrypt(fld.PhysicalUploadPath + f)}");
+                    return FileMeta(ContentType(f), url, f);
+                });
+        }
+
+        private static Dictionary<string, object> FileMeta(string type, string url, string name) =>
+            new Dictionary<string, object> { { "type", type }, { "url", url }, { "name", name } };
+
+        private object BuildScalarCell(DbField fld, object value)
+        {
+            var s = ConvertToString(value);
+            if (fld.DataType == DataType.Date && value is DateTime dt)
+                s = dt.ToString("s");
+            return ConvertToString(s);
+        }
+
+// Get record key value from array
+protected string GetRecordKeyValue(Dictionary<string, object> dict) {
             string key = "";
             key += UrlEncode(ConvertToString(dict.ContainsKey("IdPenerimaan") ? dict["IdPenerimaan"] : IdPenerimaan.CurrentValue));
             return key;
@@ -492,78 +529,147 @@ public partial class SnDOne {
         }
 
         #pragma warning disable 219
-        /// <summary>
-        /// Lookup data from table
-        /// </summary>
+/// <summary>
+/// Lookup data from table
+/// </summary>
         public async Task<Dictionary<string, object>> Lookup(Dictionary<string, string>? dict = null)
+{
+    Language = ResolveLanguage();
+    Security = ResolveSecurity();
+    var lookupField = FieldByName(GetFieldName(dict));
+    var lookup = lookupField?.Lookup;
+    if (lookup == null)
+        return new Dictionary<string, object>();
+            string lookupType = GetLookupType(dict);
+    var (searchValue, pageSize) = GetSearchAndPageSize(dict, lookupType);
+    int offset = CalculateOffset(dict, pageSize);
+    ApplyUserSettings(dict, lookup);
+    ApplyFilterValues(dict, lookup);
+    lookup.LookupType = lookupType;
+    lookup.SearchValue = searchValue;
+    lookup.PageSize = pageSize;
+    lookup.Offset = offset;
+    return await lookup.ToJson(this);
+}
+
+private string GetFieldName(Dictionary<string, string>? dict)
+{
+    return GetValue(dict, "field", Post("field"));
+}
+
+private string GetLookupType(Dictionary<string, string>? dict)
+{
+    return GetValue(dict, "ajax", Post("ajax") ?? "unknown");
+}
+
+private (string searchValue, int pageSize) GetSearchAndPageSize(Dictionary<string, string>? dict, string lookupType)
+{
+    string searchValue = "";
+    int pageSize = -1;
+    if (SameText(lookupType, "modal") || SameText(lookupType, "filter"))
+    {
+        searchValue = GetValue(dict, new[] { "q", "sv" }, Param("q") ?? Post("sv"));
+        int fallback = 10;
+        if (IsNumeric(Param("n")))
         {
-            Language = ResolveLanguage();
-            Security = ResolveSecurity();
-            string? v;
-
-            // Get lookup object
-            string fieldName = IsDictionary(dict) && dict.TryGetValue("field", out v) && v != null ? v : Post("field");
-            var lookupField = FieldByName(fieldName);
-            var lookup = lookupField?.Lookup;
-            if (lookup == null) // DN
-                return new Dictionary<string, object>();
-            string lookupType = IsDictionary(dict) && dict.TryGetValue("ajax", out v) && v != null ? v : (Post("ajax") ?? "unknown");
-            int pageSize = -1;
-            int offset = -1;
-            string searchValue = "";
-            if (SameText(lookupType, "modal") || SameText(lookupType, "filter")) {
-                searchValue = IsDictionary(dict) && (dict.TryGetValue("q", out v) && v != null || dict.TryGetValue("sv", out v) && v != null)
-                    ? v
-                    : (Param("q") ?? Post("sv"));
-                pageSize = IsDictionary(dict) && (dict.TryGetValue("n", out v) || dict.TryGetValue("recperpage", out v))
-                    ? ConvertToInt(v)
-                    : (IsNumeric(Param("n")) ? Param<int>("n") : (Post("recperpage", out StringValues rpp) ? ConvertToInt(rpp.ToString()) : 10));
-            } else if (SameText(lookupType, "autosuggest")) {
-                searchValue = IsDictionary(dict) && dict.TryGetValue("q", out v) && v != null ? v : Param("q");
-                pageSize = IsDictionary(dict) && dict.TryGetValue("n", out v) ? ConvertToInt(v) : (IsNumeric(Param("n")) ? Param<int>("n") : -1);
-                if (pageSize <= 0)
-                    pageSize = Config.AutoSuggestMaxEntries;
-            }
-            int start = IsDictionary(dict) && dict.TryGetValue("start", out v) ? ConvertToInt(v) : (IsNumeric(Param("start")) ? Param<int>("start") : -1);
-            int page = IsDictionary(dict) && dict.TryGetValue("page", out v) ? ConvertToInt(v) : (IsNumeric(Param("page")) ? Param<int>("page") : -1);
-            offset = start >= 0 ? start : (page > 0 && pageSize > 0 ? (page - 1) * pageSize : 0);
-            string userSelect = Decrypt(IsDictionary(dict) && dict.TryGetValue("s", out v) && v != null ? v : Post("s"));
-            string userFilter = Decrypt(IsDictionary(dict) && dict.TryGetValue("f", out v) && v != null ? v : Post("f"));
-            string userOrderBy = Decrypt(IsDictionary(dict) && dict.TryGetValue("o", out v) && v != null ? v : Post("o"));
-
-            // Selected records from modal, skip parent/filter fields and show all records
-            lookup.LookupType = lookupType; // Lookup type
-            lookup.FilterValues.Clear(); // Clear filter values first
-            StringValues keys = IsDictionary(dict) && dict.TryGetValue("keys", out v) && !Empty(v)
-                ? (StringValues)v
-                : (Post("keys[]", out StringValues k) ? (StringValues)k : StringValues.Empty);
-            if (!Empty(keys)) { // Selected records from modal
-                lookup.FilterFields = new(); // Skip parent fields if any
-                pageSize = -1; // Show all records
-                lookup.FilterValues.Add(String.Join(",", keys.ToArray()));
-            } else { // Lookup values
-                string lookupValue = IsDictionary(dict) && (dict.TryGetValue("v0", out v) && v != null || dict.TryGetValue("lookupValue", out v) && v != null)
-                    ? v
-                    : (Post<string>("v0") ?? Post("lookupValue"));
-                lookup.FilterValues.Add(lookupValue);
-            }
-            int cnt = IsDictionary(lookup.FilterFields) ? lookup.FilterFields.Count : 0;
-            for (int i = 1; i <= cnt; i++) {
-                var val = UrlDecode(IsDictionary(dict) && dict.TryGetValue("v" + i, out v) ? v : Post("v" + i));
-                if (val != null) // DN
-                    lookup.FilterValues.Add(val);
-            }
-            lookup.SearchValue = searchValue;
-            lookup.PageSize = pageSize;
-            lookup.Offset = offset;
-            if (userSelect != "")
-                lookup.UserSelect = userSelect;
-            if (userFilter != "")
-                lookup.UserFilter = userFilter;
-            if (userOrderBy != "")
-                lookup.UserOrderBy = userOrderBy;
-            return await lookup.ToJson(this);
+            fallback = Param<int>("n");
         }
+        else if (Post("recperpage", out StringValues rpp))
+        {
+            fallback = ConvertToInt(rpp.ToString());
+        }
+        pageSize = GetInt(dict, new[] { "n", "recperpage" }, fallback);
+    }
+    else if (SameText(lookupType, "autosuggest"))
+    {
+        searchValue = GetValue(dict, "q", Param("q"));
+        pageSize = GetInt(dict, "n", IsNumeric(Param("n")) ? Param<int>("n") : -1);
+        if (pageSize <= 0)
+            pageSize = Config.AutoSuggestMaxEntries;
+    }
+    return (searchValue, pageSize);
+}
+
+private int CalculateOffset(Dictionary<string, string>? dict, int pageSize)
+{
+    int start = GetInt(dict, "start", IsNumeric(Param("start")) ? Param<int>("start") : -1);
+    int page = GetInt(dict, "page", IsNumeric(Param("page")) ? Param<int>("page") : -1);
+    if (start >= 0)
+        return start;
+    return (page > 0 && pageSize > 0)
+        ? (page - 1) * pageSize
+        : 0;
+}
+
+private void ApplyUserSettings(Dictionary<string, string>? dict, dynamic lookup)
+{
+    string userSelect = Decrypt(GetValue(dict, "s", Post("s")));
+    string userFilter = Decrypt(GetValue(dict, "f", Post("f")));
+    string userOrderBy = Decrypt(GetValue(dict, "o", Post("o")));
+    if (!string.IsNullOrEmpty(userSelect)) lookup.UserSelect = userSelect;
+    if (!string.IsNullOrEmpty(userFilter)) lookup.UserFilter = userFilter;
+    if (!string.IsNullOrEmpty(userOrderBy)) lookup.UserOrderBy = userOrderBy;
+}
+
+private void ApplyFilterValues(Dictionary<string, string>? dict, dynamic lookup)
+{
+    lookup.FilterValues.Clear();
+    StringValues keys = GetKeys(dict);
+    if (!Empty(keys))
+    {
+        lookup.FilterFields = new List<string>(); // Skip parent fields if any
+        lookup.FilterValues.Add(string.Join(",", keys.ToArray()));
+    }
+    else
+    {
+        string lookupValue = GetValue(dict, new[] { "v0", "lookupValue" }, Post<string>("v0") ?? Post("lookupValue"));
+        lookup.FilterValues.Add(lookupValue);
+        int cnt = lookup.FilterFields?.Count ?? 0;
+        for (int i = 1; i <= cnt; i++)
+        {
+            var val = UrlDecode(GetValue(dict, $"v{i}", Post($"v{i}")));
+            if (val != null)
+                lookup.FilterValues.Add(val);
+        }
+    }
+}
+
+private string GetValue(Dictionary<string, string>? dict, string key, string? fallback = null)
+{
+    return IsDictionary(dict) && dict.TryGetValue(key, out var v) && v != null ? v : fallback ?? "";
+}
+
+private string GetValue(Dictionary<string, string>? dict, string[] keys, string? fallback = null)
+{
+    foreach (var key in keys)
+    {
+        if (IsDictionary(dict) && dict.TryGetValue(key, out var v) && v != null)
+            return v;
+    }
+    return fallback ?? "";
+}
+
+private int GetInt(Dictionary<string, string>? dict, string key, int fallback)
+{
+    return IsDictionary(dict) && dict.TryGetValue(key, out var v) ? ConvertToInt(v) : fallback;
+}
+
+private int GetInt(Dictionary<string, string>? dict, string[] keys, int fallback)
+{
+    foreach (var key in keys)
+    {
+        if (IsDictionary(dict) && dict.TryGetValue(key, out var v))
+            return ConvertToInt(v);
+    }
+    return fallback;
+}
+
+private StringValues GetKeys(Dictionary<string, string>? dict)
+{
+    if (IsDictionary(dict) && dict.TryGetValue("keys", out var v) && !Empty(v))
+        return (StringValues)v;
+    return Post("keys[]", out StringValues k) ? k : StringValues.Empty;
+}
         #pragma warning restore 219
 
         // Properties
@@ -680,18 +786,510 @@ public partial class SnDOne {
             Recordset = await LoadRecordset();
         }
 
-        #pragma warning disable 219
         /// <summary>
         /// Page run
         /// </summary>
         /// <returns>Page result</returns>
         public override async Task<IActionResult> Run()
         {
+            // --- BEGIN include dipindah ke helper yang bisa return IActionResult ---
+            var beginResult = await PageRunBeginAsync();
+            if (beginResult != null)
+                return beginResult;
+
+            // --- Initial setup ---
+            PrepareInitialSettings();
+
+            // --- Process list actions (for list pages) ---
+            var listActionResult = await ProcessListActionsIfNeeded();
+            if (listActionResult != null)
+                return listActionResult;
+
+            // --- Setup display and commands ---
+            SetupDisplayAndCommands();
+
+            // --- Handle import (if applicable) ---
+            var importResult = await HandleImportIfNeeded();
+            if (importResult != null)
+                return importResult;
+
+            // --- Process inline actions ---
+            var inlineResult = await ProcessInlineActions();
+            if (inlineResult != null)
+                return inlineResult;
+
+            // --- Setup options visibility ---
+            SetupOptionsVisibility();
+
+            // --- Process search and filters ---
+            var searchResult = await ProcessSearchAndFilters();
+            if (searchResult != null)
+                return searchResult;
+
+            // --- Build filter and load records ---
+            var recordResult = await BuildFilterAndLoadRecords();
+            if (recordResult != null)
+                return recordResult;
+
+            // --- Handle API requests ---
+            var apiResult = await HandleApiRequests();
+            if (apiResult != null)
+                return apiResult;
+
+            // --- Final setup ---
+            FinalSetup();
+
+            // --- END include ---
+            PageRunEnd();
+            return PageResult();
+        }
+
+        // ================== GENERATED HELPERS ==================
+        private void PrepareInitialSettings()
+        {
             // Multi column button position
             MultiColumnListOptionsPosition = Config.MultiColumnListOptionsPosition;
             if (Empty(DashboardReport))
                 DashboardReport = Param(Config.PageDashboard);
 
+            // Update form name to avoid conflict
+            if (IsModal)
+                FormName = "fPenerimaangrid";
+
+            // Set up infinite scroll
+            UseInfiniteScroll = Param<bool>("infinitescroll");
+
+            // Set up Dashboard Filter
+            if (!Empty(DashboardReport))
+                AddFilter(ref Filter, GetDashboardFilter(DashboardReport, TableVar));
+
+            // Get command
+            Command = Get("cmd").ToLower();
+        }
+
+        private async Task<IActionResult?> ProcessListActionsIfNeeded()
+        {
+            // Process list action first
+            var result = await ProcessListAction();
+            if (result is not EmptyResult) // Ajax request
+                return result;
+            return null;
+        }
+
+        private void SetupDisplayAndCommands()
+        {
+            // Set up records per page
+            SetupDisplayRecords();
+
+            // Handle reset command
+            ResetCommand();
+
+            // Set up Breadcrumb
+            if (!IsExport())
+                SetupBreadcrumb();
+        }
+
+        private async Task<IActionResult?> HandleImportIfNeeded()
+        {
+            await Task.CompletedTask; // Satisfy async requirement
+            return null;
+        }
+
+        private async Task<IActionResult?> ProcessInlineActions()
+        {
+            await Task.CompletedTask; // Satisfy async requirement
+            return null;
+        }
+
+        private void SetupOptionsVisibility()
+        {
+            // Hide list options
+            if (IsExport()) {
+                ListOptions.HideAllOptions(["sequence"]);
+                ListOptions.UseDropDownButton = false; // Disable drop down button
+                ListOptions.UseButtonGroup = false; // Disable button group
+            } else if (IsGridAdd || IsGridEdit || IsMultiEdit || IsConfirm) {
+                ListOptions.HideAllOptions();
+                ListOptions.UseDropDownButton = false; // Disable drop down button
+                ListOptions.UseButtonGroup = false; // Disable button group
+            }
+
+            // Hide options
+            if (IsExport() || !(Empty(CurrentAction) || IsSearch)) {
+                ExportOptions.HideAllOptions();
+                FilterOptions.HideAllOptions();
+                ImportOptions.HideAllOptions();
+            }
+
+            // Hide other options
+            if (IsExport()) {
+                foreach (var (key, value) in OtherOptions)
+                    value.HideAllOptions();
+            }
+        }
+
+        private async Task<IActionResult?> ProcessSearchAndFilters()
+        {
+            // Initialize search variables
+            var searchContext = InitializeSearchContext();
+
+            // Setup default search criteria
+            SetupDefaultSearchCriteria();
+
+            // Load and validate search values
+            await LoadAndValidateSearchValues();
+
+            // Process filter list - early return if needed
+            var filterResult = await ProcessFilterList();
+            if (filterResult != null) {
+                if (!Config.Debug)
+                    Response?.Clear();
+                return Controller.Json(filterResult);
+            }
+
+            // Handle search parameters and events
+            HandleSearchParametersAndEvents();
+
+            // Process search criteria and build filters
+            ProcessSearchCriteriaAndBuildFilters(searchContext);
+            return null;
+        }
+
+        private SearchContext InitializeSearchContext()
+        {
+            return new SearchContext
+            {
+                SrchAdvanced = "",
+                SrchBasic = "",
+                Query = ""
+            };
+        }
+
+        private void SetupDefaultSearchCriteria()
+        {
+            AddFilter(ref DefaultSearchWhere, BasicSearchWhere(true));
+            AddFilter(ref DefaultSearchWhere, AdvancedSearchWhere(true));
+        }
+
+        private async Task LoadAndValidateSearchValues()
+        {
+            await Task.CompletedTask; // Satisfy async requirement
+            LoadBasicSearchValues();
+            if (Empty(UserAction))
+                LoadSearchValues();
+        }
+
+        private void HandleSearchParametersAndEvents()
+        {
+            CurrentForm?.ResetIndex();
+            if (!ValidateSearch()) {
+                // Nothing to do
+            }
+
+            // Restore search parms from Session if not searching / reset / export
+            if ((IsExport() || Command != "search" && Command != "reset" && Command != "resetall") && Command != "json" && CheckSearchParms())
+                RestoreSearchParms();
+            RecordsetSearchValidated();
+
+            // Set up sorting order
+            SetupSortOrder();
+        }
+
+        private void ProcessSearchCriteriaAndBuildFilters(SearchContext searchContext)
+        {
+            // Get search criteria
+            GetSearchCriteria(searchContext);
+
+            // Restore display records
+            RestoreDisplayRecords();
+
+            // Load search defaults if needed
+            LoadSearchDefaultsIfNeeded(searchContext);
+
+            // Restore advanced search settings
+            RestoreAdvancedSearchSettings();
+
+            // Build and save search criteria
+            BuildAndSaveSearchCriteria(searchContext);
+        }
+
+        private void GetSearchCriteria(SearchContext searchContext)
+        {
+            if (!HasInvalidFields())
+                searchContext.SrchBasic = BasicSearchWhere();
+            if (!HasInvalidFields())
+                searchContext.SrchAdvanced = AdvancedSearchWhere();
+            searchContext.Query = !Empty(DashboardReport) ? "" : QueryBuilderWhere();
+        }
+
+        private void RestoreDisplayRecords()
+        {
+            if (Command != "json" && (RecordsPerPage == -1 || RecordsPerPage > 0)) {
+                DisplayRecords = RecordsPerPage;
+            } else {
+                DisplayRecords = 10;
+                RecordsPerPage = DisplayRecords;
+            }
+        }
+
+        private void LoadSearchDefaultsIfNeeded(SearchContext searchContext)
+        {
+            if (!CheckSearchParms() && Empty(searchContext.Query)) {
+                BasicSearch.LoadDefault();
+                if (!Empty(BasicSearch.Keyword))
+                    searchContext.SrchBasic = BasicSearchWhere();
+                if (LoadAdvancedSearchDefault())
+                    searchContext.SrchAdvanced = AdvancedSearchWhere();
+            }
+        }
+
+        private void RestoreAdvancedSearchSettings()
+        {
+            if (!HasInvalidFields())
+                LoadAdvancedSearch();
+        }
+
+        private void BuildAndSaveSearchCriteria(SearchContext searchContext)
+        {
+            // Build search criteria
+            if (!Empty(searchContext.Query)) {
+                AddFilter(ref SearchWhere, searchContext.Query);
+            } else {
+                AddFilter(ref SearchWhere, searchContext.SrchAdvanced);
+                AddFilter(ref SearchWhere, searchContext.SrchBasic);
+            }
+            RecordsetSearching(ref SearchWhere);
+
+            // Save search criteria
+            if (Command == "search" && !RestoreSearch) {
+                SessionSearchWhere = SearchWhere;
+                StartRecord = 1;
+                StartRecordNumber = StartRecord;
+            } else if (Command != "json" && Empty(searchContext.Query)) {
+                SearchWhere = SessionSearchWhere;
+            }
+        }
+
+        // Support class
+        private sealed class SearchContext
+        {
+            public string SrchAdvanced { get; set; } = "";
+
+            public string SrchBasic { get; set; } = "";
+
+            public string Query { get; set; } = "";
+        }
+
+        private async Task<IActionResult?> BuildFilterAndLoadRecords()
+        {
+            await Task.CompletedTask; // Satisfy async requirement
+
+            // Build filter
+            if (!Security.CanList)
+                Filter = "(0=1)"; // Filter all records
+            AddFilter(ref Filter, DbDetailFilter);
+            AddFilter(ref Filter, SearchWhere);
+
+            // Load master records and handle early returns
+            var masterResult = await LoadMasterRecords();
+            if (masterResult != null)
+                return masterResult;
+
+            // Set up filter and load recordset
+            SetupFilterAndRecordset();
+
+            // Load recordset based on mode
+            await LoadRecordsetByMode();
+
+            // Setup list actions and load records
+            await SetupListActionsAndRecords();
+            return null;
+        }
+
+        private async Task<IActionResult?> LoadMasterRecords()
+        {
+            await Task.CompletedTask; // Satisfy async requirement
+            return null;
+        }
+
+        private void SetupFilterAndRecordset()
+        {
+            // Set up filter
+            if (Command == "json") {
+                UseSessionForListSql = false; // Do not use session for ListSql
+                CurrentFilter = Filter;
+            } else {
+                SessionWhere = Filter;
+                CurrentFilter = "";
+            }
+            Filter = ApplyUserIDFilters(Filter);
+        }
+
+        private async Task LoadRecordsetByMode()
+        {
+            if (IsGridAdd) {
+                await LoadRecordsetForGridAdd();
+            } else if ((IsEdit || IsCopy || IsInlineInserted || IsInlineUpdated) && UseInfiniteScroll) {
+                await LoadRecordsetForInlineOperations();
+            } else if (UseInfiniteScroll && IsGridInserted ||
+                       UseInfiniteScroll && (IsGridEdit || IsGridUpdated) ||
+                       IsMultiEdit ||
+                       UseInfiniteScroll && IsMultiUpdated) {
+                await LoadRecordsetForModalActions();
+            } else {
+                await LoadRecordsetNormal();
+            }
+        }
+
+        private async Task LoadRecordsetForGridAdd()
+        {
+            await Task.CompletedTask; // Satisfy async requirement
+            CurrentFilter = "0=1";
+            StartRecord = 1;
+            DisplayRecords = GridAddRowCount;
+            TotalRecords = DisplayRecords;
+            StopRecord = DisplayRecords;
+        }
+
+        private async Task LoadRecordsetForInlineOperations()
+        {
+            // Get current record only
+            CurrentFilter = IsInlineUpdated ? GetRecordFilter() : GetFilterFromRecordKeys();
+            TotalRecords = ListRecordCount();
+            StartRecord = 1;
+            StopRecord = DisplayRecords;
+            Recordset = await LoadRecordset();
+        }
+
+        private async Task LoadRecordsetForModalActions()
+        {
+            // Get current records only
+            CurrentFilter = FilterForModalActions; // Restore filter
+            TotalRecords = ListRecordCount();
+            StartRecord = 1;
+            StopRecord = DisplayRecords;
+            Recordset = await LoadRecordset();
+        }
+
+        private async Task LoadRecordsetNormal()
+        {
+            TotalRecords = await ListRecordCountAsync();
+            StopRecord = DisplayRecords;
+            StartRecord = 1;
+            if (DisplayRecords <= 0 || (IsExport() && ExportAll)) // Display all records
+                DisplayRecords = TotalRecords;
+            if (!(IsExport() && ExportAll)) // Set up start record position
+                SetupStartRecord();
+        }
+
+        private async Task SetupListActionsAndRecords()
+        {
+            // Recordset
+            bool selectLimit = UseSelectLimit;
+
+            // Set up list action columns, must be before LoadRecordset // DN
+            foreach (var (key, act) in ListActions.Items.Where(kvp => kvp.Value.Allowed)) {
+                if (act.Select == Config.ActionMultiple && ListOptions["checkbox"] is ListOption listOpt) { // Show checkbox column if multiple action
+                    listOpt.Visible = true;
+                } else if (act.Select == Config.ActionSingle) { // Show list action column
+                        ListOptions["listactions"]?.SetVisible(true); // Set visible if any list action is allowed
+                }
+            }
+            if (selectLimit)
+                Recordset = await LoadRecordset(StartRecord - 1, DisplayRecords);
+
+            // Set no record found message
+            if ((Empty(CurrentAction) || IsSearch) && TotalRecords == 0) {
+                if (!Security.CanList)
+                    WarningMessage = DeniedMessage();
+                if (SearchWhere == "0=101")
+                    WarningMessage = Language.Phrase("EnterSearchCriteria");
+                else
+                    WarningMessage = Language.Phrase("NoRecord");
+            }
+        }
+
+        private async Task<IActionResult?> HandleApiRequests()
+        {
+            SetupSearchOptionsAndPanel();
+            HandleCustomTemplateLayout();
+            return await ProcessApiRequest();
+        }
+
+        private void SetupSearchOptionsAndPanel()
+        {
+            // Search options
+            SetupSearchOptions();
+
+            // Set up search panel class
+            if (!Empty(SearchWhere)) {
+                SetupSearchPanelClass();
+            }
+        }
+
+        private void SetupSearchPanelClass()
+        {
+            string query = !Empty(DashboardReport) ? "" : QueryBuilderWhere();
+            if (!Empty(query)) {
+                SearchPanelClass = RemoveClass(SearchPanelClass, "show");
+            } else {
+                SearchPanelClass = AppendClass(SearchPanelClass, "show");
+            }
+        }
+
+        private void HandleCustomTemplateLayout()
+        {
+            // No custom template handling needed
+        }
+
+        private async Task<IActionResult?> ProcessApiRequest()
+        {
+            if (!IsApi())
+                return null;
+            if (CurrentPageName().ToLowerInvariant().EndsWith(Config.ApiListAction)) {
+                return await HandleApiListAction();
+            } else if (!Empty(FailureMessage)) {
+                return Controller.Json(new { success = false, error = GetFailureMessage() });
+            }
+            return new EmptyResult();
+        }
+
+        private async Task<IActionResult> HandleApiListAction()
+        {
+            if (IsExport())
+                return new EmptyResult();
+            await MoveToStartRecord();
+            using (Recordset) {
+                return Controller.Json(new Dictionary<string, object> { 
+                    {"success", true}, 
+                    {TableVar, await GetRecordsFromRecordset(Recordset)}, 
+                    {"totalRecordCount", TotalRecords}, 
+                    {"version", Config.ProductVersion} 
+                });
+            }
+        }
+
+        private async Task MoveToStartRecord()
+        {
+            if (!Connection.SelectOffset && Recordset != null) {
+                for (var i = 1; i <= StartRecord - 1; i++)
+                    await Recordset.ReadAsync();
+            }
+        }
+
+        private void FinalSetup()
+        {
+            // Render other options
+            RenderOtherOptions();
+
+            // Set ReturnUrl in header if necessary
+            if (TempData["Return-Url"] != null)
+                AddHeader("Return-Url", ConvertToString(TempData["Return-Url"]));
+        }
+
+        // ===== Wrap includes ke helper =====
+        private async Task<IActionResult?> PageRunBeginAsync()
+        {
             // Is modal
             IsModal = Param<bool>("modal");
             UseLayout = UseLayout && !IsModal;
@@ -746,7 +1344,7 @@ public partial class SnDOne {
 
             // Global Page Loading event
             PageLoading();
-            PageLoadingEventHandler?.Invoke(this, EventArgs.Empty);
+            PageLoadingEventHandler?.Invoke(null, EventArgs.Empty);
 
             // Page Load event
             PageLoad();
@@ -763,11 +1361,12 @@ public partial class SnDOne {
             CreateToken();
 
             // Hide fields for add/edit
-            if (!UseAjaxActions)
+            if (!UseAjaxActions) {
                 HideFieldsForAddEdit();
-            // Use inline delete
-            if (UseAjaxActions)
+            }
+            else { // Use inline delete
                 InlineDelete = true;
+            }
 
             // Setup other options
             SetupOtherOptions();
@@ -782,263 +1381,11 @@ public partial class SnDOne {
             await SetupLookupOptions(IdPenyaluran);
             await SetupLookupOptions(PenyaluranLookup);
             await SetupLookupOptions(IdDermaga);
+            return null; // kalau include tidak melakukan return
+        }
 
-            // Update form name to avoid conflict
-            if (IsModal)
-                FormName = "fPenerimaangrid";
-
-            // Set up infinite scroll
-            UseInfiniteScroll = Param<bool>("infinitescroll");
-
-            // Search filters
-            string srchAdvanced = ""; // Advanced search filter
-            string srchBasic = ""; // Basic search filter
-            string query = ""; // Query builder
-
-            // Set up Dashboard Filter
-            if (!Empty(DashboardReport))
-                AddFilter(ref Filter, GetDashboardFilter(DashboardReport, TableVar));
-
-            // Get command
-            Command = Get("cmd").ToLower();
-
-            // Process list action first
-            var result = await ProcessListAction();
-            if (result is not EmptyResult) // Ajax request
-                return result;
-
-            // Set up records per page
-            SetupDisplayRecords();
-
-            // Handle reset command
-            ResetCommand();
-
-            // Set up Breadcrumb
-            if (!IsExport())
-                SetupBreadcrumb();
-
-            // Hide list options
-            if (IsExport()) {
-                ListOptions.HideAllOptions(["sequence"]);
-                ListOptions.UseDropDownButton = false; // Disable drop down button
-                ListOptions.UseButtonGroup = false; // Disable button group
-            } else if (IsGridAdd || IsGridEdit || IsMultiEdit || IsConfirm) {
-                ListOptions.HideAllOptions();
-                ListOptions.UseDropDownButton = false; // Disable drop down button
-                ListOptions.UseButtonGroup = false; // Disable button group
-            }
-
-            // Hide options
-            if (IsExport() || !(Empty(CurrentAction) || IsSearch)) {
-                ExportOptions.HideAllOptions();
-                FilterOptions.HideAllOptions();
-                ImportOptions.HideAllOptions();
-            }
-
-            // Hide other options
-            if (IsExport()) {
-                foreach (var (key, value) in OtherOptions)
-                    value.HideAllOptions();
-            }
-
-            // Get default search criteria
-            AddFilter(ref DefaultSearchWhere, BasicSearchWhere(true));
-            AddFilter(ref DefaultSearchWhere, AdvancedSearchWhere(true));
-
-            // Get basic search values
-            LoadBasicSearchValues();
-
-            // Get and validate search values for advanced search
-            if (Empty(UserAction)) // Skip if user action
-                LoadSearchValues(); // Get search values
-
-            // Process filter list
-            var filterResult = await ProcessFilterList();
-            if (filterResult != null) {
-                // Clean output buffer
-                if (!Config.Debug)
-                    Response?.Clear();
-                return Controller.Json(filterResult);
-            }
-            CurrentForm?.ResetIndex();
-            if (!ValidateSearch()) {
-                // Nothing to do
-            }
-
-            // Restore search parms from Session if not searching / reset / export
-            if ((IsExport() || Command != "search" && Command != "reset" && Command != "resetall") && Command != "json" && CheckSearchParms())
-                RestoreSearchParms();
-
-            // Call Recordset SearchValidated event
-            RecordsetSearchValidated();
-
-            // Set up sorting order
-            SetupSortOrder();
-
-            // Get basic search criteria
-            if (!HasInvalidFields())
-                srchBasic = BasicSearchWhere();
-
-            // Get search criteria for advanced search
-            if (!HasInvalidFields())
-                srchAdvanced = AdvancedSearchWhere();
-
-            // Get query builder criteria
-            query = !Empty(DashboardReport) ? "" : QueryBuilderWhere();
-
-            // Restore display records
-            if (Command != "json" && (RecordsPerPage == -1 || RecordsPerPage > 0)) {
-                DisplayRecords = RecordsPerPage; // Restore from Session
-            } else {
-                DisplayRecords = 10; // Load default
-                RecordsPerPage = DisplayRecords; // Save default to session
-            }
-
-            // Load search default if no existing search criteria
-            if (!CheckSearchParms() && Empty(query)) {
-                // Load basic search from default
-                BasicSearch.LoadDefault();
-                if (!Empty(BasicSearch.Keyword))
-                    srchBasic = BasicSearchWhere(); // Save to session
-
-                // Load advanced search from default
-                if (LoadAdvancedSearchDefault())
-                    srchAdvanced = AdvancedSearchWhere(); // Save to session
-            }
-
-            // Restore search settings from Session
-            if (!HasInvalidFields())
-                LoadAdvancedSearch();
-
-            // Build search criteria
-            if (!Empty(query)) {
-                AddFilter(ref SearchWhere, query);
-            } else {
-                AddFilter(ref SearchWhere, srchAdvanced);
-                AddFilter(ref SearchWhere, srchBasic);
-            }
-
-            // Call Recordset Searching event
-            RecordsetSearching(ref SearchWhere);
-
-            // Save search criteria
-            if (Command == "search" && !RestoreSearch) {
-                SessionSearchWhere = SearchWhere; // Save to Session (rename as SessionSearchWhere property)
-                StartRecord = 1; // Reset start record counter
-                StartRecordNumber = StartRecord;
-            } else if (Command != "json" && Empty(query)) {
-                SearchWhere = SessionSearchWhere;
-            }
-
-            // Build filter
-            if (!Security.CanList)
-                Filter = "(0=1)"; // Filter all records
-            AddFilter(ref Filter, DbDetailFilter);
-            AddFilter(ref Filter, SearchWhere);
-
-            // Set up filter
-            if (Command == "json") {
-                UseSessionForListSql = false; // Do not use session for ListSql
-                CurrentFilter = Filter;
-            } else {
-                SessionWhere = Filter;
-                CurrentFilter = "";
-            }
-            Filter = ApplyUserIDFilters(Filter);
-            if (IsGridAdd) {
-                CurrentFilter = "0=1";
-                StartRecord = 1;
-                DisplayRecords = GridAddRowCount;
-                TotalRecords = DisplayRecords;
-                StopRecord = DisplayRecords;
-            } else if ((IsEdit || IsCopy || IsInlineInserted || IsInlineUpdated) && UseInfiniteScroll) { // Get current record only
-                CurrentFilter = IsInlineUpdated ? GetRecordFilter() : GetFilterFromRecordKeys();
-                TotalRecords = ListRecordCount();
-                StartRecord = 1;
-                StopRecord = DisplayRecords;
-                Recordset = await LoadRecordset();
-            } else if (
-                UseInfiniteScroll && IsGridInserted ||
-                UseInfiniteScroll && (IsGridEdit || IsGridUpdated) ||
-                IsMultiEdit ||
-                UseInfiniteScroll && IsMultiUpdated
-            ) { // Get current records only
-                CurrentFilter = FilterForModalActions; // Restore filter
-                TotalRecords = ListRecordCount();
-                StartRecord = 1;
-                StopRecord = DisplayRecords;
-                Recordset = await LoadRecordset();
-            } else {
-                TotalRecords = await ListRecordCountAsync();
-                StopRecord = DisplayRecords;
-                StartRecord = 1;
-                if (DisplayRecords <= 0 || (IsExport() && ExportAll)) // Display all records
-                    DisplayRecords = TotalRecords;
-                if (!(IsExport() && ExportAll)) // Set up start record position
-                    SetupStartRecord();
-
-                // Recordset
-                bool selectLimit = UseSelectLimit;
-
-                // Set up list action columns, must be before LoadRecordset // DN
-                foreach (var (key, act) in ListActions.Items.Where(kvp => kvp.Value.Allowed)) {
-                    if (act.Select == Config.ActionMultiple && ListOptions["checkbox"] is ListOption listOpt) { // Show checkbox column if multiple action
-                        listOpt.Visible = true;
-                    } else if (act.Select == Config.ActionSingle) { // Show list action column
-                            ListOptions["listactions"]?.SetVisible(true); // Set visible if any list action is allowed
-                    }
-                }
-                if (selectLimit)
-                    Recordset = await LoadRecordset(StartRecord - 1, DisplayRecords);
-
-                // Set no record found message
-                if ((Empty(CurrentAction) || IsSearch) && TotalRecords == 0) {
-                    if (!Security.CanList)
-                        WarningMessage = DeniedMessage();
-                    if (SearchWhere == "0=101")
-                        WarningMessage = Language.Phrase("EnterSearchCriteria");
-                    else
-                        WarningMessage = Language.Phrase("NoRecord");
-                }
-            }
-
-            // Search options
-            SetupSearchOptions();
-
-            // Set up search panel class
-            if (!Empty(SearchWhere)) {
-                if (!Empty(query)) { // Hide search panel if using QueryBuilder
-                    SearchPanelClass = RemoveClass(SearchPanelClass, "show");
-                } else {
-                    SearchPanelClass = AppendClass(SearchPanelClass, "show");
-                }
-            }
-
-            // API list action
-            if (IsApi()) {
-                if (CurrentPageName().ToLowerInvariant().EndsWith(Config.ApiListAction)) { // DN
-                    if (!IsExport()) {
-                        if (!Connection.SelectOffset && Recordset != null) { // DN
-                            for (var i = 1; i <= StartRecord - 1; i++) // Move to first record
-                                await Recordset.ReadAsync();
-                        }
-                        using (Recordset) {
-                            return Controller.Json(new Dictionary<string, object> { {"success", true}, {TableVar, await GetRecordsFromRecordset(Recordset)}, {"totalRecordCount", TotalRecords}, {"version", Config.ProductVersion} });
-                        }
-                    }
-                } else if (!Empty(FailureMessage)) {
-                    return Controller.Json(new { success = false, error = GetFailureMessage() });
-                }
-                return new EmptyResult();
-            }
-
-            // Render other options
-            RenderOtherOptions();
-
-            // Set ReturnUrl in header if necessary
-            if (TempData["Return-Url"] != null)
-                AddHeader("Return-Url", ConvertToString(TempData["Return-Url"]));
-
+        private void PageRunEnd()
+        {
             // Set LoginStatus, Page Rendering and Page Render
             if (!IsApi() && !IsTerminated) {
                 SetupLoginStatus(); // Setup login status
@@ -1048,12 +1395,11 @@ public partial class SnDOne {
 
                 // Global Page Rendering event
                 PageRendering();
-                PageRenderingEventHandler?.Invoke(this, EventArgs.Empty);
+                PageRenderingEventHandler?.Invoke(null, EventArgs.Empty);
 
                 // Page Render event
                 penerimaanList?.PageRender();
             }
-            return PageResult();
         }
         #pragma warning restore 219
 
@@ -1146,42 +1492,53 @@ public partial class SnDOne {
                 return false;
             var filter = JsonConvert.DeserializeObject<Dictionary<string, string>>(Post("filter"));
             Command = "search";
+
+            // Process field filters
+            ProcessFieldFilters(filter);
+
+            // Process basic search and query builder
+            ProcessAdditionalFilters(filter);
+            return true;
+        }
+
+        private void ProcessFieldFilters(Dictionary<string, string>? filter)
+        {
+            if (filter == null) return;
             string? sv;
 
             // Field TanggalSandar
-            if (filter?.TryGetValue("x_TanggalSandar", out sv) ?? false) {
-                TanggalSandar.AdvancedSearch.SearchValue = sv;
-                TanggalSandar.AdvancedSearch.SearchOperator = filter["z_TanggalSandar"];
-                TanggalSandar.AdvancedSearch.SearchCondition = filter["v_TanggalSandar"];
-                TanggalSandar.AdvancedSearch.SearchValue2 = filter["y_TanggalSandar"];
-                TanggalSandar.AdvancedSearch.SearchOperator2 = filter["w_TanggalSandar"];
-                TanggalSandar.AdvancedSearch.Save();
+            if (filter.TryGetValue("x_TanggalSandar", out sv)) {
+                RestoreFieldFilter(TanggalSandar, filter, "TanggalSandar", sv);
             }
 
             // Field TanggalDibuat
-            if (filter?.TryGetValue("x_TanggalDibuat", out sv) ?? false) {
-                TanggalDibuat.AdvancedSearch.SearchValue = sv;
-                TanggalDibuat.AdvancedSearch.SearchOperator = filter["z_TanggalDibuat"];
-                TanggalDibuat.AdvancedSearch.SearchCondition = filter["v_TanggalDibuat"];
-                TanggalDibuat.AdvancedSearch.SearchValue2 = filter["y_TanggalDibuat"];
-                TanggalDibuat.AdvancedSearch.SearchOperator2 = filter["w_TanggalDibuat"];
-                TanggalDibuat.AdvancedSearch.Save();
+            if (filter.TryGetValue("x_TanggalDibuat", out sv)) {
+                RestoreFieldFilter(TanggalDibuat, filter, "TanggalDibuat", sv);
             }
 
             // Field TanggalDiperbarui
-            if (filter?.TryGetValue("x_TanggalDiperbarui", out sv) ?? false) {
-                TanggalDiperbarui.AdvancedSearch.SearchValue = sv;
-                TanggalDiperbarui.AdvancedSearch.SearchOperator = filter["z_TanggalDiperbarui"];
-                TanggalDiperbarui.AdvancedSearch.SearchCondition = filter["v_TanggalDiperbarui"];
-                TanggalDiperbarui.AdvancedSearch.SearchValue2 = filter["y_TanggalDiperbarui"];
-                TanggalDiperbarui.AdvancedSearch.SearchOperator2 = filter["w_TanggalDiperbarui"];
-                TanggalDiperbarui.AdvancedSearch.Save();
+            if (filter.TryGetValue("x_TanggalDiperbarui", out sv)) {
+                RestoreFieldFilter(TanggalDiperbarui, filter, "TanggalDiperbarui", sv);
             }
-            if (filter?.TryGetValue(Config.TableBasicSearch, out string? keyword) ?? false)
+        }
+
+        private void RestoreFieldFilter(dynamic field, Dictionary<string, string> filter, string fieldParm, string searchValue)
+        {
+            field.AdvancedSearch.SearchValue = searchValue;
+            field.AdvancedSearch.SearchOperator = filter.GetValueOrDefault($"z_{fieldParm}", "");
+            field.AdvancedSearch.SearchCondition = filter.GetValueOrDefault($"v_{fieldParm}", "");
+            field.AdvancedSearch.SearchValue2 = filter.GetValueOrDefault($"y_{fieldParm}", "");
+            field.AdvancedSearch.SearchOperator2 = filter.GetValueOrDefault($"w_{fieldParm}", "");
+            field.AdvancedSearch.Save();
+        }
+
+        private void ProcessAdditionalFilters(Dictionary<string, string>? filter)
+        {
+            if (filter == null) return;
+            if (filter.TryGetValue(Config.TableBasicSearch, out string? keyword))
                 BasicSearch.SessionKeyword = keyword;
-            if (filter?.TryGetValue(Config.TableBasicSearchType, out string? type) ?? false)
+            if (filter.TryGetValue(Config.TableBasicSearchType, out string? type))
                 BasicSearch.SessionType = type;
-            return true;
         }
 
         // Advanced search WHERE clause based on QueryString
@@ -1266,178 +1623,198 @@ public partial class SnDOne {
         // Build search SQL
         public void BuildSearchSql(ref string where, DbField fld, bool def, bool multiValue)
         {
-            string fldParm = fld.Param;
-            string fldVal = def ? ConvertToString(fld.AdvancedSearch.SearchValueDefault) : ConvertToString(fld.AdvancedSearch.SearchValue);
-            string fldOpr = def ? fld.AdvancedSearch.SearchOperatorDefault : fld.AdvancedSearch.SearchOperator;
-            string fldCond = def ? fld.AdvancedSearch.SearchConditionDefault : fld.AdvancedSearch.SearchCondition;
-            string fldVal2 = def ? ConvertToString(fld.AdvancedSearch.SearchValue2Default) : ConvertToString(fld.AdvancedSearch.SearchValue2);
-            string fldOpr2 = def ? fld.AdvancedSearch.SearchOperator2Default : fld.AdvancedSearch.SearchOperator2;
-            fldVal = ConvertSearchValue(fldVal, fldOpr, fld);
-            fldVal2 = ConvertSearchValue(fldVal2, fldOpr2, fld);
-            fldOpr = ConvertSearchOperator(fldOpr, fld, fldVal);
-            fldOpr2 = ConvertSearchOperator(fldOpr2, fld, fldVal2);
-            string wrk = "";
-            if (Config.SearchMultiValueOption == 1 && !fld.UseFilter || !IsMultiSearchOperator(fldOpr))
-                multiValue = false;
-            if (multiValue) {
-                wrk = !Empty(fldVal) ? GetMultiSearchSql(fld, fldOpr, fldVal, DbId) : ""; // Field value 1
-                string wrk2 = !Empty(fldVal2) ? GetMultiSearchSql(fld, fldOpr2, fldVal2, DbId) : ""; // Field value 2
-                AddFilter(ref wrk, wrk2, fldCond);
-            } else {
-                wrk = GetSearchSql(fld, fldVal, fldOpr, fldCond, fldVal2, fldOpr2, DbId);
+            var searchParams = ExtractSearchParameters(fld, def);
+            var processedParams = ProcessSearchParameters(searchParams, fld);
+            if (ShouldUseMultiValue(multiValue, fld, processedParams.Operator))
+            {
+                var wrk = BuildMultiValueSearch(processedParams, fld);
+                AddFilterToWhere(ref where, wrk);
             }
+            else
+            {
+                var wrk = BuildStandardSearch(processedParams, fld);
+                AddFilterToWhere(ref where, wrk);
+            }
+        }
+
+        private SearchParameters ExtractSearchParameters(DbField fld, bool def)
+        {
+            return new SearchParameters
+            {
+                Value = def ? ConvertToString(fld.AdvancedSearch.SearchValueDefault) : ConvertToString(fld.AdvancedSearch.SearchValue),
+                Operator = def ? fld.AdvancedSearch.SearchOperatorDefault : fld.AdvancedSearch.SearchOperator,
+                Condition = def ? fld.AdvancedSearch.SearchConditionDefault : fld.AdvancedSearch.SearchCondition,
+                Value2 = def ? ConvertToString(fld.AdvancedSearch.SearchValue2Default) : ConvertToString(fld.AdvancedSearch.SearchValue2),
+                Operator2 = def ? fld.AdvancedSearch.SearchOperator2Default : fld.AdvancedSearch.SearchOperator2
+            };
+        }
+
+        private ProcessedSearchParameters ProcessSearchParameters(SearchParameters searchParams, DbField fld)
+        {
+            return new ProcessedSearchParameters
+            {
+                Value = ConvertSearchValue(searchParams.Value, searchParams.Operator, fld),
+                Value2 = ConvertSearchValue(searchParams.Value2, searchParams.Operator2, fld),
+                Operator = ConvertSearchOperator(searchParams.Operator, fld, searchParams.Value),
+                Operator2 = ConvertSearchOperator(searchParams.Operator2, fld, searchParams.Value2),
+                Condition = searchParams.Condition
+            };
+        }
+
+        private bool ShouldUseMultiValue(bool multiValue, DbField fld, string fldOpr)
+        {
+            if (Config.SearchMultiValueOption == 1 && !fld.UseFilter || !IsMultiSearchOperator(fldOpr))
+                return false;
+            return multiValue;
+        }
+
+        private string BuildMultiValueSearch(ProcessedSearchParameters processedParams, DbField fld)
+        {
+            string wrk = !Empty(processedParams.Value) ? GetMultiSearchSql(fld, processedParams.Operator, processedParams.Value, DbId) : "";
+            string wrk2 = !Empty(processedParams.Value2) ? GetMultiSearchSql(fld, processedParams.Operator2, processedParams.Value2, DbId) : "";
+            AddFilter(ref wrk, wrk2, processedParams.Condition);
+            return wrk;
+        }
+
+        private string BuildStandardSearch(ProcessedSearchParameters processedParams, DbField fld)
+        {
+            return GetSearchSql(fld, processedParams.Value, processedParams.Operator, processedParams.Condition, processedParams.Value2, processedParams.Operator2, DbId);
+        }
+
+        private void AddFilterToWhere(ref string where, string wrk)
+        {
             string cond = SearchOption == "AUTO" && (new[] { "AND", "OR" }).Contains(BasicSearch.Type)
                 ? BasicSearch.Type
                 : SameText(SearchOption, "OR") ? "OR" : "AND";
             AddFilter(ref where, wrk, cond);
         }
 
+        // Support classes
+        private sealed class SearchParameters
+        {
+            public string Value { get; set; } = "";
+
+            public string Operator { get; set; } = "";
+
+            public string Condition { get; set; } = "";
+
+            public string Value2 { get; set; } = "";
+
+            public string Operator2 { get; set; } = "";
+        }
+
+        private sealed class ProcessedSearchParameters
+        {
+            public string Value { get; set; } = "";
+
+            public string Value2 { get; set; } = "";
+
+            public string Operator { get; set; } = "";
+
+            public string Operator2 { get; set; } = "";
+
+            public string Condition { get; set; } = "";
+        }
+
         // Show list of filters
         public void ShowFilterList()
         {
-            // Initialize
-            string filterList = "",
-                filter = "",
-                captionClass = IsExport("email") ? "ew-filter-caption-email" : "ew-filter-caption",
-                captionSuffix = IsExport("email") ? ": " : "";
+            var filterConfig = InitializeFilterConfiguration();
+            string filterList = BuildAllFilters(filterConfig);
+            RenderFilterList(filterList, filterConfig);
+        }
 
-            // Field Proses
-            filter = QueryBuilderWhere("Proses");
-            if (Empty(filter))
-                BuildSearchSql(ref filter, Proses2, false, true);
-            if (!Empty(filter))
-                filterList += "<div><span class=\"" + captionClass + "\">" + Proses2.Caption + "</span>" + captionSuffix + filter + "</div>";
+        private FilterConfiguration InitializeFilterConfiguration()
+        {
+            return new FilterConfiguration
+            {
+                CaptionClass = IsExport("email") ? "ew-filter-caption-email" : "ew-filter-caption",
+                CaptionSuffix = IsExport("email") ? ": " : ""
+            };
+        }
 
-            // Field NomorVoyage
-            filter = QueryBuilderWhere("NomorVoyage");
-            if (Empty(filter))
-                BuildSearchSql(ref filter, NomorVoyage, false, true);
-            if (!Empty(filter))
-                filterList += "<div><span class=\"" + captionClass + "\">" + NomorVoyage.Caption + "</span>" + captionSuffix + filter + "</div>";
+        private string BuildAllFilters(FilterConfiguration config)
+        {
+            string filterList = "";
+            filterList += BuildFieldFilters(config);
+            filterList += BuildBasicSearchFilter(config);
+            return filterList;
+        }
 
-            // Field NomorPengiriman
-            filter = QueryBuilderWhere("NomorPengiriman");
-            if (Empty(filter))
-                BuildSearchSql(ref filter, NomorPengiriman, false, true);
-            if (!Empty(filter))
-                filterList += "<div><span class=\"" + captionClass + "\">" + NomorPengiriman.Caption + "</span>" + captionSuffix + filter + "</div>";
+        private string BuildFieldFilters(FilterConfiguration config)
+        {
+            string filterList = "";
+            filterList += ProcessFieldFilter("Proses", Proses2, true, config);
+            filterList += ProcessFieldFilter("NomorVoyage", NomorVoyage, true, config);
+            filterList += ProcessFieldFilter("NomorPengiriman", NomorPengiriman, true, config);
+            filterList += ProcessFieldFilter("IdPlant", IdPlant, true, config);
+            filterList += ProcessFieldFilter("TipeProdukSTS", TipeProdukSTS, true, config);
+            filterList += ProcessFieldFilter("KodeProduk", KodeProduk, true, config);
+            filterList += ProcessFieldFilter("ModaTransportasi", ModaTransportasi, true, config);
+            filterList += ProcessFieldFilter("NamaKapal", NamaKapal, true, config);
+            filterList += ProcessFieldFilter("Refinery", Refinery, true, config);
+            filterList += ProcessFieldFilter("TanggalSandar", TanggalSandar, true, config);
+            filterList += ProcessFieldFilter("IdDermaga", IdDermaga, true, config);
+            filterList += ProcessFieldFilter("StatusProses", StatusProses, true, config);
+            filterList += ProcessFieldFilter("PersentaseProgress", PersentaseProgress, true, config);
+            filterList += ProcessFieldFilter("IdTemplate", IdTemplate, true, config);
+            filterList += ProcessFieldFilter("DibuatOleh", DibuatOleh, true, config);
+            filterList += ProcessFieldFilter("TanggalDibuat", TanggalDibuat, true, config);
+            filterList += ProcessFieldFilter("DiperbaruiOleh", DiperbaruiOleh, true, config);
+            filterList += ProcessFieldFilter("TanggalDiperbarui", TanggalDiperbarui, true, config);
+            return filterList;
+        }
 
-            // Field IdPlant
-            filter = QueryBuilderWhere("IdPlant");
+        private string ProcessFieldFilter(string fieldName, dynamic field, bool multiSelect, FilterConfiguration config)
+        {
+            string filter = QueryBuilderWhere(fieldName);
             if (Empty(filter))
-                BuildSearchSql(ref filter, IdPlant, false, true);
+                BuildSearchSql(ref filter, field, false, multiSelect);
             if (!Empty(filter))
-                filterList += "<div><span class=\"" + captionClass + "\">" + IdPlant.Caption + "</span>" + captionSuffix + filter + "</div>";
+                return BuildFilterItem(field.Caption, filter, config);
+            return "";
+        }
 
-            // Field TipeProdukSTS
-            filter = QueryBuilderWhere("TipeProdukSTS");
-            if (Empty(filter))
-                BuildSearchSql(ref filter, TipeProdukSTS, false, true);
-            if (!Empty(filter))
-                filterList += "<div><span class=\"" + captionClass + "\">" + TipeProdukSTS.Caption + "</span>" + captionSuffix + filter + "</div>";
-
-            // Field KodeProduk
-            filter = QueryBuilderWhere("KodeProduk");
-            if (Empty(filter))
-                BuildSearchSql(ref filter, KodeProduk, false, true);
-            if (!Empty(filter))
-                filterList += "<div><span class=\"" + captionClass + "\">" + KodeProduk.Caption + "</span>" + captionSuffix + filter + "</div>";
-
-            // Field ModaTransportasi
-            filter = QueryBuilderWhere("ModaTransportasi");
-            if (Empty(filter))
-                BuildSearchSql(ref filter, ModaTransportasi, false, true);
-            if (!Empty(filter))
-                filterList += "<div><span class=\"" + captionClass + "\">" + ModaTransportasi.Caption + "</span>" + captionSuffix + filter + "</div>";
-
-            // Field NamaKapal
-            filter = QueryBuilderWhere("NamaKapal");
-            if (Empty(filter))
-                BuildSearchSql(ref filter, NamaKapal, false, true);
-            if (!Empty(filter))
-                filterList += "<div><span class=\"" + captionClass + "\">" + NamaKapal.Caption + "</span>" + captionSuffix + filter + "</div>";
-
-            // Field Refinery
-            filter = QueryBuilderWhere("Refinery");
-            if (Empty(filter))
-                BuildSearchSql(ref filter, Refinery, false, true);
-            if (!Empty(filter))
-                filterList += "<div><span class=\"" + captionClass + "\">" + Refinery.Caption + "</span>" + captionSuffix + filter + "</div>";
-
-            // Field TanggalSandar
-            filter = QueryBuilderWhere("TanggalSandar");
-            if (Empty(filter))
-                BuildSearchSql(ref filter, TanggalSandar, false, true);
-            if (!Empty(filter))
-                filterList += "<div><span class=\"" + captionClass + "\">" + TanggalSandar.Caption + "</span>" + captionSuffix + filter + "</div>";
-
-            // Field IdDermaga
-            filter = QueryBuilderWhere("IdDermaga");
-            if (Empty(filter))
-                BuildSearchSql(ref filter, IdDermaga, false, true);
-            if (!Empty(filter))
-                filterList += "<div><span class=\"" + captionClass + "\">" + IdDermaga.Caption + "</span>" + captionSuffix + filter + "</div>";
-
-            // Field StatusProses
-            filter = QueryBuilderWhere("StatusProses");
-            if (Empty(filter))
-                BuildSearchSql(ref filter, StatusProses, false, true);
-            if (!Empty(filter))
-                filterList += "<div><span class=\"" + captionClass + "\">" + StatusProses.Caption + "</span>" + captionSuffix + filter + "</div>";
-
-            // Field PersentaseProgress
-            filter = QueryBuilderWhere("PersentaseProgress");
-            if (Empty(filter))
-                BuildSearchSql(ref filter, PersentaseProgress, false, true);
-            if (!Empty(filter))
-                filterList += "<div><span class=\"" + captionClass + "\">" + PersentaseProgress.Caption + "</span>" + captionSuffix + filter + "</div>";
-
-            // Field IdTemplate
-            filter = QueryBuilderWhere("IdTemplate");
-            if (Empty(filter))
-                BuildSearchSql(ref filter, IdTemplate, false, true);
-            if (!Empty(filter))
-                filterList += "<div><span class=\"" + captionClass + "\">" + IdTemplate.Caption + "</span>" + captionSuffix + filter + "</div>";
-
-            // Field DibuatOleh
-            filter = QueryBuilderWhere("DibuatOleh");
-            if (Empty(filter))
-                BuildSearchSql(ref filter, DibuatOleh, false, true);
-            if (!Empty(filter))
-                filterList += "<div><span class=\"" + captionClass + "\">" + DibuatOleh.Caption + "</span>" + captionSuffix + filter + "</div>";
-
-            // Field TanggalDibuat
-            filter = QueryBuilderWhere("TanggalDibuat");
-            if (Empty(filter))
-                BuildSearchSql(ref filter, TanggalDibuat, false, true);
-            if (!Empty(filter))
-                filterList += "<div><span class=\"" + captionClass + "\">" + TanggalDibuat.Caption + "</span>" + captionSuffix + filter + "</div>";
-
-            // Field DiperbaruiOleh
-            filter = QueryBuilderWhere("DiperbaruiOleh");
-            if (Empty(filter))
-                BuildSearchSql(ref filter, DiperbaruiOleh, false, true);
-            if (!Empty(filter))
-                filterList += "<div><span class=\"" + captionClass + "\">" + DiperbaruiOleh.Caption + "</span>" + captionSuffix + filter + "</div>";
-
-            // Field TanggalDiperbarui
-            filter = QueryBuilderWhere("TanggalDiperbarui");
-            if (Empty(filter))
-                BuildSearchSql(ref filter, TanggalDiperbarui, false, true);
-            if (!Empty(filter))
-                filterList += "<div><span class=\"" + captionClass + "\">" + TanggalDiperbarui.Caption + "</span>" + captionSuffix + filter + "</div>";
+        private string BuildBasicSearchFilter(FilterConfiguration config)
+        {
             if (!Empty(BasicSearch.Keyword))
-                filterList += "<div><span class=\"" + captionClass + "\">" + Language.Phrase("BasicSearchKeyword") + "</span>" + captionSuffix + BasicSearch.Keyword + "</div>";
+                return BuildFilterItem(Language.Phrase("BasicSearchKeyword"), BasicSearch.Keyword, config);
+            return "";
+        }
 
-            // Show Filters
+        private string BuildFilterItem(string caption, string filter, FilterConfiguration config)
+        {
+            return "<div><span class=\"" + config.CaptionClass + "\">" + caption + "</span>" + config.CaptionSuffix + filter + "</div>";
+        }
+
+        private void RenderFilterList(string filterList, FilterConfiguration config)
+        {
             if (!Empty(filterList)) {
-                string message = "<div id=\"ew-filter-list\" class=\"callout callout-info d-table\"><div id=\"ew-current-filters\">" +
-                    Language.Phrase("CurrentFilters") + "</div>" + filterList + "</div>";
-                MessageShowing(ref message, "");
-                Write(message);
-            } else { // Output empty tag
-                Write("<div id=\"ew-filter-list\"></div>");
+                RenderNonEmptyFilterList(filterList);
+            } else {
+                RenderEmptyFilterList();
             }
+        }
+
+        private void RenderNonEmptyFilterList(string filterList)
+        {
+            string message = "<div id=\"ew-filter-list\" class=\"callout callout-info d-table\"><div id=\"ew-current-filters\">" +
+                Language.Phrase("CurrentFilters") + "</div>" + filterList + "</div>";
+            MessageShowing(ref message, "");
+            Write(message);
+        }
+
+        private void RenderEmptyFilterList()
+        {
+            Write("<div id=\"ew-filter-list\"></div>");
+        }
+
+        // Support class
+        private sealed class FilterConfiguration
+        {
+            public string CaptionClass { get; set; } = "";
+
+            public string CaptionSuffix { get; set; } = "";
         }
 
         // Return basic search WHERE clause based on search keyword and type
@@ -2050,98 +2427,172 @@ public partial class SnDOne {
         {
             string filter = GetFilterFromRecordKeys();
             string userAction = Post("action");
+            if (Empty(filter) || Empty(userAction))
+                return new EmptyResult();
+            var actionResult = ValidateListAction(userAction);
+            if (actionResult != null)
+                return actionResult;
+            return await ExecuteListAction(userAction, filter);
+        }
+
+        private IActionResult? ValidateListAction(string userAction)
+        {
+            string actionCaption = userAction;
             ListAction? listAction = null;
-            if (filter != "" && userAction != "") {
-                // Check permission first
-                string actionCaption = userAction;
-                foreach (var (key, act) in ListActions.Items) {
-                    if (SameString(key, userAction)) {
-                        listAction = act;
-                        actionCaption = !Empty(act.Caption) ? act.Caption : act.Action;
-                        if (CustomActions.ContainsKey(userAction)) {
-                            UserAction = userAction;
-                            CurrentAction = "";
-                        }
-                        if (!act.Allowed) {
-                            string errmsg = Language.Phrase("CustomActionNotAllowed").Replace("%s", actionCaption);
-                            if (Post("ajax") == userAction) // Ajax
-                                return Controller.Content("<p class=\"text-danger\">" + errmsg + "</p>", "text/plain", Encoding.UTF8);
-                            else
-                                FailureMessage = errmsg;
-                            return new EmptyResult();
-                        }
+            foreach (var (key, act) in ListActions.Items) {
+                if (SameString(key, userAction)) {
+                    listAction = act;
+                    actionCaption = !Empty(act.Caption) ? act.Caption : act.Action;
+                    SetupCustomAction(userAction, act);
+                    if (!act.Allowed) {
+                        string errmsg = Language.Phrase("CustomActionNotAllowed").Replace("%s", actionCaption);
+                        if (Post("ajax") == userAction) // Ajax
+                            return Controller.Content("<p class=\"text-danger\">" + errmsg + "</p>", "text/plain", Encoding.UTF8);
+                        else
+                            FailureMessage = errmsg;
+                        return new EmptyResult();
                     }
                 }
-                CurrentFilter = filter;
-                string sql = CurrentSql;
-                var rows = await Connection.GetRowsAsync(sql);
-                ActionValue = Post("actionvalue");
+            }
+            return null;
+        }
 
-                // Call row custom action event
-                if (rows != null) {
-                    if (UseTransaction)
-                        Connection.BeginTrans();
-                    bool processed = true;
-                    SelectedCount = rows.Count();
-                    SelectedIndex = 0;
-                    foreach (var row in rows) {
-                        SelectedIndex++;
-                        if (listAction != null) { // Handle list action
-                            var result = await listAction.Handle(row, this);
-                            processed = result;
-                            if (listAction.Method == Config.ActionAjax && result.Value != null) // DN
-                                ActionResult = result;
-                        }
-                        if (!processed)
-                            break;
-                        processed = RowCustomAction(userAction, row);
-                        if (!processed)
-                            break;
-                    }
-                    if (processed) {
-                        if (UseTransaction)
-                            Connection.CommitTrans(); // Commit the changes
-                            SuccessMessage = listAction?.SuccessMessage ?? "";
-                        if (Empty(SuccessMessage))
-                            SuccessMessage = Language.Phrase("CustomActionCompleted").Replace("%s", actionCaption); // Set up success message
-                    } else {
-                        if (UseTransaction)
-                            Connection.RollbackTrans(); // Rollback changes
-                            FailureMessage = listAction?.FailureMessage ?? "";
+        private void SetupCustomAction(string userAction, ListAction act)
+        {
+            if (CustomActions.ContainsKey(userAction)) {
+                UserAction = userAction;
+                CurrentAction = "";
+            }
+        }
 
-                        // Set up error message
-                        if (!Empty(SuccessMessage) || !Empty(FailureMessage)) {
-                            // Use the message, do nothing
-                        } else if (!Empty(CancelMessage)) {
-                            FailureMessage = CancelMessage;
-                            CancelMessage = "";
-                        } else {
-                            FailureMessage = Language.Phrase("CustomActionFailed").Replace("%s", actionCaption);
-                        }
-                    }
+        private async Task<IActionResult> ExecuteListAction(string userAction, string filter)
+        {
+            CurrentFilter = filter;
+            string sql = CurrentSql;
+            var rows = await Connection.GetRowsAsync(sql);
+            ActionValue = Post("actionvalue");
+            var actionResult = await ProcessListActionRows(userAction, rows);
+            return HandleActionResponse(userAction, actionResult);
+        }
+
+        private async Task<bool> ProcessListActionRows(string userAction, IEnumerable<Dictionary<string, object>>? rows)
+        {
+            if (rows == null) return false;
+            if (UseTransaction)
+                Connection.BeginTrans();
+            bool processed = true;
+            SelectedCount = rows.Count();
+            SelectedIndex = 0;
+            foreach (var row in rows) {
+                SelectedIndex++;
+                processed = await ProcessSingleRow(userAction, row);
+                if (!processed)
+                    break;
+            }
+            HandleTransactionResult(processed);
+            return processed;
+        }
+
+        private async Task<bool> ProcessSingleRow(string userAction, Dictionary<string, object> row)
+        {
+            var listAction = GetListActionByUserAction(userAction);
+            bool processed = true;
+            if (listAction != null) { // Handle list action
+                var result = await listAction.Handle(row, this);
+                processed = result;
+                if (listAction.Method == Config.ActionAjax && result.Value != null) // DN
+                    ActionResult = result;
+            }
+            if (!processed) return false;
+            processed = RowCustomAction(userAction, row);
+            return processed;
+        }
+
+        private ListAction? GetListActionByUserAction(string userAction)
+        {
+            foreach (var (key, act) in ListActions.Items) {
+                if (SameString(key, userAction)) {
+                    return act;
                 }
-                CurrentAction = ""; // Clear action
-                if (Post("ajax") == userAction) { // Ajax
-                    if (ActionResult != null) // Action result set by Row CustomAction event // DN
-                        return ActionResult;
-                    string msg = "";
-                    if (SuccessMessage != "") {
-                        msg = "<p class=\"text-success\">" + SuccessMessage + "</p>";
-                        ClearSuccessMessage(); // Clear message
-                    }
-                    if (FailureMessage != "") {
-                        msg = "<p class=\"text-danger\">" + FailureMessage + "</p>";
-                        ClearFailureMessage(); // Clear message
-                    }
-                    if (!Empty(msg))
-                        return Controller.Content(msg, "text/plain", Encoding.UTF8);
-                }
+            }
+            return null;
+        }
+
+        private void HandleTransactionResult(bool processed)
+        {
+            var listAction = GetListActionByUserAction(Post("action"));
+            var actionCaption = listAction?.Caption ?? Post("action");
+            var rows = Connection.GetRowsAsync(CurrentSql).Result;
+            if (processed) {
+                if (UseTransaction)
+                    Connection.CommitTrans(); // Commit the changes
+                SetupSuccessMessage(listAction, actionCaption, rows);
+            } else {
+                if (UseTransaction)
+                    Connection.RollbackTrans(); // Rollback changes
+                SetupFailureMessage(listAction, actionCaption, rows);
+            }
+        }
+
+        private void SetupSuccessMessage(ListAction? listAction, string actionCaption, IEnumerable<Dictionary<string, object>>? rows)
+        {
+            SuccessMessage = listAction?.SuccessMessage ?? "";
+            if (Empty(SuccessMessage))
+                SuccessMessage = Language.Phrase("CustomActionCompleted").Replace("%s", actionCaption);
+        }
+
+        private void SetupFailureMessage(ListAction? listAction, string actionCaption, IEnumerable<Dictionary<string, object>>? rows)
+        {
+            FailureMessage = listAction?.FailureMessage ?? "";
+
+            // Set up error message
+            if (!Empty(SuccessMessage) || !Empty(FailureMessage)) {
+                // Use the message, do nothing
+            } else if (!Empty(CancelMessage)) {
+                FailureMessage = CancelMessage;
+                CancelMessage = "";
+            } else {
+                FailureMessage = Language.Phrase("CustomActionFailed").Replace("%s", actionCaption);
+            }
+        }
+
+        private IActionResult HandleActionResponse(string userAction, bool processed)
+        {
+            CurrentAction = ""; // Clear action
+            if (Post("ajax") == userAction) { // Ajax
+                if (ActionResult != null) // Action result set by Row CustomAction event // DN
+                    return ActionResult;
+                string msg = BuildResponseMessage();
+                if (!Empty(msg))
+                    return Controller.Content(msg, "text/plain", Encoding.UTF8);
             }
             return new EmptyResult(); // Not ajax request
         }
 
+        private string BuildResponseMessage()
+        {
+            string msg = "";
+            if (SuccessMessage != "") {
+                msg = "<p class=\"text-success\">" + SuccessMessage + "</p>";
+                ClearSuccessMessage(); // Clear message
+            }
+            if (FailureMessage != "") {
+                msg = "<p class=\"text-danger\">" + FailureMessage + "</p>";
+                ClearFailureMessage(); // Clear message
+            }
+            return msg;
+        }
+
         // Set up Grid
         public async Task SetupGrid()
+        {
+            SetupRecordRange();
+            await HandleFormKeyCount();
+            await HandleRecordset();
+            await SetupAggregateAndInlineOperations();
+        }
+
+        private void SetupRecordRange()
         {
             if (ExportAll && IsExport()) {
                 StopRecord = TotalRecords;
@@ -2153,25 +2604,60 @@ public partial class SnDOne {
                     StopRecord = TotalRecords;
                 }
             }
+        }
+
+        private async Task HandleFormKeyCount()
+        {
+            // If empty, means all conditions are not fulfilled
+        }
+
+        private async Task HandleRecordset()
+        {
             if (Recordset != null && Recordset.HasRows) {
-                if (!Connection.SelectOffset) { // DN
-                    for (int i = 1; i <= StartRecord - 1; i++) { // Move to first record
-                        if (await Recordset.ReadAsync())
-                            RecordCount++;
-                    }
-                } else {
-                    RecordCount = StartRecord - 1;
+                await HandleExistingRecordset();
+            } else {
+                HandleEmptyRecordset();
+            }
+        }
+
+        private async Task HandleExistingRecordset()
+        {
+            if (!Connection.SelectOffset) { // DN
+                for (int i = 1; i <= StartRecord - 1; i++) { // Move to first record
+                    if (await Recordset.ReadAsync())
+                        RecordCount++;
                 }
-            } else if (IsGridAdd && !AllowAddDeleteRow && StopRecord == 0) { // Grid-Add with no records
+            } else {
+                RecordCount = StartRecord - 1;
+            }
+        }
+
+        private void HandleEmptyRecordset()
+        {
+            if (IsGridAdd && !AllowAddDeleteRow && StopRecord == 0) { // Grid-Add with no records
                 StopRecord = GridAddRowCount;
             } else if (IsAdd && TotalRecords == 0) { // Inline-Add with no records
                 StopRecord = 1;
             }
+        }
 
+        private async Task SetupAggregateAndInlineOperations()
+        {
             // Initialize aggregate
             RowType = RowType.AggregateInit;
             ResetAttributes();
             await RenderRow();
+            SetupInlineOperations();
+            SetupGridOperations();
+        }
+
+        private void SetupInlineOperations()
+        {
+            // If empty, means all conditions are not fulfilled
+        }
+
+        private void SetupGridOperations()
+        {
             if ((IsGridAdd || IsGridEdit)) // Render template row first
                 RowIndex = "$rowindex$";
         }
@@ -2179,37 +2665,101 @@ public partial class SnDOne {
         // Set up Row
         public async Task SetupRow()
         {
-            if (IsGridAdd || IsGridEdit) {
-                if (SameString(RowIndex, "$rowindex$")) { // Render template row first
-                    await LoadRowValues();
+            // Handle template row for grid operations
+            if (await HandleTemplateRow())
+                return;
 
-                    // Set row properties
-                    ResetAttributes();
-                    RowAttrs.Add("data-rowindex", ConvertToString(RowIndex));
-                    RowAttrs.Add("id", "r0_Penerimaan");
-                    RowAttrs.Add("data-rowtype", ConvertToString((int)RowType.Add));
-                    RowAttrs.Add("data-inline", (IsAdd || IsCopy || IsEdit) ? "true" : "false");
-                    RowAttrs.AppendClass("ew-template");
+            // Setup form and row index
+            SetupFormAndRowIndex();
 
-                    // Render row
-                    RowType = RowType.Add;
-                    await RenderRow();
+            // Initialize row attributes
+            InitializeRowAttributes();
 
-                    // Render list options
-                    await RenderListOptions();
+            // Load row data based on context
+            await LoadRowData();
 
-                    // Reset record count for template row
-                    RecordCount--;
-                    return;
-                }
+            // Setup row type and actions
+            SetupRowTypeAndActions();
+
+            // Handle edit mode specific setup
+            await HandleEditModeSetup();
+
+            // Handle form restoration on errors
+            await HandleFormRestoration();
+
+            // Setup row counts and final attributes
+            SetupRowCountsAndAttributes();
+
+            // Render row and options
+            await RenderRowAndOptions();
+        }
+
+        private async Task<bool> HandleTemplateRow()
+        {
+            if ((IsGridAdd || IsGridEdit) && SameString(RowIndex, "$rowindex$")) { // Render template row first
+                await LoadRowValues();
+
+                // Set row properties
+                ResetAttributes();
+                RowAttrs.Add("data-rowindex", ConvertToString(RowIndex));
+                RowAttrs.Add("id", "r0_Penerimaan");
+                RowAttrs.Add("data-rowtype", ConvertToString((int)RowType.Add));
+                RowAttrs.Add("data-inline", (IsAdd || IsCopy || IsEdit) ? "true" : "false");
+                RowAttrs.AppendClass("ew-template");
+
+                // Render row
+                RowType = RowType.Add;
+                await RenderRow();
+
+                // Render list options
+                await RenderListOptions();
+
+                // Reset record count for template row
+                RecordCount--;
+                return true; // Exit early
             }
+            return false;
+        }
 
+        private void SetupFormAndRowIndex()
+        {
+            // If empty, means all conditions are not 
+        }
+
+        private void InitializeRowAttributes()
+        {
             // Set up key count
             KeyCount = ConvertToInt(RowIndex);
 
             // Init row class and style
             ResetAttributes();
             CssClass = "";
+        }
+
+        private async Task LoadRowData()
+        {
+            await LoadRowDataForList();
+        }
+
+        private async Task LoadRowDataForGrid()
+        {
+            if (IsGridAdd) {
+                if (CurrentMode == "copy") {
+                    await LoadRowValues(Recordset); // Load row values
+                    OldKey = GetKey(true); // Get from CurrentValue
+                } else {
+                    await LoadRowValues(); // Load default values
+                    OldKey = "";
+                }
+            } else {
+                await LoadRowValues(Recordset); // Load row values
+                OldKey = GetKey(true); // Get from CurrentValue
+            }
+            SetKey(OldKey);
+        }
+
+        private async Task LoadRowDataForList()
+        {
             if (IsCopy && InlineRowCount == 0 && !await LoadRow()) { // Inline copy
                 CurrentAction = "add";
             }
@@ -2226,10 +2776,27 @@ public partial class SnDOne {
                     SetKey(OldKey);
                 }
             }
+        }
+
+        private void SetupRowTypeAndActions()
+        {
             RowType = RowType.View; // Render view
             if ((IsAdd || IsCopy) && InlineRowCount == 0 || IsGridAdd) // Add
                 RowType = RowType.Add; // Render add
+        }
 
+        private async Task HandleEditModeSetup()
+        {
+            // If empty, means all conditions are not 
+        }
+
+        private async Task HandleFormRestoration()
+        {
+            // If empty, means all conditions are not 
+        }
+
+        private void SetupRowCountsAndAttributes()
+        {
             // Inline Add/Copy row (row 0)
             if (RowType == RowType.Add && (IsAdd || IsCopy)) {
                 InlineRowCount++;
@@ -2251,13 +2818,68 @@ public partial class SnDOne {
             RowAttrs.AppendClass(penerimaanList.RowCount % 2 != 1 ? "ew-table-alt-row" : "");
             if (IsAdd && penerimaanList.RowType == RowType.Add || IsEdit && penerimaanList.RowType == RowType.Edit) // Inline-Add/Edit row
                 RowAttrs.AppendClass("table-active");
+        }
 
+        private async Task RenderRowAndOptions()
+        {
             // Render row
             await RenderRow();
 
             // Render list options
             await RenderListOptions();
         }
+
+// ================== GENERATED HELPERS ==================
+private void ResolveLookupView(dynamic fld, string keyFieldName, string fallbackType = "auto")
+{
+    string curVal = ConvertToString(fld.CurrentValue);
+
+    // kosong → DbNullValue lalu selesai
+    if (Empty(curVal))
+    {
+        fld.ViewValue = DbNullValue;
+        return;
+    }
+
+    // siapkan fallback awal (kalau cache/DB tidak dapat)
+    if (fallbackType == "number")
+    {
+        fld.ViewValue = FormatNumber(fld.CurrentValue, fld.FormatPattern);
+    }
+    else if (fallbackType == "date")
+    {
+        var tmp = fld.CurrentValue;
+        fld.ViewValue = FormatDateTime(tmp, fld.FormatPattern);
+    }
+    else if (fallbackType == "string")
+    {
+        fld.ViewValue = ConvertToString(fld.CurrentValue);
+    }
+    else
+    { // auto
+        fld.ViewValue = IsNumeric(fld.CurrentValue)
+            ? FormatNumber(fld.CurrentValue, fld.FormatPattern)
+            : ConvertToString(fld.CurrentValue);
+    }
+
+    // coba dari cache
+    if (fld.Lookup != null && IsDictionary(fld.Lookup?.Options) && fld.Lookup?.Options.Values.Count > 0)
+    {
+        fld.ViewValue = fld.LookupCacheOption(curVal);
+        return;
+    }
+
+    // fallback: query DB
+    var keyField = fld.Lookup?.GetTable()?.Fields[keyFieldName];
+    string filterWrk = SearchFilter(keyField?.SearchExpression, "=", fld.CurrentValue, keyField?.SearchDataType, "");
+    string? sqlWrk = fld.Lookup?.GetSql(false, filterWrk, null, this, true, true);
+    List<Dictionary<string, object>>? rswrk = sqlWrk != null ? Connection.GetRows(sqlWrk) : null;
+    if (rswrk?.Count > 0 && fld.Lookup != null)
+    {
+        var listwrk = fld.Lookup?.RenderViewRow(rswrk?[0]);
+        fld.ViewValue = fld.DisplayValue(listwrk);
+    }
+}
 
         // Load basic search values // DN
         protected void LoadBasicSearchValues() {
@@ -2271,133 +2893,323 @@ public partial class SnDOne {
 
         // Load search values for validation // DN
         protected void LoadSearchValues() {
+            LoadQueryBuilderRules();
+            LoadFieldSearchValues();
+        }
+
+        // ================= HELPER METHODS =================
+        private void LoadQueryBuilderRules()
+        {
             // Load query builder rules
             string rules = Post("rules");
             if (!Empty(rules) && Empty(Command)) {
                 QueryRules = rules;
                 Command = "search";
             }
+        }
 
+        private void LoadFieldSearchValues()
+        {
+            LoadFieldNomorPenerimaanSearchValues();
+            LoadFieldProses2SearchValues();
+            LoadFieldNomorVoyageSearchValues();
+            LoadFieldNomorPengirimanSearchValues();
+            LoadFieldIdPlantSearchValues();
+            LoadFieldTipeProdukSTSSearchValues();
+            LoadFieldKodeProdukSearchValues();
+            LoadFieldModaTransportasiSearchValues();
+            LoadFieldNamaKapalSearchValues();
+            LoadFieldRefinerySearchValues();
+            LoadFieldTanggalSandarSearchValues();
+            LoadFieldIdDermagaSearchValues();
+            LoadFieldStatusProsesSearchValues();
+            LoadFieldPersentaseProgressSearchValues();
+            LoadFieldIdTemplateSearchValues();
+            LoadFieldCatatanSearchValues();
+            LoadFieldDibuatOlehSearchValues();
+            LoadFieldTanggalDibuatSearchValues();
+            LoadFieldDiperbaruiOlehSearchValues();
+            LoadFieldTanggalDiperbaruiSearchValues();
+        }
+
+        private void LoadFieldNomorPenerimaanSearchValues()
+        {
             // NomorPenerimaan
-            if (!IsAddOrEdit)
-                if (Query.ContainsKey("x_NomorPenerimaan[]"))
-                    NomorPenerimaan.AdvancedSearch.SearchValue = Get("x_NomorPenerimaan[]", Config.FilterOptionSeparator);
-                else
-                    NomorPenerimaan.AdvancedSearch.SearchValue = Get("NomorPenerimaan"); // Default Value // DN
+            LoadPrimarySearchValueNomorPenerimaan();
+            LoadSearchOperatorNomorPenerimaan();
+        }
+
+        private void LoadPrimarySearchValueNomorPenerimaan()
+        {
+            if (!IsAddOrEdit && Query.ContainsKey("x_NomorPenerimaan[]")) {
+                NomorPenerimaan.AdvancedSearch.SearchValue = Get("x_NomorPenerimaan[]", Config.FilterOptionSeparator);
+            }
+            else if (!IsAddOrEdit) {
+                NomorPenerimaan.AdvancedSearch.SearchValue = Get("NomorPenerimaan"); // Default Value // DN
+            }
             if (!Empty(NomorPenerimaan.AdvancedSearch.SearchValue) && Command == "")
                 Command = "search";
+        }
+
+        private void LoadSearchOperatorNomorPenerimaan()
+        {
             if (Query.ContainsKey("z_NomorPenerimaan"))
                 NomorPenerimaan.AdvancedSearch.SearchOperator = Get("z_NomorPenerimaan", Config.FilterOptionSeparator);
+        }
 
+        private void LoadFieldProses2SearchValues()
+        {
             // Proses2
-            if (!IsAddOrEdit)
-                if (Query.ContainsKey("x_Proses2[]"))
-                    Proses2.AdvancedSearch.SearchValue = Get("x_Proses2[]", Config.FilterOptionSeparator);
-                else
-                    Proses2.AdvancedSearch.SearchValue = Get("Proses2"); // Default Value // DN
+            LoadPrimarySearchValueProses2();
+            LoadSearchOperatorProses2();
+        }
+
+        private void LoadPrimarySearchValueProses2()
+        {
+            if (!IsAddOrEdit && Query.ContainsKey("x_Proses2[]")) {
+                Proses2.AdvancedSearch.SearchValue = Get("x_Proses2[]", Config.FilterOptionSeparator);
+            }
+            else if (!IsAddOrEdit) {
+                Proses2.AdvancedSearch.SearchValue = Get("Proses2"); // Default Value // DN
+            }
             if (!Empty(Proses2.AdvancedSearch.SearchValue) && Command == "")
                 Command = "search";
+        }
+
+        private void LoadSearchOperatorProses2()
+        {
             if (Query.ContainsKey("z_Proses2"))
                 Proses2.AdvancedSearch.SearchOperator = Get("z_Proses2", Config.FilterOptionSeparator);
+        }
 
+        private void LoadFieldNomorVoyageSearchValues()
+        {
             // NomorVoyage
-            if (!IsAddOrEdit)
-                if (Query.ContainsKey("x_NomorVoyage[]"))
-                    NomorVoyage.AdvancedSearch.SearchValue = Get("x_NomorVoyage[]", Config.FilterOptionSeparator);
-                else
-                    NomorVoyage.AdvancedSearch.SearchValue = Get("NomorVoyage"); // Default Value // DN
+            LoadPrimarySearchValueNomorVoyage();
+            LoadSearchOperatorNomorVoyage();
+        }
+
+        private void LoadPrimarySearchValueNomorVoyage()
+        {
+            if (!IsAddOrEdit && Query.ContainsKey("x_NomorVoyage[]")) {
+                NomorVoyage.AdvancedSearch.SearchValue = Get("x_NomorVoyage[]", Config.FilterOptionSeparator);
+            }
+            else if (!IsAddOrEdit) {
+                NomorVoyage.AdvancedSearch.SearchValue = Get("NomorVoyage"); // Default Value // DN
+            }
             if (!Empty(NomorVoyage.AdvancedSearch.SearchValue) && Command == "")
                 Command = "search";
+        }
+
+        private void LoadSearchOperatorNomorVoyage()
+        {
             if (Query.ContainsKey("z_NomorVoyage"))
                 NomorVoyage.AdvancedSearch.SearchOperator = Get("z_NomorVoyage", Config.FilterOptionSeparator);
+        }
 
+        private void LoadFieldNomorPengirimanSearchValues()
+        {
             // NomorPengiriman
-            if (!IsAddOrEdit)
-                if (Query.ContainsKey("x_NomorPengiriman[]"))
-                    NomorPengiriman.AdvancedSearch.SearchValue = Get("x_NomorPengiriman[]", Config.FilterOptionSeparator);
-                else
-                    NomorPengiriman.AdvancedSearch.SearchValue = Get("NomorPengiriman"); // Default Value // DN
+            LoadPrimarySearchValueNomorPengiriman();
+            LoadSearchOperatorNomorPengiriman();
+        }
+
+        private void LoadPrimarySearchValueNomorPengiriman()
+        {
+            if (!IsAddOrEdit && Query.ContainsKey("x_NomorPengiriman[]")) {
+                NomorPengiriman.AdvancedSearch.SearchValue = Get("x_NomorPengiriman[]", Config.FilterOptionSeparator);
+            }
+            else if (!IsAddOrEdit) {
+                NomorPengiriman.AdvancedSearch.SearchValue = Get("NomorPengiriman"); // Default Value // DN
+            }
             if (!Empty(NomorPengiriman.AdvancedSearch.SearchValue) && Command == "")
                 Command = "search";
+        }
+
+        private void LoadSearchOperatorNomorPengiriman()
+        {
             if (Query.ContainsKey("z_NomorPengiriman"))
                 NomorPengiriman.AdvancedSearch.SearchOperator = Get("z_NomorPengiriman", Config.FilterOptionSeparator);
+        }
 
+        private void LoadFieldIdPlantSearchValues()
+        {
             // IdPlant
-            if (!IsAddOrEdit)
-                if (Query.ContainsKey("x_IdPlant[]"))
-                    IdPlant.AdvancedSearch.SearchValue = Get("x_IdPlant[]", Config.FilterOptionSeparator);
-                else
-                    IdPlant.AdvancedSearch.SearchValue = Get("IdPlant"); // Default Value // DN
+            LoadPrimarySearchValueIdPlant();
+            LoadSearchOperatorIdPlant();
+        }
+
+        private void LoadPrimarySearchValueIdPlant()
+        {
+            if (!IsAddOrEdit && Query.ContainsKey("x_IdPlant[]")) {
+                IdPlant.AdvancedSearch.SearchValue = Get("x_IdPlant[]", Config.FilterOptionSeparator);
+            }
+            else if (!IsAddOrEdit) {
+                IdPlant.AdvancedSearch.SearchValue = Get("IdPlant"); // Default Value // DN
+            }
             if (!Empty(IdPlant.AdvancedSearch.SearchValue) && Command == "")
                 Command = "search";
+        }
+
+        private void LoadSearchOperatorIdPlant()
+        {
             if (Query.ContainsKey("z_IdPlant"))
                 IdPlant.AdvancedSearch.SearchOperator = Get("z_IdPlant", Config.FilterOptionSeparator);
+        }
 
+        private void LoadFieldTipeProdukSTSSearchValues()
+        {
             // TipeProdukSTS
-            if (!IsAddOrEdit)
-                if (Query.ContainsKey("x_TipeProdukSTS[]"))
-                    TipeProdukSTS.AdvancedSearch.SearchValue = Get("x_TipeProdukSTS[]", Config.FilterOptionSeparator);
-                else
-                    TipeProdukSTS.AdvancedSearch.SearchValue = Get("TipeProdukSTS"); // Default Value // DN
+            LoadPrimarySearchValueTipeProdukSTS();
+            LoadSearchOperatorTipeProdukSTS();
+        }
+
+        private void LoadPrimarySearchValueTipeProdukSTS()
+        {
+            if (!IsAddOrEdit && Query.ContainsKey("x_TipeProdukSTS[]")) {
+                TipeProdukSTS.AdvancedSearch.SearchValue = Get("x_TipeProdukSTS[]", Config.FilterOptionSeparator);
+            }
+            else if (!IsAddOrEdit) {
+                TipeProdukSTS.AdvancedSearch.SearchValue = Get("TipeProdukSTS"); // Default Value // DN
+            }
             if (!Empty(TipeProdukSTS.AdvancedSearch.SearchValue) && Command == "")
                 Command = "search";
+        }
+
+        private void LoadSearchOperatorTipeProdukSTS()
+        {
             if (Query.ContainsKey("z_TipeProdukSTS"))
                 TipeProdukSTS.AdvancedSearch.SearchOperator = Get("z_TipeProdukSTS", Config.FilterOptionSeparator);
+        }
 
+        private void LoadFieldKodeProdukSearchValues()
+        {
             // KodeProduk
-            if (!IsAddOrEdit)
-                if (Query.ContainsKey("x_KodeProduk[]"))
-                    KodeProduk.AdvancedSearch.SearchValue = Get("x_KodeProduk[]", Config.FilterOptionSeparator);
-                else
-                    KodeProduk.AdvancedSearch.SearchValue = Get("KodeProduk"); // Default Value // DN
+            LoadPrimarySearchValueKodeProduk();
+            LoadSearchOperatorKodeProduk();
+        }
+
+        private void LoadPrimarySearchValueKodeProduk()
+        {
+            if (!IsAddOrEdit && Query.ContainsKey("x_KodeProduk[]")) {
+                KodeProduk.AdvancedSearch.SearchValue = Get("x_KodeProduk[]", Config.FilterOptionSeparator);
+            }
+            else if (!IsAddOrEdit) {
+                KodeProduk.AdvancedSearch.SearchValue = Get("KodeProduk"); // Default Value // DN
+            }
             if (!Empty(KodeProduk.AdvancedSearch.SearchValue) && Command == "")
                 Command = "search";
+        }
+
+        private void LoadSearchOperatorKodeProduk()
+        {
             if (Query.ContainsKey("z_KodeProduk"))
                 KodeProduk.AdvancedSearch.SearchOperator = Get("z_KodeProduk", Config.FilterOptionSeparator);
+        }
 
+        private void LoadFieldModaTransportasiSearchValues()
+        {
             // ModaTransportasi
-            if (!IsAddOrEdit)
-                if (Query.ContainsKey("x_ModaTransportasi[]"))
-                    ModaTransportasi.AdvancedSearch.SearchValue = Get("x_ModaTransportasi[]", Config.FilterOptionSeparator);
-                else
-                    ModaTransportasi.AdvancedSearch.SearchValue = Get("ModaTransportasi"); // Default Value // DN
+            LoadPrimarySearchValueModaTransportasi();
+            LoadSearchOperatorModaTransportasi();
+        }
+
+        private void LoadPrimarySearchValueModaTransportasi()
+        {
+            if (!IsAddOrEdit && Query.ContainsKey("x_ModaTransportasi[]")) {
+                ModaTransportasi.AdvancedSearch.SearchValue = Get("x_ModaTransportasi[]", Config.FilterOptionSeparator);
+            }
+            else if (!IsAddOrEdit) {
+                ModaTransportasi.AdvancedSearch.SearchValue = Get("ModaTransportasi"); // Default Value // DN
+            }
             if (!Empty(ModaTransportasi.AdvancedSearch.SearchValue) && Command == "")
                 Command = "search";
+        }
+
+        private void LoadSearchOperatorModaTransportasi()
+        {
             if (Query.ContainsKey("z_ModaTransportasi"))
                 ModaTransportasi.AdvancedSearch.SearchOperator = Get("z_ModaTransportasi", Config.FilterOptionSeparator);
+        }
 
+        private void LoadFieldNamaKapalSearchValues()
+        {
             // NamaKapal
-            if (!IsAddOrEdit)
-                if (Query.ContainsKey("x_NamaKapal[]"))
-                    NamaKapal.AdvancedSearch.SearchValue = Get("x_NamaKapal[]", Config.FilterOptionSeparator);
-                else
-                    NamaKapal.AdvancedSearch.SearchValue = Get("NamaKapal"); // Default Value // DN
+            LoadPrimarySearchValueNamaKapal();
+            LoadSearchOperatorNamaKapal();
+        }
+
+        private void LoadPrimarySearchValueNamaKapal()
+        {
+            if (!IsAddOrEdit && Query.ContainsKey("x_NamaKapal[]")) {
+                NamaKapal.AdvancedSearch.SearchValue = Get("x_NamaKapal[]", Config.FilterOptionSeparator);
+            }
+            else if (!IsAddOrEdit) {
+                NamaKapal.AdvancedSearch.SearchValue = Get("NamaKapal"); // Default Value // DN
+            }
             if (!Empty(NamaKapal.AdvancedSearch.SearchValue) && Command == "")
                 Command = "search";
+        }
+
+        private void LoadSearchOperatorNamaKapal()
+        {
             if (Query.ContainsKey("z_NamaKapal"))
                 NamaKapal.AdvancedSearch.SearchOperator = Get("z_NamaKapal", Config.FilterOptionSeparator);
+        }
 
+        private void LoadFieldRefinerySearchValues()
+        {
             // Refinery
-            if (!IsAddOrEdit)
-                if (Query.ContainsKey("x_Refinery[]"))
-                    Refinery.AdvancedSearch.SearchValue = Get("x_Refinery[]", Config.FilterOptionSeparator);
-                else
-                    Refinery.AdvancedSearch.SearchValue = Get("Refinery"); // Default Value // DN
+            LoadPrimarySearchValueRefinery();
+            LoadSearchOperatorRefinery();
+        }
+
+        private void LoadPrimarySearchValueRefinery()
+        {
+            if (!IsAddOrEdit && Query.ContainsKey("x_Refinery[]")) {
+                Refinery.AdvancedSearch.SearchValue = Get("x_Refinery[]", Config.FilterOptionSeparator);
+            }
+            else if (!IsAddOrEdit) {
+                Refinery.AdvancedSearch.SearchValue = Get("Refinery"); // Default Value // DN
+            }
             if (!Empty(Refinery.AdvancedSearch.SearchValue) && Command == "")
                 Command = "search";
+        }
+
+        private void LoadSearchOperatorRefinery()
+        {
             if (Query.ContainsKey("z_Refinery"))
                 Refinery.AdvancedSearch.SearchOperator = Get("z_Refinery", Config.FilterOptionSeparator);
+        }
 
+        private void LoadFieldTanggalSandarSearchValues()
+        {
             // TanggalSandar
-            if (!IsAddOrEdit)
-                if (Query.ContainsKey("x_TanggalSandar[]"))
-                    TanggalSandar.AdvancedSearch.SearchValue = Get("x_TanggalSandar[]", Config.FilterOptionSeparator);
-                else
-                    TanggalSandar.AdvancedSearch.SearchValue = Get("TanggalSandar"); // Default Value // DN
+            LoadPrimarySearchValueTanggalSandar();
+            LoadSearchOperatorTanggalSandar();
+            LoadSecondarySearchValuesTanggalSandar();
+        }
+
+        private void LoadPrimarySearchValueTanggalSandar()
+        {
+            if (!IsAddOrEdit && Query.ContainsKey("x_TanggalSandar[]")) {
+                TanggalSandar.AdvancedSearch.SearchValue = Get("x_TanggalSandar[]", Config.FilterOptionSeparator);
+            }
+            else if (!IsAddOrEdit) {
+                TanggalSandar.AdvancedSearch.SearchValue = Get("TanggalSandar"); // Default Value // DN
+            }
             if (!Empty(TanggalSandar.AdvancedSearch.SearchValue) && Command == "")
                 Command = "search";
+        }
+
+        private void LoadSearchOperatorTanggalSandar()
+        {
             if (Query.ContainsKey("z_TanggalSandar"))
                 TanggalSandar.AdvancedSearch.SearchOperator = Get("z_TanggalSandar", Config.FilterOptionSeparator);
+        }
+
+        private void LoadSecondarySearchValuesTanggalSandar()
+        {
             if (Query.ContainsKey("v_TanggalSandar"))
                 TanggalSandar.AdvancedSearch.SearchCondition = Get("v_TanggalSandar", Config.FilterOptionSeparator);
             if (Query.ContainsKey("y_TanggalSandar"))
@@ -2406,83 +3218,186 @@ public partial class SnDOne {
                 Command = "search";
             if (Query.ContainsKey("w_TanggalSandar"))
                 TanggalSandar.AdvancedSearch.SearchOperator2 = Get("w_TanggalSandar", Config.FilterOptionSeparator);
+        }
 
+        private void LoadFieldIdDermagaSearchValues()
+        {
             // IdDermaga
-            if (!IsAddOrEdit)
-                if (Query.ContainsKey("x_IdDermaga[]"))
-                    IdDermaga.AdvancedSearch.SearchValue = Get("x_IdDermaga[]", Config.FilterOptionSeparator);
-                else
-                    IdDermaga.AdvancedSearch.SearchValue = Get("IdDermaga"); // Default Value // DN
+            LoadPrimarySearchValueIdDermaga();
+            LoadSearchOperatorIdDermaga();
+        }
+
+        private void LoadPrimarySearchValueIdDermaga()
+        {
+            if (!IsAddOrEdit && Query.ContainsKey("x_IdDermaga[]")) {
+                IdDermaga.AdvancedSearch.SearchValue = Get("x_IdDermaga[]", Config.FilterOptionSeparator);
+            }
+            else if (!IsAddOrEdit) {
+                IdDermaga.AdvancedSearch.SearchValue = Get("IdDermaga"); // Default Value // DN
+            }
             if (!Empty(IdDermaga.AdvancedSearch.SearchValue) && Command == "")
                 Command = "search";
+        }
+
+        private void LoadSearchOperatorIdDermaga()
+        {
             if (Query.ContainsKey("z_IdDermaga"))
                 IdDermaga.AdvancedSearch.SearchOperator = Get("z_IdDermaga", Config.FilterOptionSeparator);
+        }
 
+        private void LoadFieldStatusProsesSearchValues()
+        {
             // StatusProses
-            if (!IsAddOrEdit)
-                if (Query.ContainsKey("x_StatusProses[]"))
-                    StatusProses.AdvancedSearch.SearchValue = Get("x_StatusProses[]", Config.FilterOptionSeparator);
-                else
-                    StatusProses.AdvancedSearch.SearchValue = Get("StatusProses"); // Default Value // DN
+            LoadPrimarySearchValueStatusProses();
+            LoadSearchOperatorStatusProses();
+        }
+
+        private void LoadPrimarySearchValueStatusProses()
+        {
+            if (!IsAddOrEdit && Query.ContainsKey("x_StatusProses[]")) {
+                StatusProses.AdvancedSearch.SearchValue = Get("x_StatusProses[]", Config.FilterOptionSeparator);
+            }
+            else if (!IsAddOrEdit) {
+                StatusProses.AdvancedSearch.SearchValue = Get("StatusProses"); // Default Value // DN
+            }
             if (!Empty(StatusProses.AdvancedSearch.SearchValue) && Command == "")
                 Command = "search";
+        }
+
+        private void LoadSearchOperatorStatusProses()
+        {
             if (Query.ContainsKey("z_StatusProses"))
                 StatusProses.AdvancedSearch.SearchOperator = Get("z_StatusProses", Config.FilterOptionSeparator);
+        }
 
+        private void LoadFieldPersentaseProgressSearchValues()
+        {
             // PersentaseProgress
-            if (!IsAddOrEdit)
-                if (Query.ContainsKey("x_PersentaseProgress[]"))
-                    PersentaseProgress.AdvancedSearch.SearchValue = Get("x_PersentaseProgress[]", Config.FilterOptionSeparator);
-                else
-                    PersentaseProgress.AdvancedSearch.SearchValue = Get("PersentaseProgress"); // Default Value // DN
+            LoadPrimarySearchValuePersentaseProgress();
+            LoadSearchOperatorPersentaseProgress();
+        }
+
+        private void LoadPrimarySearchValuePersentaseProgress()
+        {
+            if (!IsAddOrEdit && Query.ContainsKey("x_PersentaseProgress[]")) {
+                PersentaseProgress.AdvancedSearch.SearchValue = Get("x_PersentaseProgress[]", Config.FilterOptionSeparator);
+            }
+            else if (!IsAddOrEdit) {
+                PersentaseProgress.AdvancedSearch.SearchValue = Get("PersentaseProgress"); // Default Value // DN
+            }
             if (!Empty(PersentaseProgress.AdvancedSearch.SearchValue) && Command == "")
                 Command = "search";
+        }
+
+        private void LoadSearchOperatorPersentaseProgress()
+        {
             if (Query.ContainsKey("z_PersentaseProgress"))
                 PersentaseProgress.AdvancedSearch.SearchOperator = Get("z_PersentaseProgress", Config.FilterOptionSeparator);
+        }
 
+        private void LoadFieldIdTemplateSearchValues()
+        {
             // IdTemplate
-            if (!IsAddOrEdit)
-                if (Query.ContainsKey("x_IdTemplate[]"))
-                    IdTemplate.AdvancedSearch.SearchValue = Get("x_IdTemplate[]", Config.FilterOptionSeparator);
-                else
-                    IdTemplate.AdvancedSearch.SearchValue = Get("IdTemplate"); // Default Value // DN
+            LoadPrimarySearchValueIdTemplate();
+            LoadSearchOperatorIdTemplate();
+        }
+
+        private void LoadPrimarySearchValueIdTemplate()
+        {
+            if (!IsAddOrEdit && Query.ContainsKey("x_IdTemplate[]")) {
+                IdTemplate.AdvancedSearch.SearchValue = Get("x_IdTemplate[]", Config.FilterOptionSeparator);
+            }
+            else if (!IsAddOrEdit) {
+                IdTemplate.AdvancedSearch.SearchValue = Get("IdTemplate"); // Default Value // DN
+            }
             if (!Empty(IdTemplate.AdvancedSearch.SearchValue) && Command == "")
                 Command = "search";
+        }
+
+        private void LoadSearchOperatorIdTemplate()
+        {
             if (Query.ContainsKey("z_IdTemplate"))
                 IdTemplate.AdvancedSearch.SearchOperator = Get("z_IdTemplate", Config.FilterOptionSeparator);
+        }
 
+        private void LoadFieldCatatanSearchValues()
+        {
             // Catatan
-            if (!IsAddOrEdit)
-                if (Query.ContainsKey("x_Catatan[]"))
-                    Catatan.AdvancedSearch.SearchValue = Get("x_Catatan[]", Config.FilterOptionSeparator);
-                else
-                    Catatan.AdvancedSearch.SearchValue = Get("Catatan"); // Default Value // DN
+            LoadPrimarySearchValueCatatan();
+            LoadSearchOperatorCatatan();
+        }
+
+        private void LoadPrimarySearchValueCatatan()
+        {
+            if (!IsAddOrEdit && Query.ContainsKey("x_Catatan[]")) {
+                Catatan.AdvancedSearch.SearchValue = Get("x_Catatan[]", Config.FilterOptionSeparator);
+            }
+            else if (!IsAddOrEdit) {
+                Catatan.AdvancedSearch.SearchValue = Get("Catatan"); // Default Value // DN
+            }
             if (!Empty(Catatan.AdvancedSearch.SearchValue) && Command == "")
                 Command = "search";
+        }
+
+        private void LoadSearchOperatorCatatan()
+        {
             if (Query.ContainsKey("z_Catatan"))
                 Catatan.AdvancedSearch.SearchOperator = Get("z_Catatan", Config.FilterOptionSeparator);
+        }
 
+        private void LoadFieldDibuatOlehSearchValues()
+        {
             // DibuatOleh
-            if (!IsAddOrEdit)
-                if (Query.ContainsKey("x_DibuatOleh[]"))
-                    DibuatOleh.AdvancedSearch.SearchValue = Get("x_DibuatOleh[]", Config.FilterOptionSeparator);
-                else
-                    DibuatOleh.AdvancedSearch.SearchValue = Get("DibuatOleh"); // Default Value // DN
+            LoadPrimarySearchValueDibuatOleh();
+            LoadSearchOperatorDibuatOleh();
+        }
+
+        private void LoadPrimarySearchValueDibuatOleh()
+        {
+            if (!IsAddOrEdit && Query.ContainsKey("x_DibuatOleh[]")) {
+                DibuatOleh.AdvancedSearch.SearchValue = Get("x_DibuatOleh[]", Config.FilterOptionSeparator);
+            }
+            else if (!IsAddOrEdit) {
+                DibuatOleh.AdvancedSearch.SearchValue = Get("DibuatOleh"); // Default Value // DN
+            }
             if (!Empty(DibuatOleh.AdvancedSearch.SearchValue) && Command == "")
                 Command = "search";
+        }
+
+        private void LoadSearchOperatorDibuatOleh()
+        {
             if (Query.ContainsKey("z_DibuatOleh"))
                 DibuatOleh.AdvancedSearch.SearchOperator = Get("z_DibuatOleh", Config.FilterOptionSeparator);
+        }
 
+        private void LoadFieldTanggalDibuatSearchValues()
+        {
             // TanggalDibuat
-            if (!IsAddOrEdit)
-                if (Query.ContainsKey("x_TanggalDibuat[]"))
-                    TanggalDibuat.AdvancedSearch.SearchValue = Get("x_TanggalDibuat[]", Config.FilterOptionSeparator);
-                else
-                    TanggalDibuat.AdvancedSearch.SearchValue = Get("TanggalDibuat"); // Default Value // DN
+            LoadPrimarySearchValueTanggalDibuat();
+            LoadSearchOperatorTanggalDibuat();
+            LoadSecondarySearchValuesTanggalDibuat();
+        }
+
+        private void LoadPrimarySearchValueTanggalDibuat()
+        {
+            if (!IsAddOrEdit && Query.ContainsKey("x_TanggalDibuat[]")) {
+                TanggalDibuat.AdvancedSearch.SearchValue = Get("x_TanggalDibuat[]", Config.FilterOptionSeparator);
+            }
+            else if (!IsAddOrEdit) {
+                TanggalDibuat.AdvancedSearch.SearchValue = Get("TanggalDibuat"); // Default Value // DN
+            }
             if (!Empty(TanggalDibuat.AdvancedSearch.SearchValue) && Command == "")
                 Command = "search";
+        }
+
+        private void LoadSearchOperatorTanggalDibuat()
+        {
             if (Query.ContainsKey("z_TanggalDibuat"))
                 TanggalDibuat.AdvancedSearch.SearchOperator = Get("z_TanggalDibuat", Config.FilterOptionSeparator);
+        }
+
+        private void LoadSecondarySearchValuesTanggalDibuat()
+        {
             if (Query.ContainsKey("v_TanggalDibuat"))
                 TanggalDibuat.AdvancedSearch.SearchCondition = Get("v_TanggalDibuat", Config.FilterOptionSeparator);
             if (Query.ContainsKey("y_TanggalDibuat"))
@@ -2491,28 +3406,61 @@ public partial class SnDOne {
                 Command = "search";
             if (Query.ContainsKey("w_TanggalDibuat"))
                 TanggalDibuat.AdvancedSearch.SearchOperator2 = Get("w_TanggalDibuat", Config.FilterOptionSeparator);
+        }
 
+        private void LoadFieldDiperbaruiOlehSearchValues()
+        {
             // DiperbaruiOleh
-            if (!IsAddOrEdit)
-                if (Query.ContainsKey("x_DiperbaruiOleh[]"))
-                    DiperbaruiOleh.AdvancedSearch.SearchValue = Get("x_DiperbaruiOleh[]", Config.FilterOptionSeparator);
-                else
-                    DiperbaruiOleh.AdvancedSearch.SearchValue = Get("DiperbaruiOleh"); // Default Value // DN
+            LoadPrimarySearchValueDiperbaruiOleh();
+            LoadSearchOperatorDiperbaruiOleh();
+        }
+
+        private void LoadPrimarySearchValueDiperbaruiOleh()
+        {
+            if (!IsAddOrEdit && Query.ContainsKey("x_DiperbaruiOleh[]")) {
+                DiperbaruiOleh.AdvancedSearch.SearchValue = Get("x_DiperbaruiOleh[]", Config.FilterOptionSeparator);
+            }
+            else if (!IsAddOrEdit) {
+                DiperbaruiOleh.AdvancedSearch.SearchValue = Get("DiperbaruiOleh"); // Default Value // DN
+            }
             if (!Empty(DiperbaruiOleh.AdvancedSearch.SearchValue) && Command == "")
                 Command = "search";
+        }
+
+        private void LoadSearchOperatorDiperbaruiOleh()
+        {
             if (Query.ContainsKey("z_DiperbaruiOleh"))
                 DiperbaruiOleh.AdvancedSearch.SearchOperator = Get("z_DiperbaruiOleh", Config.FilterOptionSeparator);
+        }
 
+        private void LoadFieldTanggalDiperbaruiSearchValues()
+        {
             // TanggalDiperbarui
-            if (!IsAddOrEdit)
-                if (Query.ContainsKey("x_TanggalDiperbarui[]"))
-                    TanggalDiperbarui.AdvancedSearch.SearchValue = Get("x_TanggalDiperbarui[]", Config.FilterOptionSeparator);
-                else
-                    TanggalDiperbarui.AdvancedSearch.SearchValue = Get("TanggalDiperbarui"); // Default Value // DN
+            LoadPrimarySearchValueTanggalDiperbarui();
+            LoadSearchOperatorTanggalDiperbarui();
+            LoadSecondarySearchValuesTanggalDiperbarui();
+        }
+
+        private void LoadPrimarySearchValueTanggalDiperbarui()
+        {
+            if (!IsAddOrEdit && Query.ContainsKey("x_TanggalDiperbarui[]")) {
+                TanggalDiperbarui.AdvancedSearch.SearchValue = Get("x_TanggalDiperbarui[]", Config.FilterOptionSeparator);
+            }
+            else if (!IsAddOrEdit) {
+                TanggalDiperbarui.AdvancedSearch.SearchValue = Get("TanggalDiperbarui"); // Default Value // DN
+            }
             if (!Empty(TanggalDiperbarui.AdvancedSearch.SearchValue) && Command == "")
                 Command = "search";
+        }
+
+        private void LoadSearchOperatorTanggalDiperbarui()
+        {
             if (Query.ContainsKey("z_TanggalDiperbarui"))
                 TanggalDiperbarui.AdvancedSearch.SearchOperator = Get("z_TanggalDiperbarui", Config.FilterOptionSeparator);
+        }
+
+        private void LoadSecondarySearchValuesTanggalDiperbarui()
+        {
             if (Query.ContainsKey("v_TanggalDiperbarui"))
                 TanggalDiperbarui.AdvancedSearch.SearchCondition = Get("v_TanggalDiperbarui", Config.FilterOptionSeparator);
             if (Query.ContainsKey("y_TanggalDiperbarui"))
@@ -2738,184 +3686,157 @@ public partial class SnDOne {
 
             // View row
             if (RowType == RowType.View) {
-                // Proses
-                Proses2.ViewValue = ConvertToString(Proses2.CurrentValue); // DN
-                Proses2.ViewCustomAttributes = "";
-
                 // NomorVoyage
-                NomorVoyage.ViewValue = ConvertToString(NomorVoyage.CurrentValue); // DN
-                NomorVoyage.ViewCustomAttributes = "";
 
                 // NomorPengiriman
-                NomorPengiriman.ViewValue = ConvertToString(NomorPengiriman.CurrentValue); // DN
-                NomorPengiriman.ViewCustomAttributes = "";
 
                 // IdPlant
-                IdPlant.ViewValue = IdPlant.CurrentValue;
-                string curVal2 = ConvertToString(IdPlant.CurrentValue);
-                if (!Empty(curVal2)) {
-                    if (IdPlant.Lookup != null && IsDictionary(IdPlant.Lookup?.Options) && IdPlant.Lookup?.Options.Values.Count > 0) { // Load from cache // DN
-                        IdPlant.ViewValue = IdPlant.LookupCacheOption(curVal2);
-                    } else { // Lookup from database // DN
-                        string filterWrk2 = SearchFilter(IdPlant.Lookup?.GetTable()?.Fields["IdPlant"].SearchExpression, "=", IdPlant.CurrentValue, IdPlant.Lookup?.GetTable()?.Fields["IdPlant"].SearchDataType, "");
-                        string? sqlWrk2 = IdPlant.Lookup?.GetSql(false, filterWrk2, null, this, true, true);
-                        List<Dictionary<string, object>>? rswrk2 = sqlWrk2 != null ? Connection.GetRows(sqlWrk2) : null; // Must use Sync to avoid overwriting ViewValue in RenderViewRow
-                        if (rswrk2?.Count > 0 && IdPlant.Lookup != null) { // Lookup values found
-                            var listwrk = IdPlant.Lookup?.RenderViewRow(rswrk2[0]);
-                            IdPlant.ViewValue = IdPlant.DisplayValue(listwrk);
-                        } else {
-                            IdPlant.ViewValue = FormatNumber(IdPlant.CurrentValue, IdPlant.FormatPattern);
-                        }
-                    }
-                } else {
-                    IdPlant.ViewValue = DbNullValue;
-                }
-                IdPlant.ViewCustomAttributes = "";
 
                 // TipeProdukSTS
-                List<object?>? listWrk3 = [ // DN
-                    TipeProdukSTS.CurrentValue,
-                    TipeProdukSTS.CurrentValue,
-                ];
-                listWrk3 = TipeProdukSTS.Lookup?.RenderViewRow(listWrk3, this);
-                string? dispVal3 = TipeProdukSTS.DisplayValue(listWrk3);
-                if (!Empty(dispVal3))
-                    TipeProdukSTS.ViewValue = dispVal3;
-                TipeProdukSTS.ViewCustomAttributes = "";
 
                 // KodeProduk
-                string curVal4 = ConvertToString(KodeProduk.CurrentValue);
-                if (!Empty(curVal4)) {
-                    if (KodeProduk.Lookup != null && IsDictionary(KodeProduk.Lookup?.Options) && KodeProduk.Lookup?.Options.Values.Count > 0) { // Load from cache // DN
-                        KodeProduk.ViewValue = KodeProduk.LookupCacheOption(curVal4);
-                    } else { // Lookup from database // DN
-                        string filterWrk4 = SearchFilter(KodeProduk.Lookup?.GetTable()?.Fields["NoProduk"].SearchExpression, "=", KodeProduk.CurrentValue, KodeProduk.Lookup?.GetTable()?.Fields["NoProduk"].SearchDataType, "");
-                        string? sqlWrk4 = KodeProduk.Lookup?.GetSql(false, filterWrk4, null, this, true, true);
-                        List<Dictionary<string, object>>? rswrk4 = sqlWrk4 != null ? Connection.GetRows(sqlWrk4) : null; // Must use Sync to avoid overwriting ViewValue in RenderViewRow
-                        if (rswrk4?.Count > 0 && KodeProduk.Lookup != null) { // Lookup values found
-                            var listwrk = KodeProduk.Lookup?.RenderViewRow(rswrk4[0]);
-                            KodeProduk.ViewValue = KodeProduk.DisplayValue(listwrk);
-                        } else {
-                            KodeProduk.ViewValue = KodeProduk.CurrentValue;
-                        }
-                    }
-                } else {
-                    KodeProduk.ViewValue = DbNullValue;
-                }
-                KodeProduk.ViewCustomAttributes = "";
 
                 // ModaTransportasi
-                string curVal5 = ConvertToString(ModaTransportasi.CurrentValue);
-                if (!Empty(curVal5)) {
-                    if (ModaTransportasi.Lookup != null && IsDictionary(ModaTransportasi.Lookup?.Options) && ModaTransportasi.Lookup?.Options.Values.Count > 0) { // Load from cache // DN
-                        ModaTransportasi.ViewValue = ModaTransportasi.LookupCacheOption(curVal5);
-                    } else { // Lookup from database // DN
-                        string filterWrk5 = SearchFilter(ModaTransportasi.Lookup?.GetTable()?.Fields["IdModa"].SearchExpression, "=", ModaTransportasi.CurrentValue, ModaTransportasi.Lookup?.GetTable()?.Fields["IdModa"].SearchDataType, "");
-                        string? sqlWrk5 = ModaTransportasi.Lookup?.GetSql(false, filterWrk5, null, this, true, true);
-                        List<Dictionary<string, object>>? rswrk5 = sqlWrk5 != null ? Connection.GetRows(sqlWrk5) : null; // Must use Sync to avoid overwriting ViewValue in RenderViewRow
-                        if (rswrk5?.Count > 0 && ModaTransportasi.Lookup != null) { // Lookup values found
-                            var listwrk = ModaTransportasi.Lookup?.RenderViewRow(rswrk5[0]);
-                            ModaTransportasi.ViewValue = ModaTransportasi.DisplayValue(listwrk);
-                        } else {
-                            ModaTransportasi.ViewValue = ModaTransportasi.CurrentValue;
-                        }
-                    }
-                } else {
-                    ModaTransportasi.ViewValue = DbNullValue;
-                }
-                ModaTransportasi.ViewCustomAttributes = "";
 
                 // NamaKapal
-                NamaKapal.ViewValue = ConvertToString(NamaKapal.CurrentValue); // DN
-                NamaKapal.ViewCustomAttributes = "";
 
                 // Refinery
-                if (ConvertToBool(Refinery.CurrentValue)) {
-                    Refinery.ViewValue = Refinery.TagCaption(1) != "" ? Refinery.TagCaption(1) : "Yes";
-                } else {
-                    Refinery.ViewValue = Refinery.TagCaption(2) != "" ? Refinery.TagCaption(2) : "No";
-                }
-                Refinery.ViewCustomAttributes = "";
 
                 // PenyaluranLookup
-                PenyaluranLookup.ViewValue = PenyaluranLookup.CurrentValue;
-                string curVal8 = ConvertToString(PenyaluranLookup.CurrentValue);
-                if (!Empty(curVal8)) {
-                    if (PenyaluranLookup.Lookup != null && IsDictionary(PenyaluranLookup.Lookup?.Options) && PenyaluranLookup.Lookup?.Options.Values.Count > 0) { // Load from cache // DN
-                        PenyaluranLookup.ViewValue = PenyaluranLookup.LookupCacheOption(curVal8);
-                    } else { // Lookup from database // DN
-                        string filterWrk8 = SearchFilter(PenyaluranLookup.Lookup?.GetTable()?.Fields["IdPenyaluran"].SearchExpression, "=", PenyaluranLookup.CurrentValue, PenyaluranLookup.Lookup?.GetTable()?.Fields["IdPenyaluran"].SearchDataType, "");
-                        string? sqlWrk8 = PenyaluranLookup.Lookup?.GetSql(false, filterWrk8, null, this, true, true);
-                        List<Dictionary<string, object>>? rswrk8 = sqlWrk8 != null ? Connection.GetRows(sqlWrk8) : null; // Must use Sync to avoid overwriting ViewValue in RenderViewRow
-                        if (rswrk8?.Count > 0 && PenyaluranLookup.Lookup != null) { // Lookup values found
-                            var listwrk = PenyaluranLookup.Lookup?.RenderViewRow(rswrk8[0]);
-                            PenyaluranLookup.ViewValue = PenyaluranLookup.DisplayValue(listwrk);
-                        } else {
-                            PenyaluranLookup.ViewValue = FormatNumber(PenyaluranLookup.CurrentValue, PenyaluranLookup.FormatPattern);
-                        }
-                    }
-                } else {
-                    PenyaluranLookup.ViewValue = DbNullValue;
-                }
-                PenyaluranLookup.ViewCustomAttributes = "";
 
                 // TanggalSandar
-                TanggalSandar.ViewValue = TanggalSandar.CurrentValue;
-                TanggalSandar.ViewValue = FormatDateTime(TanggalSandar.ViewValue, TanggalSandar.FormatPattern);
-                TanggalSandar.ViewCustomAttributes = "";
 
                 // IdDermaga
-                string curVal9 = ConvertToString(IdDermaga.CurrentValue);
-                if (!Empty(curVal9)) {
-                    if (IdDermaga.Lookup != null && IsDictionary(IdDermaga.Lookup?.Options) && IdDermaga.Lookup?.Options.Values.Count > 0) { // Load from cache // DN
-                        IdDermaga.ViewValue = IdDermaga.LookupCacheOption(curVal9);
-                    } else { // Lookup from database // DN
-                        string filterWrk9 = SearchFilter(IdDermaga.Lookup?.GetTable()?.Fields["IdDermaga"].SearchExpression, "=", IdDermaga.CurrentValue, IdDermaga.Lookup?.GetTable()?.Fields["IdDermaga"].SearchDataType, "");
-                        string? sqlWrk9 = IdDermaga.Lookup?.GetSql(false, filterWrk9, null, this, true, true);
-                        List<Dictionary<string, object>>? rswrk9 = sqlWrk9 != null ? Connection.GetRows(sqlWrk9) : null; // Must use Sync to avoid overwriting ViewValue in RenderViewRow
-                        if (rswrk9?.Count > 0 && IdDermaga.Lookup != null) { // Lookup values found
-                            var listwrk = IdDermaga.Lookup?.RenderViewRow(rswrk9[0]);
-                            IdDermaga.ViewValue = IdDermaga.DisplayValue(listwrk);
-                        } else {
-                            IdDermaga.ViewValue = FormatNumber(IdDermaga.CurrentValue, IdDermaga.FormatPattern);
-                        }
-                    }
-                } else {
-                    IdDermaga.ViewValue = DbNullValue;
-                }
-                IdDermaga.ViewCustomAttributes = "";
 
                 // StatusProses
-                StatusProses.ViewValue = StatusProses.CurrentValue;
-                StatusProses.ViewCustomAttributes = "";
 
                 // PersentaseProgress
-                PersentaseProgress.ViewValue = PersentaseProgress.CurrentValue;
-                PersentaseProgress.ViewValue = FormatPercent(PersentaseProgress.ViewValue, PersentaseProgress.FormatPattern);
-                PersentaseProgress.ViewCustomAttributes = "";
 
                 // IdTemplate
-                IdTemplate.ViewValue = IdTemplate.CurrentValue;
-                IdTemplate.ViewValue = FormatNumber(IdTemplate.ViewValue, IdTemplate.FormatPattern);
-                IdTemplate.ViewCustomAttributes = "";
 
                 // DibuatOleh
-                DibuatOleh.ViewValue = DibuatOleh.CurrentValue;
-                DibuatOleh.ViewCustomAttributes = "";
 
                 // TanggalDibuat
-                TanggalDibuat.ViewValue = TanggalDibuat.CurrentValue;
-                TanggalDibuat.ViewValue = FormatDateTime(TanggalDibuat.ViewValue, TanggalDibuat.FormatPattern);
-                TanggalDibuat.ViewCustomAttributes = "";
 
                 // DiperbaruiOleh
-                DiperbaruiOleh.ViewValue = DiperbaruiOleh.CurrentValue;
-                DiperbaruiOleh.ViewCustomAttributes = "";
 
                 // TanggalDiperbarui
-                TanggalDiperbarui.ViewValue = TanggalDiperbarui.CurrentValue;
-                TanggalDiperbarui.ViewValue = FormatDateTime(TanggalDiperbarui.ViewValue, TanggalDiperbarui.FormatPattern);
-                TanggalDiperbarui.ViewCustomAttributes = "";
+
+                    // Proses
+                    Proses2.ViewValue = ConvertToString(Proses2.CurrentValue); // DN
+                    Proses2.ViewCustomAttributes = "";
+
+                    // NomorVoyage
+                    NomorVoyage.ViewValue = ConvertToString(NomorVoyage.CurrentValue); // DN
+                    NomorVoyage.ViewCustomAttributes = "";
+
+                    // NomorPengiriman
+                    NomorPengiriman.ViewValue = ConvertToString(NomorPengiriman.CurrentValue); // DN
+                    NomorPengiriman.ViewCustomAttributes = "";
+
+                    // IdPlant
+                    IdPlant.ViewValue = IdPlant.CurrentValue;
+
+                    // awallookupbung
+                    // IdPlant
+                    ResolveLookupView(IdPlant, "IdPlant", "number");
+                    // akhirlookupbung
+                    IdPlant.ViewCustomAttributes = "";
+
+                    // TipeProdukSTS
+                    List<object?>? listWrk3 = [ // DN
+                        TipeProdukSTS.CurrentValue,
+                        TipeProdukSTS.CurrentValue,
+                    ];
+                    listWrk3 = TipeProdukSTS.Lookup?.RenderViewRow(listWrk3, this);
+                    string? dispVal3 = TipeProdukSTS.DisplayValue(listWrk3);
+                    if (!Empty(dispVal3))
+                        TipeProdukSTS.ViewValue = dispVal3;
+
+                    // akhirlookupbung
+                    TipeProdukSTS.ViewCustomAttributes = "";
+
+                    // KodeProduk
+
+                    // awallookupbung
+                    // KodeProduk (jaga leading zero)
+                    ResolveLookupView(KodeProduk, "NoProduk", "string");
+                    // akhirlookupbung
+                    KodeProduk.ViewCustomAttributes = "";
+
+                    // ModaTransportasi
+
+                    // awallookupbung
+                    // ModaTransportasi (jaga leading zero)
+                    ResolveLookupView(ModaTransportasi, "IdModa", "string");
+                    // akhirlookupbung
+                    ModaTransportasi.ViewCustomAttributes = "";
+
+                    // NamaKapal
+                    NamaKapal.ViewValue = ConvertToString(NamaKapal.CurrentValue); // DN
+                    NamaKapal.ViewCustomAttributes = "";
+
+                    // Refinery
+                    if (ConvertToBool(Refinery.CurrentValue)) {
+                        Refinery.ViewValue = Refinery.TagCaption(1) != "" ? Refinery.TagCaption(1) : "Yes";
+                    } else {
+                        Refinery.ViewValue = Refinery.TagCaption(2) != "" ? Refinery.TagCaption(2) : "No";
+                    }
+                    Refinery.ViewCustomAttributes = "";
+
+                    // PenyaluranLookup
+                    PenyaluranLookup.ViewValue = PenyaluranLookup.CurrentValue;
+
+                    // awallookupbung
+                    // PenyaluranLookup
+                    ResolveLookupView(PenyaluranLookup, "IdPenyaluran", "number");
+                    // akhirlookupbung
+                    PenyaluranLookup.ViewCustomAttributes = "";
+
+                    // TanggalSandar
+                    TanggalSandar.ViewValue = TanggalSandar.CurrentValue;
+                    TanggalSandar.ViewValue = FormatDateTime(TanggalSandar.ViewValue, TanggalSandar.FormatPattern);
+                    TanggalSandar.ViewCustomAttributes = "";
+
+                    // IdDermaga
+
+                    // awallookupbung
+                    // IdDermaga
+                    ResolveLookupView(IdDermaga, "IdDermaga", "number");
+                    // akhirlookupbung
+                    IdDermaga.ViewCustomAttributes = "";
+
+                    // StatusProses
+                    StatusProses.ViewValue = StatusProses.CurrentValue;
+                    StatusProses.ViewCustomAttributes = "";
+
+                    // PersentaseProgress
+                    PersentaseProgress.ViewValue = PersentaseProgress.CurrentValue;
+                    PersentaseProgress.ViewValue = FormatPercent(PersentaseProgress.ViewValue, PersentaseProgress.FormatPattern);
+                    PersentaseProgress.ViewCustomAttributes = "";
+
+                    // IdTemplate
+                    IdTemplate.ViewValue = IdTemplate.CurrentValue;
+                    IdTemplate.ViewValue = FormatNumber(IdTemplate.ViewValue, IdTemplate.FormatPattern);
+                    IdTemplate.ViewCustomAttributes = "";
+
+                    // DibuatOleh
+                    DibuatOleh.ViewValue = DibuatOleh.CurrentValue;
+                    DibuatOleh.ViewCustomAttributes = "";
+
+                    // TanggalDibuat
+                    TanggalDibuat.ViewValue = TanggalDibuat.CurrentValue;
+                    TanggalDibuat.ViewValue = FormatDateTime(TanggalDibuat.ViewValue, TanggalDibuat.FormatPattern);
+                    TanggalDibuat.ViewCustomAttributes = "";
+
+                    // DiperbaruiOleh
+                    DiperbaruiOleh.ViewValue = DiperbaruiOleh.CurrentValue;
+                    DiperbaruiOleh.ViewCustomAttributes = "";
+
+                    // TanggalDiperbarui
+                    TanggalDiperbarui.ViewValue = TanggalDiperbarui.CurrentValue;
+                    TanggalDiperbarui.ViewValue = FormatDateTime(TanggalDiperbarui.ViewValue, TanggalDiperbarui.FormatPattern);
+                    TanggalDiperbarui.ViewCustomAttributes = "";
 
                 // Proses
                 Proses2.HrefValue = "";
@@ -3130,45 +4051,46 @@ public partial class SnDOne {
         }
 
         // Get export HTML tag
-        protected string GetExportTag(string type, bool custom = false) {
-            string exportUrl = AppPath(CurrentPageName()); // DN
-            if (type == "print" || custom) { // Printer friendly / custom export
+        protected string GetExportTag(string type, bool custom = false)
+{
+    // Build export URL
+    string exportUrl = AppPath(CurrentPageName()); // DN
+    if (type == "print" || custom)
+    { // Printer friendly / custom export
                 exportUrl += "?export=" + type + (custom ? "&amp;custom=1" : "");
-            } else {
-                exportUrl = AppPath(Config.ApiUrl + Config.ApiExportAction + "/" + type + "/" + TableVar);
+    }
+    else
+    {
+        exportUrl = AppPath(Config.ApiUrl + Config.ApiExportAction + "/" + type + "/" + TableVar);
             }
-            if (SameText(type, "excel")) {
-                if (custom)
-                    return "<button type=\"button\" class=\"btn btn-default ew-export-link ew-excel\" title=\"" + HtmlEncode(Language.Phrase("ExportToExcel", true)) + "\" data-caption=\"" + HtmlEncode(Language.Phrase("ExportToExcel", true)) + "\" form=\"fPenerimaanlist\" data-url=\"" + exportUrl + "\" data-ew-action=\"export\" data-export=\"excel\" data-custom=\"true\" data-export-selected=\"false\">" + Language.Phrase("ExportToExcel") + "</button>";
-                else
-                    return "<a href=\"" + exportUrl + "\" class=\"btn btn-default ew-export-link ew-excel\" title=\"" + HtmlEncode(Language.Phrase("ExportToExcel", true)) + "\" data-caption=\"" + HtmlEncode(Language.Phrase("ExportToExcel", true)) + "\">" + Language.Phrase("ExportToExcel") + "</a>";
-            } else if (SameText(type, "word")) {
-                if (custom)
-                    return "<button type=\"button\" class=\"btn btn-default ew-export-link ew-word\" title=\"" + HtmlEncode(Language.Phrase("ExportToWord", true)) + "\" data-caption=\"" + HtmlEncode(Language.Phrase("ExportToWord", true)) + "\" form=\"fPenerimaanlist\" data-url=\"" + exportUrl + "\" data-ew-action=\"export\" data-export=\"word\" data-custom=\"true\" data-export-selected=\"false\">" + Language.Phrase("ExportToWord") + "</button>";
-                else
-                    return "<a href=\"" + exportUrl + "\" class=\"btn btn-default ew-export-link ew-word\" title=\"" + HtmlEncode(Language.Phrase("ExportToWord", true)) + "\" data-caption=\"" + HtmlEncode(Language.Phrase("ExportToWord", true)) + "\">" + Language.Phrase("ExportToWord") + "</a>";
-            } else if (SameText(type, "pdf")) {
-                if (custom)
-                    return "<button type=\"button\" class=\"btn btn-default ew-export-link ew-pdf\" title=\"" + HtmlEncode(Language.Phrase("ExportToPdf", true)) + "\" data-caption=\"" + HtmlEncode(Language.Phrase("ExportToPdf", true)) + "\" form=\"fPenerimaanlist\" data-url=\"" + exportUrl + "\" data-ew-action=\"export\" data-export=\"pdf\" data-custom=\"true\" data-export-selected=\"false\">" + Language.Phrase("ExportToPDF") + "</button>";
-                else
-                    return "<a href=\"" + exportUrl + "\" class=\"btn btn-default ew-export-link ew-pdf\" title=\"" + HtmlEncode(Language.Phrase("ExportToPdf", true)) + "\" data-caption=\"" + HtmlEncode(Language.Phrase("ExportToPdf", true)) + "\">" + Language.Phrase("ExportToPDF") + "</a>";
-            } else if (SameText(type, "html")) {
-                return "<a href=\"" + exportUrl + "\" class=\"btn btn-default ew-export-link ew-html\" title=\"" + HtmlEncode(Language.Phrase("ExportToHtml", true)) + "\" data-caption=\"" + HtmlEncode(Language.Phrase("ExportToHtml", true)) + "\">" + Language.Phrase("ExportToHtml") + "</a>";
-            } else if (SameText(type, "xml")) {
-                return "<a href=\"" + exportUrl + "\" class=\"btn btn-default ew-export-link ew-xml\" title=\"" + HtmlEncode(Language.Phrase("ExportToXml", true)) + "\" data-caption=\"" + HtmlEncode(Language.Phrase("ExportToXml", true)) + "\">" + Language.Phrase("ExportToXml") + "</a>";
-            } else if (SameText(type, "csv")) {
-                return "<a href=\"" + exportUrl + "\" class=\"btn btn-default ew-export-link ew-csv\" title=\"" + HtmlEncode(Language.Phrase("ExportToCsv", true)) + "\" data-caption=\"" + HtmlEncode(Language.Phrase("ExportToCsv", true)) + "\">" + Language.Phrase("ExportToCsv") + "</a>";
-            } else if (SameText(type, "email")) {
-                string url = custom ? " data-url=\"" + exportUrl + "\"" : "";
+
+            // Handle email case separately due to complex logic requirements
+            string typeKey = type.ToLower();
+    if (typeKey == "email")
+    {
+        string url = custom ? " data-url=\"" + exportUrl + "\"" : "";
                 return "<button type=\"button\" class=\"btn btn-default ew-export-link ew-email\" title=\"" + Language.Phrase("ExportToEmail", true) + "\" data-caption=\"" + Language.Phrase("ExportToEmail", true) + "\" form=\"fPenerimaanlist\" data-ew-action=\"email\" data-custom=\"false\" data-hdr=\"" + Language.Phrase("ExportToEmail", true) + "\" data-export-selected=\"false\"" + url + ">" + Language.Phrase("ExportToEmail") + "</button>";
-            } else if (SameText(type, "print")) {
-                return "<a href=\"" + exportUrl + "\" class=\"btn btn-default ew-export-link ew-print\" title=\"" + HtmlEncode(Language.Phrase("PrinterFriendly", true)) + "\" data-caption=\"" + HtmlEncode(Language.Phrase("PrinterFriendly", true)) + "\">" + Language.Phrase("PrinterFriendly") + "</a>";
             }
-            return "";
+
+    // Handle all other types with switch expression
+    return typeKey switch
+    {
+        "print" => "<a href=\"" + exportUrl + "\" class=\"btn btn-default ew-export-link ew-print\" title=\"" + HtmlEncode(Language.Phrase("PrinterFriendly", true)) + "\" data-caption=\"" + HtmlEncode(Language.Phrase("PrinterFriendly", true)) + "\">" + Language.Phrase("PrinterFriendly") + "</a>",
+                "excel" => custom ? "<button type=\"button\" class=\"btn btn-default ew-export-link ew-excel\" title=\"" + HtmlEncode(Language.Phrase("ExportToExcel", true)) + "\" data-caption=\"" + HtmlEncode(Language.Phrase("ExportToExcel", true)) + "\" form=\"fPenerimaanlist\" data-url=\"" + exportUrl + "\" data-ew-action=\"export\" data-export=\"excel\" data-custom=\"true\" data-export-selected=\"false\">" + Language.Phrase("ExportToExcel") + "</button>" 
+                                  : "<a href=\"" + exportUrl + "\" class=\"btn btn-default ew-export-link ew-excel\" title=\"" + HtmlEncode(Language.Phrase("ExportToExcel", true)) + "\" data-caption=\"" + HtmlEncode(Language.Phrase("ExportToExcel", true)) + "\">" + Language.Phrase("ExportToExcel") + "</a>",
+                "word" => custom ? "<button type=\"button\" class=\"btn btn-default ew-export-link ew-word\" title=\"" + HtmlEncode(Language.Phrase("ExportToWord", true)) + "\" data-caption=\"" + HtmlEncode(Language.Phrase("ExportToWord", true)) + "\" form=\"fPenerimaanlist\" data-url=\"" + exportUrl + "\" data-ew-action=\"export\" data-export=\"word\" data-custom=\"true\" data-export-selected=\"false\">" + Language.Phrase("ExportToWord") + "</button>" 
+                                 : "<a href=\"" + exportUrl + "\" class=\"btn btn-default ew-export-link ew-word\" title=\"" + HtmlEncode(Language.Phrase("ExportToWord", true)) + "\" data-caption=\"" + HtmlEncode(Language.Phrase("ExportToWord", true)) + "\">" + Language.Phrase("ExportToWord") + "</a>",
+                "pdf" => custom ? "<button type=\"button\" class=\"btn btn-default ew-export-link ew-pdf\" title=\"" + HtmlEncode(Language.Phrase("ExportToPdf", true)) + "\" data-caption=\"" + HtmlEncode(Language.Phrase("ExportToPdf", true)) + "\" form=\"fPenerimaanlist\" data-url=\"" + exportUrl + "\" data-ew-action=\"export\" data-export=\"pdf\" data-custom=\"true\" data-export-selected=\"false\">" + Language.Phrase("ExportToPDF") + "</button>" 
+                                : "<a href=\"" + exportUrl + "\" class=\"btn btn-default ew-export-link ew-pdf\" title=\"" + HtmlEncode(Language.Phrase("ExportToPdf", true)) + "\" data-caption=\"" + HtmlEncode(Language.Phrase("ExportToPdf", true)) + "\">" + Language.Phrase("ExportToPDF") + "</a>",
+                "html" => "<a href=\"" + exportUrl + "\" class=\"btn btn-default ew-export-link ew-html\" title=\"" + HtmlEncode(Language.Phrase("ExportToHtml", true)) + "\" data-caption=\"" + HtmlEncode(Language.Phrase("ExportToHtml", true)) + "\">" + Language.Phrase("ExportToHtml") + "</a>",
+                "xml" => "<a href=\"" + exportUrl + "\" class=\"btn btn-default ew-export-link ew-xml\" title=\"" + HtmlEncode(Language.Phrase("ExportToXml", true)) + "\" data-caption=\"" + HtmlEncode(Language.Phrase("ExportToXml", true)) + "\">" + Language.Phrase("ExportToXml") + "</a>",
+                "csv" => "<a href=\"" + exportUrl + "\" class=\"btn btn-default ew-export-link ew-csv\" title=\"" + HtmlEncode(Language.Phrase("ExportToCsv", true)) + "\" data-caption=\"" + HtmlEncode(Language.Phrase("ExportToCsv", true)) + "\">" + Language.Phrase("ExportToCsv") + "</a>",
+                _ => ""
+    };
         }
 
-        // Set up export options
-        protected void SetupExportOptions() {
+// Set up export options
+protected void SetupExportOptions() {
             ListOption item;
 
             // Printer friendly
@@ -3362,32 +4284,39 @@ public partial class SnDOne {
         {
             if (fld.Lookup == null)
                 return;
+            if (fld.Lookup.Options.Count is int opt && opt > 0) 
+                return;
             Func<string>? lookupFilter = null;
             dynamic conn = Connection;
-            if (fld.Lookup.Options.Count is int c && c == 0) {
+
+                // Set up lookup SQL
+
                 // Always call to Lookup.GetSql so that user can setup Lookup.Options in Lookup Selecting server event
                 var sql = fld.Lookup.GetSql(false, "", lookupFilter, this);
 
                 // Set up lookup cache
-                if (!fld.HasLookupOptions && fld.UseLookupCache && !Empty(sql) && fld.Lookup.ParentFields.Count == 0 && fld.Lookup.Options.Count == 0) {
-                    int totalCnt = await TryGetRecordCountAsync(sql, conn);
-                    if (totalCnt > fld.LookupCacheCount) // Total count > cache count, do not cache
-                        return;
-                    var dict = new Dictionary<string, Dictionary<string, object>>();
-                    List<object> values = [];
-                    List<Dictionary<string, object>> rs = await conn.GetRowsAsync(sql);
-                    if (rs != null) {
-                        for (int i = 0; i < rs.Count; i++) {
-                            var row = rs[i];
-                            row = fld.Lookup?.RenderViewRow(row, Resolve(fld.Lookup.LinkTable));
-                            string key = row?.Values.First()?.ToString() ?? String.Empty;
-                            if (!dict.ContainsKey(key) && row != null)
-                                dict.Add(key, row);
-                        }
+                if (fld.HasLookupOptions ||
+                    !fld.UseLookupCache ||
+                    Empty(sql) ||
+                    fld.Lookup.ParentFields.Count != 0 ||
+                    fld.Lookup.Options.Count != 0)
+                            return;
+                int totalCnt = await TryGetRecordCountAsync(sql, conn);
+                if (totalCnt > fld.LookupCacheCount) // Total count > cache count, do not cache
+                    return;
+                var dict = new Dictionary<string, Dictionary<string, object>>();
+                List<object> values = [];
+                List<Dictionary<string, object>> rs = await conn.GetRowsAsync(sql);
+                if (rs != null) {
+                    for (int i = 0; i < rs.Count; i++) {
+                        var row = rs[i];
+                        row = fld.Lookup?.RenderViewRow(row, Resolve(fld.Lookup.LinkTable));
+                        string key = row?.Values.First()?.ToString() ?? String.Empty;
+                        if (!dict.ContainsKey(key) && row != null)
+                            dict.Add(key, row);
                     }
-                    fld.Lookup?.SetOptions(dict);
                 }
-            }
+                fld.Lookup?.SetOptions(dict);
         }
 
         // Close recordset

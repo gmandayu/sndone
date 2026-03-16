@@ -13,6 +13,11 @@ public partial class HomeController : Controller
         masterToolsList.Cache = _cache;
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["IdTools"];
+
+        // Run the page
         return await masterToolsList.Run();
     }
 
@@ -23,6 +28,11 @@ public partial class HomeController : Controller
     {
         // Create page object
         masterToolsAdd = new GLOBALS.MasterToolsAdd(this);
+
+        // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["IdTools"];
 
         // Run the page
         return await masterToolsAdd.Run();
@@ -37,6 +47,11 @@ public partial class HomeController : Controller
         masterToolsView = new GLOBALS.MasterToolsView(this);
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["IdTools"];
+
+        // Run the page
         return await masterToolsView.Run();
     }
 
@@ -49,6 +64,11 @@ public partial class HomeController : Controller
         masterToolsEdit = new GLOBALS.MasterToolsEdit(this);
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["IdTools"];
+
+        // Run the page
         return await masterToolsEdit.Run();
     }
 
@@ -59,6 +79,11 @@ public partial class HomeController : Controller
     {
         // Create page object
         masterToolsDelete = new GLOBALS.MasterToolsDelete(this);
+
+        // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["IdTools"];
 
         // Run the page
         return await masterToolsDelete.Run();

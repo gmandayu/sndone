@@ -13,6 +13,11 @@ public partial class HomeController : Controller
         mwtOnlineList.Cache = _cache;
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["Id"];
+
+        // Run the page
         return await mwtOnlineList.Run();
     }
 
@@ -23,6 +28,11 @@ public partial class HomeController : Controller
     {
         // Create page object
         mwtOnlineAdd = new GLOBALS.MwtOnlineAdd(this);
+
+        // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["Id"];
 
         // Run the page
         return await mwtOnlineAdd.Run();
@@ -37,6 +47,11 @@ public partial class HomeController : Controller
         mwtOnlineEdit = new GLOBALS.MwtOnlineEdit(this);
 
         // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["Id"];
+
+        // Run the page
         return await mwtOnlineEdit.Run();
     }
 
@@ -47,6 +62,11 @@ public partial class HomeController : Controller
     {
         // Create page object
         mwtOnlineDelete = new GLOBALS.MwtOnlineDelete(this);
+
+        // Run the page
+
+        // Touch route params to satisfy analyzers
+                    _ = RouteData.Values["Id"];
 
         // Run the page
         return await mwtOnlineDelete.Run();

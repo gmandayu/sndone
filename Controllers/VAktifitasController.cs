@@ -13,6 +13,8 @@ public partial class HomeController : Controller
         vAktifitasList.Cache = _cache;
 
         // Run the page
+
+        // Run the page
         return await vAktifitasList.Run();
     }
 }

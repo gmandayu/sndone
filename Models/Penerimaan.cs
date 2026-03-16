@@ -384,7 +384,7 @@ public partial class SnDOne {
                 CustomMessage = Language.FieldPhrase("Penerimaan", "ModaTransportasi", "CustomMsg"),
                 IsUpload = false
             };
-            ModaTransportasi.Lookup = new Lookup<DbField>(ModaTransportasi, "MasterModa", true, "IdModa", new List<string> {"NamaModa", "", "", ""}, "", "", new List<string> {}, new List<string> {}, new List<string> {}, new List<string> {}, new List<string> {}, new List<string> {}, false, "", "", "[NamaModa]");
+            ModaTransportasi.Lookup = new Lookup<DbField>(ModaTransportasi, "MasterModa", true, "IdModa", new List<string> {"NamaModa", "", "", ""}, "", "", new List<string> {}, new List<string> {}, new List<string> {}, new List<string> {}, new List<string> {}, new List<string> {}, false, "[Kategori] DESC", "", "[NamaModa]");
             Fields.Add("ModaTransportasi", ModaTransportasi);
 
             // NamaKapal
@@ -3143,8 +3143,9 @@ public partial class SnDOne {
         // Lookup Selecting event
         public void LookupSelecting(DbField fld, ref string filter) {
             // Enter your code here
+            if (fld.FieldVar == "x_ModaTransportasi")
+                fld.Lookup.Distinct = false;
         }
-
         // Row Rendering event
         public void RowRendering() {
             if (TipeProdukSTS.CurrentValue == null || 

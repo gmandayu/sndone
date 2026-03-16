@@ -206,6 +206,7 @@ public partial class SnDOne {
         {
             IdModa.SetVisibility();
             NamaModa.SetVisibility();
+            Kategori.SetVisibility();
         }
 
         // Constructor
@@ -987,6 +988,10 @@ private void ResolveLookupView(dynamic fld, string keyFieldName, string fallback
             // Standard handling for 'NamaModa'
             NamaModa.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
             SetNormalField(NamaModa, "NamaModa", "x_NamaModa");
+
+            // Standard handling for 'Kategori'
+            Kategori.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(Kategori, "Kategori", "x_Kategori");
         }
         #pragma warning restore 1998
 
@@ -995,6 +1000,7 @@ private void ResolveLookupView(dynamic fld, string keyFieldName, string fallback
         {
             IdModa.CurrentValue = IdModa.FormValue;
             NamaModa.CurrentValue = NamaModa.FormValue;
+            Kategori.CurrentValue = Kategori.FormValue;
         }
 
         // Load row based on key values
@@ -1037,6 +1043,7 @@ private void ResolveLookupView(dynamic fld, string keyFieldName, string fallback
             RowSelected(row);
             IdModa.SetDbValue(row["IdModa"]);
             NamaModa.SetDbValue(row["NamaModa"]);
+            Kategori.SetDbValue(row["Kategori"]);
         }
         #pragma warning restore 162, 168, 1998, 4014
 
@@ -1045,6 +1052,7 @@ private void ResolveLookupView(dynamic fld, string keyFieldName, string fallback
             var row = new Dictionary<string, object>();
             row.Add("IdModa", IdModa.DefaultValue ?? DbNullValue); // DN
             row.Add("NamaModa", NamaModa.DefaultValue ?? DbNullValue); // DN
+            row.Add("Kategori", Kategori.DefaultValue ?? DbNullValue); // DN
             return row;
         }
 
@@ -1084,9 +1092,14 @@ private void ResolveLookupView(dynamic fld, string keyFieldName, string fallback
             // NamaModa
             NamaModa.RowCssClass = "row";
 
+            // Kategori
+            Kategori.RowCssClass = "row";
+
             // View row
             if (RowType == RowType.View) {
                 // NamaModa
+
+                // Kategori
 
                     // IdModa
                     IdModa.ViewValue = IdModa.CurrentValue;
@@ -1096,12 +1109,19 @@ private void ResolveLookupView(dynamic fld, string keyFieldName, string fallback
                     NamaModa.ViewValue = ConvertToString(NamaModa.CurrentValue); // DN
                     NamaModa.ViewCustomAttributes = "";
 
+                    // Kategori
+                    Kategori.ViewValue = ConvertToString(Kategori.CurrentValue); // DN
+                    Kategori.ViewCustomAttributes = "";
+
                 // IdModa
                 IdModa.HrefValue = "";
                 IdModa.TooltipValue = "";
 
                 // NamaModa
                 NamaModa.HrefValue = "";
+
+                // Kategori
+                Kategori.HrefValue = "";
             } else if (RowType == RowType.Edit) {
                 // IdModa
                 IdModa.SetupEditAttributes();
@@ -1115,6 +1135,13 @@ private void ResolveLookupView(dynamic fld, string keyFieldName, string fallback
                 NamaModa.EditValue = HtmlEncode(NamaModa.CurrentValue);
                 NamaModa.PlaceHolder = RemoveHtml(NamaModa.Caption);
 
+                // Kategori
+                Kategori.SetupEditAttributes();
+                if (!Kategori.Raw)
+                    Kategori.CurrentValue = HtmlDecode(Kategori.CurrentValue);
+                Kategori.EditValue = HtmlEncode(Kategori.CurrentValue);
+                Kategori.PlaceHolder = RemoveHtml(Kategori.Caption);
+
                 // Edit refer script
 
                 // IdModa
@@ -1123,6 +1150,9 @@ private void ResolveLookupView(dynamic fld, string keyFieldName, string fallback
 
                 // NamaModa
                 NamaModa.HrefValue = "";
+
+                // Kategori
+                Kategori.HrefValue = "";
             }
             if (RowType == RowType.Add || RowType == RowType.Edit || RowType == RowType.Search) // Add/Edit/Search row
                 SetupFieldTitles();
@@ -1138,7 +1168,7 @@ private void ResolveLookupView(dynamic fld, string keyFieldName, string fallback
         private void ValidateCustomIdModa() {
             if (IdModa.Visible && IdModa.Required) {
                 if (!IdModa.IsDetailKey && Empty(IdModa.FormValue)) {
-                    IdModa.AddErrorMessage(ConvertToString(NamaModa.RequiredErrorMessage).Replace("%s", NamaModa.Caption));
+                    IdModa.AddErrorMessage(ConvertToString(Kategori.RequiredErrorMessage).Replace("%s", Kategori.Caption));
                 }
             }
         }
@@ -1146,7 +1176,15 @@ private void ResolveLookupView(dynamic fld, string keyFieldName, string fallback
         private void ValidateCustomNamaModa() {
             if (NamaModa.Visible && NamaModa.Required) {
                 if (!NamaModa.IsDetailKey && Empty(NamaModa.FormValue)) {
-                    NamaModa.AddErrorMessage(ConvertToString(NamaModa.RequiredErrorMessage).Replace("%s", NamaModa.Caption));
+                    NamaModa.AddErrorMessage(ConvertToString(Kategori.RequiredErrorMessage).Replace("%s", Kategori.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomKategori() {
+            if (Kategori.Visible && Kategori.Required) {
+                if (!Kategori.IsDetailKey && Empty(Kategori.FormValue)) {
+                    Kategori.AddErrorMessage(ConvertToString(Kategori.RequiredErrorMessage).Replace("%s", Kategori.Caption));
                 }
             }
         }
@@ -1159,6 +1197,7 @@ private void ResolveLookupView(dynamic fld, string keyFieldName, string fallback
             bool validateForm = true;
                 ValidateCustomIdModa();
                 ValidateCustomNamaModa();
+                ValidateCustomKategori();
 
             // Return validate result
             validateForm = validateForm && !HasInvalidFields();
@@ -1262,6 +1301,9 @@ private void ResolveLookupView(dynamic fld, string keyFieldName, string fallback
 
             // NamaModa
             NamaModa.SetDbValue(rsnew, NamaModa.CurrentValue, NamaModa.ReadOnly);
+
+            // Kategori
+            Kategori.SetDbValue(rsnew, Kategori.CurrentValue, Kategori.ReadOnly);
             return rsnew;
         }
 
@@ -1274,6 +1316,8 @@ private void ResolveLookupView(dynamic fld, string keyFieldName, string fallback
             object? value;
             if (row.TryGetValue("NamaModa", out value)) // NamaModa
                 NamaModa.CurrentValue = value;
+            if (row.TryGetValue("Kategori", out value)) // Kategori
+                Kategori.CurrentValue = value;
         }
 
         // Set up Breadcrumb

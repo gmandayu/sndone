@@ -376,7 +376,7 @@ public partial class SnDOne {
                 IsUpload = false
             };
             IdModa.Raw = true;
-            IdModa.Lookup = new Lookup<DbField>(IdModa, "MasterModa", true, "IdModa", new List<string> {"NamaModa", "", "", ""}, "", "", new List<string> {}, new List<string> {}, new List<string> {}, new List<string> {}, new List<string> {}, new List<string> {}, false, "", "", "[NamaModa]");
+            IdModa.Lookup = new Lookup<DbField>(IdModa, "MasterModa", true, "IdModa", new List<string> {"NamaModa", "", "", ""}, "", "", new List<string> {}, new List<string> {}, new List<string> {}, new List<string> {}, new List<string> {}, new List<string> {}, false, "[Kategori] DESC", "", "[NamaModa]");
             Fields.Add("IdModa", IdModa);
 
             // IdTangki
@@ -2742,6 +2742,9 @@ public partial class SnDOne {
         // Lookup Selecting event
         public void LookupSelecting(DbField fld, ref string filter) {
             // Enter your code here
+            // Lookup Selecting event
+            if (fld.FieldVar == "x_IdModa")
+                fld.Lookup.Distinct = false;
             // if (fld.Name != "Plant" || !Security.IsLoggedIn)
             //     return;
 

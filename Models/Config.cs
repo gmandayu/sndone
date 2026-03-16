@@ -85,7 +85,7 @@ public partial class SnDOne {
 
         public const string ProjectId = "{92B91853-0216-4B42-B097-FA7CDF2469EB}"; // Project ID (GUID)
 
-        public static readonly string RandomKey = "wnhefSbM58xZiG4z"; // Random key for encryption // DN
+        public static readonly string RandomKey = "9rKrsC2hTm5b41aJ"; // Random key for encryption // DN
 
         public static string EncryptionKey { get; set; } = ""; // Encryption key for data protection
 

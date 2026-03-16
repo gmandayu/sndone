@@ -206,6 +206,7 @@ public partial class SnDOne {
         {
             IdModa.Visible = false;
             NamaModa.SetVisibility();
+            Kategori.SetVisibility();
         }
 
         // Constructor
@@ -949,6 +950,10 @@ private StringValues GetKeys(Dictionary<string, string>? dict)
             // Standard handling for 'NamaModa'
             NamaModa.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
             SetNormalField(NamaModa, "NamaModa", "x_NamaModa");
+
+            // Standard handling for 'Kategori'
+            Kategori.MultiUpdate = string.Empty; // initialize (will be set later for update control if needed)
+            SetNormalField(Kategori, "Kategori", "x_Kategori");
         }
         #pragma warning restore 1998
 
@@ -956,6 +961,7 @@ private StringValues GetKeys(Dictionary<string, string>? dict)
         public void RestoreFormValues()
         {
             NamaModa.CurrentValue = NamaModa.FormValue;
+            Kategori.CurrentValue = Kategori.FormValue;
         }
 
         // Load row based on key values
@@ -998,6 +1004,7 @@ private StringValues GetKeys(Dictionary<string, string>? dict)
             RowSelected(row);
             IdModa.SetDbValue(row["IdModa"]);
             NamaModa.SetDbValue(row["NamaModa"]);
+            Kategori.SetDbValue(row["Kategori"]);
         }
         #pragma warning restore 162, 168, 1998, 4014
 
@@ -1006,6 +1013,7 @@ private StringValues GetKeys(Dictionary<string, string>? dict)
             var row = new Dictionary<string, object>();
             row.Add("IdModa", IdModa.DefaultValue ?? DbNullValue); // DN
             row.Add("NamaModa", NamaModa.DefaultValue ?? DbNullValue); // DN
+            row.Add("Kategori", Kategori.DefaultValue ?? DbNullValue); // DN
             return row;
         }
 
@@ -1045,9 +1053,14 @@ private StringValues GetKeys(Dictionary<string, string>? dict)
             // NamaModa
             NamaModa.RowCssClass = "row";
 
+            // Kategori
+            Kategori.RowCssClass = "row";
+
             // View row
             if (RowType == RowType.View) {
                 // NamaModa
+
+                // Kategori
 
                     // IdModa
                     IdModa.ViewValue = IdModa.CurrentValue;
@@ -1057,8 +1070,15 @@ private StringValues GetKeys(Dictionary<string, string>? dict)
                     NamaModa.ViewValue = ConvertToString(NamaModa.CurrentValue); // DN
                     NamaModa.ViewCustomAttributes = "";
 
+                    // Kategori
+                    Kategori.ViewValue = ConvertToString(Kategori.CurrentValue); // DN
+                    Kategori.ViewCustomAttributes = "";
+
                 // NamaModa
                 NamaModa.HrefValue = "";
+
+                // Kategori
+                Kategori.HrefValue = "";
             } else if (RowType == RowType.Add) {
                 // NamaModa
                 NamaModa.SetupEditAttributes();
@@ -1067,10 +1087,20 @@ private StringValues GetKeys(Dictionary<string, string>? dict)
                 NamaModa.EditValue = HtmlEncode(NamaModa.CurrentValue);
                 NamaModa.PlaceHolder = RemoveHtml(NamaModa.Caption);
 
+                // Kategori
+                Kategori.SetupEditAttributes();
+                if (!Kategori.Raw)
+                    Kategori.CurrentValue = HtmlDecode(Kategori.CurrentValue);
+                Kategori.EditValue = HtmlEncode(Kategori.CurrentValue);
+                Kategori.PlaceHolder = RemoveHtml(Kategori.Caption);
+
                 // Add refer script
 
                 // NamaModa
                 NamaModa.HrefValue = "";
+
+                // Kategori
+                Kategori.HrefValue = "";
             }
             if (RowType == RowType.Add || RowType == RowType.Edit || RowType == RowType.Search) // Add/Edit/Search row
                 SetupFieldTitles();
@@ -1086,7 +1116,15 @@ private StringValues GetKeys(Dictionary<string, string>? dict)
         private void ValidateCustomNamaModa() {
             if (NamaModa.Visible && NamaModa.Required) {
                 if (!NamaModa.IsDetailKey && Empty(NamaModa.FormValue)) {
-                    NamaModa.AddErrorMessage(ConvertToString(NamaModa.RequiredErrorMessage).Replace("%s", NamaModa.Caption));
+                    NamaModa.AddErrorMessage(ConvertToString(Kategori.RequiredErrorMessage).Replace("%s", Kategori.Caption));
+                }
+            }
+        }
+
+        private void ValidateCustomKategori() {
+            if (Kategori.Visible && Kategori.Required) {
+                if (!Kategori.IsDetailKey && Empty(Kategori.FormValue)) {
+                    Kategori.AddErrorMessage(ConvertToString(Kategori.RequiredErrorMessage).Replace("%s", Kategori.Caption));
                 }
             }
         }
@@ -1098,6 +1136,7 @@ private StringValues GetKeys(Dictionary<string, string>? dict)
                 return true;
             bool validateForm = true;
                 ValidateCustomNamaModa();
+                ValidateCustomKategori();
 
             // Return validate result
             validateForm = validateForm && !HasInvalidFields();
@@ -1182,6 +1221,9 @@ private StringValues GetKeys(Dictionary<string, string>? dict)
 
                 // NamaModa
                 NamaModa.SetDbValue(rsnew, NamaModa.CurrentValue);
+
+                // Kategori
+                Kategori.SetDbValue(rsnew, Kategori.CurrentValue);
                 return rsnew;
             } catch (Exception e) {
                 if (Config.Debug)
@@ -1200,6 +1242,8 @@ private StringValues GetKeys(Dictionary<string, string>? dict)
             object? value;
             if (row.TryGetValue("NamaModa", out value)) // NamaModa
                 NamaModa.SetFormValue(ConvertToString(value));
+            if (row.TryGetValue("Kategori", out value)) // Kategori
+                Kategori.SetFormValue(ConvertToString(value));
         }
 
         // Set up Breadcrumb

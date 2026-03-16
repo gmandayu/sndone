@@ -394,7 +394,7 @@ public partial class SnDOne {
                 CustomMessage = Language.FieldPhrase("RencanaPenyaluran", "IdModa", "CustomMsg"),
                 IsUpload = false
             };
-            IdModa.Lookup = new Lookup<DbField>(IdModa, "MasterModa", true, "IdModa", new List<string> {"NamaModa", "", "", ""}, "", "", new List<string> {}, new List<string> {}, new List<string> {}, new List<string> {}, new List<string> {}, new List<string> {}, false, "", "", "[NamaModa]");
+            IdModa.Lookup = new Lookup<DbField>(IdModa, "MasterModa", true, "IdModa", new List<string> {"NamaModa", "", "", ""}, "", "", new List<string> {}, new List<string> {}, new List<string> {}, new List<string> {}, new List<string> {}, new List<string> {}, false, "[Kategori] DESC", "", "[NamaModa]");
             Fields.Add("IdModa", IdModa);
 
             // TipePenyaluran
@@ -2562,6 +2562,8 @@ public partial class SnDOne {
         // Lookup Selecting event
         public void LookupSelecting(DbField fld, ref string filter) {
             // Enter your code here
+            if (fld.FieldVar == "x_IdModa")
+                fld.Lookup.Distinct = false;
             // if (fld.Name != "IdPlant" || !Security.IsLoggedIn)
             //     return;
 

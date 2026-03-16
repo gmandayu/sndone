@@ -206,6 +206,7 @@ public partial class SnDOne {
         {
             IdModa.SetVisibility();
             NamaModa.SetVisibility();
+            Kategori.SetVisibility();
         }
 
         // Constructor
@@ -704,6 +705,7 @@ protected string GetRecordKeyValue(Dictionary<string, object> dict) {
             RowSelected(row);
             IdModa.SetDbValue(row["IdModa"]);
             NamaModa.SetDbValue(row["NamaModa"]);
+            Kategori.SetDbValue(row["Kategori"]);
         }
         #pragma warning restore 162, 168, 1998, 4014
 
@@ -712,6 +714,7 @@ protected string GetRecordKeyValue(Dictionary<string, object> dict) {
             var row = new Dictionary<string, object>();
             row.Add("IdModa", IdModa.DefaultValue ?? DbNullValue); // DN
             row.Add("NamaModa", NamaModa.DefaultValue ?? DbNullValue); // DN
+            row.Add("Kategori", Kategori.DefaultValue ?? DbNullValue); // DN
             return row;
         }
 
@@ -728,9 +731,13 @@ protected string GetRecordKeyValue(Dictionary<string, object> dict) {
 
             // NamaModa
 
+            // Kategori
+
             // View row
             if (RowType == RowType.View) {
                 // NamaModa
+
+                // Kategori
 
                     // IdModa
                     IdModa.ViewValue = IdModa.CurrentValue;
@@ -740,6 +747,10 @@ protected string GetRecordKeyValue(Dictionary<string, object> dict) {
                     NamaModa.ViewValue = ConvertToString(NamaModa.CurrentValue); // DN
                     NamaModa.ViewCustomAttributes = "";
 
+                    // Kategori
+                    Kategori.ViewValue = ConvertToString(Kategori.CurrentValue); // DN
+                    Kategori.ViewCustomAttributes = "";
+
                 // IdModa
                 IdModa.HrefValue = "";
                 IdModa.TooltipValue = "";
@@ -747,6 +758,10 @@ protected string GetRecordKeyValue(Dictionary<string, object> dict) {
                 // NamaModa
                 NamaModa.HrefValue = "";
                 NamaModa.TooltipValue = "";
+
+                // Kategori
+                Kategori.HrefValue = "";
+                Kategori.TooltipValue = "";
             }
 
             // Call Row Rendered event

@@ -276,6 +276,7 @@ public partial class SnDOne {
         {
             IdModa.SetVisibility();
             NamaModa.SetVisibility();
+            Kategori.SetVisibility();
         }
 
         // Constructor
@@ -1414,6 +1415,7 @@ private StringValues GetKeys(Dictionary<string, string>? dict)
 
             // Initialize
             var filters = new JObject(); // DN
+            filters.Merge(JObject.Parse(Kategori.AdvancedSearch.ToJson())); // Field Kategori
             filters.Merge(JObject.Parse(BasicSearch.ToJson()));
 
             // Return filter list in JSON
@@ -1451,6 +1453,11 @@ private StringValues GetKeys(Dictionary<string, string>? dict)
         {
             if (filter == null) return;
             string? sv;
+
+            // Field Kategori
+            if (filter.TryGetValue("x_Kategori", out sv)) {
+                RestoreFieldFilter(Kategori, filter, "Kategori", sv);
+            }
         }
 
         private void RestoreFieldFilter(dynamic field, Dictionary<string, string> filter, string fieldParm, string searchValue)
@@ -1479,11 +1486,14 @@ private StringValues GetKeys(Dictionary<string, string>? dict)
                 return "";
             BuildSearchSql(ref where, IdModa, def, true); // IdModa
             BuildSearchSql(ref where, NamaModa, def, true); // NamaModa
+            BuildSearchSql(ref where, Kategori, def, false); // Kategori
 
             // Set up search command
             if (!def && !Empty(where) && (new[] { "", "reset", "resetall" }).Contains(Command))
                 Command = "search";
             if (!def && Command == "search") {
+                Kategori.AdvancedSearch.Save(); // Kategori
+
                 // Clear rules for QueryBuilder
                 SessionRules = "";
             }
@@ -1519,6 +1529,7 @@ private StringValues GetKeys(Dictionary<string, string>? dict)
             // Clear other search and save rules to session
             if (!Empty(where) && Empty(fieldName)) { // Skip if get query for specific field
                 ResetSearchParms();
+                Kategori.AdvancedSearch.Save(); // Kategori
                 SessionRules = rules;
             }
 
@@ -1652,6 +1663,7 @@ private StringValues GetKeys(Dictionary<string, string>? dict)
             string filterList = "";
             filterList += ProcessFieldFilter("IdModa", IdModa, true, config);
             filterList += ProcessFieldFilter("NamaModa", NamaModa, true, config);
+            filterList += ProcessFieldFilter("Kategori", Kategori, false, config);
             return filterList;
         }
 
@@ -1717,6 +1729,7 @@ private StringValues GetKeys(Dictionary<string, string>? dict)
             List<DbField> searchFlds = [];
             searchFlds.Add(IdModa);
             searchFlds.Add(NamaModa);
+            searchFlds.Add(Kategori);
             string searchKeyword = def ? BasicSearch.KeywordDefault : BasicSearch.Keyword;
             string searchType = def ? BasicSearch.TypeDefault : BasicSearch.Type;
 
@@ -1745,6 +1758,8 @@ private StringValues GetKeys(Dictionary<string, string>? dict)
             if (IdModa.AdvancedSearch.IssetSession)
                 return true;
             if (NamaModa.AdvancedSearch.IssetSession)
+                return true;
+            if (Kategori.AdvancedSearch.IssetSession)
                 return true;
             return false;
         }
@@ -1778,6 +1793,7 @@ private StringValues GetKeys(Dictionary<string, string>? dict)
         protected void ResetAdvancedSearchParms() {
             IdModa.AdvancedSearch.UnsetSession();
             NamaModa.AdvancedSearch.UnsetSession();
+            Kategori.AdvancedSearch.UnsetSession();
         }
 
         // Restore all search parameters
@@ -1790,6 +1806,7 @@ private StringValues GetKeys(Dictionary<string, string>? dict)
             // Restore advanced search values
             IdModa.AdvancedSearch.Load();
             NamaModa.AdvancedSearch.Load();
+            Kategori.AdvancedSearch.Load();
         }
 
         // Set up sort parameters
@@ -1810,6 +1827,7 @@ private StringValues GetKeys(Dictionary<string, string>? dict)
                 CurrentOrderType = Get("ordertype");
                 UpdateSort(IdModa, ctrl); // IdModa
                 UpdateSort(NamaModa, ctrl); // NamaModa
+                UpdateSort(Kategori, ctrl); // Kategori
                 StartRecordNumber = 1; // Reset start position
             }
 
@@ -1836,6 +1854,7 @@ private StringValues GetKeys(Dictionary<string, string>? dict)
                     SessionOrderBy = orderBy;
                     IdModa.Sort = "";
                     NamaModa.Sort = "";
+                    Kategori.Sort = "";
                 }
 
                 // Reset start position
@@ -2056,6 +2075,7 @@ private StringValues GetKeys(Dictionary<string, string>? dict)
                 item.Visible = UseColumnVisibility;
                 CreateColumnOption(option.Add("IdModa")); // DN
                 CreateColumnOption(option.Add("NamaModa")); // DN
+                CreateColumnOption(option.Add("Kategori")); // DN
             }
 
             // Set up custom action (compatible with old version)
@@ -2642,6 +2662,7 @@ private void ResolveLookupView(dynamic fld, string keyFieldName, string fallback
         {
             LoadFieldIdModaSearchValues();
             LoadFieldNamaModaSearchValues();
+            LoadFieldKategoriSearchValues();
         }
 
         private void LoadFieldIdModaSearchValues()
@@ -2692,6 +2713,31 @@ private void ResolveLookupView(dynamic fld, string keyFieldName, string fallback
         {
             if (Query.ContainsKey("z_NamaModa"))
                 NamaModa.AdvancedSearch.SearchOperator = Get("z_NamaModa", Config.FilterOptionSeparator);
+        }
+
+        private void LoadFieldKategoriSearchValues()
+        {
+            // Kategori
+            LoadPrimarySearchValueKategori();
+            LoadSearchOperatorKategori();
+        }
+
+        private void LoadPrimarySearchValueKategori()
+        {
+            if (!IsAddOrEdit && Query.ContainsKey("x_Kategori")) {
+                Kategori.AdvancedSearch.SearchValue = Get("x_Kategori");
+            }
+            else if (!IsAddOrEdit) {
+                Kategori.AdvancedSearch.SearchValue = Get("Kategori"); // Default Value // DN
+            }
+            if (!Empty(Kategori.AdvancedSearch.SearchValue) && Command == "")
+                Command = "search";
+        }
+
+        private void LoadSearchOperatorKategori()
+        {
+            if (Query.ContainsKey("z_Kategori"))
+                Kategori.AdvancedSearch.SearchOperator = Get("z_Kategori");
         }
 
         // Load recordset // DN
@@ -2758,6 +2804,7 @@ private void ResolveLookupView(dynamic fld, string keyFieldName, string fallback
             RowSelected(row);
             IdModa.SetDbValue(row["IdModa"]);
             NamaModa.SetDbValue(row["NamaModa"]);
+            Kategori.SetDbValue(row["Kategori"]);
         }
         #pragma warning restore 162, 168, 1998, 4014
 
@@ -2766,6 +2813,7 @@ private void ResolveLookupView(dynamic fld, string keyFieldName, string fallback
             var row = new Dictionary<string, object>();
             row.Add("IdModa", IdModa.DefaultValue ?? DbNullValue); // DN
             row.Add("NamaModa", NamaModa.DefaultValue ?? DbNullValue); // DN
+            row.Add("Kategori", Kategori.DefaultValue ?? DbNullValue); // DN
             return row;
         }
 
@@ -2803,9 +2851,13 @@ private void ResolveLookupView(dynamic fld, string keyFieldName, string fallback
 
             // NamaModa
 
+            // Kategori
+
             // View row
             if (RowType == RowType.View) {
                 // NamaModa
+
+                // Kategori
 
                     // IdModa
                     IdModa.ViewValue = IdModa.CurrentValue;
@@ -2815,6 +2867,10 @@ private void ResolveLookupView(dynamic fld, string keyFieldName, string fallback
                     NamaModa.ViewValue = ConvertToString(NamaModa.CurrentValue); // DN
                     NamaModa.ViewCustomAttributes = "";
 
+                    // Kategori
+                    Kategori.ViewValue = ConvertToString(Kategori.CurrentValue); // DN
+                    Kategori.ViewCustomAttributes = "";
+
                 // IdModa
                 IdModa.HrefValue = "";
                 IdModa.TooltipValue = "";
@@ -2822,6 +2878,10 @@ private void ResolveLookupView(dynamic fld, string keyFieldName, string fallback
                 // NamaModa
                 NamaModa.HrefValue = "";
                 NamaModa.TooltipValue = "";
+
+                // Kategori
+                Kategori.HrefValue = "";
+                Kategori.TooltipValue = "";
             } else if (RowType == RowType.Search) {
                 // IdModa
                 if (IdModa.UseFilter && !Empty(IdModa.AdvancedSearch.SearchValue)) {
@@ -2832,6 +2892,13 @@ private void ResolveLookupView(dynamic fld, string keyFieldName, string fallback
                 if (NamaModa.UseFilter && !Empty(NamaModa.AdvancedSearch.SearchValue)) {
                     NamaModa.EditValue = ConvertToString(NamaModa.AdvancedSearch.SearchValue).Split(Config.FilterOptionSeparator).ToList();
                 }
+
+                // Kategori
+                Kategori.SetupEditAttributes();
+                if (!Kategori.Raw)
+                    Kategori.AdvancedSearch.SearchValue = HtmlDecode(Kategori.AdvancedSearch.SearchValue);
+                Kategori.EditValue = HtmlEncode(Kategori.AdvancedSearch.SearchValue);
+                Kategori.PlaceHolder = RemoveHtml(Kategori.Caption);
             }
 
             // Call Row Rendered event
@@ -2860,6 +2927,7 @@ private void ResolveLookupView(dynamic fld, string keyFieldName, string fallback
         // Load advanced search
         public void LoadAdvancedSearch()
         {
+            Kategori.AdvancedSearch.Load();
         }
 
         // Get export HTML tag

@@ -12,4 +12,7 @@ public class MasterModa
 
     [Column("NamaModa")]
     public required string NamaModa { get; set; } = default!;
+
+    [Column("Kategori")]
+    public string? Kategori { get; set; }
 }

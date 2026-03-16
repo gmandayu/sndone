@@ -59,6 +59,8 @@ public partial class SnDOne {
 
         public readonly DbField<SqlDbType> NamaModa;
 
+        public readonly DbField<SqlDbType> Kategori;
+
         // Constructor
         public MasterModa()
         {
@@ -138,6 +140,27 @@ public partial class SnDOne {
             };
             NamaModa.Lookup = new Lookup<DbField>(NamaModa, "MasterModa", true, "NamaModa", new List<string> {"NamaModa", "", "", ""}, "", "", new List<string> {}, new List<string> {}, new List<string> {}, new List<string> {}, new List<string> {}, new List<string> {}, false, "", "", "");
             Fields.Add("NamaModa", NamaModa);
+
+            // Kategori
+            Kategori = new(this, "x_Kategori", 202, SqlDbType.NVarChar) {
+                Name = "Kategori",
+                Expression = "[Kategori]",
+                UseBasicSearch = true,
+                BasicSearchExpression = "[Kategori]",
+                DateTimeFormat = -1,
+                VirtualExpression = "[Kategori]",
+                IsVirtual = false,
+                ForceSelection = false,
+                SelectMultiple = false,
+                VirtualSearch = false,
+                ViewTag = "FORMATTED TEXT",
+                HtmlTag = "TEXT",
+                InputTextType = "text",
+                SearchOperators = ["=", "<>", "IN", "NOT IN", "STARTS WITH", "NOT STARTS WITH", "LIKE", "NOT LIKE", "ENDS WITH", "NOT ENDS WITH", "IS EMPTY", "IS NOT EMPTY", "IS NULL", "IS NOT NULL"],
+                CustomMessage = Language.FieldPhrase("MasterModa", "Kategori", "CustomMsg"),
+                IsUpload = false
+            };
+            Fields.Add("Kategori", Kategori);
 
             // Call Table Load event
             TableLoad();
@@ -793,6 +816,7 @@ public partial class SnDOne {
             try {
                 IdModa.DbValue = row["IdModa"]; // Set DB value only
                 NamaModa.DbValue = row["NamaModa"]; // Set DB value only
+                Kategori.DbValue = row["Kategori"]; // Set DB value only
             } catch {}
         }
 
@@ -1201,6 +1225,7 @@ public partial class SnDOne {
                 return;
             IdModa.SetDbValue(row["IdModa"]);
             NamaModa.SetDbValue(row["NamaModa"]);
+            Kategori.SetDbValue(row["Kategori"]);
         }
 
         // Load row values from recordset
@@ -1234,6 +1259,8 @@ public partial class SnDOne {
 
             // NamaModa
 
+            // Kategori
+
             // IdModa
             IdModa.ViewValue = IdModa.CurrentValue;
             IdModa.ViewCustomAttributes = "";
@@ -1242,6 +1269,10 @@ public partial class SnDOne {
             NamaModa.ViewValue = ConvertToString(NamaModa.CurrentValue); // DN
             NamaModa.ViewCustomAttributes = "";
 
+            // Kategori
+            Kategori.ViewValue = ConvertToString(Kategori.CurrentValue); // DN
+            Kategori.ViewCustomAttributes = "";
+
             // IdModa
             IdModa.HrefValue = "";
             IdModa.TooltipValue = "";
@@ -1249,6 +1280,10 @@ public partial class SnDOne {
             // NamaModa
             NamaModa.HrefValue = "";
             NamaModa.TooltipValue = "";
+
+            // Kategori
+            Kategori.HrefValue = "";
+            Kategori.TooltipValue = "";
 
             // Call Row Rendered event
             RowRendered();
@@ -1276,6 +1311,13 @@ public partial class SnDOne {
                 NamaModa.CurrentValue = HtmlDecode(NamaModa.CurrentValue);
             NamaModa.EditValue = NamaModa.CurrentValue;
             NamaModa.PlaceHolder = RemoveHtml(NamaModa.Caption);
+
+            // Kategori
+            Kategori.SetupEditAttributes();
+            if (!Kategori.Raw)
+                Kategori.CurrentValue = HtmlDecode(Kategori.CurrentValue);
+            Kategori.EditValue = Kategori.CurrentValue;
+            Kategori.PlaceHolder = RemoveHtml(Kategori.Caption);
 
             // Call Row Rendered event
             RowRendered();
@@ -1311,9 +1353,11 @@ public partial class SnDOne {
                     if (exportType == "view") {
                         doc.ExportCaption(IdModa);
                         doc.ExportCaption(NamaModa);
+                        doc.ExportCaption(Kategori);
                     } else {
                         doc.ExportCaption(IdModa);
                         doc.ExportCaption(NamaModa);
+                        doc.ExportCaption(Kategori);
                     }
                     doc.EndExportRow();
                 }
@@ -1353,9 +1397,11 @@ public partial class SnDOne {
                         if (exportType == "view") {
                             await doc.ExportField(IdModa);
                             await doc.ExportField(NamaModa);
+                            await doc.ExportField(Kategori);
                         } else {
                             await doc.ExportField(IdModa);
                             await doc.ExportField(NamaModa);
+                            await doc.ExportField(Kategori);
                         }
                         doc.EndExportRow(rowcnt);
                     }
